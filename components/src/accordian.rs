@@ -1,9 +1,6 @@
-#![allow(non_snake_case)]
 use dioxus::prelude::*;
 
-#[macro_use]
-mod props;
-
+const _STYLE: &str = manganis::mg!(file("css-out/accordian.css"));
 
 props!(AccordianProps {
     #[props(into)]
@@ -14,9 +11,14 @@ props!(AccordianProps {
 pub fn Accordian(props: AccordianProps) -> Element {
     rsx! {
         div {
+            id: props.id,
+            class: props.class,
+            style: props.style,
+
             if let Some(title) = props.title {
                 h2 { {title} }
             }
+
 
             {props.children}
         }
@@ -26,9 +28,7 @@ pub fn Accordian(props: AccordianProps) -> Element {
 props!(AccordianItemProps {
     #[props(into)]
     title: String,
-
-    #[props(into)]
-    content: String,
+    children: Element,
 });
 
 pub fn AccordianItem(props: AccordianItemProps) -> Element {
@@ -36,9 +36,10 @@ pub fn AccordianItem(props: AccordianItemProps) -> Element {
         div {
             id: props.id,
             class: props.class,
+            style: props.style,
 
             h3 { "{props.title}" }
-            p { "{props.content}" }
+            {props.children}
         }
     }
 }

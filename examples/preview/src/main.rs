@@ -1,7 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_components::{Accordian, AccordianItem};
 
-const DIOXUS_LOGO: &str = manganis::mg!(file("./assets/dioxus_color.svg"));
 
 fn main() {
     launch(App);
@@ -37,10 +36,6 @@ fn App() -> Element {
         // Hero {
 
         // }
-
-        img {
-            src: "{DIOXUS_LOGO}"
-        }
 
 
         Accordian {

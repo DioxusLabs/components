@@ -1,16 +1,11 @@
-[package]
-name = "dioxus-components"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+resolver = "2"
+members = [
+    "components",
+    "examples/*"
+]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
+[workspace.dependencies]
+dioxus-components = { path = "./components" }
 dioxus = { version = "0.5" }
 manganis = "0.2.2"
-
-[dev-dependencies]
-dioxus = { version = "0.5", features = ["desktop"] }
-
-
-[features]
