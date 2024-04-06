@@ -4,8 +4,8 @@ use dioxus::prelude::*;
 #[macro_use]
 mod props;
 
-mod accordian;
-pub use accordian::*;
+mod accordion;
+pub use accordion::*;
 
 props!(ContainerProps { children: Element });
 

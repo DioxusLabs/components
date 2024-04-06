@@ -5,7 +5,8 @@
 This crate requires `sass` to be installed.
 
 ## Running Preview
-To run the preview example, use:
+Currently examples fail to build due to an asset handling issue.
+~~To run the preview example, use:~~
 ```
 cargo run --example preview
 ```
