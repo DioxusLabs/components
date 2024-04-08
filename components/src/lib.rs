@@ -6,15 +6,12 @@ mod props;
 
 mod use_unique_id;
 pub(crate) use use_unique_id::*;
+mod layout;
 
 mod accordion;
 pub use accordion::*;
 
-mod row;
-pub use row::*;
-
-mod column;
-pub use column::*;
+pub use layout::*;
 
 props!(ContainerProps { children: Element });
 
