@@ -33,20 +33,35 @@ props!(AccordionItemProps {
 });
 
 pub fn AccordionItem(props: AccordionItemProps) -> Element {
+    let unique_id = crate::use_unique_id();
     let mut is_closed = use_signal(|| true);
-    let mut text_height = use_signal(|| -1);
-    let mut has_text_height = use_signal(|| false);
+    let mut text_height = use_signal(|| String::from("0"));
 
-    let button_clicked = move |_| {
+    let button_clicked = move |_| async move {
+        if let Some(id) = unique_id() {
+            if is_closed() {
+                let mut eval = eval(
+                    r#"
+                let elementId = await dioxus.recv();  
+                let element = document.getElementById(elementId);
+                let scrollHeight = element.scrollHeight;
+                console.log(scrollHeight);
+                dioxus.send(scrollHeight);
+                "#,
+                );
+
+                eval.send(id.into()).unwrap();
+                let scroll_height = eval.recv().await.unwrap().to_string();
+                text_height.set(scroll_height);
+            }
+        }
         is_closed.toggle();
     };
 
 
-    let on_text_mount = move |evt: Event<MountedData>| async move {
-        let rect = evt.get_client_rect().await.unwrap();
-        let height = rect.height().ceil() as i32;
-        text_height.set(height);
-        has_text_height.set(true);
+    let final_height = match is_closed() {
+        true => "0px".to_string(),
+        false => format!("{}px", text_height()),
     };
 
     rsx! {
@@ -62,15 +77,16 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
                 onclick: button_clicked,
 
                 p { "{props.title}" }
-                img { 
+                img {
                     src: "{ARROW_DOWN_IMG}"
                 }
             }
 
             div {
+                id: if let Some(id) = unique_id() { "{id}" },
                 class: "dxc-accordian-text",
-                height: if is_closed() && has_text_height() { "0px" } else if has_text_height() { "{text_height()}" },
-                onmounted: on_text_mount,
+                class: if !is_closed() { "active" },
+                height: final_height,
 
                 {props.children}
             }

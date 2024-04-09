@@ -4,6 +4,9 @@ use dioxus::prelude::*;
 #[macro_use]
 mod props;
 
+mod use_unique_id;
+pub(crate) use use_unique_id::*;
+
 mod accordion;
 pub use accordion::*;
 

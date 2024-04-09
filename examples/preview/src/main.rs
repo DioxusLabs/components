@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_components::{Accordian, AccordianItem};
+use dioxus_components::{Accordion, AccordionItem};
 
 
 fn main() {
@@ -38,15 +38,15 @@ fn App() -> Element {
         // }
 
 
-        Accordian {
+        Accordion {
             id: "hi",
             title: "Got Questions?",
-            AccordianItem {
+            AccordionItem {
                 title: "What is this?",
                 "This is just a preview of Dioxus Components! Pretty cool, right?"
             }
 
-            AccordianItem {
+            AccordionItem {
                 title: "How do I use it?",
                 "Check out our ",
                 a {
