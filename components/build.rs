@@ -9,6 +9,9 @@ fn main() {
     // Build scss
     let files = fs::read_dir(STYLES_IN).unwrap();
 
+    //Ignore error, usually it's just that the dir already exists.
+    _ = fs::create_dir(STYLES_OUT);
+
     for file in files {
         let file = file.unwrap();
         let path = file.path();
@@ -17,12 +20,8 @@ fn main() {
 
         let out_path = PathBuf::from(STYLES_OUT).join(format!("{}.css", raw_name));
 
-        std::process::Command::new("sass.cmd")
-            .arg("--no-source-map")
-            .arg("--style=compressed")
-            .arg(path)
-            .arg(out_path)
-            .spawn()
-            .expect("You need `sass` installed to build this crate.");
+        let scss_options = grass::Options::default().style(grass::OutputStyle::Compressed);
+        let css = grass::from_path(path, &scss_options).unwrap();
+        fs::write(out_path, css).unwrap();
     }
 }

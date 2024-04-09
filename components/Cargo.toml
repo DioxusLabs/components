@@ -17,5 +17,8 @@ categories = ["gui", "wasm"]
 dioxus = { workspace = true }
 manganis = { workspace = true }
 
+[build-dependencies]
+grass = "0.13.2"
+
 
 [features]

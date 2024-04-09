@@ -1,11 +1,10 @@
 > [!CAUTION]
 > This library is under heavy development! It is not ready to use. Proceed at your own risk.
 
-## Building
-This crate requires `sass` to be installed.
 
 ## Running Preview
 Currently examples fail to build due to an asset handling issue.
+
 ~~To run the preview example, use:~~
 ```
 cargo run --example preview
