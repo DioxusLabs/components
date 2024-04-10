@@ -23,12 +23,12 @@ props!(RowProps {
 /// # Example
 ///
 /// ```
-/// let row = Row(RowProps {
-///     id: Some("myRow"),
-///     class: Some("myClass"),
-///     style: Some("myStyle"),
-///     children: vec![],
-/// });
+///   Row {
+///      id: "hi",
+///      style: "background-color: #f5f5f5; padding: 20px;",
+///      class: "bg-gray-100 p-5",
+///      Element
+///     }
 /// ```
 pub fn Row(props: RowProps) -> Element {
     rsx! {

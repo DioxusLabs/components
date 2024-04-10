@@ -23,13 +23,14 @@ props!(ColumnProps {
 /// # Example
 ///
 /// ```
-/// let column = Column(ColumnProps {
-///     id: Some("myColumn"),
-///     class: Some("myClass"),
-///     style: Some("myStyle"),
-///     children: vec![],
-/// });
+///   Column {
+///      id: "hi",
+///      style: "background-color: #f5f5f5; padding: 20px;",
+///      class: "bg-gray-100 p-5",
+///      Element
+///     }
 /// ```
+
 pub fn Column(props: ColumnProps) -> Element {
     rsx! {
         style { {include_str!("../../css-out/column.css")} }
