@@ -38,27 +38,25 @@ fn App() -> Element {
 
         // }
 
-        img {
-            src: "{DIOXUS_LOGO}"
+        img { src: "{DIOXUS_LOGO}" }
+
+        Accordian { id: "hi", title: "Got Questions?",
+            AccordianItem { title: "What is this?", "This is just a preview of Dioxus Components! Pretty cool, right?" }
+
+            AccordianItem { title: "How do I use it?",
+                "Check out our "
+                a { href: "https://github.com/DioxusLabs/components", "GitHub" }
+                "!"
+            }
         }
 
-
-        Accordian {
+        Row {
             id: "hi",
-            title: "Got Questions?",
-            AccordianItem {
-                title: "What is this?",
-                "This is just a preview of Dioxus Components! Pretty cool, right?"
-            }
-
-            AccordianItem {
-                title: "How do I use it?",
-                "Check out our ",
-                a {
-                    href: "https://github.com/DioxusLabs/components",
-                    "GitHub"
-                },
-                "!"
+            style: "background-color: #f5f5f5; padding: 40px;",
+            class: "bg-gray-100 p-5",
+            Column { style: "flex: 1;",
+                h1 { "Hello, World!" }
+                p { "Welcome to Dioxus Components!" }
             }
         }
     }
