@@ -10,6 +10,9 @@ pub(crate) use use_unique_id::*;
 mod accordion;
 pub use accordion::*;
 
+mod carousel;
+pub use carousel::*;
+
 props!(ContainerProps { children: Element });
 
 /// A Container is a ``div`` that can be styled. A good use of this is to apply

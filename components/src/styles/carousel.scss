@@ -1,0 +1,50 @@
+.dxc-carousel {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    >.dxc-carousel-display {
+        margin-left: auto;
+        margin-right: auto;
+        display: flex;
+        flex-direction: row;
+        overflow: hidden;
+    }
+
+    >.dxc-carousel-btn {
+        display: flex;
+        align-items: center;
+        margin: 40px;
+
+        >button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            height: 35px;
+            width: 35px;
+            background-color: transparent;
+            border-radius: 50%;
+            padding: 0;
+            margin: 0;
+
+            >img {
+                margin: auto;
+                width: 15px;
+                height: 15px;
+            }
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+    }
+}
+
+.dxc-carousel-item {
+    flex-shrink: 0;
+    height: 100%;
+    width: 100%;
+
+    user-select: none;
+}
