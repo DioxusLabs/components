@@ -27,6 +27,10 @@ fn App() -> Element {
                 h1 { "Hello, World!" }
                 p { "Welcome to Dioxus Components!" }
             }
+            Column {
+                h1 { "Hello, World!" }
+                p { "Welcome to Dioxus Components!" }
+            }
         }
     }
 }

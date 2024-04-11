@@ -54,7 +54,7 @@ fn App() -> Element {
             id: "hi",
             style: "background-color: #f5f5f5; padding: 40px;",
             class: "bg-gray-100 p-5",
-            Column { style: "flex: 1;",
+            Column {
                 h1 { "Hello, World!" }
                 p { "Welcome to Dioxus Components!" }
             }
