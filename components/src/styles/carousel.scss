@@ -14,7 +14,15 @@
     >.dxc-carousel-btn {
         display: flex;
         align-items: center;
-        margin: 40px;
+
+        &.first {
+            margin-right: 40px;
+        }
+
+        &.last {
+            margin-left: 40px;
+        }
+
 
         >button {
             display: flex;
@@ -23,8 +31,13 @@
 
             height: 35px;
             width: 35px;
+
             background-color: transparent;
+            color: #000000;
+
+            border: 2px solid #000000;
             border-radius: 50%;
+
             padding: 0;
             margin: 0;
 
@@ -32,6 +45,14 @@
                 margin: auto;
                 width: 15px;
                 height: 15px;
+            }
+
+            &.disabled {
+                border: 2px solid #c9c9c9;
+
+                >img {
+                    filter: invert(88%) sepia(0%) saturate(106%) hue-rotate(225deg) brightness(90%) contrast(98%);
+                }
             }
 
             &:hover {

@@ -74,6 +74,7 @@ pub fn Carousel(props: CarouselProps) -> Element {
     };
     let on_button_right = move |_| async move {
         let new_index = current_item() + 1;
+
         if new_index > item_counter().0 {
             return;
         }
@@ -83,12 +84,16 @@ pub fn Carousel(props: CarouselProps) -> Element {
         }
     };
 
+    let at_min = current_item() == 0;
+    let at_max = current_item() == item_counter().0;
+
     rsx! {
         div {
             class: "dxc-carousel",
             div {
-                class: "dxc-carousel-btn",
+                class: "dxc-carousel-btn first",
                 button {
+                    class: if at_min { "disabled" },
                     onclick: on_button_left,
                     img { src: "{CARD_ARROW_LEFT_IMG}"}
                 }
@@ -104,8 +109,9 @@ pub fn Carousel(props: CarouselProps) -> Element {
                 {props.children}
             }
             div {
-                class: "dxc-carousel-btn",
+                class: "dxc-carousel-btn last",
                 button {
+                    class: if at_max { "disabled" },
                     onclick: on_button_right,
                     img { src: "{CARD_ARROW_RIGHT_IMG}"}
                 }
@@ -122,7 +128,7 @@ pub fn CarouselItem(props: CarouselItemProps) -> Element {
     rsx! {
         div {
             class: "dxc-carousel-item",
-            {props.children}
+            {props.children} 
         }
     }
 }
@@ -130,7 +136,7 @@ pub fn CarouselItem(props: CarouselItemProps) -> Element {
 // Tells the parent that an item exists.
 fn use_counter() {
     let mut counter = use_context::<Signal<ItemCounter>>();
-    let mut counter_incremented = Signal::new(false);
+    let mut counter_incremented = use_signal(|| false);
 
     use_effect(move || {
         if !counter_incremented() {
@@ -161,16 +167,13 @@ async fn get_lefts(id: String) -> (f64, f64) {
 }
 
 async fn scrollTo(parent_id: String, index: i32) {
-    // Eval does not send the number 0 for some reason. 
+    // Eval does not send the number 0 for some reason.
     // We work around this by incrementing here and decrementing in the eval.
     let index = index + 1;
     let eval = eval(
         r#"
         let parentId = await dioxus.recv();
         let elIndex = await dioxus.recv() - 1;
-
-        console.log(parentId);
-        console.log(elIndex);
 
         let parent = document.getElementById(parentId);
         let children = parent.children;
