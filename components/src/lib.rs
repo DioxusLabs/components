@@ -7,11 +7,7 @@ mod props;
 mod use_unique_id;
 pub(crate) use use_unique_id::*;
 
-mod accordion;
-pub use accordion::*;
-
-mod carousel;
-pub use carousel::*;
+pub mod display;
 
 props!(ContainerProps { children: Element });
 

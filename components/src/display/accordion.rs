@@ -57,7 +57,6 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
         is_closed.toggle();
     };
 
-
     let final_height = match is_closed() {
         true => "0px".to_string(),
         false => format!("{}px", text_height()),
