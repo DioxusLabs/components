@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-// const _STYLE: &str = manganis::mg!(file("./css-out/row.css"));
+const _STYLE: &str = manganis::mg!(file("./css-out/row.css"));
 
 props!(RowProps {
     #[props(into)]
@@ -32,7 +32,7 @@ props!(RowProps {
 /// ```
 pub fn Row(props: RowProps) -> Element {
     rsx! {
-        style { {include_str!("../../css-out/row.css")} }
+        // style { {include_str!("../../css-out/row.css")} }
         div {
             id: if let Some(id) = props.id { "{id}" },
             class: if let Some(class) = props.class { "{class}" },
