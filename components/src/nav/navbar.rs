@@ -18,7 +18,20 @@ props!(NavbarProps {
 });
 
 pub fn Navbar(props: NavbarProps) -> Element {
-    let _ctx = use_context_provider(|| Signal::new(ItemSpacing(props.item_spacing)));
+    let original_item_spacing = use_signal(|| props.item_spacing.clone());
+    let mut item_spacing = use_context_provider(|| Signal::new(ItemSpacing(props.item_spacing)));
+    let mut nav_open_mobile = use_signal(|| false);
+
+    let on_hamburger_click = move |_| {
+        nav_open_mobile.toggle();
+        if nav_open_mobile() {
+            item_spacing.set(ItemSpacing("0".to_string()));
+        } else {
+            item_spacing.set(ItemSpacing(original_item_spacing()));
+        }
+    };
+
+    let children2 = props.children.clone();
 
     rsx! {
         div {
@@ -31,10 +44,16 @@ pub fn Navbar(props: NavbarProps) -> Element {
 
             div {
                 class: "dxc-navitem dxc-nav-hamburger",
+                onclick: on_hamburger_click,
                 img {
                     src: "{HAMBURGER_ICON}",
                 }
             }
+        }
+        div {
+            class: "dxc-navbar-vertical",
+            class: if nav_open_mobile() { "open" },
+            {children2}
         }
     }
 }
