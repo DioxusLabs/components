@@ -7,8 +7,7 @@ mod props;
 mod use_unique_id;
 pub(crate) use use_unique_id::*;
 
-mod accordion;
-pub use accordion::*;
+pub mod display;
 
 mod layout;
 pub use layout::*;
