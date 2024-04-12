@@ -50,10 +50,7 @@ fn App() -> Element {
             }
         }
 
-        Row {
-            id: "hi",
-            style: "background-color: #f5f5f5; padding: 40px;",
-            class: "bg-gray-100 p-5",
+        Row { id: "hi", style: "background-color: #f5f5f5; padding: 40px;",
             Column {
                 h1 { "Hello, World!" }
                 p { "Welcome to Dioxus Components!" }

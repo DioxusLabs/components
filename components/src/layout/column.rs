@@ -33,12 +33,11 @@ props!(ColumnProps {
 
 pub fn Column(props: ColumnProps) -> Element {
     rsx! {
-        // style { {include_str!("../../css-out/column.css")} }
         div {
             id: if let Some(id) = props.id { "{id}" },
             class: if let Some(class) = props.class { "{class}" },
             style: if let Some(style) = props.style { "{style}" },
-            style: "dxc-column",
+            class: "dxc-column",
             {props.children}
         }
     }

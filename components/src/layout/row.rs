@@ -32,7 +32,6 @@ props!(RowProps {
 /// ```
 pub fn Row(props: RowProps) -> Element {
     rsx! {
-        // style { {include_str!("../../css-out/row.css")} }
         div {
             id: if let Some(id) = props.id { "{id}" },
             class: if let Some(class) = props.class { "{class}" },
