@@ -1,0 +1,30 @@
+.dxc-navbar {
+    display: flex;
+    flex-direction: row;
+
+    .dxc-navitem {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .dxc-nav-align-left {
+        display: flex;
+        flex-direction: row;
+        margin-right: auto;
+    }
+    
+    .dxc-nav-align-center {
+        display: flex;
+        flex-direction: row;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .dxc-nav-align-right {
+        display: flex;
+        flex-direction: row;
+        margin-left: auto;
+    }
+}
+
