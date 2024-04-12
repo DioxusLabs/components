@@ -16,6 +16,7 @@ categories = ["gui", "wasm"]
 [dependencies]
 dioxus = { workspace = true }
 manganis = { workspace = true }
+serde_json = { workspace = true }
 
 [build-dependencies]
 grass = "0.13.2"

@@ -9,3 +9,4 @@ members = [
 dioxus-components = { path = "./components" }
 dioxus = { version = "0.5" }
 manganis = "0.2.2"
+serde_json = "1.0.115"

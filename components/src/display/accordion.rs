@@ -4,7 +4,7 @@ const _: &str = manganis::mg!(file("./css-out/accordion.css"));
 const ARROW_DOWN_IMG: &str = manganis::mg!(file("./src/images/arrow-down-pd.svg"));
 
 props!(AccordionProps {
-    #[props(into)]
+    #[props(into, optional)]
     title: Option<String>,
     children: Element,
 });
@@ -45,7 +45,6 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
                 let elementId = await dioxus.recv();  
                 let element = document.getElementById(elementId);
                 let scrollHeight = element.scrollHeight;
-                console.log(scrollHeight);
                 dioxus.send(scrollHeight);
                 "#,
                 );
@@ -57,7 +56,6 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
         }
         is_closed.toggle();
     };
-
 
     let final_height = match is_closed() {
         true => "0px".to_string(),

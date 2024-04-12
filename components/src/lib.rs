@@ -7,8 +7,10 @@ mod props;
 mod use_unique_id;
 pub(crate) use use_unique_id::*;
 
-mod accordion;
-pub use accordion::*;
+pub mod display;
+
+mod layout;
+pub use layout::*;
 
 pub mod nav;
 
@@ -19,11 +21,6 @@ props!(ContainerProps { children: Element });
 /// consistent margins between your components and the page border.
 pub fn Container(props: ContainerProps) -> Element {
     rsx! {
-        div {
-            id: props.id,
-            class: props.class,
-            style: props.style,
-            {props.children}
-        }
+        div { id: props.id, class: props.class, style: props.style, {props.children} }
     }
 }
