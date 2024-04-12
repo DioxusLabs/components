@@ -3,6 +3,7 @@ use dioxus::prelude::*;
 use super::Align;
 
 const _: &str = manganis::mg!(file("./css-out/navbar.css"));
+const HAMBURGER_ICON: &str = manganis::mg!(file("./images/align-text-pd.svg"));
 
 #[derive(Clone)]
 struct ItemSpacing(String);
@@ -11,7 +12,7 @@ struct ItemSpacing(String);
 struct ItemAlign(Align);
 
 props!(NavbarProps {
-    #[props(into, optional, default = "15px".to_string())]
+    #[props(into, optional, default = "3vw".to_string())]
     item_spacing: String,
     children: Element,
 });
@@ -21,12 +22,19 @@ pub fn Navbar(props: NavbarProps) -> Element {
 
     rsx! {
         div {
-            id: if let Some(id) = props.id { "{id}" },
-            class: if let Some(class) = props.class { "{class}" },
-            style: if let Some(style) = props.style { "{style}" },
+            id: props.id,
+            class: props.class,
+            style: props.style,
             class: "dxc-navbar",
 
             {props.children}
+
+            div {
+                class: "dxc-navitem dxc-nav-hamburger",
+                img {
+                    src: "{HAMBURGER_ICON}",
+                }
+            }
         }
     }
 }
@@ -46,9 +54,9 @@ pub fn NavItem(props: NavItemProps) -> Element {
 
     rsx! {
         div {
-            id: if let Some(id) = props.id { "{id}" },
-            class: if let Some(class) = props.class { "{class}" },
-            style: if let Some(style) = props.style { "{style}" },
+            id: props.id,
+            class: props.class,
+            style: props.style,
             style: "{spacing_style}",
             class: "dxc-navitem",
 
@@ -63,9 +71,9 @@ pub fn NavAlignLeft(props: NavAlignLeftProps) -> Element {
 
     rsx! {
         div {
-            id: if let Some(id) = props.id { "{id}" },
-            class: if let Some(class) = props.class { "{class}" },
-            style: if let Some(style) = props.style { "{style}" },
+            id: props.id,
+            class: props.class,
+            style: props.style,
             class: "dxc-nav-align-left",
 
             {props.children}
@@ -79,9 +87,9 @@ pub fn NavAlignCenter(props: NavAlignCenterProps) -> Element {
 
     rsx! {
         div {
-            id: if let Some(id) = props.id { "{id}" },
-            class: if let Some(class) = props.class { "{class}" },
-            style: if let Some(style) = props.style { "{style}" },
+            id: props.id,
+            class: props.class,
+            style: props.style,
             class: "dxc-nav-align-center",
 
             {props.children}
@@ -95,9 +103,9 @@ pub fn NavAlignRight(props: NavAlignRightProps) -> Element {
 
     rsx! {
         div {
-            id: if let Some(id) = props.id { "{id}" },
-            class: if let Some(class) = props.class { "{class}" },
-            style: if let Some(style) = props.style { "{style}" },
+            id: props.id,
+            class: props.class,
+            style: props.style,
             class: "dxc-nav-align-right",
 
             {props.children}

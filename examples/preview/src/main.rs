@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_components::{Accordion, AccordionItem, Column, Row};
+use dioxus_components::{layout::*, display::*};
 
 fn main() {
     launch(App);

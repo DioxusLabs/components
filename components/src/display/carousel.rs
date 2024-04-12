@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 
 const _: &str = manganis::mg!(file("./css-out/carousel.css"));
-const CARD_ARROW_LEFT_IMG: &str = manganis::mg!(file("./src/images/card-arrow-left-pd.svg"));
-const CARD_ARROW_RIGHT_IMG: &str = manganis::mg!(file("./src/images/card-arrow-right-pd.svg"));
+const CARD_ARROW_LEFT_IMG: &str = manganis::mg!(file("./images/card-arrow-left-pd.svg"));
+const CARD_ARROW_RIGHT_IMG: &str = manganis::mg!(file("./images/card-arrow-right-pd.svg"));
 
 #[derive(Clone, Copy)]
 struct ItemCounter(i32);

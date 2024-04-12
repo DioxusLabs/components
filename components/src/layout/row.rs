@@ -33,9 +33,9 @@ props!(RowProps {
 pub fn Row(props: RowProps) -> Element {
     rsx! {
         div {
-            id: if let Some(id) = props.id { "{id}" },
-            class: if let Some(class) = props.class { "{class}" },
-            style: if let Some(style) = props.style { "{style}" },
+            id: props.id,
+            class: props.class,
+            style: props.style,
             class: "dxc-row",
             {props.children}
         }

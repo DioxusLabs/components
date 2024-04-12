@@ -6,6 +6,19 @@
         display: flex;
         flex-direction: row;
         align-items: center;
+        font-size: 1.2rem;
+        min-height: 60px;
+
+        &.dxc-nav-hamburger {
+            height: 30px;
+            width: 30px;
+            margin-left: auto;
+            display: none;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
     }
 
     .dxc-nav-align-left {
@@ -13,18 +26,34 @@
         flex-direction: row;
         margin-right: auto;
     }
-    
+
     .dxc-nav-align-center {
         display: flex;
         flex-direction: row;
         margin-left: auto;
         margin-right: auto;
     }
-    
+
     .dxc-nav-align-right {
         display: flex;
         flex-direction: row;
         margin-left: auto;
     }
-}
 
+    @media (max-width: 425px) {
+
+        .dxc-navitem:not(:first-child) {
+            display: none;
+        }
+
+
+        &>.dxc-nav-align-center,
+        &>.dxc-nav-align-right {
+            display: none;
+        }
+
+        &>.dxc-navitem.dxc-nav-hamburger {
+            display: flex;
+        }
+    }
+}
