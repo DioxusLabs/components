@@ -1,6 +1,6 @@
-use dioxus::prelude::*;
-
 use super::Align;
+use dioxus::prelude::*;
+use dioxus_sdk::utils::window::use_window_size;
 
 const _: &str = manganis::mg!(file("./css-out/navbar.css"));
 const HAMBURGER_ICON: &str = manganis::mg!(file("./images/align-text-pd.svg"));
@@ -12,24 +12,50 @@ struct ItemSpacing(String);
 struct ItemAlign(Align);
 
 props!(NavbarProps {
+    /// The minimum size in pixels before the navbar collapses into a vertical navbar.
+    /// Defaults to `425px`, Chrome's Large Mobile size.
+    #[props(optional, default = 425)]
+    collapse_width: u32,
+    /// The spacing between [`NavItem`]s.
+    /// Defaults to `3vw`.
     #[props(into, optional, default = "3vw".to_string())]
     item_spacing: String,
+
     children: Element,
 });
 
 pub fn Navbar(props: NavbarProps) -> Element {
-    let original_item_spacing = use_signal(|| props.item_spacing.clone());
-    let mut item_spacing = use_context_provider(|| Signal::new(ItemSpacing(props.item_spacing)));
+    // Spacing context provider for spacing between nav elements.
+    let mut item_spacing =
+        use_context_provider(|| Signal::new(ItemSpacing(props.item_spacing.clone())));
+
+    // Handle nav opening/closing on mobile.
+    let window_size = use_window_size();
+    let mut mobile_mode = use_signal(|| false);
     let mut nav_open_mobile = use_signal(|| false);
+    let item_spacing_prop = props.item_spacing.clone();
+
+    use_memo(move || {
+        if window_size().width > props.collapse_width {
+            nav_open_mobile.set(false);
+            mobile_mode.set(false);
+            item_spacing.set(ItemSpacing(item_spacing_prop.clone()));
+        } else {
+            mobile_mode.set(true);
+            item_spacing.set(ItemSpacing("NONE".to_string()));
+        }
+    });
 
     let on_hamburger_click = move |_| {
-        nav_open_mobile.toggle();
-        if nav_open_mobile() {
-            item_spacing.set(ItemSpacing("0".to_string()));
-        } else {
-            item_spacing.set(ItemSpacing(original_item_spacing()));
-        }
+        nav_open_mobile.set(!nav_open_mobile());
     };
+
+    // Handle item_spacing context updates from props
+    use_memo(use_reactive((&props.item_spacing,), move |(spacing,)| {
+        if !mobile_mode() {
+            item_spacing.set(ItemSpacing(spacing));
+        }
+    }));
 
     let children2 = props.children.clone();
 
@@ -39,21 +65,24 @@ pub fn Navbar(props: NavbarProps) -> Element {
             class: props.class,
             style: props.style,
             class: "dxc-navbar",
+            class: if mobile_mode() { "mobile" },
 
-            {props.children}
+            {props.children},
 
-            div {
-                class: "dxc-navitem dxc-nav-hamburger",
-                onclick: on_hamburger_click,
-                img {
-                    src: "{HAMBURGER_ICON}",
+            if mobile_mode() {
+                div {
+                    class: "dxc-navitem dxc-nav-hamburger",
+                    onclick: on_hamburger_click,
+                    img { src: "{HAMBURGER_ICON}" }
                 }
             }
         }
-        div {
-            class: "dxc-navbar-vertical",
-            class: if nav_open_mobile() { "open" },
-            {children2}
+
+        if nav_open_mobile() {
+            div {
+                class: "dxc-navbar-vertical",
+                {children2}
+            }
         }
     }
 }

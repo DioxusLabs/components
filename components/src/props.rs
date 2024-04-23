@@ -1,6 +1,6 @@
 /// Provides a prop struct with default props.
 /// Usage:
-/// ```rs
+/// ```rust
 /// props!(MyStruct {
 ///     my_prop: i32,
 ///     
@@ -26,9 +26,9 @@
 ///     #[props(into)]
 ///     title: Option<String>,
 /// }
-/// ````
+/// ```
 macro_rules! props {
-    ($name:ident { $($(#[$attr:meta])? $field:ident : $type:ty),* $(,)? } ) => {
+    ($name:ident { $($(#[$attr:meta])* $field:ident : $type:ty),* $(,)? } ) => {
         #[derive(Props, PartialEq, Clone)]
         pub struct $name {
             #[props(into, optional, default = "".to_string())]
