@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 const _: &str = manganis::mg!(file("./css-out/accordion.css"));
-const ARROW_DOWN_IMG: &str = manganis::mg!(file("./src/images/arrow-down-pd.svg"));
+const ARROW_DOWN_IMG: &str = manganis::mg!(file("./images/arrow-down-pd.svg"));
 
 props!(AccordionProps {
     #[props(into, optional)]
@@ -12,9 +12,9 @@ props!(AccordionProps {
 pub fn Accordion(props: AccordionProps) -> Element {
     rsx! {
         div {
-            id: if let Some(id) = props.id { "{id}" },
-            class: if let Some(class) = props.class { "{class}" },
-            style: if let Some(style) = props.style { "{style}" },
+            id: props.id,
+            class: props.class,
+            style: props.style,
             class: "dxc-accordian",
 
             if let Some(title) = props.title {
@@ -64,9 +64,9 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
 
     rsx! {
         div {
-            id: if let Some(id) = props.id { "{id}" },
-            class: if let Some(class) = props.class { "{class}" },
-            style: if let Some(style) = props.style { "{style}" },
+            id: props.id,
+            class: props.class,
+            style: props.style,
             class: "dxc-accordian-item",
 
             button {
