@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::theme::use_theme;
+
 const _: &str = manganis::mg!(file("./css-out/column.css"));
 
 props!(ColumnProps {
@@ -30,14 +32,15 @@ props!(ColumnProps {
 ///      Element
 ///     }
 /// ```
-
 pub fn Column(props: ColumnProps) -> Element {
+    let theme = use_theme();
+
     rsx! {
         div {
             id: props.id,
             class: props.class,
             style: props.style,
-            class: "dxc-column",
+            class: "dxc-column {theme().0}",
             {props.children}
         }
     }

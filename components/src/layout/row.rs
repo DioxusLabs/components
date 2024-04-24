@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::theme::use_theme;
+
 const _STYLE: &str = manganis::mg!(file("./css-out/row.css"));
 
 props!(RowProps {
@@ -31,12 +33,14 @@ props!(RowProps {
 ///     }
 /// ```
 pub fn Row(props: RowProps) -> Element {
+    let theme = use_theme();
+
     rsx! {
         div {
             id: props.id,
             class: props.class,
             style: props.style,
-            class: "dxc-row",
+            class: "dxc-row {theme().0}",
             {props.children}
         }
     }

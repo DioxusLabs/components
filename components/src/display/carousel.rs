@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::theme::use_theme;
+
 const _: &str = manganis::mg!(file("./css-out/carousel.css"));
 const CARD_ARROW_LEFT_IMG: &str = manganis::mg!(file("./images/card-arrow-left-pd.svg"));
 const CARD_ARROW_RIGHT_IMG: &str = manganis::mg!(file("./images/card-arrow-right-pd.svg"));
@@ -16,7 +18,6 @@ pub fn Carousel(props: CarouselProps) -> Element {
     let unique_id = crate::use_unique_id();
 
     // Mouse scrolling
-
     let mut mouse_down = use_signal(|| false);
     let mut start_x = use_signal(|| 0.0);
     let mut scroll_left = use_signal(|| 0.0);
@@ -61,7 +62,6 @@ pub fn Carousel(props: CarouselProps) -> Element {
     };
 
     // Button Handlers
-
     let on_button_left = move |_| async move {
         let new_index = current_item() - 1;
         if new_index < 0 {
@@ -87,11 +87,13 @@ pub fn Carousel(props: CarouselProps) -> Element {
     let at_min = current_item() == 0;
     let at_max = current_item() == item_counter().0;
 
+    let theme = use_theme();
+
     rsx! {
         div {
-            class: "dxc-carousel",
+            class: "dxc-carousel {theme().0}",
             div {
-                class: "dxc-carousel-btn first",
+                class: "dxc-carousel-btn first {theme().0}",
                 button {
                     class: if at_min { "disabled" },
                     onclick: on_button_left,
@@ -100,7 +102,7 @@ pub fn Carousel(props: CarouselProps) -> Element {
             }
             div {
                 id: if let Some(id) = unique_id() { "{id}" },
-                class: "dxc-carousel-display",
+                class: "dxc-carousel-display {theme().0}",
                 onmousemove: on_mouse_move,
                 onmousedown: mouse_is_down,
                 onmouseup: mouse_is_up,
@@ -109,7 +111,7 @@ pub fn Carousel(props: CarouselProps) -> Element {
                 {props.children}
             }
             div {
-                class: "dxc-carousel-btn last",
+                class: "dxc-carousel-btn last {theme().0}",
                 button {
                     class: if at_max { "disabled" },
                     onclick: on_button_right,
@@ -124,10 +126,11 @@ props!(CarouselItemProps { children: Element });
 
 pub fn CarouselItem(props: CarouselItemProps) -> Element {
     use_counter();
+    let theme = use_theme();
 
     rsx! {
         div {
-            class: "dxc-carousel-item",
+            class: "dxc-carousel-item {theme().0}",
             {props.children} 
         }
     }

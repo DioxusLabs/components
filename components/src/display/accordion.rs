@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::theme::use_theme;
+
 const _: &str = manganis::mg!(file("./css-out/accordion.css"));
 const ARROW_DOWN_IMG: &str = manganis::mg!(file("./images/arrow-down-pd.svg"));
 
@@ -10,12 +12,14 @@ props!(AccordionProps {
 });
 
 pub fn Accordion(props: AccordionProps) -> Element {
+    let theme = use_theme();
+
     rsx! {
         div {
             id: props.id,
             class: props.class,
             style: props.style,
-            class: "dxc-accordian",
+            class: "dxc-accordian {theme().0}",
 
             if let Some(title) = props.title {
                 h2 { "{title}" }
@@ -62,15 +66,17 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
         false => format!("{}px", text_height()),
     };
 
+    let theme = use_theme();
+
     rsx! {
         div {
             id: props.id,
             class: props.class,
             style: props.style,
-            class: "dxc-accordian-item",
+            class: "dxc-accordian-item {theme().0}",
 
             button {
-                class: "dxc-accordian-button",
+                class: "dxc-accordian-button {theme().0}",
                 class: if !is_closed() { "active" },
                 onclick: button_clicked,
 
@@ -82,7 +88,7 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
 
             div {
                 id: if let Some(id) = unique_id() { "{id}" },
-                class: "dxc-accordian-text",
+                class: "dxc-accordian-text {theme().0}",
                 class: if !is_closed() { "active" },
                 height: final_height,
 

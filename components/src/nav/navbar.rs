@@ -1,3 +1,5 @@
+use crate::theme::use_theme;
+
 use super::Align;
 use dioxus::prelude::*;
 use dioxus_sdk::utils::window::use_window_size;
@@ -51,12 +53,13 @@ pub fn Navbar(props: NavbarProps) -> Element {
     };
 
     // Handle item_spacing context updates from props
-    use_memo(use_reactive((&props.item_spacing,), move |(spacing,)| {
+    use_memo(use_reactive(&props.item_spacing, move |spacing| {
         if !mobile_mode() {
             item_spacing.set(ItemSpacing(spacing));
         }
     }));
 
+    let theme = use_theme();
     let children2 = props.children.clone();
 
     rsx! {
@@ -64,14 +67,14 @@ pub fn Navbar(props: NavbarProps) -> Element {
             id: props.id,
             class: props.class,
             style: props.style,
-            class: "dxc-navbar",
+            class: "dxc-navbar {theme().0}",
             class: if mobile_mode() { "mobile" },
 
             {props.children},
 
             if mobile_mode() {
                 div {
-                    class: "dxc-navitem dxc-nav-hamburger",
+                    class: "dxc-navitem dxc-nav-hamburger {theme().0}",
                     onclick: on_hamburger_click,
                     img { src: "{HAMBURGER_ICON}" }
                 }
@@ -80,7 +83,7 @@ pub fn Navbar(props: NavbarProps) -> Element {
 
         if nav_open_mobile() {
             div {
-                class: "dxc-navbar-vertical",
+                class: "dxc-navbar-vertical {theme().0}",
                 {children2}
             }
         }
@@ -100,13 +103,15 @@ pub fn NavItem(props: NavItemProps) -> Element {
         Align::Right => format!("margin-left: {}", item_spacing.0),
     };
 
+    let theme = use_theme();
+
     rsx! {
         div {
             id: props.id,
             class: props.class,
             style: props.style,
             style: "{spacing_style}",
-            class: "dxc-navitem",
+            class: "dxc-navitem {theme().0}",
 
             {props.children}
         }
@@ -116,13 +121,14 @@ pub fn NavItem(props: NavItemProps) -> Element {
 props!(NavAlignLeftProps { children: Element });
 pub fn NavAlignLeft(props: NavAlignLeftProps) -> Element {
     let _item_align = use_context_provider(|| ItemAlign(Align::Left));
+    let theme = use_theme();
 
     rsx! {
         div {
             id: props.id,
             class: props.class,
             style: props.style,
-            class: "dxc-nav-align-left",
+            class: "dxc-nav-align-left {theme().0}",
 
             {props.children}
         }
@@ -132,13 +138,14 @@ pub fn NavAlignLeft(props: NavAlignLeftProps) -> Element {
 props!(NavAlignCenterProps { children: Element });
 pub fn NavAlignCenter(props: NavAlignCenterProps) -> Element {
     let _item_align = use_context_provider(|| ItemAlign(Align::Center));
+    let theme = use_theme();
 
     rsx! {
         div {
             id: props.id,
             class: props.class,
             style: props.style,
-            class: "dxc-nav-align-center",
+            class: "dxc-nav-align-center {theme().0}",
 
             {props.children}
         }
@@ -148,13 +155,14 @@ pub fn NavAlignCenter(props: NavAlignCenterProps) -> Element {
 props!(NavAlignRightProps { children: Element });
 pub fn NavAlignRight(props: NavAlignRightProps) -> Element {
     let _item_align = use_context_provider(|| ItemAlign(Align::Right));
+    let theme = use_theme();
 
     rsx! {
         div {
             id: props.id,
             class: props.class,
             style: props.style,
-            class: "dxc-nav-align-right",
+            class: "dxc-nav-align-right {theme().0}",
 
             {props.children}
         }
