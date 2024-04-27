@@ -18,9 +18,10 @@ pub fn use_theme_provider<S: ToString>(theme: S) -> Signal<Theme> {
     let theme = theme.to_string();
 
     let mut theme_ctx = use_context_provider(|| Signal::new(Theme(theme.clone())));
-    use_memo(use_reactive(&theme, move |theme| {
+    let theme_changed = theme_ctx.read().0 != &theme;
+    if theme_changed  {
         theme_ctx.set(Theme(theme));
-    }));
+    }
 
     theme_ctx
 }
