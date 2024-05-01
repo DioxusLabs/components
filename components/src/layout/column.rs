@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::theme::use_theme;
 
-const _: &str = manganis::mg!(file("./css-out/column.css"));
+const _: &str = manganis::mg!(file("./styles/core/column.css"));
 
 props!(ColumnProps {
     #[props(into)]

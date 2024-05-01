@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::theme::use_theme;
 
-const _: &str = manganis::mg!(file("./css-out/branding.css"));
+const _: &str = manganis::mg!(file("./styles/core/branding.css"));
 
 props!(LogoTextProps {
     #[props(into)]

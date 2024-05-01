@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::theme::use_theme;
 
-const _STYLE: &str = manganis::mg!(file("./css-out/row.css"));
+const _STYLE: &str = manganis::mg!(file("./styles/core/row.css"));
 
 props!(RowProps {
     #[props(into)]

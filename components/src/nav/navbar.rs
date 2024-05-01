@@ -4,7 +4,7 @@ use super::Align;
 use dioxus::prelude::*;
 use dioxus_sdk::utils::window::use_window_size;
 
-const _: &str = manganis::mg!(file("./css-out/navbar.css"));
+const _: &str = manganis::mg!(file("./styles/core/navbar.css"));
 const HAMBURGER_ICON: &str = manganis::mg!(file("./images/align-text-pd.svg"));
 
 #[derive(Clone)]

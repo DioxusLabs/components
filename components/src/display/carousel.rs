@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::theme::use_theme;
 
-const _: &str = manganis::mg!(file("./css-out/carousel.css"));
+const _: &str = manganis::mg!(file("./styles/core/carousel.css"));
 const CARD_ARROW_LEFT_IMG: &str = manganis::mg!(file("./images/card-arrow-left-pd.svg"));
 const CARD_ARROW_RIGHT_IMG: &str = manganis::mg!(file("./images/card-arrow-right-pd.svg"));
 

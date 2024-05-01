@@ -12,4 +12,4 @@ pub mod display;
 pub mod nav;
 
 
-const _: &str = manganis::mg!(file("./css-out/index.css"));
+const _: &str = manganis::mg!(file("./styles/core/index.css"));
