@@ -2,6 +2,8 @@ use dioxus::prelude::*;
 
 use crate::theme::use_theme;
 
+#[cfg(feature = "theme_minimal")]
+const _: &str = manganis::mg!(file("./styles/minimal/branding.css"));
 const _: &str = manganis::mg!(file("./styles/core/branding.css"));
 
 props!(LogoTextProps {

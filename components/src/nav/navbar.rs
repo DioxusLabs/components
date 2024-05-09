@@ -4,6 +4,8 @@ use super::Align;
 use dioxus::prelude::*;
 use dioxus_sdk::utils::window::use_window_size;
 
+#[cfg(feature = "theme_minimal")]
+const _: &str = manganis::mg!(file("./styles/minimal/navbar.css"));
 const _: &str = manganis::mg!(file("./styles/core/navbar.css"));
 const HAMBURGER_ICON: &str = manganis::mg!(file("./images/align-text-pd.svg"));
 

@@ -1,6 +1,5 @@
-use dioxus::prelude::*;
-
 use crate::theme::use_theme;
+use dioxus::prelude::*;
 
 props!(ContainerProps { children: Element });
 
@@ -10,12 +9,12 @@ pub fn Container(props: ContainerProps) -> Element {
     let theme = use_theme();
 
     rsx! {
-        div { 
-            id: props.id, 
-            class: props.class, 
-            style: props.style, 
+        div {
+            id: props.id,
+            class: props.class,
+            style: props.style,
             class: "dxc-container {theme().0}",
-            {props.children} 
+            {props.children}
         }
     }
 }

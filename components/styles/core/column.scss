@@ -1,10 +1,5 @@
-.dxc-row {
-    padding: 10px;
+.dxc-column {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
-    &:last-child {
-        border-bottom: none;
-    }
 }

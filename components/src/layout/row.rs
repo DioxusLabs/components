@@ -1,8 +1,9 @@
+use crate::theme::use_theme;
 use dioxus::prelude::*;
 
-use crate::theme::use_theme;
-
-const _STYLE: &str = manganis::mg!(file("./styles/core/row.css"));
+#[cfg(feature = "theme_minimal")]
+const _: &str = manganis::mg!(file("./styles/minimal/row.css"));
+const _: &str = manganis::mg!(file("./styles/core/row.css"));
 
 props!(RowProps {
     #[props(into)]
@@ -25,12 +26,12 @@ props!(RowProps {
 /// # Example
 ///
 /// ```
-///   Row {
-///      id: "hi",
-///      style: "background-color: #f5f5f5; padding: 20px;",
-///      class: "bg-gray-100 p-5",
-///      Element
-///     }
+/// Row {
+///     id: "hi",
+///     style: "background-color: #f5f5f5; padding: 20px;",
+///     class: "bg-gray-100 p-5",
+///     Element
+/// }
 /// ```
 pub fn Row(props: RowProps) -> Element {
     let theme = use_theme();

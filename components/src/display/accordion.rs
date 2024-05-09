@@ -1,7 +1,8 @@
 use dioxus::prelude::*;
-
 use crate::theme::use_theme;
 
+#[cfg(feature = "theme_minimal")]
+const _: &str = manganis::mg!(file("./styles/minimal/accordion.css"));
 const _: &str = manganis::mg!(file("./styles/core/accordion.css"));
 const ARROW_DOWN_IMG: &str = manganis::mg!(file("./images/arrow-down-pd.svg"));
 

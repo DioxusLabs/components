@@ -3,7 +3,8 @@ use dioxus::prelude::*;
 static CURRENT_ID: GlobalSignal<usize> = Signal::global(|| 0);
 const ID_PREFIX: &str = "dxc-uniq-";
 
-pub fn use_unique_id() -> Signal<Option<String>> {
+/// Generate a unique dxc-uniq-x id.
+pub(crate) fn use_unique_id() -> Signal<Option<String>> {
     let mut id = use_signal(|| None);
 
     if id().is_none() {

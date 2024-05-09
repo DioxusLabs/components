@@ -1,0 +1,24 @@
+.dxc-navbar {
+    .dxc-navitem {
+        min-height: 60px;
+    }
+}
+
+
+.dxc-navbar-vertical {
+    .dxc-navitem {
+        margin-bottom: 10px;
+    }
+}
+
+
+.dxc-navitem {
+    align-items: center;
+    font-size: 1.2rem;
+
+    &.dxc-nav-hamburger {
+        max-height: 30px;
+        max-width: 30px;
+    }
+}
+

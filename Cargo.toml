@@ -7,7 +7,7 @@ members = [
 
 [workspace.dependencies]
 dioxus-components = { path = "./components" }
-dioxus-sdk = { path = "../sdk/sdk", features = ["use_window_size"]}
+dioxus-sdk = { path = "../sdk/sdk", features = ["window_size"]}
 dioxus = { version = "0.5" }
 manganis = "0.2.2"
 serde_json = "1.0.115"

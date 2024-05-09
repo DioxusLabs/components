@@ -1,7 +1,8 @@
+use crate::theme::use_theme;
 use dioxus::prelude::*;
 
-use crate::theme::use_theme;
-
+#[cfg(feature = "theme_minimal")]
+const _: &str = manganis::mg!(file("./styles/minimal/column.css"));
 const _: &str = manganis::mg!(file("./styles/core/column.css"));
 
 props!(ColumnProps {
@@ -25,12 +26,12 @@ props!(ColumnProps {
 /// # Example
 ///
 /// ```
-///   Column {
-///      id: "hi",
-///      style: "background-color: #f5f5f5; padding: 20px;",
-///      class: "bg-gray-100 p-5",
-///      Element
-///     }
+/// Column {
+///     id: "hi",
+///     style: "background-color: #f5f5f5; padding: 20px;",
+///     class: "bg-gray-100 p-5",
+///     Element
+/// }
 /// ```
 pub fn Column(props: ColumnProps) -> Element {
     let theme = use_theme();

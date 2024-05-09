@@ -24,4 +24,5 @@ grass = "0.13.2"
 
 
 [features]
-theme-minimal = []
+default = ["theme_minimal"]
+theme_minimal = []

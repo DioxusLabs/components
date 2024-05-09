@@ -11,10 +11,6 @@
     display: flex;
     flex-direction: column;
 
-    .dxc-navitem {
-        margin-bottom: 10px;
-    }
-
     >.dxc-nav-align-left>.dxc-navitem:first-child {
         display: none;
     }
@@ -33,12 +29,8 @@
 .dxc-navitem {
     display: flex;
     flex-direction: row;
-    align-items: center;
-    font-size: 1.2rem;
 
     &.dxc-nav-hamburger {
-        height: 30px;
-        width: 30px;
         margin-left: auto;
         display: flex;
 
