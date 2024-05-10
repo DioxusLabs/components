@@ -12,6 +12,7 @@ struct ItemCounter(i32);
 props!(CarouselProps { children: Element });
 
 pub fn Carousel(props: CarouselProps) -> Element {
+    println!("RENDERING");
     let item_counter = use_context_provider(|| Signal::new(ItemCounter(-1)));
     let mut current_item = use_signal(|| 0);
 
@@ -41,6 +42,7 @@ pub fn Carousel(props: CarouselProps) -> Element {
         }
 
         if let Some(id) = unique_id() {
+            println!("RUNNING1");
             let page_x = e.page_coordinates().x;
             let (_, offset_left) = get_lefts(id.clone()).await;
 
@@ -58,6 +60,7 @@ pub fn Carousel(props: CarouselProps) -> Element {
             );
             eval.send(id.into()).unwrap();
             eval.send(final_value.into()).unwrap();
+            println!("RUNNING1 COMPLETE");
         }
     };
 
