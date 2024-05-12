@@ -15,14 +15,9 @@ categories = ["gui", "wasm"]
 
 [dependencies]
 dioxus = { workspace = true }
-dioxus-sdk = { workspace = true }
+#dioxus-sdk = { workspace = true }
 manganis = { workspace = true }
-serde_json = { workspace = true }
+#serde_json = { workspace = true }
 
 [build-dependencies]
 grass = "0.13.2"
-
-
-[features]
-default = ["theme_minimal"]
-theme_minimal = []

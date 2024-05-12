@@ -1,0 +1,59 @@
+@use "../var" as v;
+
+// Button Small
+$btn-sm-font-size: 14px;
+$btn-sm-padding: 5px 8px;
+
+// Button Medium
+$btn-md-font-size: 14px;
+$btn-md-padding: 8px 16px;
+
+// Button Large
+$btn-lg-font-size: 20px;
+$btn-lg-padding: 10px 18px;
+
+.dxc-button {
+    border: none;
+    border-radius: 5px;
+    outline: none;
+    font-weight: 700;
+    user-select: none;
+
+    &:not(.disabled):hover {
+        cursor: pointer;
+    }
+
+
+    &.s-sm {
+        font-size: $btn-sm-font-size;
+        padding: $btn-sm-padding;
+    }
+
+    &.s-md {
+        font-size: $btn-md-font-size;
+        padding: $btn-md-padding;
+    }
+
+    &.s-lg {
+        font-size: $btn-lg-font-size;
+        padding: $btn-lg-padding;
+    }
+
+    &.s-auto {
+        @media (max-width: v.$breakpoint-md) {
+            font-size: $btn-sm-font-size;
+            padding: $btn-sm-padding;
+        }
+
+        @media (min-width: v.$breakpoint-md) {
+            font-size: $btn-md-font-size;
+            padding: $btn-md-padding;
+        }
+
+        @media (min-width: v.$breakpoint-lg) {
+            font-size: $btn-lg-font-size;
+            padding: $btn-lg-padding;
+        }
+    }
+    
+}
