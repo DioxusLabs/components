@@ -64,7 +64,7 @@ pub enum FontFamily {
 impl Display for FontFamily {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Arial => write!(f, "font-family: Arial, Helvetica, sans-serif;"),
+            Self::Arial => write!(f, "font-family:Arial,Helvetica,sans-serif;"),
         }
     }
 }
