@@ -1,0 +1,17 @@
+@use "../var" as v;
+
+.dxc-button-group {
+    display: flex;
+
+    >.dxc-button:not(:first-child):not(:last-child) {
+        border-radius: 0;
+    }
+
+    >.dxc-button:first-child {
+        border-radius: v.$border-radius 0 0 v.$border-radius;
+    }
+
+    >.dxc-button:last-child {
+        border-radius: 0 v.$border-radius v.$border-radius 0;
+    }
+}

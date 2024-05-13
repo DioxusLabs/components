@@ -14,7 +14,7 @@ $btn-lg-padding: 10px 18px;
 
 .dxc-button {
     border: none;
-    border-radius: 5px;
+    border-radius: v.$border-radius;
     outline: none;
     font-weight: 700;
     user-select: none;

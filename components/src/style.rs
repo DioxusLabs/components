@@ -8,6 +8,17 @@ pub enum Size {
     Auto,
 }
 
+impl Size {
+    pub fn as_css_class(&self) -> &str {
+        match self {
+            Size::Small => "s-sm",
+            Size::Medium => "s-md",
+            Size::Large => "s-lg",
+            Size::Auto => "s-auto",
+        }
+    }
+}
+
 impl Default for Size {
     fn default() -> Self {
         Self::Auto
@@ -16,12 +27,7 @@ impl Default for Size {
 
 impl Display for Size {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Small => write!(f, "s-sm"),
-            Self::Medium => write!(f, "s-md"),
-            Self::Large => write!(f, "s-lg"),
-            Self::Auto => write!(f, "s-auto"),
-        }
+        write!(f, "{}", self.as_css_class())
     }
 }
 
@@ -56,7 +62,7 @@ impl Display for Color {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum FontFamily {
     Arial,
 }
@@ -72,5 +78,26 @@ impl Display for FontFamily {
 impl Default for FontFamily {
     fn default() -> Self {
         Self::Arial
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum Orientation {
+    Horizontal,
+    Vertical,
+}
+
+impl Orientation {
+    pub fn as_flex_direction(&self) -> &str {
+        match self {
+            Self::Horizontal => "row",
+            Self::Vertical => "column",
+        }
+    }
+}
+
+impl Default for Orientation {
+    fn default() -> Self {
+        Self::Horizontal
     }
 }
