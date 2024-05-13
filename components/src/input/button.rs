@@ -1,6 +1,6 @@
-use crate::style::{Color, FontFamily, Size};
+use crate::style::{AsCss, Color, FontFamily, Size};
 use dioxus::prelude::*;
-use std::fmt::Display;
+use std::fmt::Write as _;
 
 const _: &str = manganis::mg!(file("./styles/input/button.css"));
 
@@ -39,13 +39,15 @@ impl Default for ButtonStyling {
     }
 }
 
-impl Display for ButtonStyling {
-    /// Display [`ButtonStyling`] in valid css.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "background-color:{};", self.background_color)?;
-        write!(f, "color:{};", self.text_color)?;
-        write!(f, "{}", self.text_font)?;
-        Ok(())
+impl AsCss for ButtonStyling {
+    fn as_css(&self) -> String {
+        let mut css = String::new();
+
+        write!(css, "background-color:{};", self.background_color.as_css()).ok();
+        write!(css, "color:{};", self.text_color.as_css()).ok();
+        write!(css, "{}", self.text_font.as_css()).ok();
+
+        css
     }
 }
 
@@ -98,8 +100,8 @@ pub fn Button(props: ButtonProps) -> Element {
 
     rsx! {
         button {
-            class: "dxc-button {props.size} {disabled_class}",
-            style: "{styling}{hover_style}",
+            class: "dxc-button {props.size.as_class()} {disabled_class}",
+            style: "{styling.as_css()}{hover_style}",
             onclick: move |evt| {
                 if !props.disabled {
                     props.on_click.call(evt);

@@ -1,4 +1,9 @@
 use std::fmt::Display;
+use std::fmt::Write as _;
+
+pub trait AsCss {
+    fn as_css(&self) -> String;
+}
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Size {
@@ -9,7 +14,7 @@ pub enum Size {
 }
 
 impl Size {
-    pub fn as_css_class(&self) -> &str {
+    pub fn as_class(&self) -> &str {
         match self {
             Size::Small => "s-sm",
             Size::Medium => "s-md",
@@ -25,39 +30,52 @@ impl Default for Size {
     }
 }
 
-impl Display for Size {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_css_class())
-    }
-}
-
+// We have a separate color enum so that we can enforce
+// usage of type-checking functions.
 #[derive(Clone, PartialEq)]
-pub enum Color {
+enum ColorType {
     Hex(String),
     Rgb(u8, u8, u8),
     Rgba(u8, u8, u8, f32),
 }
 
+#[derive(Clone, PartialEq)]
+pub struct Color {
+    color: ColorType,
+}
+
 impl Color {
     pub fn hex<T: ToString>(value: T) -> Self {
-        Self::Hex(value.to_string())
+        Self {
+            color: ColorType::Hex(value.to_string()),
+        }
     }
 
     pub fn rgb(r: u8, g: u8, b: u8) -> Self {
-        Self::Rgb(r, g, b)
+        Self {
+            color: ColorType::Rgb(r, g, b),
+        }
     }
 
     pub fn rgba(r: u8, g: u8, b: u8, a: f32) -> Self {
-        Self::Rgba(r, g, b, a)
+        Self {
+            color: ColorType::Rgba(r, g, b, a),
+        }
+    }
+}
+
+impl AsCss for Color {
+    fn as_css(&self) -> String {
+        self.to_string()
     }
 }
 
 impl Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Hex(hex) => write!(f, "#{}", hex),
-            Self::Rgb(r, g, b) => write!(f, "rgb({},{},{})", r, g, b),
-            Self::Rgba(r, g, b, a) => write!(f, "rgba({},{},{},{})", r, g, b, a),
+        match &self.color {
+            ColorType::Hex(hex) => write!(f, "#{}", hex),
+            ColorType::Rgb(r, g, b) => write!(f, "rgb({},{},{})", r, g, b),
+            ColorType::Rgba(r, g, b, a) => write!(f, "rgba({},{},{},{})", r, g, b, a),
         }
     }
 }
@@ -67,11 +85,15 @@ pub enum FontFamily {
     Arial,
 }
 
-impl Display for FontFamily {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl AsCss for FontFamily {
+    fn as_css(&self) -> String {
+        let mut css = String::new();
+
         match self {
-            Self::Arial => write!(f, "font-family:Arial,Helvetica,sans-serif;"),
-        }
+            Self::Arial => write!(css, "font-family:Arial,Helvetica,sans-serif;").ok(),
+        };
+
+        css
     }
 }
 
@@ -89,22 +111,16 @@ pub enum Orientation {
 
 impl Orientation {
     pub fn as_class(&self) -> String {
-        self.to_string()
+        match self {
+            Self::Horizontal => "horizontal".to_string(),
+            Self::Vertical => "vertical".to_string(),
+        }
     }
-    
+
     pub fn as_flex_direction(&self) -> &str {
         match self {
             Self::Horizontal => "row",
             Self::Vertical => "column",
-        }
-    }
-}
-
-impl Display for Orientation {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Horizontal => write!(f, "horizontal"),
-            Self::Vertical => write!(f, "vertical"),
         }
     }
 }
@@ -114,4 +130,3 @@ impl Default for Orientation {
         Self::Horizontal
     }
 }
-
