@@ -14,21 +14,23 @@ pub(crate) struct DividerOrientationOverride(pub(crate) Signal<Orientation>);
 pub struct DividerProps {
     #[props(optional)]
     orientation: Orientation,
-    
+
     #[props(optional, default = 0)]
     spacing: u32,
 
-    #[props(optional, default = Color::hex("000000"))]
-    color: Color,
+    color: Option<Color>,
 }
 
 pub fn Divider(props: DividerProps) -> Element {
     let spacing_half = props.spacing / 2;
 
-    // Check for color override
-    let color = match try_use_context::<DividerColorOverride>() {
-        Some(color) => color.0(),
-        None => props.color.clone(),
+    // If the color prop is set, use that. Otherwise use default unless the DividerColorOverride is provided.
+    let color = match props.color {
+        Some(c) => c,
+        None => match try_consume_context::<DividerColorOverride>() {
+            Some(color) => color.0(),
+            None => Color::hex("000000"),
+        },
     };
 
     // Build styling

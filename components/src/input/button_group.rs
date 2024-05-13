@@ -3,7 +3,6 @@ use crate::{
     style::{Color, Orientation, Size},
 };
 use dioxus::prelude::*;
-use std::fmt::Write as _;
 
 const _: &str = manganis::mg!(file("./styles/input/button_group.css"));
 
