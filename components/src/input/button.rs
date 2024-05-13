@@ -51,7 +51,7 @@ impl Display for ButtonStyling {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct ButtonProps {
-    /// Optional size for this  button. 
+    /// Optional size for this  button.
     /// See [`style::Size`] for more info.
     #[props(optional)]
     size: Size,
@@ -77,24 +77,17 @@ pub struct ButtonProps {
 }
 
 pub fn Button(props: ButtonProps) -> Element {
-    let mut disabled = use_signal(|| props.disabled);
-
-    // Subscribe to changes of `props.disabled`
-    use_memo(use_reactive((&props.disabled,), move |(data,)| {
-        disabled.set(data)
-    }));
-
     // Determine styling if button is disabled.
-    let styling = match disabled() {
+    let styling = match props.disabled {
         true => props.disabled_style,
         false => props.style,
     };
 
-    let disabled_class = if disabled() { "disabled" } else { "" };
+    let disabled_class = if props.disabled { "disabled" } else { "" };
 
     // Handle color transition on mouse hover.
     let mut mouse_hover = use_signal(|| false);
-    let hover_style = if !disabled() && mouse_hover() {
+    let hover_style = if !props.disabled && mouse_hover() {
         format!(
             "background-color:{};",
             styling.hover_background_color.to_string()
@@ -108,7 +101,7 @@ pub fn Button(props: ButtonProps) -> Element {
             class: "dxc-button {props.size} {disabled_class}",
             style: "{styling}{hover_style}",
             onclick: move |evt| {
-                if !disabled() {
+                if !props.disabled {
                     props.on_click.call(evt);
                 }
             },

@@ -88,10 +88,23 @@ pub enum Orientation {
 }
 
 impl Orientation {
+    pub fn as_class(&self) -> String {
+        self.to_string()
+    }
+    
     pub fn as_flex_direction(&self) -> &str {
         match self {
             Self::Horizontal => "row",
             Self::Vertical => "column",
+        }
+    }
+}
+
+impl Display for Orientation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Horizontal => write!(f, "horizontal"),
+            Self::Vertical => write!(f, "vertical"),
         }
     }
 }
@@ -101,3 +114,4 @@ impl Default for Orientation {
         Self::Horizontal
     }
 }
+

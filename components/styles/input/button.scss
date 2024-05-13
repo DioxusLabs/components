@@ -21,6 +21,8 @@ $btn-lg-padding: 10px 18px;
 
     transition: background-color ease 0.2s;
 
+    width: fit-content;
+
     &:not(.disabled):hover {
         cursor: pointer;
     }
