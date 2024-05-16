@@ -62,6 +62,14 @@ impl Color {
             color: ColorType::Rgba(r, g, b, a),
         }
     }
+
+    pub fn as_bg_css(&self) -> String {
+        format!("background-color:{};", self.as_css())
+    }
+
+    pub fn as_fg_css(&self) -> String {
+        format!("color:{};", self.as_css())
+    }
 }
 
 impl AsCss for Color {

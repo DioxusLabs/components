@@ -7,38 +7,10 @@
     &.horizontal {
         grid-auto-flow: column;
         grid-auto-rows: 1fr;
-
-        >.dxc-button:not(:first-child):not(:last-child) {
-            border-radius: 0;
-        }
-
-        >.dxc-button:first-child {
-            border-radius: v.$border-radius 0 0 v.$border-radius;
-        }
-
-        >.dxc-button:last-child {
-            border-radius: 0 v.$border-radius v.$border-radius 0;
-        }
     }
 
     &.vertical {
         grid-auto-flow: row;
         grid-auto-columns: 1fr;
-
-        >.dxc-button {
-            width: auto;
-        }
-
-        >.dxc-button:not(:first-child):not(:last-child) {
-            border-radius: 0;
-        }
-
-        >.dxc-button:first-child {
-            border-radius: v.$border-radius v.$border-radius 0 0;
-        }
-
-        >.dxc-button:last-child {
-            border-radius: 0 0 v.$border-radius v.$border-radius;
-        }
     }
 }

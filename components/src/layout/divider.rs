@@ -5,29 +5,33 @@ use std::fmt::Write as _;
 const _: &str = manganis::mg!(file("./styles/layout/divider.css"));
 
 #[derive(Clone, Copy, PartialEq)]
-pub(crate) struct DividerColorOverride(pub(crate) Signal<Color>);
+pub(crate) struct DividerColor(pub(crate) Signal<Color>);
 
 #[derive(Clone, Copy, PartialEq)]
-pub(crate) struct DividerOrientationOverride(pub(crate) Signal<Orientation>);
+pub(crate) struct DividerVisible(pub(crate) Signal<bool>);
 
 #[derive(Props, Clone, PartialEq)]
 pub struct DividerProps {
+    /// The orientation of the divider.
     #[props(optional)]
     orientation: Orientation,
 
-    #[props(optional, default = 0)]
-    spacing: u32,
-
+    /// The color of the divider.
     color: Option<Color>,
 }
 
 pub fn Divider(props: DividerProps) -> Element {
-    let spacing_half = props.spacing / 2;
+    // Hide divider if context has divider visible override.
+    if let Some(div_visible) = try_consume_context::<DividerVisible>() {
+        if div_visible.0() {
+            return None;
+        }
+    }
 
     // If the color prop is set, use that. Otherwise use default unless the DividerColorOverride is provided.
     let color = match props.color {
         Some(c) => c,
-        None => match try_consume_context::<DividerColorOverride>() {
+        None => match try_consume_context::<DividerColor>() {
             Some(color) => color.0(),
             None => Color::hex("000000"),
         },
@@ -36,8 +40,6 @@ pub fn Divider(props: DividerProps) -> Element {
     // Build styling
     let mut style = String::new();
     write!(style, "background-color:{};", color).ok();
-    write!(style, "margin-left:{spacing_half}px;").ok();
-    write!(style, "margin-right:{spacing_half}px;").ok();
 
     rsx! {
         div {

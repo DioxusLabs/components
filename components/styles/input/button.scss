@@ -18,9 +18,7 @@ $btn-lg-padding: 10px 18px;
     outline: none;
     font-weight: 700;
     user-select: none;
-
     transition: background-color ease 0.2s;
-
     width: fit-content;
 
     &:not(.disabled):hover {
@@ -59,5 +57,43 @@ $btn-lg-padding: 10px 18px;
             padding: $btn-lg-padding;
         }
     }
-    
+
 }
+
+// ButtonGroup SCSS
+.dxc-button-group.horizontal>.dxc-button:not(.independent) {
+    &:not(:first-child):not(:last-child) {
+        border-radius: 0;
+    }
+
+    &:first-child {
+        border-radius: v.$border-radius 0 0 v.$border-radius;
+    }
+
+    &:last-child {
+        border-radius: 0 v.$border-radius v.$border-radius 0;
+    }
+}
+
+
+.dxc-button-group.vertical>.dxc-button {
+    width: auto;
+
+    &:not(.independent) {
+        &:not(:first-child):not(:last-child) {
+            border-radius: 0;
+        }
+
+        &:first-child {
+            border-radius: v.$border-radius v.$border-radius 0 0;
+        }
+
+        &:last-child {
+            border-radius: 0 0 v.$border-radius v.$border-radius;
+        }
+    }
+}
+
+// .dxc-button-group.vertical>.dxc-button.independent {
+//     border-radius: v.$border-radius;
+// }
