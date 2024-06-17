@@ -26,6 +26,9 @@ pub struct ButtonProps {
     on_toggled: Option<EventHandler<bool>>,
 }
 
+/// The `Button` ARIA pattern.
+/// 
+/// 
 #[component]
 pub fn Button(props: ButtonProps) -> Element {
     let mut is_toggled = use_signal(|| false);
