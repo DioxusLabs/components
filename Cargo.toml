@@ -1,13 +1,11 @@
 [workspace]
 resolver = "2"
-members = [
-    "components",
-    "examples/*"
-]
+members = ["components", "aria"]
 
 [workspace.dependencies]
+dioxus-aria = { path = "./aria" }
 dioxus-components = { path = "./components" }
-dioxus-sdk = { path = "../sdk/sdk", features = ["use_window_size"]}
+
 dioxus = { version = "0.5" }
 manganis = "0.2.2"
-serde_json = "1.0.115"
+

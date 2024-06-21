@@ -1,0 +1,16 @@
+@use "../var" as v;
+
+.dxc-button-group {
+    display: grid;
+    width: fit-content;
+
+    &.horizontal {
+        grid-auto-flow: column;
+        grid-auto-rows: 1fr;
+    }
+
+    &.vertical {
+        grid-auto-flow: row;
+        grid-auto-columns: 1fr;
+    }
+}

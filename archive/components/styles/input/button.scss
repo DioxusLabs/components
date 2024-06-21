@@ -1,0 +1,99 @@
+@use "../var" as v;
+
+// Button Small
+$btn-sm-font-size: 14px;
+$btn-sm-padding: 5px 8px;
+
+// Button Medium
+$btn-md-font-size: 14px;
+$btn-md-padding: 8px 16px;
+
+// Button Large
+$btn-lg-font-size: 20px;
+$btn-lg-padding: 10px 18px;
+
+.dxc-button {
+    border: none;
+    border-radius: v.$border-radius;
+    outline: none;
+    font-weight: 700;
+    user-select: none;
+    transition: background-color ease 0.2s;
+    width: fit-content;
+
+    &:not(.disabled):hover {
+        cursor: pointer;
+    }
+
+
+    &.s-sm {
+        font-size: $btn-sm-font-size;
+        padding: $btn-sm-padding;
+    }
+
+    &.s-md {
+        font-size: $btn-md-font-size;
+        padding: $btn-md-padding;
+    }
+
+    &.s-lg {
+        font-size: $btn-lg-font-size;
+        padding: $btn-lg-padding;
+    }
+
+    &.s-auto {
+        @media (max-width: v.$breakpoint-md) {
+            font-size: $btn-sm-font-size;
+            padding: $btn-sm-padding;
+        }
+
+        @media (min-width: v.$breakpoint-md) {
+            font-size: $btn-md-font-size;
+            padding: $btn-md-padding;
+        }
+
+        @media (min-width: v.$breakpoint-lg) {
+            font-size: $btn-lg-font-size;
+            padding: $btn-lg-padding;
+        }
+    }
+
+}
+
+// ButtonGroup SCSS
+.dxc-button-group.horizontal>.dxc-button:not(.independent) {
+    &:not(:first-child):not(:last-child) {
+        border-radius: 0;
+    }
+
+    &:first-child {
+        border-radius: v.$border-radius 0 0 v.$border-radius;
+    }
+
+    &:last-child {
+        border-radius: 0 v.$border-radius v.$border-radius 0;
+    }
+}
+
+
+.dxc-button-group.vertical>.dxc-button {
+    width: auto;
+
+    &:not(.independent) {
+        &:not(:first-child):not(:last-child) {
+            border-radius: 0;
+        }
+
+        &:first-child {
+            border-radius: v.$border-radius v.$border-radius 0 0;
+        }
+
+        &:last-child {
+            border-radius: 0 0 v.$border-radius v.$border-radius;
+        }
+    }
+}
+
+// .dxc-button-group.vertical>.dxc-button.independent {
+//     border-radius: v.$border-radius;
+// }
