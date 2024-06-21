@@ -1,0 +1,1 @@
+.dxc-accordion-icon{margin-left:20px}.dxc-accordion-content{display:grid;grid-template-rows:0fr;transition:grid-template-rows 500ms}.dxc-accordion-content>div{overflow:hidden}.dxc-accordion-content.open{grid-template-rows:1fr}
