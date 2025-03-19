@@ -1,5 +1,12 @@
 use dioxus_lib::prelude::*;
 
+// TODO: Convert default and add controlled version from "open"/"default_open" props on AccordionItem
+// TODO: Add onvaluechange callback
+// TODO: collapsible? as in, allow all items to collapse.
+// TODO: horizontal accordion?
+// TODO: Aria compatibility
+// TODO: Keybinds
+
 #[derive(Clone, Copy, Default)]
 struct AccordionContext {
     /// Used to track the next runtime-generated id.
