@@ -1,11 +1,8 @@
 use dioxus_lib::prelude::*;
 
-// TODO: Convert default and add controlled version from "open"/"default_open" props on AccordionItem
-// TODO: Add onvaluechange callback
-// TODO: collapsible? as in, allow all items to collapse.
-// TODO: horizontal accordion?
+// TODO: add controlled version
 // TODO: Aria compatibility
-// TODO: Keybinds
+// TODO: Keybinds & horizontal accordion
 
 #[derive(Clone, Copy, Default)]
 struct AccordionContext {
@@ -18,25 +15,25 @@ struct AccordionContext {
     /// Whether multiple items can be open at once.
     allow_multiple_open: ReadOnlySignal<bool>,
 
-    /// The name of the default open item.
-    default_open: ReadOnlySignal<Option<String>>,
-
     /// Whether the entire accordion is disabled.
     disabled: ReadOnlySignal<bool>,
+
+    /// Whether all accordion items can be collapsed.
+    collapsible: ReadOnlySignal<bool>,
 }
 
 impl AccordionContext {
     pub fn new(
         allow_multiple_open: ReadOnlySignal<bool>,
-        default_open: ReadOnlySignal<Option<String>>,
         disabled: ReadOnlySignal<bool>,
+        collapsible: ReadOnlySignal<bool>,
     ) -> Self {
         Self {
             next_id: Signal::new(0),
             open_items: Signal::new(Vec::new()),
             allow_multiple_open,
-            default_open,
             disabled,
+            collapsible,
         }
     }
 
@@ -56,6 +53,12 @@ impl AccordionContext {
 
     pub fn set_closed(&mut self, id: usize) {
         let mut open_items = self.open_items.write();
+
+        // If the accordion is not collapsible, we can't close this one.
+        if !*self.collapsible.peek() && open_items.len() == 1 {
+            return;
+        }
+
         *open_items = open_items
             .iter()
             .cloned()
@@ -65,15 +68,6 @@ impl AccordionContext {
 
     pub fn is_open(&self, id: usize) -> bool {
         self.open_items.read().contains(&id)
-    }
-
-    pub fn is_default(&self, name: &str) -> bool {
-        let value = self.default_open.read();
-        if let Some(value) = value.as_ref() {
-            return *value == name;
-        }
-
-        false
     }
 
     pub fn is_disabled(&self) -> bool {
@@ -94,21 +88,21 @@ pub struct AccordionProps {
     #[props(default)]
     allow_multiple_open: ReadOnlySignal<bool>,
 
-    /// The accordion item opened by default.
-    default_item: ReadOnlySignal<Option<String>>,
-
+    /// Set whether the accordion is disabled.
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
+
+    /// Whether the accordion can be fully collapsed.
+    ///
+    /// Setting this to true will allow all accordion items to close. Defaults to true.
+    #[props(default)]
+    collapsible: ReadOnlySignal<bool>,
 }
 
 #[component]
 pub fn Accordion(props: AccordionProps) -> Element {
     let _ctx = use_context_provider(|| {
-        AccordionContext::new(
-            props.allow_multiple_open,
-            props.default_item,
-            props.disabled,
-        )
+        AccordionContext::new(props.allow_multiple_open, props.disabled, props.collapsible)
     });
 
     rsx! {
@@ -130,12 +124,23 @@ pub struct AccordionItemProps {
     style: Option<String>,
     children: Element,
 
-    /// Set the name of the accordion item.
-    name: Option<String>,
-
-    /// Set whether the accordion item is disabled.
+    /// Whether the accordion item is disabled.
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
+
+    /// Whether this accordion item should be opened by default.
+    #[props(default)]
+    default_open: bool,
+
+    /// Callback for when the accordion's open/closed state changes.
+    ///
+    /// The new value is provided.
+    #[props(default)]
+    on_change: Callback<bool, ()>,
+
+    /// Callback for when the trigger is clicked.
+    #[props(default)]
+    on_trigger_click: Callback,
 }
 
 #[component]
@@ -144,16 +149,20 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
     let item = use_context_provider(|| Item {
         id: ctx.unique_id(),
         disabled: props.disabled,
+        on_trigger_click: props.on_trigger_click,
     });
 
-    // Check if we're the default item.
-    use_effect(move || {
-        if let Some(name) = &props.name {
-            let is_default = ctx.is_default(name);
-            if is_default {
-                ctx.set_open(item.id);
-            }
+    // Open this item if we're set as default.
+    use_hook(move || {
+        if props.default_open {
+            ctx.set_open(item.id);
         }
+    });
+
+    // Handle calling `on_change` callback.
+    use_effect(move || {
+        let open = ctx.is_open(item.id);
+        props.on_change.call(open)
     });
 
     rsx! {
@@ -216,7 +225,9 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
                 if is_disabled {
                     return;
                 }
+                item.on_trigger_click.call(());
 
+                // If the item is not controlled, handle state.
                 match ctx.is_open(item.id) {
                     true => ctx.set_closed(item.id),
                     false => ctx.set_open(item.id),
@@ -232,6 +243,7 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
 struct Item {
     id: usize,
     disabled: ReadOnlySignal<bool>,
+    on_trigger_click: Callback,
 }
 
 impl Item {

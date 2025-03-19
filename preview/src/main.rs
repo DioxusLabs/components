@@ -1,5 +1,5 @@
+use dioxus::{document::eval, prelude::*};
 use primitives::accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger};
-use dioxus::prelude::*;
 
 fn main() {
     dioxus::launch(App);
@@ -20,11 +20,17 @@ fn AccordionExample() -> Element {
         Accordion {
             class: "accordion",
             allow_multiple_open: false,
-            default_item: "gullible",
+            collapsible: true,
 
             AccordionItem {
                 class: "accordion-item",
-                disabled: true,
+                on_change: move |open| {
+                    eval(&format!("console.log({open});"));
+                },
+                on_trigger_click: move || {
+                    eval("console.log('trigger');");
+                },
+
                 AccordionTrigger {
                     class: "accordion-trigger",
                     "the quick brown fox",
@@ -40,7 +46,7 @@ fn AccordionExample() -> Element {
 
             AccordionItem {
                 class: "accordion-item",
-                name: "gullible",
+                default_open: true,
 
                 AccordionTrigger {
                     class: "accordion-trigger",
@@ -57,6 +63,7 @@ fn AccordionExample() -> Element {
 
             AccordionItem {
                 class: "accordion-item",
+
                 AccordionTrigger {
                     class: "accordion-trigger",
                     "Does it work?",
