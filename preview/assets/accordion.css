@@ -14,6 +14,10 @@
   font-weight: bold;
 }
 
+.accordion-trigger:focus {
+  border: 1px solid maroon;
+}
+
 .accordion-trigger:hover {
   cursor: pointer;
 }

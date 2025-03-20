@@ -20,7 +20,7 @@ fn AccordionExample() -> Element {
         Accordion {
             class: "accordion",
             allow_multiple_open: false,
-            collapsible: true,
+            horizontal: true,
 
             AccordionItem {
                 class: "accordion-item",
