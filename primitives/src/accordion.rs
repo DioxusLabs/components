@@ -3,8 +3,9 @@ use dioxus_lib::prelude::*;
 use std::rc::Rc;
 
 // TODO: controlled version
-// TODO: Keybinds & horizontal accordion
+// TODO: docs
 
+/// Internal accordion context.
 #[derive(Clone, Copy, Default)]
 struct AccordionContext {
     /// Used to track the next runtime-generated id.
@@ -359,6 +360,7 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
     }
 }
 
+/// Internal accordion-item context.
 #[derive(Clone, Copy, PartialEq)]
 struct Item {
     id: usize,

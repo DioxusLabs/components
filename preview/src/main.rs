@@ -1,5 +1,8 @@
 use dioxus::{document::eval, prelude::*};
-use primitives::accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger};
+use primitives::{
+    accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
+    aspect_ratio::AspectRatio,
+};
 
 fn main() {
     dioxus::launch(App);
@@ -9,7 +12,26 @@ fn main() {
 fn App() -> Element {
     rsx! {
         h1 { "Components Preview" }
+        AspectRatioExample {}
+        br {}
         AccordionExample {}
+    }
+}
+
+#[component]
+fn AspectRatioExample() -> Element {
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("/assets/aspect-ratio.css") }
+        div {
+            class: "aspect-ratio-container",
+            AspectRatio {
+                ratio: 4.0 / 3.0,
+                img {
+                    class: "aspect-ratio-image",
+                    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+                }
+            }
+        }
     }
 }
 
@@ -20,7 +42,7 @@ fn AccordionExample() -> Element {
         Accordion {
             class: "accordion",
             allow_multiple_open: false,
-            horizontal: true,
+            horizontal: false,
 
             AccordionItem {
                 class: "accordion-item",

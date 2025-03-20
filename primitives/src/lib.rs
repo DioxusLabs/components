@@ -4,7 +4,9 @@ use dioxus_lib::{
 };
 
 pub mod accordion;
+pub mod aspect_ratio;
 
+/// Generate a runtime-unique id.
 fn use_unique_id() -> Signal<String> {
     static NEXT_ID: GlobalSignal<usize> = Signal::global(|| 0);
 
