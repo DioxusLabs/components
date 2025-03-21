@@ -1,13 +1,8 @@
 use crate::use_unique_id;
-use dioxus_lib::{
-    document::eval,
-    prelude::{dioxus_core::DynamicNode, *},
-};
+use dioxus_lib::prelude::*;
 use std::rc::Rc;
 
 // TODO: controlled version
-// TODO: aria home & end keybinds.
-// TODO: Fix navigation keybind indexes (depends on rendering order & fails for dynamic accordions)
 // TODO: docs
 
 /// Internal accordion context.
@@ -31,8 +26,11 @@ struct AccordionContext {
     /// Whether the accordion is horizontal.
     horizontal: ReadOnlySignal<bool>,
 
-    /// The focused accordion item, if any.
-    focused_id: Signal<Option<usize>>,
+    /// Number of current accordion items.
+    num_items: Signal<usize>,
+
+    /// The focused accordion item by index, if any.
+    focused_index: Signal<Option<usize>>,
 }
 
 impl AccordionContext {
@@ -44,20 +42,28 @@ impl AccordionContext {
     ) -> Self {
         Self {
             next_id: Signal::new(0),
+            num_items: Signal::new(0),
             open_items: Signal::new(Vec::new()),
             allow_multiple_open,
             disabled,
             collapsible,
             horizontal,
-            focused_id: Signal::new(None),
+            focused_index: Signal::new(None),
         }
     }
 
-    pub fn unique_id(&mut self) -> usize {
+    pub fn register_item(&mut self) -> usize {
         let mut next_id = self.next_id.write();
         let id = *next_id;
         *next_id += 1;
+
+        self.num_items += 1;
+
         id
+    }
+
+    pub fn unregister_item(&mut self) {
+        self.num_items -= 1;
     }
 
     pub fn set_open(&mut self, id: usize) {
@@ -90,9 +96,9 @@ impl AccordionContext {
         (self.disabled)()
     }
 
-    pub fn is_focused(&self, id: usize) -> bool {
-        if let Some(current_id) = *self.focused_id.read() {
-            return current_id == id;
+    pub fn is_focused(&self, index: usize) -> bool {
+        if let Some(current_index) = *self.focused_index.read() {
+            return current_index == index;
         }
 
         false
@@ -102,35 +108,47 @@ impl AccordionContext {
     ///
     /// This should be used by `focus`/`focusout` event only to start tracking focus.
     pub fn set_focus(&mut self, id: Option<usize>) {
-        self.focused_id.set(id);
+        self.focused_index.set(id);
     }
 
     /// Focus the next accordion item.
     pub fn next_focus(&mut self) {
-        let Some(id) = *self.focused_id.read() else {
+        let Some(id) = *self.focused_index.read() else {
             return;
         };
 
-        let count = (self.next_id)() - 1;
-        let mut next_id = id.saturating_add(1);
+        let mut next_focused = id.saturating_add(1);
+
+        let count = (self.num_items)() - 1;
         if id == count {
-            next_id = 0;
+            next_focused = 0;
         }
-        self.focused_id.set(Some(next_id));
+
+        self.focused_index.set(Some(next_focused));
     }
 
     /// Focus the previous accordion item.
     pub fn previous_focus(&mut self) {
-        let Some(id) = *self.focused_id.read() else {
+        let Some(id) = *self.focused_index.read() else {
             return;
         };
 
-        let count = (self.next_id)() - 1;
-        let mut next_id = id.saturating_sub(1);
+        let mut next_focused = id.saturating_sub(1);
+
+        let count = (self.num_items)() - 1;
         if id == 0 {
-            next_id = count;
+            next_focused = count;
         }
-        self.focused_id.set(Some(next_id));
+
+        self.focused_index.set(Some(next_focused));
+    }
+
+    pub fn focus_start(&mut self) {
+        self.focused_index.set(Some(0));
+    }
+
+    pub fn focus_end(&mut self) {
+        self.focused_index.set(Some((self.num_items)() - 1));
     }
 
     pub fn is_horizontal(&self) -> bool {
@@ -179,16 +197,6 @@ pub fn Accordion(props: AccordionProps) -> Element {
         )
     });
 
-    if let Ok(ref children) = props.children {
-        for root in children.template.roots {
-            if let TemplateNode::Dynamic { id } = root {
-                if let Some(DynamicNode::Component(node)) = children.dynamic_nodes.get(*id) {
-                    eval(&format!("console.log('{}');", node.name));
-                };
-            }
-        }
-    }
-
     rsx! {
         div {
             id: props.id,
@@ -229,6 +237,9 @@ pub struct AccordionItemProps {
     /// Callback for when the trigger is clicked.
     #[props(default)]
     on_trigger_click: Callback,
+
+    /// Required index for tracking component ordering.
+    index: usize,
 }
 
 #[component]
@@ -237,10 +248,15 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
     let aria_id = use_unique_id();
 
     let item = use_context_provider(|| Item {
-        id: ctx.unique_id(),
+        id: ctx.register_item(),
+        index: props.index,
         aria_id,
         disabled: props.disabled,
         on_trigger_click: props.on_trigger_click,
+    });
+
+    use_drop(move || {
+        ctx.unregister_item();
     });
 
     // Open this item if we're set as default.
@@ -320,7 +336,7 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
 
     let mut btn_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
     use_effect(move || {
-        let is_focused = ctx.is_focused(item.id);
+        let is_focused = ctx.is_focused(item.index);
         if is_focused {
             if let Some(md) = btn_ref() {
                 spawn(async move {
@@ -354,6 +370,8 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
                     Key::ArrowDown if !horizontal => ctx.next_focus(),
                     Key::ArrowLeft if horizontal => ctx.previous_focus(),
                     Key::ArrowRight if horizontal => ctx.next_focus(),
+                    Key::Home => ctx.focus_start(),
+                    Key::End => ctx.focus_end(),
                     _ => {},
                 };
             },
@@ -380,6 +398,7 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
 #[derive(Clone, Copy, PartialEq)]
 struct Item {
     id: usize,
+    index: usize,
     aria_id: Signal<String>,
     disabled: ReadOnlySignal<bool>,
     on_trigger_click: Callback,

@@ -53,60 +53,64 @@ fn AccordionExample() -> Element {
             allow_multiple_open: false,
             horizontal: false,
 
-            AccordionItem {
-                class: "accordion-item",
-                on_change: move |open| {
-                    eval(&format!("console.log({open});"));
-                },
-                on_trigger_click: move || {
-                    eval("console.log('trigger');");
-                },
+            for i in 0..4 {
+                AccordionItem {
+                    class: "accordion-item",
+                    index: i,
 
-                AccordionTrigger {
-                    class: "accordion-trigger",
-                    "the quick brown fox",
-                }
-                AccordionContent {
-                    class: "accordion-content",
-                    div {
-                        class: "accordion-content-inner",
-                        p { "lorem ipsum lorem ipsum" }
+                    on_change: move |open| {
+                        eval(&format!("console.log({open});"));
+                    },
+                    on_trigger_click: move || {
+                        eval("console.log('trigger');");
+                    },
+
+                    AccordionTrigger {
+                        class: "accordion-trigger",
+                        "the quick brown fox",
+                    }
+                    AccordionContent {
+                        class: "accordion-content",
+                        div {
+                            class: "accordion-content-inner",
+                            p { "lorem ipsum lorem ipsum" }
+                        }
                     }
                 }
             }
 
-            AccordionItem {
-                class: "accordion-item",
-                default_open: true,
+            // AccordionItem {
+            //     class: "accordion-item",
+            //     default_open: true,
 
-                AccordionTrigger {
-                    class: "accordion-trigger",
-                    "This statement is false",
-                }
-                AccordionContent {
-                    class: "accordion-content",
-                    div {
-                        class: "accordion-content-inner",
-                        p { "hi" }
-                    }
-                }
-            }
+            //     AccordionTrigger {
+            //         class: "accordion-trigger",
+            //         "This statement is false",
+            //     }
+            //     AccordionContent {
+            //         class: "accordion-content",
+            //         div {
+            //             class: "accordion-content-inner",
+            //             p { "hi" }
+            //         }
+            //     }
+            // }
 
-            AccordionItem {
-                class: "accordion-item",
+            // AccordionItem {
+            //     class: "accordion-item",
 
-                AccordionTrigger {
-                    class: "accordion-trigger",
-                    "Does it work?",
-                }
-                AccordionContent {
-                    class: "accordion-content",
-                    div {
-                        class: "accordion-content-inner",
-                        p { "If you can see this, good news! It does!" }
-                    }
-                }
-            }
+            //     AccordionTrigger {
+            //         class: "accordion-trigger",
+            //         "Does it work?",
+            //     }
+            //     AccordionContent {
+            //         class: "accordion-content",
+            //         div {
+            //             class: "accordion-content-inner",
+            //             p { "If you can see this, good news! It does!" }
+            //         }
+            //     }
+            // }
         }
     }
 }
