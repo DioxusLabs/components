@@ -1,8 +1,13 @@
 use crate::use_unique_id;
-use dioxus_lib::prelude::*;
+use dioxus_lib::{
+    document::eval,
+    prelude::{dioxus_core::DynamicNode, *},
+};
 use std::rc::Rc;
 
 // TODO: controlled version
+// TODO: aria home & end keybinds.
+// TODO: Fix navigation keybind indexes (depends on rendering order & fails for dynamic accordions)
 // TODO: docs
 
 /// Internal accordion context.
@@ -174,6 +179,16 @@ pub fn Accordion(props: AccordionProps) -> Element {
         )
     });
 
+    if let Ok(ref children) = props.children {
+        for root in children.template.roots {
+            if let TemplateNode::Dynamic { id } = root {
+                if let Some(DynamicNode::Component(node)) = children.dynamic_nodes.get(*id) {
+                    eval(&format!("console.log('{}');", node.name));
+                };
+            }
+        }
+    }
+
     rsx! {
         div {
             id: props.id,
@@ -322,8 +337,9 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
             style: props.style,
             disabled: is_disabled,
             tabindex: "0",
-            "aria-controls": item.aria_id(),
-            "aria-expanded": ctx.is_open(item.id),
+
+            aria_controls: item.aria_id(),
+            aria_expanded: ctx.is_open(item.id),
 
             onmounted: move |data| btn_ref.set(Some(data.data())),
             onfocus: move |_| {

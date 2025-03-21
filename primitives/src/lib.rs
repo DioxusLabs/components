@@ -5,6 +5,7 @@ use dioxus_lib::{
 
 pub mod accordion;
 pub mod aspect_ratio;
+pub mod separator;
 
 /// Generate a runtime-unique id.
 fn use_unique_id() -> Signal<String> {

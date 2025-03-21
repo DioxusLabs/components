@@ -8,6 +8,6 @@ dioxus = "0.6.3"
 primitives.workspace = true
 
 [features]
-default = ["web"]
+default = ["desktop"]
 web = ["dioxus/web"]
 desktop = ["dioxus/desktop"]
