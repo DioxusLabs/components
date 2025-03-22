@@ -14,36 +14,32 @@ fn main() {
 #[component]
 fn App() -> Element {
     let portal = use_portal();
-    //let mut items = use_signal(|| vec![]);
+    let mut items = use_signal(|| vec![]);
 
     rsx! {
         div {
             id: "firstDiv",
-            // PortalIn {
-            //     portal,
-            //     button {
-            //         onclick: move |_| items.push(items.len()),
-            //         "hi!!"
-            //     }
+            PortalIn {
+                portal,
+                button {
+                    onclick: move |_| items.push(items.len()),
+                    "hi!!"
+                }
 
-            //     for item in items() {
-            //         p { "{item}" }
-            //     }
+                for item in items() {
+                    p { "{item}" }
+                }
 
-            //     AspectRatioExample {}
-            //     br {}
-            //     AccordionExample {}
-            // }
+                AspectRatioExample {}
+                br {}
+                AccordionExample {}
+            }
         }
 
         div {
             id: "otherDiv",
             p { "hi" }
-            PortalIn {
-                portal,
-                p { "hi" }
-                PortalOut { portal }
-            }
+            PortalOut { portal }
 
         }
 
