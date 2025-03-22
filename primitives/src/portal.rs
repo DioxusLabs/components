@@ -4,7 +4,7 @@ use std::collections::HashMap;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PortalId(usize);
 
-#[derive(Clone, Copy, PartialEq, Default)]
+#[derive(Clone, Copy, PartialEq)]
 struct PortalCtx {
     portals: Signal<HashMap<usize, Signal<Element>>>,
 }
@@ -14,8 +14,9 @@ pub fn use_portal() -> PortalId {
     static NEXT_ID: GlobalSignal<usize> = Signal::global(|| 0);
 
     let (sig, id) = use_hook(|| {
-        let id = *NEXT_ID.peek();
-        *NEXT_ID.write() += 1;
+        let mut next_id = NEXT_ID.write();
+        let id = next_id.clone();
+        *next_id += 1;
 
         let mut ctx = match try_consume_context::<PortalCtx>() {
             Some(ctx) => ctx,
