@@ -5,6 +5,40 @@
 todo
 
 
+- [x] Accordion
+ - Needs Docs
+ - Needs Controlled Version
+- [ ] Alert Dialog
+- [x] Aspect Ratio
+ - Needs Docs
+- [ ] Avatar
+- [ ] Checkbox
+- [ ] Collapsible
+- [ ] Context Menu 
+- [ ] Dialog
+- [ ] Dropdown Menu
+- [ ] Form(?)
+- [ ] Hover Card
+- [ ] Label
+- [ ] Menubar
+- [ ] Navigation Menu
+- [ ] Popover
+- [ ] Progress
+- [ ] Radio Group
+- [ ] Scroll Area
+- [ ] Select
+- [x] Separator
+ - Needs Docs
+- [ ] Slider
+- [ ] Switch
+- [ ] Tabs
+- [ ] Toast
+- [ ] Toggle
+- [ ] Toggle Group
+- [ ] Toolbar
+- [ ] Tooltip
+
+
 ## License
 This project is dual licensed under the [MIT](./LICENSE-MIT) and [Apache 2.0](./LICENSE-APACHE) licenses.
 

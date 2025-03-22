@@ -1,8 +1,10 @@
 use dioxus::{document::eval, prelude::*};
 use primitives::{
+    PortalIn, PortalOut,
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
     aspect_ratio::AspectRatio,
     separator::Separator,
+    use_portal,
 };
 
 fn main() {
@@ -11,19 +13,53 @@ fn main() {
 
 #[component]
 fn App() -> Element {
+    let portal = use_portal();
+    //let mut items = use_signal(|| vec![]);
+
     rsx! {
+        div {
+            id: "firstDiv",
+            // PortalIn {
+            //     portal,
+            //     button {
+            //         onclick: move |_| items.push(items.len()),
+            //         "hi!!"
+            //     }
+
+            //     for item in items() {
+            //         p { "{item}" }
+            //     }
+
+            //     AspectRatioExample {}
+            //     br {}
+            //     AccordionExample {}
+            // }
+        }
+
+        div {
+            id: "otherDiv",
+            p { "hi" }
+            PortalIn {
+                portal,
+                p { "hi" }
+                PortalOut { portal }
+            }
+
+        }
+
+
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
 
-        h1 { "Components Preview" }
-        Separator {
-            class: "separator",
-            style: "margin: 15px 0;",
-            horizontal: true,
-            decorative: false
-        }
-        AspectRatioExample {}
-        br {}
-        AccordionExample {}
+        // h1 { "Components Preview" }
+        // Separator {
+        //     class: "separator",
+        //     style: "margin: 15px 0;",
+        //     horizontal: true,
+        //     decorative: false
+        // }
+        // AspectRatioExample {}
+        // br {}
+        // AccordionExample {}
     }
 }
 
