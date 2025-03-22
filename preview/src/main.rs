@@ -1,10 +1,8 @@
 use dioxus::{document::eval, prelude::*};
 use primitives::{
-    PortalIn, PortalOut,
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
     aspect_ratio::AspectRatio,
-    separator::Separator,
-    use_portal,
+    portal::{PortalIn, PortalOut, use_portal},
 };
 
 fn main() {
@@ -14,7 +12,7 @@ fn main() {
 #[component]
 fn App() -> Element {
     let portal = use_portal();
-    let mut items = use_signal(|| vec![]);
+    let mut items = use_signal(Vec::new);
 
     rsx! {
         div {
@@ -23,7 +21,7 @@ fn App() -> Element {
                 portal,
                 button {
                     onclick: move |_| items.push(items.len()),
-                    "hi!!"
+                    "add number"
                 }
 
                 for item in items() {
