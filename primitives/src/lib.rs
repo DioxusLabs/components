@@ -2,8 +2,8 @@ use dioxus_lib::prelude::*;
 
 pub mod accordion;
 pub mod aspect_ratio;
-pub mod portal;
 pub mod separator;
+pub mod checkbox;
 
 /// Generate a runtime-unique id.
 fn use_unique_id() -> Signal<String> {

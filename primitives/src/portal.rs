@@ -15,7 +15,7 @@ pub fn use_portal() -> PortalId {
 
     let (sig, id) = use_hook(|| {
         let mut next_id = NEXT_ID.write();
-        let id = next_id.clone();
+        let id = *next_id;
         *next_id += 1;
 
         let mut ctx = match try_consume_context::<PortalCtx>() {

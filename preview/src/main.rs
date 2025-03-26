@@ -2,7 +2,7 @@ use dioxus::{document::eval, prelude::*};
 use primitives::{
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
     aspect_ratio::AspectRatio,
-    portal::{PortalIn, PortalOut, use_portal},
+    separator::Separator,
 };
 
 fn main() {
@@ -11,49 +11,19 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    let portal = use_portal();
-    let mut items = use_signal(Vec::new);
-
     rsx! {
-        div {
-            id: "firstDiv",
-            PortalIn {
-                portal,
-                button {
-                    onclick: move |_| items.push(items.len()),
-                    "add number"
-                }
-
-                for item in items() {
-                    p { "{item}" }
-                }
-
-                AspectRatioExample {}
-                br {}
-                AccordionExample {}
-            }
-        }
-
-        div {
-            id: "otherDiv",
-            p { "hi" }
-            PortalOut { portal }
-
-        }
-
-
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
 
-        // h1 { "Components Preview" }
-        // Separator {
-        //     class: "separator",
-        //     style: "margin: 15px 0;",
-        //     horizontal: true,
-        //     decorative: false
-        // }
-        // AspectRatioExample {}
-        // br {}
-        // AccordionExample {}
+        h1 { "Components Preview" }
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: false
+        }
+        AspectRatioExample {}
+        br {}
+        AccordionExample {}
     }
 }
 
