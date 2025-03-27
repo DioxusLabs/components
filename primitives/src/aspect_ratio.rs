@@ -10,7 +10,7 @@ pub struct AspectRatioProps {
 
     children: Element,
 
-    #[props(extends = GlobalAttributes, extends = div)]
+    #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 }
 

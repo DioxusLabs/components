@@ -3,6 +3,8 @@ use primitives::{
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
     aspect_ratio::AspectRatio,
     checkbox::{Checkbox, CheckboxIndicator},
+    collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger},
+    separator::Separator,
 };
 
 fn main() {
@@ -14,24 +16,58 @@ fn App() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
 
-        // h1 { "Components Preview!!!" }
-        // Separator {
-        //     class: "separator",
-        //     style: "margin: 15px 0;",
-        //     horizontal: true,
-        //     decorative: false
-        // }
-        // AspectRatioExample {}
-        // br {}
-        FormExample {}
-        // br {}
-        // AccordionExample {}
+        h1 { "Components Preview" }
+
+        Collapsible {
+            CollapsibleTrigger { "Form Example" }
+            CollapsibleContent {
+                FormExample {}
+            }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        Collapsible {
+            CollapsibleTrigger { "Aspect Ratio Example" }
+            CollapsibleContent {
+                AspectRatioExample {}
+            }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        Collapsible {
+            disabled: true,
+
+            CollapsibleTrigger { "Accordion Example" }
+            CollapsibleContent {
+                AccordionExample {}
+            }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
     }
 }
 
 #[component]
 fn FormExample() -> Element {
     rsx! {
+
         form {
             onsubmit: move |e| {
                 println!("{:?}", e.values());

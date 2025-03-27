@@ -13,7 +13,7 @@ pub struct SeparatorProps {
     #[props(default = false)]
     decorative: bool,
 
-    #[props(extends = GlobalAttributes, extends = div)]
+    #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 }
 

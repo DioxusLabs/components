@@ -74,9 +74,6 @@ pub struct CheckboxProps {
     #[props(default)]
     on_checked_changed: Callback<CheckboxState>,
 
-    #[props(default)]
-    on_click: Callback<Event<MouseData>>,
-
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
@@ -85,17 +82,13 @@ pub struct CheckboxProps {
 
 #[component]
 pub fn Checkbox(props: CheckboxProps) -> Element {
-    let mut internal_checked = use_signal(|| props.default_checked);
+    let mut internal_checked =
+        use_signal(|| props.checked.map(|x| x()).unwrap_or(props.default_checked));
+
     let checked = use_memo(move || props.checked.unwrap_or(internal_checked)());
     let _ctx = use_context_provider(|| CheckboxCtx {
         checked: checked.into(),
         disabled: props.disabled,
-    });
-
-    // Call the checked changed.
-    use_effect(move || {
-        let checked = checked();
-        props.on_checked_changed.call(checked);
     });
 
     rsx! {
@@ -109,11 +102,13 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
             "data-state": checked().to_data_state(),
             "data-disabled": props.disabled,
 
-            onclick: move |e| {
-                internal_checked.set(!checked());
-                props.on_click.call(e);
+            onclick: move |_| {
+                let new_checked = !checked();
+                internal_checked.set(new_checked);
+                props.on_checked_changed.call(new_checked);
             },
 
+            // Aria says only spacebar can change state of checkboxes.
             onkeydown: move |e| {
                 if e.key() == Key::Enter {
                     e.prevent_default();

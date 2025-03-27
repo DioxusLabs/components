@@ -1,9 +1,10 @@
-use crate::use_unique_id;
+use crate::{use_aria_or, use_unique_id};
 use dioxus_lib::prelude::*;
 use std::rc::Rc;
 
 // TODO: controlled version
 // TODO: docs
+// TODO: rewrite this to use collapsible
 
 /// Internal accordion context.
 #[derive(Clone, Copy, Default)]
@@ -295,19 +296,8 @@ pub struct AccordionContentProps {
 
 #[component]
 pub fn AccordionContent(props: AccordionContentProps) -> Element {
-    let mut item: Item = use_context();
-
-    // Elements can only have one id so if the user provides their own, we must use it as the aria id.
-    let id = use_memo(move || {
-        let user_id = (props.id)();
-        match user_id {
-            Some(id) => {
-                item.aria_id.set(id.clone());
-                id
-            }
-            None => item.aria_id.peek().clone(),
-        }
-    });
+    let item: Item = use_context();
+    let id = use_aria_or(item.aria_id, props.id);
 
     rsx! {
         div {

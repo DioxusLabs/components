@@ -12,7 +12,8 @@ todo
 - [x] Aspect Ratio
  - Needs Docs
 - [ ] Avatar
-- [ ] Checkbox
+- [x] Checkbox
+ - Needs Docs
 - [ ] Collapsible
 - [ ] Context Menu 
 - [ ] Dialog
