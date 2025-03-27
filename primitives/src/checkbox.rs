@@ -2,14 +2,7 @@ use crate::use_unique_id;
 use dioxus_lib::{document::eval, prelude::*};
 use std::ops::Not;
 
-/*
-TODO
-
-- Test controlled version
-- Test other options
-- Test form value bubbling
-- Docs
-*/
+// TODO: Docs
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CheckboxState {
@@ -38,10 +31,7 @@ impl CheckboxState {
 
 impl From<CheckboxState> for bool {
     fn from(value: CheckboxState) -> Self {
-        match value {
-            CheckboxState::Unchecked => false,
-            _ => true,
-        }
+        !matches!(value, CheckboxState::Unchecked)
     }
 }
 
@@ -68,9 +58,6 @@ pub struct CheckboxProps {
 
     #[props(default = CheckboxState::Unchecked)]
     default_checked: CheckboxState,
-
-    #[props(default)]
-    form_control: ReadOnlySignal<bool>,
 
     #[props(default)]
     required: ReadOnlySignal<bool>,
@@ -105,8 +92,6 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
         disabled: props.disabled,
     });
 
-    let mut user_propogation_stopped = use_signal(|| false);
-
     // Call the checked changed.
     use_effect(move || {
         let checked = checked();
@@ -125,13 +110,6 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
             "data-disabled": props.disabled,
 
             onclick: move |e| {
-                if (props.form_control)() {
-                    user_propogation_stopped.set(e.propagates());
-                    if !user_propogation_stopped() {
-                        e.stop_propagation();
-                    }
-                }
-
                 internal_checked.set(!checked());
                 props.on_click.call(e);
             },

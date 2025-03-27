@@ -3,7 +3,6 @@ use primitives::{
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
     aspect_ratio::AspectRatio,
     checkbox::{Checkbox, CheckboxIndicator},
-    separator::Separator,
 };
 
 fn main() {
@@ -33,13 +32,25 @@ fn App() -> Element {
 #[component]
 fn FormExample() -> Element {
     rsx! {
-        Checkbox {
-            id: "tos-check",
-            CheckboxIndicator { "+" }
-        }
-        label {
-            for: "checkmate",
-            "I agree to the terms presented."
+        form {
+            onsubmit: move |e| {
+                println!("{:?}", e.values());
+            },
+
+            Checkbox {
+                id: "tos-check",
+                name: "tos-check",
+                CheckboxIndicator { "+" }
+            }
+            label {
+                for: "tos-check",
+                "I agree to the terms presented."
+            }
+            br {}
+            button {
+                type: "submit",
+                "Submit"
+            }
         }
     }
 }
