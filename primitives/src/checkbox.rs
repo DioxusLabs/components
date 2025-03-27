@@ -1,7 +1,15 @@
 use dioxus_lib::{document::eval, prelude::*};
 use std::ops::Not;
-
 use crate::use_unique_id;
+
+/*
+TODO
+
+- Test controlled version
+- Test other options
+- Test form value bubbling
+- Docs
+*/
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CheckboxState {
@@ -61,8 +69,10 @@ pub struct CheckboxProps {
     #[props(default = ReadOnlySignal::new(Signal::new(String::from("on"))))]
     value: ReadOnlySignal<String>,
 
+    #[props(default)]
     on_checked_changed: Callback<CheckboxState>,
 
+    #[props(default)]
     on_click: Callback<Event<MouseData>>,
 
     #[props(extends = GlobalAttributes)]
@@ -180,7 +190,7 @@ fn BubbleInput(
             style: "transform: 'translateX(-100%)';",
 
             // Default checked
-            checked: if default_checked != CheckboxState::Unchecked { Some("true") },
+            checked: default_checked != CheckboxState::Unchecked,
 
             ..attributes,
         }

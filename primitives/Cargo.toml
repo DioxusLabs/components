@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-dioxus-lib = "0.6.2"
+dioxus-lib.workspace = true

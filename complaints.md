@@ -1,9 +1,11 @@
 This file is to track any dx issues with Dioxus found while developing this library.
 
 ## Unused props don't emit unused warnings.
+https://github.com/DioxusLabs/dioxus/issues/3919
 Self explanatory.
 
 ## Setting default of signal prop is verbose.
+https://github.com/DioxusLabs/dioxus/issues/3920
 It's verbose to set a `Signal` or `ReadOnlySignal`'s default value through props.
 ```rust
 #[derive(Props, Clone, PartialEq)]
