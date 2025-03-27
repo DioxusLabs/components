@@ -1,6 +1,6 @@
+use crate::use_unique_id;
 use dioxus_lib::{document::eval, prelude::*};
 use std::ops::Not;
-use crate::use_unique_id;
 
 /*
 TODO
@@ -36,6 +36,15 @@ impl CheckboxState {
     }
 }
 
+impl From<CheckboxState> for bool {
+    fn from(value: CheckboxState) -> Self {
+        match value {
+            CheckboxState::Unchecked => false,
+            _ => true,
+        }
+    }
+}
+
 impl Not for CheckboxState {
     type Output = Self;
 
@@ -47,9 +56,15 @@ impl Not for CheckboxState {
     }
 }
 
+#[derive(Clone, Copy)]
+struct CheckboxCtx {
+    checked: ReadOnlySignal<CheckboxState>,
+    disabled: ReadOnlySignal<bool>,
+}
+
 #[derive(Props, Clone, PartialEq)]
 pub struct CheckboxProps {
-    checked: Option<ReadOnlySignal<CheckboxState>>,
+    checked: Option<Signal<CheckboxState>>,
 
     #[props(default = CheckboxState::Unchecked)]
     default_checked: CheckboxState,
@@ -83,7 +98,13 @@ pub struct CheckboxProps {
 
 #[component]
 pub fn Checkbox(props: CheckboxProps) -> Element {
-    let mut checked = use_signal(|| props.default_checked);
+    let mut internal_checked = use_signal(|| props.default_checked);
+    let checked = use_memo(move || props.checked.unwrap_or(internal_checked)());
+    let _ctx = use_context_provider(|| CheckboxCtx {
+        checked: checked.into(),
+        disabled: props.disabled,
+    });
+
     let mut user_propogation_stopped = use_signal(|| false);
 
     // Call the checked changed.
@@ -98,6 +119,7 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
             value: props.value,
             role: "checkbox",
             aria_checked: checked().to_aria_checked(),
+            aria_required: props.required,
             disabled: props.disabled,
             "data-state": checked().to_data_state(),
             "data-disabled": props.disabled,
@@ -110,11 +132,7 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
                     }
                 }
 
-                // If we're not controlled input mode, handle check state ourselves.
-                if props.checked.is_none() {
-                    checked.set(!checked());
-                }
-
+                internal_checked.set(!checked());
                 props.on_click.call(e);
             },
 
@@ -135,6 +153,27 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
             name: props.name,
             value: props.value,
             disabled: props.disabled,
+        }
+    }
+}
+
+#[component]
+pub fn CheckboxIndicator(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let ctx: CheckboxCtx = use_context();
+    let checked = (ctx.checked)();
+
+    rsx! {
+        span {
+            "data-state": checked.to_data_state(),
+            "data-disabled": ctx.disabled,
+            ..attributes,
+
+            if checked.into() {
+                {children}
+            }
         }
     }
 }

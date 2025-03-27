@@ -1,6 +1,9 @@
 use dioxus::{document::eval, prelude::*};
 use primitives::{
-    accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger}, aspect_ratio::AspectRatio, checkbox::Checkbox, separator::Separator
+    accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
+    aspect_ratio::AspectRatio,
+    checkbox::{Checkbox, CheckboxIndicator},
+    separator::Separator,
 };
 
 fn main() {
@@ -12,18 +15,18 @@ fn App() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
 
-        h1 { "Components Preview!!!" }
-        Separator {
-            class: "separator",
-            style: "margin: 15px 0;",
-            horizontal: true,
-            decorative: false
-        }
-        AspectRatioExample {}
-        br {}
+        // h1 { "Components Preview!!!" }
+        // Separator {
+        //     class: "separator",
+        //     style: "margin: 15px 0;",
+        //     horizontal: true,
+        //     decorative: false
+        // }
+        // AspectRatioExample {}
+        // br {}
         FormExample {}
-        br {}
-        AccordionExample {}
+        // br {}
+        // AccordionExample {}
     }
 }
 
@@ -31,12 +34,12 @@ fn App() -> Element {
 fn FormExample() -> Element {
     rsx! {
         Checkbox {
-            id: "checkmate",
-            "checkmate!"
+            id: "tos-check",
+            CheckboxIndicator { "+" }
         }
         label {
             for: "checkmate",
-            "Click to checkmate!"
+            "I agree to the terms presented."
         }
     }
 }
