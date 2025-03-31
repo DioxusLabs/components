@@ -1,5 +1,7 @@
 use dioxus_lib::prelude::*;
 
+use crate::use_controlled;
+
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleProps {
     pressed: Option<Signal<bool>>,
@@ -21,10 +23,11 @@ pub struct ToggleProps {
 
 #[component]
 pub fn Toggle(props: ToggleProps) -> Element {
-    let mut internal_pressed =
-        use_signal(|| props.pressed.map(|x| x()).unwrap_or(props.default_pressed));
-
-    let pressed = use_memo(move || props.pressed.unwrap_or(internal_pressed)());
+    let (pressed, set_pressed) = use_controlled(
+        props.pressed,
+        props.default_pressed,
+        props.on_pressed_change,
+    );
 
     rsx! {
         button {
@@ -36,8 +39,7 @@ pub fn Toggle(props: ToggleProps) -> Element {
 
             onclick: move |_| {
                 let new_pressed = !pressed();
-                internal_pressed.set(new_pressed);
-                props.on_pressed_change.call(new_pressed);
+                set_pressed.call(new_pressed);
             },
 
             ..props.attributes,

@@ -1,4 +1,4 @@
-use crate::use_unique_id;
+use crate::{use_controlled, use_unique_id};
 use dioxus_lib::{document::eval, prelude::*};
 use std::ops::Not;
 
@@ -82,10 +82,12 @@ pub struct CheckboxProps {
 
 #[component]
 pub fn Checkbox(props: CheckboxProps) -> Element {
-    let mut internal_checked =
-        use_signal(|| props.checked.map(|x| x()).unwrap_or(props.default_checked));
+    let (checked, set_checked) = use_controlled(
+        props.checked,
+        props.default_checked,
+        props.on_checked_change,
+    );
 
-    let checked = use_memo(move || props.checked.unwrap_or(internal_checked)());
     let _ctx = use_context_provider(|| CheckboxCtx {
         checked: checked.into(),
         disabled: props.disabled,
@@ -104,8 +106,7 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
 
             onclick: move |_| {
                 let new_checked = !checked();
-                internal_checked.set(new_checked);
-                props.on_checked_change.call(new_checked);
+                set_checked.call(new_checked);
             },
 
             // Aria says only spacebar can change state of checkboxes.

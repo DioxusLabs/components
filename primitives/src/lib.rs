@@ -32,3 +32,20 @@ fn use_aria_or(
         None => gen_id.peek().clone(),
     })
 }
+
+/// Allows some state to be either controlled or uncontrolled.
+fn use_controlled<T: Clone + PartialEq>(
+    prop: Option<Signal<T>>,
+    default: T,
+    on_change: Callback<T>,
+) -> (Memo<T>, Callback<T>) {
+    let mut internal_value = use_signal(|| prop.map(|x| x()).unwrap_or(default));
+    let value = use_memo(move || prop.unwrap_or(internal_value)());
+
+    let set_value = Callback::new(move |x: T| {
+        internal_value.set(x.clone());
+        on_change.call(x);
+    });
+
+    (value, set_value)
+}

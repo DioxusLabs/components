@@ -1,11 +1,10 @@
-use crate::{use_aria_or, use_unique_id};
+use crate::{use_aria_or, use_controlled, use_unique_id};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone, Copy)]
 struct CollapsibleCtx {
-    internal_open: Signal<bool>,
-    open: Option<Signal<bool>>,
-    on_open_changed: Callback<bool>,
+    open: Memo<bool>,
+    set_open: Callback<bool>,
     disabled: ReadOnlySignal<bool>,
     aria_controls_id: Signal<String>,
 }
@@ -21,7 +20,7 @@ pub struct CollapsibleProps {
     open: Option<Signal<bool>>,
 
     #[props(default)]
-    on_open_changed: Callback<bool>,
+    on_open_change: Callback<bool>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -31,17 +30,16 @@ pub struct CollapsibleProps {
 
 #[component]
 pub fn Collapsible(props: CollapsibleProps) -> Element {
-    let internal_open = use_signal(|| props.open.map(|x| x()).unwrap_or(props.default_open));
+    let (open, set_open) = use_controlled(props.open, props.default_open, props.on_open_change);
+
     let aria_controls_id = use_unique_id();
     let _ctx = use_context_provider(|| CollapsibleCtx {
-        internal_open,
-        open: props.open,
-        on_open_changed: props.on_open_changed,
+        open,
+        set_open,
         disabled: props.disabled,
         aria_controls_id,
     });
 
-    let open = use_memo(move || props.open.unwrap_or(internal_open)());
     let state = open_state(open());
 
     rsx! {
@@ -69,7 +67,7 @@ pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
     let ctx: CollapsibleCtx = use_context();
     let id = use_aria_or(ctx.aria_controls_id, props.id);
 
-    let open = use_memo(move || ctx.open.unwrap_or(ctx.internal_open)());
+    let open = ctx.open;
     let state = open_state(open());
 
     rsx! {
@@ -95,9 +93,9 @@ pub struct CollapsibleTriggerProps {
 
 #[component]
 pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
-    let mut ctx: CollapsibleCtx = use_context();
+    let ctx: CollapsibleCtx = use_context();
 
-    let open = use_memo(move || ctx.open.unwrap_or(ctx.internal_open)());
+    let open = ctx.open;
     let state = open_state(open());
 
     rsx! {
@@ -112,9 +110,8 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
             aria_expanded: open,
 
             onclick: move |_| {
-                let new_open = !(ctx.internal_open)();
-                ctx.internal_open.set(new_open);
-                ctx.on_open_changed.call(new_open);
+                let new_open = !open();
+                ctx.set_open.call(new_open);
             },
 
             ..props.attributes,
