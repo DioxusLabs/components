@@ -72,7 +72,7 @@ pub struct CheckboxProps {
     value: ReadOnlySignal<String>,
 
     #[props(default)]
-    on_checked_changed: Callback<CheckboxState>,
+    on_checked_change: Callback<CheckboxState>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -105,7 +105,7 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
             onclick: move |_| {
                 let new_checked = !checked();
                 internal_checked.set(new_checked);
-                props.on_checked_changed.call(new_checked);
+                props.on_checked_change.call(new_checked);
             },
 
             // Aria says only spacebar can change state of checkboxes.
