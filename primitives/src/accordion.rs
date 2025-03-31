@@ -5,6 +5,7 @@ use std::rc::Rc;
 // TODO: controlled version
 // TODO: docs
 // TODO: rewrite this to use collapsible
+// TODO: keyboard should skip disabled items when focusing.
 
 /// Internal accordion context.
 #[derive(Clone, Copy, Default)]

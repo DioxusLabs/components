@@ -1,24 +1,45 @@
+//! Content that can be collapsed.
+
 use crate::{use_aria_or, use_controlled, use_unique_id};
 use dioxus_lib::prelude::*;
+
+// TODO: more docs
 
 #[derive(Clone, Copy)]
 struct CollapsibleCtx {
     open: Memo<bool>,
     set_open: Callback<bool>,
     disabled: ReadOnlySignal<bool>,
+    keep_mounted: ReadOnlySignal<bool>,
     aria_controls_id: Signal<String>,
 }
 
 #[derive(Props, Clone, PartialEq)]
 pub struct CollapsibleProps {
+    /// Keep [`CollapsibleContent`] mounted in the DOM when the collapsible is closed.
+    ///
+    /// This does not apply any special ARIA or other attributes.
+    #[props(default)]
+    keep_mounted: ReadOnlySignal<bool>,
+
+    /// The default `open` state.
+    ///
+    /// This will be overridden if the component is controlled.
     #[props(default)]
     default_open: bool,
 
+    /// The disabled state of the collapsible.
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// The controlled `open` state of the collapsible.
+    ///
+    /// If this is provided, you must use `on_open_change`.
     open: Option<Signal<bool>>,
 
+    /// A callback for when the open state changes.
+    ///
+    /// The provided argument is a bool of whether the collapsible is open or closed.
     #[props(default)]
     on_open_change: Callback<bool>,
 
@@ -28,6 +49,7 @@ pub struct CollapsibleProps {
     children: Element,
 }
 
+/// The provider for a collapsible piece of content.
 #[component]
 pub fn Collapsible(props: CollapsibleProps) -> Element {
     let (open, set_open) = use_controlled(props.open, props.default_open, props.on_open_change);
@@ -37,6 +59,7 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
         open,
         set_open,
         disabled: props.disabled,
+        keep_mounted: props.keep_mounted,
         aria_controls_id,
     });
 
@@ -62,6 +85,7 @@ pub struct CollapsibleContentProps {
     children: Element,
 }
 
+/// A section of content that can be collapsed.
 #[component]
 pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
     let ctx: CollapsibleCtx = use_context();
@@ -77,7 +101,7 @@ pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
             "data-disabled": ctx.disabled,
             ..props.attributes,
 
-            if open() {
+            if open() || (ctx.keep_mounted)() {
                 {props.children}
             }
         }
@@ -91,6 +115,7 @@ pub struct CollapsibleTriggerProps {
     children: Element,
 }
 
+/// The trigger of a collapsible piece of content.
 #[component]
 pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
     let ctx: CollapsibleCtx = use_context();
