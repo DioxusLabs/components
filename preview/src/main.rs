@@ -16,7 +16,7 @@ fn App() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
 
-        h1 { "Components Preview" }
+        h1 { "Components Preview!!!!!" }
 
         Collapsible {
             CollapsibleTrigger { "Form Example" }
@@ -47,8 +47,6 @@ fn App() -> Element {
         }
 
         Collapsible {
-            disabled: true,
-
             CollapsibleTrigger { "Accordion Example" }
             CollapsibleContent {
                 AccordionExample {}
@@ -142,39 +140,6 @@ fn AccordionExample() -> Element {
                     }
                 }
             }
-
-            // AccordionItem {
-            //     class: "accordion-item",
-            //     default_open: true,
-
-            //     AccordionTrigger {
-            //         class: "accordion-trigger",
-            //         "This statement is false",
-            //     }
-            //     AccordionContent {
-            //         class: "accordion-content",
-            //         div {
-            //             class: "accordion-content-inner",
-            //             p { "hi" }
-            //         }
-            //     }
-            // }
-
-            // AccordionItem {
-            //     class: "accordion-item",
-
-            //     AccordionTrigger {
-            //         class: "accordion-trigger",
-            //         "Does it work?",
-            //     }
-            //     AccordionContent {
-            //         class: "accordion-content",
-            //         div {
-            //             class: "accordion-content-inner",
-            //             p { "If you can see this, good news! It does!" }
-            //         }
-            //     }
-            // }
         }
     }
 }

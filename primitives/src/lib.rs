@@ -4,6 +4,7 @@ pub mod accordion;
 pub mod aspect_ratio;
 pub mod checkbox;
 pub mod collapsible;
+pub mod label;
 pub mod separator;
 
 /// Generate a runtime-unique id.

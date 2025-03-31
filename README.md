@@ -6,21 +6,18 @@ todo
 
 
 - [x] Accordion
- - Needs Docs
  - Needs Controlled Version
 - [ ] Alert Dialog
 - [x] Aspect Ratio
- - Needs Docs
 - [ ] Avatar
 - [x] Checkbox
- - Needs Docs
-- [ ] Collapsible
+- [x] Collapsible
 - [ ] Context Menu 
 - [ ] Dialog
 - [ ] Dropdown Menu
 - [ ] Form(?)
 - [ ] Hover Card
-- [ ] Label
+- [x] Label
 - [ ] Menubar
 - [ ] Navigation Menu
 - [ ] Popover
@@ -29,7 +26,6 @@ todo
 - [ ] Scroll Area
 - [ ] Select
 - [x] Separator
- - Needs Docs
 - [ ] Slider
 - [ ] Switch
 - [ ] Tabs
@@ -38,6 +34,10 @@ todo
 - [ ] Toggle Group
 - [ ] Toolbar
 - [ ] Tooltip
+
+6/28
+
+Everything needs docs.
 
 
 ## License
