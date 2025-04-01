@@ -65,7 +65,6 @@ fn App() -> Element {
 #[component]
 fn FormExample() -> Element {
     rsx! {
-
         form {
             onsubmit: move |e| {
                 println!("{:?}", e.values());

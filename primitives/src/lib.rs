@@ -7,6 +7,7 @@ pub mod collapsible;
 pub mod label;
 pub mod separator;
 pub mod toggle;
+pub mod toggle_group;
 
 /// Generate a runtime-unique id.
 fn use_unique_id() -> Signal<String> {

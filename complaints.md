@@ -68,3 +68,18 @@ pub fn App() -> Element {
 ```
 
 ## `From<Signal<T>>` Is Not Implemented For `Option<ReadOnlySignal<T>>`
+
+## `From<T>` Is Not Implemented For `Option<Signal<T>>`
+
+## No `#[props(extends = MyPropsStruct)]`
+
+```rust
+pub fn MyComp1(#[props(extends = MyComp2)] comp2_attr: Vec<Attribute>) -> Element {
+    rsx! {
+        MyComp2 {
+            ..comp2_attr
+        }
+    }
+}
+
+```
