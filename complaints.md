@@ -1,11 +1,11 @@
 This file is to track any dx issues with Dioxus found while developing this library.
 
-## Unused props don't emit unused warnings.
+### Unused props don't emit unused warnings.
 https://github.com/DioxusLabs/dioxus/issues/3919
-Self explanatory.
 
-## Setting default of signal prop is verbose.
+### Setting default of signal prop is verbose.
 https://github.com/DioxusLabs/dioxus/issues/3920
+
 It's verbose to set a `Signal` or `ReadOnlySignal`'s default value through props.
 ```rust
 #[derive(Props, Clone, PartialEq)]
@@ -22,10 +22,14 @@ pub struct SomeProps {
     // Instead you have to do this:
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
     value: ReadOnlySignal<bool>,
+
+    // Same for a regular signal:
+    #[props(default = Signal::new(true))]
+    value: Signal<bool>,
 }
 ```
 
-## No way to know a component or element's parent, siblings, or children.
+### No way to know a component or element's parent, siblings, or children.
 
 Some stuff relies on knowing their surrounding elements for proper behavior. 
 
@@ -33,7 +37,7 @@ Take [radix-primitives' switch](https://github.com/radix-ui/primitives/blob/6e75
 
 This is also an issue with keybind navigation - we can give components ids to internally track them through a parent context, but how do we know which order they are in for navigation?
 
-## Need Portals
+### Need Portals
 Components should behave as if they are still a child of the parent of the "portaled" item. Same scope basically - context is still consumable as if it was a child.
 
 Aka the component is still used in the same spot, and the portal only moves where that component is actually rendered. Portals can't have children or attributes:
@@ -67,11 +71,26 @@ pub fn App() -> Element {
 
 ```
 
-## `From<Signal<T>>` Is Not Implemented For `Option<ReadOnlySignal<T>>`
+### `From<Signal<T>>` Is Not Implemented For `Option<ReadOnlySignal<T>>`
 
-## `From<T>` Is Not Implemented For `Option<Signal<T>>`
+### `From<T>` Is Not Implemented For `Option<ReadOnlySignal<T>>`
+`T` can already be converted to `Option<Signal<T>>` when provided thru props.
+This however doesn't work for `Option<ReadOnlySignal<T>>`.
 
-## No `#[props(extends = MyPropsStruct)]`
+### Number Props Don't Type Infer
+Normally Rust would automatically determine that a number should be of type thru inference but for props it doesn't work when the prop is a signal.
+
+`index: ReadOnlySignal<usize>,` fails
+`index: usize,` works
+
+```rust
+SomeComponent {
+    index: 1,
+}
+```
+
+### No `#[props(extends = MyPropsStruct)]`
+https://github.com/DioxusLabs/dioxus/issues/3938
 
 ```rust
 pub fn MyComp1(#[props(extends = MyComp2)] comp2_attr: Vec<Attribute>) -> Element {

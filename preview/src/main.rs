@@ -1,10 +1,6 @@
 use dioxus::{document::eval, prelude::*};
 use primitives::{
-    accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
-    aspect_ratio::AspectRatio,
-    checkbox::{Checkbox, CheckboxIndicator},
-    collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger},
-    separator::Separator,
+    accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger}, aspect_ratio::AspectRatio, checkbox::{Checkbox, CheckboxIndicator}, collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger}, separator::Separator, toggle::Toggle, toggle_group::{ToggleGroup, ToggleItem}
 };
 
 fn main() {
@@ -12,11 +8,57 @@ fn main() {
 }
 
 #[component]
+fn TestBtn(#[props(extends = button)] attributes: Vec<Attribute>) -> Element {
+    rsx! {
+        button {
+            ..attributes,
+            "button!",
+        }
+    }
+}
+
+#[component]
 fn App() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
+        document::Link { rel: "stylesheet", href: asset!("/assets/separator.css") }
 
-        h1 { "Components Preview!!!!!" }
+        document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
+        div {
+            id: "hero",
+            h1 { "Dioxus Primitives" }
+            h2 { "Accessible, unstyled foundational components for Dioxus." }
+        }
+        Separator {
+            id: "hero-separator",
+            class: "separator",
+            horizontal: true,
+        }
+
+        Toggle {
+            "TEST TOGGLE"
+        }
+
+        document::Link { rel: "stylesheet", href: asset!("/assets/toggle-group.css") }
+        ToggleGroup {
+            class: "toggle-group",
+            ToggleItem {
+                class: "toggle-item",
+                index: 0,
+                "Align Left"
+            }
+            ToggleItem {
+                class: "toggle-item",
+                index: 1,
+                "Align Middle"
+            }
+            ToggleItem {
+                class: "toggle-item",
+                index: 2,
+                "Align Right"
+            }
+        }
+
 
         Collapsible {
             CollapsibleTrigger { "Form Example" }
