@@ -114,7 +114,7 @@ impl AccordionContext {
     }
 
     /// Focus the next accordion item.
-    pub fn next_focus(&mut self) {
+    pub fn focus_next(&mut self) {
         let Some(id) = *self.focused_index.read() else {
             return;
         };
@@ -130,7 +130,7 @@ impl AccordionContext {
     }
 
     /// Focus the previous accordion item.
-    pub fn previous_focus(&mut self) {
+    pub fn focus_prev(&mut self) {
         let Some(id) = *self.focused_index.read() else {
             return;
         };
@@ -257,9 +257,7 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
         on_trigger_click: props.on_trigger_click,
     });
 
-    use_drop(move || {
-        ctx.unregister_item();
-    });
+    use_drop(move || ctx.unregister_item());
 
     // Open this item if we're set as default.
     use_hook(move || {
@@ -355,16 +353,21 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
             onkeydown: move |event| {
                 let key = event.key();
                 let horizontal = ctx.is_horizontal();
+                let mut prevent_default = true;
 
                 match key {
-                    Key::ArrowUp if !horizontal => ctx.previous_focus(),
-                    Key::ArrowDown if !horizontal => ctx.next_focus(),
-                    Key::ArrowLeft if horizontal => ctx.previous_focus(),
-                    Key::ArrowRight if horizontal => ctx.next_focus(),
+                    Key::ArrowUp if !horizontal => ctx.focus_prev(),
+                    Key::ArrowDown if !horizontal => ctx.focus_next(),
+                    Key::ArrowLeft if horizontal => ctx.focus_prev(),
+                    Key::ArrowRight if horizontal => ctx.focus_next(),
                     Key::Home => ctx.focus_start(),
                     Key::End => ctx.focus_end(),
-                    _ => {},
+                    _ => prevent_default = false,
                 };
+
+                if prevent_default {
+                    event.prevent_default();
+                }
             },
 
             onclick: move |_| {

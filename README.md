@@ -30,11 +30,11 @@ todo
 - [ ] Tabs
 - [ ] Toast
 - [x] Toggle
-- [-] Toggle Group
+- [x] Toggle Group
 - [ ] Toolbar
 - [ ] Tooltip
 
-7/27
+8/27
 
 Everything needs docs.
 

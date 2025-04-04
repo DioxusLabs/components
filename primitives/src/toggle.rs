@@ -1,5 +1,5 @@
-use dioxus_lib::prelude::*;
 use crate::use_controlled;
+use dioxus_lib::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleProps {
@@ -17,6 +17,14 @@ pub struct ToggleProps {
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    // https://github.com/DioxusLabs/dioxus/issues/2467
+    #[props(default)]
+    onmounted: Callback<Event<MountedData>>,
+    #[props(default)]
+    onfocus: Callback<Event<FocusData>>,
+    #[props(default)]
+    onkeydown: Callback<Event<KeyboardData>>,
+
     children: Element,
 }
 
@@ -30,6 +38,10 @@ pub fn Toggle(props: ToggleProps) -> Element {
 
     rsx! {
         button {
+            onmounted: props.onmounted,
+            onfocus: props.onfocus,
+            onkeydown: props.onkeydown,
+
             type: "button",
             disabled: props.disabled,
             aria_pressed: pressed,

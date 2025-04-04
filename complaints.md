@@ -37,6 +37,8 @@ Take [radix-primitives' switch](https://github.com/radix-ui/primitives/blob/6e75
 
 This is also an issue with keybind navigation - we can give components ids to internally track them through a parent context, but how do we know which order they are in for navigation?
 
+At a minimum, I need the ordering index. This could be a special prop similar to `children`. 
+
 ### Need Portals
 Components should behave as if they are still a child of the parent of the "portaled" item. Same scope basically - context is still consumable as if it was a child.
 

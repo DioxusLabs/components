@@ -1,6 +1,11 @@
 use dioxus::{document::eval, prelude::*};
 use primitives::{
-    accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger}, aspect_ratio::AspectRatio, checkbox::{Checkbox, CheckboxIndicator}, collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger}, separator::Separator, toggle::Toggle, toggle_group::{ToggleGroup, ToggleItem}
+    accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
+    aspect_ratio::AspectRatio,
+    checkbox::{Checkbox, CheckboxIndicator},
+    collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger},
+    separator::Separator,
+    toggle_group::{ToggleGroup, ToggleItem},
 };
 
 fn main() {
@@ -35,13 +40,11 @@ fn App() -> Element {
             horizontal: true,
         }
 
-        Toggle {
-            "TEST TOGGLE"
-        }
 
         document::Link { rel: "stylesheet", href: asset!("/assets/toggle-group.css") }
         ToggleGroup {
             class: "toggle-group",
+            horizontal: true,
             ToggleItem {
                 class: "toggle-item",
                 index: 0,
