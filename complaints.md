@@ -104,3 +104,20 @@ pub fn MyComp1(#[props(extends = MyComp2)] comp2_attr: Vec<Attribute>) -> Elemen
 }
 
 ```
+
+### Unable To Insert Attributes On `Element`.
+
+Ideally there would be a way to pass attributes through a top-level component. Radix has the `asChild` prop which replaces their element with the user provided one. E.g.
+```rs
+rsx! {
+
+    if as_child {
+        p {
+            aria_something: "abc",
+            {children}
+        }
+    } else {
+        {children} // Can't add `aria_something`
+    }
+}
+```

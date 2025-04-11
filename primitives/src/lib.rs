@@ -4,6 +4,7 @@ pub mod accordion;
 pub mod aspect_ratio;
 pub mod checkbox;
 pub mod collapsible;
+pub mod dialog;
 pub mod label;
 pub mod separator;
 pub mod toggle;
@@ -21,10 +22,7 @@ fn use_unique_id() -> Signal<String> {
 }
 
 // Elements can only have one id so if the user provides their own, we must use it as the aria id.
-fn use_aria_or(
-    mut gen_id: Signal<String>,
-    user_id: ReadOnlySignal<Option<String>>,
-) -> Memo<String> {
+fn use_id_or(mut gen_id: Signal<String>, user_id: ReadOnlySignal<Option<String>>) -> Memo<String> {
     use_memo(move || match user_id() {
         Some(id) => {
             gen_id.set(id.clone());

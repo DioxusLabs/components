@@ -1,6 +1,6 @@
 //! Content that can be collapsed.
 
-use crate::{use_aria_or, use_controlled, use_unique_id};
+use crate::{use_controlled, use_id_or, use_unique_id};
 use dioxus_lib::prelude::*;
 
 // TODO: more docs
@@ -89,7 +89,7 @@ pub struct CollapsibleContentProps {
 #[component]
 pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
     let ctx: CollapsibleCtx = use_context();
-    let id = use_aria_or(ctx.aria_controls_id, props.id);
+    let id = use_id_or(ctx.aria_controls_id, props.id);
 
     let open = ctx.open;
     let state = open_state(open());

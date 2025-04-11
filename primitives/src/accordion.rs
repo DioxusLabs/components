@@ -1,4 +1,4 @@
-use crate::{use_aria_or, use_unique_id};
+use crate::{use_id_or, use_unique_id};
 use dioxus_lib::prelude::*;
 use std::rc::Rc;
 
@@ -296,7 +296,7 @@ pub struct AccordionContentProps {
 #[component]
 pub fn AccordionContent(props: AccordionContentProps) -> Element {
     let item: Item = use_context();
-    let id = use_aria_or(item.aria_id, props.id);
+    let id = use_id_or(item.aria_id, props.id);
 
     rsx! {
         div {
