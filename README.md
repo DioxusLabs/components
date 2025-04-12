@@ -17,7 +17,7 @@ todo
 - [x] Dropdown Menu
 - [ ] Hover Card
 - [x] Label
-- [ ] Menubar
+- [x] Menubar
 - [ ] Navigation Menu
 - [ ] Popover
 - [x] Progress
@@ -34,7 +34,7 @@ todo
 - [ ] Toolbar
 - [ ] Tooltip
 
-13/27
+14/27
 
 Everything needs docs.
 

@@ -6,6 +6,7 @@ use primitives::{
     checkbox::{Checkbox, CheckboxIndicator},
     collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger},
     dropdown_menu::{DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger},
+    menubar::{Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger},
     progress::{Progress, ProgressIndicator},
     radio_group::{RadioGroup, RadioItem},
     separator::Separator,
@@ -163,6 +164,18 @@ fn App() -> Element {
         Collapsible {
             CollapsibleTrigger { "Dropdown Menu Example" }
             CollapsibleContent { DropdownMenuExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        Collapsible {
+            CollapsibleTrigger { "Menubar Example" }
+            CollapsibleContent { MenubarExample {} }
         }
 
         Separator {
@@ -462,6 +475,76 @@ fn DropdownMenuExample() -> Element {
                         eval(&format!("console.log('Selected: {}')", value));
                     },
                     "Item 3"
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn MenubarExample() -> Element {
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("/assets/menubar.css") }
+        div { class: "menubar-example",
+            Menubar { class: "menubar",
+                MenubarMenu { class: "menubar-menu", index: 0,
+                    MenubarTrigger { class: "menubar-trigger", "File" }
+                    MenubarContent { class: "menubar-content",
+                        MenubarItem {
+                            class: "menubar-item",
+                            value: "new".to_string(),
+                            on_select: move |value| {
+                                eval(&format!("console.log('Selected: {}')", value));
+                            },
+                            "New"
+                        }
+                        MenubarItem {
+                            class: "menubar-item",
+                            value: "open".to_string(),
+                            on_select: move |value| {
+                                eval(&format!("console.log('Selected: {}')", value));
+                            },
+                            "Open"
+                        }
+                        MenubarItem {
+                            class: "menubar-item",
+                            value: "save".to_string(),
+                            on_select: move |value| {
+                                eval(&format!("console.log('Selected: {}')", value));
+                            },
+                            "Save"
+                        }
+                    }
+                }
+
+                MenubarMenu { class: "menubar-menu", index: 1,
+                    MenubarTrigger { class: "menubar-trigger", "Edit" }
+                    MenubarContent { class: "menubar-content",
+                        MenubarItem {
+                            class: "menubar-item",
+                            value: "cut".to_string(),
+                            on_select: move |value| {
+                                eval(&format!("console.log('Selected: {}')", value));
+                            },
+                            "Cut"
+                        }
+                        MenubarItem {
+                            class: "menubar-item",
+                            value: "copy".to_string(),
+                            on_select: move |value| {
+                                eval(&format!("console.log('Selected: {}')", value));
+                            },
+                            "Copy"
+                        }
+                        MenubarItem {
+                            class: "menubar-item",
+                            value: "paste".to_string(),
+                            on_select: move |value| {
+                                eval(&format!("console.log('Selected: {}')", value));
+                            },
+                            "Paste"
+                        }
+                    }
                 }
             }
         }

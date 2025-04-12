@@ -7,6 +7,7 @@ pub mod collapsible;
 pub mod dialog;
 pub mod dropdown_menu;
 pub mod label;
+pub mod menubar;
 pub mod progress;
 pub mod radio_group;
 pub mod separator;
