@@ -23,6 +23,9 @@ pub use avatar::*;
 mod scroll_area;
 pub use scroll_area::*;
 
+mod context_menu;
+pub use context_menu::*;
+
 /// Generate a runtime-unique id.
 fn use_unique_id() -> Signal<String> {
     static NEXT_ID: GlobalSignal<usize> = Signal::global(|| 0);

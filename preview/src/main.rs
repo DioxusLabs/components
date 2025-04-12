@@ -1,6 +1,7 @@
 use dioxus::{document::eval, prelude::*};
 use primitives::{
-    Avatar, AvatarFallback, ScrollArea, ScrollDirection,
+    Avatar, AvatarFallback, ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger,
+    ScrollArea, ScrollDirection,
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
     aspect_ratio::AspectRatio,
     checkbox::{Checkbox, CheckboxIndicator},
@@ -189,6 +190,19 @@ fn App() -> Element {
         Collapsible {
             CollapsibleTrigger { "Scroll Area Example" }
             CollapsibleContent { ScrollAreaExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        document::Link { rel: "stylesheet", href: asset!("./assets/context-menu.css") }
+        Collapsible {
+            CollapsibleTrigger { "Context Menu Example" }
+            CollapsibleContent { ContextMenuExample {} }
         }
     }
 }
@@ -607,6 +621,60 @@ fn ScrollAreaExample() -> Element {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn ContextMenuExample() -> Element {
+    let mut selected_value = use_signal(String::new);
+
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("./assets/context-menu.css") }
+        div { class: "context-menu-example",
+            ContextMenu {
+                ContextMenuTrigger { class: "context-menu-trigger", "Right click here to open context menu" }
+
+                ContextMenuContent { class: "context-menu-content",
+                    ContextMenuItem {
+                        class: "context-menu-item",
+                        value: "edit".to_string(),
+                        index: 0,
+                        on_select: move |value| {
+                            selected_value.set(value);
+                        },
+                        "Edit"
+                    }
+
+                    ContextMenuItem {
+                        class: "context-menu-item",
+                        value: "duplicate".to_string(),
+                        index: 1,
+                        on_select: move |value| {
+                            selected_value.set(value);
+                        },
+                        "Duplicate"
+                    }
+
+                    ContextMenuItem {
+                        class: "context-menu-item",
+                        value: "delete".to_string(),
+                        index: 2,
+                        on_select: move |value| {
+                            selected_value.set(value);
+                        },
+                        "Delete"
+                    }
+                }
+            }
+
+            div { class: "selected-value",
+                if selected_value().is_empty() {
+                    "No action selected"
+                } else {
+                    "Selected action: {selected_value()}"
                 }
             }
         }
