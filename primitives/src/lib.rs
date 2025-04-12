@@ -5,6 +5,7 @@ pub mod aspect_ratio;
 pub mod checkbox;
 pub mod collapsible;
 pub mod dialog;
+pub mod dropdown_menu;
 pub mod label;
 pub mod progress;
 pub mod radio_group;

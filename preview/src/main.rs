@@ -5,6 +5,7 @@ use primitives::{
     aspect_ratio::AspectRatio,
     checkbox::{Checkbox, CheckboxIndicator},
     collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger},
+    dropdown_menu::{DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger},
     progress::{Progress, ProgressIndicator},
     radio_group::{RadioGroup, RadioItem},
     separator::Separator,
@@ -150,6 +151,18 @@ fn App() -> Element {
         Collapsible {
             CollapsibleTrigger { "Tabs Example" }
             CollapsibleContent { TabsExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        Collapsible {
+            CollapsibleTrigger { "Dropdown Menu Example" }
+            CollapsibleContent { DropdownMenuExample {} }
         }
 
         Separator {
@@ -407,6 +420,50 @@ fn TabsExample() -> Element {
             TabContent { class: "tabs-content", value: "tab1".to_string(), "Tab 1 Content" }
             TabContent { class: "tabs-content", value: "tab2".to_string(), "Tab 2 Content" }
             TabContent { class: "tabs-content", value: "tab3".to_string(), "Tab 3 Content" }
+        }
+    }
+}
+
+#[component]
+fn DropdownMenuExample() -> Element {
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("./assets/dropdown-menu.css") }
+        DropdownMenu { class: "dropdown-menu", default_open: false,
+
+            DropdownMenuTrigger { class: "dropdown-menu-trigger", "Open Menu" }
+
+            DropdownMenuContent { class: "dropdown-menu-content",
+
+                DropdownMenuItem {
+                    class: "dropdown-menu-item",
+                    value: "item1".to_string(),
+                    index: 0,
+                    on_select: move |value| {
+                        eval(&format!("console.log('Selected: {}')", value));
+                    },
+                    "Item 1"
+                }
+
+                DropdownMenuItem {
+                    class: "dropdown-menu-item",
+                    value: "item2".to_string(),
+                    index: 1,
+                    on_select: move |value| {
+                        eval(&format!("console.log('Selected: {}')", value));
+                    },
+                    "Item 2"
+                }
+
+                DropdownMenuItem {
+                    class: "dropdown-menu-item",
+                    value: "item3".to_string(),
+                    index: 2,
+                    on_select: move |value| {
+                        eval(&format!("console.log('Selected: {}')", value));
+                    },
+                    "Item 3"
+                }
+            }
         }
     }
 }
