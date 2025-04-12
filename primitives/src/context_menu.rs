@@ -54,8 +54,30 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
         current_focus: Signal::new(None),
     });
 
+    let handle_click = move |event: Event<MouseData>| {
+        if open() {
+            let coords = event.data().client_coordinates();
+            let click_x = coords.x as i32;
+            let click_y = coords.y as i32;
+            let (menu_x, menu_y) = position();
+
+            // Simple boundary check
+            let menu_width = 200; // Approximate menu width
+            let menu_height = 200; // Approximate menu height
+
+            if click_x < menu_x
+                || click_x > menu_x + menu_width
+                || click_y < menu_y
+                || click_y > menu_y + menu_height
+            {
+                set_open.call(false);
+            }
+        }
+    };
+
     rsx! {
         div {
+            onclick: handle_click,
             "data-state": if open() { "open" } else { "closed" },
             "data-disabled": (props.disabled)(),
             ..props.attributes,
@@ -109,25 +131,12 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
         format!("position: fixed; left: {}px; top: {}px;", x, y)
     });
 
-    // Close menu when clicking outside
-    let handle_window_click = move |event: Event<MouseData>| {
-        let coords = event.data().client_coordinates();
-        let x = coords.x as i32;
-        let y = coords.y as i32;
-        let (menu_x, menu_y) = position();
-
-        // Check if click is outside the menu
-        if x < menu_x || y < menu_y {
-            ctx.set_open.call(false);
-        }
-    };
-
     rsx! {
         div {
             style: "{style}",
             "data-state": if (ctx.open)() { "open" } else { "closed" },
             hidden: !(ctx.open)(),
-            onclick: handle_window_click,
+            onclick: move |e| e.stop_propagation(),
             ..props.attributes,
 
             {props.children}
