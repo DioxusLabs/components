@@ -1,0 +1,33 @@
+.progress {
+    position: relative;
+    overflow: hidden;
+    background: #e2e8f0;
+    border-radius: 9999px;
+    width: 300px;
+    height: 20px;
+    border: 2px solid #94a3b8;
+    box-sizing: border-box;
+}
+
+.progress[data-state='indeterminate'] .progress-indicator {
+    width: 50%;
+    animation: indeterminate 1s infinite linear;
+}
+
+.progress-indicator {
+    height: 100%;
+    background-color: #3b82f6;
+    transition: width 250ms ease;
+    width: var(--progress-value, 0%);
+    /* Use CSS variable for width */
+}
+
+@keyframes indeterminate {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(200%);
+    }
+}

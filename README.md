@@ -20,13 +20,13 @@ todo
 - [ ] Menubar
 - [ ] Navigation Menu
 - [ ] Popover
-- [ ] Progress
+- [x] Progress
 - [ ] Radio Group
 - [ ] Scroll Area
 - [ ] Select
 - [x] Separator
 - [ ] Slider
-- [ ] Switch
+- [x] Switch
 - [ ] Tabs
 - [ ] Toast
 - [x] Toggle
@@ -34,7 +34,7 @@ todo
 - [ ] Toolbar
 - [ ] Tooltip
 
-8/27
+10/27
 
 Everything needs docs.
 
