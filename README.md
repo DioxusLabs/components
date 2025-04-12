@@ -12,7 +12,7 @@ todo
 - [x] Avatar
 - [x] Checkbox
 - [x] Collapsible
-- [ ] Context Menu 
+- [!] Context Menu (Implemented in a hacky way)
 - [ ] Dialog
 - [x] Dropdown Menu
 - [ ] Hover Card
