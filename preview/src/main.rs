@@ -10,6 +10,7 @@ use primitives::{
     separator::Separator,
     slider::{Slider, SliderRange, SliderThumb, SliderTrack, SliderValue},
     switch::{Switch, SwitchThumb},
+    tabs::{TabContent, TabTrigger, Tabs},
     toggle_group::{ToggleGroup, ToggleItem},
 };
 
@@ -137,6 +138,18 @@ fn App() -> Element {
         Collapsible {
             CollapsibleTrigger { "Radio Group Example" }
             CollapsibleContent { RadioGroupExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        Collapsible {
+            CollapsibleTrigger { "Tabs Example" }
+            CollapsibleContent { TabsExample {} }
         }
 
         Separator {
@@ -361,5 +374,39 @@ fn RadioGroupExample() -> Element {
         }
 
         div { style: "margin-top: 1rem;", "Selected value: {value()}" }
+    }
+}
+
+#[component]
+fn TabsExample() -> Element {
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("/assets/tabs.css") }
+        Tabs { class: "tabs", default_value: "tab1".to_string(),
+
+            div { class: "tabs-list",
+                TabTrigger {
+                    class: "tabs-trigger",
+                    value: "tab1".to_string(),
+                    index: 0,
+                    "Tab 1"
+                }
+                TabTrigger {
+                    class: "tabs-trigger",
+                    value: "tab2".to_string(),
+                    index: 1,
+                    "Tab 2"
+                }
+                TabTrigger {
+                    class: "tabs-trigger",
+                    value: "tab3".to_string(),
+                    index: 2,
+                    "Tab 3"
+                }
+            }
+
+            TabContent { class: "tabs-content", value: "tab1".to_string(), "Tab 1 Content" }
+            TabContent { class: "tabs-content", value: "tab2".to_string(), "Tab 2 Content" }
+            TabContent { class: "tabs-content", value: "tab3".to_string(), "Tab 3 Content" }
+        }
     }
 }

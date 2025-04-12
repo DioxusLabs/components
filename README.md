@@ -27,14 +27,14 @@ todo
 - [x] Separator
 - [x] Slider
 - [x] Switch
-- [ ] Tabs
+- [x] Tabs
 - [ ] Toast
 - [x] Toggle
 - [x] Toggle Group
 - [ ] Toolbar
 - [ ] Tooltip
 
-12/27
+13/27
 
 Everything needs docs.
 

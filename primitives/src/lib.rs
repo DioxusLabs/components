@@ -11,6 +11,7 @@ pub mod radio_group;
 pub mod separator;
 pub mod slider;
 pub mod switch;
+pub mod tabs;
 pub mod toggle;
 pub mod toggle_group;
 
