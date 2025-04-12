@@ -1,10 +1,12 @@
 use dioxus::{document::eval, prelude::*};
 use primitives::{
+    Avatar, AvatarFallback,
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
     aspect_ratio::AspectRatio,
     checkbox::{Checkbox, CheckboxIndicator},
     collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger},
     progress::{Progress, ProgressIndicator},
+    radio_group::{RadioGroup, RadioItem},
     separator::Separator,
     slider::{Slider, SliderRange, SliderThumb, SliderTrack, SliderValue},
     switch::{Switch, SwitchThumb},
@@ -110,6 +112,31 @@ fn App() -> Element {
         Collapsible {
             CollapsibleTrigger { "Slider Example" }
             CollapsibleContent { SliderExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        Collapsible {
+            CollapsibleTrigger { "Avatar Example" }
+            CollapsibleContent { AvatarExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        document::Link { rel: "stylesheet", href: asset!("/assets/radio-group.css") }
+        Collapsible {
+            CollapsibleTrigger { "Radio Group Example" }
+            CollapsibleContent { RadioGroupExample {} }
         }
 
         Separator {
@@ -285,5 +312,54 @@ fn SliderExample() -> Element {
                 }
             }
         }
+    }
+}
+
+#[component]
+fn AvatarExample() -> Element {
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("./assets/avatar.css") }
+        div { class: "avatar-example",
+            // Avatar with image
+            Avatar {
+                class: "avatar",
+                src: "https://github.com/DioxusLabs.png",
+                alt: "Dioxus Labs",
+            }
+
+            // Avatar with fallback text
+            Avatar { class: "avatar", alt: "John Doe" }
+
+            // Avatar with custom fallback
+            Avatar {
+                class: "avatar",
+                src: "invalid-url",
+                fallback: rsx! {
+                    AvatarFallback { class: "avatar-fallback", "👤" }
+                },
+            }
+        }
+    }
+}
+
+#[component]
+fn RadioGroupExample() -> Element {
+    let mut value = use_signal(|| String::from("option1"));
+
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("/assets/radio-group.css") }
+        RadioGroup {
+            class: "radio-group",
+            value,
+            on_value_change: move |new_value| {
+                value.set(new_value);
+            },
+
+            RadioItem { class: "radio-item", value: "option1".to_string(), index: 0, "Option 1" }
+            RadioItem { class: "radio-item", value: "option2".to_string(), index: 1, "Option 2" }
+            RadioItem { class: "radio-item", value: "option3".to_string(), index: 2, "Option 3" }
+        }
+
+        div { style: "margin-top: 1rem;", "Selected value: {value()}" }
     }
 }

@@ -7,11 +7,15 @@ pub mod collapsible;
 pub mod dialog;
 pub mod label;
 pub mod progress;
+pub mod radio_group;
 pub mod separator;
 pub mod slider;
 pub mod switch;
 pub mod toggle;
 pub mod toggle_group;
+
+mod avatar;
+pub use avatar::*;
 
 /// Generate a runtime-unique id.
 fn use_unique_id() -> Signal<String> {
