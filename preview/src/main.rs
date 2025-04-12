@@ -4,7 +4,10 @@ use primitives::{
     aspect_ratio::AspectRatio,
     checkbox::{Checkbox, CheckboxIndicator},
     collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger},
+    progress::{Progress, ProgressIndicator},
     separator::Separator,
+    slider::{Slider, SliderRange, SliderThumb, SliderTrack, SliderValue},
+    switch::{Switch, SwitchThumb},
     toggle_group::{ToggleGroup, ToggleItem},
 };
 
@@ -15,10 +18,7 @@ fn main() {
 #[component]
 fn TestBtn(#[props(extends = button)] attributes: Vec<Attribute>) -> Element {
     rsx! {
-        button {
-            ..attributes,
-            "button!",
-        }
+        button { ..attributes,"button!" }
     }
 }
 
@@ -29,45 +29,24 @@ fn App() -> Element {
         document::Link { rel: "stylesheet", href: asset!("/assets/separator.css") }
 
         document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
-        div {
-            id: "hero",
+        div { id: "hero",
             h1 { "Dioxus Primitives" }
             h2 { "Accessible, unstyled foundational components for Dioxus." }
         }
-        Separator {
-            id: "hero-separator",
-            class: "separator",
-            horizontal: true,
-        }
+        Separator { id: "hero-separator", class: "separator", horizontal: true }
 
 
         document::Link { rel: "stylesheet", href: asset!("/assets/toggle-group.css") }
-        ToggleGroup {
-            class: "toggle-group",
-            horizontal: true,
-            ToggleItem {
-                class: "toggle-item",
-                index: 0,
-                "Align Left"
-            }
-            ToggleItem {
-                class: "toggle-item",
-                index: 1,
-                "Align Middle"
-            }
-            ToggleItem {
-                class: "toggle-item",
-                index: 2,
-                "Align Right"
-            }
+        ToggleGroup { class: "toggle-group", horizontal: true,
+            ToggleItem { class: "toggle-item", index: 0, "Align Left" }
+            ToggleItem { class: "toggle-item", index: 1, "Align Middle" }
+            ToggleItem { class: "toggle-item", index: 2, "Align Right" }
         }
 
 
         Collapsible {
             CollapsibleTrigger { "Form Example" }
-            CollapsibleContent {
-                FormExample {}
-            }
+            CollapsibleContent { FormExample {} }
         }
 
         Separator {
@@ -79,9 +58,20 @@ fn App() -> Element {
 
         Collapsible {
             CollapsibleTrigger { "Aspect Ratio Example" }
-            CollapsibleContent {
-                AspectRatioExample {}
-            }
+            CollapsibleContent { AspectRatioExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        document::Link { rel: "stylesheet", href: asset!("/assets/progress.css") }
+        Collapsible {
+            CollapsibleTrigger { "Progress Example" }
+            CollapsibleContent { ProgressExample {} }
         }
 
         Separator {
@@ -93,9 +83,33 @@ fn App() -> Element {
 
         Collapsible {
             CollapsibleTrigger { "Accordion Example" }
-            CollapsibleContent {
-                AccordionExample {}
-            }
+            CollapsibleContent { AccordionExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        document::Link { rel: "stylesheet", href: asset!("/assets/switch.css") }
+        Collapsible {
+            CollapsibleTrigger { "Switch Example" }
+            CollapsibleContent { SwitchExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        document::Link { rel: "stylesheet", href: asset!("/assets/slider.css") }
+        Collapsible {
+            CollapsibleTrigger { "Slider Example" }
+            CollapsibleContent { SliderExample {} }
         }
 
         Separator {
@@ -115,20 +129,12 @@ fn FormExample() -> Element {
                 println!("{:?}", e.values());
             },
 
-            Checkbox {
-                id: "tos-check",
-                name: "tos-check",
+            Checkbox { id: "tos-check", name: "tos-check",
                 CheckboxIndicator { "+" }
             }
-            label {
-                for: "tos-check",
-                "I agree to the terms presented."
-            }
+            label { r#for: "tos-check", "I agree to the terms presented." }
             br {}
-            button {
-                type: "submit",
-                "Submit"
-            }
+            button { r#type: "submit", "Submit" }
         }
     }
 }
@@ -137,10 +143,8 @@ fn FormExample() -> Element {
 fn AspectRatioExample() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/aspect-ratio.css") }
-        div {
-            class: "aspect-ratio-container",
-            AspectRatio {
-                ratio: 4.0 / 3.0,
+        div { class: "aspect-ratio-container",
+            AspectRatio { ratio: 4.0 / 3.0,
                 img {
                     class: "aspect-ratio-image",
                     src: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
@@ -171,16 +175,112 @@ fn AccordionExample() -> Element {
                         eval("console.log('trigger');");
                     },
 
-                    AccordionTrigger {
-                        class: "accordion-trigger",
-                        "the quick brown fox",
-                    }
-                    AccordionContent {
-                        class: "accordion-content",
-                        div {
-                            class: "accordion-content-inner",
+                    AccordionTrigger { class: "accordion-trigger", "the quick brown fox" }
+                    AccordionContent { class: "accordion-content",
+                        div { class: "accordion-content-inner",
                             p { "lorem ipsum lorem ipsum" }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn ProgressExample() -> Element {
+    let mut progress = use_signal(|| 80.0);
+
+    rsx! {
+        Progress { class: "progress", value: Some(progress.into()),
+            ProgressIndicator { class: "progress-indicator" }
+        }
+        button { onclick: move |_| progress.set(progress() + 10.0), "Increment" }
+        button { onclick: move |_| progress.set(progress() - 10.0), "Decrement" }
+        button { onclick: move |_| progress.set(0.0), "Reset" }
+        button { onclick: move |_| progress.set(100.0), "Complete" }
+    }
+}
+
+#[component]
+fn SwitchExample() -> Element {
+    let mut checked = use_signal(|| false);
+
+    rsx! {
+        div { class: "switch-example",
+            label { "Airplane Mode" }
+            Switch {
+                class: "switch",
+                checked,
+                on_checked_change: move |new_checked| {
+                    checked.set(new_checked);
+                    eval(&format!("console.log('Switch toggled: {}')", new_checked));
+                },
+
+                SwitchThumb { class: "switch-thumb" }
+            }
+        }
+    }
+}
+
+#[component]
+fn SliderExample() -> Element {
+    let mut value = use_signal(|| SliderValue::Single(50.0));
+    let mut range_value = use_signal(|| SliderValue::Range(25.0, 75.0));
+
+    rsx! {
+        div { class: "slider-example",
+            // Single value slider
+            div {
+                label { "Single Value Slider" }
+                div { style: "display: flex; align-items: center; gap: 1rem;",
+                    Slider {
+                        class: "slider",
+                        value,
+                        on_value_change: move |v| {
+                            value.set(v);
+                        },
+
+                        SliderTrack { class: "slider-track",
+                            SliderRange { class: "slider-range" }
+                            SliderThumb { class: "slider-thumb" }
+                        }
+                    }
+                    input {
+                        r#type: "text",
+                        readonly: true,
+                        value: match value() {
+                            SliderValue::Single(v) => format!("{:.1}", v),
+                            _ => String::new(),
+                        },
+                    }
+                }
+            }
+
+            // Range slider
+            div {
+                label { "Range Slider" }
+                div { style: "display: flex; align-items: center; gap: 1rem;",
+                    Slider {
+                        class: "slider",
+                        value: range_value,
+                        on_value_change: move |v| {
+                            range_value.set(v);
+                        },
+
+                        SliderTrack { class: "slider-track",
+                            SliderRange { class: "slider-range" }
+                            SliderThumb { class: "slider-thumb", index: 0 }
+                            SliderThumb { class: "slider-thumb", index: 1 }
+                        }
+                    }
+                    input {
+                        r#type: "text",
+                        readonly: true,
+                        value: match range_value() {
+                            SliderValue::Range(start, end) => format!("{:.1}, {:.1}", start, end),
+                            _ => String::new(),
+                        },
                     }
                 }
             }
