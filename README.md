@@ -22,7 +22,7 @@ todo
 - [ ] Popover
 - [x] Progress
 - [x] Radio Group
-- [ ] Scroll Area
+- [x] Scroll Area
 - [ ] Select
 - [x] Separator
 - [x] Slider

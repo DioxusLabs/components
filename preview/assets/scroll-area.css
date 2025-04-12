@@ -1,0 +1,125 @@
+.scroll-area-demo {
+    padding: 20px;
+}
+
+.scroll-demo-section {
+    margin-bottom: 30px;
+}
+
+.scroll-demo-section h3 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.demo-scroll-area {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+}
+
+/* Vertical scroll example */
+.demo-scroll-area[data-scroll-direction="vertical"] {
+    height: 200px;
+}
+
+.scroll-content {
+    padding: 10px;
+}
+
+.scroll-content p {
+    margin: 8px 0;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+/* Horizontal scroll example */
+.demo-scroll-area[data-scroll-direction="horizontal"] {
+    height: auto;
+    width: 100%;
+}
+
+.scroll-content-horizontal {
+    padding: 10px;
+    white-space: nowrap;
+}
+
+.scroll-content-horizontal span {
+    display: inline-block;
+    margin: 0 4px;
+    padding: 8px 16px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+/* Both directions example */
+.demo-scroll-area[data-scroll-direction="both"] {
+    height: 200px;
+    width: 100%;
+}
+
+.scroll-content-both {
+    padding: 10px;
+    white-space: nowrap;
+}
+
+.scroll-content-both div {
+    margin: 4px 0;
+}
+
+.scroll-content-both span {
+    display: inline-block;
+    margin: 0 4px;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* Scrollbar styles */
+.scroll-area-auto-hide {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+.scroll-area-auto-hide::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.scroll-area-auto-hide::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scroll-area-auto-hide::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.scroll-area-auto-hide::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+.scroll-area-always-show {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.1);
+}
+
+.scroll-area-always-show::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.scroll-area-always-show::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.scroll-area-always-show::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.scroll-area-always-show::-webkit-scrollbar-corner {
+    background: rgba(0, 0, 0, 0.1);
+}

@@ -1,6 +1,6 @@
 use dioxus::{document::eval, prelude::*};
 use primitives::{
-    Avatar, AvatarFallback,
+    Avatar, AvatarFallback, ScrollArea, ScrollDirection,
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
     aspect_ratio::AspectRatio,
     checkbox::{Checkbox, CheckboxIndicator},
@@ -183,6 +183,12 @@ fn App() -> Element {
             style: "margin: 15px 0;",
             horizontal: true,
             decorative: true,
+        }
+
+        document::Link { rel: "stylesheet", href: asset!("/assets/scroll-area.css") }
+        Collapsible {
+            CollapsibleTrigger { "Scroll Area Example" }
+            CollapsibleContent { ScrollAreaExample {} }
         }
     }
 }
@@ -543,6 +549,62 @@ fn MenubarExample() -> Element {
                                 eval(&format!("console.log('Selected: {}')", value));
                             },
                             "Paste"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn ScrollAreaExample() -> Element {
+    rsx! {
+        div { class: "scroll-area-demo",
+            // Vertical scroll example
+            div { class: "scroll-demo-section",
+                h3 { "Vertical Scroll" }
+                ScrollArea {
+                    class: "demo-scroll-area",
+                    direction: ScrollDirection::Vertical,
+
+                    div { class: "scroll-content",
+                        for i in 1..=20 {
+                            p { "Scrollable content item {i}" }
+                        }
+                    }
+                }
+            }
+
+            // Horizontal scroll example
+            div { class: "scroll-demo-section",
+                h3 { "Horizontal Scroll" }
+                ScrollArea {
+                    class: "demo-scroll-area",
+                    direction: ScrollDirection::Horizontal,
+
+                    div { class: "scroll-content-horizontal",
+                        for i in 1..=20 {
+                            span { "Column {i} " }
+                        }
+                    }
+                }
+            }
+
+            // Both directions example
+            div { class: "scroll-demo-section",
+                h3 { "Both Directions" }
+                ScrollArea {
+                    class: "demo-scroll-area",
+                    direction: ScrollDirection::Both,
+
+                    div { class: "scroll-content-both",
+                        for i in 1..=20 {
+                            div {
+                                for j in 1..=20 {
+                                    span { "Cell {i},{j} " }
+                                }
+                            }
                         }
                     }
                 }
