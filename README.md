@@ -25,7 +25,7 @@ todo
 - [ ] Scroll Area
 - [ ] Select
 - [x] Separator
-- [ ] Slider
+- [x] Slider
 - [x] Switch
 - [ ] Tabs
 - [ ] Toast
@@ -34,7 +34,7 @@ todo
 - [ ] Toolbar
 - [ ] Tooltip
 
-10/27
+11/27
 
 Everything needs docs.
 
