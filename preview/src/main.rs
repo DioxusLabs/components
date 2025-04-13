@@ -11,6 +11,9 @@ use primitives::{
     menubar::{Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger},
     progress::{Progress, ProgressIndicator},
     radio_group::{RadioGroup, RadioItem},
+    select::{
+        Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger,
+    },
     separator::Separator,
     slider::{Slider, SliderRange, SliderThumb, SliderTrack, SliderValue},
     switch::{Switch, SwitchThumb},
@@ -236,6 +239,19 @@ fn App() -> Element {
         Collapsible {
             CollapsibleTrigger { "Tooltip Example" }
             CollapsibleContent { TooltipExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        document::Link { rel: "stylesheet", href: asset!("./assets/select.css") }
+        Collapsible {
+            CollapsibleTrigger { "Select Example" }
+            CollapsibleContent { SelectExample {} }
         }
     }
 }
@@ -851,7 +867,9 @@ fn HoverCardExample() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/hover-card.css") }
 
-        div { class: "hover-card-example", style: "padding: 50px; display: flex; gap: 40px;",
+        div {
+            class: "hover-card-example",
+            style: "padding: 50px; display: flex; gap: 40px;",
             // User profile hover card
             HoverCard { class: "hover-card",
                 HoverCardTrigger { class: "hover-card-trigger",
@@ -861,14 +879,20 @@ fn HoverCardExample() -> Element {
                 HoverCardContent { class: "hover-card-content", side: HoverCardSide::Bottom,
                     div { class: "user-card",
                         div { class: "user-card-header",
-                            img { class: "user-card-avatar", src: "https://github.com/DioxusLabs.png", alt: "User avatar" }
+                            img {
+                                class: "user-card-avatar",
+                                src: "https://github.com/DioxusLabs.png",
+                                alt: "User avatar",
+                            }
                             div {
                                 h4 { class: "user-card-name", "John Doe" }
                                 p { class: "user-card-username", "@johndoe" }
                             }
                         }
 
-                        p { class: "user-card-bio", "Software developer passionate about Rust and web technologies. Building awesome UI components with Dioxus." }
+                        p { class: "user-card-bio",
+                            "Software developer passionate about Rust and web technologies. Building awesome UI components with Dioxus."
+                        }
 
                         div { class: "user-card-stats",
                             div { class: "user-card-stat",
@@ -894,12 +918,21 @@ fn HoverCardExample() -> Element {
                     button { class: "product-trigger", "View Product" }
                 }
 
-                HoverCardContent { class: "hover-card-content", side: HoverCardSide::Right, align: HoverCardAlign::Start,
+                HoverCardContent {
+                    class: "hover-card-content",
+                    side: HoverCardSide::Right,
+                    align: HoverCardAlign::Start,
                     div { class: "product-card",
-                        img { class: "product-card-image", src: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e", alt: "Product image" }
+                        img {
+                            class: "product-card-image",
+                            src: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+                            alt: "Product image",
+                        }
                         h4 { class: "product-card-title", "Wireless Headphones" }
                         p { class: "product-card-price", "$129.99" }
-                        p { class: "product-card-description", "High-quality wireless headphones with noise cancellation and 30-hour battery life." }
+                        p { class: "product-card-description",
+                            "High-quality wireless headphones with noise cancellation and 30-hour battery life."
+                        }
                         div { class: "product-card-rating", "★★★★☆ (4.5)" }
                     }
                 }
@@ -911,10 +944,103 @@ fn HoverCardExample() -> Element {
                     a { href: "#", "Hover over this link" }
                 }
 
-                HoverCardContent { class: "hover-card-content", side: HoverCardSide::Top, align: HoverCardAlign::Center,
+                HoverCardContent {
+                    class: "hover-card-content",
+                    side: HoverCardSide::Top,
+                    align: HoverCardAlign::Center,
                     div { style: "padding: 8px;",
                         p { style: "margin: 0;", "This link will take you to an external website." }
                     }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn SelectExample() -> Element {
+    let mut selected = use_signal(|| None::<String>);
+
+    // Debug output for selected value
+    use_effect(move || {
+        if let Some(value) = selected() {
+            println!("Selected value: {}", value);
+        }
+    });
+
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("./assets/select.css") }
+        div { class: "select-example",
+            h3 { "Select Example" }
+
+            // Basic select
+            div { class: "select-container",
+                Select {
+                    class: "select",
+                    value: selected,
+                    on_value_change: move |value| selected.set(value),
+
+                    SelectLabel { class: "select-label", "Choose a fruit:" }
+
+                    SelectTrigger { class: "select-trigger",
+                        // Down arrow icon
+                        span { class: "select-icon", "▼" }
+                    }
+
+                    SelectContent { class: "select-content",
+                        SelectGroup { class: "select-group",
+                            SelectItem {
+                                class: "select-item",
+                                value: "apple".to_string(),
+                                index: 0,
+                                "Apple"
+                            }
+                            SelectItem {
+                                class: "select-item",
+                                value: "banana".to_string(),
+                                index: 1,
+                                "Banana"
+                            }
+                            SelectItem {
+                                class: "select-item",
+                                value: "orange".to_string(),
+                                index: 2,
+                                "Orange"
+                            }
+                            SelectItem {
+                                class: "select-item",
+                                value: "strawberry".to_string(),
+                                index: 3,
+                                "Strawberry"
+                            }
+                            SelectItem {
+                                class: "select-item",
+                                value: "watermelon".to_string(),
+                                index: 4,
+                                "Watermelon"
+                            }
+                        }
+
+                        SelectSeparator { class: "select-separator" }
+
+                        SelectGroup { class: "select-group",
+                            SelectItem {
+                                class: "select-item",
+                                value: "other".to_string(),
+                                index: 5,
+                                "Other"
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Display selected value
+            div { class: "selected-value",
+                if let Some(value) = selected() {
+                    "Selected: {value}"
+                } else {
+                    "No selection"
                 }
             }
         }

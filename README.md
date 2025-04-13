@@ -23,7 +23,7 @@ todo
 - [x] Progress
 - [x] Radio Group
 - [x] Scroll Area
-- [ ] Select
+- [x] Select
 - [x] Separator
 - [x] Slider
 - [x] Switch
@@ -34,7 +34,7 @@ todo
 - [x] Toolbar
 - [x] Tooltip
 
-21/27
+22/27
 
 Everything needs docs.
 
