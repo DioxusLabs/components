@@ -5,6 +5,10 @@ use primitives::{
     ScrollDirection, Tooltip, TooltipContent, TooltipTrigger,
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
     aspect_ratio::AspectRatio,
+    calendar::{
+        Calendar, CalendarCell, CalendarDate, CalendarGrid, CalendarHeader, CalendarMode,
+        CalendarNavigation,
+    },
     checkbox::{Checkbox, CheckboxIndicator},
     collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger},
     dropdown_menu::{DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger},
@@ -250,6 +254,19 @@ fn App() -> Element {
         Collapsible {
             CollapsibleTrigger { "Select Example" }
             CollapsibleContent { SelectExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        document::Link { rel: "stylesheet", href: asset!("./assets/calendar.css") }
+        Collapsible {
+            CollapsibleTrigger { "Calendar Example" }
+            CollapsibleContent { CalendarExample {} }
         }
     }
 }
@@ -1007,6 +1024,49 @@ fn SelectExample() -> Element {
                     "Selected: {value}"
                 } else {
                     "No selection"
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn CalendarExample() -> Element {
+    let mut selected_date = use_signal(|| None::<CalendarDate>);
+    let mut view_date = use_signal(|| CalendarDate::new(2024, 5, 15));
+
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("/assets/calendar.css") }
+
+        div { class: "calendar-example", style: "padding: 20px;",
+            // Basic calendar
+            div { class: "calendar",
+                Calendar {
+                    selected_date: selected_date,
+                    view_date: view_date,
+                    on_date_change: move |date| {
+                        println!("Selected date: {:?}", date);
+                        selected_date.set(date);
+                    },
+                    on_view_change: move |new_view: CalendarDate| {
+                        println!("View changed to: {}-{}", new_view.year, new_view.month);
+                        view_date.set(new_view);
+                    },
+
+                    CalendarHeader {
+                        CalendarNavigation {}
+                    }
+
+                    CalendarGrid {}
+                }
+            }
+
+            // Display selected date
+            div { class: "selected-date", style: "margin-top: 20px;",
+                if let Some(date) = selected_date() {
+                    p { style: "font-weight: bold;", "Selected date: {date}" }
+                } else {
+                    p { style: "color: #666;", "No date selected" }
                 }
             }
         }

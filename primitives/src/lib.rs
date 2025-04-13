@@ -2,6 +2,7 @@ use dioxus_lib::prelude::*;
 
 pub mod accordion;
 pub mod aspect_ratio;
+pub mod calendar;
 pub mod checkbox;
 pub mod collapsible;
 pub mod dialog;

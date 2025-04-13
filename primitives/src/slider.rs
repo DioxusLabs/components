@@ -273,6 +273,7 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone)]
 struct SliderContext {
     value: Memo<SliderValue>,
