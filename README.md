@@ -31,10 +31,10 @@ todo
 - [ ] Toast
 - [x] Toggle
 - [x] Toggle Group
-- [ ] Toolbar
+- [x] Toolbar
 - [x] Tooltip
 
-19/27
+20/27
 
 Everything needs docs.
 

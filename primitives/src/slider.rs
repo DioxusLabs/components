@@ -255,10 +255,10 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
                     (SliderValue::Single(_), _) => {
                         ctx.set_value.call(SliderValue::Single(stepped));
                     }
-                    (SliderValue::Range(start, end), Some(0)) => {
+                    (SliderValue::Range(_start, end), Some(0)) => {
                         ctx.set_value.call(SliderValue::Range(stepped.min(end), end));
                     }
-                    (SliderValue::Range(start, end), Some(1)) => {
+                    (SliderValue::Range(start, _end), Some(1)) => {
                         ctx.set_value.call(SliderValue::Range(start, stepped.max(start)));
                     }
                     _ => {}
