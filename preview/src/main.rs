@@ -11,9 +11,7 @@ use primitives::{
     menubar::{Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger},
     progress::{Progress, ProgressIndicator},
     radio_group::{RadioGroup, RadioItem},
-    select::{
-        Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger,
-    },
+    select::{Select, SelectGroup, SelectOption},
     separator::Separator,
     slider::{Slider, SliderRange, SliderThumb, SliderTrack, SliderValue},
     switch::{Switch, SwitchThumb},
@@ -975,62 +973,30 @@ fn SelectExample() -> Element {
 
             // Basic select
             div { class: "select-container",
+                // Label for the select
+                label { class: "select-label", "Choose a fruit:" }
+
+                // Native select element
                 Select {
                     class: "select",
                     value: selected,
                     on_value_change: move |value| selected.set(value),
+                    placeholder: "Select a fruit...",
 
-                    SelectLabel { class: "select-label", "Choose a fruit:" }
+                    // Fruits group
+                    SelectGroup { label: "Fruits".to_string(),
 
-                    SelectTrigger { class: "select-trigger",
-                        // Down arrow icon
-                        span { class: "select-icon", "▼" }
+                        SelectOption { value: "apple".to_string(), "Apple" }
+                        SelectOption { value: "banana".to_string(), "Banana" }
+                        SelectOption { value: "orange".to_string(), "Orange" }
+                        SelectOption { value: "strawberry".to_string(), "Strawberry" }
+                        SelectOption { value: "watermelon".to_string(), "Watermelon" }
                     }
 
-                    SelectContent { class: "select-content",
-                        SelectGroup { class: "select-group",
-                            SelectItem {
-                                class: "select-item",
-                                value: "apple".to_string(),
-                                index: 0,
-                                "Apple"
-                            }
-                            SelectItem {
-                                class: "select-item",
-                                value: "banana".to_string(),
-                                index: 1,
-                                "Banana"
-                            }
-                            SelectItem {
-                                class: "select-item",
-                                value: "orange".to_string(),
-                                index: 2,
-                                "Orange"
-                            }
-                            SelectItem {
-                                class: "select-item",
-                                value: "strawberry".to_string(),
-                                index: 3,
-                                "Strawberry"
-                            }
-                            SelectItem {
-                                class: "select-item",
-                                value: "watermelon".to_string(),
-                                index: 4,
-                                "Watermelon"
-                            }
-                        }
+                    // Other options group
+                    SelectGroup { label: "Other".to_string(),
 
-                        SelectSeparator { class: "select-separator" }
-
-                        SelectGroup { class: "select-group",
-                            SelectItem {
-                                class: "select-item",
-                                value: "other".to_string(),
-                                index: 5,
-                                "Other"
-                            }
-                        }
+                        SelectOption { value: "other".to_string(), "Other" }
                     }
                 }
             }
