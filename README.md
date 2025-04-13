@@ -15,7 +15,7 @@ todo
 - [!] Context Menu (Implemented in a hacky way, refactor needed for focus)
 - [ ] Dialog
 - [x] Dropdown Menu
-- [ ] Hover Card
+- [x] Hover Card
 - [x] Label
 - [x] Menubar
 - [ ] Navigation Menu
@@ -34,7 +34,7 @@ todo
 - [x] Toolbar
 - [x] Tooltip
 
-20/27
+21/27
 
 Everything needs docs.
 

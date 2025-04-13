@@ -6,6 +6,7 @@ pub mod checkbox;
 pub mod collapsible;
 pub mod dialog;
 pub mod dropdown_menu;
+pub mod hover_card;
 pub mod label;
 pub mod menubar;
 pub mod progress;
@@ -28,6 +29,9 @@ pub use scroll_area::*;
 mod context_menu;
 pub use context_menu::*;
 
+pub use hover_card::{
+    HoverCard, HoverCardAlign, HoverCardContent, HoverCardSide, HoverCardTrigger,
+};
 pub use tooltip::*;
 
 /// Generate a runtime-unique id.
