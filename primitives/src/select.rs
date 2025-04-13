@@ -1,3 +1,4 @@
+use crate::use_unique_id;
 use dioxus_lib::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
@@ -34,6 +35,18 @@ pub struct SelectProps {
     #[props(default = "Select an option")]
     placeholder: &'static str,
 
+    /// Optional label for the select (for accessibility)
+    #[props(default)]
+    aria_label: Option<String>,
+
+    /// Optional ID of the element that labels this select (for accessibility)
+    #[props(default)]
+    aria_labelledby: Option<String>,
+
+    /// Optional ID of the element that describes this select (for accessibility)
+    #[props(default)]
+    aria_describedby: Option<String>,
+
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
@@ -44,6 +57,15 @@ pub struct SelectProps {
 pub fn Select(props: SelectProps) -> Element {
     // Use internal state for value if not controlled
     let mut internal_value = use_signal(|| props.value.map(|x| x()).unwrap_or(props.default_value));
+
+    // Generate unique IDs for accessibility if not provided
+    let select_id = use_unique_id();
+
+    // Create an ID for the select element
+    let id_value = match props.id.peek().as_ref() {
+        Some(user_id) => user_id.clone(),
+        None => select_id.peek().clone(),
+    };
 
     // Handle value changes
     let handle_change = move |event: Event<FormData>| {
@@ -56,9 +78,17 @@ pub fn Select(props: SelectProps) -> Element {
     // Get the current value (either controlled or internal)
     let current_value = props.value.map(|v| v()).unwrap_or_else(|| internal_value());
 
+    // Determine if a value is selected for ARIA
+    let has_selection = current_value.is_some();
+
+    // Create option ID for aria-activedescendant
+    let active_option_id =
+        has_selection.then(|| format!("option-{}", current_value.clone().unwrap()));
+
     rsx! {
         select {
             // Standard HTML attributes
+            id: id_value,
             name: props.name,
             disabled: (props.disabled)(),
             required: (props.required)(),
@@ -67,12 +97,31 @@ pub fn Select(props: SelectProps) -> Element {
             value: current_value.clone().unwrap_or_default(),
             onchange: handle_change,
 
+            // ARIA attributes
+            role: "combobox",
+            aria_haspopup: "listbox",
+            aria_expanded: "false", // Native select handles expansion state
+            aria_autocomplete: "none",
+            aria_required: (props.required)().to_string(),
+            aria_label: props.aria_label.clone(),
+            aria_labelledby: props.aria_labelledby.clone(),
+            aria_describedby: props.aria_describedby.clone(),
+            aria_invalid: "false", // Could be made dynamic with form validation
+            aria_activedescendant: active_option_id,
+
             // Pass through other attributes
             ..props.attributes,
 
             // Add placeholder option if needed
             if current_value.is_none() {
-                option { value: "", selected: true, disabled: true, {props.placeholder} }
+                option {
+                    value: "",
+                    selected: true,
+                    disabled: true,
+                    role: "option",
+                    aria_selected: "false",
+                    {props.placeholder}
+                }
             }
 
             // Render children (options)
@@ -90,6 +139,14 @@ pub struct SelectOptionProps {
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Optional label for the option (for accessibility)
+    #[props(default)]
+    aria_label: Option<String>,
+
+    /// Optional description role for the option (for accessibility)
+    #[props(default)]
+    aria_roledescription: Option<String>,
+
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
@@ -98,10 +155,22 @@ pub struct SelectOptionProps {
 
 #[component]
 pub fn SelectOption(props: SelectOptionProps) -> Element {
+    // Generate a unique ID for this option for accessibility
+    let option_id = format!("option-{}", props.value);
+
     rsx! {
         option {
+            id: option_id,
             value: props.value.clone(),
             disabled: (props.disabled)(),
+
+            // ARIA attributes
+            role: "option",
+            aria_selected: "false", // Will be set to true by the browser when selected
+            aria_disabled: (props.disabled)().to_string(),
+            aria_label: props.aria_label.clone(),
+            aria_roledescription: props.aria_roledescription.clone(),
+
             ..props.attributes,
             {props.children}
         }
@@ -117,6 +186,14 @@ pub struct SelectGroupProps {
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Optional label for the group (for accessibility)
+    #[props(default)]
+    aria_label: Option<String>,
+
+    /// Optional description role for the group (for accessibility)
+    #[props(default)]
+    aria_roledescription: Option<String>,
+
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
@@ -125,10 +202,21 @@ pub struct SelectGroupProps {
 
 #[component]
 pub fn SelectGroup(props: SelectGroupProps) -> Element {
+    // Generate a unique ID for this group
+    let group_id = format!("group-{}", props.label.to_lowercase().replace(" ", "-"));
+
     rsx! {
         optgroup {
+            id: group_id,
             label: props.label.clone(),
             disabled: (props.disabled)(),
+
+            // ARIA attributes
+            role: "group",
+            aria_disabled: (props.disabled)().to_string(),
+            aria_label: props.aria_label.clone(),
+            aria_roledescription: props.aria_roledescription.clone(),
+
             ..props.attributes,
             {props.children}
         }
