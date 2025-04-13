@@ -12,7 +12,7 @@ todo
 - [x] Avatar
 - [x] Checkbox
 - [x] Collapsible
-- [!] Context Menu (Implemented in a hacky way)
+- [!] Context Menu (Implemented in a hacky way, refactor needed for focus)
 - [ ] Dialog
 - [x] Dropdown Menu
 - [ ] Hover Card
@@ -32,9 +32,9 @@ todo
 - [x] Toggle
 - [x] Toggle Group
 - [ ] Toolbar
-- [ ] Tooltip
+- [x] Tooltip
 
-17/27
+19/27
 
 Everything needs docs.
 
