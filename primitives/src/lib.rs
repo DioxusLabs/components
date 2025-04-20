@@ -6,10 +6,12 @@ pub mod checkbox;
 pub mod collapsible;
 pub mod dialog;
 pub mod label;
+mod portal;
 pub mod progress;
 pub mod separator;
 pub mod slider;
 pub mod switch;
+pub mod toast;
 pub mod toggle;
 pub mod toggle_group;
 
