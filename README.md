@@ -28,13 +28,13 @@ todo
 - [x] Slider
 - [x] Switch
 - [ ] Tabs
-- [ ] Toast
+- [x] Toast
 - [x] Toggle
 - [x] Toggle Group
 - [ ] Toolbar
 - [ ] Tooltip
 
-11/27
+12/27
 
 Everything needs docs.
 
