@@ -840,21 +840,21 @@ fn ToolbarExample() -> Element {
 
                 ToolbarButton {
                     class: "toolbar-button",
-                    index: 0,
+                    index: ReadOnlySignal::new(Signal::new(0)),
                     on_click: move |_| toggle_style("bold"),
                     "Bold"
                 }
 
                 ToolbarButton {
                     class: "toolbar-button",
-                    index: 1,
+                    index: ReadOnlySignal::new(Signal::new(1)),
                     on_click: move |_| toggle_style("italic"),
                     "Italic"
                 }
 
                 ToolbarButton {
                     class: "toolbar-button",
-                    index: 2,
+                    index: ReadOnlySignal::new(Signal::new(2)),
                     on_click: move |_| toggle_style("underline"),
                     "Underline"
                 }
@@ -863,21 +863,21 @@ fn ToolbarExample() -> Element {
 
                 ToolbarButton {
                     class: "toolbar-button",
-                    index: 3,
+                    index: ReadOnlySignal::new(Signal::new(3)),
                     on_click: move |_| set_align("left"),
                     "Align Left"
                 }
 
                 ToolbarButton {
                     class: "toolbar-button",
-                    index: 4,
+                    index: ReadOnlySignal::new(Signal::new(4)),
                     on_click: move |_| set_align("center"),
                     "Align Center"
                 }
 
                 ToolbarButton {
                     class: "toolbar-button",
-                    index: 5,
+                    index: ReadOnlySignal::new(Signal::new(5)),
                     on_click: move |_| set_align("right"),
                     "Align Right"
                 }

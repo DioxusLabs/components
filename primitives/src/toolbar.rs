@@ -77,7 +77,7 @@ pub fn Toolbar(props: ToolbarProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ToolbarButtonProps {
     /// Index of the button in the toolbar
-    index: usize,
+    index: ReadOnlySignal<usize>,
 
     /// Whether the button is disabled
     #[props(default)]
@@ -101,7 +101,7 @@ pub fn ToolbarButton(props: ToolbarButtonProps) -> Element {
     let mut button_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
 
     // Check if this button is focused
-    let is_focused = use_memo(move || ctx.is_focused(props.index));
+    let is_focused = use_memo(move || ctx.is_focused((props.index)()));
 
     // Set focus when needed
     use_effect(move || {
@@ -122,7 +122,7 @@ pub fn ToolbarButton(props: ToolbarButtonProps) -> Element {
             "data-disabled": (ctx.disabled)() || (props.disabled)(),
 
             onmounted: move |data: Event<MountedData>| button_ref.set(Some(data.data())),
-            onfocus: move |_| ctx.set_focus(Some(props.index)),
+            onfocus: move |_| ctx.set_focus(Some((props.index)())),
 
             onclick: move |_| {
                 if !(ctx.disabled)() && !(props.disabled)() {
@@ -134,39 +134,35 @@ pub fn ToolbarButton(props: ToolbarButtonProps) -> Element {
                 let key = event.key();
                 let horizontal = (ctx.horizontal)();
                 let mut prevent_default = true;
-
                 match key {
                     Key::ArrowUp if !horizontal => {
-                        // Handle up arrow navigation
-                        if props.index > 0 {
-                            ctx.set_focus(Some(props.index - 1));
+                        let index = (props.index)();
+                        if index > 0 {
+                            ctx.set_focus(Some(index - 1));
                         }
-                    },
+                    }
                     Key::ArrowDown if !horizontal => {
-                        // Handle down arrow navigation
-                        ctx.set_focus(Some(props.index + 1));
-                    },
+                        let index = (props.index)();
+                        ctx.set_focus(Some(index + 1));
+                    }
                     Key::ArrowLeft if horizontal => {
-                        // Handle left arrow navigation
-                        if props.index > 0 {
-                            ctx.set_focus(Some(props.index - 1));
+                        let index = (props.index)();
+                        if index > 0 {
+                            ctx.set_focus(Some(index - 1));
                         }
-                    },
+                    }
                     Key::ArrowRight if horizontal => {
-                        // Handle right arrow navigation
-                        ctx.set_focus(Some(props.index + 1));
-                    },
+                        let index = (props.index)();
+                        ctx.set_focus(Some(index + 1));
+                    }
                     Key::Home => {
-                        // Focus first item
                         ctx.set_focus(Some(0));
-                    },
+                    }
                     Key::End => {
-                        // Focus last item (we don't know the count, so just use a large number)
                         ctx.set_focus(Some(100));
-                    },
+                    }
                     _ => prevent_default = false,
                 };
-
                 if prevent_default {
                     event.prevent_default();
                 }
