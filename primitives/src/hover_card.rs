@@ -1,4 +1,4 @@
-use crate::{use_controlled, use_unique_id};
+use crate::{use_controlled, use_id_or, use_unique_id};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone)]
@@ -64,7 +64,7 @@ pub fn HoverCard(props: HoverCardProps) -> Element {
 pub struct HoverCardTriggerProps {
     /// Optional ID for the trigger element
     #[props(default)]
-    id: Option<String>,
+    id: ReadOnlySignal<Option<String>>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -75,6 +75,12 @@ pub struct HoverCardTriggerProps {
 #[component]
 pub fn HoverCardTrigger(props: HoverCardTriggerProps) -> Element {
     let ctx: HoverCardCtx = use_context();
+
+    // Generate a unique ID for the trigger
+    let trigger_id = use_unique_id();
+
+    // Use use_id_or to handle the ID
+    let id = use_id_or(trigger_id, props.id);
 
     // Handle mouse events
     let handle_mouse_enter = move |_: Event<MouseData>| {
@@ -91,7 +97,7 @@ pub fn HoverCardTrigger(props: HoverCardTriggerProps) -> Element {
 
     rsx! {
         div {
-            id: props.id.clone(),
+            id,
             class: "hover-card-trigger",
 
             // Mouse events
@@ -149,7 +155,7 @@ impl HoverCardAlign {
 pub struct HoverCardContentProps {
     /// Optional ID for the hover card content
     #[props(default)]
-    id: Option<String>,
+    id: ReadOnlySignal<Option<String>>,
 
     /// Side of the trigger to place the hover card
     #[props(default = HoverCardSide::Top)]
@@ -179,6 +185,9 @@ pub fn HoverCardContent(props: HoverCardContentProps) -> Element {
         return rsx!({});
     }
 
+    // Use use_id_or to handle the ID
+    let id = use_id_or(ctx.content_id, props.id);
+
     // Handle mouse events to keep the hover card open when hovered
     let handle_mouse_enter = move |_: Event<MouseData>| {
         if !(ctx.disabled)() {
@@ -194,7 +203,7 @@ pub fn HoverCardContent(props: HoverCardContentProps) -> Element {
 
     rsx! {
         div {
-            id: props.id.clone().unwrap_or_else(|| ctx.content_id.peek().clone()),
+            id: id,
             class: "hover-card-content",
             role: "dialog",
             "data-state": if is_open { "open" } else { "closed" },
