@@ -23,7 +23,7 @@ pub mod toolbar;
 pub mod tooltip;
 
 mod avatar;
-pub use avatar::*;
+pub use avatar::{Avatar, AvatarFallback, AvatarImage, AvatarState};
 
 mod scroll_area;
 pub use scroll_area::*;
