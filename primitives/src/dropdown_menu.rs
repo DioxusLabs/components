@@ -175,6 +175,14 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
         ctx.item_count += 1;
     });
 
+    // Cleanup when the component is unmounted
+    use_drop(move || {
+        ctx.item_count -= 1;
+        if (ctx.current_focus)() == Some(props.index) {
+            ctx.set_focus(None);
+        }
+    });
+
     let tab_index = use_memo(move || {
         if (ctx.current_focus)() == Some(props.index) {
             "0"
