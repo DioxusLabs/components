@@ -153,8 +153,8 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuItemProps {
-    value: String,
-    index: usize,
+    value: ReadOnlySignal<String>,
+    index: ReadOnlySignal<usize>,
 
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
@@ -178,13 +178,13 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
     // Cleanup when the component is unmounted
     use_drop(move || {
         ctx.item_count -= 1;
-        if (ctx.current_focus)() == Some(props.index) {
+        if (ctx.current_focus)() == Some((props.index)()) {
             ctx.set_focus(None);
         }
     });
 
     let tab_index = use_memo(move || {
-        if (ctx.current_focus)() == Some(props.index) {
+        if (ctx.current_focus)() == Some((props.index)()) {
             "0"
         } else {
             "-1"
@@ -198,7 +198,7 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
             "data-disabled": (ctx.disabled)() || (props.disabled)(),
 
             onclick: {
-                let value = props.value.clone();
+                let value = (props.value)().clone();
                 move |_| {
                     if !(ctx.disabled)() && !(props.disabled)() {
                         props.on_select.call(value.clone());
@@ -207,10 +207,10 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
                 }
             },
 
-            onfocus: move |_| ctx.set_focus(Some(props.index)),
+            onfocus: move |_| ctx.set_focus(Some((props.index)())),
 
             onkeydown: {
-                let value = props.value.clone();
+                let value = (props.value)().clone();
                 move |event: Event<KeyboardData>| {
                     let mut prevent_default = true;
                     match event.key() {

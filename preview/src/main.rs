@@ -569,8 +569,8 @@ fn DropdownMenuExample() -> Element {
 
                 DropdownMenuItem {
                     class: "dropdown-menu-item",
-                    value: "item1".to_string(),
-                    index: 0,
+                    value: ReadOnlySignal::new(Signal::new("item1".to_string())),
+                    index: ReadOnlySignal::new(Signal::new(0)),
                     on_select: move |value| {
                         eval(&format!("console.log('Selected: {}')", value));
                     },
@@ -579,8 +579,8 @@ fn DropdownMenuExample() -> Element {
 
                 DropdownMenuItem {
                     class: "dropdown-menu-item",
-                    value: "item2".to_string(),
-                    index: 1,
+                    value: ReadOnlySignal::new(Signal::new("item2".to_string())),
+                    index: ReadOnlySignal::new(Signal::new(1)),
                     on_select: move |value| {
                         eval(&format!("console.log('Selected: {}')", value));
                     },
@@ -589,8 +589,8 @@ fn DropdownMenuExample() -> Element {
 
                 DropdownMenuItem {
                     class: "dropdown-menu-item",
-                    value: "item3".to_string(),
-                    index: 2,
+                    value: ReadOnlySignal::new(Signal::new("item3".to_string())),
+                    index: ReadOnlySignal::new(Signal::new(2)),
                     on_select: move |value| {
                         eval(&format!("console.log('Selected: {}')", value));
                     },
@@ -740,8 +740,8 @@ fn ContextMenuExample() -> Element {
                 ContextMenuContent { class: "context-menu-content",
                     ContextMenuItem {
                         class: "context-menu-item",
-                        value: "edit".to_string(),
-                        index: 0,
+                        value: ReadOnlySignal::new(Signal::new("edit".to_string())),
+                        index: ReadOnlySignal::new(Signal::new(0)),
                         on_select: move |value| {
                             selected_value.set(value);
                         },
@@ -750,8 +750,8 @@ fn ContextMenuExample() -> Element {
 
                     ContextMenuItem {
                         class: "context-menu-item",
-                        value: "duplicate".to_string(),
-                        index: 1,
+                        value: ReadOnlySignal::new(Signal::new("duplicate".to_string())),
+                        index: ReadOnlySignal::new(Signal::new(1)),
                         on_select: move |value| {
                             selected_value.set(value);
                         },
@@ -760,8 +760,8 @@ fn ContextMenuExample() -> Element {
 
                     ContextMenuItem {
                         class: "context-menu-item",
-                        value: "delete".to_string(),
-                        index: 2,
+                        value: ReadOnlySignal::new(Signal::new("delete".to_string())),
+                        index: ReadOnlySignal::new(Signal::new(2)),
                         on_select: move |value| {
                             selected_value.set(value);
                         },

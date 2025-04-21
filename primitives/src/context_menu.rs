@@ -252,10 +252,10 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuItemProps {
     /// The value of the menu item
-    value: String,
+    value: ReadOnlySignal<String>,
 
     /// The index of the item in the menu
-    index: usize,
+    index: ReadOnlySignal<usize>,
 
     /// Callback when the item is selected
     #[props(default)]
@@ -278,14 +278,14 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
     // Cleanup when the component is unmounted
     use_drop(move || {
         ctx.item_count -= 1;
-        if (ctx.current_focus)() == Some(props.index) {
+        if (ctx.current_focus)() == Some((props.index)()) {
             ctx.set_focus(None);
         }
     });
 
     // Determine if this item is currently focused
     let tab_index = use_memo(move || {
-        if (ctx.current_focus)() == Some(props.index) {
+        if (ctx.current_focus)() == Some((props.index)()) {
             "0"
         } else {
             "-1"
@@ -293,7 +293,7 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
     });
 
     let handle_click = {
-        let value = props.value.clone();
+        let value = (props.value)().clone();
         move |_| {
             if !(ctx.disabled)() {
                 props.on_select.call(value.clone());
@@ -304,7 +304,7 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
     };
 
     let handle_keydown = {
-        let value = props.value.clone();
+        let value = (props.value)().clone();
         move |event: Event<KeyboardData>| {
             // Check for Enter or Space key
             if event.key() == Key::Enter || event.key().to_string() == " " {
@@ -324,7 +324,7 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
             tabindex: tab_index,
             onclick: handle_click,
             onkeydown: handle_keydown,
-            onfocus: move |_| ctx.set_focus(Some(props.index)),
+            onfocus: move |_| ctx.set_focus(Some((props.index)())),
             aria_disabled: (ctx.disabled)(),
             ..props.attributes,
 
