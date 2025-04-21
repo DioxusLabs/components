@@ -147,6 +147,13 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
         ctx.item_count += 1;
     });
 
+    use_drop(move || {
+        ctx.item_count -= 1;
+        if (ctx.current_focus)() == Some((props.index)()) {
+            ctx.set_focus(None);
+        }
+    });
+
     let value = props.value.clone();
     let selected = use_memo(move || (ctx.value)() == value);
 
