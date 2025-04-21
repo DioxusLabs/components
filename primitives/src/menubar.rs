@@ -171,7 +171,7 @@ pub struct MenubarTriggerProps {
 #[component]
 pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
     rsx! {
-        button { r#type: "button", ..props.attributes, {props.children} }
+        button { ..props.attributes,{props.children} }
     }
 }
 
