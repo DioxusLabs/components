@@ -144,10 +144,6 @@ pub struct TooltipContentProps {
     #[props(default = TooltipAlign::Center)]
     align: TooltipAlign,
 
-    /// Whether to use a portal for rendering
-    #[props(default = true)]
-    use_portal: bool,
-
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
