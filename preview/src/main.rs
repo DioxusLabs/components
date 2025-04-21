@@ -533,19 +533,19 @@ fn TabsExample() -> Element {
                 TabTrigger {
                     class: "tabs-trigger",
                     value: "tab1".to_string(),
-                    index: 0,
+                    index: ReadOnlySignal::new(Signal::new(0)),
                     "Tab 1"
                 }
                 TabTrigger {
                     class: "tabs-trigger",
                     value: "tab2".to_string(),
-                    index: 1,
+                    index: ReadOnlySignal::new(Signal::new(1)),
                     "Tab 2"
                 }
                 TabTrigger {
                     class: "tabs-trigger",
                     value: "tab3".to_string(),
-                    index: 2,
+                    index: ReadOnlySignal::new(Signal::new(2)),
                     "Tab 3"
                 }
             }

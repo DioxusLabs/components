@@ -128,7 +128,7 @@ pub fn Tabs(props: TabsProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct TabTriggerProps {
     value: String,
-    index: usize,
+    index: ReadOnlySignal<usize>,
 
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
@@ -158,7 +158,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
         if selected() {
             return "0";
         }
-        if (ctx.current_focus)() == Some(props.index) {
+        if (ctx.current_focus)() == Some((props.index)()) {
             return "0";
         }
         "-1"
@@ -183,7 +183,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
                 }
             },
 
-            onfocus: move |_| ctx.set_focus(Some(props.index)),
+            onfocus: move |_| ctx.set_focus(Some((props.index)())),
 
             onkeydown: move |event: Event<KeyboardData>| {
                 let key = event.key();
