@@ -135,8 +135,8 @@ pub fn RadioGroup(props: RadioGroupProps) -> Element {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct RadioItemProps {
-    value: String,
-    index: usize,
+    value: ReadOnlySignal<String>,
+    index: ReadOnlySignal<usize>,
 
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
@@ -157,7 +157,7 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
         ctx.item_count += 1;
     });
 
-    let value = props.value.clone();
+    let value = (props.value)().clone();
     let checked = use_memo(move || (ctx.value)() == value);
 
     // Tab index for roving index
@@ -169,7 +169,7 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
         if checked() {
             return "0";
         }
-        if (ctx.current_focus)() == Some(props.index) {
+        if (ctx.current_focus)() == Some((props.index)()) {
             return "0";
         }
         "-1"
@@ -188,13 +188,13 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
             disabled: (ctx.disabled)() || (props.disabled)(),
 
             onclick: move |_| {
-                let value = props.value.clone();
+                let value = (props.value)().clone();
                 if !checked() {
                     ctx.set_value.call(value);
                 }
             },
 
-            onfocus: move |_| ctx.set_focus(Some(props.index)),
+            onfocus: move |_| ctx.set_focus(Some((props.index)())),
 
             onkeydown: move |event: Event<KeyboardData>| {
                 let key = event.key();

@@ -514,9 +514,24 @@ fn RadioGroupExample() -> Element {
                 value.set(new_value);
             },
 
-            RadioItem { class: "radio-item", value: "option1".to_string(), index: 0, "Option 1" }
-            RadioItem { class: "radio-item", value: "option2".to_string(), index: 1, "Option 2" }
-            RadioItem { class: "radio-item", value: "option3".to_string(), index: 2, "Option 3" }
+            RadioItem {
+                class: "radio-item",
+                value: ReadOnlySignal::new(Signal::new("option1".to_string())),
+                index: ReadOnlySignal::new(Signal::new(0)),
+                "Option 1"
+            }
+            RadioItem {
+                class: "radio-item",
+                value: ReadOnlySignal::new(Signal::new("option2".to_string())),
+                index: ReadOnlySignal::new(Signal::new(1)),
+                "Option 2"
+            }
+            RadioItem {
+                class: "radio-item",
+                value: ReadOnlySignal::new(Signal::new("option3".to_string())),
+                index: ReadOnlySignal::new(Signal::new(2)),
+                "Option 3"
+            }
         }
 
         div { style: "margin-top: 1rem;", "Selected value: {value()}" }
@@ -1042,8 +1057,8 @@ fn CalendarExample() -> Element {
             // Basic calendar
             div { class: "calendar",
                 Calendar {
-                    selected_date: selected_date,
-                    view_date: view_date,
+                    selected_date,
+                    view_date,
                     on_date_change: move |date| {
                         println!("Selected date: {:?}", date);
                         selected_date.set(date);
@@ -1053,9 +1068,7 @@ fn CalendarExample() -> Element {
                         view_date.set(new_view);
                     },
 
-                    CalendarHeader {
-                        CalendarNavigation {}
-                    }
+                    CalendarHeader { CalendarNavigation {} }
 
                     CalendarGrid {}
                 }
