@@ -32,8 +32,8 @@ pub struct SelectProps {
     id: ReadOnlySignal<Option<String>>,
 
     /// Optional placeholder text
-    #[props(default = "Select an option")]
-    placeholder: &'static str,
+    #[props(default = String::from("Select an option"))]
+    placeholder: String,
 
     /// Optional label for the select (for accessibility)
     #[props(default)]
