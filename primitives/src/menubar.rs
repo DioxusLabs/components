@@ -102,6 +102,13 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
         ctx.menu_count += 1;
     });
 
+    use_drop(move || {
+        ctx.menu_count -= 1;
+        if (ctx.current_focus)() == Some(props.index) {
+            ctx.set_focus(None);
+        }
+    });
+
     let is_open = use_memo(move || (ctx.open_menu)() == Some(props.index));
     let tab_index = use_memo(move || {
         if (ctx.current_focus)() == Some(props.index) {
