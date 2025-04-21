@@ -1,4 +1,4 @@
-use crate::use_unique_id;
+use crate::{use_id_or, use_unique_id};
 use dioxus_lib::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
@@ -61,11 +61,8 @@ pub fn Select(props: SelectProps) -> Element {
     // Generate unique IDs for accessibility if not provided
     let select_id = use_unique_id();
 
-    // Create an ID for the select element
-    let id_value = match props.id.peek().as_ref() {
-        Some(user_id) => user_id.clone(),
-        None => select_id.peek().clone(),
-    };
+    // Create an ID for the select element using use_id_or
+    let id_value = use_id_or(select_id, props.id);
 
     // Handle value changes
     let handle_change = move |event: Event<FormData>| {
@@ -139,6 +136,10 @@ pub struct SelectOptionProps {
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Optional ID for the option
+    #[props(default)]
+    id: ReadOnlySignal<Option<String>>,
+
     /// Optional label for the option (for accessibility)
     #[props(default)]
     aria_label: Option<String>,
@@ -156,11 +157,14 @@ pub struct SelectOptionProps {
 #[component]
 pub fn SelectOption(props: SelectOptionProps) -> Element {
     // Generate a unique ID for this option for accessibility
-    let option_id = format!("option-{}", props.value);
+    let option_id = use_signal(|| format!("option-{}", props.value));
+
+    // Use use_id_or to handle the ID
+    let id = use_id_or(option_id, props.id);
 
     rsx! {
         option {
-            id: option_id,
+            id,
             value: props.value.clone(),
             disabled: (props.disabled)(),
 
@@ -186,6 +190,10 @@ pub struct SelectGroupProps {
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Optional ID for the group
+    #[props(default)]
+    id: ReadOnlySignal<Option<String>>,
+
     /// Optional label for the group (for accessibility)
     #[props(default)]
     aria_label: Option<String>,
@@ -203,11 +211,14 @@ pub struct SelectGroupProps {
 #[component]
 pub fn SelectGroup(props: SelectGroupProps) -> Element {
     // Generate a unique ID for this group
-    let group_id = format!("group-{}", props.label.to_lowercase().replace(" ", "-"));
+    let group_id = use_signal(|| format!("group-{}", props.label.to_lowercase().replace(" ", "-")));
+
+    // Use use_id_or to handle the ID
+    let id = use_id_or(group_id, props.id);
 
     rsx! {
         optgroup {
-            id: group_id,
+            id,
             label: props.label.clone(),
             disabled: (props.disabled)(),
 
