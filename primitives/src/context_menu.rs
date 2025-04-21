@@ -275,6 +275,14 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
         ctx.item_count += 1;
     });
 
+    // Cleanup when the component is unmounted
+    use_drop(move || {
+        ctx.item_count -= 1;
+        if (ctx.current_focus)() == Some(props.index) {
+            ctx.set_focus(None);
+        }
+    });
+
     // Determine if this item is currently focused
     let tab_index = use_memo(move || {
         if (ctx.current_focus)() == Some(props.index) {
