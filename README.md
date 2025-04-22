@@ -40,7 +40,7 @@ We're still in the early days - Many components are still being created and stab
 - [x] Checkbox
 - [x] Collapsible
 - [ ] Context Menu - In Progress
-- [ ] Dialog
+- [ ] Dialog - In Progress
 - [x] Dropdown Menu
 - [x] Hover Card
 - [x] Label

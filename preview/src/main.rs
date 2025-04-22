@@ -1,20 +1,18 @@
 use dioxus::{document::eval, prelude::*};
-use primitives::{
-    Avatar, AvatarFallback, AvatarImage, ContextMenu, ContextMenuContent, ContextMenuItem,
-    ContextMenuTrigger, HoverCard, HoverCardAlign, HoverCardContent, HoverCardSide,
-    HoverCardTrigger, ScrollArea, ScrollDirection, Tooltip, TooltipContent, TooltipTrigger,
+use dioxus_primitives::{
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
     aspect_ratio::AspectRatio,
-    calendar::{
-        Calendar, CalendarCell, CalendarDate, CalendarGrid, CalendarHeader, CalendarMode,
-        CalendarNavigation,
-    },
+    avatar::{Avatar, AvatarFallback, AvatarImage},
+    calendar::{Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarNavigation},
     checkbox::{Checkbox, CheckboxIndicator},
     collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger},
+    context_menu::{ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger},
     dropdown_menu::{DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger},
+    hover_card::{HoverCard, HoverCardAlign, HoverCardContent, HoverCardSide, HoverCardTrigger},
     menubar::{Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger},
     progress::{Progress, ProgressIndicator},
     radio_group::{RadioGroup, RadioItem},
+    scroll_area::{ScrollArea, ScrollDirection},
     select::{Select, SelectGroup, SelectOption},
     separator::Separator,
     slider::{Slider, SliderRange, SliderThumb, SliderTrack, SliderValue},
@@ -23,7 +21,7 @@ use primitives::{
     toast::{ToastOptions, ToastProvider, use_toast},
     toggle_group::{ToggleGroup, ToggleItem},
     toolbar::{Toolbar, ToolbarButton, ToolbarSeparator},
-    tooltip::TooltipSide,
+    tooltip::{Tooltip, TooltipContent, TooltipSide, TooltipTrigger},
 };
 use std::time::Duration;
 
@@ -601,7 +599,6 @@ fn SliderExample() -> Element {
 #[component]
 fn AvatarExample() -> Element {
     let mut avatar_state = use_signal(|| "No state yet".to_string());
-    let mut selected_avatar = use_signal(|| 0);
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./assets/avatar.css") }
@@ -983,7 +980,7 @@ fn ContextMenuExample() -> Element {
 
 #[component]
 fn ToolbarExample() -> Element {
-    let mut text_style = use_signal(|| Vec::new());
+    let mut text_style = use_signal(Vec::new);
     let mut text_align = use_signal(|| String::from("left"));
 
     let mut toggle_style = move |style: &str| {

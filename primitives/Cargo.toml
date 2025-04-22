@@ -1,6 +1,6 @@
 [package]
-name = "primitives"
-version = "0.1.0"
+name = "dioxus-primitives"
+version = "0.0.1"
 edition = "2024"
 
 [dependencies]

@@ -3,10 +3,8 @@ resolver = "3"
 members = ["primitives", "preview"]
 
 [workspace.dependencies]
-primitives = { path = "primitives" }
+dioxus-primitives = { path = "primitives" }
 
-# dioxus = { path = "../dioxus/packages/dioxus" }
-# dioxus-lib = { path = "../dioxus/packages/dioxus-lib" }
 dioxus = "0.6"
 dioxus-lib = "0.6"
 

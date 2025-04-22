@@ -1095,6 +1095,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "dioxus-primitives"
+version = "0.0.1"
+dependencies = [
+ "dioxus-lib",
+ "dioxus-time",
+]
+
+[[package]]
 name = "dioxus-rsx"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3219,15 +3227,7 @@ name = "preview"
 version = "0.1.0"
 dependencies = [
  "dioxus",
- "primitives",
-]
-
-[[package]]
-name = "primitives"
-version = "0.1.0"
-dependencies = [
- "dioxus-lib",
- "dioxus-time",
+ "dioxus-primitives",
 ]
 
 [[package]]
