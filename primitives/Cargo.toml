@@ -2,6 +2,13 @@
 name = "dioxus-primitives"
 version = "0.0.1"
 edition = "2024"
+readme = "../README.md"
+keywords = ["gui", "dioxus", "components", "primitives"]
+categories = ["gui", "wasm"]
+authors = ["Dioxus Labs", "DogeDark"]
+license = "MIT OR Apache-2.0"
+homepage = "https://dioxuslabs.com"
+repository = "https://github.com/DioxusLabs/components"
 
 [dependencies]
 dioxus-lib.workspace = true
