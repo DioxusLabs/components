@@ -10,9 +10,10 @@ todo
 - [ ] Alert Dialog
 - [x] Aspect Ratio
 - [x] Avatar
+- [] Calendar - In Progress
 - [x] Checkbox
 - [x] Collapsible
-- [!] Context Menu (Implemented in a hacky way, refactor needed for focus)
+- [ ] Context Menu - In Progress
 - [ ] Dialog
 - [x] Dropdown Menu
 - [x] Hover Card
@@ -28,13 +29,13 @@ todo
 - [x] Slider
 - [x] Switch
 - [x] Tabs
-- [ ] Toast
+- [x] Toast
 - [x] Toggle
 - [x] Toggle Group
 - [x] Toolbar
 - [x] Tooltip
 
-22/27
+23/28
 
 Everything needs docs.
 

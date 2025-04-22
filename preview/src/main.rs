@@ -19,11 +19,13 @@ use primitives::{
     separator::Separator,
     slider::{Slider, SliderRange, SliderThumb, SliderTrack, SliderValue},
     switch::{Switch, SwitchThumb},
+    toast::{ToastOptions, ToastProvider, use_toast},
     tabs::{TabContent, TabTrigger, Tabs},
     toggle_group::{ToggleGroup, ToggleItem},
     toolbar::{Toolbar, ToolbarButton, ToolbarSeparator},
     tooltip::TooltipSide,
 };
+use std::time::Duration;
 
 fn main() {
     dioxus::launch(App);
@@ -32,98 +34,113 @@ fn main() {
 #[component]
 fn App() -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
-        document::Link { rel: "stylesheet", href: asset!("/assets/separator.css") }
+        ToastProvider {
+            document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
+            document::Link { rel: "stylesheet", href: asset!("/assets/separator.css") }
 
-        document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
-        div { id: "hero",
-            h1 { "Dioxus Primitives" }
-            h2 { "Accessible, unstyled foundational components for Dioxus." }
-        }
-        Separator { id: "hero-separator", class: "separator", horizontal: true }
-
-
-        document::Link { rel: "stylesheet", href: asset!("/assets/toggle-group.css") }
-        ToggleGroup { class: "toggle-group", horizontal: true,
-            ToggleItem { class: "toggle-item", index: 0, "Align Left" }
-            ToggleItem { class: "toggle-item", index: 1, "Align Middle" }
-            ToggleItem { class: "toggle-item", index: 2, "Align Right" }
-        }
+            document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
+            div { id: "hero",
+                h1 { "Dioxus Primitives" }
+                h2 { "Accessible, unstyled foundational components for Dioxus." }
+            }
+            Separator { id: "hero-separator", class: "separator", horizontal: true }
 
 
-        Collapsible {
-            CollapsibleTrigger { "Form Example" }
-            CollapsibleContent { FormExample {} }
-        }
+            document::Link { rel: "stylesheet", href: asset!("/assets/toggle-group.css") }
+            ToggleGroup { class: "toggle-group", horizontal: true,
+                ToggleItem { class: "toggle-item", index: 0, "Align Left" }
+                ToggleItem { class: "toggle-item", index: 1, "Align Middle" }
+                ToggleItem { class: "toggle-item", index: 2, "Align Right" }
+            }
 
-        Separator {
-            class: "separator",
-            style: "margin: 15px 0;",
-            horizontal: true,
-            decorative: true,
-        }
 
-        Collapsible {
-            CollapsibleTrigger { "Aspect Ratio Example" }
-            CollapsibleContent { AspectRatioExample {} }
-        }
+            Collapsible {
+                CollapsibleTrigger { "Form Example" }
+                CollapsibleContent { FormExample {} }
+            }
 
-        Separator {
-            class: "separator",
-            style: "margin: 15px 0;",
-            horizontal: true,
-            decorative: true,
-        }
+            Separator {
+                class: "separator",
+                style: "margin: 15px 0;",
+                horizontal: true,
+                decorative: true,
+            }
 
-        document::Link { rel: "stylesheet", href: asset!("/assets/progress.css") }
-        Collapsible {
-            CollapsibleTrigger { "Progress Example" }
-            CollapsibleContent { ProgressExample {} }
-        }
+            Collapsible {
+                CollapsibleTrigger { "Aspect Ratio Example" }
+                CollapsibleContent { AspectRatioExample {} }
+            }
 
-        Separator {
-            class: "separator",
-            style: "margin: 15px 0;",
-            horizontal: true,
-            decorative: true,
-        }
+            Separator {
+                class: "separator",
+                style: "margin: 15px 0;",
+                horizontal: true,
+                decorative: true,
+            }
 
-        Collapsible {
-            CollapsibleTrigger { "Accordion Example" }
-            CollapsibleContent { AccordionExample {} }
-        }
+            document::Link { rel: "stylesheet", href: asset!("/assets/progress.css") }
+            Collapsible {
+                CollapsibleTrigger { "Progress Example" }
+                CollapsibleContent { ProgressExample {} }
+            }
 
-        Separator {
-            class: "separator",
-            style: "margin: 15px 0;",
-            horizontal: true,
-            decorative: true,
-        }
+            Separator {
+                class: "separator",
+                style: "margin: 15px 0;",
+                horizontal: true,
+                decorative: true,
+            }
 
-        document::Link { rel: "stylesheet", href: asset!("/assets/switch.css") }
-        Collapsible {
-            CollapsibleTrigger { "Switch Example" }
-            CollapsibleContent { SwitchExample {} }
-        }
+            Collapsible {
+                CollapsibleTrigger { "Accordion Example" }
+                CollapsibleContent { AccordionExample {} }
+            }
 
-        Separator {
-            class: "separator",
-            style: "margin: 15px 0;",
-            horizontal: true,
-            decorative: true,
-        }
+            Separator {
+                class: "separator",
+                style: "margin: 15px 0;",
+                horizontal: true,
+                decorative: true,
+            }
 
-        document::Link { rel: "stylesheet", href: asset!("/assets/slider.css") }
-        Collapsible {
-            CollapsibleTrigger { "Slider Example" }
-            CollapsibleContent { SliderExample {} }
-        }
+            document::Link { rel: "stylesheet", href: asset!("/assets/switch.css") }
+            Collapsible {
+                CollapsibleTrigger { "Switch Example" }
+                CollapsibleContent { SwitchExample {} }
+            }
 
-        Separator {
-            class: "separator",
-            style: "margin: 15px 0;",
-            horizontal: true,
-            decorative: true,
+            Separator {
+                class: "separator",
+                style: "margin: 15px 0;",
+                horizontal: true,
+                decorative: true,
+            }
+
+            document::Link { rel: "stylesheet", href: asset!("/assets/slider.css") }
+            Collapsible {
+                CollapsibleTrigger { "Slider Example" }
+                CollapsibleContent { SliderExample {} }
+            }
+
+            Separator {
+                class: "separator",
+                style: "margin: 15px 0;",
+                horizontal: true,
+                decorative: true,
+            }
+
+            document::Link { rel: "stylesheet", href: asset!("/assets/toast.css") }
+            Collapsible {
+                CollapsibleTrigger { "Toast Example" }
+                CollapsibleContent { ToastExample {} }
+            }
+
+            Separator {
+                class: "separator",
+                style: "margin: 15px 0;",
+                horizontal: true,
+                decorative: true,
+            }
         }
 
         Collapsible {
@@ -404,6 +421,113 @@ fn SwitchExample() -> Element {
                 },
 
                 SwitchThumb { class: "switch-thumb" }
+            }
+        }
+    }
+}
+
+#[component]
+fn ToastExample() -> Element {
+    // Get the toast API
+    let toast_api = use_toast();
+
+    rsx! {
+        div { class: "toast-example",
+            h3 { "Toast Notifications" }
+            p { "Click the buttons below to show different types of toast notifications." }
+
+            h4 { "Timed Toasts (auto-dismiss)" }
+            div { class: "toast-buttons",
+                button {
+                    onclick: move |_| {
+                        toast_api
+                            .success(
+                                "Success".to_string(),
+                                Some(ToastOptions {
+                                    duration: Some(Duration::from_secs(3)),
+                                    ..Default::default()
+                                }),
+                            );
+                    },
+                    "Success (3s)"
+                }
+
+                button {
+                    onclick: move |_| {
+                        toast_api
+                            .error(
+                                "Error".to_string(),
+                                Some(ToastOptions {
+                                    duration: Some(Duration::from_secs(5)),
+                                    ..Default::default()
+                                }),
+                            );
+                    },
+                    "Error (5s)"
+                }
+
+                button {
+                    onclick: move |_| {
+                        toast_api
+                            .warning(
+                                "Warning".to_string(),
+                                Some(ToastOptions {
+                                    description: Some("This action might cause issues".to_string()),
+                                    duration: Some(Duration::from_secs(3)),
+                                    ..Default::default()
+                                }),
+                            );
+                    },
+                    "Warning (3s)"
+                }
+            }
+
+            h4 { "Permanent Toasts (manual close)" }
+            div { class: "toast-buttons",
+                button {
+                    onclick: move |_| {
+                        toast_api
+                            .success(
+                                "Important".to_string(),
+                                Some(ToastOptions {
+                                    permanent: true,
+                                    ..Default::default()
+                                }),
+                            );
+                    },
+                    "Permanent Success"
+                }
+
+                button {
+                    onclick: move |_| {
+                        toast_api
+                            .error(
+                                "Critical Error".to_string(),
+                                Some(ToastOptions {
+                                    permanent: true,
+                                    ..Default::default()
+                                }),
+                            );
+                    },
+                    "Permanent Error"
+                }
+
+                button {
+                    onclick: move |_| {
+                        toast_api
+                            .info(
+                                "Custom Toast".to_string(),
+                                Some(ToastOptions {
+                                    description: Some(
+                                        "This is a custom toast with specific settings".to_string(),
+                                    ),
+                                    duration: Some(Duration::from_secs(10)),
+                                    permanent: false,
+                                }),
+                            );
+                    },
+                    "Custom Info (10s)"
+                }
             }
         }
     }
