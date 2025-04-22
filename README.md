@@ -36,7 +36,7 @@ We're still in the early days - Many components are still being created and stab
 - [ ] Alert Dialog
 - [x] Aspect Ratio
 - [x] Avatar
-- [] Calendar - In Progress
+- [ ] Calendar - In Progress
 - [x] Checkbox
 - [x] Collapsible
 - [ ] Context Menu - In Progress
