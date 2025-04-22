@@ -9,32 +9,32 @@ todo
  - Needs Controlled Version
 - [ ] Alert Dialog
 - [x] Aspect Ratio
-- [ ] Avatar
+- [x] Avatar
 - [x] Checkbox
 - [x] Collapsible
-- [ ] Context Menu 
+- [!] Context Menu (Implemented in a hacky way, refactor needed for focus)
 - [ ] Dialog
-- [ ] Dropdown Menu
-- [ ] Hover Card
+- [x] Dropdown Menu
+- [x] Hover Card
 - [x] Label
-- [ ] Menubar
+- [x] Menubar
 - [ ] Navigation Menu
 - [ ] Popover
 - [x] Progress
-- [ ] Radio Group
-- [ ] Scroll Area
-- [ ] Select
+- [x] Radio Group
+- [x] Scroll Area
+- [x] Select
 - [x] Separator
 - [x] Slider
 - [x] Switch
-- [ ] Tabs
+- [x] Tabs
 - [ ] Toast
 - [x] Toggle
 - [x] Toggle Group
-- [ ] Toolbar
-- [ ] Tooltip
+- [x] Toolbar
+- [x] Tooltip
 
-11/27
+22/27
 
 Everything needs docs.
 
