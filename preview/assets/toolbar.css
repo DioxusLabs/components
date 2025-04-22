@@ -1,0 +1,71 @@
+.toolbar-example {
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+}
+
+.toolbar {
+    display: flex;
+    gap: 5px;
+    padding: 5px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+}
+
+.toolbar button {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.toolbar button:hover {
+    background-color: #f0f0f0;
+}
+
+.toolbar button:focus {
+    outline: 2px solid #0066cc;
+    outline-offset: 2px;
+}
+
+.toolbar button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.toolbar-separator {
+    width: 1px;
+    height: 24px;
+    background-color: #ccc;
+    margin: 0 5px;
+}
+
+.toolbar-content {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.toolbar-content p {
+    margin: 0;
+    padding: 0;
+}
+
+/* For text formatting buttons */
+.toolbar-bold {
+    font-weight: bold;
+}
+
+.toolbar-italic {
+    font-style: italic;
+}
+
+.toolbar-underline {
+    text-decoration: underline;
+}

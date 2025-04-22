@@ -1,11 +1,23 @@
 [workspace]
-resolver = "2"
-members = ["components", "aria"]
+resolver = "3"
+members = ["primitives", "preview"]
 
 [workspace.dependencies]
-dioxus-aria = { path = "./aria" }
-dioxus-components = { path = "./components" }
+primitives = { path = "primitives" }
 
-dioxus = { version = "0.5" }
-manganis = "0.2.2"
+# dioxus = { path = "../dioxus/packages/dioxus" }
+# dioxus-lib = { path = "../dioxus/packages/dioxus-lib" }
+dioxus = "0.6"
+dioxus-lib = "0.6"
 
+[profile]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"

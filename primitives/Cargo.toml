@@ -1,0 +1,8 @@
+[package]
+name = "primitives"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+dioxus-lib.workspace = true
+dioxus-time = "=0.1.0-alpha.1"
