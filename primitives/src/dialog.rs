@@ -1,6 +1,6 @@
 use dioxus_lib::{document::eval, prelude::*};
 
-use crate::{use_id_or, use_controlled, use_unique_id};
+use crate::{use_controlled, use_id_or, use_unique_id};
 
 #[derive(Clone, Copy)]
 struct DialogCtx {
@@ -72,9 +72,9 @@ pub fn Dialog(props: DialogProps) -> Element {
             } else {
                 dialog.close(); 
             }
-            "#
+            "#,
         );
-        
+
         let _ = js.send(id());
         let _ = js.send(is_open);
         let _ = js.send(is_modal);

@@ -1,12 +1,13 @@
-> [!CAUTION]
-> This library is under heavy development! It is not ready to use. Proceed at your own risk.
+# Dioxus Primitives: Accessible, unstyled foundational components for Dioxus.
+Dioxus primitives is an ARIA-accessible, unstyled, foundational component library for Dioxus based on Radix Primitives. We provide the logic, you bring your own styling.
 
+Building styled and more featured component libraries on top of Dioxus Primitives is encouraged!
 
-todo
+### Here's what we have.
+We're still in the early days - Many components are still being created and stabilized.
 
-
-- [x] Accordion
- - Needs Controlled Version
+23/28
+- [ ] Accordion - In Progress
 - [ ] Alert Dialog
 - [x] Aspect Ratio
 - [x] Avatar
@@ -35,9 +36,11 @@ todo
 - [x] Toolbar
 - [x] Tooltip
 
-23/28
-
-Everything needs docs.
+### Running the preview.
+You can run the `preview` app with:
+```
+dx serve -p preview
+```
 
 
 ## License
