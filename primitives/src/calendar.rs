@@ -139,22 +139,15 @@ struct CalendarContext {
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarProps {
     /// The selected date
-    selected_date: Option<Signal<Option<CalendarDate>>>,
-
-    /// Default selected date
     #[props(default)]
-    default_selected_date: Option<CalendarDate>,
+    selected_date: Option<CalendarDate>,
 
     /// Callback when selected date changes
     #[props(default)]
     on_date_change: Callback<Option<CalendarDate>>,
 
     /// The month being viewed
-    view_date: Option<Signal<CalendarDate>>,
-
-    /// Default view date (defaults to current month)
-    #[props(default = CalendarDate::today())]
-    default_view_date: CalendarDate,
+    view_date: CalendarDate,
 
     /// Callback when view date changes
     #[props(default)]
@@ -202,20 +195,6 @@ pub struct CalendarProps {
 // Main Calendar component
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
-    // Controlled state for selected date
-    let (selected_date, set_selected_date) = use_controlled(
-        props.selected_date,
-        props.default_selected_date,
-        props.on_date_change,
-    );
-
-    // Controlled state for view date
-    let (view_date, set_view_date) = use_controlled(
-        props.view_date,
-        props.default_view_date,
-        props.on_view_change,
-    );
-
     // State for calendar mode
     let mut mode = use_signal(|| props.mode);
     let set_mode = Callback::new(move |new_mode: CalendarMode| {
@@ -231,10 +210,10 @@ pub fn Calendar(props: CalendarProps) -> Element {
 
     // Create context provider for child components
     let _ctx = use_context_provider(|| CalendarContext {
-        selected_date: selected_date.into(),
-        set_selected_date,
-        view_date: view_date.into(),
-        set_view_date,
+        selected_date: ReadOnlySignal::new(Signal::new(props.selected_date.clone())),
+        set_selected_date: props.on_date_change.clone(),
+        view_date: ReadOnlySignal::new(Signal::new(props.view_date.clone())),
+        set_view_date: props.on_view_change.clone(),
         mode: mode.into(),
         set_mode,
         disabled: props.disabled,
