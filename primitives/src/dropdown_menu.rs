@@ -83,15 +83,23 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
     });
 
     rsx! {
-        div {
-            role: "menu",
-            "data-state": if open() { "open" } else { "closed" },
-            "data-disabled": (props.disabled)(),
-
-            onfocusout: move |_| ctx.set_focus(None),
-            ..props.attributes,
-
-            {props.children}
+        div { class: "dropdown-menu-root",
+            // Backdrop for click-outside-to-close
+            if open() {
+                div {
+                    class: "dropdown-menu-backdrop",
+                    onclick: move |_| set_open.call(false),
+                    style: "position: fixed; inset: 0; z-index: 999; background: transparent;",
+                }
+            }
+            div {
+                role: "menu",
+                "data-state": if open() { "open" } else { "closed" },
+                "data-disabled": (props.disabled)(),
+                onfocusout: move |_| ctx.set_focus(None),
+                ..props.attributes,
+                {props.children}
+            }
         }
     }
 }
