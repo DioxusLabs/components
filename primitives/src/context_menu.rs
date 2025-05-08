@@ -115,28 +115,6 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
         current_focus: Signal::new(None),
     });
 
-    let handle_click = move |event: Event<MouseData>| {
-        if open() {
-            let coords = event.data().client_coordinates();
-            let click_x = coords.x as i32;
-            let click_y = coords.y as i32;
-            let (menu_x, menu_y) = position();
-
-            // Simple boundary check
-            let menu_width = 200; // Approximate menu width
-            let menu_height = 200; // Approximate menu height
-
-            if click_x < menu_x
-                || click_x > menu_x + menu_width
-                || click_y < menu_y
-                || click_y > menu_y + menu_height
-            {
-                set_open.call(false);
-                ctx.restore_trigger_focus();
-            }
-        }
-    };
-
     // Handle escape key to close the menu
     let handle_keydown = move |event: Event<KeyboardData>| {
         if open() && event.key() == Key::Escape {
@@ -148,12 +126,17 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
 
     rsx! {
         div {
-            onclick: handle_click,
+            tabindex: 0, // Make the menu container focusable
+            onfocusout: move |_| {
+                if open() {
+                    set_open.call(false);
+                    ctx.restore_trigger_focus();
+                }
+            },
             onkeydown: handle_keydown,
             "data-state": if open() { "open" } else { "closed" },
             "data-disabled": (props.disabled)(),
             ..props.attributes,
-
             {props.children}
         }
     }
@@ -322,7 +305,7 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
         div {
             role: "menuitem",
             tabindex: tab_index,
-            onclick: handle_click,
+            onmousedown: handle_click,
             onkeydown: handle_keydown,
             onfocus: move |_| ctx.set_focus(Some((props.index)())),
             aria_disabled: (ctx.disabled)(),
