@@ -84,13 +84,22 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 
     rsx! {
         div {
+            tabindex: 0,
+            onfocusout: move |_| {
+                if open() {
+                    set_open.call(false);
+                }
+            },
             role: "menu",
             "data-state": if open() { "open" } else { "closed" },
             "data-disabled": (props.disabled)(),
-
-            onfocusout: move |_| ctx.set_focus(None),
+            onkeydown: move |event| {
+                if event.key() == Key::Escape && open() {
+                    event.prevent_default();
+                    set_open.call(false);
+                }
+            },
             ..props.attributes,
-
             {props.children}
         }
     }
