@@ -125,6 +125,14 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
     };
 
     rsx! {
+        if open() {
+            div {
+                onclick: move |_| {
+                    set_open.call(false);
+                    ctx.restore_trigger_focus();
+                },
+            }
+        }
         div {
             tabindex: 0, // Make the menu container focusable
             onfocusout: move |_| {
@@ -164,9 +172,18 @@ pub fn ContextMenuTrigger(props: ContextMenuTriggerProps) -> Element {
         }
     };
 
+    // NEW: Handle left-click to close if already open
+    let handle_click = move |_| {
+        if (ctx.open)() {
+            ctx.set_open.call(false);
+            ctx.restore_trigger_focus();
+        }
+    };
+
     rsx! {
         div {
             oncontextmenu: handle_context_menu,
+            onclick: handle_click,
             aria_haspopup: "menu",
             aria_expanded: (ctx.open)(),
             ..props.attributes,
