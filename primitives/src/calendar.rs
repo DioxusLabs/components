@@ -305,13 +305,15 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
     let ctx: CalendarContext = use_context();
 
     // Handle navigation to previous month
-    let handle_prev_month = move |_| {
+    let handle_prev_month = move |e: Event<MouseData>| {
+        e.prevent_default();
         let current_view = (ctx.view_date)();
         ctx.set_view_date.call(current_view.prev_month());
     };
 
     // Handle navigation to next month
-    let handle_next_month = move |_| {
+    let handle_next_month = move |e: Event<MouseData>| {
+        e.prevent_default();
         let current_view = (ctx.view_date)();
         ctx.set_view_date.call(current_view.next_month());
     };
@@ -344,6 +346,7 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
             button {
                 class: "calendar-nav-prev",
                 aria_label: "Previous month",
+                r#type: "button",
                 onclick: handle_prev_month,
                 disabled: (ctx.disabled)(),
                 "←"
@@ -354,6 +357,7 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
             button {
                 class: "calendar-nav-next",
                 aria_label: "Next month",
+                r#type: "button",
                 onclick: handle_next_month,
                 disabled: (ctx.disabled)(),
                 "→"
@@ -465,7 +469,11 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                         if let Some(day) = day_opt {
                             button {
                                 class: "calendar-grid-cell",
-                                onclick: move |_| handle_day_select(day),
+                                onclick: move |e| {
+                                    e.prevent_default();
+                                    handle_day_select(day);
+                                },
+                                r#type: "button",
                                 "data-today": day == (ctx.view_date)().day,
                                 "data-selected": (ctx.selected_date)()
                                     .is_some_and(|d| {
@@ -531,6 +539,7 @@ pub fn CalendarCell(props: CalendarCellProps) -> Element {
             class: "calendar-grid-cell {state_class}",
             "aria-selected": props.is_selected,
             "aria-disabled": props.is_disabled,
+            r#type: "button",
             disabled: props.is_disabled,
             "data-selected": props.is_selected,
             "data-today": props.is_today,
