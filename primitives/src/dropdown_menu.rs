@@ -82,23 +82,39 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
         current_focus: Signal::new(None),
     });
 
+    // Use a signal to track if we're in a click operation
+    let mut is_selecting = use_signal(|| false);
+
+    // Handle escape key to close the menu
+    let handle_keydown = move |event: Event<KeyboardData>| {
+        if open() && event.key() == Key::Escape {
+            event.prevent_default();
+            set_open.call(false);
+            ctx.set_focus(None);
+        }
+    };
+
     rsx! {
         div {
             tabindex: 0,
+            // We only close on focusout if we're not in a selection action
             onfocusout: move |_| {
-                if open() {
+                if open() && !is_selecting() && !is_selecting() {
                     set_open.call(false);
                 }
             },
             role: "menu",
             "data-state": if open() { "open" } else { "closed" },
             "data-disabled": (props.disabled)(),
-            onkeydown: move |event| {
-                if event.key() == Key::Escape && open() {
-                    event.prevent_default();
-                    set_open.call(false);
-                }
+            // Track mousedown events for selection
+            onmousedown: move |_| {
+                is_selecting.set(true);
             },
+            // Reset selection flag on mouseup
+            onmouseup: move |_| {
+                is_selecting.set(false);
+            },
+            onkeydown: handle_keydown,
             ..props.attributes,
             {props.children}
         }
@@ -145,15 +161,43 @@ pub struct DropdownMenuContentProps {
 
 #[component]
 pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
-    let ctx: DropdownMenuContext = use_context();
+    let mut ctx: DropdownMenuContext = use_context();
     let open = ctx.open;
+
+    // When menu opens, focus the first item
+    let is_open = open();
+    use_effect(move || {
+        if is_open {
+            ctx.focus_first();
+        }
+    });
 
     rsx! {
         div {
             role: "menu",
             "data-state": if open() { "open" } else { "closed" },
             hidden: !open(),
-
+            // Stop propagation to prevent unwanted interactions
+            onclick: move |e| {
+                e.stop_propagation();
+            },
+            onkeydown: move |event: Event<KeyboardData>| {
+                let mut prevent_default = true;
+                match event.key() {
+                    Key::ArrowDown => ctx.focus_next(),
+                    Key::ArrowUp => ctx.focus_prev(),
+                    Key::Home => ctx.focus_first(),
+                    Key::End => ctx.focus_last(),
+                    Key::Escape => {
+                        ctx.set_open.call(false);
+                        ctx.set_focus(None);
+                    }
+                    _ => prevent_default = false,
+                }
+                if prevent_default {
+                    event.prevent_default();
+                }
+            },
             ..props.attributes,
             {props.children}
         }
@@ -208,7 +252,8 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
 
             onclick: {
                 let value = (props.value)().clone();
-                move |_| {
+                move |e| {
+                    e.stop_propagation();
                     if !(ctx.disabled)() && !(props.disabled)() {
                         props.on_select.call(value.clone());
                         ctx.set_open.call(false);
