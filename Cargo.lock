@@ -1100,6 +1100,7 @@ version = "0.0.1"
 dependencies = [
  "dioxus-lib",
  "dioxus-time",
+ "tracing",
 ]
 
 [[package]]
