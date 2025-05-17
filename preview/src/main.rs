@@ -757,6 +757,7 @@ fn TabsExample() -> Element {
 
 #[component]
 fn DropdownMenuExample() -> Element {
+    let mut selected_value = use_signal(String::new);
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./assets/dropdown-menu.css") }
         DropdownMenu { class: "dropdown-menu", default_open: false,
@@ -770,7 +771,7 @@ fn DropdownMenuExample() -> Element {
                     value: ReadOnlySignal::new(Signal::new("item1".to_string())),
                     index: ReadOnlySignal::new(Signal::new(0)),
                     on_select: move |value| {
-                        eval(&format!("console.log('Selected: {}')", value));
+                        selected_value.set(value);
                     },
                     "Item 1"
                 }
@@ -780,7 +781,7 @@ fn DropdownMenuExample() -> Element {
                     value: ReadOnlySignal::new(Signal::new("item2".to_string())),
                     index: ReadOnlySignal::new(Signal::new(1)),
                     on_select: move |value| {
-                        eval(&format!("console.log('Selected: {}')", value));
+                        selected_value.set(value);
                     },
                     "Item 2"
                 }
@@ -790,10 +791,18 @@ fn DropdownMenuExample() -> Element {
                     value: ReadOnlySignal::new(Signal::new("item3".to_string())),
                     index: ReadOnlySignal::new(Signal::new(2)),
                     on_select: move |value| {
-                        eval(&format!("console.log('Selected: {}')", value));
+                        selected_value.set(value);
                     },
                     "Item 3"
                 }
+            }
+        }
+
+        div { class: "selected-value",
+            if selected_value().is_empty() {
+                "No selection"
+            } else {
+                "Selected: {selected_value()}"
             }
         }
     }
