@@ -252,7 +252,7 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
 
             onclick: {
                 let value = (props.value)().clone();
-                move |e| {
+                move |e: Event<MouseData>| {
                     e.stop_propagation();
                     if !(ctx.disabled)() && !(props.disabled)() {
                         props.on_select.call(value.clone());
