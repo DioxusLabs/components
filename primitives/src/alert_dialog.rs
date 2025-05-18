@@ -51,7 +51,7 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
             user_on_open_change.call(v);
         }
     });
-    let ctx = use_context_provider(|| AlertDialogCtx {
+    use_context_provider(|| AlertDialogCtx {
         open: props.open.unwrap_or(open_signal),
         set_open,
         labelledby,
