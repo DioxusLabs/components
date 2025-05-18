@@ -1,126 +1,191 @@
+// AlertDialog primitive for Dioxus, Radix-style composable API
+// Usage:
+// rsx! {
+//     let open = use_signal(|| false);
+//     button { onclick: move |_| open.set(true), "Show Alert Dialog" }
+//     AlertDialogRoot { open: Some(open), on_open_change: move |v| open.set(v),
+//         AlertDialogContent {
+//             AlertDialogTitle { "Title" }
+//             AlertDialogDescription { "Description" }
+//             AlertDialogActions {
+//                 AlertDialogCancel { "Cancel" }
+//                 AlertDialogAction { "Confirm" }
+//             }
+//         }
+//     }
+// }
+//
+// You can pass on_click to AlertDialogAction/Cancel for custom logic.
+
+use crate::use_unique_id;
 use dioxus_lib::prelude::*;
 
-use crate::{use_controlled, use_id_or, use_unique_id};
-
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 struct AlertDialogCtx {
-    open: Memo<bool>,
+    open: Signal<bool>,
     set_open: Callback<bool>,
-    alert_labelledby: Signal<String>,
-    alert_describedby: Signal<String>,
+    labelledby: String,
+    describedby: String,
 }
 
 #[derive(Props, Clone, PartialEq)]
-pub struct AlertDialogProps {
-    id: ReadOnlySignal<Option<String>>,
-    open: Option<Signal<bool>>,
+pub struct AlertDialogRootProps {
     #[props(default)]
     default_open: bool,
+    #[props(default)]
+    open: Option<Signal<bool>>,
     #[props(default)]
     on_open_change: Callback<bool>,
     children: Element,
 }
 
 #[component]
-pub fn AlertDialog(props: AlertDialogProps) -> Element {
-    let alert_labelledby = use_unique_id();
-    let alert_describedby = use_unique_id();
-    let (open, set_open) = use_controlled(props.open, props.default_open, props.on_open_change);
-
-    let ctx = use_context_provider(|| AlertDialogCtx {
-        open,
-        set_open,
-        alert_labelledby,
-        alert_describedby,
+pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
+    let labelledby = use_unique_id().to_string();
+    let describedby = use_unique_id().to_string();
+    let mut open_signal = use_signal(|| props.default_open);
+    let set_open = Callback::new({
+        let user_on_open_change = props.on_open_change;
+        move |v: bool| {
+            open_signal.set(v);
+            user_on_open_change.call(v);
+        }
     });
+    let ctx = use_context_provider(|| AlertDialogCtx {
+        open: props.open.unwrap_or(open_signal),
+        set_open,
+        labelledby,
+        describedby,
+    });
+    rsx! {
+        {props.children}
+    }
+}
 
-    let gen_id = use_unique_id();
-    let id = use_id_or(gen_id, props.id);
+#[derive(Props, Clone, PartialEq)]
+pub struct AlertDialogContentProps {
+    #[props(default)]
+    style: Option<String>,
+    #[props(default)]
+    class: Option<String>,
+    children: Element,
+}
 
-    // Keyboard handling: close on Escape
-    let on_keydown = move |e: Event<KeyboardData>| {
-        if e.key() == Key::Escape {
-            set_open.call(false);
-            e.prevent_default();
+#[component]
+pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
+    let ctx: AlertDialogCtx = use_context();
+    let open = ctx.open;
+    let on_keydown = {
+        let set_open = ctx.set_open;
+        move |e: Event<KeyboardData>| {
+            if e.key() == Key::Escape {
+                set_open.call(false);
+                e.prevent_default();
+            }
         }
     };
-
-    // Focus out: close if focus leaves dialog
     let on_focusout = move |_e: Event<FocusData>| {
-        set_open.call(false);
+        ctx.set_open.call(false);
     };
-
     if !open() {
         return rsx! {};
     }
     rsx! {
         div {
-            div {
-                class: "alert-dialog-backdrop",
-                style: "position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1000;",
-                onclick: move |_| set_open.call(false),
-            }
-            div {
-                id,
-                role: "alertdialog",
-                aria_modal: "true",
-                aria_labelledby: ctx.alert_labelledby.peek().clone(),
-                aria_describedby: ctx.alert_describedby.peek().clone(),
-                tabindex: "0",
-                class: "alert-dialog",
-                style: "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1001; background: white; outline: none;",
-                autofocus: true,
-                onfocusout: on_focusout,
-                onkeydown: on_keydown,
-                {props.children}
-            }
+            class: "alert-dialog-backdrop",
+            style: "position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1000;",
+            onclick: move |_| ctx.set_open.call(false),
+        }
+        div {
+            role: "alertdialog",
+            aria_modal: "true",
+            aria_labelledby: ctx.labelledby.clone(),
+            aria_describedby: ctx.describedby.clone(),
+            tabindex: "0",
+            class: props.class.clone().unwrap_or_else(|| "alert-dialog".to_string()),
+            style: props
+                .style
+                .clone()
+                .unwrap_or_else(|| {
+                    "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1001; background: white; outline: none;"
+                        .to_string()
+                }),
+            autofocus: true,
+            onfocusout: on_focusout,
+            onkeydown: on_keydown,
+            {props.children}
         }
     }
 }
 
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogTitleProps {
-    id: ReadOnlySignal<Option<String>>,
     children: Element,
 }
 
 #[component]
 pub fn AlertDialogTitle(props: AlertDialogTitleProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
-    let id = use_id_or(ctx.alert_labelledby, props.id);
     rsx! {
-        h2 { id, {props.children} }
+        h2 { id: ctx.labelledby.clone(), class: "alert-dialog-title", {props.children} }
     }
 }
 
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogDescriptionProps {
-    id: ReadOnlySignal<Option<String>>,
     children: Element,
 }
 
 #[component]
 pub fn AlertDialogDescription(props: AlertDialogDescriptionProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
-    let id = use_id_or(ctx.alert_describedby, props.id);
     rsx! {
-        p { id, {props.children} }
+        p { id: ctx.describedby.clone(), class: "alert-dialog-description", {props.children} }
+    }
+}
+
+#[derive(Props, Clone, PartialEq)]
+pub struct AlertDialogActionsProps {
+    children: Element,
+}
+
+#[component]
+pub fn AlertDialogActions(props: AlertDialogActionsProps) -> Element {
+    rsx! {
+        div { class: "alert-dialog-actions", {props.children} }
     }
 }
 
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogActionProps {
+    #[props(default)]
+    on_click: Option<EventHandler<MouseEvent>>,
+    #[props(default)]
+    class: Option<String>,
+    #[props(default)]
+    style: Option<String>,
+    #[props(default = "button".to_string())]
+    r#type: String,
     children: Element,
 }
 
 #[component]
 pub fn AlertDialogAction(props: AlertDialogActionProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
+    let set_open = ctx.set_open;
+    let user_on_click = props.on_click;
+    let on_click = EventHandler::new(move |evt: MouseEvent| {
+        set_open.call(false);
+        if let Some(cb) = &user_on_click {
+            cb.call(evt.clone());
+        }
+    });
     rsx! {
         button {
-            r#type: "button",
-            class: "alert-dialog-action",
-            onclick: move |_| ctx.set_open.call(false),
+            r#type: props.r#type.clone(),
+            class: props.class.clone().unwrap_or_else(|| "alert-dialog-action".to_string()),
+            style: props.style.clone().unwrap_or_default(),
+            onclick: on_click,
             {props.children}
         }
     }
@@ -128,17 +193,34 @@ pub fn AlertDialogAction(props: AlertDialogActionProps) -> Element {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogCancelProps {
+    #[props(default)]
+    on_click: Option<EventHandler<MouseEvent>>,
+    #[props(default)]
+    class: Option<String>,
+    #[props(default)]
+    style: Option<String>,
+    #[props(default = "button".to_string())]
+    r#type: String,
     children: Element,
 }
 
 #[component]
 pub fn AlertDialogCancel(props: AlertDialogCancelProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
+    let set_open = ctx.set_open;
+    let user_on_click = props.on_click;
+    let on_click = EventHandler::new(move |evt: MouseEvent| {
+        set_open.call(false);
+        if let Some(cb) = &user_on_click {
+            cb.call(evt.clone());
+        }
+    });
     rsx! {
         button {
-            r#type: "button",
-            class: "alert-dialog-cancel",
-            onclick: move |_| ctx.set_open.call(false),
+            r#type: props.r#type.clone(),
+            class: props.class.clone().unwrap_or_else(|| "alert-dialog-cancel".to_string()),
+            style: props.style.clone().unwrap_or_default(),
+            onclick: on_click,
             {props.children}
         }
     }

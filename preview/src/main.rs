@@ -2,7 +2,8 @@ use dioxus::{document::eval, prelude::*};
 use dioxus_primitives::{
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
     alert_dialog::{
-        AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogDescription, AlertDialogTitle,
+        AlertDialogAction, AlertDialogActions, AlertDialogCancel, AlertDialogContent,
+        AlertDialogDescription, AlertDialogRoot, AlertDialogTitle,
     },
     aspect_ratio::AspectRatio,
     avatar::{Avatar, AvatarFallback, AvatarImage},
@@ -287,6 +288,14 @@ fn App() -> Element {
             CollapsibleContent { CalendarExample {} }
         }
 
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        document::Link { rel: "stylesheet", href: asset!("/assets/alert-dialog.css") }
         Collapsible {
             CollapsibleTrigger { "Alert Dialog Example" }
             CollapsibleContent { AlertDialogExample {} }
@@ -1289,12 +1298,14 @@ fn AlertDialogExample() -> Element {
     let mut open = use_signal(|| false);
     rsx! {
         button { onclick: move |_| open.set(true), "Show Alert Dialog" }
-        AlertDialog { open: Some(open), on_open_change: move |v| open.set(v),
-            AlertDialogTitle { "Delete item" }
-            AlertDialogDescription { "Are you sure you want to delete this item? This action cannot be undone." }
-            div { style: "display: flex; gap: 8px; margin-top: 16px;",
-                AlertDialogCancel { "Cancel" }
-                AlertDialogAction { "Delete" }
+        AlertDialogRoot { open: Some(open), on_open_change: move |v| open.set(v),
+            AlertDialogContent {
+                AlertDialogTitle { "Delete item" }
+                AlertDialogDescription { "Are you sure you want to delete this item? This action cannot be undone." }
+                AlertDialogActions {
+                    AlertDialogCancel { on_click: move |_| println!("Cancel clicked"), "Cancel" }
+                    AlertDialogAction { on_click: move |_| println!("Delete clicked"), "Delete" }
+                }
             }
         }
     }
