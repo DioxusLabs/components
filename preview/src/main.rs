@@ -1,6 +1,9 @@
 use dioxus::{document::eval, prelude::*};
 use dioxus_primitives::{
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
+    alert_dialog::{
+        AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogDescription, AlertDialogTitle,
+    },
     aspect_ratio::AspectRatio,
     avatar::{Avatar, AvatarFallback, AvatarImage},
     calendar::{Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarNavigation},
@@ -282,6 +285,18 @@ fn App() -> Element {
         Collapsible {
             CollapsibleTrigger { "Calendar Example" }
             CollapsibleContent { CalendarExample {} }
+        }
+
+        Collapsible {
+            CollapsibleTrigger { "Alert Dialog Example" }
+            CollapsibleContent { AlertDialogExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
         }
     }
 }
@@ -566,33 +581,33 @@ fn SliderExample() -> Element {
                 }
             }
 
-            // Range slider
-            // div {
-            //     label { "Range Slider" }
-            //     div { style: "display: flex; align-items: center; gap: 1rem;",
-            //         Slider {
-            //             class: "slider",
-            //             value: range_value,
-            //             on_value_change: move |v| {
-            //                 range_value.set(v);
-            //             },
-            //
-            //             SliderTrack { class: "slider-track",
-            //                 SliderRange { class: "slider-range" }
-            //                 SliderThumb { class: "slider-thumb", index: 0 }
-            //                 SliderThumb { class: "slider-thumb", index: 1 }
-            //             }
-            //         }
-            //         input {
-            //             r#type: "text",
-            //             readonly: true,
-            //             value: match range_value() {
-            //                 SliderValue::Range(start, end) => format!("{:.1}, {:.1}", start, end),
-            //                 _ => String::new(),
-            //             },
-            //         }
-            //     }
-            // }
+        // Range slider
+        // div {
+        //     label { "Range Slider" }
+        //     div { style: "display: flex; align-items: center; gap: 1rem;",
+        //         Slider {
+        //             class: "slider",
+        //             value: range_value,
+        //             on_value_change: move |v| {
+        //                 range_value.set(v);
+        //             },
+        //
+        //             SliderTrack { class: "slider-track",
+        //                 SliderRange { class: "slider-range" }
+        //                 SliderThumb { class: "slider-thumb", index: 0 }
+        //                 SliderThumb { class: "slider-thumb", index: 1 }
+        //             }
+        //         }
+        //         input {
+        //             r#type: "text",
+        //             readonly: true,
+        //             value: match range_value() {
+        //                 SliderValue::Range(start, end) => format!("{:.1}, {:.1}", start, end),
+        //                 _ => String::new(),
+        //             },
+        //         }
+        //     }
+        // }
         }
     }
 }
@@ -1264,6 +1279,22 @@ fn CalendarExample() -> Element {
                 } else {
                     p { style: "color: #666;", "No date selected" }
                 }
+            }
+        }
+    }
+}
+
+#[component]
+fn AlertDialogExample() -> Element {
+    let mut open = use_signal(|| false);
+    rsx! {
+        button { onclick: move |_| open.set(true), "Show Alert Dialog" }
+        AlertDialog { open: Some(open), on_open_change: move |v| open.set(v),
+            AlertDialogTitle { "Delete item" }
+            AlertDialogDescription { "Are you sure you want to delete this item? This action cannot be undone." }
+            div { style: "display: flex; gap: 8px; margin-top: 16px;",
+                AlertDialogCancel { "Cancel" }
+                AlertDialogAction { "Delete" }
             }
         }
     }
