@@ -1,6 +1,10 @@
 use dioxus::{document::eval, prelude::*};
 use dioxus_primitives::{
     accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
+    alert_dialog::{
+        AlertDialogAction, AlertDialogActions, AlertDialogCancel, AlertDialogContent,
+        AlertDialogDescription, AlertDialogRoot, AlertDialogTitle,
+    },
     aspect_ratio::AspectRatio,
     avatar::{Avatar, AvatarFallback, AvatarImage},
     calendar::{Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarNavigation},
@@ -282,6 +286,26 @@ fn App() -> Element {
         Collapsible {
             CollapsibleTrigger { "Calendar Example" }
             CollapsibleContent { CalendarExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
+        }
+
+        document::Link { rel: "stylesheet", href: asset!("/assets/alert-dialog.css") }
+        Collapsible {
+            CollapsibleTrigger { "Alert Dialog Example" }
+            CollapsibleContent { AlertDialogExample {} }
+        }
+
+        Separator {
+            class: "separator",
+            style: "margin: 15px 0;",
+            horizontal: true,
+            decorative: true,
         }
     }
 }
@@ -566,33 +590,33 @@ fn SliderExample() -> Element {
                 }
             }
 
-            // Range slider
-            // div {
-            //     label { "Range Slider" }
-            //     div { style: "display: flex; align-items: center; gap: 1rem;",
-            //         Slider {
-            //             class: "slider",
-            //             value: range_value,
-            //             on_value_change: move |v| {
-            //                 range_value.set(v);
-            //             },
-            //
-            //             SliderTrack { class: "slider-track",
-            //                 SliderRange { class: "slider-range" }
-            //                 SliderThumb { class: "slider-thumb", index: 0 }
-            //                 SliderThumb { class: "slider-thumb", index: 1 }
-            //             }
-            //         }
-            //         input {
-            //             r#type: "text",
-            //             readonly: true,
-            //             value: match range_value() {
-            //                 SliderValue::Range(start, end) => format!("{:.1}, {:.1}", start, end),
-            //                 _ => String::new(),
-            //             },
-            //         }
-            //     }
-            // }
+        // Range slider
+        // div {
+        //     label { "Range Slider" }
+        //     div { style: "display: flex; align-items: center; gap: 1rem;",
+        //         Slider {
+        //             class: "slider",
+        //             value: range_value,
+        //             on_value_change: move |v| {
+        //                 range_value.set(v);
+        //             },
+        //
+        //             SliderTrack { class: "slider-track",
+        //                 SliderRange { class: "slider-range" }
+        //                 SliderThumb { class: "slider-thumb", index: 0 }
+        //                 SliderThumb { class: "slider-thumb", index: 1 }
+        //             }
+        //         }
+        //         input {
+        //             r#type: "text",
+        //             readonly: true,
+        //             value: match range_value() {
+        //                 SliderValue::Range(start, end) => format!("{:.1}, {:.1}", start, end),
+        //                 _ => String::new(),
+        //             },
+        //         }
+        //     }
+        // }
         }
     }
 }
@@ -1263,6 +1287,24 @@ fn CalendarExample() -> Element {
                     p { style: "font-weight: bold;", "Selected date: {date}" }
                 } else {
                     p { style: "color: #666;", "No date selected" }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn AlertDialogExample() -> Element {
+    let mut open = use_signal(|| false);
+    rsx! {
+        button { onclick: move |_| open.set(true), "Show Alert Dialog" }
+        AlertDialogRoot { open: Some(open), on_open_change: move |v| open.set(v),
+            AlertDialogContent {
+                AlertDialogTitle { "Delete item" }
+                AlertDialogDescription { "Are you sure you want to delete this item? This action cannot be undone." }
+                AlertDialogActions {
+                    AlertDialogCancel { on_click: move |_| println!("Cancel clicked"), "Cancel" }
+                    AlertDialogAction { on_click: move |_| println!("Delete clicked"), "Delete" }
                 }
             }
         }

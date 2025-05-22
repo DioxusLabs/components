@@ -1,6 +1,7 @@
 use dioxus_lib::prelude::*;
 
 pub mod accordion;
+pub mod alert_dialog;
 pub mod aspect_ratio;
 pub mod avatar;
 pub mod calendar;

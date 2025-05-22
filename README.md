@@ -33,7 +33,7 @@ We're still in the early days - Many components are still being created and stab
 
 23/28
 - [ ] Accordion - In Progress
-- [ ] Alert Dialog
+- [!] Alert Dialog - In Progress
 - [x] Aspect Ratio
 - [x] Avatar
 - [ ] Calendar - In Progress
