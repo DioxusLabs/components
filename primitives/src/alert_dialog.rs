@@ -73,6 +73,9 @@ pub struct AlertDialogContentProps {
 
 #[component]
 pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
+    // TODO: Implement focus trap so Tab/Shift+Tab cycles focus within the dialog.
+    // This is important for accessibility. Currently, focus can escape the dialog and close the dialog.
+    // See: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/#keyboard-interaction
     let ctx: AlertDialogCtx = use_context();
     let open = ctx.open;
     let on_keydown = {
@@ -221,6 +224,7 @@ pub fn AlertDialogCancel(props: AlertDialogCancelProps) -> Element {
             class: props.class.clone().unwrap_or_else(|| "alert-dialog-cancel".to_string()),
             style: props.style.clone().unwrap_or_default(),
             onclick: on_click,
+            autofocus: true,
             {props.children}
         }
     }
