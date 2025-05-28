@@ -1132,6 +1132,7 @@ dependencies = [
 name = "dioxus-primitives"
 version = "0.0.1"
 dependencies = [
+ "dioxus 0.7.0-alpha.0",
  "dioxus-lib 0.7.0-alpha.0",
  "dioxus-time",
  "tracing",
