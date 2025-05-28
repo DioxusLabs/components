@@ -69,12 +69,25 @@ pub fn Menubar(props: MenubarProps) -> Element {
         current_focus: Signal::new(None),
     });
 
+    // Add is_selecting signal to track if a click is happening inside
+    let mut is_selecting = use_signal(|| false);
+
     rsx! {
         div {
             role: "menubar",
             "data-disabled": (props.disabled)(),
 
-            onfocusout: move |_| ctx.set_focus(None),
+            // Set is_selecting on mousedown/mouseup
+            onmousedown: move |_| is_selecting.set(true),
+            onmouseup: move |_| is_selecting.set(false),
+
+            // Close menu on focusout if not selecting
+            onfocusout: move |_| {
+                ctx.set_focus(None);
+                if open_menu().is_some() && !is_selecting() {
+                    set_open_menu.call(None);
+                }
+            },
             ..props.attributes,
 
             {props.children}
@@ -115,6 +128,13 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
             "0"
         } else {
             "-1"
+        }
+    });
+
+    // Focus the first item when the menu is opened
+    use_effect(move || {
+        if is_open() {
+            ctx.focus_first();
         }
     });
 
