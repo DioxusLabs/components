@@ -1,5 +1,4 @@
-use super::ComponentDemoData;
-
+use super::{ComponentDemoData, HighlightedCode};
 
 macro_rules! examples {
     ($($name:ident),*) => {
@@ -11,8 +10,14 @@ macro_rules! examples {
             $(
                 ComponentDemoData {
                     name: stringify!($name),
-                    rs_source: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/mod.rs.html")),
-                    css_source: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.html")),
+                    rs_highlighted: HighlightedCode {
+                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/mod.rs.base16-ocean.light.html")),
+                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/mod.rs.base16-ocean.dark.html")),
+                    },
+                    css_highlighted: HighlightedCode {
+                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.light.html")),
+                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.dark.html")),
+                    },
                     component: $name::Demo,
                 },
             )*

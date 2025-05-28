@@ -9,8 +9,8 @@ mod components;
 #[derive(Clone, PartialEq)]
 struct ComponentDemoData {
     name: &'static str,
-    rs_source: &'static str,
-    css_source: &'static str,
+    rs_highlighted: HighlightedCode,
+    css_highlighted: HighlightedCode,
     component: fn() -> Element,
 }
 
@@ -18,11 +18,33 @@ fn main() {
     dioxus::launch(App);
 }
 
+#[derive(Copy, Clone, PartialEq)]
+struct HighlightedCode {
+    light: &'static str,
+    dark: &'static str,
+}
+
+#[component]
+fn CodeBlock(
+    source: HighlightedCode
+) -> Element {
+    rsx! {
+        pre {
+            class: "code-block-dark",
+            dangerous_inner_html: source.dark
+        }
+        pre {
+            class: "code-block-light",
+            dangerous_inner_html: source.light
+        }
+    }
+}
+
 #[component]
 fn ComponentDemo(
     demo: ComponentDemoData,
 ) -> Element {
-    let ComponentDemoData { name, rs_source, css_source, component: Comp } = demo;
+    let ComponentDemoData { name, rs_highlighted, css_highlighted, component: Comp } = demo;
 
     rsx! {
         div { class: "component-demo",
@@ -46,8 +68,8 @@ fn ComponentDemo(
                         }
                     }
 
-                    TabContent { class: "tabs-content", value: "main.rs", div { dangerous_inner_html: rs_source } }
-                    TabContent { class: "tabs-content", value: "style.css", div { dangerous_inner_html: css_source } }
+                    TabContent { class: "tabs-content", value: "main.rs", CodeBlock { source: rs_highlighted } }
+                    TabContent { class: "tabs-content", value: "style.css", CodeBlock { source: css_highlighted } }
                 }
             }
         }

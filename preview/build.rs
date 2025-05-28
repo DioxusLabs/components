@@ -21,14 +21,17 @@ fn main() {
             }
             let file_name = file.file_name();
             let file_name = file_name.to_string_lossy();
-            let html = highlight_file(&file.path());
-            let out_file_path = out_folder.join(format!("{}.html", file_name));
-            std::fs::write(out_file_path, html).unwrap();
+            for theme in ["base16-ocean.dark", "base16-ocean.light"] {
+                // Generate HTML for the file with the specified theme
+                let html = highlight_file_to(&file.path(), theme);
+                let out_file_path = out_folder.join(format!("{file_name}.{theme}.html"));
+                std::fs::write(out_file_path, html).unwrap();
+            }
         }
     }
 }
 
-fn highlight_file(file_path: &std::path::Path) -> String {
+fn highlight_file_to(file_path: &std::path::Path, theme: &str) -> String {
     use std::io::BufRead;
     use syntect::easy::HighlightFile;
     use syntect::highlighting::{Style, ThemeSet};
@@ -43,7 +46,7 @@ fn highlight_file(file_path: &std::path::Path) -> String {
     let mut all_html = String::new();
 
     let mut highlighter =
-        HighlightFile::new(&file_path, &ss, &ts.themes["base16-ocean.dark"]).unwrap();
+        HighlightFile::new(&file_path, &ss, &ts.themes[theme]).unwrap();
     let mut line = String::new();
     while highlighter.reader.read_line(&mut line).unwrap_or_default() > 0 {
         {
