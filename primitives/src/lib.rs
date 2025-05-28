@@ -80,3 +80,8 @@ fn use_controlled<T: Clone + PartialEq>(
 
     (value, set_value)
 }
+
+/// Run some cleanup code when the component is unmounted if the effect was run.
+fn use_effect_cleanup<F: FnOnce() + 'static>(#[allow(unused)] cleanup: F) {
+    web! {use_drop(cleanup)}
+}

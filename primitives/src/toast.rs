@@ -166,7 +166,7 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
                 // Render all toasts
                 for toast in toast_list().iter() {
                     Toast {
-                        key: format!("{}", toast.id),
+                        key: "{toast.id}",
                         id: toast.id,
                         title: toast.title.clone(),
                         description: toast.description.clone(),

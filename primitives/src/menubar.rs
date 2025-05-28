@@ -1,5 +1,7 @@
 use dioxus_lib::prelude::*;
 
+use crate::use_effect_cleanup;
+
 #[derive(Clone, Copy)]
 struct MenubarContext {
     // Currently open menu index
@@ -102,7 +104,7 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
         ctx.menu_count += 1;
     });
 
-    use_drop(move || {
+    use_effect_cleanup(move || {
         ctx.menu_count -= 1;
         if (ctx.current_focus)() == Some(props.index) {
             ctx.set_focus(None);
