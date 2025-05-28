@@ -25,32 +25,39 @@ struct HighlightedCode {
 }
 
 #[component]
-fn CodeBlock(
-    source: HighlightedCode
-) -> Element {
+fn CodeBlock(source: HighlightedCode) -> Element {
     rsx! {
         pre {
-            class: "code-block-dark",
+            class: "code-block code-block-dark",
             dangerous_inner_html: source.dark
         }
         pre {
-            class: "code-block-light",
+            class: "code-block code-block-light",
             dangerous_inner_html: source.light
         }
     }
 }
 
 #[component]
-fn ComponentDemo(
-    demo: ComponentDemoData,
-) -> Element {
-    let ComponentDemoData { name, rs_highlighted, css_highlighted, component: Comp } = demo;
+fn ComponentDemo(demo: ComponentDemoData) -> Element {
+    let ComponentDemoData {
+        name,
+        rs_highlighted,
+        css_highlighted,
+        component: Comp,
+    } = demo;
+    let name = name.replace("_", " ");
 
     rsx! {
         div { class: "component-demo",
             h3 { class: "component-title", {name} }
             div { class: "component-description", "Component Description" }
-            div { class: "component-preview", Comp {} }
+            div { class: "component-preview",
+                div {
+                    class: "component-preview-contents",
+                    Comp {}
+                }
+            }
             div { class: "component-code",
                 Tabs { class: "tabs", default_value: "main.rs",
                     div { class: "tabs-list",

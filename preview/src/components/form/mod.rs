@@ -4,7 +4,9 @@ use dioxus_primitives::checkbox::{Checkbox, CheckboxIndicator};
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
+        document::Link { rel: "stylesheet", href: asset!("/src/components/form/style.css") }
         form {
+            class: "form-example",
             onsubmit: move |e| {
                 println!("{:?}", e.values());
             },
@@ -18,4 +20,3 @@ pub(super) fn Demo() -> Element {
         }
     }
 }
-

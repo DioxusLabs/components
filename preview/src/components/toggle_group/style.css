@@ -10,21 +10,22 @@
   font-size: 14px;
   padding: 10px;
   min-width: 35px;
-  background-color: rgb(228, 228, 228);
+  color: var(--text-color);
+  background-color: var(--brighter-background-color);
 
   transition: background-color 200ms ease, border 200ms ease;
 
-  border-top: 1px solid rgb(94, 94, 94);
-  border-bottom: 1px solid rgb(94, 94, 94);
+  border-top: 1px solid var(--dim-border-color);
+  border-bottom: 1px solid var(--dim-border-color);
 }
 
 .toggle-item:hover, .toggle-item:focus {
   cursor: pointer;
-  background-color: rgb(57, 146, 206); 
+  background-color: var(--hover-background-color);
 }
 
 .toggle-item[data-state="on"] {
-  background-color: rgb(69, 175, 247);  
+  background-color: var(--focused-background-color);
 }
 
 .toggle-item:first-child {
@@ -38,5 +39,5 @@
 }
 
 .toggle-item:first-child, .toggle-item:last-child {
-  border: 1px solid rgb(94, 94, 94);
+  border: 1px solid var(--dim-border-color);
 }

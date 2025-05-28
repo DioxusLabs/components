@@ -1,8 +1,6 @@
 #hero {
   padding: 50px;
   margin: 0;
-  background: rgb(11,104,195);
-  background: linear-gradient(90deg, rgba(11,104,195,1) 0%, rgba(5,22,154,1) 100%); 
 }
 
 #hero>h1, #hero>h2 {

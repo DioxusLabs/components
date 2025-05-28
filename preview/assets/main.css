@@ -1,6 +1,38 @@
 body {
   margin: 0;
   padding: 0;
+  color: var(--text-color);
+}
+
+/* Theme style variables */
+@media (prefers-color-scheme: light) {
+  :root {
+    --background-color: #fff;
+    --brighter-background-color: #e6e6e6;
+    --dim-background-color: #d2d2d2;
+    --hover-background-color: #b3b3b3;
+    --focused-background-color: #c0c0c0;
+    --contrast-background-color: #0d0d0d;
+    --text-color: #000;
+    --dim-text-color: rgb(43, 43, 43);
+    --border-color: #000;
+    --dim-border-color: rgb(43, 43, 43);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #000;
+    --brighter-background-color: #0d0d0d;
+    --dim-background-color: #141313;
+    --hover-background-color: #292929;
+    --focused-background-color: #2c2b2b;
+    --contrast-background-color: #e6e6e6;
+    --text-color: #fff;
+    --dim-text-color: rgb(220, 220, 220);
+    --border-color: #fff;
+    --dim-border-color: rgb(43, 43, 43);
+  }
 }
 
 @media (prefers-color-scheme: light) {
@@ -13,4 +45,53 @@ body {
   .code-block-light {
     display: none;
   }
+}
+
+body {
+  background-color: var(--background-color);
+}
+
+/* Code block styles */
+.code-block {
+  border: 1px solid var(--border-color);
+  background-color: var(--brighter-background-color);
+  font-family: "Courier New", Courier, monospace;
+  border-radius: 4px;
+  padding: 12px;
+  overflow: auto;
+}
+
+/* Demo frame styles */
+.component-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100%;
+}
+
+.component-preview-contents {
+  background-color: var(--dim-background-color);
+  border: 1px solid var(--dim-border-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  box-sizing: border-box;
+  margin: 20px 0;
+  max-width: 75vw;
+}
+
+/* component info styles */
+.component-title {
+  font-size: 2em;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+  text-transform: capitalize;
+}
+
+.component-description {
+  font-size: 1em;
+  margin-bottom: 20px;
 }

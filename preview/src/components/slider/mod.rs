@@ -27,6 +27,7 @@ pub(super) fn Demo() -> Element {
                         }
                     }
                     input {
+                        class: "slider-value",
                         r#type: "text",
                         readonly: true,
                         value: match value() {
@@ -54,6 +55,7 @@ pub(super) fn Demo() -> Element {
                         }
                     }
                     input {
+                        class: "slider-value",
                         r#type: "text",
                         readonly: true,
                         value: match range_value() {

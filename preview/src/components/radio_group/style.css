@@ -10,15 +10,16 @@
     align-items: center;
     padding: 8px 16px;
     border-radius: 6px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
     background: none;
     cursor: pointer;
     font-size: 14px;
     transition: all 0.2s;
+    color: var(--text-color);
 }
 
 .radio-item:hover {
-    background: #f5f5f5;
+    background: var(--hover-background-color);
 }
 
 .radio-item:focus {
@@ -27,8 +28,8 @@
 }
 
 .radio-item[data-state="checked"] {
-    background: #e9ecef;
-    border-color: #adb5bd;
+    background: var(--focused-background-color);
+    border-color: var(--border-color);
 }
 
 .radio-item[data-disabled="true"] {

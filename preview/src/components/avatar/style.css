@@ -6,7 +6,7 @@
 .avatar-example-section h4 {
     margin-bottom: 1rem;
     font-size: 1.2rem;
-    color: #334155;
+    color: var(--dim-text-color);
 }
 
 .avatar-example {
@@ -14,7 +14,7 @@
     flex-wrap: wrap;
     gap: 1.5rem;
     padding: 1rem;
-    background: #f8fafc;
+    background: var(--brighter-background-color);
     border-radius: 8px;
 }
 
@@ -27,7 +27,7 @@
 
 .avatar-label {
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--text-color);
     margin: 0;
 }
 
@@ -37,8 +37,8 @@
     height: 64px;
     border-radius: 50%;
     overflow: hidden;
-    background: #e2e8f0;
-    color: #64748b;
+    background: var(--brighter-background-color);
+    color: var(--text-color);
     font-weight: 500;
     display: inline-flex;
     align-items: center;
@@ -123,5 +123,5 @@
     background: #f0f0f0;
     border-radius: 4px;
     font-family: monospace;
-    color: #334155;
+    color: var(--dim-text-color);
 }

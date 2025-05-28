@@ -6,8 +6,9 @@
 
 .dropdown-menu-trigger {
     padding: 8px 16px;
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
+    color: var(--text-color);
+    background-color: var(--brighter-background-color);
+    border: 1px solid var(--dim-border-color);
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
@@ -15,7 +16,7 @@
 }
 
 .dropdown-menu-trigger:hover {
-    background-color: #e9ecef;
+    background-color: var(--dim-background-color);
 }
 
 .dropdown-menu-trigger:focus {
@@ -29,8 +30,8 @@
     left: 0;
     margin-top: 4px;
     min-width: 200px;
-    background-color: white;
-    border: 1px solid #dee2e6;
+    background-color: var(--brighter-background-color);
+    border: 1px solid var(--dim-border-color);
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 1000;
@@ -50,12 +51,12 @@
 }
 
 .dropdown-menu-item:hover {
-    background-color: #f8f9fa;
+    background-color: var(--hover-background-color);
 }
 
 .dropdown-menu-item:focus {
     outline: none;
-    background-color: #e9ecef;
+    background-color: var(--focused-background-color);
 }
 
 /* State styles */

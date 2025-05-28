@@ -5,11 +5,13 @@ use dioxus_primitives::separator::Separator;
 pub(super) fn Demo() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/src/components/separator/style.css") }
+        "One thing"
         Separator {
             class: "separator",
-            style: "margin: 15px 0;",
+            style: "margin: 15px 0; width: 30vw;",
             horizontal: true,
             decorative: true,
         }
+        "Another thing"
     }
 }

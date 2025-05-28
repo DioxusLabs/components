@@ -5,8 +5,8 @@
 
 .context-menu-trigger {
     padding: 20px;
-    background: #f5f5f5;
-    border: 1px solid #ddd;
+    background: var(--brighter-background-color);
+    border: 1px solid var(--dim-border-color);
     border-radius: 4px;
     cursor: context-menu;
     user-select: none;
@@ -14,11 +14,11 @@
 
 .context-menu-content {
     min-width: 220px;
-    background: white;
+    background: var(--brighter-background-color);
     border-radius: 6px;
     padding: 5px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    border: 1px solid #ddd;
+    border: 1px solid var(--dim-border-color);
     animation: slideIn 0.1s ease-out;
 }
 
@@ -33,17 +33,17 @@
     user-select: none;
     outline: none;
     font-size: 14px;
-    color: #333;
+    color: var(--text-color);
     display: flex;
     align-items: center;
 }
 
 .context-menu-item:hover {
-    background: #f5f5f5;
+    background: var(--hover-background-color);
 }
 
 .context-menu-item:focus {
-    background: #eee;
+    background: var(--focused-background-color);
 }
 
 @keyframes slideIn {

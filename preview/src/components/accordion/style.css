@@ -1,14 +1,15 @@
 .accordion {
   width: 500px;
-  background-color: rgb(223, 223, 223);
+  background-color: var(--brighter-background-color);
 }
 
 .accordion-trigger {
   border: none;
   outline: none;
-  border-bottom: 1px solid rgb(102, 102, 102);
+  border-bottom: 1px solid var(--dim-border-color);
   width: 100%;
-  background-color: rgb(160, 160, 160);
+  color: var(--text-color);
+  background-color: var(--brighter-background-color);
   padding: 10px;
   text-align: left;
   font-weight: bold;

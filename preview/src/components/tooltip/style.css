@@ -14,8 +14,8 @@
     max-width: 250px;
     padding: 8px 12px;
     border-radius: 4px;
-    background-color: #333;
-    color: white;
+    background-color: var(--brighter-background-color);
+    color: var(--text-color);
     font-size: 14px;
     line-height: 1.4;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
@@ -111,4 +111,24 @@
 
 .tooltip-content[data-state="open"] {
     display: block;
+}
+
+.tooltip button {
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    font-size: 14px;
+    background-color: var(--brighter-background-color);
+    border: 1px solid var(--dim-border-color);
+    color: var(--text-color);
+}
+
+.tooltip button:hover {
+    background: var(--hover-background-color);
+}
+
+.tooltip button:focus {
+    background: var(--focused-background-color);
 }

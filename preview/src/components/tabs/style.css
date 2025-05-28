@@ -7,7 +7,7 @@
 
 .tabs-list {
     display: flex;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--dim-border-color);
     gap: 2px;
 }
 
@@ -15,20 +15,20 @@
     all: unset;
     padding: 8px 16px;
     font-size: 14px;
-    color: #64748b;
+    color: var(--text-color);
     cursor: pointer;
     border-radius: 4px 4px 0 0;
-    transition: all 0.2s;
+    transition: background-color 0.2s;
 }
 
 .tabs-trigger:hover {
-    color: #0f172a;
-    background: #f8fafc;
+    color: var(--hover-text-color);
+    background: var(--hover-background-color);
 }
 
 .tabs-trigger[data-state="active"] {
-    color: #0f172a;
-    background: #f1f5f9;
+    color: var(--text-color);
+    background: var(--focused-background-color);
     border-bottom: 2px solid #3b82f6;
     margin-bottom: -1px;
 }
@@ -45,7 +45,7 @@
 
 .tabs-content {
     padding: 16px;
-    background: #f8fafc;
+    background: var(--background-color);
     border-radius: 4px;
     font-size: 14px;
 }

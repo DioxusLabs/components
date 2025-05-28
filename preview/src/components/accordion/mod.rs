@@ -17,7 +17,7 @@ pub(super) fn Demo() -> Element {
                     index: i,
 
                     on_change: move |open| {
-                        tracing::info!("console.log({open});");
+                        tracing::info!("{open};");
                     },
                     on_trigger_click: move || {
                         tracing::info!("trigger");
