@@ -8,10 +8,10 @@ body {
 @media (prefers-color-scheme: light) {
   :root {
     --background-color: #fff;
-    --brighter-background-color: #e6e6e6;
-    --dim-background-color: #d2d2d2;
-    --hover-background-color: #b3b3b3;
-    --focused-background-color: #c0c0c0;
+    --brighter-background-color: #fbfbfb;
+    --dim-background-color: oklch(0.967 0.003 264.542);
+    --hover-background-color: #dadada;
+    --focused-background-color: #d7d7d7;
     --contrast-background-color: #0d0d0d;
     --text-color: #000;
     --dim-text-color: rgb(43, 43, 43);
