@@ -55,28 +55,35 @@ fn ComponentDemo(demo: ComponentDemoData) -> Element {
             div { class: "component-preview",
                 div {
                     class: "component-preview-contents",
-                    Comp {}
-                }
-            }
-            div { class: "component-code",
-                Tabs { class: "tabs", default_value: "main.rs",
-                    div { class: "tabs-list",
-                        TabTrigger {
-                            class: "tabs-trigger",
-                            value: "main.rs",
-                            index: 0usize,
-                            "main.rs"
-                        }
-                        TabTrigger {
-                            class: "tabs-trigger",
-                            value: "style.css",
-                            index: 1usize,
-                            "style.css"
+                    div {
+                        class: "component-preview-frame",
+                        Comp {}
+                    }
+                    Separator {
+                        class: "component-preview-separator",
+                        horizontal: true,
+                    }
+                    div { class: "component-code",
+                        Tabs { class: "tabs", default_value: "main.rs",
+                            div { class: "tabs-list",
+                                TabTrigger {
+                                    class: "tabs-trigger",
+                                    value: "main.rs",
+                                    index: 0usize,
+                                    "main.rs"
+                                }
+                                TabTrigger {
+                                    class: "tabs-trigger",
+                                    value: "style.css",
+                                    index: 1usize,
+                                    "style.css"
+                                }
+                            }
+        
+                            TabContent { class: "tabs-content", value: "main.rs", CodeBlock { source: rs_highlighted } }
+                            TabContent { class: "tabs-content", value: "style.css", CodeBlock { source: css_highlighted } }
                         }
                     }
-
-                    TabContent { class: "tabs-content", value: "main.rs", CodeBlock { source: rs_highlighted } }
-                    TabContent { class: "tabs-content", value: "style.css", CodeBlock { source: css_highlighted } }
                 }
             }
         }
