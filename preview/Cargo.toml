@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-dioxus.workspace = true
+dioxus = { workspace = true, features = ["router", "fullstack"]}
 dioxus-primitives.workspace = true
+syntect-html = { git = "https://github.com/DioxusLabs/docsite" }
 
 [features]
-default = ["desktop"]
 web = ["dioxus/web"]
-desktop = ["dioxus/desktop"]
+server = ["dioxus/server"]
