@@ -1,29 +1,10 @@
-use dioxus::{document::eval, prelude::*};
+use dioxus::prelude::*;
 use dioxus_primitives::{
-    accordion::{Accordion, AccordionContent, AccordionItem, AccordionTrigger},
-    aspect_ratio::AspectRatio,
-    avatar::{Avatar, AvatarFallback, AvatarImage},
-    calendar::{Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarNavigation},
-    checkbox::{Checkbox, CheckboxIndicator},
     collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger},
-    context_menu::{ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger},
-    dropdown_menu::{DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger},
-    hover_card::{HoverCard, HoverCardAlign, HoverCardContent, HoverCardSide, HoverCardTrigger},
-    menubar::{Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger},
-    progress::{Progress, ProgressIndicator},
-    radio_group::{RadioGroup, RadioItem},
-    scroll_area::{ScrollArea, ScrollDirection},
-    select::{Select, SelectGroup, SelectOption},
     separator::Separator,
-    slider::{Slider, SliderRange, SliderThumb, SliderTrack, SliderValue},
-    switch::{Switch, SwitchThumb},
     tabs::{TabContent, TabTrigger, Tabs},
-    toast::{ToastOptions, ToastProvider, use_toast},
-    toggle_group::{ToggleGroup, ToggleItem},
-    toolbar::{Toolbar, ToolbarButton, ToolbarSeparator},
-    tooltip::{Tooltip, TooltipContent, TooltipSide, TooltipTrigger},
+    toast::ToastProvider,
 };
-use std::time::Duration;
 
 macro_rules! example {
     ($name:ident) => {
@@ -38,7 +19,6 @@ example!(avatar);
 example!(calendar);
 example!(context_menu);
 example!(dropdown_menu);
-example!(hero);
 example!(hover_card);
 example!(form);
 example!(menubar);
@@ -116,9 +96,8 @@ fn App() -> Element {
     rsx! {
         ToastProvider {
             document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
-            document::Link { rel: "stylesheet", href: asset!("/src/separator/style.css") }
 
-            document::Link { rel: "stylesheet", href: asset!("/src/hero/style.css") }
+            document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
             div { id: "hero",
                 h1 { "Dioxus Primitives" }
                 h2 { "Accessible, unstyled foundational components for Dioxus." }
@@ -137,12 +116,6 @@ fn App() -> Element {
                 CollapsibleContent { FormExample {} }
             }
 
-            Separator {
-                class: "separator",
-                style: "margin: 15px 0;",
-                horizontal: true,
-                decorative: true,
-            }
 
             Collapsible {
                 CollapsibleTrigger { "Aspect Ratio Example" }

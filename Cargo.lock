@@ -2560,6 +2560,7 @@ dependencies = [
  "dioxus 0.7.0-alpha.0",
  "dioxus-primitives",
  "syntect-html",
+ "tracing",
 ]
 
 [[package]]
