@@ -6,8 +6,10 @@ edition = "2024"
 [dependencies]
 dioxus = { workspace = true, features = ["router", "fullstack"]}
 dioxus-primitives.workspace = true
-syntect-html = { git = "https://github.com/DioxusLabs/docsite" }
 tracing.workspace = true
+
+[build-dependencies]
+syntect = "5.0"
 
 [features]
 web = ["dioxus/web"]
