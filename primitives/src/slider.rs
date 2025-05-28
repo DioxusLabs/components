@@ -92,7 +92,8 @@ pub fn Slider(props: SliderProps) -> Element {
         dragging: dragging.into(),
     });
 
-    let rect = use_signal(|| None);
+    let mut rect = use_signal(|| None);
+    let mut div_element = use_signal(|| None);
 
     rsx! {
         div {
@@ -100,14 +101,22 @@ pub fn Slider(props: SliderProps) -> Element {
             "data-disabled": props.disabled,
             "data-orientation": orientation,
 
-            onmounted: move |evt| {
-                let mut rect = rect.clone();
+            onmounted: move |evt| async move {
                 // Get the bounding rect of the slider
-                spawn(async move {
-                    if let Ok(r) = evt.data().get_client_rect().await {
-                        rect.set(Some(r));
-                    }
-                });
+                if let Ok(r) = evt.data().get_client_rect().await {
+                    rect.set(Some(r));
+                }
+                div_element.set(Some(evt.data()));
+            },
+            onresize: move |_| async move {
+                // Update the rect on resize
+                let Some(div_element) = div_element() else {
+                    tracing::warn!("Slider div element is not (yet) set");
+                    return;
+                };
+                if let Ok(r) = div_element.get_client_rect().await {
+                    rect.set(Some(r));
+                }
             },
             onmousemove: move |e| {
                 if !dragging() || (ctx.disabled)() {
@@ -140,7 +149,7 @@ pub fn Slider(props: SliderProps) -> Element {
                 if (ctx.disabled)() {
                     return;
                 }
-                                let Some(rect) = rect() else {
+                let Some(rect) = rect() else {
                     tracing::warn!("Slider rect is not (yet) set");
                     return;
                 };
