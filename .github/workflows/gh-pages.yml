@@ -35,7 +35,7 @@ jobs:
       - name: Build
         run: cd preview && dx build --platform web --release
       - name: Copy output
-        run: cp -r target/dx/dioxus_docs_site/release/web/public docs
+        run: cp -r target/dx/preview/release/web/public docs
       - name: Add gh pages 404
         run: cp docs/index.html docs/404.html
       - name: Deploy 🚀
