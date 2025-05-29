@@ -91,10 +91,10 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 flex_direction: "column",
                 justify_content: "center",
                 align_items: "center",
-                TabContent { class: "tabs-content", value: "main.rs", max_width: "100%",
+                TabContent { class: "tabs-content", value: "main.rs", width: "100%",
                     CodeBlock { source: rs_highlighted, collapsed: collapsed() }
                 }
-                TabContent { class: "tabs-content", value: "style.css", max_width: "100%",
+                TabContent { class: "tabs-content", value: "style.css", width: "100%",
                     CodeBlock { source: css_highlighted, collapsed: collapsed() }
                 }
                 button {
