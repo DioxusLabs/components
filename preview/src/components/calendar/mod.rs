@@ -1,16 +1,17 @@
 use dioxus::prelude::*;
-use dioxus_primitives::calendar::{Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarNavigation};
-
+use dioxus_primitives::calendar::{
+    Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarNavigation,
+};
 #[component]
 pub(super) fn Demo() -> Element {
     let mut selected_date = use_signal(|| None::<CalendarDate>);
     let mut view_date = use_signal(|| CalendarDate::new(2024, 5, 15));
-
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/src/components/calendar/style.css") }
-
+        document::Link {
+            rel: "stylesheet",
+            href: asset!("/src/components/calendar/style.css"),
+        }
         div { class: "calendar-example", style: "padding: 20px;",
-            // Basic calendar
             div { class: "calendar",
                 Calendar {
                     selected_date: selected_date(),
@@ -23,14 +24,10 @@ pub(super) fn Demo() -> Element {
                         println!("View changed to: {}-{}", new_view.year, new_view.month);
                         view_date.set(new_view);
                     },
-
                     CalendarHeader { CalendarNavigation {} }
-
                     CalendarGrid {}
                 }
             }
-
-            // Display selected date
             div { class: "selected-date", style: "margin-top: 20px;",
                 if let Some(date) = selected_date() {
                     p { style: "font-weight: bold;", "Selected date: {date}" }

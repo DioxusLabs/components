@@ -1,24 +1,20 @@
 use std::time::Duration;
-
 use dioxus::prelude::*;
 use dioxus_primitives::toast::{ToastOptions, ToastProvider, use_toast};
-
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
-        ToastProvider {
-            ToastButton {}
-        }
+        ToastProvider { ToastButton {} }
     }
 }
-
 #[component]
 fn ToastButton() -> Element {
-    // Get the toast API
     let toast_api = use_toast();
-
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/src/components/toast/style.css") }
+        document::Link {
+            rel: "stylesheet",
+            href: asset!("/src/components/toast/style.css"),
+        }
         div { class: "toast-example",
             h4 { "Timed Toasts (auto-dismiss)" }
             div { class: "toast-buttons",
@@ -35,7 +31,6 @@ fn ToastButton() -> Element {
                     },
                     "Success (3s)"
                 }
-
                 button {
                     onclick: move |_| {
                         toast_api
@@ -49,7 +44,6 @@ fn ToastButton() -> Element {
                     },
                     "Error (5s)"
                 }
-
                 button {
                     onclick: move |_| {
                         toast_api
@@ -65,7 +59,6 @@ fn ToastButton() -> Element {
                     "Warning (3s)"
                 }
             }
-
             h4 { "Permanent Toasts (manual close)" }
             div { class: "toast-buttons",
                 button {
@@ -81,7 +74,6 @@ fn ToastButton() -> Element {
                     },
                     "Permanent Success"
                 }
-
                 button {
                     onclick: move |_| {
                         toast_api
@@ -95,7 +87,6 @@ fn ToastButton() -> Element {
                     },
                     "Permanent Error"
                 }
-
                 button {
                     onclick: move |_| {
                         toast_api

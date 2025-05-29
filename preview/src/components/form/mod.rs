@@ -1,6 +1,5 @@
 use dioxus::prelude::*;
 use dioxus_primitives::checkbox::{Checkbox, CheckboxIndicator};
-
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
@@ -10,7 +9,6 @@ pub(super) fn Demo() -> Element {
             onsubmit: move |e| {
                 println!("{:?}", e.values());
             },
-
             Checkbox { id: "tos-check", name: "tos-check",
                 CheckboxIndicator { "+" }
             }

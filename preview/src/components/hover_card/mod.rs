@@ -1,20 +1,21 @@
 use dioxus::prelude::*;
-use dioxus_primitives::hover_card::{HoverCard, HoverCardAlign, HoverCardContent, HoverCardSide, HoverCardTrigger};
-
+use dioxus_primitives::hover_card::{
+    HoverCard, HoverCardAlign, HoverCardContent, HoverCardSide, HoverCardTrigger,
+};
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/src/components/hover_card/style.css") }
-
+        document::Link {
+            rel: "stylesheet",
+            href: asset!("/src/components/hover_card/style.css"),
+        }
         div {
             class: "hover-card-example",
-            style: "padding: 50px; display: flex; gap: 40px;",
-            // User profile hover card
+            style: "padding: 50px; display: flex; flex-wrap: wrap; gap: 40px;",
             HoverCard { class: "hover-card",
                 HoverCardTrigger { class: "hover-card-trigger",
                     button { class: "user-trigger", "@johndoe" }
                 }
-
                 HoverCardContent { class: "hover-card-content", side: HoverCardSide::Bottom,
                     div { class: "user-card",
                         div { class: "user-card-header",
@@ -28,11 +29,9 @@ pub(super) fn Demo() -> Element {
                                 p { class: "user-card-username", "@johndoe" }
                             }
                         }
-
                         p { class: "user-card-bio",
                             "Software developer passionate about Rust and web technologies. Building awesome UI components with Dioxus."
                         }
-
                         div { class: "user-card-stats",
                             div { class: "user-card-stat",
                                 span { class: "user-card-stat-value", "142" }
@@ -50,13 +49,10 @@ pub(super) fn Demo() -> Element {
                     }
                 }
             }
-
-            // Product hover card
             HoverCard { class: "hover-card",
                 HoverCardTrigger { class: "hover-card-trigger",
                     button { class: "product-trigger", "View Product" }
                 }
-
                 HoverCardContent {
                     class: "hover-card-content",
                     side: HoverCardSide::Right,
@@ -76,13 +72,10 @@ pub(super) fn Demo() -> Element {
                     }
                 }
             }
-
-            // Link hover card
             HoverCard { class: "hover-card",
                 HoverCardTrigger { class: "hover-card-trigger",
                     a { href: "#", "Hover over this link" }
                 }
-
                 HoverCardContent {
                     class: "hover-card-content",
                     side: HoverCardSide::Top,

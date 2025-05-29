@@ -10,6 +10,7 @@ tracing.workspace = true
 
 [build-dependencies]
 syntect = "5.0"
+pulldown-cmark = "0.13.0"
 
 [features]
 web = ["dioxus/web"]

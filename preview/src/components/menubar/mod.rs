@@ -2,11 +2,13 @@ use dioxus::prelude::*;
 use dioxus_primitives::menubar::{
     Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
 };
-
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/src/components/menubar/style.css") }
+        document::Link {
+            rel: "stylesheet",
+            href: asset!("/src/components/menubar/style.css"),
+        }
         div { class: "menubar-example",
             Menubar { class: "menubar",
                 MenubarMenu { class: "menubar-menu", index: 0usize,
@@ -38,7 +40,6 @@ pub(super) fn Demo() -> Element {
                         }
                     }
                 }
-
                 MenubarMenu { class: "menubar-menu", index: 1usize,
                     MenubarTrigger { class: "menubar-trigger", "Edit" }
                     MenubarContent { class: "menubar-content",

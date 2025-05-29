@@ -1,17 +1,18 @@
 use dioxus::prelude::*;
-use dioxus_primitives::context_menu::{ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger};
-
-
+use dioxus_primitives::context_menu::{
+    ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger,
+};
 #[component]
 pub(super) fn Demo() -> Element {
     let mut selected_value = use_signal(String::new);
-
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/src/components/context_menu/style.css") }
+        document::Link {
+            rel: "stylesheet",
+            href: asset!("/src/components/context_menu/style.css"),
+        }
         div { class: "context-menu-example",
             ContextMenu {
                 ContextMenuTrigger { class: "context-menu-trigger", "Right click here to open context menu" }
-
                 ContextMenuContent { class: "context-menu-content",
                     ContextMenuItem {
                         class: "context-menu-item",
@@ -22,7 +23,6 @@ pub(super) fn Demo() -> Element {
                         },
                         "Edit"
                     }
-
                     ContextMenuItem {
                         class: "context-menu-item",
                         value: "duplicate".to_string(),
@@ -32,7 +32,6 @@ pub(super) fn Demo() -> Element {
                         },
                         "Duplicate"
                     }
-
                     ContextMenuItem {
                         class: "context-menu-item",
                         value: "delete".to_string(),
@@ -44,7 +43,6 @@ pub(super) fn Demo() -> Element {
                     }
                 }
             }
-
             div { class: "selected-value",
                 if selected_value().is_empty() {
                     "No action selected"
