@@ -1,14 +1,4 @@
 /* Avatar Example Layout */
-.avatar-example-section {
-    margin-bottom: 2rem;
-}
-
-.avatar-example-section h4 {
-    margin-bottom: 1rem;
-    font-size: 1.2rem;
-    color: var(--dim-text-color);
-}
-
 .avatar-example {
     display: flex;
     flex-wrap: wrap;

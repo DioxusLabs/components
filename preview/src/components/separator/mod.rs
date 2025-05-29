@@ -8,7 +8,7 @@ pub(super) fn Demo() -> Element {
         "One thing"
         Separator {
             class: "separator",
-            style: "margin: 15px 0; width: 30vw;",
+            style: "margin: 15px 0; width: 50%;",
             horizontal: true,
             decorative: true,
         }

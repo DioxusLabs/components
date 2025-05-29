@@ -1,6 +1,6 @@
 /* Calendar Container */
 .calendar {
-    width: 300px;
+    width: 100%;
     border: 1px solid #ddd;
     border-radius: 8px;
     background-color: #fff;

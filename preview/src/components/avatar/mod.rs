@@ -8,9 +8,7 @@ pub(super) fn Demo() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/src/components/avatar/style.css") }
 
-        // Basic examples section
         div { class: "avatar-example-section",
-            h4 { "Basic Examples" }
             div { class: "avatar-example",
                 // Basic Avatar with image and fallback
                 div { class: "avatar-item",

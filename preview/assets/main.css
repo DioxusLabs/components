@@ -105,7 +105,7 @@ body {
   border-top-right-radius: .5em;
   border-top-left-radius: .5em;
   background-image: linear-gradient(
-    to bottom,
+    to bottom right,
     var(--highlight-color-main),
     var(--highlight-color-secondary)
   );
@@ -129,4 +129,29 @@ body {
 
 .component-code {
   width: 100%;
+}
+
+/* Masonry styles */
+.masonry-with-columns {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 0 0 1rem;
+}
+.masonry-with-columns .masonry-preview-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 10rem;
+  max-width: calc(100vw - 2rem);
+  margin: 0 1rem 1rem 0;
+  padding: 1rem;
+  flex: 1 0 auto;
+  border-radius: .5rem;
+  background-image: linear-gradient(
+    to bottom right,
+    var(--highlight-color-main),
+    var(--highlight-color-secondary)
+  );
+  box-sizing: border-box;
 }

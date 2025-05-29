@@ -39,7 +39,7 @@ fn CodeBlock(source: HighlightedCode) -> Element {
 }
 
 #[component]
-fn ComponentDemo(demo: ComponentDemoData) -> Element {
+fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     let ComponentDemoData {
         name,
         rs_highlighted,
@@ -79,7 +79,7 @@ fn ComponentDemo(demo: ComponentDemoData) -> Element {
                                     "style.css"
                                 }
                             }
-        
+
                             TabContent { class: "tabs-content", value: "main.rs", CodeBlock { source: rs_highlighted } }
                             TabContent { class: "tabs-content", value: "style.css", CodeBlock { source: css_highlighted } }
                         }
@@ -100,10 +100,27 @@ fn App() -> Element {
             h1 { "Dioxus Primitives" }
             h2 { "Accessible, unstyled foundational components for Dioxus." }
         }
+        
         Separator { id: "hero-separator", class: "separator", horizontal: true }
 
-        for demo in components::DEMOS.iter().cloned() {
-            ComponentDemo { demo }
+        ComponentGallery {}
+
+        // for demo in components::DEMOS.iter().cloned() {
+        //     ComponentHighlight { demo }
+        // }
+    }
+}
+
+#[component]
+fn ComponentGallery() -> Element {
+    rsx! {
+        div { class: "masonry-with-columns",
+            for ComponentDemoData { component: Comp, .. } in components::DEMOS.iter().cloned() {
+                div {
+                    class: "masonry-preview-frame",
+                    Comp {}
+                }
+            }
         }
     }
 }
