@@ -1,5 +1,6 @@
 .toolbar-example {
-    width: 100%;
+    width: 35rem;
+    max-width: 100%;
     margin: 20px;
     padding: 10px;
     border: 1px solid var(--border-color);

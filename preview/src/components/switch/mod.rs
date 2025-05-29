@@ -9,7 +9,6 @@ pub(super) fn Demo() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/src/components/switch/style.css") }
         div { class: "switch-example",
-            label { "Airplane Mode" }
             Switch {
                 class: "switch",
                 checked,

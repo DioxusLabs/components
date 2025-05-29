@@ -20,9 +20,6 @@ fn ToastButton() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/src/components/toast/style.css") }
         div { class: "toast-example",
-            h3 { "Toast Notifications" }
-            p { "Click the buttons below to show different types of toast notifications." }
-
             h4 { "Timed Toasts (auto-dismiss)" }
             div { class: "toast-buttons",
                 button {

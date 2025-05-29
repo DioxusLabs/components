@@ -1,6 +1,12 @@
 .scroll-area-demo {
-    padding: 20px;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2em;
+    width: 35rem;
+    max-width: 100%;
 }
 
 .scroll-demo-section {
@@ -16,11 +22,14 @@
     border: 1px solid var(--border-color);
     border-radius: 4px;
     background: var(--background-color);
+    max-width: 20rem;
+    max-height: 20rem;
 }
 
 /* Vertical scroll example */
 .demo-scroll-area[data-scroll-direction="vertical"] {
-    height: 200px;
+    height: 20rem;
+    width: auto;
 }
 
 .scroll-content {
@@ -37,7 +46,7 @@
 /* Horizontal scroll example */
 .demo-scroll-area[data-scroll-direction="horizontal"] {
     height: auto;
-    width: 100%;
+    width: 20rem;
 }
 
 .scroll-content-horizontal {
@@ -55,8 +64,8 @@
 
 /* Both directions example */
 .demo-scroll-area[data-scroll-direction="both"] {
-    height: 200px;
-    width: 100%;
+    height: 20rem;
+    width: 20rem;
 }
 
 .scroll-content-both {
