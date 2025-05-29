@@ -187,7 +187,6 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s ease;
 }
 
 .product-card {
@@ -238,5 +237,4 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s ease;
 }

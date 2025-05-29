@@ -11,7 +11,7 @@ pub(super) fn Demo() -> Element {
             // Single value slider
             div {
                 label { "Single Value Slider" }
-                div { style: "display: flex; align-items: center; gap: 1rem;",
+                div { style: "display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;",
                     Slider {
                         class: "slider",
                         value,

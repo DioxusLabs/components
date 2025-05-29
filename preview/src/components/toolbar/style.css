@@ -1,4 +1,5 @@
 .toolbar-example {
+    width: 100%;
     margin: 20px;
     padding: 10px;
     border: 1px solid var(--border-color);
@@ -8,6 +9,7 @@
 
 .toolbar {
     display: flex;
+    flex-wrap: wrap;
     flex-direction: row;
     align-items: center;
     gap: 5px;
@@ -38,6 +40,12 @@
 .toolbar button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.toolbar-group {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
 }
 
 .toolbar-separator {

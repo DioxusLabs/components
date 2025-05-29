@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_primitives::checkbox::{Checkbox, CheckboxIndicator};
+use dioxus_primitives::checkbox::{Checkbox, CheckboxIndicator, CheckboxState};
 
 #[component]
 pub(super) fn Demo() -> Element {

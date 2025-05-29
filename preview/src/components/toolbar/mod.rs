@@ -44,48 +44,54 @@ pub(super) fn Demo() -> Element {
 
             Toolbar { class: "toolbar", aria_label: "Text formatting",
 
-                ToolbarButton {
-                    class: "toolbar-button",
-                    index: 0usize,
-                    on_click: move |_| toggle_style("bold"),
-                    "Bold"
-                }
+                div {
+                    class: "toolbar-group",
+                    ToolbarButton {
+                        class: "toolbar-button",
+                        index: 0usize,
+                        on_click: move |_| toggle_style("bold"),
+                        "Bold"
+                    }
 
-                ToolbarButton {
-                    class: "toolbar-button",
-                    index: 1usize,
-                    on_click: move |_| toggle_style("italic"),
-                    "Italic"
-                }
+                    ToolbarButton {
+                        class: "toolbar-button",
+                        index: 1usize,
+                        on_click: move |_| toggle_style("italic"),
+                        "Italic"
+                    }
 
-                ToolbarButton {
-                    class: "toolbar-button",
-                    index: 2usize,
-                    on_click: move |_| toggle_style("underline"),
-                    "Underline"
+                    ToolbarButton {
+                        class: "toolbar-button",
+                        index: 2usize,
+                        on_click: move |_| toggle_style("underline"),
+                        "Underline"
+                    }
                 }
 
                 ToolbarSeparator { class: "toolbar-separator" }
 
-                ToolbarButton {
-                    class: "toolbar-button",
-                    index: 3usize,
-                    on_click: move |_| set_align("left"),
-                    "Align Left"
-                }
+                div {
+                    class: "toolbar-group",
+                    ToolbarButton {
+                        class: "toolbar-button",
+                        index: 3usize,
+                        on_click: move |_| set_align("left"),
+                        "Align Left"
+                    }
 
-                ToolbarButton {
-                    class: "toolbar-button",
-                    index: 4usize,
-                    on_click: move |_| set_align("center"),
-                    "Align Center"
-                }
+                    ToolbarButton {
+                        class: "toolbar-button",
+                        index: 4usize,
+                        on_click: move |_| set_align("center"),
+                        "Align Center"
+                    }
 
-                ToolbarButton {
-                    class: "toolbar-button",
-                    index: 5usize,
-                    on_click: move |_| set_align("right"),
-                    "Align Right"
+                    ToolbarButton {
+                        class: "toolbar-button",
+                        index: 5usize,
+                        on_click: move |_| set_align("right"),
+                        "Align Right"
+                    }
                 }
             }
 
