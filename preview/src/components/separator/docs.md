@@ -1,5 +1,3 @@
-# Separator
-
 The Separator component is a simple horizontal or vertical line that can be used to visually separate content in your application.
 
 ## Component Structure

@@ -1,5 +1,3 @@
-# Tooltip
-
 The Tooltip component is used to display additional information when a user hovers over an element.
 
 ## Component Structure

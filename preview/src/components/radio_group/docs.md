@@ -1,5 +1,3 @@
-# Radio Group
-
 The RadioGroup component is used to create a group of radio buttons that allows the user to select one option from a set.
 
 ## Component Structure

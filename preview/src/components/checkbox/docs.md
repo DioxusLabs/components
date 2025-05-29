@@ -1,5 +1,3 @@
-# Checkbox
-
 The Checkbox component is used to create an accessible checkbox input.
 
 ## Component Structure

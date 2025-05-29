@@ -102,6 +102,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     height: "2rem",
                     color: "var(--text-color)",
                     background_color: "var(--background-color)",
+                    border_radius: "0 0 0.5rem 0.5rem",
                     border: "none",
                     text_align: "center",
                     onclick: move |_| {
@@ -133,9 +134,12 @@ fn ComponentDemo(component_name: String) -> Element {
         };
     };
     rsx! {
+        document::Link { rel: "stylesheet", href: asset!("/assets/prism.css") }
+        script { src: asset!("/assets/prism.js") }
         ComponentHighlight { demo }
     }
 }
+
 #[component]
 fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     let ComponentDemoData {

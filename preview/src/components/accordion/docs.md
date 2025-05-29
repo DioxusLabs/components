@@ -1,5 +1,3 @@
-# Accordion
-
 The accordion component is used to display collapsible content panels for presenting information in a limited amount of space. It allows users to expand and collapse sections to view more or less content.
 
 ## Component Structure

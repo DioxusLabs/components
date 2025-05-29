@@ -1,5 +1,3 @@
-# Context Menu
-
 The context menu component can be used to define a context menu that is displayed when the user right-clicks on an element. It can contain various menu items that the user can interact with.
 
 ## Component Structure

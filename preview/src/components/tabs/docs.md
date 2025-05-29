@@ -1,5 +1,3 @@
-# Tabs
-
 The Tabs component is used to create a tabbed interface, allowing users to switch between different views or sections of content.
 
 ## Component Structure

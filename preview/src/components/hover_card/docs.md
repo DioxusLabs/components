@@ -1,5 +1,3 @@
-# HoverCard
-
 The HoverCard component can be used to display additional information when a user hovers over an element. It is useful for showing tooltips, additional details, or any other content that should be revealed on hover.
 
 ## Component Structure

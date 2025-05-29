@@ -1,5 +1,3 @@
-# Slider
-
 The slider component allows users to select a value from a range by sliding a handle along a track.
 
 ## Component Structure

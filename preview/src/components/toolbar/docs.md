@@ -1,5 +1,3 @@
-# Toolbar
-
 The toolbar component is a flexible and customizable component that can be used to create a variety of toolbars. It can be used to create a simple toolbar with a title, or a more complex toolbar with multiple buttons and actions.
 
 ## Component Structure

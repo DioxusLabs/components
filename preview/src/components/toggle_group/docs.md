@@ -1,5 +1,3 @@
-# Toggle Group
-
 The Toggle Group component is used to create a group of toggle buttons that allows the user to select one or more options from a set. It is useful for creating a set of options.
 
 ## Component Structure

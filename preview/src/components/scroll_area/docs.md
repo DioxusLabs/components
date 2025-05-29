@@ -1,5 +1,3 @@
-# Scroll Area
-
 The ScrollArea component is used to create a scrollable container for its children. It can be used to enable scrolling for content that overflows the available space.
 
 ## Component Structure

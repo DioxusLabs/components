@@ -1,5 +1,3 @@
-# Switch
-
 The Switch component allows users to toggle between two states, such as on and off.
 
 ## Component Structure

@@ -1,5 +1,3 @@
-# Toast
-
 The Toast component is used to display brief messages to the user, typically for notifications or alerts.
 
 ## Component Structure

@@ -1,5 +1,3 @@
-# Menubar
-
 The Menubar component can be used to display a menu bar with collapsible menus. It is useful for creating a navigation bar or a menu system in your application.
 
 ## Component Structure

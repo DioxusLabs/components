@@ -1,5 +1,3 @@
-# DropdownMenu
-
 The DropdownMenu component is used to create a dropdown menu that can be triggered by a button click. It allows users to select an option from a list of items.
 
 ## Component Structure

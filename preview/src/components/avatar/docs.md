@@ -1,5 +1,3 @@
-# Avatar
-
 The Avatar component is used to display a user's profile picture or an icon representing the user. It handles the loading state of the image and can display a fallback icon if the image fails to load.
 
 ## Component Structure

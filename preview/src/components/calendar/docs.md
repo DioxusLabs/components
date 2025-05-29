@@ -1,5 +1,3 @@
-# Calendar
-
 The Calendar component is used to display a calendar interface, allowing users to select dates. It provides a grid layout of days for a specific month and year.
 
 ## Component Structure

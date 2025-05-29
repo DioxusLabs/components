@@ -1,5 +1,3 @@
-# Select
-
 The Select component is used to create a dropdown menu that allows users to select one or more options from the select groups.
 
 ## Component Structure
