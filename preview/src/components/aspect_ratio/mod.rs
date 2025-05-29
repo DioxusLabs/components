@@ -12,7 +12,7 @@ pub(super) fn Demo() -> Element {
             AspectRatio { ratio: 4.0 / 3.0,
                 img {
                     class: "aspect-ratio-image",
-                    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+                    src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif())
                 }
             }
         }

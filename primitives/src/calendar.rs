@@ -328,7 +328,7 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
                 r#type: "button",
                 onclick: handle_prev_month,
                 disabled: (ctx.disabled)(),
-                "←"
+                "⬅"
             }
 
             div { class: "calendar-nav-title", {month_year} }
@@ -339,7 +339,7 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
                 r#type: "button",
                 onclick: handle_next_month,
                 disabled: (ctx.disabled)(),
-                "→"
+                "⮕"
             }
         }
     }

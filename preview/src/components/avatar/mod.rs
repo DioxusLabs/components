@@ -20,7 +20,7 @@ pub(super) fn Demo() -> Element {
                         },
 
                         AvatarImage {
-                            src: "https://github.com/DioxusLabs.png",
+                            src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif()),
                             alt: "User avatar",
                         }
 
@@ -74,7 +74,7 @@ pub(super) fn Demo() -> Element {
                         },
 
                         AvatarImage {
-                            src: "https://github.com/DioxusLabs.png",
+                            src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif()),
                             alt: "Large avatar",
                         }
 
