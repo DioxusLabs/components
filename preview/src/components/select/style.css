@@ -11,6 +11,7 @@
     cursor: pointer;
     font-size: 14px;
     transition: all 0.2s ease;
+    appearance: none;
 }
 
 .select-label {

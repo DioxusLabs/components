@@ -5,6 +5,12 @@ body {
 }
 
 /* Theme style variables */
+:root {
+  --highlight-color-main: #DD7230;
+  --highlight-color-secondary: #EB5160;
+  --highlight-color-tertiary: #2B7FFF;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     --background-color: #fff;
@@ -73,7 +79,6 @@ body {
   width: 100%;
   height: 1px;
   background-color: var(--dim-border-color);
-  margin: 20px 0;
 }
 
 .component-preview-contents {
@@ -85,10 +90,27 @@ body {
   border: 1px solid var(--dim-border-color);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
   box-sizing: border-box;
   margin: 20px 0;
-  max-width: 75vw;
+  width: 75vw;
+}
+
+.component-preview-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-top-right-radius: .5em;
+  border-top-left-radius: .5em;
+  background-image: linear-gradient(
+    to bottom,
+    var(--highlight-color-main),
+    var(--highlight-color-secondary)
+  );
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 /* component info styles */

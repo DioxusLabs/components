@@ -35,7 +35,7 @@ pub(super) fn Demo() -> Element {
                 if let Some(date) = selected_date() {
                     p { style: "font-weight: bold;", "Selected date: {date}" }
                 } else {
-                    p { style: "color: #666;", "No date selected" }
+                    p { "No date selected" }
                 }
             }
         }

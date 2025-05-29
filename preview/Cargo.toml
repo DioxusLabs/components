@@ -13,3 +13,4 @@ syntect = "5.0"
 
 [features]
 web = ["dioxus/web"]
+desktop = ["dioxus/desktop"]
