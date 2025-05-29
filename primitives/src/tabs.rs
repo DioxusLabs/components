@@ -221,6 +221,9 @@ pub struct TabContentProps {
 
     id: Option<String>,
     class: Option<String>,
+    #[props(extends = GlobalAttributes)]
+    #[props(extends = div)]
+    attributes: Vec<Attribute>,
 
     children: Element,
 }
@@ -239,6 +242,7 @@ pub fn TabContent(props: TabContentProps) -> Element {
             tabindex: "0",
             "data-state": if selected() { "active" } else { "inactive" },
             hidden: !selected(),
+            ..props.attributes,
 
             {props.children}
         }

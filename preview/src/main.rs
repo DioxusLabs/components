@@ -69,52 +69,52 @@ fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
 fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCode) -> Element {
     let mut collapsed = use_signal(|| true);
     rsx! {
-         Tabs { class: "tabs", default_value: "main.rs",
-                            div { class: "tabs-list",
-                                TabTrigger {
-                                    class: "tabs-trigger",
-                                    value: "main.rs",
-                                    index: 0usize,
-                                    "main.rs"
-                                }
-                                TabTrigger {
-                                    class: "tabs-trigger",
-                                    value: "style.css",
-                                    index: 1usize,
-                                    "style.css"
-                                }
-                            }
-        div {
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            flex_direction: "column",
-            justify_content: "center",
-            align_items: "center",
-            TabContent { class: "tabs-content", value: "main.rs",
-                CodeBlock { source: rs_highlighted, collapsed: collapsed() }
+        Tabs { class: "tabs", default_value: "main.rs",
+            div { class: "tabs-list",
+                TabTrigger {
+                    class: "tabs-trigger",
+                    value: "main.rs",
+                    index: 0usize,
+                    "main.rs"
+                }
+                TabTrigger {
+                    class: "tabs-trigger",
+                    value: "style.css",
+                    index: 1usize,
+                    "style.css"
+                }
             }
-            TabContent { class: "tabs-content", value: "style.css",
-                CodeBlock { source: css_highlighted, collapsed: collapsed() }
-            }
-            button {
+            div {
                 width: "100%",
-                height: "2rem",
-                color: "var(--text-color)",
-                background_color: "var(--background-color)",
-                border: "none",
-                text_align: "center",
-                onclick: move |_| {
-                    collapsed.toggle();
-                },
-                if collapsed() {
-                    "↓"
-                } else {
-                    "↑"
+                height: "100%",
+                display: "flex",
+                flex_direction: "column",
+                justify_content: "center",
+                align_items: "center",
+                TabContent { class: "tabs-content", value: "main.rs", max_width: "100%",
+                    CodeBlock { source: rs_highlighted, collapsed: collapsed() }
+                }
+                TabContent { class: "tabs-content", value: "style.css", max_width: "100%",
+                    CodeBlock { source: css_highlighted, collapsed: collapsed() }
+                }
+                button {
+                    width: "100%",
+                    height: "2rem",
+                    color: "var(--text-color)",
+                    background_color: "var(--background-color)",
+                    border: "none",
+                    text_align: "center",
+                    onclick: move |_| {
+                        collapsed.toggle();
+                    },
+                    if collapsed() {
+                        "↓"
+                    } else {
+                        "↑"
+                    }
                 }
             }
         }
-    }
     }
 }
 
