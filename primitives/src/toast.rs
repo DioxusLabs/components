@@ -322,7 +322,12 @@ impl Toasts {
 
 // Hook to use the toast API
 pub fn use_toast() -> Toasts {
-    let ctx = use_context::<ToastCtx>();
+    use_hook(consume_toast)
+}
+
+// Consume the toast API from the context
+pub fn consume_toast() -> Toasts {
+    let ctx = consume_context::<ToastCtx>();
     let add_toast = ctx.add_toast;
     let remove_toast = ctx.remove_toast;
 
