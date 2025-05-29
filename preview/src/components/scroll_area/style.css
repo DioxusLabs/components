@@ -10,6 +10,8 @@
 }
 
 .scroll-demo-section {
+    max-width: 30rem;
+    max-height: 30rem;
     margin-bottom: 30px;
 }
 
@@ -22,8 +24,6 @@
     border: 1px solid var(--border-color);
     border-radius: 4px;
     background: var(--background-color);
-    max-width: 20rem;
-    max-height: 20rem;
 }
 
 /* Vertical scroll example */
