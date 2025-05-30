@@ -1,7 +1,7 @@
 /* Calendar Container */
 .calendar {
     width: 100%;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--dim-border-color);
     border-radius: 8px;
     background-color: var(--background-color);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -14,7 +14,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 12px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--dim-border-color);
 }
 
 .calendar-nav-title {

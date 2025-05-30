@@ -35,7 +35,11 @@ pub(super) fn Demo() -> Element {
             href: asset!("/src/components/toolbar/style.css"),
         }
         div { class: "toolbar-example",
-            h3 { "Text Formatting Toolbar" }
+            h3 {
+                width: "100%",
+                text_align: "center",
+                "Text Formatting Toolbar"
+            }
             Toolbar { class: "toolbar", aria_label: "Text formatting",
                 div { class: "toolbar-group",
                     ToolbarButton {

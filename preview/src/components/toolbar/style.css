@@ -3,7 +3,7 @@
     max-width: 100%;
     margin: 20px;
     padding: 10px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--dim-border-color);
     border-radius: .5em;
     background-color: var(--background-color);
 }
@@ -21,7 +21,7 @@
 
 .toolbar button {
     padding: 8px 12px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--dim-border-color);
     border-radius: 4px;
     color: var(--text-color);
     background-color: var(--background-color);
@@ -59,7 +59,7 @@
 .toolbar-content {
     margin-top: 20px;
     padding: 20px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--dim-border-color);
     border-radius: 4px;
     background-color: var(--background-color);
 }

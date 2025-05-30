@@ -21,7 +21,7 @@
 }
 
 .demo-scroll-area {
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--dim-border-color);
     border-radius: 4px;
     background: var(--background-color);
 }
