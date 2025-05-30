@@ -4,10 +4,16 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-dioxus.workspace = true
+dioxus = { workspace = true, features = ["router"] }
 dioxus-primitives.workspace = true
+tracing.workspace = true
+
+[build-dependencies]
+syntect = "5.0"
+pulldown-cmark = "0.13.0"
 
 [features]
-default = ["desktop"]
 web = ["dioxus/web"]
 desktop = ["dioxus/desktop"]
+fullstack = ["dioxus/fullstack"]
+server = ["dioxus/server"]

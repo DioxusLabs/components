@@ -1,12 +1,14 @@
 #hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 50px;
   margin: 0;
-  background: rgb(11,104,195);
-  background: linear-gradient(90deg, rgba(11,104,195,1) 0%, rgba(5,22,154,1) 100%); 
 }
 
 #hero>h1, #hero>h2 {
-  color: #ffffff;
+  color: var(--text-color);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 1.5rem;
   font-weight: 500;
@@ -26,4 +28,27 @@
 #hero-separator {
   margin-bottom: 50px;
   height: 2px;
+}
+
+#hero-search-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+}
+
+#hero-search-input {
+  width: 100%;
+  margin: 20px 0;
+  padding: 10px;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--brighter-background-color);
+  box-sizing: border-box;
+  margin: 2em auto;
+  padding: 10px 20px;
 }

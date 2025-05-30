@@ -3,7 +3,7 @@ use dioxus_lib::prelude::*;
 #[derive(Props, Clone, PartialEq)]
 pub struct ProgressProps {
     /// The current progress value, between 0 and max
-    value: Option<ReadOnlySignal<f64>>,
+    value: ReadOnlySignal<Option<f64>>,
 
     /// The maximum value. Defaults to 100
     #[props(default = ReadOnlySignal::new(Signal::new(100.0)))]
@@ -19,9 +19,9 @@ pub struct ProgressProps {
 pub fn Progress(props: ProgressProps) -> Element {
     // Calculate percentage for styling and "data-state"
     let percentage = use_memo(move || {
-        props.value.map(|v| {
+        props.value.cloned().map(|v| {
             let max = (props.max)();
-            (v() / max) * 100.0
+            (v / max) * 100.0
         })
     });
 
@@ -35,9 +35,9 @@ pub fn Progress(props: ProgressProps) -> Element {
             role: "progressbar",
             "aria-valuemin": 0,
             "aria-valuemax": props.max,
-            "aria-valuenow": props.value.map(|v| v()),
+            "aria-valuenow": props.value.cloned(),
             "data-state": state,
-            "data-value": props.value.map(|v| v().to_string()),
+            "data-value": props.value.cloned().map(|v| v.to_string()),
             "data-max": props.max,
             style: percentage().map(|p| format!("--progress-value: {}%", p)),
             ..props.attributes,

@@ -195,12 +195,12 @@ fn BubbleInput(
             id,
             type: "checkbox",
             aria_hidden: "true",
-            tabindex: -1,
+            tabindex: "-1",
             position: "absolute",
             pointer_events: "none",
-            opacity: 0,
-            margin: 0,
-            style: "transform: 'translateX(-100%)';",
+            opacity: "0",
+            margin: "0",
+            transform: "translateX(-100%)",
 
             // Default checked
             checked: default_checked != CheckboxState::Unchecked,

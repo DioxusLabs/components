@@ -69,14 +69,16 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
     let portal = use_portal();
 
     // Create context first so we can reference it in the callbacks
+    let add_toast = use_callback(|_| {}); // Temporary placeholder
+    let remove_toast = use_callback(|_| {}); // Temporary placeholder
     let ctx = ToastCtx {
         toasts,
-        add_toast: Callback::new(|_| {}),    // Temporary placeholder
-        remove_toast: Callback::new(|_| {}), // Temporary placeholder
+        add_toast,
+        remove_toast,
     };
 
     // Remove toast callback
-    let remove_toast = Callback::new(move |id: usize| {
+    let remove_toast = use_callback(move |id: usize| {
         let mut toasts_vec = toasts.write();
         if let Some(pos) = toasts_vec.iter().position(|t| t.id == id) {
             toasts_vec.remove(pos);
@@ -84,7 +86,7 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
     });
 
     // Add toast callback
-    let add_toast = Callback::new(
+    let add_toast = use_callback(
         move |(title, description, toast_type, duration, permanent): (
             String,
             Option<String>,
@@ -166,7 +168,7 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
                 // Render all toasts
                 for toast in toast_list().iter() {
                     Toast {
-                        key: format!("{}", toast.id),
+                        key: "{toast.id}",
                         id: toast.id,
                         title: toast.title.clone(),
                         description: toast.description.clone(),
@@ -322,7 +324,12 @@ impl Toasts {
 
 // Hook to use the toast API
 pub fn use_toast() -> Toasts {
-    let ctx = use_context::<ToastCtx>();
+    use_hook(consume_toast)
+}
+
+// Consume the toast API from the context
+pub fn consume_toast() -> Toasts {
+    let ctx = consume_context::<ToastCtx>();
     let add_toast = ctx.add_toast;
     let remove_toast = ctx.remove_toast;
 
