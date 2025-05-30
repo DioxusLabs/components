@@ -17,7 +17,7 @@
 }
 
 .switch[data-state="checked"] {
-    background-color: rgb(34, 197, 94);
+    background-color: var(--contrast-background-color);
 }
 
 .switch-thumb {
@@ -34,6 +34,7 @@
 
 .switch[data-state="checked"] .switch-thumb {
     transform: translateX(19px);
+    background-color: var(--background-color);
 }
 
 /* Only apply disabled styles when data-disabled is "true" */

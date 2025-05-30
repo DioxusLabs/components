@@ -4,7 +4,7 @@
     margin: 8px 16px;
     color: var(--text-color);
     background-color: var(--background-color);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--dim-border-color);
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;

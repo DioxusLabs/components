@@ -16,7 +16,7 @@
 
 .progress-indicator {
     height: 100%;
-    background-color: #3b82f6;
+    background-color: var(--contrast-background-color);
     transition: width 250ms ease;
     width: var(--progress-value, 0%);
     /* Use CSS variable for width */
