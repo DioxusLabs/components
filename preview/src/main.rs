@@ -26,7 +26,7 @@ fn App() -> Element {
 
 #[derive(Routable, Clone, PartialEq)]
 pub(crate) enum Route {
-    #[layout(Navigation)]
+    #[layout(NavigationLayout)]
     #[route("/")]
     Home,
     #[route("/component/:component_name")]
@@ -34,12 +34,43 @@ pub(crate) enum Route {
 }
 
 #[component]
-fn Navigation() -> Element {
+fn NavigationLayout() -> Element {
     rsx! {
+        Navbar {}
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
         document::Link { rel: "stylesheet", href: asset!("/src/components/tabs/style.css") }
         Outlet::<Route> {}
+    }
+}
+
+#[component]
+fn Navbar() -> Element {
+    rsx! {
+        nav { class: "navbar",
+            Link {
+                to: Route::Home,
+                class: "navbar-brand",
+                img {
+                    src: asset!("/assets/dioxus_color.svg"),
+                    alt: "Dioxus Logo",
+                    width: "32",
+                    height: "32",
+                }
+            }
+            div { class: "navbar-links",
+                Link {
+                    to: Route::Home,
+                    class: "navbar-link",
+                    "Home"
+                }
+                Link {
+                    to: "https://docs.rs/crate/dioxus-components/latest",
+                    class: "navbar-link",
+                    "docs.rs"
+                }
+            }
+        }
     }
 }
 
@@ -93,6 +124,7 @@ fn CopyIcon() -> Element {
 #[component]
 fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCode) -> Element {
     let mut collapsed = use_signal(|| true);
+
     rsx! {
         Tabs { class: "tabs", default_value: "main.rs",
             border_bottom_left_radius: "0.5rem",
@@ -201,34 +233,61 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
         }
     }
 }
+
 #[component]
 fn Home() -> Element {
+    let mut search = use_signal(|| String::new());
+
     rsx! {
         div { id: "hero",
             h1 { "Dioxus Primitives" }
-            h2 { "Accessible, unstyled foundational components for Dioxus." }
+            h2 {
+                b{ "Accessible" }
+                ", "
+                i { "unstyled" }
+                " foundational components for Dioxus."
+            }
+            div {
+                id: "hero-search-container",
+                input {
+                    id: "hero-search-input",
+                    type: "search",
+                    placeholder: "Search components...",
+                    value: search,
+                    oninput: move |e| {
+                        search.set(e.value());
+                    },
+                }
+            }
         }
-        Separator { id: "hero-separator", class: "separator", horizontal: true }
-        ComponentGallery {}
+        ComponentGallery {
+            search
+        }
     }
 }
+
 #[component]
-fn ComponentGallery() -> Element {
+fn ComponentGallery(search: String) -> Element {
     rsx! {
         div { class: "masonry-with-columns",
-            for ComponentDemoData { component : Comp , name , .. } in components::DEMOS.iter().cloned() {
-                div { class: "masonry-preview-frame", position: "relative",
-                    GotoIcon {
-                        class: "goto-icon",
-                        position: "absolute",
-                        margin: "0.5rem",
-                        top: "0",
-                        right: "0",
-                        to: Route::ComponentDemo {
-                            component_name: name.to_string(),
-                        },
+            for ComponentDemoData { component : Comp, name, .. } in components::DEMOS.iter().cloned() {
+                if search.is_empty() || name.to_lowercase().contains(&search.to_lowercase()) {
+                    div { class: "masonry-preview-frame", position: "relative",
+                        h3 { class: "component-title", {name.replace("_", " ")} }
+                        GotoIcon {
+                            class: "goto-icon",
+                            position: "absolute",
+                            margin: "0.5rem",
+                            top: "0",
+                            right: "0",
+                            to: Route::ComponentDemo {
+                                component_name: name.to_string(),
+                            },
+                        }
+                        div { class: "masonry-component-frame",
+                            Comp {}
+                        }
                     }
-                    Comp {}
                 }
             }
         }

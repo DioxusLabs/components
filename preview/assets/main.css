@@ -1,9 +1,3 @@
-body {
-  margin: 0;
-  padding: 0;
-  color: var(--text-color);
-}
-
 /* Theme style variables */
 :root {
   --highlight-color-main: #dd7230;
@@ -74,7 +68,48 @@ body {
 }
 
 body {
+  margin: 0;
+  padding: 0;
+  color: var(--text-color);
   background-color: var(--background-color);
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  padding: 1rem;
+  top: 0;
+  z-index: 1000;
+  background-color: var(--brighter-background-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-link {
+  color: var(--text-color);
+  text-decoration: none;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 0.5em 1em;
+}
+
+.navbar-link:hover {
+  color: var(--dim-text-color);
+}
+
+.navbar-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.navbar-brand {
+  display: flex;
+  text-decoration: none;
+  align-items: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: var(--text-color);
 }
 
 /* Code block styles */
@@ -126,6 +161,12 @@ body {
 }
 
 /* Demo frame styles */
+.component-title {
+  font-size: 1.5em;
+  margin: 0.5em 0;
+  text-transform: capitalize;
+}
+
 .component-preview {
   display: flex;
   flex-direction: column;
@@ -198,7 +239,6 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   min-height: 10rem;
   max-width: calc(100vw - 2rem);
   margin: 0 1rem 1rem 0;
@@ -208,4 +248,13 @@ body {
   background-color: var(--dim-background-color);
   border: 1px solid var(--dim-border-color);
   box-sizing: border-box;
+}
+
+.masonry-with-columns .masonry-component-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
 }

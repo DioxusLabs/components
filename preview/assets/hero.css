@@ -1,4 +1,8 @@
 #hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 50px;
   margin: 0;
 }
@@ -24,4 +28,27 @@
 #hero-separator {
   margin-bottom: 50px;
   height: 2px;
+}
+
+#hero-search-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+}
+
+#hero-search-input {
+  width: 100%;
+  margin: 20px 0;
+  padding: 10px;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--brighter-background-color);
+  box-sizing: border-box;
+  margin: 2em auto;
+  padding: 10px 20px;
 }
