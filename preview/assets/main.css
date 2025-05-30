@@ -25,6 +25,12 @@ body {
     --dim-border-color: rgb(43, 43, 43);
     --muted-text-color: #b0b0b0;
     --focused-border-color: #2b7fff;
+    --success-background-color: #ecfdf5;
+    --success-text-color: #10b981;
+    --warning-background-color: #fffbeb;
+    --warning-text-color: #f59e0b;
+    --error-background-color: #fef2f2;
+    --error-text-color: #ef4444;
   }
 }
 
@@ -42,6 +48,12 @@ body {
     --dim-border-color: rgb(43, 43, 43);
     --muted-text-color: #b0b0b0;
     --focused-border-color: #2b7fff;
+    --success-background-color: #02271c;
+    --success-text-color: #b6fae3;
+    --warning-background-color: #342203;
+    --warning-text-color: #feeac7;
+    --error-background-color: #360e0e;
+    --error-text-color: #e0baba;
   }
 }
 
