@@ -1,4 +1,4 @@
-use crate::use_controlled;
+use crate::{use_controlled, use_effect_cleanup};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone, Copy)]
@@ -229,7 +229,7 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
     });
 
     // Cleanup when the component is unmounted
-    use_drop(move || {
+    use_effect_cleanup(move || {
         ctx.item_count -= 1;
         if (ctx.current_focus)() == Some((props.index)()) {
             ctx.set_focus(None);

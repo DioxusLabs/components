@@ -1,0 +1,23 @@
+#tos-check {
+    width: 25px;
+    height: 25px;
+    margin: 8px 16px;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    border: 1px solid var(--dim-border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#tos-check:hover {
+    color: var(--text-color);
+    background-color: var(--hover-background-color);
+    transition: background-color 0.2s ease;
+}
+
+#tos-check:focus {
+    color: var(--text-color);
+    background-color: var(--focused-background-color);
+    transition: background-color 0.2s ease;
+}

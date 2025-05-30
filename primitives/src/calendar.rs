@@ -1,4 +1,4 @@
-use crate::{use_controlled, use_unique_id};
+use crate::use_unique_id;
 use dioxus_lib::prelude::*;
 use std::fmt;
 
@@ -139,22 +139,15 @@ struct CalendarContext {
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarProps {
     /// The selected date
-    selected_date: Option<Signal<Option<CalendarDate>>>,
-
-    /// Default selected date
     #[props(default)]
-    default_selected_date: Option<CalendarDate>,
+    selected_date: ReadOnlySignal<Option<CalendarDate>>,
 
     /// Callback when selected date changes
     #[props(default)]
     on_date_change: Callback<Option<CalendarDate>>,
 
     /// The month being viewed
-    view_date: Option<Signal<CalendarDate>>,
-
-    /// Default view date (defaults to current month)
-    #[props(default = CalendarDate::today())]
-    default_view_date: CalendarDate,
+    view_date: ReadOnlySignal<CalendarDate>,
 
     /// Callback when view date changes
     #[props(default)]
@@ -202,23 +195,9 @@ pub struct CalendarProps {
 // Main Calendar component
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
-    // Controlled state for selected date
-    let (selected_date, set_selected_date) = use_controlled(
-        props.selected_date,
-        props.default_selected_date,
-        props.on_date_change,
-    );
-
-    // Controlled state for view date
-    let (view_date, set_view_date) = use_controlled(
-        props.view_date,
-        props.default_view_date,
-        props.on_view_change,
-    );
-
     // State for calendar mode
     let mut mode = use_signal(|| props.mode);
-    let set_mode = Callback::new(move |new_mode: CalendarMode| {
+    let set_mode = use_callback(move |new_mode: CalendarMode| {
         mode.set(new_mode);
         props.on_mode_change.call(new_mode);
     });
@@ -231,10 +210,10 @@ pub fn Calendar(props: CalendarProps) -> Element {
 
     // Create context provider for child components
     let _ctx = use_context_provider(|| CalendarContext {
-        selected_date: selected_date.into(),
-        set_selected_date,
-        view_date: view_date.into(),
-        set_view_date,
+        selected_date: props.selected_date,
+        set_selected_date: props.on_date_change.clone(),
+        view_date: props.view_date,
+        set_view_date: props.on_view_change.clone(),
         mode: mode.into(),
         set_mode,
         disabled: props.disabled,
@@ -305,13 +284,15 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
     let ctx: CalendarContext = use_context();
 
     // Handle navigation to previous month
-    let handle_prev_month = move |_| {
+    let handle_prev_month = move |e: Event<MouseData>| {
+        e.prevent_default();
         let current_view = (ctx.view_date)();
         ctx.set_view_date.call(current_view.prev_month());
     };
 
     // Handle navigation to next month
-    let handle_next_month = move |_| {
+    let handle_next_month = move |e: Event<MouseData>| {
+        e.prevent_default();
         let current_view = (ctx.view_date)();
         ctx.set_view_date.call(current_view.next_month());
     };
@@ -344,9 +325,10 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
             button {
                 class: "calendar-nav-prev",
                 aria_label: "Previous month",
+                r#type: "button",
                 onclick: handle_prev_month,
                 disabled: (ctx.disabled)(),
-                "←"
+                "⬅"
             }
 
             div { class: "calendar-nav-title", {month_year} }
@@ -354,9 +336,10 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
             button {
                 class: "calendar-nav-next",
                 aria_label: "Next month",
+                r#type: "button",
                 onclick: handle_next_month,
                 disabled: (ctx.disabled)(),
-                "→"
+                "⮕"
             }
         }
     }
@@ -393,7 +376,6 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
     let days_grid = use_memo(move || {
         // Get the current view date from context
         let view_date = (ctx.view_date)();
-        println!("Generating grid for {}-{}", view_date.year, view_date.month);
         let days_in_month = view_date.days_in_month();
 
         // For a proper calendar grid, we need to determine the day of week for the first day
@@ -465,7 +447,11 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                         if let Some(day) = day_opt {
                             button {
                                 class: "calendar-grid-cell",
-                                onclick: move |_| handle_day_select(day),
+                                onclick: move |e| {
+                                    e.prevent_default();
+                                    handle_day_select(day);
+                                },
+                                r#type: "button",
                                 "data-today": day == (ctx.view_date)().day,
                                 "data-selected": (ctx.selected_date)()
                                     .is_some_and(|d| {
@@ -531,6 +517,7 @@ pub fn CalendarCell(props: CalendarCellProps) -> Element {
             class: "calendar-grid-cell {state_class}",
             "aria-selected": props.is_selected,
             "aria-disabled": props.is_disabled,
+            r#type: "button",
             disabled: props.is_disabled,
             "data-selected": props.is_selected,
             "data-today": props.is_today,

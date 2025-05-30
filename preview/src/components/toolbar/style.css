@@ -1,0 +1,84 @@
+.toolbar-example {
+    width: 35rem;
+    max-width: 100%;
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid var(--dim-border-color);
+    border-radius: .5em;
+    background-color: var(--background-color);
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    padding: 5px;
+    background-color: var(--brighter-background-color);
+    border-radius: 4px;
+}
+
+.toolbar button {
+    padding: 8px 12px;
+    border: 1px solid var(--dim-border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.toolbar button:hover {
+    background-color: var(--hover-background-color);
+}
+
+.toolbar button:focus {
+    outline: 2px solid #0066cc;
+    outline-offset: 2px;
+}
+
+.toolbar button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.toolbar-group {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.toolbar-separator {
+    width: 1px;
+    height: 24px;
+    background-color: var(--dim-border-color);
+    margin: 0 5px;
+}
+
+.toolbar-content {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid var(--dim-border-color);
+    border-radius: 4px;
+    background-color: var(--background-color);
+}
+
+.toolbar-content p {
+    margin: 0;
+    padding: 0;
+}
+
+/* For text formatting buttons */
+.toolbar-bold {
+    font-weight: bold;
+}
+
+.toolbar-italic {
+    font-style: italic;
+}
+
+.toolbar-underline {
+    text-decoration: underline;
+}

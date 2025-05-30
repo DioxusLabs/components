@@ -1,4 +1,4 @@
-use crate::{use_id_or, use_unique_id};
+use crate::{use_effect_cleanup, use_id_or, use_unique_id};
 use dioxus_lib::prelude::*;
 use std::rc::Rc;
 
@@ -257,7 +257,7 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
         on_trigger_click: props.on_trigger_click,
     });
 
-    use_drop(move || ctx.unregister_item());
+    use_effect_cleanup(move || ctx.unregister_item());
 
     // Open this item if we're set as default.
     use_hook(move || {

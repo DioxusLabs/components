@@ -1,4 +1,4 @@
-use crate::use_controlled;
+use crate::{use_controlled, use_effect_cleanup};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone, Copy)]
@@ -147,7 +147,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
         ctx.item_count += 1;
     });
 
-    use_drop(move || {
+    use_effect_cleanup(move || {
         ctx.item_count -= 1;
         if (ctx.current_focus)() == Some((props.index)()) {
             ctx.set_focus(None);
@@ -221,6 +221,9 @@ pub struct TabContentProps {
 
     id: Option<String>,
     class: Option<String>,
+    #[props(extends = GlobalAttributes)]
+    #[props(extends = div)]
+    attributes: Vec<Attribute>,
 
     children: Element,
 }
@@ -239,6 +242,7 @@ pub fn TabContent(props: TabContentProps) -> Element {
             tabindex: "0",
             "data-state": if selected() { "active" } else { "inactive" },
             hidden: !selected(),
+            ..props.attributes,
 
             {props.children}
         }

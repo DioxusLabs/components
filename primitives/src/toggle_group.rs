@@ -1,4 +1,4 @@
-use crate::{toggle::Toggle, use_controlled};
+use crate::{toggle::Toggle, use_controlled, use_effect_cleanup};
 use dioxus_lib::prelude::*;
 use std::{collections::HashSet, rc::Rc};
 
@@ -219,7 +219,7 @@ pub fn ToggleItem(props: ToggleItemProps) -> Element {
 
     // un/register item with ctx
     use_hook(move || ctx.register_item());
-    use_drop(move || ctx.unregister_item());
+    use_effect_cleanup(move || ctx.unregister_item());
 
     // We need a kept-alive signal to control the toggle.
     let mut pressed = use_signal(|| ctx.is_pressed(props.index));
