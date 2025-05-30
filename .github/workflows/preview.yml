@@ -1,0 +1,55 @@
+# .github/workflows/preview.yml
+name: Deploy PR previews
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_INCREMENTAL: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev libxdo-dev
+          version: 1.0
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: "true"
+          cache-on-failure: "false"
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Install CLI
+        run: cargo install dioxus-cli --git https://github.com/ealmloff/dioxus --branch fix-bundle
+      - name: Set base path
+        run: |
+            echo "[application]
+            name = \"Dioxus Preview\"
+            version = \"0.1.0\"
+
+            [web.app]
+            base_path = \"components/pr-preview/pr-${{ github.event.pull_request.number }}/\"" > preview/Dioxus.toml
+      - name: Build
+        run: cd preview && dx build --platform web --release
+      - name: Copy output
+        run: cp -r target/dx/preview/release/web/public docs
+      - name: Add gh pages 404
+        run: cp docs/index.html docs/404.html
+      - name: Deploy preview
+        uses: rossjrw/pr-preview-action@v1
+        with:
+            preview-branch: gh-pages # The branch the action should deploy to.
+            source-dir: docs # The folder the action should deploy.
