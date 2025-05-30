@@ -37,7 +37,13 @@ jobs:
       - name: Install CLI
         run: cargo install dioxus-cli --git https://github.com/ealmloff/dioxus --branch fix-bundle
       - name: Set base path
-        run: echo "[application]\nname = \"Dioxus Preview\"\nversion = \"0.1.0\"\n\n[web.app]\nbase_path = \"components/pr-preview/pr-${{ github.event.pull_request.number }}/\"" > preview/Dioxus.toml
+        run: |
+            echo "[application]
+            name = \"Dioxus Preview\"
+            version = \"0.1.0\"
+
+            [web.app]
+            base_path = \"components/pr-preview/pr-${{ github.event.pull_request.number }}/\"" > preview/Dioxus.toml
       - name: Build
         run: cd preview && dx build --platform web --release
       - name: Copy output
