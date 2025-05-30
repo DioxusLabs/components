@@ -70,6 +70,8 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
     let mut collapsed = use_signal(|| true);
     rsx! {
         Tabs { class: "tabs", default_value: "main.rs",
+            border_bottom_left_radius: "0.5rem",
+            border_bottom_right_radius: "0.5rem",
             div { class: "tabs-list",
                 TabTrigger {
                     class: "tabs-trigger",
@@ -101,7 +103,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     width: "100%",
                     height: "2rem",
                     color: "var(--text-color)",
-                    background_color: "var(--background-color)",
+                    background_color: "rgba(0, 0, 0, 0)",
                     border_radius: "0 0 0.5rem 0.5rem",
                     border: "none",
                     text_align: "center",

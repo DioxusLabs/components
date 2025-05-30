@@ -1,15 +1,18 @@
 use std::time::Duration;
 use dioxus::prelude::*;
 use dioxus_primitives::toast::{ToastOptions, ToastProvider, use_toast};
+
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
         ToastProvider { ToastButton {} }
     }
 }
+
 #[component]
 fn ToastButton() -> Element {
     let toast_api = use_toast();
+
     rsx! {
         document::Link {
             rel: "stylesheet",
