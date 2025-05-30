@@ -110,7 +110,7 @@ pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
                 .style
                 .clone()
                 .unwrap_or_else(|| {
-                    "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1001; background: white; outline: none;"
+                    "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1001;"
                         .to_string()
                 }),
             autofocus: true,

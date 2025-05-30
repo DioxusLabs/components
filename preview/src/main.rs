@@ -301,21 +301,3 @@ fn GotoIcon(mut props: LinkProps) -> Element {
     };
     Link(props)
 }
-
-#[component]
-fn AlertDialogExample() -> Element {
-    let mut open = use_signal(|| false);
-    rsx! {
-        button { onclick: move |_| open.set(true), "Show Alert Dialog" }
-        AlertDialogRoot { open: Some(open), on_open_change: move |v| open.set(v),
-            AlertDialogContent {
-                AlertDialogTitle { "Delete item" }
-                AlertDialogDescription { "Are you sure you want to delete this item? This action cannot be undone." }
-                AlertDialogActions {
-                    AlertDialogCancel { on_click: move |_| println!("Cancel clicked"), "Cancel" }
-                    AlertDialogAction { on_click: move |_| println!("Delete clicked"), "Delete" }
-                }
-            }
-        }
-    }
-}

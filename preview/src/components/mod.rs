@@ -18,6 +18,7 @@ examples!(
     accordion,
     aspect_ratio,
     avatar,
+    alert_dialog,
     calendar,
     context_menu,
     checkbox,
