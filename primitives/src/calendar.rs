@@ -1,4 +1,4 @@
-use crate::{use_controlled, use_unique_id};
+use crate::use_unique_id;
 use dioxus_lib::prelude::*;
 use std::fmt;
 
@@ -140,14 +140,14 @@ struct CalendarContext {
 pub struct CalendarProps {
     /// The selected date
     #[props(default)]
-    selected_date: Option<CalendarDate>,
+    selected_date: ReadOnlySignal<Option<CalendarDate>>,
 
     /// Callback when selected date changes
     #[props(default)]
     on_date_change: Callback<Option<CalendarDate>>,
 
     /// The month being viewed
-    view_date: CalendarDate,
+    view_date: ReadOnlySignal<CalendarDate>,
 
     /// Callback when view date changes
     #[props(default)]
@@ -197,7 +197,7 @@ pub struct CalendarProps {
 pub fn Calendar(props: CalendarProps) -> Element {
     // State for calendar mode
     let mut mode = use_signal(|| props.mode);
-    let set_mode = Callback::new(move |new_mode: CalendarMode| {
+    let set_mode = use_callback(move |new_mode: CalendarMode| {
         mode.set(new_mode);
         props.on_mode_change.call(new_mode);
     });
@@ -210,9 +210,9 @@ pub fn Calendar(props: CalendarProps) -> Element {
 
     // Create context provider for child components
     let _ctx = use_context_provider(|| CalendarContext {
-        selected_date: ReadOnlySignal::new(Signal::new(props.selected_date.clone())),
+        selected_date: props.selected_date,
         set_selected_date: props.on_date_change.clone(),
-        view_date: ReadOnlySignal::new(Signal::new(props.view_date.clone())),
+        view_date: props.view_date,
         set_view_date: props.on_view_change.clone(),
         mode: mode.into(),
         set_mode,
@@ -328,7 +328,7 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
                 r#type: "button",
                 onclick: handle_prev_month,
                 disabled: (ctx.disabled)(),
-                "←"
+                "⬅"
             }
 
             div { class: "calendar-nav-title", {month_year} }
@@ -339,7 +339,7 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
                 r#type: "button",
                 onclick: handle_next_month,
                 disabled: (ctx.disabled)(),
-                "→"
+                "⮕"
             }
         }
     }
@@ -376,7 +376,6 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
     let days_grid = use_memo(move || {
         // Get the current view date from context
         let view_date = (ctx.view_date)();
-        println!("Generating grid for {}-{}", view_date.year, view_date.month);
         let days_in_month = view_date.days_in_month();
 
         // For a proper calendar grid, we need to determine the day of week for the first day

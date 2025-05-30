@@ -1,0 +1,58 @@
+.menubar {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--dim-border-color);
+    border-radius: 4px;
+    background: var(--background-color);
+}
+
+.menubar-menu {
+    position: relative;
+}
+
+.menubar-trigger {
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.menubar-trigger:hover {
+    background: var(--hover-background-color);
+    border-radius: 4px;
+}
+
+.menubar-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    background: var(--background-color);
+    border: 1px solid var(--dim-border-color);
+    border-radius: 4px;
+    padding: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.menubar-menu[data-state="open"] .menubar-content {
+    display: block;
+}
+
+.menubar-item {
+    display: block;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.menubar-item:hover {
+    background: var(--hover-background-color);
+}
+
+[data-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

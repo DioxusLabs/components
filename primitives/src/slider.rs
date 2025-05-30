@@ -1,8 +1,8 @@
 use crate::use_controlled;
+use dioxus_lib::html::geometry::Pixels;
+use dioxus_lib::html::geometry::euclid::Rect;
 use dioxus_lib::prelude::*;
 use std::ops::RangeInclusive;
-use dioxus_lib::html::geometry::euclid::Rect;
-use dioxus_lib::html::geometry::Pixels;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SliderValue {
@@ -77,8 +77,6 @@ pub fn Slider(props: SliderProps) -> Element {
     };
     let range = props.min..=props.max;
 
-
-
     let mut dragging = use_signal(|| false);
 
     let ctx = use_context_provider(|| SliderContext {
@@ -94,8 +92,8 @@ pub fn Slider(props: SliderProps) -> Element {
         dragging: dragging.into(),
     });
 
-
-    let rect = use_signal(|| None);
+    let mut rect = use_signal(|| None);
+    let mut div_element = use_signal(|| None);
 
     rsx! {
         div {
@@ -103,14 +101,22 @@ pub fn Slider(props: SliderProps) -> Element {
             "data-disabled": props.disabled,
             "data-orientation": orientation,
 
-            onmounted: move |evt| {
-                let mut rect = rect.clone();
+            onmounted: move |evt| async move {
                 // Get the bounding rect of the slider
-                spawn(async move {
-                    if let Ok(r) = evt.data().get_client_rect().await {
-                        rect.set(Some(r));
-                    }
-                });
+                if let Ok(r) = evt.data().get_client_rect().await {
+                    rect.set(Some(r));
+                }
+                div_element.set(Some(evt.data()));
+            },
+            onresize: move |_| async move {
+                // Update the rect on resize
+                let Some(div_element) = div_element() else {
+                    tracing::warn!("Slider div element is not (yet) set");
+                    return;
+                };
+                if let Ok(r) = div_element.get_client_rect().await {
+                    rect.set(Some(r));
+                }
             },
             onmousemove: move |e| {
                 if !dragging() || (ctx.disabled)() {
@@ -143,7 +149,7 @@ pub fn Slider(props: SliderProps) -> Element {
                 if (ctx.disabled)() {
                     return;
                 }
-                                let Some(rect) = rect() else {
+                let Some(rect) = rect() else {
                     tracing::warn!("Slider rect is not (yet) set");
                     return;
                 };
@@ -307,11 +313,11 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
 fn linear_scale(input: [f64; 2], output: [f64; 2]) -> impl Fn(f64) -> f64 {
     let [in_min, in_max] = input;
     let [out_min, out_max] = output;
-    
+
     move |x: f64| {
         // Calculate position in input range (0.0 ~ 1.0)
         let normalized = (x - in_min) / (in_max - in_min);
-        
+
         // Convert to output range
         out_min + normalized * (out_max - out_min)
     }
@@ -330,11 +336,17 @@ fn linear_scale(input: [f64; 2], output: [f64; 2]) -> impl Fn(f64) -> f64 {
 /// # Returns
 ///
 /// The calculated value within the range
-fn get_value_from_pointer(pointer_position: f64, rect: &Rect<f64, Pixels>, min: f64, max: f64, inverted: bool) -> f64 {
+fn get_value_from_pointer(
+    pointer_position: f64,
+    rect: &Rect<f64, Pixels>,
+    min: f64,
+    max: f64,
+    inverted: bool,
+) -> f64 {
     let input = [0.0, rect.width()];
     let output = if !inverted { [min, max] } else { [max, min] };
     let value = linear_scale(input, output);
-    
+
     value(pointer_position - rect.origin.x)
 }
 

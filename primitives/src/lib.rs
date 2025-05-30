@@ -1,3 +1,5 @@
+use std::sync::atomic::{AtomicUsize, Ordering};
+
 use dioxus_lib::prelude::*;
 
 pub mod accordion;
@@ -29,17 +31,22 @@ pub mod tooltip;
 
 /// Generate a runtime-unique id.
 fn use_unique_id() -> Signal<String> {
-    static NEXT_ID: GlobalSignal<usize> = Signal::global(|| 0);
+    static NEXT_ID: AtomicUsize = AtomicUsize::new(0);
 
-    let id = *NEXT_ID.peek();
-    let id_str = format!("dxc-{id}");
-
-    // Update the ID counter in an effect to avoid signal writes during rendering
-    use_effect(move || {
-        *NEXT_ID.write() += 1;
+    #[allow(unused_mut)]
+    let mut initial_value = use_hook(|| {
+        let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
+        let id_str = format!("dxc-{id}");
+        id_str
     });
 
-    use_signal(|| id_str)
+    fullstack! {
+        let server_id = dioxus::prelude::use_server_cached(move || {
+            initial_value.clone()
+        });
+        initial_value = server_id;
+    }
+    use_signal(|| initial_value)
 }
 
 // Elements can only have one id so if the user provides their own, we must use it as the aria id.
@@ -73,10 +80,15 @@ fn use_controlled<T: Clone + PartialEq>(
     let mut internal_value = use_signal(|| prop.map(|x| x()).unwrap_or(default));
     let value = use_memo(move || prop.unwrap_or(internal_value)());
 
-    let set_value = Callback::new(move |x: T| {
+    let set_value = use_callback(move |x: T| {
         internal_value.set(x.clone());
         on_change.call(x);
     });
 
     (value, set_value)
+}
+
+/// Run some cleanup code when the component is unmounted if the effect was run.
+fn use_effect_cleanup<F: FnOnce() + 'static>(#[allow(unused)] cleanup: F) {
+    web!(use_drop(cleanup))
 }

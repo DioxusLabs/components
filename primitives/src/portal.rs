@@ -1,6 +1,8 @@
 use dioxus_lib::{prelude::*, warnings::Warning};
 use std::collections::HashMap;
 
+use crate::use_effect_cleanup;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PortalId(usize);
 
@@ -34,7 +36,7 @@ pub fn use_portal() -> PortalId {
     });
 
     // Cleanup the portal.
-    use_drop(move || {
+    use_effect_cleanup(move || {
         let mut ctx = consume_context::<PortalCtx>();
         ctx.portals.write().remove(&id.0);
         sig.manually_drop();
