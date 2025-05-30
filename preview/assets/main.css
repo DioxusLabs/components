@@ -31,6 +31,8 @@ body {
     --warning-text-color: #f59e0b;
     --error-background-color: #fef2f2;
     --error-text-color: #ef4444;
+    --info-background-color: #e0f2fe;
+    --info-text-color: #0284c7;
   }
 }
 
@@ -54,6 +56,8 @@ body {
     --warning-text-color: #feeac7;
     --error-background-color: #360e0e;
     --error-text-color: #e0baba;
+    --info-background-color: #0c1f2b;
+    --info-text-color: #b3d7e6;
   }
 }
 

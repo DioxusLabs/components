@@ -1,6 +1,6 @@
-use std::time::Duration;
 use dioxus::prelude::*;
 use dioxus_primitives::toast::{ToastOptions, ToastProvider, use_toast};
+use std::time::Duration;
 
 #[component]
 pub(super) fn Demo() -> Element {
@@ -61,6 +61,22 @@ fn ToastButton() -> Element {
                     },
                     "Warning (3s)"
                 }
+                button {
+                    onclick: move |_| {
+                        toast_api
+                            .info(
+                                "Custom Toast".to_string(),
+                                Some(ToastOptions {
+                                    description: Some(
+                                        "This is a custom toast with specific settings".to_string(),
+                                    ),
+                                    duration: Some(Duration::from_secs(10)),
+                                    permanent: false,
+                                }),
+                            );
+                    },
+                    "Custom Info (10s)"
+                }
             }
             h4 { "Permanent Toasts (manual close)" }
             div { class: "toast-buttons",
@@ -93,18 +109,30 @@ fn ToastButton() -> Element {
                 button {
                     onclick: move |_| {
                         toast_api
-                            .info(
-                                "Custom Toast".to_string(),
+                            .warning(
+                                "Attention Needed".to_string(),
                                 Some(ToastOptions {
-                                    description: Some(
-                                        "This is a custom toast with specific settings".to_string(),
-                                    ),
-                                    duration: Some(Duration::from_secs(10)),
-                                    permanent: false,
+                                    description: Some("This requires your attention".to_string()),
+                                    permanent: true,
+                                    ..Default::default()
                                 }),
                             );
                     },
-                    "Custom Info (10s)"
+                    "Permanent Warning"
+                }
+                button {
+                    onclick: move |_| {
+                        toast_api
+                            .info(
+                                "Info Toast".to_string(),
+                                Some(ToastOptions {
+                                    description: Some("This is an informational message".to_string()),
+                                    permanent: true,
+                                    ..Default::default()
+                                }),
+                            );
+                    },
+                    "Permanent Info"
                 }
             }
         }

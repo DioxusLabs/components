@@ -148,6 +148,11 @@
   color: var(--warning-text-color);
 }
 
+.toast-buttons button:nth-child(4) {
+  background-color: var(--info-background-color);
+  color: var(--info-text-color);
+}
+
 .toast-buttons button:hover {
   filter: brightness(0.95);
 }

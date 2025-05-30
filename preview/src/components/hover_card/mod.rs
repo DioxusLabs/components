@@ -10,8 +10,7 @@ pub(super) fn Demo() -> Element {
             href: asset!("/src/components/hover_card/style.css"),
         }
         div {
-            class: "hover-card-example",
-            style: "padding: 50px; display: flex; flex-wrap: wrap; gap: 40px;",
+            style: "padding: 50px; display: flex; flex-direction: row; flex-wrap: wrap; gap: 40px; justify-content: center; align-items: center;",
             HoverCard { class: "hover-card",
                 HoverCardTrigger { class: "hover-card-trigger",
                     button { class: "user-trigger", "@johndoe" }
