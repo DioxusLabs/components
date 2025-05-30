@@ -9,6 +9,16 @@ dioxus = "0.7.0-alpha.0"
 dioxus-lib = "0.7.0-alpha.0"
 tracing = { version = "0.1", features = ["std"] }
 
+[patch.crates-io]
+dioxus-geolocation = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
+dioxus-notification = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
+dioxus-sdk = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
+dioxus_storage = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
+dioxus-sync = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
+dioxus-time = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
+dioxus-util = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
+dioxus-window = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
+
 [profile]
 
 [profile.wasm-dev]

@@ -127,11 +127,7 @@ body {
   max-height: 100%;
   border-top-right-radius: 0.5em;
   border-top-left-radius: 0.5em;
-  background-image: linear-gradient(
-    to bottom right,
-    var(--highlight-color-main),
-    var(--highlight-color-secondary)
-  );
+  background-color: var(--dim-background-color);
   padding: 20px;
   box-sizing: border-box;
 }
@@ -172,12 +168,7 @@ body {
   padding: 3rem;
   flex: 1 0 auto;
   border-radius: 0.5rem;
-  background-image: linear-gradient(
-    to bottom right,
-    var(--highlight-color-main),
-    var(--highlight-color-secondary)
-  );
-  /* background-color: var(--dim-background-color); */
-  /* border: 1px solid var(--dim-border-color); */
+  background-color: var(--dim-background-color);
+  border: 1px solid var(--dim-border-color);
   box-sizing: border-box;
 }
