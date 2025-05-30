@@ -41,7 +41,7 @@
 
 .slider-range {
     position: absolute;
-    background-color: rgb(34, 197, 94);
+    background-color: var(--contrast-background-color);
     border-radius: 9999px;
     height: 100%;
 }
@@ -58,7 +58,7 @@
     background-color: var(--brighter-background-color);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 50%;
-    border: 2px solid rgb(34, 197, 94);
+    border: 2px solid var(--contrast-background-color);
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -72,11 +72,11 @@
 }
 
 .slider-thumb:hover {
-    border-color: rgb(21, 170, 75);
+    border-color: var(--hover-border-color);
 }
 
 .slider-thumb:focus-visible {
-    outline: 2px solid rgb(34, 197, 94);
+    outline: 2px solid var(--focused-border-color);
     outline-offset: 2px;
 }
 

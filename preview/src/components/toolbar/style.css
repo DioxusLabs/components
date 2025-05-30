@@ -13,6 +13,7 @@
     flex-wrap: wrap;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
     gap: 5px;
     padding: 5px;
     background-color: var(--brighter-background-color);
