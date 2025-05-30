@@ -16,12 +16,12 @@ pub(super) fn Demo() -> Element {
                 Calendar {
                     selected_date: selected_date(),
                     on_date_change: move |date| {
-                        println!("Selected date: {:?}", date);
+                        tracing::info!("Selected date: {:?}", date);
                         selected_date.set(date);
                     },
                     view_date: view_date(),
                     on_view_change: move |new_view: CalendarDate| {
-                        println!("View changed to: {}-{}", new_view.year, new_view.month);
+                        tracing::info!("View changed to: {}-{}", new_view.year, new_view.month);
                         view_date.set(new_view);
                     },
                     CalendarHeader { CalendarNavigation {} }

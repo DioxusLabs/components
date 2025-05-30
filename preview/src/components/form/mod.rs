@@ -7,7 +7,7 @@ pub(super) fn Demo() -> Element {
         form {
             class: "form-example",
             onsubmit: move |e| {
-                println!("{:?}", e.values());
+                tracing::info!("{:?}", e.values());
             },
             Checkbox { id: "tos-check", name: "tos-check",
                 CheckboxIndicator { "+" }

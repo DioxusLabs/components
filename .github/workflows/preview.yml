@@ -1,4 +1,3 @@
-# .github/workflows/preview.yml
 name: Deploy PR previews
 
 on:

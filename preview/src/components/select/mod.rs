@@ -5,7 +5,7 @@ pub(super) fn Demo() -> Element {
     let mut selected = use_signal(|| None::<String>);
     use_effect(move || {
         if let Some(value) = selected() {
-            println!("Selected value: {value}");
+            tracing::info!("Selected value: {value}");
         }
     });
     rsx! {

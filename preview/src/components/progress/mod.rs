@@ -9,7 +9,7 @@ pub(super) fn Demo() -> Element {
             href: asset!("/src/components/progress/style.css"),
         }
         div { style: "display: flex; flex-direction: column; align-items: center; gap: 4px;",
-            Progress { class: "progress", value: Some(progress.into()),
+            Progress { class: "progress", value: progress(),
                 ProgressIndicator { class: "progress-indicator" }
             }
             button {
