@@ -32,15 +32,15 @@ Building styled and more featured component libraries on top of Dioxus Primitive
 We're still in the early days - Many components are still being created and stabilized.
 
 23/28
-- [ ] Accordion - In Progress
+- [x] Accordion - In Progress
 - [x] Alert Dialog
 - [x] Aspect Ratio
 - [x] Avatar
-- [ ] Calendar - In Progress
+- [x] Calendar - In Progress
 - [x] Checkbox
 - [x] Collapsible
 - [ ] Context Menu - In Progress
-- [ ] Dialog - In Progress
+- [x] Dialog - In Progress
 - [x] Dropdown Menu
 - [x] Hover Card
 - [x] Label
