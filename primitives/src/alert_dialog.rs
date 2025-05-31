@@ -77,27 +77,25 @@ pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
     // This is important for accessibility. Currently, focus can escape the dialog and close the dialog.
     // See: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/#keyboard-interaction
     let ctx: AlertDialogCtx = use_context();
-    let open = ctx.open;
-    let on_keydown = {
-        let set_open = ctx.set_open;
-        move |e: Event<KeyboardData>| {
-            if e.key() == Key::Escape {
-                set_open.call(false);
-                e.prevent_default();
-            }
+    let on_keydown = use_callback(move |e: Event<KeyboardData>| {
+        if e.key() == Key::Escape {
+            ctx.set_open.call(false);
+            e.prevent_default();
         }
-    };
-    let on_focusout = move |_e: Event<FocusData>| {
+    });
+
+    let on_focusout = use_callback(move |_e: Event<FocusData>| {
         ctx.set_open.call(false);
-    };
-    if !open() {
+    });
+    let on_backdrop_click = use_callback(move |_| ctx.set_open.call(false));
+    if !(ctx.open)() {
         return rsx! {};
     }
     rsx! {
         div {
             class: "alert-dialog-backdrop",
             style: "position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1000;",
-            onclick: move |_| ctx.set_open.call(false),
+            onclick: on_backdrop_click,
         }
         div {
             role: "alertdialog",
@@ -177,7 +175,7 @@ pub fn AlertDialogAction(props: AlertDialogActionProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
     let set_open = ctx.set_open;
     let user_on_click = props.on_click;
-    let on_click = EventHandler::new(move |evt: MouseEvent| {
+    let on_click = use_callback(move |evt: MouseEvent| {
         set_open.call(false);
         if let Some(cb) = &user_on_click {
             cb.call(evt.clone());
@@ -212,7 +210,7 @@ pub fn AlertDialogCancel(props: AlertDialogCancelProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
     let set_open = ctx.set_open;
     let user_on_click = props.on_click;
-    let on_click = EventHandler::new(move |evt: MouseEvent| {
+    let on_click = use_callback(move |evt: MouseEvent| {
         set_open.call(false);
         if let Some(cb) = &user_on_click {
             cb.call(evt.clone());
