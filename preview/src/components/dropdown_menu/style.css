@@ -36,10 +36,26 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     padding: 4px 0;
+    
+    /* Animation properties */
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+    transition: all 0.2s ease;
+    pointer-events: none;
 }
 
-.dropdown-menu-content[hidden] {
-    display: none;
+/* Open state animations */
+.dropdown-menu-content[data-state="open"] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Closed state animations */
+.dropdown-menu-content[data-state="closed"] {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+    pointer-events: none;
 }
 
 .dropdown-menu-item {

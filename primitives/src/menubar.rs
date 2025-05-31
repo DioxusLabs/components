@@ -15,6 +15,14 @@ struct MenubarContext {
     current_focus: Signal<Option<usize>>,
 }
 
+#[derive(Clone, Copy)]
+struct MenubarMenuContext {
+    // The index of this specific menu
+    menu_index: usize,
+    // Reference to the global menubar context
+    global_ctx: MenubarContext,
+}
+
 impl MenubarContext {
     fn set_focus(&mut self, index: Option<usize>) {
         if let Some(idx) = index {
@@ -71,12 +79,25 @@ pub fn Menubar(props: MenubarProps) -> Element {
         current_focus: Signal::new(None),
     });
 
+    // Add is_selecting signal to track if a click is happening inside
+    let mut is_selecting = use_signal(|| false);
+
     rsx! {
         div {
             role: "menubar",
             "data-disabled": (props.disabled)(),
 
-            onfocusout: move |_| ctx.set_focus(None),
+            // Set is_selecting on mousedown/mouseup
+            onmousedown: move |_| is_selecting.set(true),
+            onmouseup: move |_| is_selecting.set(false),
+
+            // Close menu on focusout if not selecting
+            onfocusout: move |_| {
+                ctx.set_focus(None);
+                if open_menu().is_some() && !is_selecting() {
+                    set_open_menu.call(None);
+                }
+            },
             ..props.attributes,
 
             {props.children}
@@ -118,6 +139,19 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
         } else {
             "-1"
         }
+    });
+
+    // Focus the first item when the menu is opened
+    use_effect(move || {
+        if is_open() {
+            ctx.focus_first();
+        }
+    });
+
+    // Provide the menu-specific context
+    let _menu_ctx = use_context_provider(|| MenubarMenuContext {
+        menu_index: props.index,
+        global_ctx: ctx,
     });
 
     rsx! {
@@ -186,8 +220,17 @@ pub struct MenubarContentProps {
 
 #[component]
 pub fn MenubarContent(props: MenubarContentProps) -> Element {
+    let menu_ctx: MenubarMenuContext = use_context();
+    let is_open = use_memo(move || (menu_ctx.global_ctx.open_menu)() == Some(menu_ctx.menu_index));
+
     rsx! {
-        div { role: "menu", ..props.attributes, {props.children} }
+        div { 
+            role: "menu",
+            "data-state": if is_open() { "open" } else { "closed" },
+            onclick: move |e| e.stop_propagation(),
+            ..props.attributes, 
+            {props.children} 
+        }
     }
 }
 
@@ -208,19 +251,19 @@ pub struct MenubarItemProps {
 
 #[component]
 pub fn MenubarItem(props: MenubarItemProps) -> Element {
-    let ctx: MenubarContext = use_context();
+    let menu_ctx: MenubarMenuContext = use_context();
 
     rsx! {
         div {
             role: "menuitem",
-            "data-disabled": (ctx.disabled)() || (props.disabled)(),
+            "data-disabled": (menu_ctx.global_ctx.disabled)() || (props.disabled)(),
 
             onclick: {
                 let value = props.value.clone();
                 move |_| {
-                    if !(ctx.disabled)() && !(props.disabled)() {
+                    if !(menu_ctx.global_ctx.disabled)() && !(props.disabled)() {
                         props.on_select.call(value.clone());
-                        ctx.set_open_menu.call(None);
+                        menu_ctx.global_ctx.set_open_menu.call(None);
                     }
                 }
             },
