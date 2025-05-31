@@ -223,7 +223,6 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
             aria_orientation: "vertical",
             style: "{style}",
             "data-state": if (ctx.open)() { "open" } else { "closed" },
-            hidden: !(ctx.open)(),
             onclick: move |e| e.stop_propagation(),
             onkeydown: move |event: Event<KeyboardData>| {
                 let mut prevent_default = true;

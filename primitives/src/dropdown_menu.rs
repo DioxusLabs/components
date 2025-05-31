@@ -176,7 +176,6 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
         div {
             role: "menu",
             "data-state": if open() { "open" } else { "closed" },
-            hidden: !open(),
             // Stop propagation to prevent unwanted interactions
             onclick: move |e| {
                 e.stop_propagation();

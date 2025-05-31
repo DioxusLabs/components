@@ -18,11 +18,22 @@
     padding: 5px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--dim-border-color);
-    animation: slideIn 0.1s ease-out;
+    z-index: 1000;
+    transform-origin: var(--radix-context-menu-content-transform-origin);
+    will-change: transform, opacity;
 }
 
-.context-menu-content[hidden] {
-    display: none;
+.context-menu-content[data-state="closed"] {
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.95) translateY(-2px);
+    transition: opacity 150ms ease-in, transform 150ms ease-in;
+}
+
+.context-menu-content[data-state="open"] {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    transition: opacity 200ms ease-out, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .context-menu-item {
@@ -35,6 +46,7 @@
     color: var(--text-color);
     display: flex;
     align-items: center;
+    transition: background-color 100ms ease-out;
 }
 
 .context-menu-item:hover {
@@ -45,14 +57,4 @@
     background: var(--focused-background-color);
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
+/* Remove old keyframes - now using CSS transitions for smoother animations */

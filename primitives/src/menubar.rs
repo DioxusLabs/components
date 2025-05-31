@@ -15,6 +15,14 @@ struct MenubarContext {
     current_focus: Signal<Option<usize>>,
 }
 
+#[derive(Clone, Copy)]
+struct MenubarMenuContext {
+    // The index of this specific menu
+    menu_index: usize,
+    // Reference to the global menubar context
+    global_ctx: MenubarContext,
+}
+
 impl MenubarContext {
     fn set_focus(&mut self, index: Option<usize>) {
         if let Some(idx) = index {
@@ -140,6 +148,12 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
         }
     });
 
+    // Provide the menu-specific context
+    let _menu_ctx = use_context_provider(|| MenubarMenuContext {
+        menu_index: props.index,
+        global_ctx: ctx,
+    });
+
     rsx! {
         div {
             role: "menu",
@@ -206,8 +220,17 @@ pub struct MenubarContentProps {
 
 #[component]
 pub fn MenubarContent(props: MenubarContentProps) -> Element {
+    let menu_ctx: MenubarMenuContext = use_context();
+    let is_open = use_memo(move || (menu_ctx.global_ctx.open_menu)() == Some(menu_ctx.menu_index));
+
     rsx! {
-        div { role: "menu", ..props.attributes, {props.children} }
+        div { 
+            role: "menu",
+            "data-state": if is_open() { "open" } else { "closed" },
+            onclick: move |e| e.stop_propagation(),
+            ..props.attributes, 
+            {props.children} 
+        }
     }
 }
 
@@ -228,19 +251,19 @@ pub struct MenubarItemProps {
 
 #[component]
 pub fn MenubarItem(props: MenubarItemProps) -> Element {
-    let ctx: MenubarContext = use_context();
+    let menu_ctx: MenubarMenuContext = use_context();
 
     rsx! {
         div {
             role: "menuitem",
-            "data-disabled": (ctx.disabled)() || (props.disabled)(),
+            "data-disabled": (menu_ctx.global_ctx.disabled)() || (props.disabled)(),
 
             onclick: {
                 let value = props.value.clone();
                 move |_| {
-                    if !(ctx.disabled)() && !(props.disabled)() {
+                    if !(menu_ctx.global_ctx.disabled)() && !(props.disabled)() {
                         props.on_select.call(value.clone());
-                        ctx.set_open_menu.call(None);
+                        menu_ctx.global_ctx.set_open_menu.call(None);
                     }
                 }
             },

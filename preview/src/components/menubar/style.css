@@ -17,15 +17,15 @@
     background: none;
     cursor: pointer;
     color: var(--text-color);
+    border-radius: 4px;
+    transition: background-color 100ms ease-out;
 }
 
 .menubar-trigger:hover {
     background: var(--hover-background-color);
-    border-radius: 4px;
 }
 
 .menubar-content {
-    display: none;
     position: absolute;
     top: 100%;
     left: 0;
@@ -35,10 +35,22 @@
     border-radius: 4px;
     padding: 4px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transform-origin: top;
+    will-change: transform, opacity;
 }
 
-.menubar-menu[data-state="open"] .menubar-content {
-    display: block;
+.menubar-content[data-state="closed"] {
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+    transition: opacity 150ms ease-in, transform 150ms ease-in;
+}
+
+.menubar-content[data-state="open"] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity 200ms ease-out, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .menubar-item {
@@ -46,6 +58,7 @@
     padding: 8px 12px;
     cursor: pointer;
     border-radius: 4px;
+    transition: background-color 100ms ease-out;
 }
 
 .menubar-item:hover {
@@ -56,3 +69,5 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* Remove old keyframes - now using CSS transitions for smoother animations */
