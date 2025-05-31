@@ -39,7 +39,7 @@ We're still in the early days - Many components are still being created and stab
 - [x] Calendar - In Progress
 - [x] Checkbox
 - [x] Collapsible
-- [ ] Context Menu - In Progress
+- [x] Context Menu - In Progress
 - [x] Dialog - In Progress
 - [x] Dropdown Menu
 - [x] Hover Card
