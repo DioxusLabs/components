@@ -232,7 +232,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
 
 #[component]
 fn Home() -> Element {
-    let mut search = use_signal(|| String::new());
+    let mut search = use_signal(String::new);
 
     rsx! {
         div { id: "hero",
