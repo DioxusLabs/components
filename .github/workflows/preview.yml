@@ -12,6 +12,8 @@ concurrency:
 
 jobs:
   deploy-preview:
+    if: github.event.pull_request.draft == false
+    name: Deploy PR Preview
     runs-on: ubuntu-latest
     env:
       CARGO_INCREMENTAL: 1
