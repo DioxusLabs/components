@@ -61,14 +61,14 @@ jobs:
                     // Find the subroute root from the current URL. Just the pattern components/pr-preview/pr-<PR_NUMBER>
                     const parts = window.location.pathname.split('/');
                     let realUrl;
-                    if (parts[1] === 'pr-preview')) {
-                        realUrl = '/' + parts.slice(0, 4).join('/') + '/';
+                    if (parts[2] === 'pr-preview') {
+                        realUrl = '/' + parts.slice(1, 4).join('/') + '/';
                     } else {
                         // If not a PR preview, redirect to the main page
-                        realUrl = parts.slice(0, 4);
+                        realUrl = '/' + parts.slice(1, 4).join('/');
                     }
                     // Manually fetch the index.html file from the correct subroute
-                    fetch(realUrl + 'index.html')
+                    fetch(realUrl)
                         .then(response => {
                             if (!response.ok) {
                                 throw new Error('Network response was not ok');
