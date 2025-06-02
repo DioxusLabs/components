@@ -1,23 +1,92 @@
-#tos-check {
-    width: 25px;
-    height: 25px;
-    margin: 8px 16px;
-    color: var(--text-color);
-    background-color: var(--background-color);
-    border: 1px solid var(--dim-border-color);
+/* Checkbox root styling - modern and consistent with theme */
+.CheckboxRoot {
+    all: unset;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--dim-border-color);
     border-radius: 4px;
+    background: var(--background-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    outline: none;
+}
+
+/* Hover state */
+.CheckboxRoot:hover {
+    border-color: var(--focused-border-color);
+    background: var(--hover-background-color);
+}
+
+/* Focus state */
+.CheckboxRoot:focus-visible {
+    border-color: var(--focused-border-color);
+    box-shadow: 0 0 0 2px var(--focused-border-color)40;
+}
+
+/* Checked state using data-state */
+.CheckboxRoot[data-state="checked"] {
+    border-color: var(--focused-border-color);
+    background: var(--focused-border-color);
+    color: var(--background-color);
+}
+
+.CheckboxRoot[data-state="checked"]:hover {
+    background: var(--focused-border-color);
+    border-color: var(--focused-border-color);
+}
+
+/* Indeterminate state */
+.CheckboxRoot[data-state="indeterminate"] {
+    border-color: var(--focused-border-color);
+    background: var(--focused-border-color);
+    color: var(--background-color);
+}
+
+/* Disabled state using data-disabled */
+.CheckboxRoot[data-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--dim-border-color);
+    background: var(--dim-background-color);
+}
+
+.CheckboxRoot[data-disabled="true"]:hover {
+    border-color: var(--dim-border-color);
+    background: var(--dim-background-color);
+}
+
+/* Checkbox indicator styling */
+.CheckboxIndicator {
+    color: currentColor;
     font-size: 14px;
+    line-height: 1;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    opacity: 1;
+    transform: scale(1);
 }
 
-#tos-check:hover {
-    color: var(--text-color);
-    background-color: var(--hover-background-color);
-    transition: background-color 0.2s ease;
+/* Unchecked state - hide indicator */
+.CheckboxRoot[data-state="unchecked"] .CheckboxIndicator {
+    opacity: 0;
+    transform: scale(0.8);
 }
 
-#tos-check:focus {
+/* Label styling */
+.Label {
+    margin-left: 12px;
+    user-select: none;
     color: var(--text-color);
-    background-color: var(--focused-background-color);
-    transition: background-color 0.2s ease;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+    line-height: 1.4;
 }
