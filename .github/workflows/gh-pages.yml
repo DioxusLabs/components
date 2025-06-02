@@ -37,7 +37,43 @@ jobs:
       - name: Copy output
         run: cp -r target/dx/preview/release/web/public docs
       - name: Add gh pages 404
-        run: cp docs/index.html docs/404.html
+        run: |
+            echo "<!DOCTYPE html>
+            <html lang=\"en\">
+            <head>
+                <meta charset=\"UTF-8\">
+                <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+                <title>Redirecting</title>
+            </head>
+            <body>
+                <script>
+                    // Find the subroute root from the current URL. Just the pattern components/pr-preview/pr-<PR_NUMBER>
+                    const parts = window.location.pathname.split('/');
+                    let realUrl;
+                    if (parts[1] === 'pr-preview')) {
+                        realUrl = '/' + parts.slice(0, 4).join('/') + '/';
+                    } else {
+                        // If not a PR preview, redirect to the main page
+                        realUrl = parts.slice(0, 4);
+                    }
+                    // Manually fetch the index.html file from the correct subroute
+                    fetch(realUrl + 'index.html')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.text();
+                        })
+                        .then(html => {
+                            // Set the current document's HTML to the fetched content
+                            document.documentElement.innerHTML = html;
+                        })
+                        .catch(error => {
+                            console.error('There was a problem with the fetch operation:', error);
+                        });
+                </script>
+            </body>
+            </html>" > docs/404.html
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.2.3
         with:
