@@ -66,6 +66,19 @@ jobs:
                         .then(html => {
                             // Set the current document's HTML to the fetched content
                             document.documentElement.innerHTML = html;
+                            // After setting `elm.innerHTML = ...`, run scripts manually
+                            elm.querySelectorAll('script').forEach(oldScript => {
+                              const newScript = document.createElement('script');
+                              // copy over all attributes (e.g. src, type, async, etc.)
+                              for (const { name, value } of oldScript.attributes) {
+                                newScript.setAttribute(name, value);
+                              }
+                              // copy inline code or fallback to src-based loading
+                              newScript.textContent = oldScript.textContent;
+                              // replace the old <script> so the browser will actually execute it
+                              oldScript.replaceWith(newScript);
+                            });
+
                         })
                         .catch(error => {
                             console.error('There was a problem with the fetch operation:', error);
