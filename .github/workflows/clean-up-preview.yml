@@ -1,9 +1,13 @@
 name: Clean Up Preview
 
-# only trigger on pull request closed events
 on:
-  pull_request:
-    types: [ closed ]
+  pull_request_target:
+    types:
+      - closed
+
+permissions:
+  contents: write
+  pages: write
 
 jobs:
   merge_job:
