@@ -18,5 +18,5 @@ jobs:
         branch: gh-pages # The branch the action should deploy to.
         folder: "${{ env.empty_dir }}" # The folder the action should deploy.
         target-folder: "pr-preview/pr-${{ github.event.pull_request.number }}/"
-        clean: false
+        clean: true
         single-commit: true
