@@ -4,10 +4,13 @@ use crate::{use_controlled, use_id_or, use_unique_id};
 
 #[derive(Clone, Copy)]
 struct DialogCtx {
+    #[allow(unused)]
     open: Memo<bool>,
+    #[allow(unused)]
     set_open: Callback<bool>,
 
     // Whether the dialog is a modal and should capture focus.
+    #[allow(unused)]
     is_modal: ReadOnlySignal<bool>,
     dialog_labelledby: Signal<String>,
     dialog_describedby: Signal<String>,
