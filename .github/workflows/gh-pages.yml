@@ -66,8 +66,8 @@ jobs:
                         .then(html => {
                             // Set the current document's HTML to the fetched content
                             document.documentElement.innerHTML = html;
-                            // After setting `elm.innerHTML = ...`, run scripts manually
-                            elm.querySelectorAll('script').forEach(oldScript => {
+                            // After setting `document.documentElement.innerHTML = ...`, run scripts manually
+                            document.documentElement.querySelectorAll('script').forEach(oldScript => {
                               const newScript = document.createElement('script');
                               // copy over all attributes (e.g. src, type, async, etc.)
                               for (const { name, value } of oldScript.attributes) {
@@ -92,5 +92,4 @@ jobs:
           branch: gh-pages # The branch the action should deploy to.
           folder: docs # The folder the action should deploy.
           target-folder: .
-          clean: true
           single-commit: true
