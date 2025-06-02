@@ -224,13 +224,12 @@ pub fn MenubarContent(props: MenubarContentProps) -> Element {
     let is_open = use_memo(move || (menu_ctx.global_ctx.open_menu)() == Some(menu_ctx.menu_index));
 
     rsx! {
-        div {
+        div { 
             role: "menu",
             "data-state": if is_open() { "open" } else { "closed" },
-            "inert": if !is_open() { "true" } else { "" },
             onclick: move |e| e.stop_propagation(),
-            ..props.attributes,
-            {props.children}
+            ..props.attributes, 
+            {props.children} 
         }
     }
 }
