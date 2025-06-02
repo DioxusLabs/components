@@ -9,6 +9,7 @@ jobs:
   merge_job:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
     - name: Create empty directory and store it in a variable
       run: echo "empty_dir=$(mktemp -d)" >> $GITHUB_ENV
     - name: Deploy 🚀
