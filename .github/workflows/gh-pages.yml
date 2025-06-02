@@ -92,4 +92,5 @@ jobs:
           branch: gh-pages # The branch the action should deploy to.
           folder: docs # The folder the action should deploy.
           target-folder: .
-          single-commit: true
+          clean: true
+          clean-exclude: pr-preview/**
