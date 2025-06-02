@@ -1,4 +1,4 @@
-name: check examples
+name: Rust CI
 
 on:
   push:
