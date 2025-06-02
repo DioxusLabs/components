@@ -46,8 +46,11 @@ jobs:
         run: cd preview && dx build --platform web --release
       - name: Copy output
         run: cp -r target/dx/preview/release/web/public docs
-      - name: Deploy preview
-        uses: rossjrw/pr-preview-action@v1
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.2.3
         with:
-            preview-branch: gh-pages # The branch the action should deploy to.
-            source-dir: docs # The folder the action should deploy.
+          branch: gh-pages # The branch the action should deploy to.
+          folder: docs # The folder the action should deploy.
+          target-folder: "pr-preview/pr-${{ github.event.pull_request.number }}/"
+          clean: false
+          single-commit: true
