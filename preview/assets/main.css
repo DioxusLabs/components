@@ -7,7 +7,7 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    --background-color: #fff;
+    --background-color: red;
     --brighter-background-color: #fbfbfb;
     --dim-background-color: oklch(0.967 0.003 264.542);
     --hover-background-color: #dadada;
@@ -32,7 +32,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background-color: #000;
+    --background-color: red;
     --brighter-background-color: #0e0e0e;
     --dim-background-color: #141313;
     --hover-background-color: #292929;
