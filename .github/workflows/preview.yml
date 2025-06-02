@@ -43,7 +43,7 @@ jobs:
             [web.app]
             base_path = \"components/pr-preview/pr-${{ github.event.pull_request.number }}/\"" > preview/Dioxus.toml
       - name: Build
-        run: cd preview && dx build --platform web
+        run: cd preview && dx build --platform web --release
       - name: Copy output
         run: cp -r target/dx/preview/release/web/public docs
       - name: Deploy preview
