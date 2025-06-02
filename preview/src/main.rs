@@ -48,9 +48,7 @@ fn NavigationLayout() -> Element {
 fn Navbar() -> Element {
     rsx! {
         nav { class: "navbar",
-            Link {
-                to: Route::Home,
-                class: "navbar-brand",
+            Link { to: Route::Home, class: "navbar-brand",
                 img {
                     src: asset!("/assets/dioxus_color.svg"),
                     alt: "Dioxus Logo",
@@ -59,11 +57,7 @@ fn Navbar() -> Element {
                 }
             }
             div { class: "navbar-links",
-                Link {
-                    to: Route::Home,
-                    class: "navbar-link",
-                    "Home"
-                }
+                Link { to: Route::Home, class: "navbar-link", "Home" }
                 Link {
                     to: "https://docs.rs/crate/dioxus-components/latest",
                     class: "navbar-link",
@@ -126,16 +120,13 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
     let mut collapsed = use_signal(|| true);
 
     rsx! {
-        Tabs { class: "tabs", default_value: "main.rs",
+        Tabs {
+            class: "tabs",
+            default_value: "main.rs",
             border_bottom_left_radius: "0.5rem",
             border_bottom_right_radius: "0.5rem",
             div { class: "tabs-list",
-                TabTrigger {
-                    class: "tabs-trigger",
-                    value: "main.rs",
-                    index: 0usize,
-                    "main.rs"
-                }
+                TabTrigger { class: "tabs-trigger", value: "main.rs", index: 0usize, "main.rs" }
                 TabTrigger {
                     class: "tabs-trigger",
                     value: "style.css",
@@ -150,10 +141,18 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 flex_direction: "column",
                 justify_content: "center",
                 align_items: "center",
-                TabContent { class: "tabs-content", value: "main.rs", width: "100%",  position: "relative",
+                TabContent {
+                    class: "tabs-content",
+                    value: "main.rs",
+                    width: "100%",
+                    position: "relative",
                     CodeBlock { source: rs_highlighted, collapsed: collapsed() }
                 }
-                TabContent { class: "tabs-content", value: "style.css", width: "100%", position: "relative",
+                TabContent {
+                    class: "tabs-content",
+                    value: "style.css",
+                    width: "100%",
+                    position: "relative",
                     CodeBlock { source: css_highlighted, collapsed: collapsed() }
                 }
                 button {
@@ -220,10 +219,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
                         horizontal: true,
                     }
                     div { class: "component-code",
-                        ComponentCode {
-                            rs_highlighted: rs_highlighted,
-                            css_highlighted: css_highlighted,
-                        }
+                        ComponentCode { rs_highlighted, css_highlighted }
                     }
                 }
             }
@@ -242,16 +238,15 @@ fn Home() -> Element {
         div { id: "hero",
             h1 { "Dioxus Primitives" }
             h2 {
-                b{ "Accessible" }
+                b { "Accessible" }
                 ", "
                 i { "unstyled" }
                 " foundational components for Dioxus."
             }
-            div {
-                id: "hero-search-container",
+            div { id: "hero-search-container",
                 input {
                     id: "hero-search-input",
-                    type: "search",
+                    r#type: "search",
                     placeholder: "Search components...",
                     value: search,
                     oninput: move |e| {
@@ -260,9 +255,7 @@ fn Home() -> Element {
                 }
             }
         }
-        ComponentGallery {
-            search
-        }
+        ComponentGallery { search }
     }
 }
 
@@ -270,7 +263,7 @@ fn Home() -> Element {
 fn ComponentGallery(search: String) -> Element {
     rsx! {
         div { class: "masonry-with-columns",
-            for ComponentDemoData { component : Comp, name, .. } in components::DEMOS.iter().cloned() {
+            for ComponentDemoData { component : Comp , name , .. } in components::DEMOS.iter().cloned() {
                 if search.is_empty() || name.to_lowercase().contains(&search.to_lowercase()) {
                     div { class: "masonry-preview-frame", position: "relative",
                         h3 { class: "component-title", {name.replace("_", " ")} }
@@ -284,9 +277,7 @@ fn ComponentGallery(search: String) -> Element {
                                 component_name: name.to_string(),
                             },
                         }
-                        div { class: "masonry-component-frame",
-                            Comp {}
-                        }
+                        div { class: "masonry-component-frame", Comp {} }
                     }
                 }
             }
