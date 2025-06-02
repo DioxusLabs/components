@@ -34,7 +34,7 @@ jobs:
           cache-on-failure: "false"
       - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
-        run: cargo install dioxus-cli@0.7.0.alpha.1
+        run: cargo binstall dioxus-cli@0.7.0.alpha.1 -y
       - name: Set base path
         run: |
             echo "[application]
