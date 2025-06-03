@@ -4,7 +4,10 @@ use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs};
 pub(super) fn Demo() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/src/components/tabs/style.css") }
-        Tabs { class: "tabs", default_value: "tab1".to_string(),
+        Tabs {
+            class: "tabs",
+            default_value: "tab1".to_string(),
+            horizontal: true,
             div { class: "tabs-list",
                 TabTrigger {
                     class: "tabs-trigger",

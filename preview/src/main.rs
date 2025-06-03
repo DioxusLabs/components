@@ -125,6 +125,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
             default_value: "main.rs",
             border_bottom_left_radius: "0.5rem",
             border_bottom_right_radius: "0.5rem",
+            horizontal: true,
             div { class: "tabs-list",
                 TabTrigger { class: "tabs-trigger", value: "main.rs", index: 0usize, "main.rs" }
                 TabTrigger {
