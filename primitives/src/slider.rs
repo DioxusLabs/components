@@ -1,11 +1,10 @@
 use crate::use_controlled;
 use dioxus::html::geometry::euclid::Vector2D;
-use dioxus::html::geometry::{ClientPoint, ClientSpace, ElementPoint};
+use dioxus::html::geometry::{ClientPoint, ClientSpace};
 use dioxus_lib::html::geometry::Pixels;
 use dioxus_lib::html::geometry::euclid::Rect;
 use dioxus_lib::prelude::*;
 use std::cell::RefCell;
-use std::ops::RangeInclusive;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -233,42 +232,47 @@ pub fn Slider(props: SliderProps) -> Element {
                 }
             },
 
-            onmousedown: move |evt| async move {
-                if (ctx.disabled)() {
-                    return;
-                }
-                let Some(div_element) = div_element() else {
-                    tracing::warn!("Slider div element is not (yet) set");
-                    return;
-                };
+            onmousedown: move |evt| {
+                // Prevent default to avoid loosing focus on the range
+                evt.prevent_default();
 
-                // Update the bounding rect of the slider in case it moved
-                if let Ok(r) = div_element.get_client_rect().await {
-                    rect.set(Some(r));
-
-                    let size = if props.horizontal {
-                        r.width()
-                    } else {
-                        r.height()
+                async move {
+                    if (ctx.disabled)() {
+                        return;
+                    }
+                    let Some(div_element) = div_element() else {
+                        tracing::warn!("Slider div element is not (yet) set");
+                        return;
                     };
 
-                    // Get the mouse position relative to the slider
-                    let top_left = r.origin;
-                    let mouse_pos = evt.data().client_coordinates();
-                    let relative_pos = mouse_pos - top_left.cast_unit();
+                    // Update the bounding rect of the slider in case it moved
+                    if let Ok(r) = div_element.get_client_rect().await {
+                        rect.set(Some(r));
 
-                    let offset = if ctx.horizontal {
-                        relative_pos.x
-                    } else {
-                        relative_pos.y
-                    };
-                    let new = (offset / size) * ctx.range_size() + ctx.min;
-                    granular_value.set(SliderValue::Single(new));
-                    let stepped = (new / ctx.step).round() * ctx.step;
-                    ctx.set_value.call(SliderValue::Single(stepped));
+                        let size = if props.horizontal {
+                            r.width()
+                        } else {
+                            r.height()
+                        };
+
+                        // Get the mouse position relative to the slider
+                        let top_left = r.origin;
+                        let mouse_pos = evt.data().client_coordinates();
+                        let relative_pos = mouse_pos - top_left.cast_unit();
+
+                        let offset = if ctx.horizontal {
+                            relative_pos.x
+                        } else {
+                            relative_pos.y
+                        };
+                        let new = (offset / size) * ctx.range_size() + ctx.min;
+                        granular_value.set(SliderValue::Single(new));
+                        let stepped = (new / ctx.step).round() * ctx.step;
+                        ctx.set_value.call(SliderValue::Single(stepped));
+                    }
+
+                    dragging.set(true);
                 }
-
-                dragging.set(true);
             },
 
             ..props.attributes,
@@ -357,7 +361,7 @@ pub struct SliderThumbProps {
 
 #[component]
 pub fn SliderThumb(props: SliderThumbProps) -> Element {
-    let mut ctx = use_context::<SliderContext>();
+    let ctx = use_context::<SliderContext>();
     let orientation = if ctx.horizontal {
         "horizontal"
     } else {
@@ -384,8 +388,12 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
         let button_ref = button_ref();
         if let Some(button) = button_ref {
             // Focus the button while dragging
-            if !(ctx.disabled)() && (ctx.dragging)() {
-                button.set_focus(true);
+            let disabled = ctx.disabled.cloned();
+            let dragging = ctx.dragging.cloned();
+            if !disabled && dragging {
+                spawn(async move {
+                    _ = button.set_focus(true).await;
+                });
             }
         }
     });
@@ -446,17 +454,6 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
     }
 }
 
-/// Scale the input value which must be somewhere within the range into
-/// a number between 0 and 1
-fn normalize(range: [f64; 2]) -> impl Fn(f64) -> f64 {
-    let [in_min, in_max] = range;
-
-    move |x: f64| {
-        // Calculate position in input range (0.0 ~ 1.0)
-        (x - in_min) / (in_max - in_min)
-    }
-}
-
 #[allow(dead_code)]
 #[derive(Copy, Clone)]
 struct SliderContext {
@@ -483,9 +480,5 @@ impl SliderContext {
     fn range_size(&self) -> f64 {
         let [range_min, range_max] = self.range();
         range_max - range_min
-    }
-
-    fn range_inclusive(&self) -> RangeInclusive<f64> {
-        self.min..=self.max
     }
 }
