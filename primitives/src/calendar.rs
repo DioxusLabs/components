@@ -211,9 +211,9 @@ pub fn Calendar(props: CalendarProps) -> Element {
     // Create context provider for child components
     let _ctx = use_context_provider(|| CalendarContext {
         selected_date: props.selected_date,
-        set_selected_date: props.on_date_change.clone(),
+        set_selected_date: props.on_date_change,
         view_date: props.view_date,
-        set_view_date: props.on_view_change.clone(),
+        set_view_date: props.on_view_change,
         mode: mode.into(),
         set_mode,
         disabled: props.disabled,

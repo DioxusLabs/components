@@ -16,8 +16,8 @@ pub enum SliderValue {
 impl std::fmt::Display for SliderValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SliderValue::Single(v) => write!(f, "{}", v),
-            SliderValue::Range(start, end) => write!(f, "{}, {}", start, end),
+            SliderValue::Single(v) => write!(f, "{v}"),
+            SliderValue::Range(start, end) => write!(f, "{start}, {end}"),
         }
     }
 }
@@ -377,9 +377,9 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
 
     let percent = ((value() - ctx.min) / (ctx.max - ctx.min) * 100.0).clamp(0.0, 100.0);
     let style = if ctx.horizontal {
-        format!("left: {}%", percent)
+        format!("left: {percent}%")
     } else {
-        format!("bottom: {}%", percent)
+        format!("bottom: {percent}%")
     };
 
     let mut button_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);

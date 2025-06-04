@@ -42,13 +42,13 @@ fn highlight_file_to(file_path: &std::path::Path, theme: &str) -> String {
     let ss = SYNTAX_SET.get_or_init(SyntaxSet::load_defaults_newlines);
     let ts = THEME_SET.get_or_init(ThemeSet::load_defaults);
     let mut all_html = String::new();
-    let mut highlighter = HighlightFile::new(&file_path, &ss, &ts.themes[theme]).unwrap();
+    let mut highlighter = HighlightFile::new(file_path, ss, &ts.themes[theme]).unwrap();
     let mut line = String::new();
     while highlighter.reader.read_line(&mut line).unwrap_or_default() > 0 {
         {
             let regions: Vec<(Style, &str)> = highlighter
                 .highlight_lines
-                .highlight_line(&line, &ss)
+                .highlight_line(&line, ss)
                 .unwrap();
             let html =
                 styled_line_to_highlighted_html(&regions[..], IncludeBackground::No).unwrap();
