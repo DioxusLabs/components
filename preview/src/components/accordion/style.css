@@ -29,13 +29,13 @@
 }
 
 .accordion-content[data-open="false"] {
-	animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
+	animation: accordionSlideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
 }
 .accordion-content[data-open="true"] {
-  animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
+  animation: accordionSlideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
 }
 
-@keyframes slideDown {
+@keyframes accordionSlideDown {
 	from {
     height: var(--collapsible-content-width);
 	}
@@ -44,7 +44,7 @@
 	}
 }
 
-@keyframes slideUp {
+@keyframes accordionSlideUp {
 	from {
     height: 0px;
 	}
