@@ -1,7 +1,7 @@
 name: Deploy PR previews
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
@@ -10,13 +10,24 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+  pages: write
+  pull-requests: write
+
 jobs:
   deploy-preview:
+    if: github.event.pull_request.draft == false
+    name: Deploy PR Preview
     runs-on: ubuntu-latest
     env:
       CARGO_INCREMENTAL: 1
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: "refs/pull/${{ github.event.pull_request.number }}/merge"
+          fetch-depth: 0
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           packages: libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev libxdo-dev
@@ -30,9 +41,8 @@ jobs:
         with:
           cache-all-crates: "true"
           cache-on-failure: "false"
-      - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
-        run: cargo install dioxus-cli --git https://github.com/ealmloff/dioxus --branch fix-bundle
+        run: cargo install dioxus-cli@0.7.0-alpha.1
       - name: Set base path
         run: |
             echo "[application]
@@ -45,10 +55,20 @@ jobs:
         run: cd preview && dx build --platform web --release
       - name: Copy output
         run: cp -r target/dx/preview/release/web/public docs
-      - name: Add gh pages 404
-        run: cp docs/index.html docs/404.html
-      - name: Deploy preview
-        uses: rossjrw/pr-preview-action@v1
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.2.3
         with:
-            preview-branch: gh-pages # The branch the action should deploy to.
-            source-dir: docs # The folder the action should deploy.
+          token: ${{ github.token }}
+          branch: gh-pages # The branch the action should deploy to.
+          folder: docs # The folder the action should deploy.
+          target-folder: "pr-preview/pr-${{ github.event.pull_request.number }}/"
+          clean: false
+          single-commit: true
+      - name: Comment PR
+        # Only run if the pr just opened
+        if: github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'ready_for_review'
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          message: |
+            Preview available at https://dioxuslabs.github.io/components/pr-preview/pr-${{ github.event.pull_request.number }}/
+          comment-tag: "pr-preview"

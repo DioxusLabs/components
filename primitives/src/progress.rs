@@ -39,7 +39,7 @@ pub fn Progress(props: ProgressProps) -> Element {
             "data-state": state,
             "data-value": props.value.cloned().map(|v| v.to_string()),
             "data-max": props.max,
-            style: percentage().map(|p| format!("--progress-value: {}%", p)),
+            style: percentage().map(|p| format!("--progress-value: {p}%")),
             ..props.attributes,
 
             {props.children}

@@ -73,7 +73,7 @@ pub fn Select(props: SelectProps) -> Element {
     };
 
     // Get the current value (either controlled or internal)
-    let current_value = props.value.map(|v| v()).unwrap_or_else(|| internal_value());
+    let current_value = props.value.map(|v| v()).unwrap_or_else(&*internal_value);
 
     // Determine if a value is selected for ARIA
     let has_selection = current_value.is_some();

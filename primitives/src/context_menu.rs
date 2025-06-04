@@ -206,7 +206,7 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
 
     let style = use_memo(move || {
         let (x, y) = position();
-        format!("position: fixed; left: {}px; top: {}px;", x, y)
+        format!("position: fixed; left: {x}px; top: {y}px;")
     });
 
     // When menu opens, focus the first item
