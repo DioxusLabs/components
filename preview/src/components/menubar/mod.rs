@@ -4,6 +4,8 @@ use dioxus_primitives::menubar::{
 };
 #[component]
 pub(super) fn Demo() -> Element {
+    let mut selected_value = use_signal(String::new);
+
     rsx! {
         document::Link {
             rel: "stylesheet",
@@ -18,7 +20,7 @@ pub(super) fn Demo() -> Element {
                             class: "menubar-item",
                             value: "new".to_string(),
                             on_select: move |value| {
-                                tracing::info!("Selected: {value}");
+                                selected_value.set(value);
                             },
                             "New"
                         }
@@ -26,7 +28,7 @@ pub(super) fn Demo() -> Element {
                             class: "menubar-item",
                             value: "open".to_string(),
                             on_select: move |value| {
-                                tracing::info!("Selected: {value}");
+                                selected_value.set(value);
                             },
                             "Open"
                         }
@@ -34,7 +36,7 @@ pub(super) fn Demo() -> Element {
                             class: "menubar-item",
                             value: "save".to_string(),
                             on_select: move |value| {
-                                tracing::info!("Selected: {value}");
+                                selected_value.set(value);
                             },
                             "Save"
                         }
@@ -47,7 +49,7 @@ pub(super) fn Demo() -> Element {
                             class: "menubar-item",
                             value: "cut".to_string(),
                             on_select: move |value| {
-                                tracing::info!("Selected: {value}");
+                                selected_value.set(value);
                             },
                             "Cut"
                         }
@@ -55,7 +57,7 @@ pub(super) fn Demo() -> Element {
                             class: "menubar-item",
                             value: "copy".to_string(),
                             on_select: move |value| {
-                                tracing::info!("Selected: {value}");
+                                selected_value.set(value);
                             },
                             "Copy"
                         }
@@ -63,11 +65,18 @@ pub(super) fn Demo() -> Element {
                             class: "menubar-item",
                             value: "paste".to_string(),
                             on_select: move |value| {
-                                tracing::info!("Selected: {value}");
+                                selected_value.set(value);
                             },
                             "Paste"
                         }
                     }
+                }
+            }
+            div { class: "selected-value",
+                if selected_value().is_empty() {
+                    "No selection"
+                } else {
+                    "Selected: {selected_value()}"
                 }
             }
         }
