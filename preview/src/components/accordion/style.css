@@ -1,42 +1,83 @@
-.accordion {
-  background-color: var(--brighter-background-color);
-}
-
 .accordion-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
   border: none;
   outline: none;
-  border-bottom: 1px solid var(--dim-border-color);
   width: 100%;
   color: var(--text-color);
-  background-color: var(--brighter-background-color);
-  padding: 10px;
+  background-color: transparent;
+  padding: 0;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   text-align: left;
-  font-weight: bold;
+  box-sizing: border-box;
 }
 
-.accordion-trigger:focus {
-  border: 1px solid maroon;
+.accordion-trigger:focus-visible {
+  box-shadow: 0 0 0 3px var(--focused-border-color);
 }
 
 .accordion-trigger:hover {
   cursor: pointer;
+  text-decoration-line: underline;
 }
 
 .accordion-content {
   display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.3s ease-out;
 }
 
-.accordion-item[data-open="true"] .accordion-content {
-  grid-template-rows: 1fr;
+.accordion-content[data-open="false"] {
+	animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+.accordion-content[data-open="true"] {
+  animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
 }
 
-.accordion-content-inner {
+@keyframes slideDown {
+	from {
+    height: var(--collapsible-content-width);
+	}
+	to {
+    height: 0px;
+	}
+}
+
+@keyframes slideUp {
+	from {
+    height: 0px;
+	}
+	to {
+    height: var(--collapsible-content-width);
+	}
+}
+
+.accordion-item {
+  margin-top: 1px;
+  border-bottom: 1px solid var(--dim-border-color);
   overflow: hidden;
 }
 
-.accordion-content-inner p {
-  margin: 0;
-  padding: 10px;
+.accordion-item:first-child {
+  margin-top: 0px;
+}
+
+.accordion-item:last-child {
+  border-bottom: none;
+}
+
+.accordion-expand-icon {
+  fill: none;
+  stroke: var(--text-color);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  width: 20px;
+  height: 20px;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-item[data-open="true"] .accordion-expand-icon {
+  rotate: 180deg;
 }

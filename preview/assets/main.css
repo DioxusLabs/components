@@ -38,10 +38,10 @@
     --hover-background-color: #292929;
     --focused-background-color: #2c2b2b;
     --contrast-background-color: #e6e6e6;
-    --text-color: #fff;
+    --text-color: #D4D4D4;
     --dim-text-color: rgb(220, 220, 220);
     --border-color: #fff;
-    --dim-border-color: rgb(43, 43, 43);
+    --dim-border-color: #232323;
     --muted-text-color: #b0b0b0;
     --focused-border-color: #2b7fff;
     --success-background-color: #02271c;

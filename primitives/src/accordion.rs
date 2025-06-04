@@ -186,6 +186,10 @@ pub struct AccordionProps {
     /// Settings this to true will use left/right keybinds for navigation instead of up/down. Defaults to false.
     #[props(default)]
     horizontal: ReadOnlySignal<bool>,
+
+    /// Attributes to extend the root element.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
@@ -209,6 +213,8 @@ pub fn Accordion(props: AccordionProps) -> Element {
             onfocusout: move |_| {
                 ctx.set_focus(None);
             },
+
+            ..props.attributes,
 
             {props.children}
         }
@@ -297,14 +303,19 @@ pub struct AccordionContentProps {
 pub fn AccordionContent(props: AccordionContentProps) -> Element {
     let item: Item = use_context();
     let id = use_id_or(item.aria_id, props.id);
+    let ctx: AccordionContext = use_context();
+    let open = ctx.is_open(item.id);
 
     rsx! {
         div {
             id: id,
             class: props.class,
             style: props.style,
+            "data-open": open,
 
-            {props.children}
+            if open {
+                {props.children}
+            }
         }
     }
 }
