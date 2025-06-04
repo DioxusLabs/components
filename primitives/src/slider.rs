@@ -1,6 +1,6 @@
 use crate::use_controlled;
 use dioxus::html::geometry::euclid::Vector2D;
-use dioxus::html::geometry::{ClientPoint, ClientSpace};
+use dioxus::html::geometry::{ClientPoint, ClientSpace, PagePoint, PageSpace};
 use dioxus_lib::html::geometry::Pixels;
 use dioxus_lib::html::geometry::euclid::Rect;
 use dioxus_lib::prelude::*;
@@ -28,9 +28,20 @@ static MOUSE_DOWN: Global<ReadOnlySignal<bool>> = Global::new(|| {
     queue_effect(move || {
         runtime.spawn(ScopeId::ROOT, async move {
             let mut mouse_updates = dioxus::document::eval(
-                "window.addEventListener('mousedown', (e) => {
+                "// Track mouse down events
+                window.addEventListener('mousedown', (e) => {
+                    console.log('Mouse down event received', e);
                     dioxus.send(true);
-                });",
+                });
+                // Track touch start events
+                window.addEventListener('touchstart', (e) => {
+                    console.log('Touch start event received', e);
+                    if (e.touches.length === 1) {
+                        const touch = e.touches[0];
+                        dioxus.send(true);
+                    }
+                });
+                ",
             );
             while let Ok(_) = mouse_updates.recv::<bool>().await {
                 signal.set(true);
@@ -38,8 +49,24 @@ static MOUSE_DOWN: Global<ReadOnlySignal<bool>> = Global::new(|| {
         });
         runtime.spawn(ScopeId::ROOT, async move {
             let mut mouse_updates = dioxus::document::eval(
-                "window.addEventListener('mouseup', (e) => {
+                "// Track mouse up events
+                window.addEventListener('mouseup', (e) => {
+                    console.log('Mouse up event received', e);
                     dioxus.send(false);
+                });
+                // Track touch end events
+                window.addEventListener('touchend', (e) => {
+                    console.log('Touch end event received', e);
+                    if (e.touches.length === 0) {
+                        dioxus.send(false);
+                    }
+                });
+                // Track touch cancel events
+                window.addEventListener('touchcancel', (e) => {
+                    console.log('Touch cancel event received', e);
+                    if (e.touches.length === 0) {
+                        dioxus.send(false);
+                    }
                 });",
             );
             while let Ok(_) = mouse_updates.recv::<bool>().await {
@@ -50,26 +77,37 @@ static MOUSE_DOWN: Global<ReadOnlySignal<bool>> = Global::new(|| {
     signal.into()
 });
 
-static MOUSE_POSITION: Global<ReadOnlySignal<Option<ClientPoint>>> = Global::new(|| {
+static MOUSE_POSITION: Global<ReadOnlySignal<Option<PagePoint>>> = Global::new(|| {
     let mut signal = Signal::new_in_scope(None, ScopeId::ROOT);
     let runtime = Runtime::current().unwrap();
     queue_effect(move || {
         runtime.spawn(ScopeId::ROOT, async move {
             let mut mouse_updates = dioxus::document::eval(
-                "window.addEventListener('mousemove', (e) => {
-                    dioxus.send([e.clientX, e.clientY]);
-                });",
+                "// Track the mouse position
+                window.addEventListener('mousemove', (e) => {
+                    console.log('Mouse move event received', e);
+                    dioxus.send([e.pageX, e.pageY]);
+                });
+                // Track the touch position
+                window.addEventListener('touchmove', (e) => {
+                    console.log('Touch move event received', e);
+                    if (e.touches.length === 1) {
+                        const touch = e.touches[0];
+                        dioxus.send([touch.pageX, touch.pageY]);
+                    }
+                });
+                ",
             );
             while let Ok([x, y]) = mouse_updates.recv::<[f64; 2]>().await {
-                signal.set(Some(ClientPoint::new(x, y)));
+                signal.set(Some(PagePoint::new(x, y)));
             }
         });
     });
     signal.into()
 });
 
-static MOUSE_DELTA: GlobalMemo<Vector2D<f64, ClientSpace>> = Global::new(|| {
-    static LAST_MOUSE_POSITION: Global<Rc<RefCell<Option<ClientPoint>>>> =
+static MOUSE_DELTA: GlobalMemo<Vector2D<f64, PageSpace>> = Global::new(|| {
+    static LAST_MOUSE_POSITION: Global<Rc<RefCell<Option<PagePoint>>>> =
         Global::new(|| Rc::new(RefCell::new(None)));
     let last_position_resolved = LAST_MOUSE_POSITION.resolve();
     let mut last_position_mut = last_position_resolved.borrow_mut();
@@ -157,7 +195,7 @@ pub fn Slider(props: SliderProps) -> Element {
     });
 
     let mut rect = use_signal(|| None);
-    let mut div_element = use_signal(|| None);
+    let mut div_element: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
     let mut granular_value = use_hook(|| CopyValue::new(props.default_value.clone()));
 
     let size = rect().map(|r: Rect<f64, Pixels>| {
@@ -208,6 +246,46 @@ pub fn Slider(props: SliderProps) -> Element {
         }
     });
 
+    let pointer_interaction = move |evt: &dyn InteractionLocation| {
+        let mouse_pos = evt.client_coordinates();
+        async move {
+            if (ctx.disabled)() {
+                return;
+            }
+            let Some(div_element) = div_element() else {
+                tracing::warn!("Slider div element is not (yet) set");
+                return;
+            };
+
+            // Update the bounding rect of the slider in case it moved
+            if let Ok(r) = div_element.get_client_rect().await {
+                rect.set(Some(r));
+
+                let size = if props.horizontal {
+                    r.width()
+                } else {
+                    r.height()
+                };
+
+                // Get the mouse position relative to the slider
+                let top_left = r.origin;
+                let relative_pos = mouse_pos - top_left.cast_unit();
+
+                let offset = if ctx.horizontal {
+                    relative_pos.x
+                } else {
+                    relative_pos.y
+                };
+                let new = (offset / size) * ctx.range_size() + ctx.min;
+                granular_value.set(SliderValue::Single(new));
+                let stepped = (new / ctx.step).round() * ctx.step;
+                ctx.set_value.call(SliderValue::Single(stepped));
+            }
+
+            dragging.set(true);
+        }
+    };
+
     rsx! {
         div {
             role: "group",
@@ -231,48 +309,21 @@ pub fn Slider(props: SliderProps) -> Element {
                     rect.set(Some(r));
                 }
             },
-
-            onmousedown: move |evt| {
-                // Prevent default to avoid loosing focus on the range
+            ontouchstart: move |evt| {
+                // Don't focus the button. The dragging state will handle focus
                 evt.prevent_default();
 
                 async move {
-                    if (ctx.disabled)() {
-                        return;
+                    for touch in evt.target_touches() {
+                        pointer_interaction(&touch).await;
                     }
-                    let Some(div_element) = div_element() else {
-                        tracing::warn!("Slider div element is not (yet) set");
-                        return;
-                    };
-
-                    // Update the bounding rect of the slider in case it moved
-                    if let Ok(r) = div_element.get_client_rect().await {
-                        rect.set(Some(r));
-
-                        let size = if props.horizontal {
-                            r.width()
-                        } else {
-                            r.height()
-                        };
-
-                        // Get the mouse position relative to the slider
-                        let top_left = r.origin;
-                        let mouse_pos = evt.data().client_coordinates();
-                        let relative_pos = mouse_pos - top_left.cast_unit();
-
-                        let offset = if ctx.horizontal {
-                            relative_pos.x
-                        } else {
-                            relative_pos.y
-                        };
-                        let new = (offset / size) * ctx.range_size() + ctx.min;
-                        granular_value.set(SliderValue::Single(new));
-                        let stepped = (new / ctx.step).round() * ctx.step;
-                        ctx.set_value.call(SliderValue::Single(stepped));
-                    }
-
-                    dragging.set(true);
                 }
+            },
+            onmousedown: move |evt| {
+                // Prevent default to avoid loosing focus on the range
+                evt.prevent_default();
+                
+                pointer_interaction(&*evt.data())
             },
 
             ..props.attributes,
@@ -416,6 +467,10 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
                 button_ref.set(Some(evt.data()));
             },
             onmousedown: move |evt| {
+                // Don't focus the button. The dragging state will handle focus
+                evt.prevent_default();
+            },
+            ontouchstart: move |evt| {
                 // Don't focus the button. The dragging state will handle focus
                 evt.prevent_default();
             },
