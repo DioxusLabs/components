@@ -201,7 +201,7 @@ pub fn Slider(props: SliderProps) -> Element {
 
         let delta_pos = if ctx.horizontal { delta.x } else { delta.y } as f64;
 
-        let delta = delta_pos / size as f64 * ctx.range_size();
+        let delta = delta_pos / size * ctx.range_size();
 
         let current_value = match granular_value.cloned() {
             SliderValue::Single(v) => v,

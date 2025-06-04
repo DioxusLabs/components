@@ -1,6 +1,6 @@
-use std::rc::Rc;
 use crate::{use_controlled, use_effect_cleanup};
 use dioxus_lib::prelude::*;
+use std::rc::Rc;
 
 #[derive(Clone, Copy)]
 struct TabsContext {
