@@ -1,11 +1,10 @@
 .progress {
     position: relative;
     overflow: hidden;
-    background: var(--brighter-background-color);
+    background: var(--hover-border-color);
     border-radius: 9999px;
     width: 200px;
-    height: 20px;
-    border: 2px solid var(--dim-border-color);
+    height: .5rem;
     box-sizing: border-box;
 }
 
@@ -16,10 +15,9 @@
 
 .progress-indicator {
     height: 100%;
-    background-color: var(--contrast-background-color);
+    background-color: var(--bright-text-color);
     transition: width 250ms ease;
     width: var(--progress-value, 0%);
-    /* Use CSS variable for width */
 }
 
 @keyframes indeterminate {
@@ -30,24 +28,4 @@
     100% {
         transform: translateX(200%);
     }
-}
-
-.progress-button {
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    user-select: none;
-    outline: none;
-    font-size: 14px;
-    background-color: var(--brighter-background-color);
-    border: 1px solid var(--dim-border-color);
-    color: var(--text-color);
-}
-
-.progress-button:hover {
-    background: var(--hover-background-color);
-}
-
-.progress-button:focus {
-    background: var(--focused-background-color);
 }
