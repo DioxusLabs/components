@@ -1,47 +1,61 @@
 .context-menu-content {
-    min-width: 220px;
+  min-width: 220px;
+  background: var(--background-color);
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+  box-shadow: 0 0 0 1px var(--dim-border-color);
+  animation: slideIn 0.1s ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  .context-menu-content {
     background: var(--focused-background-color);
-    border-radius: .5rem;
-    padding: .25rem;
     box-shadow: 0 0 0 1px var(--hover-border-color);
-    animation: slideIn 0.1s ease-out;
+  }
 }
 
 .context-menu-content[hidden] {
-    display: none;
+  display: none;
 }
 
 .context-menu-item {
-    padding: 8px 12px;
-    border-radius: calc(.5rem - .25rem);
-    cursor: pointer;
-    user-select: none;
-    outline: none;
-    font-size: 14px;
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
+  padding: 8px 12px;
+  border-radius: calc(0.5rem - 0.25rem);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
 }
 
 .context-menu-item[data-disabled="true"] {
-    color: var(--muted-text-color);
-    cursor: not-allowed;
+  color: var(--muted-text-color);
+  cursor: not-allowed;
 }
 
 .context-menu-item:hover:not([data-disabled="true"]),
 .context-menu-item:focus-visible {
-    color: var(--bright-text-color);
+  color: var(--bright-text-color);
+  background: var(--hover-background-color);
+}
+
+@media (prefers-color-scheme: dark) {
+  .context-menu-item:hover:not([data-disabled="true"]),
+  .context-menu-item:focus-visible {
     background: var(--hover-border-color);
+  }
 }
 
 @keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
 
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

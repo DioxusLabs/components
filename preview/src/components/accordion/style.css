@@ -16,7 +16,7 @@
 }
 
 .accordion-trigger:focus-visible {
-  box-shadow: 0 0 0 3px var(--focused-border-color);
+  box-shadow: 0 0 0 2px var(--focused-border-color);
 }
 
 .accordion-trigger:hover {

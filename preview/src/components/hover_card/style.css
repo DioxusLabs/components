@@ -14,11 +14,21 @@
   min-width: 200px;
   border-radius: .5rem;
   min-width: 200px;
-  background: var(--focused-background-color);
   border-radius: .5rem;
   padding: 5px;
-  box-shadow: 0 0 0 1px var(--hover-border-color);
+  background: var(--background-color);
+   /* Semi transparent shadow effect in light mode */
+  box-shadow: 0 2px 10px #0000001a;
+  border: 1px solid var(--dim-border-color);
   animation: hoverCardFadeIn 0.1s ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hover-card-content {
+    background: var(--focused-background-color);
+    box-shadow: 0 0 0 1px var(--hover-border-color);
+    border: none;
+  }
 }
 
 /* Positioning based on side */
