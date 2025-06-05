@@ -2,7 +2,6 @@ use dioxus::prelude::*;
 use dioxus_primitives::radio_group::{RadioGroup, RadioItem};
 #[component]
 pub(super) fn Demo() -> Element {
-    let mut value = use_signal(|| String::from("option1"));
     rsx! {
         document::Link {
             rel: "stylesheet",
@@ -10,10 +9,6 @@ pub(super) fn Demo() -> Element {
         }
         RadioGroup {
             class: "radio-group",
-            value,
-            on_value_change: move |new_value| {
-                value.set(new_value);
-            },
             RadioItem {
                 class: "radio-item",
                 value: "option1".to_string(),
@@ -34,6 +29,5 @@ pub(super) fn Demo() -> Element {
                 "Green"
             }
         }
-        div { style: "margin-top: 1rem;", "Selected value: {value()}" }
     }
 }
