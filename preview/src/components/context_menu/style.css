@@ -1,23 +1,9 @@
-.context-menu-example {
-    padding: 20px;
-}
-
-.context-menu-trigger {
-    padding: 20px;
-    background: var(--brighter-background-color);
-    border: 1px solid var(--dim-border-color);
-    border-radius: 4px;
-    cursor: context-menu;
-    user-select: none;
-}
-
 .context-menu-content {
     min-width: 220px;
-    background: var(--brighter-background-color);
+    background: var(--focused-background-color);
     border-radius: 6px;
     padding: 5px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--dim-border-color);
+    box-shadow: 0 0 0 1px var(--hover-border-color);
     animation: slideIn 0.1s ease-out;
 }
 
@@ -37,12 +23,14 @@
     align-items: center;
 }
 
-.context-menu-item:hover {
-    background: var(--hover-background-color);
+.context-menu-item[data-disabled="true"] {
+    color: var(--muted-text-color);
+    cursor: not-allowed;
 }
 
-.context-menu-item:focus {
-    background: var(--focused-background-color);
+.context-menu-item:hover:not([data-disabled="true"]),
+.context-menu-item:focus-visible {
+    background: var(--hover-border-color);
 }
 
 @keyframes slideIn {

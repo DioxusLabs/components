@@ -30,7 +30,7 @@
     --error-background-color: #ef4444;
     --error-background-color-focused: #dc2626;
     --error-border-color: var(--error-background-color);
-    --error-text-color: var(--dim-text-color);
+    --error-text-color: var(--text-color);
     --info-background-color: #e0f2fe;
     --info-text-color: #0284c7;
   }
@@ -44,7 +44,7 @@
     --dim-background-color: #141313;
     --hover-background-color: #1a1a1a;
     --hover-border-color: #3E3E3E;
-    --focused-background-color: #2c2b2b;
+    --focused-background-color: #262626;
     --contrast-background-color: #e6e6e6;
     --text-color: #D4D4D4;
     --dim-text-color: rgb(220, 220, 220);
