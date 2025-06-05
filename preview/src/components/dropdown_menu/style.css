@@ -51,7 +51,6 @@
   }
 }
 
-
 .dropdown-menu-content[hidden] {
   display: none;
 }
@@ -81,7 +80,7 @@
 
 @media (prefers-color-scheme: dark) {
   .dropdown-menu-item:hover:not([data-disabled="true"]),
-.dropdown-menu-item:focus-visible {
+  .dropdown-menu-item:focus-visible {
     background: var(--hover-border-color);
   }
 }
