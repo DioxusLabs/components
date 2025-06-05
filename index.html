@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <title>dioxus | ⛺</title>
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="UTF-8">
+    <link rel="preload" as="script" href="/components/assets/preview-44d34ccbd8b1f4.js" crossorigin><link rel="preload" as="fetch" type="application/wasm" href="/components/assets/preview_bg-48f86ce162b4172.wasm" crossorigin></head>
+    <body>
+        <div id="main"></div>
+     <script>
+  // We can't use a module script here because we need to start the script immediately when streaming
+  import("/components/assets/preview-44d34ccbd8b1f4.js").then(
+    ({ default: init, initSync, __wbg_get_imports }) => {
+      // export initSync in case a split module needs to initialize
+      window.__wasm_split_main_initSync = initSync;
+
+      // Actually perform the load
+      init({module_or_path: "/components/assets/preview_bg-48f86ce162b4172.wasm"}).then((wasm) => {
+        // assign this module to be accessible globally
+        window.__dx_mainWasm = wasm;
+        window.__dx_mainInit = init;
+        window.__dx_mainInitSync = initSync;
+        window.__dx___wbg_get_imports = __wbg_get_imports;
+
+        if (wasm.__wbindgen_start == undefined) {
+            wasm.main();
+        }
+      });
+    }
+  );
+  </script>
+            </body>
+</html>
