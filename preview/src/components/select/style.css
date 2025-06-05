@@ -1,24 +1,23 @@
 /* Select Styles */
 .select {
-    position: relative;
-    width: 100%;
-    max-width: 300px;
-    padding: 8px 16px;
-    color: var(--text-color);
-    box-shadow: inset 0 0 0 1px var(--dim-border-color);
-    border: none;
-    border-radius: 0.5rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s ease;
-    appearance: none;
-    position: absolute;
-    align-items: center;
+  position: relative;
+  max-width: 300px;
+  padding: 8px 16px;
+  color: var(--text-color);
+  box-shadow: inset 0 0 0 1px var(--dim-border-color);
+  border: none;
+  border-radius: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  appearance: none;
+  position: absolute;
+  align-items: center;
 }
 
 .select:not([aria-activedescendant]) {
-    color: var(--muted-text-color);
+  color: var(--muted-text-color);
 }
 
 @media (prefers-color-scheme: dark) {

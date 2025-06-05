@@ -1,7 +1,6 @@
 use dioxus::prelude::*;
-use dioxus_primitives::slider::{
-    Slider, SliderRange, SliderThumb, SliderTrack, SliderValue,
-};
+use dioxus_primitives::slider::{Slider, SliderRange, SliderThumb, SliderTrack};
+
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
