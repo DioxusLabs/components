@@ -7,8 +7,16 @@ pub(super) fn Demo() -> Element {
             rel: "stylesheet",
             href: asset!("/src/components/checkbox/style.css"),
         }
-        Checkbox { id: "tos-check", name: "tos-check",
-            CheckboxIndicator { "✓" }
+        Checkbox { class: "checkbox", name: "tos-check",
+            CheckboxIndicator {
+                class: "checkbox-indicator",
+                svg {
+                    class: "checkbox-check-icon",
+                    view_box: "0 0 24 24",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    path { d: "M5 13l4 4L19 7" }
+                }
+            }
         }
     }
 }
