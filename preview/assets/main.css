@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
 /* Theme style variables */
 :root {
   --highlight-color-main: #dd7230;
@@ -12,6 +14,7 @@
     --dim-background-color: #F3F4F6;
     --muted-background-color: #fff;
     --hover-background-color: #dadada;
+    --hover-border-color: #b0b0b0;
     --focused-background-color: #d7d7d7;
     --contrast-background-color: #0d0d0d;
     --text-color: #000;
@@ -40,13 +43,14 @@
     --dim-background-color: #141313;
     --muted-background-color: #0A0A0A;
     --hover-background-color: #1a1a1a;
+    --hover-border-color: #3E3E3E;
     --focused-background-color: #2c2b2b;
     --contrast-background-color: #e6e6e6;
     --text-color: #D4D4D4;
     --dim-text-color: rgb(220, 220, 220);
     --border-color: #fff;
-    --dim-border-color: #383839;
-    --muted-text-color: #b0b0b0;
+    --dim-border-color: #232323;
+    --muted-text-color: #A1A1A1;
     --focused-border-color: #2b7fff;
     --success-background-color: #02271c;
     --success-text-color: #b6fae3;
@@ -78,6 +82,10 @@ body {
   padding: 0;
   color: var(--text-color);
   background-color: var(--background-color);
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .navbar {
@@ -179,6 +187,7 @@ body {
   align-items: center;
   justify-content: center;
   width: 100vw;
+  background-color: var(--muted-background-color);
 }
 
 .component-preview-separator {
@@ -250,6 +259,7 @@ body {
   flex: 1 0 auto;
   border-radius: 0.5rem;
   border: 1px solid var(--dim-border-color);
+  background-color: var(--muted-background-color);
   box-sizing: border-box;
 }
 
