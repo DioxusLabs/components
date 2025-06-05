@@ -5,23 +5,22 @@
 }
 
 .dropdown-menu-trigger {
-    padding: 8px 16px;
+    background-color: var(--dim-background-color);
     color: var(--text-color);
-    background-color: var(--brighter-background-color);
     border: 1px solid var(--dim-border-color);
-    border-radius: 4px;
+    border-radius: .5rem;
+    padding: 8px 18px;
+    font-size: 1rem;
     cursor: pointer;
-    font-size: 14px;
     transition: all 0.2s ease;
 }
 
 .dropdown-menu-trigger:hover {
-    background-color: var(--dim-background-color);
+    background-color: var(--hover-background-color);
 }
 
 .dropdown-menu-trigger:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 2px var(--focused-border-color);
 }
 
 .dropdown-menu-content {
@@ -30,12 +29,11 @@
     left: 0;
     margin-top: 4px;
     min-width: 200px;
-    background-color: var(--brighter-background-color);
-    border: 1px solid var(--dim-border-color);
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    padding: 4px 0;
+    background: var(--focused-background-color);
+    border-radius: .5rem;
+    padding: 5px;
+    box-shadow: 0 0 0 1px var(--hover-border-color);
+    animation: slideIn 0.1s ease-out;
 }
 
 .dropdown-menu-content[hidden] {
@@ -43,29 +41,35 @@
 }
 
 .dropdown-menu-item {
-    padding: 8px 16px;
+    padding: 8px 12px;
+    border-radius: .5rem;
     cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s ease;
     user-select: none;
-}
-
-.dropdown-menu-item:hover {
-    background-color: var(--hover-background-color);
-}
-
-.dropdown-menu-item:focus {
     outline: none;
-    background-color: var(--focused-background-color);
-}
-
-/* State styles */
-.dropdown-menu[data-disabled="true"] .dropdown-menu-trigger {
-    opacity: 0.5;
-    cursor: not-allowed;
+    font-size: 14px;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
 }
 
 .dropdown-menu-item[data-disabled="true"] {
-    opacity: 0.5;
+    color: var(--muted-text-color);
     cursor: not-allowed;
+}
+
+.dropdown-menu-item:hover:not([data-disabled="true"]),
+.dropdown-menu-item:focus-visible {
+    background: var(--hover-border-color);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }

@@ -14,7 +14,7 @@
   z-index: 1000;
   min-width: 200px;
   padding: 12px 16px;
-  border-radius: 6px;
+  border-radius: .5rem;
   background-color: var(--brighter-background-color);
   color: var(--text-color);
   font-size: 14px;
