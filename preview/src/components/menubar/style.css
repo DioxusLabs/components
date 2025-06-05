@@ -1,10 +1,12 @@
 .menubar {
     display: flex;
-    gap: 4px;
-    padding: 4px;
-    border: 1px solid var(--dim-border-color);
-    border-radius: 4px;
+    gap: .25rem;
+    padding: .25rem;
+    border: none;
+    box-shadow: inset 0 0 0 1px var(--dim-border-color);
+    border-radius: .5rem;
     background: var(--background-color);
+    box-sizing: border-box;
 }
 
 .menubar-menu {
@@ -17,11 +19,23 @@
     background: none;
     cursor: pointer;
     color: var(--text-color);
+    border-radius: calc(.5rem - .25rem);
 }
 
-.menubar-trigger:hover {
-    background: var(--hover-background-color);
-    border-radius: 4px;
+.menubar-menu[data-state="open"] .menubar-trigger {
+    color: var(--bright-text-color);
+    background-color: var(--hover-border-color);
+}
+
+.menubar-trigger[data-disabled="true"] {
+    color: var(--muted-text-color);
+    cursor: not-allowed;
+}
+
+.menubar-trigger:hover:not([data-disabled="true"]),
+.menubar-trigger:focus-visible {
+    color: var(--bright-text-color);
+    background: var(--hover-border-color);
 }
 
 .menubar-content {
@@ -30,11 +44,13 @@
     top: 100%;
     left: 0;
     min-width: 200px;
-    background: var(--background-color);
-    border: 1px solid var(--dim-border-color);
-    border-radius: 4px;
-    padding: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-left: -.25rem;
+    margin-top: .5rem;
+    background: var(--focused-background-color);
+    border-radius: .5rem;
+    padding: .25rem;
+    box-shadow: inset 0 0 0 1px var(--hover-border-color);
+    animation: menubarSlideIn 0.1s ease-out;
 }
 
 .menubar-menu[data-state="open"] .menubar-content {
@@ -45,14 +61,33 @@
     display: block;
     padding: 8px 12px;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: calc(.5rem - .25rem);
 }
 
-.menubar-item:hover {
-    background: var(--hover-background-color);
+.menubar-item[data-disabled="true"] {
+    color: var(--muted-text-color);
+    cursor: not-allowed;
+}
+
+.menubar-item:hover:not([data-disabled="true"]),
+.menubar-item:focus-visible {
+    color: var(--bright-text-color);
+    background: var(--hover-border-color);
 }
 
 [data-disabled="true"] {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+@keyframes menubarSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }

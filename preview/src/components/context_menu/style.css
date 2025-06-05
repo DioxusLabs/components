@@ -2,7 +2,7 @@
     min-width: 220px;
     background: var(--focused-background-color);
     border-radius: .5rem;
-    padding: .25em;
+    padding: .25rem;
     box-shadow: 0 0 0 1px var(--hover-border-color);
     animation: slideIn 0.1s ease-out;
 }
@@ -13,7 +13,7 @@
 
 .context-menu-item {
     padding: 8px 12px;
-    border-radius: calc(.5rem - .25em);
+    border-radius: calc(.5rem - .25rem);
     cursor: pointer;
     user-select: none;
     outline: none;
@@ -30,6 +30,7 @@
 
 .context-menu-item:hover:not([data-disabled="true"]),
 .context-menu-item:focus-visible {
+    color: var(--bright-text-color);
     background: var(--hover-border-color);
 }
 
