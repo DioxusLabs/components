@@ -119,6 +119,48 @@ fn CopyIcon() -> Element {
 fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCode) -> Element {
     let mut collapsed = use_signal(|| true);
 
+    let expand = rsx!{
+        button {
+            width: "100%",
+            height: "2rem",
+            color: "var(--text-color)",
+            background_color: "rgba(0, 0, 0, 0)",
+            border_radius: "0 0 0.5rem 0.5rem",
+            border: "none",
+            text_align: "center",
+            onclick: move |_| {
+                collapsed.toggle();
+            },
+            if collapsed() {
+                svg {
+                    fill: "none",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    stroke: "var(--text-color)",
+                    stroke_linecap: "round",
+                    stroke_linejoin: "round",
+                    stroke_width: "2",
+                    width: "20px",
+                    height: "20px",
+                    view_box: "0 0 24 24",
+                    polyline { points: "6 9 12 15 18 9" }
+                }
+            } else {
+                svg {
+                    fill: "none",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    stroke: "var(--text-color)",
+                    stroke_linecap: "round",
+                    stroke_linejoin: "round",
+                    stroke_width: "2",
+                    width: "20px",
+                    height: "20px",
+                    view_box: "0 0 24 24",
+                    polyline { points: "6 15 12 9 18 15" }
+                }
+            }
+        }
+    };
+
     rsx! {
         Tabs {
             class: "tabs",
@@ -126,6 +168,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
             border_bottom_left_radius: "0.5rem",
             border_bottom_right_radius: "0.5rem",
             horizontal: true,
+            width: "100%",
             div { class: "tabs-list",
                 TabTrigger { class: "tabs-trigger", value: "main.rs", index: 0usize, "main.rs" }
                 TabTrigger {
@@ -148,6 +191,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     width: "100%",
                     position: "relative",
                     CodeBlock { source: rs_highlighted, collapsed: collapsed() }
+                    {expand.clone()}
                 }
                 TabContent {
                     class: "tabs-content",
@@ -155,23 +199,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     width: "100%",
                     position: "relative",
                     CodeBlock { source: css_highlighted, collapsed: collapsed() }
-                }
-                button {
-                    width: "100%",
-                    height: "2rem",
-                    color: "var(--text-color)",
-                    background_color: "rgba(0, 0, 0, 0)",
-                    border_radius: "0 0 0.5rem 0.5rem",
-                    border: "none",
-                    text_align: "center",
-                    onclick: move |_| {
-                        collapsed.toggle();
-                    },
-                    if collapsed() {
-                        "↓"
-                    } else {
-                        "↑"
-                    }
+                    {expand}
                 }
             }
         }
