@@ -15,6 +15,7 @@
     --dim-background-color: #F8F8F8;
     --hover-background-color: #f5f5f5;
     --hover-border-color: #b0b0b0;
+    --hover-border-color-more: #d0d0d0;
     --focused-background-color: #f5f5f5;
     --contrast-background-color: #0d0d0d;
     --bright-text-color: #000;
@@ -45,6 +46,7 @@
     --dim-background-color: #141313;
     --hover-background-color: #1a1a1a;
     --hover-border-color: #3E3E3E;
+    --hover-border-color-more: #5D5D5D;
     --focused-background-color: #262626;
     --contrast-background-color: #e6e6e6;
     --bright-text-color: #fAfAfA;
