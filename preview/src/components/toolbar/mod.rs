@@ -5,13 +5,9 @@ pub(super) fn Demo() -> Element {
     let mut text_style = use_signal(Vec::new);
     let mut text_align = use_signal(|| String::from("left"));
     let mut toggle_style = move |style: &str| {
-        let mut current_styles = text_style();
-        if current_styles.contains(&style.to_string()) {
-            current_styles.retain(|s| s != style);
-        } else {
-            current_styles.push(style.to_string());
-        }
-        text_style.set(current_styles);
+        let mut current_styles = text_style.write();
+        current_styles.retain(|s| s != style);
+        current_styles.push(style.to_string());
     };
     let mut set_align = move |align: &str| {
         text_align.set(align.to_string());
