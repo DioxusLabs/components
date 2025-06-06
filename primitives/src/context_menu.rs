@@ -251,6 +251,10 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuItemProps {
+    /// Whether the item is disabled
+    #[props(default = ReadOnlySignal::new(Signal::new(false)))]
+    disabled: ReadOnlySignal<bool>,
+
     /// The value of the menu item
     value: ReadOnlySignal<String>,
 
@@ -269,6 +273,8 @@ pub struct ContextMenuItemProps {
 #[component]
 pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
     let mut ctx: ContextMenuCtx = use_context();
+
+    let disabled = use_memo(move || (props.disabled)() || (ctx.disabled)());
 
     // Register this item with the menu
     use_effect(move || {
@@ -295,7 +301,7 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
     let handle_click = {
         let value = (props.value)().clone();
         move |_| {
-            if !(ctx.disabled)() {
+            if !disabled() {
                 props.on_select.call(value.clone());
                 ctx.set_open.call(false);
                 ctx.restore_trigger_focus();
@@ -309,7 +315,7 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
             // Check for Enter or Space key
             if event.key() == Key::Enter || event.key().to_string() == " " {
                 event.prevent_default();
-                if !(ctx.disabled)() {
+                if !disabled() {
                     props.on_select.call(value.clone());
                     ctx.set_open.call(false);
                     ctx.restore_trigger_focus();
@@ -325,7 +331,8 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
             onclick: handle_click,
             onkeydown: handle_keydown,
             onfocus: move |_| ctx.set_focus(Some((props.index)())),
-            aria_disabled: (ctx.disabled)(),
+            aria_disabled: disabled(),
+            "data-disabled": disabled(),
             ..props.attributes,
 
             {props.children}

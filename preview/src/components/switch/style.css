@@ -1,44 +1,54 @@
 .switch-example {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
 }
 
 .switch {
-    all: unset;
-    width: 42px;
-    height: 25px;
-    background-color: var(--background-color);
-    border-radius: 9999px;
-    position: relative;
-    transition: background-color 150ms;
-    cursor: pointer;
+  all: unset;
+  width: 2rem;
+  height: 1.15rem;
+  background-color: var(--dim-border-color);
+  border-radius: 9999px;
+  position: relative;
+  transition: background-color 150ms;
+  cursor: pointer;
 }
 
 .switch[data-state="checked"] {
-    background-color: var(--contrast-background-color);
+  background-color: var(--contrast-background-color);
 }
 
 .switch-thumb {
-    display: block;
-    width: 21px;
-    height: 21px;
+  display: block;
+  width: calc(1.15rem - 2px);
+  height: calc(1.15rem - 2px);
+  background-color: var(--background-color);
+  border-radius: 9999px;
+  transition: transform 150ms;
+  transform: translateX(1px);
+  will-change: transform;
+}
+
+@media (prefers-color-scheme: dark) {
+  .switch-thumb {
     background-color: var(--contrast-background-color);
-    border-radius: 9999px;
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
-    transition: transform 150ms;
-    transform: translateX(2px);
-    will-change: transform;
+  }
 }
 
 .switch[data-state="checked"] .switch-thumb {
-    transform: translateX(19px);
-    background-color: var(--background-color);
+  transform: translateX(calc(2rem - 1px - (1.15rem - 2px)));
+}
+
+@media (prefers-color-scheme: dark) {
+  .switch[data-state="checked"] .switch-thumb {
+    background-color: var(--dim-background-color);
+  }
 }
 
 /* Only apply disabled styles when data-disabled is "true" */
 .switch[data-disabled="true"] {
-    opacity: 0.5;
-    cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }

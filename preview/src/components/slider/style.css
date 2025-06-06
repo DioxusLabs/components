@@ -1,16 +1,3 @@
-.slider-example {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    padding: 2rem;
-}
-
-.slider-example>div {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
 .slider {
     position: relative;
     display: flex;
@@ -29,9 +16,10 @@
 .slider-track {
     position: relative;
     flex-grow: 1;
-    background-color: rgba(100, 116, 139, 0.1);
+    background: var(--focused-background-color);
     border-radius: 9999px;
-    height: 4px;
+    height: .5rem;
+    box-sizing: border-box;
 }
 
 .slider[data-orientation="vertical"] .slider-track {
@@ -56,9 +44,8 @@
     width: 16px;
     height: 16px;
     background-color: var(--brighter-background-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 50%;
-    border: 2px solid var(--contrast-background-color);
+    border: 1px solid var(--contrast-background-color);
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -71,13 +58,11 @@
     transform: translate(-50%, 50%);
 }
 
+.slider-thumb:focus-visible[data-dragging="true"],
+.slider-thumb:focus-visible,
 .slider-thumb:hover {
-    border-color: var(--hover-border-color);
-}
-
-.slider-thumb:focus-visible {
-    outline: 2px solid var(--focused-border-color);
-    outline-offset: 2px;
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--hover-border-color) 50%,transparent);
+    transition: box-shadow 150ms;
 }
 
 .slider[data-disabled="true"] {
@@ -87,13 +72,4 @@
 
 .slider[data-disabled="true"] .slider-thumb {
     cursor: not-allowed;
-}
-
-.slider-value {
-    font-size: 14px;
-    color: var(--text-color);
-    background-color: var(--brighter-background-color);
-    border: 1px solid var(--dim-border-color);
-    border-radius: 4px;
-    padding: 0.25rem 0.5rem;
 }

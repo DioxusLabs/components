@@ -1,11 +1,11 @@
 use dioxus::prelude::*;
 use dioxus_primitives::calendar::{
-    Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarNavigation,
+    Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 };
 #[component]
 pub(super) fn Demo() -> Element {
     let mut selected_date = use_signal(|| None::<CalendarDate>);
-    let mut view_date = use_signal(|| CalendarDate::new(2024, 5, 15));
+    let mut view_date = use_signal(|| CalendarDate::new(2025, 6, 5));
     rsx! {
         document::Link {
             rel: "stylesheet",
@@ -24,15 +24,28 @@ pub(super) fn Demo() -> Element {
                         tracing::info!("View changed to: {}-{}", new_view.year, new_view.month);
                         view_date.set(new_view);
                     },
-                    CalendarHeader { CalendarNavigation {} }
+                    CalendarHeader {
+                        CalendarNavigation {
+                            CalendarPreviousMonthButton {
+                                svg {
+                                    class: "calendar-previous-month-icon",
+                                    view_box: "0 0 24 24",
+                                    xmlns: "http://www.w3.org/2000/svg",
+                                    polyline { points: "15 6 9 12 15 18" }
+                                }
+                            }
+                            CalendarMonthTitle {}
+                            CalendarNextMonthButton {
+                                svg {
+                                    class: "calendar-next-month-icon",
+                                    view_box: "0 0 24 24",
+                                    xmlns: "http://www.w3.org/2000/svg",
+                                    polyline { points: "9 18 15 12 9 6" }
+                                }
+                            }
+                        }
+                    }
                     CalendarGrid {}
-                }
-            }
-            div { class: "selected-date", style: "margin-top: 20px;",
-                if let Some(date) = selected_date() {
-                    p { style: "font-weight: bold;", "Selected date: {date}" }
-                } else {
-                    p { "No date selected" }
                 }
             }
         }

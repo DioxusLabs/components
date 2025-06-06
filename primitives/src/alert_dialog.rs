@@ -147,13 +147,15 @@ pub fn AlertDialogDescription(props: AlertDialogDescriptionProps) -> Element {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogActionsProps {
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 }
 
 #[component]
 pub fn AlertDialogActions(props: AlertDialogActionsProps) -> Element {
     rsx! {
-        div { class: "alert-dialog-actions", {props.children} }
+        div { ..props.attributes, {props.children} }
     }
 }
 
@@ -161,13 +163,11 @@ pub fn AlertDialogActions(props: AlertDialogActionsProps) -> Element {
 pub struct AlertDialogActionProps {
     #[props(default)]
     on_click: Option<EventHandler<MouseEvent>>,
-    #[props(default)]
-    class: Option<String>,
-    #[props(default)]
-    style: Option<String>,
     #[props(default = "button".to_string())]
     r#type: String,
     children: Element,
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
@@ -184,9 +184,8 @@ pub fn AlertDialogAction(props: AlertDialogActionProps) -> Element {
     rsx! {
         button {
             r#type: props.r#type.clone(),
-            class: props.class.clone().unwrap_or_else(|| "alert-dialog-action".to_string()),
-            style: props.style.clone().unwrap_or_default(),
             onclick: on_click,
+            ..props.attributes,
             {props.children}
         }
     }
@@ -196,12 +195,10 @@ pub fn AlertDialogAction(props: AlertDialogActionProps) -> Element {
 pub struct AlertDialogCancelProps {
     #[props(default)]
     on_click: Option<EventHandler<MouseEvent>>,
-    #[props(default)]
-    class: Option<String>,
-    #[props(default)]
-    style: Option<String>,
     #[props(default = "button".to_string())]
     r#type: String,
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 }
 
@@ -219,10 +216,9 @@ pub fn AlertDialogCancel(props: AlertDialogCancelProps) -> Element {
     rsx! {
         button {
             r#type: props.r#type.clone(),
-            class: props.class.clone().unwrap_or_else(|| "alert-dialog-cancel".to_string()),
-            style: props.style.clone().unwrap_or_default(),
             onclick: on_click,
             autofocus: true,
+            ..props.attributes,
             {props.children}
         }
     }

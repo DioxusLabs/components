@@ -1,9 +1,9 @@
 use crate::use_unique_id;
 use dioxus_lib::prelude::*;
-use std::fmt;
+use std::fmt::{self, Display};
 
 // Calendar date representation
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct CalendarDate {
     pub year: i32,
     pub month: u32, // 1-12
@@ -39,19 +39,7 @@ impl CalendarDate {
 
     // Get the number of days in the month
     pub fn days_in_month(&self) -> u32 {
-        match self.month {
-            1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
-            4 | 6 | 9 | 11 => 30,
-            2 => {
-                // Leap year check (simplified)
-                if self.year % 4 == 0 && (self.year % 100 != 0 || self.year % 400 == 0) {
-                    29
-                } else {
-                    28
-                }
-            }
-            _ => 30, // Default for invalid months
-        }
+        days_in_month(self.year, self.month)
     }
 
     // Get the previous month
@@ -97,6 +85,29 @@ impl CalendarDate {
     pub fn is_same_month(&self, other: &Self) -> bool {
         self.year == other.year && self.month == other.month
     }
+}
+
+fn days_in_month(year: i32, month: u32) -> u32 {
+    match month {
+        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+        4 | 6 | 9 | 11 => 30,
+        2 => {
+            // Leap year check (simplified)
+            if year % 4 == 0 && (year % 100 != 0 || year % 400 == 0) {
+                29
+            } else {
+                28
+            }
+        }
+        _ => unreachable!(), // Invalid month
+    }
+}
+
+// Zeller's Congruence
+fn month_start_day_of_week(year: i32, month: u32) -> u32 {
+    let month_offsets = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
+    let year = if month < 3 { year - 1 } else { year };
+    ((year + year / 4 - year / 100 + year / 400 + month_offsets[month as usize - 1] + 1) % 7) as _
 }
 
 impl fmt::Display for CalendarDate {
@@ -281,8 +292,28 @@ pub struct CalendarNavigationProps {
 // Calendar Navigation component
 #[component]
 pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
-    let ctx: CalendarContext = use_context();
+    rsx! {
+        div { class: "calendar-navigation", ..props.attributes,
 
+            {props.children}
+        }
+    }
+}
+
+
+/// Next month navigation button component props
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarPreviousMonthButtonProps {
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+
+    children: Element,
+}
+
+/// Next month navigation button component
+#[component]
+pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> Element {
+    let ctx: CalendarContext = use_context();
     // Handle navigation to previous month
     let handle_prev_month = move |e: Event<MouseData>| {
         e.prevent_default();
@@ -290,6 +321,33 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
         ctx.set_view_date.call(current_view.prev_month());
     };
 
+    rsx! {
+        button {
+            class: "calendar-nav-prev",
+            aria_label: "Previous month",
+            r#type: "button",
+            onclick: handle_prev_month,
+            disabled: (ctx.disabled)(),
+            ..props.attributes,
+
+            {props.children}
+        }
+    }
+}
+
+/// Next month navigation button component props
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarNextMonthButtonProps {
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+
+    children: Element,
+}
+
+/// Next month navigation button component
+#[component]
+pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
+    let ctx: CalendarContext = use_context();
     // Handle navigation to next month
     let handle_next_month = move |e: Event<MouseData>| {
         e.prevent_default();
@@ -297,6 +355,31 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
         ctx.set_view_date.call(current_view.next_month());
     };
 
+    rsx! {
+        button {
+            class: "calendar-nav-next",
+            aria_label: "Next month",
+            r#type: "button",
+            onclick: handle_next_month,
+            disabled: (ctx.disabled)(),
+            ..props.attributes,
+
+            {props.children}
+        }
+    }
+}
+
+/// Calendar Month Title component props
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarMonthTitleProps {
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+}
+
+/// Calendar Month Title component
+#[component]
+pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
+    let ctx: CalendarContext = use_context();
     // Format the current month and year
     let month_year = use_memo(move || {
         let view_date = (ctx.view_date)();
@@ -319,28 +402,11 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
     });
 
     rsx! {
-        div { class: "calendar-navigation", ..props.attributes,
+        div {
+            class: "calendar-month-title",
+            ..props.attributes,
 
-            // Default navigation UI
-            button {
-                class: "calendar-nav-prev",
-                aria_label: "Previous month",
-                r#type: "button",
-                onclick: handle_prev_month,
-                disabled: (ctx.disabled)(),
-                "⬅"
-            }
-
-            div { class: "calendar-nav-title", {month_year} }
-
-            button {
-                class: "calendar-nav-next",
-                aria_label: "Next month",
-                r#type: "button",
-                onclick: handle_next_month,
-                disabled: (ctx.disabled)(),
-                "⮕"
-            }
+            {month_year}
         }
     }
 }
@@ -356,8 +422,8 @@ pub struct CalendarGridProps {
     #[props(default)]
     show_week_numbers: bool,
 
-    /// Day labels (Mon, Tue, etc.)
-    #[props(default = vec!["Mo".to_string(), "Tu".to_string(), "We".to_string(), "Th".to_string(), "Fr".to_string(), "Sa".to_string(), "Su".to_string()])]
+    /// Day labels (Sun, Mon, etc.)
+    #[props(default = vec!["Su".to_string(), "Mo".to_string(), "Tu".to_string(), "We".to_string(), "Th".to_string(), "Fr".to_string(), "Sa".to_string()])]
     day_labels: Vec<String>,
 
     #[props(extends = GlobalAttributes)]
@@ -378,34 +444,132 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         let view_date = (ctx.view_date)();
         let days_in_month = view_date.days_in_month();
 
-        // For a proper calendar grid, we need to determine the day of week for the first day
-        // For simplicity, we'll use a fixed offset (assuming first day is Monday)
-        // In a real implementation, we would calculate this properly
-        let first_day_offset = 2; // Adjust this based on testing
+        let first_day_offset = month_start_day_of_week(view_date.year, view_date.month);
 
         // Create a grid with empty cells for padding and actual days
         let mut grid = Vec::new();
 
         // Add empty cells for days before the first day of the month
-        for _ in 0..first_day_offset {
-            grid.push(None);
+        for i in 0..first_day_offset {
+            grid.push(CalendarDayProps {
+                month: RelativeMonth::Last,
+                day: (view_date.prev_month().days_in_month() + i + 1 - first_day_offset) as u32,
+                is_selected: false,
+                is_today: false,
+            });
         }
 
         // Add days of the month
         for day in 1..=days_in_month {
-            grid.push(Some(day));
+            grid.push(CalendarDayProps {
+                month: RelativeMonth::Current,
+                day,
+                is_selected: (ctx.selected_date)().is_some_and(|d| {
+                    d.day == day
+                        && d.month == (ctx.view_date)().month
+                        && d.year == (ctx.view_date)().year
+                }),
+                is_today: day == (ctx.view_date)().day,
+            });
         }
 
         // Add empty cells to complete the grid (for a clean layout)
         let remainder = grid.len() % 7;
         if remainder > 0 {
-            for _ in 0..(7 - remainder) {
-                grid.push(None);
+            for day in 1..=(7 - remainder) {
+                grid.push(CalendarDayProps {
+                    month: RelativeMonth::Next,
+                    day: day as u32,
+                    is_selected: false,
+                    is_today: false,
+                });
             }
         }
 
-        grid
+        // Turn the flat grid into a 2D grid (7 columns)
+        grid.chunks(7)
+            .map(|chunk| chunk.to_vec())
+            .collect::<Vec<_>>()
     });
+
+    rsx! {
+        table {
+            role: "grid",
+            id: props.id,
+            class: "calendar-grid",
+            ..props.attributes,
+
+            // Day headers
+            thead { role: "row",
+                tr {
+                    class: "calendar-grid-header",
+                    // Day name headers
+                    for day_label in &props.day_labels {
+                        th {
+                            class: "calendar-grid-day-header",
+                            {day_label.clone()}
+                        }
+                    }
+                }
+            }
+
+            // Calendar days grid
+            tbody { class: "calendar-grid-body",
+                // Display all days in a grid
+                for row in &*days_grid.read() {
+                    tr {
+                        class: "calendar-grid-week",
+                        for props in row.iter().copied() {
+                            td {
+                                CalendarDay {
+                                    day: props.day,
+                                    is_today: props.is_today,
+                                    is_selected: props.is_selected,
+                                    month: props.month
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq)]
+enum RelativeMonth {
+    Last,
+    Current,
+    Next,
+}
+
+impl Display for RelativeMonth {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            RelativeMonth::Last => write!(f, "last"),
+            RelativeMonth::Current => write!(f, "current"),
+            RelativeMonth::Next => write!(f, "next"),
+        }
+    }
+}
+
+#[derive(Props, Copy, Clone, Debug, PartialEq)]
+struct CalendarDayProps {
+    day: u32,
+    is_selected: bool,
+    is_today: bool,
+    month: RelativeMonth,
+}
+
+#[component]
+fn CalendarDay(props: CalendarDayProps) -> Element {
+    let CalendarDayProps {
+        day,
+        is_selected,
+        is_today,
+        month,
+    } = props;
+    let ctx: CalendarContext = use_context();
 
     // Handle day selection
     let handle_day_select = move |day: u32| {
@@ -417,56 +581,20 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
     };
 
     rsx! {
-        div {
-            role: "grid",
-            id: props.id,
-            class: "calendar-grid",
-            ..props.attributes,
-
-            // Day headers
-            div { role: "row", class: "calendar-grid-header",
-
-                // Day name headers
-                for day_label in &props.day_labels {
-                    div {
-                        role: "columnheader",
-                        class: "calendar-grid-day-header",
-                        {day_label.clone()}
-                    }
+        button {
+            class: "calendar-grid-cell",
+            onclick: move |e| {
+                e.prevent_default();
+                if month == RelativeMonth::Current {
+                    handle_day_select(day);
                 }
-            }
-
-            // Calendar days grid
-            div { class: "calendar-grid-body",
-
-                // Create a simple grid layout
-                div { class: "calendar-grid-days",
-
-                    // Display all days in a grid
-                    for day_opt in days_grid() {
-                        if let Some(day) = day_opt {
-                            button {
-                                class: "calendar-grid-cell",
-                                onclick: move |e| {
-                                    e.prevent_default();
-                                    handle_day_select(day);
-                                },
-                                r#type: "button",
-                                "data-today": day == (ctx.view_date)().day,
-                                "data-selected": (ctx.selected_date)()
-                                    .is_some_and(|d| {
-                                        d.day == day && d.month == (ctx.view_date)().month
-                                            && d.year == (ctx.view_date)().year
-                                    }),
-                                {day.to_string()}
-                            }
-                        } else {
-                            // Empty cell for padding
-                            div { class: "calendar-grid-cell calendar-grid-cell-empty" }
-                        }
-                    }
-                }
-            }
+            },
+            r#type: "button",
+            tabindex: (month != RelativeMonth::Current).then_some("-1"),
+            "data-today": is_today,
+            "data-selected": is_selected,
+            "data-month": "{month}",
+            {day.to_string()}
         }
     }
 }

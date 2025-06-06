@@ -61,7 +61,7 @@ pub fn Avatar(props: AvatarProps) -> Element {
     });
 
     // Create context for child components
-    let _ctx = use_context_provider(|| AvatarCtx {
+    use_context_provider(|| AvatarCtx {
         state,
         has_fallback_child,
         has_image_child,
@@ -123,7 +123,7 @@ pub fn AvatarFallback(props: AvatarFallbackProps) -> Element {
     }
 
     rsx! {
-        span { ..props.attributes,{props.children} }
+        span { ..props.attributes, {props.children} }
     }
 }
 
@@ -169,6 +169,11 @@ pub fn AvatarImage(props: AvatarImageProps) -> Element {
             handler.call(AvatarState::Error);
         }
     };
+
+    let show_image = (ctx.state)() != AvatarState::Error;
+    if !show_image {
+        return rsx!({});
+    }
 
     rsx! {
         img {
