@@ -12,9 +12,10 @@ pub(super) fn Demo() -> Element {
             width: "10em",
             min_width: "30vw",
             AspectRatio { ratio: 4.0 / 3.0,
-                img {
-                    class: "aspect-ratio-image",
-                    src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif()),
+                div {
+                    background: "linear-gradient(to bottom right, var(--hover-background-color), var(--dim-background-color))",
+                    width: "100%",
+                    height: "100%",
                 }
             }
         }

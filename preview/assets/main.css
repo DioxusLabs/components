@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
 /* Theme style variables */
 :root {
   --highlight-color-main: #dd7230;
@@ -9,24 +11,30 @@
   :root {
     --background-color: #fff;
     --brighter-background-color: #fbfbfb;
-    --dim-background-color: oklch(0.967 0.003 264.542);
-    --hover-background-color: #dadada;
-    --focused-background-color: #d7d7d7;
+    --muted-background-color: #fff;
+    --dim-background-color: #F8F8F8;
+    --hover-background-color: #f5f5f5;
+    --hover-border-color: #b0b0b0;
+    --hover-border-color-more: #d0d0d0;
+    --focused-background-color: #f5f5f5;
     --contrast-background-color: #0d0d0d;
-    --text-color: #000;
+    --bright-text-color: #000;
+    --text-color: #111;
     --dim-text-color: rgb(43, 43, 43);
     --border-color: #000;
-    --dim-border-color: rgb(43, 43, 43);
-    --muted-text-color: #b0b0b0;
+    --dim-border-color: #E5E5E5;
+    --muted-text-color: #848484;
     --focused-border-color: #2b7fff;
     --success-background-color: #ecfdf5;
     --success-text-color: #10b981;
     --warning-background-color: #fffbeb;
     --warning-text-color: #f59e0b;
-    --error-background-color: #fef2f2;
-    --error-text-color: #ef4444;
-    --info-background-color: #e0f2fe;
-    --info-text-color: #0284c7;
+    --error-background-color: #ef4444;
+    --error-background-color-focused: #dc2626;
+    --error-border-color: var(--error-background-color);
+    --error-text-color: var(--text-color);
+    --info-background-color: var(--background-color);
+    --info-text-color: var(--dim-text-color);
   }
 }
 
@@ -34,35 +42,41 @@
   :root {
     --background-color: #000;
     --brighter-background-color: #0e0e0e;
+    --muted-background-color: #0A0A0A;
     --dim-background-color: #141313;
-    --hover-background-color: #292929;
-    --focused-background-color: #2c2b2b;
+    --hover-background-color: #1a1a1a;
+    --hover-border-color: #3E3E3E;
+    --hover-border-color-more: #5D5D5D;
+    --focused-background-color: #262626;
     --contrast-background-color: #e6e6e6;
-    --text-color: #fff;
+    --bright-text-color: #fAfAfA;
+    --text-color: #D4D4D4;
     --dim-text-color: rgb(220, 220, 220);
     --border-color: #fff;
-    --dim-border-color: rgb(43, 43, 43);
-    --muted-text-color: #b0b0b0;
+    --dim-border-color: #232323;
+    --muted-text-color: #A1A1A1;
     --focused-border-color: #2b7fff;
     --success-background-color: #02271c;
     --success-text-color: #b6fae3;
     --warning-background-color: #342203;
     --warning-text-color: #feeac7;
-    --error-background-color: #360e0e;
-    --error-text-color: #e0baba;
-    --info-background-color: #0c1f2b;
-    --info-text-color: #b3d7e6;
+    --error-background-color: #a22e2e;
+    --error-background-color-focused: #9b1c1c;
+    --error-border-color: var(--error-background-color);
+    --error-text-color: var(--dim-text-color);
+    --info-background-color: var(--focused-background-color);
+    --info-text-color: var(--hover-border-color);
   }
 }
 
 @media (prefers-color-scheme: light) {
-  .code-block-dark {
+  .dark-mode-only {
     display: none;
   }
 }
 
 @media (prefers-color-scheme: dark) {
-  .code-block-light {
+  .light-mode-only {
     display: none;
   }
 }
@@ -72,6 +86,10 @@ body {
   padding: 0;
   color: var(--text-color);
   background-color: var(--background-color);
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .navbar {
@@ -79,11 +97,11 @@ body {
   align-items: center;
   justify-content: space-between;
   position: sticky;
-  padding: 1rem;
+  padding: .5rem 1rem;
   top: 0;
   z-index: 1000;
-  background-color: var(--brighter-background-color);
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--background-color);
+  border-bottom: 1px solid var(--dim-border-color);
 }
 
 .navbar-link {
@@ -115,12 +133,14 @@ body {
 /* Code block styles */
 .code-block {
   font-family: "Courier New", Courier, monospace;
-  border-radius: 4px;
+  border-radius: .5rem;
   overflow: scroll;
   width: 100%;
   height: 100%;
   max-height: 80vh;
   box-sizing: border-box;
+  padding: .5rem;
+  margin: 0;
 }
 
 .code-block[data-collapsed="true"] {
@@ -128,9 +148,8 @@ body {
   backdrop-filter: blur(1px);
   mask: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 1) 12.5%,
-    rgba(0, 0, 0, 1) 25%,
-    rgba(0, 0, 0, 1) 37.5%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 60%,
     rgba(0, 0, 0, 0) 100%
   );
   overflow: hidden;
@@ -148,7 +167,7 @@ body {
   background: none;
   color: var(--text-color);
   border: none;
-  border-radius: 4px;
+  border-radius: .5rem;
   cursor: pointer;
 }
 
@@ -175,22 +194,11 @@ body {
   width: 100vw;
 }
 
-.component-preview-separator {
-  width: 100%;
-  height: 1px;
-  background-color: var(--dim-border-color);
-}
-
 .component-preview-contents {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: var(--dim-background-color);
-  border: 1px solid var(--dim-border-color);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
   margin: 20px 0;
   width: 75vw;
 }
@@ -205,9 +213,11 @@ body {
   max-height: 100%;
   border-top-right-radius: 0.5em;
   border-top-left-radius: 0.5em;
-  background-color: var(--dim-background-color);
   padding: 20px;
   box-sizing: border-box;
+  border: 1px solid var(--dim-border-color);
+  background-color: var(--muted-background-color);
+  border-radius: 8px;
 }
 
 /* component info styles */
@@ -226,7 +236,17 @@ body {
 }
 
 .component-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  min-height: 25vh;
+  max-height: 100%;
+  border-top-right-radius: 0.5em;
+  border-top-left-radius: 0.5em;
+  padding-top: 2rem;
+  box-sizing: border-box;
 }
 
 /* Masonry styles */
@@ -245,8 +265,8 @@ body {
   padding: 3rem;
   flex: 1 0 auto;
   border-radius: 0.5rem;
-  background-color: var(--dim-background-color);
   border: 1px solid var(--dim-border-color);
+  background-color: var(--muted-background-color);
   box-sizing: border-box;
 }
 
