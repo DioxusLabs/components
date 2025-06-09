@@ -51,7 +51,7 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
             user_on_open_change.call(v);
         }
     });
-    let open = use_memo(move || (props.open)().unwrap_or_else(|| open_signal()));
+    let open = use_memo(move || (props.open)().unwrap_or_else(&*open_signal));
     use_context_provider(|| AlertDialogCtx {
         open: open.into(),
         set_open,
