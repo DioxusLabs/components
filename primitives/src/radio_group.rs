@@ -1,3 +1,5 @@
+use std::{collections::HashMap, rc::Rc};
+
 use crate::use_controlled;
 use dioxus_lib::prelude::*;
 
@@ -9,7 +11,8 @@ struct RadioGroupCtx {
     set_value: Callback<String>,
 
     // Keyboard nav data
-    item_count: Signal<usize>,
+    // A map of tabindex -> value in the enabled radio items
+    values: Signal<HashMap<usize, String>>,
     recent_focus: Signal<usize>,
     current_focus: Signal<Option<usize>>,
 
@@ -29,11 +32,20 @@ impl RadioGroupCtx {
         }
     }
 
+    /// Set the value of the radio group.
+    fn set_value(&mut self, value: String) {
+        let current_value = self.value.peek();
+        if *current_value == value {
+            return; // No change, do nothing
+        }
+        self.set_value.call(value);
+    }
+
     fn focus_next(&mut self) {
         if let Some(current_focus) = (self.current_focus)() {
             let mut new_focus = current_focus.saturating_add(1);
 
-            let item_count = (self.item_count)();
+            let item_count = self.item_count();
             if new_focus >= item_count {
                 match (self.roving_loop)() {
                     true => new_focus = 0,
@@ -42,6 +54,7 @@ impl RadioGroupCtx {
             }
 
             self.current_focus.set(Some(new_focus));
+            self.select_focused_value();
         }
     }
 
@@ -49,10 +62,20 @@ impl RadioGroupCtx {
         if let Some(current_focus) = (self.current_focus)() {
             let mut new_focus = current_focus.saturating_sub(1);
             if current_focus == 0 && (self.roving_loop)() {
-                new_focus = (self.item_count)().saturating_sub(1);
+                new_focus = self.item_count().saturating_sub(1);
             }
 
             self.current_focus.set(Some(new_focus));
+            self.select_focused_value();
+        }
+    }
+
+    fn select_focused_value(&mut self) {
+        if let Some(current_focus) = (self.current_focus)() {
+            let value = { self.values.read().get(&current_focus).cloned() };
+            if let Some(value) = value {
+                self.set_value(value.clone());
+            }
         }
     }
 
@@ -61,8 +84,13 @@ impl RadioGroupCtx {
     }
 
     fn focus_end(&mut self) {
-        let new_focus = (self.item_count)().saturating_sub(1);
+        let new_focus = self.item_count().saturating_sub(1);
         self.current_focus.set(Some(new_focus));
+    }
+
+    fn item_count(&self) -> usize {
+        let count = self.values.read().len();
+        count
     }
 }
 
@@ -110,7 +138,7 @@ pub fn RadioGroup(props: RadioGroupProps) -> Element {
         set_value,
         disabled: props.disabled,
 
-        item_count: Signal::new(0),
+        values: Signal::new(Default::default()),
         recent_focus: Signal::new(0),
         current_focus: Signal::new(None),
         horizontal: props.horizontal,
@@ -153,8 +181,11 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
 
     // Move registration logic into an effect
     use_effect(move || {
+        if (props.disabled)() {
+            return;
+        }
         // Register on mount
-        ctx.item_count += 1;
+        ctx.values.write().insert((props.index)(), (props.value)());
     });
 
     let value = (props.value)().clone();
@@ -175,6 +206,18 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
         "-1"
     });
 
+    let mut element: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    use_effect(move || {
+        let Some(element) = element() else {
+            return;
+        };
+        if (ctx.current_focus)() == Some((props.index)()) {
+            spawn(async move {
+                _ = element.set_focus(true).await;
+            });
+        }
+    });
+
     rsx! {
         button {
             role: "radio",
@@ -189,11 +232,12 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
 
             onclick: move |_| {
                 let value = (props.value)().clone();
-                if !checked() {
-                    ctx.set_value.call(value);
-                }
+                ctx.set_value(value);
             },
 
+            onmounted: move |node| {
+                element.set(Some(node.data()));
+            },
             onfocus: move |_| ctx.set_focus(Some((props.index)())),
 
             onkeydown: move |event: Event<KeyboardData>| {
@@ -201,15 +245,7 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
                 let horizontal = (ctx.horizontal)();
                 let mut prevent_default = true;
                 match key {
-                    Key::ArrowUp if !horizontal => {
-                        if let Some(current_focus) = (ctx.current_focus)() {
-                            let mut new_focus = current_focus.saturating_sub(1);
-                            if current_focus == 0 && (ctx.roving_loop)() {
-                                new_focus = (ctx.item_count)().saturating_sub(1);
-                            }
-                            ctx.current_focus.set(Some(new_focus));
-                        }
-                    }
+                    Key::ArrowUp if !horizontal => ctx.focus_prev(),
                     Key::ArrowDown if !horizontal => ctx.focus_next(),
                     Key::ArrowLeft if horizontal => ctx.focus_prev(),
                     Key::ArrowRight if horizontal => ctx.focus_next(),
