@@ -68,7 +68,7 @@ impl RadioGroupCtx {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct RadioGroupProps {
-    value: Option<Signal<String>>,
+    value: ReadOnlySignal<Option<String>>,
 
     #[props(default)]
     default_value: String,

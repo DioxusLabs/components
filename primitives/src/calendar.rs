@@ -475,7 +475,11 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         let next_month = view_date.next_month();
         if remainder > 0 {
             for day in 1..=(7 - remainder) {
-                grid.push(CalendarDate::new(next_month.year, next_month.month, day as _));
+                grid.push(CalendarDate::new(
+                    next_month.year,
+                    next_month.month,
+                    day as _,
+                ));
             }
         }
 

@@ -137,7 +137,7 @@ pub struct ToggleGroupProps {
     #[props(default)]
     default_pressed: HashSet<usize>,
 
-    pressed: Option<Signal<HashSet<usize>>>,
+    pressed: ReadOnlySignal<Option<HashSet<usize>>>,
 
     #[props(default)]
     on_pressed_change: Callback<HashSet<usize>>,
@@ -278,7 +278,7 @@ pub fn ToggleItem(props: ToggleItemProps) -> Element {
             disabled: (ctx.disabled)() || (props.disabled)(),
             "data-orientation": ctx.orientation(),
 
-            pressed,
+            pressed: pressed(),
             on_pressed_change: move |pressed| {
                 ctx.set_pressed(props.index, pressed);
             },

@@ -23,7 +23,7 @@ pub struct DialogProps {
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
     is_modal: ReadOnlySignal<bool>,
 
-    open: Option<Signal<bool>>,
+    open: ReadOnlySignal<Option<bool>>,
 
     #[props(default)]
     default_open: bool,

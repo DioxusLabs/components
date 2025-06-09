@@ -94,7 +94,7 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderProps {
     /// The controlled value of the slider
-    value: Option<Signal<SliderValue>>,
+    value: ReadOnlySignal<Option<SliderValue>>,
 
     /// The default value when uncontrolled
     #[props(default = SliderValue::Single(0.0))]

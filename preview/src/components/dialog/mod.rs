@@ -18,7 +18,7 @@ pub(super) fn Demo() -> Element {
         }
         Dialog {
             class: "dialog",
-            open: Some(open),
+            open: open(),
             on_open_change: move |v| open.set(v),
             button {
                 class: "dialog-close",

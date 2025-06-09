@@ -11,7 +11,7 @@ pub(super) fn Demo() -> Element {
         div { class: "switch-example",
             Switch {
                 class: "switch",
-                checked,
+                checked: checked(),
                 on_checked_change: move |new_checked| {
                     checked.set(new_checked);
                     tracing::info!("Switch toggled: {new_checked}");

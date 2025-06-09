@@ -3,7 +3,7 @@ use dioxus_lib::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct SwitchProps {
-    checked: Option<Signal<bool>>,
+    checked: ReadOnlySignal<Option<bool>>,
 
     #[props(default = false)]
     default_checked: bool,

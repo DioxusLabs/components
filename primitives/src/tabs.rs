@@ -67,7 +67,7 @@ impl TabsContext {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct TabsProps {
-    value: Option<Signal<String>>,
+    value: ReadOnlySignal<Option<String>>,
 
     #[props(default)]
     default_value: String,
