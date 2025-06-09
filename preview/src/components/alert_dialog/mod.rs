@@ -15,7 +15,7 @@ pub(super) fn Demo() -> Element {
             class: "alert-dialog-trigger",
             style: "margin-bottom: 1.5rem;",
             onclick: move |_| open.set(true),
-            "Show Alert Dialog (Primitive)"
+            "Show Alert Dialog"
         }
         AlertDialogRoot { open: Some(open), on_open_change: move |v| open.set(v),
             AlertDialogContent { class: "alert-dialog",
