@@ -121,6 +121,8 @@ pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogTitleProps {
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 }
 
@@ -128,12 +130,14 @@ pub struct AlertDialogTitleProps {
 pub fn AlertDialogTitle(props: AlertDialogTitleProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
     rsx! {
-        h2 { id: ctx.labelledby.clone(), class: "alert-dialog-title", {props.children} }
+        h2 { id: ctx.labelledby.clone(), class: "alert-dialog-title", ..props.attributes, {props.children} }
     }
 }
 
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogDescriptionProps {
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 }
 
@@ -141,7 +145,7 @@ pub struct AlertDialogDescriptionProps {
 pub fn AlertDialogDescription(props: AlertDialogDescriptionProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
     rsx! {
-        p { id: ctx.describedby.clone(), class: "alert-dialog-description", {props.children} }
+        p { id: ctx.describedby.clone(), class: "alert-dialog-description", ..props.attributes, {props.children} }
     }
 }
 
