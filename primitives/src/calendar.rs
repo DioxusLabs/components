@@ -472,9 +472,10 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
 
         // Add empty cells to complete the grid (for a clean layout)
         let remainder = grid.len() % 7;
+        let next_month = view_date.next_month();
         if remainder > 0 {
             for day in 1..=(7 - remainder) {
-                grid.push(CalendarDate::new(view_date.year, view_date.month, day as _));
+                grid.push(CalendarDate::new(next_month.year, next_month.month, day as _));
             }
         }
 

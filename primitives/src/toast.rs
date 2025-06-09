@@ -2,6 +2,7 @@ use crate::{
     portal::{PortalIn, PortalOut, use_portal},
     use_unique_id,
 };
+use dioxus::dioxus_core::DynamicNode;
 use dioxus_lib::prelude::*;
 use dioxus_time::use_timeout;
 use std::collections::VecDeque;
@@ -58,6 +59,9 @@ pub struct ToastProviderProps {
 
     #[props(default = ReadOnlySignal::new(Signal::new(10)))]
     max_toasts: ReadOnlySignal<usize>,
+
+    #[props(default = Callback::new(|props: ToastPropsWithOwner| rsx! { {DynamicNode::Component(props.into_vcomponent(Toast))} }))]
+    render_toast: Callback<ToastPropsWithOwner, Element>,
 
     children: Element,
 }
@@ -169,24 +173,28 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
 
                 // Render all toasts
                 for (index, toast) in toast_list.read().iter().rev().enumerate() {
-                    Toast {
+                    Fragment {
                         key: "{toast.id}",
-                        id: toast.id,
-                        index,
-                        title: toast.title.clone(),
-                        description: toast.description.clone(),
-                        toast_type: toast.toast_type,
-                        permanent: toast.permanent,
-                        on_close: {
-                            let toast_id = toast.id;
-                            let remove_toast = ctx.remove_toast;
-                            move |_| {
-                                remove_toast.call(toast_id);
-                            }
-                        },
-
-                        // Only pass duration to non-permanent toasts
-                        duration: if toast.permanent { None } else { toast.duration },
+                        {
+                            props.render_toast.call(ToastProps::builder().id(toast.id)
+                                .index(index)
+                                .title(toast.title.clone())
+                                .description(toast.description.clone())
+                                .toast_type(toast.toast_type)
+                                .permanent(toast.permanent)
+                                .on_close({
+                                    let toast_id = toast.id;
+                                    let remove_toast = ctx.remove_toast;
+                                    move |_| {
+                                        remove_toast.call(toast_id);
+                                    }
+                                })
+                                // Only pass duration to non-permanent toasts
+                                .duration(if toast.permanent { None } else { toast.duration })
+                                .attributes(vec![])
+                                .build()
+                            )
+                        }
                     }
                 }
             }

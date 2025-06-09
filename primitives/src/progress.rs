@@ -52,11 +52,12 @@ pub fn Progress(props: ProgressProps) -> Element {
 pub struct ProgressIndicatorProps {
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    children: Element,
 }
 
 #[component]
 pub fn ProgressIndicator(props: ProgressIndicatorProps) -> Element {
     rsx! {
-        div { ..props.attributes }
+        div { ..props.attributes, {props.children} }
     }
 }

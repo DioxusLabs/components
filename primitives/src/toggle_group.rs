@@ -204,11 +204,8 @@ pub struct ToggleItemProps {
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
-    // Extending props onto another component doesn't work so we need this.
-    //#[props(extends = GlobalAttributes)]
-    //attributes: Vec<Attribute>,
-    id: Option<String>,
-    class: Option<String>,
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 
     children: Element,
 }
@@ -286,9 +283,7 @@ pub fn ToggleItem(props: ToggleItemProps) -> Element {
                 ctx.set_pressed(props.index, pressed);
             },
 
-            id: props.id,
-            class: props.class,
-            //..props.attributes,
+            attributes: props.attributes.clone(),
 
             {props.children}
         }
