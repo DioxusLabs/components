@@ -152,6 +152,7 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
         let toasts_vec = toasts.read();
         toasts_vec.iter().cloned().collect::<Vec<_>>()
     });
+    let length = toast_list.len();
 
     rsx! {
         // Render children
@@ -164,12 +165,14 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
                 aria_live: "polite",
                 aria_label: "Notifications",
                 class: "toast-container",
+                style: "--toast-count: {length}",
 
                 // Render all toasts
-                for toast in toast_list().iter() {
+                for (index, toast) in toast_list.read().iter().rev().enumerate() {
                     Toast {
                         key: "{toast.id}",
                         id: toast.id,
+                        index,
                         title: toast.title.clone(),
                         description: toast.description.clone(),
                         toast_type: toast.toast_type,
@@ -198,6 +201,7 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ToastProps {
     id: usize,
+    index: usize,
     title: String,
     description: Option<String>,
     toast_type: ToastType,
@@ -245,7 +249,11 @@ pub fn Toast(props: ToastProps) -> Element {
             role: "alert",
             class: "toast",
             "data-type": props.toast_type.as_str(),
-            "data-permanent": props.permanent.to_string(),
+            "data-permanent": props.permanent,
+            "data-toast-even": (props.index % 2 == 0).then_some("true"),
+            "data-toast-odd": (props.index % 2 == 1).then_some("true"),
+            "data-top": (props.index == 0).then_some("true"),
+            style: "--toast-index: {props.index}",
             ..props.attributes,
 
             div { class: "toast-content",

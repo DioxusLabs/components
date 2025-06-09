@@ -300,7 +300,6 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
     }
 }
 
-
 /// Next month navigation button component props
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarPreviousMonthButtonProps {

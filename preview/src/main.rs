@@ -119,7 +119,7 @@ fn CopyIcon() -> Element {
 fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCode) -> Element {
     let mut collapsed = use_signal(|| true);
 
-    let expand = rsx!{
+    let expand = rsx! {
         button {
             width: "100%",
             height: "2rem",
