@@ -45,10 +45,14 @@
   margin: 20px 0;
   padding: 10px;
   color: var(--text-color);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--dim-border-color);
   border-radius: .5rem;
   background-color: var(--brighter-background-color);
   box-sizing: border-box;
   margin: 2em auto;
   padding: 10px 20px;
+}
+
+#hero-search-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--focused-border-color);
 }

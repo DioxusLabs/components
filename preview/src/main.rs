@@ -1,9 +1,8 @@
 use dioxus::prelude::*;
-use dioxus_primitives::{
-    separator::Separator,
-    tabs::{TabContent, TabTrigger, Tabs},
-};
+use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs};
+
 mod components;
+
 #[derive(Clone, PartialEq)]
 struct ComponentDemoData {
     name: &'static str,
@@ -57,11 +56,28 @@ fn Navbar() -> Element {
                 }
             }
             div { class: "navbar-links",
-                Link { to: Route::Home, class: "navbar-link", "Home" }
                 Link {
                     to: "https://docs.rs/crate/dioxus-components/latest",
                     class: "navbar-link",
-                    "docs.rs"
+                    "Docs.rs"
+                }
+                Link {
+                    to: "https://github.com/DioxusLabs/components",
+                    class: "navbar-link",
+                    img {
+                        class: "light-mode-only",
+                        src: asset!("/assets/github-mark/github-mark.svg"),
+                        alt: "GitHub",
+                        width: "24",
+                        height: "24",
+                    }
+                    img {
+                        class: "dark-mode-only",
+                        src: asset!("/assets/github-mark/github-mark-white.svg"),
+                        alt: "GitHub",
+                        width: "24",
+                        height: "24",
+                    }
                 }
             }
         }
@@ -79,12 +95,12 @@ fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
     let mut copied = use_signal(|| false);
     rsx! {
         pre {
-            class: "code-block code-block-dark",
+            class: "code-block dark-mode-only",
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.dark,
         }
         pre {
-            class: "code-block code-block-light",
+            class: "code-block light-mode-only",
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.light,
         }
@@ -243,10 +259,6 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
             div { class: "component-preview",
                 div { class: "component-preview-contents",
                     div { class: "component-preview-frame", Comp {} }
-                    Separator {
-                        class: "component-preview-separator",
-                        horizontal: true,
-                    }
                     div { class: "component-code",
                         ComponentCode { rs_highlighted, css_highlighted }
                     }

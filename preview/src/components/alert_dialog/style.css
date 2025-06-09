@@ -87,7 +87,7 @@
   background-color: var(--hover-background-color);
 }
 
-.alert-dialog-cancel:focus {
+.alert-dialog-cancel:focus-visible {
   box-shadow: 0 0 0 2px var(--focused-border-color);
 }
 
@@ -106,7 +106,7 @@
   background-color: var(--error-background-color-focused);
 }
 
-.alert-dialog-action:focus {
+.alert-dialog-action:focus-visible {
   box-shadow: 0 0 0 2px var(--focused-border-color);
 }
 
@@ -131,7 +131,7 @@
   background-color: var(--hover-background-color);
 }
 
-.alert-dialog-trigger:focus {
+.alert-dialog-trigger:focus-visible {
   box-shadow: 0 0 0 2px var(--focused-border-color);
 }
 

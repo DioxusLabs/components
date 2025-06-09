@@ -163,6 +163,6 @@
   background: var(--hover-background-color);
 }
 
-.tooltip button:focus {
+.tooltip button:focus-visible {
   background: var(--focused-background-color);
 }
