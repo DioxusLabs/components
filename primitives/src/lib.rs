@@ -74,12 +74,12 @@ fn use_id_or(mut gen_id: Signal<String>, user_id: ReadOnlySignal<Option<String>>
 
 /// Allows some state to be either controlled or uncontrolled.
 fn use_controlled<T: Clone + PartialEq>(
-    prop: Option<Signal<T>>,
+    prop: ReadOnlySignal<Option<T>>,
     default: T,
     on_change: Callback<T>,
 ) -> (Memo<T>, Callback<T>) {
-    let mut internal_value = use_signal(|| prop.map(|x| x()).unwrap_or(default));
-    let value = use_memo(move || prop.unwrap_or(internal_value)());
+    let mut internal_value = use_signal(|| prop.cloned().unwrap_or(default));
+    let value = use_memo(move || prop.cloned().unwrap_or_else(&*internal_value));
 
     let set_value = use_callback(move |x: T| {
         internal_value.set(x.clone());

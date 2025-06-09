@@ -85,7 +85,7 @@ pub struct ContextMenuProps {
     disabled: ReadOnlySignal<bool>,
 
     /// Whether the context menu is open
-    open: Option<Signal<bool>>,
+    open: ReadOnlySignal<Option<bool>>,
 
     /// Default open state
     #[props(default)]

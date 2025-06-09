@@ -96,7 +96,7 @@ impl RadioGroupCtx {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct RadioGroupProps {
-    value: Option<Signal<String>>,
+    value: ReadOnlySignal<Option<String>>,
 
     #[props(default)]
     default_value: String,
@@ -172,6 +172,8 @@ pub struct RadioItemProps {
     id: Option<String>,
     class: Option<String>,
 
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 }
 
@@ -257,6 +259,7 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
                     event.prevent_default();
                 }
             },
+            ..props.attributes,
 
             {props.children}
         }

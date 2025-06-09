@@ -15,7 +15,7 @@ struct HoverCardCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct HoverCardProps {
     /// Whether the hover card is open
-    open: Option<Signal<bool>>,
+    open: ReadOnlySignal<Option<bool>>,
 
     /// Default open state
     #[props(default)]

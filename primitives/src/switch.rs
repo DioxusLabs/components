@@ -3,7 +3,7 @@ use dioxus_lib::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct SwitchProps {
-    checked: Option<Signal<bool>>,
+    checked: ReadOnlySignal<Option<bool>>,
 
     #[props(default = false)]
     default_checked: bool,
@@ -83,11 +83,12 @@ pub fn Switch(props: SwitchProps) -> Element {
 pub struct SwitchThumbProps {
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    children: Element,
 }
 
 #[component]
 pub fn SwitchThumb(props: SwitchThumbProps) -> Element {
     rsx! {
-        span { ..props.attributes }
+        span { ..props.attributes, {props.children} }
     }
 }

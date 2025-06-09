@@ -22,7 +22,7 @@ use dioxus_lib::prelude::*;
 
 #[derive(Clone)]
 struct AlertDialogCtx {
-    open: Signal<bool>,
+    open: ReadOnlySignal<bool>,
     set_open: Callback<bool>,
     labelledby: String,
     describedby: String,
@@ -33,7 +33,7 @@ pub struct AlertDialogRootProps {
     #[props(default)]
     default_open: bool,
     #[props(default)]
-    open: Option<Signal<bool>>,
+    open: ReadOnlySignal<Option<bool>>,
     #[props(default)]
     on_open_change: Callback<bool>,
     children: Element,
@@ -51,8 +51,9 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
             user_on_open_change.call(v);
         }
     });
+    let open = use_memo(move || (props.open)().unwrap_or_else(&*open_signal));
     use_context_provider(|| AlertDialogCtx {
-        open: props.open.unwrap_or(open_signal),
+        open: open.into(),
         set_open,
         labelledby,
         describedby,
@@ -121,6 +122,8 @@ pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogTitleProps {
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 }
 
@@ -128,12 +131,14 @@ pub struct AlertDialogTitleProps {
 pub fn AlertDialogTitle(props: AlertDialogTitleProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
     rsx! {
-        h2 { id: ctx.labelledby.clone(), class: "alert-dialog-title", {props.children} }
+        h2 { id: ctx.labelledby.clone(), class: "alert-dialog-title", ..props.attributes, {props.children} }
     }
 }
 
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogDescriptionProps {
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 }
 
@@ -141,7 +146,7 @@ pub struct AlertDialogDescriptionProps {
 pub fn AlertDialogDescription(props: AlertDialogDescriptionProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
     rsx! {
-        p { id: ctx.describedby.clone(), class: "alert-dialog-description", {props.children} }
+        p { id: ctx.describedby.clone(), class: "alert-dialog-description", ..props.attributes, {props.children} }
     }
 }
 

@@ -425,6 +425,12 @@ pub struct CalendarGridProps {
     #[props(default = vec!["Su".to_string(), "Mo".to_string(), "Tu".to_string(), "We".to_string(), "Th".to_string(), "Fr".to_string(), "Sa".to_string()])]
     day_labels: Vec<String>,
 
+    /// The callback that will be used to render each day in the grid
+    #[props(default = Callback::new(|date: CalendarDate| {
+        rsx! { CalendarDay { date } }
+    }))]
+    render_day: Callback<CalendarDate, Element>,
+
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 }
@@ -449,39 +455,31 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         let mut grid = Vec::new();
 
         // Add empty cells for days before the first day of the month
+        let previous_month = view_date.prev_month();
         for i in 0..first_day_offset {
-            grid.push(CalendarDayProps {
-                month: RelativeMonth::Last,
-                day: (view_date.prev_month().days_in_month() + i + 1 - first_day_offset) as u32,
-                is_selected: false,
-                is_today: false,
-            });
+            let day = (previous_month.days_in_month() + i + 1 - first_day_offset) as u32;
+            grid.push(CalendarDate::new(
+                previous_month.year,
+                previous_month.month,
+                day,
+            ));
         }
 
         // Add days of the month
         for day in 1..=days_in_month {
-            grid.push(CalendarDayProps {
-                month: RelativeMonth::Current,
-                day,
-                is_selected: (ctx.selected_date)().is_some_and(|d| {
-                    d.day == day
-                        && d.month == (ctx.view_date)().month
-                        && d.year == (ctx.view_date)().year
-                }),
-                is_today: day == (ctx.view_date)().day,
-            });
+            grid.push(CalendarDate::new(view_date.year, view_date.month, day));
         }
 
         // Add empty cells to complete the grid (for a clean layout)
         let remainder = grid.len() % 7;
+        let next_month = view_date.next_month();
         if remainder > 0 {
             for day in 1..=(7 - remainder) {
-                grid.push(CalendarDayProps {
-                    month: RelativeMonth::Next,
-                    day: day as u32,
-                    is_selected: false,
-                    is_today: false,
-                });
+                grid.push(CalendarDate::new(
+                    next_month.year,
+                    next_month.month,
+                    day as _,
+                ));
             }
         }
 
@@ -518,14 +516,9 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                 for row in &*days_grid.read() {
                     tr {
                         class: "calendar-grid-week",
-                        for props in row.iter().copied() {
+                        for date in row.iter().copied() {
                             td {
-                                CalendarDay {
-                                    day: props.day,
-                                    is_today: props.is_today,
-                                    is_selected: props.is_selected,
-                                    month: props.month
-                                }
+                                {props.render_day.call(date)}
                             }
                         }
                     }
@@ -552,23 +545,28 @@ impl Display for RelativeMonth {
     }
 }
 
-#[derive(Props, Copy, Clone, Debug, PartialEq)]
+#[derive(Props, Clone, Debug, PartialEq)]
 struct CalendarDayProps {
-    day: u32,
-    is_selected: bool,
-    is_today: bool,
-    month: RelativeMonth,
+    date: CalendarDate,
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 }
 
 #[component]
 fn CalendarDay(props: CalendarDayProps) -> Element {
-    let CalendarDayProps {
-        day,
-        is_selected,
-        is_today,
-        month,
-    } = props;
+    let CalendarDayProps { date, attributes } = props;
     let ctx: CalendarContext = use_context();
+    let view_date = (ctx.view_date)();
+    let day = date.day;
+    let month = match date.month.cmp(&view_date.month) {
+        std::cmp::Ordering::Less => RelativeMonth::Last,
+        std::cmp::Ordering::Equal => RelativeMonth::Current,
+        std::cmp::Ordering::Greater => RelativeMonth::Next,
+    };
+    let in_current_month = month == RelativeMonth::Current;
+    let is_selected = (ctx.selected_date)()
+        .is_some_and(|d| d.day == day && d.month == view_date.month && d.year == view_date.year);
+    let is_today = date == view_date;
 
     // Handle day selection
     let handle_day_select = move |day: u32| {
@@ -584,15 +582,16 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
             class: "calendar-grid-cell",
             onclick: move |e| {
                 e.prevent_default();
-                if month == RelativeMonth::Current {
+                if in_current_month {
                     handle_day_select(day);
                 }
             },
             r#type: "button",
-            tabindex: (month != RelativeMonth::Current).then_some("-1"),
+            tabindex: (!in_current_month).then_some("-1"),
             "data-today": is_today,
             "data-selected": is_selected,
             "data-month": "{month}",
+            ..attributes,
             {day.to_string()}
         }
     }

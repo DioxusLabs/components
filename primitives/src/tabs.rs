@@ -67,7 +67,7 @@ impl TabsContext {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct TabsProps {
-    value: Option<Signal<String>>,
+    value: ReadOnlySignal<Option<String>>,
 
     #[props(default)]
     default_value: String,
@@ -136,6 +136,10 @@ pub struct TabTriggerProps {
 
     id: Option<String>,
     class: Option<String>,
+
+    #[props(extends = GlobalAttributes)]
+    #[props(extends = button)]
+    attributes: Vec<Attribute>,
 
     children: Element,
 }
@@ -228,6 +232,8 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
                     event.prevent_default();
                 }
             },
+
+            ..props.attributes,
 
             {props.children}
         }

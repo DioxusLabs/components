@@ -94,7 +94,7 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderProps {
     /// The controlled value of the slider
-    value: Option<Signal<SliderValue>>,
+    value: ReadOnlySignal<Option<SliderValue>>,
 
     /// The default value when uncontrolled
     #[props(default = SliderValue::Single(0.0))]
@@ -333,6 +333,7 @@ pub fn SliderTrack(props: SliderTrackProps) -> Element {
 pub struct SliderRangeProps {
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    children: Element,
 }
 
 #[component]
@@ -366,6 +367,7 @@ pub fn SliderRange(props: SliderRangeProps) -> Element {
             "data-orientation": orientation,
             style,
             ..props.attributes,
+            {props.children}
         }
     }
 }
@@ -378,6 +380,7 @@ pub struct SliderThumbProps {
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    children: Element,
 }
 
 #[component]
@@ -475,6 +478,7 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
                 ctx.set_value.call(SliderValue::Single(stepped_value));
             },
             ..props.attributes,
+            {props.children}
         }
     }
 }
