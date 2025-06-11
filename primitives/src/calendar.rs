@@ -1,6 +1,9 @@
 use crate::use_unique_id;
 use dioxus_lib::prelude::*;
-use std::fmt::{self, Display};
+use std::{
+    fmt::{self, Display},
+    rc::Rc,
+};
 
 // Calendar date representation
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -30,50 +33,61 @@ impl CalendarDate {
         format!("{}-{:02}-{:02}", self.year, self.month, self.day)
     }
 
-    // Get the first day of the month (1-based, Monday = 1, Sunday = 7)
-    pub fn first_day_of_month(&self) -> u32 {
-        // This is a simplified implementation
-        // In a real implementation, we would use chrono or time crate
-        ((self.day + 6) % 7) + 1
-    }
-
-    // Get the number of days in the month
+    /// Get the number of days in the month
     pub fn days_in_month(&self) -> u32 {
         days_in_month(self.year, self.month)
     }
 
-    // Get the previous month
-    pub fn prev_month(&self) -> Self {
-        if self.month == 1 {
-            Self {
-                year: self.year - 1,
-                month: 12,
-                day: 1,
-            }
-        } else {
-            Self {
-                year: self.year,
-                month: self.month - 1,
-                day: 1,
-            }
-        }
+    /// Get the day of the week the current month starts on
+    pub fn month_start_day_of_the_week(&self) -> u32 {
+        day_of_the_week(self.year, self.month, 1)
     }
 
-    // Get the next month
-    pub fn next_month(&self) -> Self {
-        if self.month == 12 {
-            Self {
-                year: self.year + 1,
-                month: 1,
-                day: 1,
-            }
+    pub fn week(&self) -> u32 {
+        let month_start_day = self.month_start_day_of_the_week();
+        (self.day - 1 + month_start_day) / 7
+    }
+
+    /// Get the day within the current month that corresponds to the 0 indexed week and 0 indexed weekday
+    pub fn day_for_position(&self, week: u32, weekday: u32) -> u32 {
+        // The day should be the same week and day of the week as the current date
+        let new_month_start_day = day_of_the_week(self.year, self.month, 1);
+        let mut day = week.saturating_sub((weekday < new_month_start_day) as u32) * 7
+            + (7 + weekday - new_month_start_day) % 7
+            + 1;
+
+        // Make sure the new day is within the bounds for the new month
+        day -= (day.saturating_sub(self.days_in_month())).div_ceil(7) * 7;
+
+        day
+    }
+
+    /// Get the previous month
+    pub fn prev_month(&self) -> Self {
+        let mut new = *self;
+
+        if self.month == 1 {
+            new.year -= 1;
+            new.month = 12;
         } else {
-            Self {
-                year: self.year,
-                month: self.month + 1,
-                day: 1,
-            }
+            new.month -= 1;
         }
+
+        new
+    }
+
+    /// Get the next month
+    pub fn next_month(&self) -> Self {
+        let mut new = *self;
+
+        if self.month == 12 {
+            new.year += 1;
+            new.month = 1;
+        } else {
+            new.month += 1;
+        }
+
+        new
     }
 
     // Check if this date is the same as another date
@@ -85,6 +99,108 @@ impl CalendarDate {
     pub fn is_same_month(&self, other: &Self) -> bool {
         self.year == other.year && self.month == other.month
     }
+
+    /// Get the next week's date
+    pub fn next_week(&self) -> Self {
+        let mut date = *self;
+        let days_in_month = self.days_in_month();
+        if date.day + 7 > days_in_month {
+            let day_of_the_week = date.day_of_the_week();
+            date = date.next_month();
+            date.day = date.day_for_position(0, day_of_the_week);
+        } else {
+            date.day += 7;
+        }
+        date
+    }
+
+    /// Get the previous week's date
+    pub fn prev_week(&self) -> Self {
+        let mut date = *self;
+        if date.day <= 7 {
+            // Then move back to the previous month
+            let day_of_the_week = date.day_of_the_week();
+            date = date.prev_month();
+            date.day = date.day_for_position(
+                (date.days_in_month() + date.month_start_day_of_the_week()) / 7,
+                day_of_the_week,
+            )
+        } else {
+            date.day -= 7;
+        }
+        date
+    }
+
+    /// Get the next day's date
+    pub fn next_day(&self) -> Self {
+        let mut date = *self;
+        if date.day < self.days_in_month() {
+            date.day += 1;
+        } else {
+            date = date.next_month();
+            date.day = 1; // Reset to the first day of the next month
+        }
+        date
+    }
+
+    /// Get the previous day's date
+    pub fn prev_day(&self) -> Self {
+        let mut date = *self;
+        if date.day > 1 {
+            date.day -= 1;
+        } else {
+            date = date.prev_month();
+            date.day = date.days_in_month();
+        }
+        date
+    }
+
+    /// Get the day of the week (0 = Sunday, 6 = Saturday)
+    pub fn day_of_the_week(&self) -> u32 {
+        day_of_the_week(self.year, self.month, self.day)
+    }
+}
+
+#[test]
+fn test_next_day() {
+    let date = CalendarDate::new(2020, 1, 31);
+    let next_date = date.next_day();
+    assert_eq!(next_date.year, 2020);
+    assert_eq!(next_date.month, 2);
+    assert_eq!(next_date.day, 1);
+    let prev_date = next_date.prev_day();
+    assert_eq!(prev_date.year, 2020);
+    assert_eq!(prev_date.month, 1);
+    assert_eq!(prev_date.day, 31);
+
+    let date = CalendarDate::new(2020, 12, 1);
+    let prev_date = date.prev_day();
+    assert_eq!(prev_date.year, 2020);
+    assert_eq!(prev_date.month, 11);
+    assert_eq!(prev_date.day, 30);
+    let next_date = date.next_day();
+    assert_eq!(next_date.year, 2020);
+    assert_eq!(next_date.month, 12);
+    assert_eq!(next_date.day, 2);
+}
+
+#[test]
+fn test_next_month() {
+    let date = CalendarDate::new(2025, 1, 1); // Wednesday
+    let prev_month_date = date.prev_month();
+    assert_eq!(prev_month_date.year, 2024);
+    assert_eq!(prev_month_date.month, 12);
+    assert_eq!(prev_month_date.day, 1);
+    let next_month_date = date.next_month();
+    assert_eq!(next_month_date.year, 2025);
+    assert_eq!(next_month_date.month, 2);
+    assert_eq!(next_month_date.day, 1);
+
+    let date = CalendarDate::new(2025, 7, 31); // Thursday
+    let next_month_date = date.next_month();
+    assert_eq!(next_month_date.year, 2025);
+    assert_eq!(next_month_date.month, 8);
+    assert_eq!(next_month_date.day, 31);
 }
 
 fn days_in_month(year: i32, month: u32) -> u32 {
@@ -104,10 +220,16 @@ fn days_in_month(year: i32, month: u32) -> u32 {
 }
 
 // Zeller's Congruence
-fn month_start_day_of_week(year: i32, month: u32) -> u32 {
+fn day_of_the_week(year: i32, month: u32, day: u32) -> u32 {
     let month_offsets = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
     let year = if month < 3 { year - 1 } else { year };
-    ((year + year / 4 - year / 100 + year / 400 + month_offsets[month as usize - 1] + 1) % 7) as _
+    ((year + year / 4 - year / 100 + year / 400 + month_offsets[month as usize - 1] + day as i32)
+        % 7) as _
+}
+
+#[test]
+fn test_day_of_the_week() {
+    assert_eq!(day_of_the_week(2025, 6, 5), 4); // Thursday
 }
 
 impl fmt::Display for CalendarDate {
@@ -131,6 +253,7 @@ struct CalendarContext {
     // State
     selected_date: ReadOnlySignal<Option<CalendarDate>>,
     set_selected_date: Callback<Option<CalendarDate>>,
+    focused_date: Signal<Option<CalendarDate>>,
     view_date: ReadOnlySignal<CalendarDate>,
     set_view_date: Callback<CalendarDate>,
     mode: ReadOnlySignal<CalendarMode>,
@@ -141,6 +264,7 @@ struct CalendarContext {
     disabled_dates: ReadOnlySignal<Vec<CalendarDate>>,
     min_date: ReadOnlySignal<Option<CalendarDate>>,
     max_date: ReadOnlySignal<Option<CalendarDate>>,
+    today: CalendarDate,
 
     // Accessibility
     calendar_id: ReadOnlySignal<String>,
@@ -159,6 +283,10 @@ pub struct CalendarProps {
 
     /// The month being viewed
     view_date: ReadOnlySignal<CalendarDate>,
+
+    /// The current date (used for highlighting today)
+    #[props(default = CalendarDate::today())]
+    today: CalendarDate,
 
     /// Callback when view date changes
     #[props(default)]
@@ -220,9 +348,10 @@ pub fn Calendar(props: CalendarProps) -> Element {
     };
 
     // Create context provider for child components
-    let _ctx = use_context_provider(|| CalendarContext {
+    let mut ctx = use_context_provider(|| CalendarContext {
         selected_date: props.selected_date,
         set_selected_date: props.on_date_change,
+        focused_date: Signal::new(props.selected_date.cloned()),
         view_date: props.view_date,
         set_view_date: props.on_view_change,
         mode: mode.into(),
@@ -232,6 +361,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
         min_date: props.min_date,
         max_date: props.max_date,
         calendar_id: calendar_id.into(),
+        today: props.today,
     });
 
     rsx! {
@@ -240,6 +370,55 @@ pub fn Calendar(props: CalendarProps) -> Element {
             "aria-label": "Calendar",
             id: props.id,
             "data-disabled": (props.disabled)(),
+            onkeydown: move |e| {
+                let Some(focused_date) = (ctx.focused_date)() else {
+                    return;
+                };
+                let mut set_focused_date = |new_date: CalendarDate| {
+                    // Make sure the view date month is the same as the focused date
+                    let mut view_date = (ctx.view_date)();
+                    if new_date.month != view_date.month {
+                        view_date.month = new_date.month;
+                        view_date.year = new_date.year;
+                        (ctx.set_view_date)(view_date);
+                    }
+                    ctx.focused_date.set(Some(new_date));
+                };
+                match e.key() {
+                    Key::ArrowLeft => {
+                        e.prevent_default();
+                        set_focused_date(focused_date.prev_day());
+                    }
+                    Key::ArrowRight => {
+                        e.prevent_default();
+                        set_focused_date(focused_date.next_day());
+                    }
+                    Key::ArrowUp => {
+                        e.prevent_default();
+                        if e.modifiers().shift() {
+                            let day_of_the_week = focused_date.day_of_the_week();
+                            let mut prev_month = focused_date.prev_month();
+                            prev_month.day = prev_month.day_for_position((prev_month.days_in_month() + prev_month.month_start_day_of_the_week()) / 7, day_of_the_week);
+                            set_focused_date(prev_month);
+                        } else {
+                            // Otherwise, move to the previous week
+                            set_focused_date(focused_date.prev_week());
+                        }
+                    }
+                    Key::ArrowDown => {
+                        e.prevent_default();
+                        if e.modifiers().shift() {
+                            let day_of_the_week = focused_date.day_of_the_week();
+                            let mut next_month = focused_date.next_month();
+                            next_month.day = next_month.day_for_position(0, day_of_the_week);
+                            set_focused_date(next_month);
+                        } else {
+                            set_focused_date(focused_date.next_week());
+                        }
+                    }
+                    _ => {}
+                }
+            },
             ..props.attributes,
 
             {props.children}
@@ -449,7 +628,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         let view_date = (ctx.view_date)();
         let days_in_month = view_date.days_in_month();
 
-        let first_day_offset = month_start_day_of_week(view_date.year, view_date.month);
+        let first_day_offset = view_date.month_start_day_of_the_week();
 
         // Create a grid with empty cells for padding and actual days
         let mut grid = Vec::new();
@@ -555,7 +734,7 @@ struct CalendarDayProps {
 #[component]
 fn CalendarDay(props: CalendarDayProps) -> Element {
     let CalendarDayProps { date, attributes } = props;
-    let ctx: CalendarContext = use_context();
+    let mut ctx: CalendarContext = use_context();
     let view_date = (ctx.view_date)();
     let day = date.day;
     let month = match date.month.cmp(&view_date.month) {
@@ -564,33 +743,46 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
         std::cmp::Ordering::Greater => RelativeMonth::Next,
     };
     let in_current_month = month == RelativeMonth::Current;
-    let is_selected = (ctx.selected_date)()
-        .is_some_and(|d| d.day == day && d.month == view_date.month && d.year == view_date.year);
-    let is_today = date == view_date;
+    let is_selected = move || (ctx.selected_date)().is_some_and(|d| d == date);
+    let is_focused = move || (ctx.focused_date)().is_some_and(|d| d == date);
+    let is_today = date == ctx.today;
 
     // Handle day selection
-    let handle_day_select = move |day: u32| {
+    let mut handle_day_select = move |day: u32| {
         if !(ctx.disabled)() {
             let view_date = (ctx.view_date)();
             let date = CalendarDate::new(view_date.year, view_date.month, day);
-            ctx.set_selected_date.call(Some(date));
+            ctx.set_selected_date.call((!is_selected()).then_some(date));
+            ctx.focused_date.set(Some(date));
         }
     };
+
+    let mut day_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    use_effect(move || {
+        if let Some(day) = day_ref() {
+            if is_focused() {
+                spawn(async move {
+                    _ = day.set_focus(true).await;
+                });
+            }
+        }
+    });
 
     rsx! {
         button {
             class: "calendar-grid-cell",
+            r#type: "button",
+            tabindex: (!in_current_month).then_some("-1"),
+            "data-today": is_today,
+            "data-selected": is_selected(),
+            "data-month": "{month}",
             onclick: move |e| {
                 e.prevent_default();
                 if in_current_month {
                     handle_day_select(day);
                 }
             },
-            r#type: "button",
-            tabindex: (!in_current_month).then_some("-1"),
-            "data-today": is_today,
-            "data-selected": is_selected,
-            "data-month": "{month}",
+            onmounted: move |e| day_ref.set(Some(e.data())),
             ..attributes,
             {day.to_string()}
         }

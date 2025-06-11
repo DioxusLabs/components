@@ -89,8 +89,7 @@ impl RadioGroupCtx {
     }
 
     fn item_count(&self) -> usize {
-        let count = self.values.read().len();
-        count
+        self.values.read().len()
     }
 }
 
@@ -202,9 +201,15 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
         if checked() {
             return "0";
         }
-        if (ctx.current_focus)() == Some((props.index)()) {
+        let current_focus = (ctx.current_focus)();
+        if let Some(current_focus) = current_focus {
+            if current_focus == (props.index)() {
+                return "0";
+            }
+        } else if (ctx.value)().is_empty() {
             return "0";
         }
+
         "-1"
     });
 

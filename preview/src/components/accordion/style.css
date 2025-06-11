@@ -16,7 +16,8 @@
 }
 
 .accordion-trigger:focus-visible {
-  box-shadow: 0 0 0 2px var(--focused-border-color);
+  box-shadow: inset 0 0 0 2px var(--focused-border-color);
+  border: none;
 }
 
 .accordion-trigger:hover {
@@ -56,6 +57,7 @@
 .accordion-item {
   margin-top: 1px;
   border-bottom: 1px solid var(--dim-border-color);
+  box-sizing: border-box;
   overflow: hidden;
 }
 
