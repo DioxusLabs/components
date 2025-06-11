@@ -134,7 +134,7 @@ impl CalendarDate {
     /// Get the next day's date
     pub fn next_day(&self) -> Self {
         let mut date = *self;
-        if date.day + 1 <= self.days_in_month() {
+        if date.day < self.days_in_month() {
             date.day += 1;
         } else {
             date = date.next_month();
