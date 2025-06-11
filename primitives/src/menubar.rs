@@ -239,7 +239,6 @@ pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
             onfocus: move |_| ctx.set_focus(Some(menu_ctx.index)),
             onblur: move |_| {
                 if (ctx.current_focus)() == Some(menu_ctx.index) && menu_ctx.current_focus.read().is_none() {
-                    tracing::info!("Blur on menu {}", menu_ctx.index);
                     ctx.set_focus(None);
                 }
             },
@@ -260,14 +259,12 @@ pub struct MenubarContentProps {
 
 #[component]
 pub fn MenubarContent(props: MenubarContentProps) -> Element {
-    let ctx: MenubarContext = use_context();
     let menu_ctx: MenubarMenuContext = use_context();
-    let is_open = use_memo(move || (ctx.open_menu)() == Some(menu_ctx.index));
 
     rsx! {
         div {
             role: "menu",
-            "data-state": if is_open() { "open" } else { "closed" },
+            "data-state": if (menu_ctx.is_open)() { "open" } else { "closed" },
             ..props.attributes,
             {props.children}
         }
