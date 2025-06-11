@@ -41,6 +41,7 @@
 .menubar-trigger:focus-visible {
     color: var(--bright-text-color);
     background: var(--hover-background-color);
+    outline: none;
 }
 @media (prefers-color-scheme: dark) {
     .menubar-trigger:hover:not([data-disabled="true"]),
@@ -92,6 +93,7 @@
 .menubar-item:focus-visible {
     color: var(--bright-text-color);
     background: var(--hover-background-color);
+    outline: none;
 }
 @media (prefers-color-scheme: dark) {
     .menubar-item:hover:not([data-disabled="true"]),

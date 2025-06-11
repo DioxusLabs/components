@@ -15,6 +15,7 @@ pub(super) fn Demo() -> Element {
                     MenubarTrigger { class: "menubar-trigger", "File" }
                     MenubarContent { class: "menubar-content",
                         MenubarItem {
+                            index: 0usize,
                             class: "menubar-item",
                             value: "new".to_string(),
                             on_select: move |value| {
@@ -23,6 +24,7 @@ pub(super) fn Demo() -> Element {
                             "New"
                         }
                         MenubarItem {
+                            index: 1usize,
                             class: "menubar-item",
                             value: "open".to_string(),
                             on_select: move |value| {
@@ -31,6 +33,7 @@ pub(super) fn Demo() -> Element {
                             "Open"
                         }
                         MenubarItem {
+                            index: 2usize,
                             class: "menubar-item",
                             value: "save".to_string(),
                             on_select: move |value| {
@@ -44,6 +47,7 @@ pub(super) fn Demo() -> Element {
                     MenubarTrigger { class: "menubar-trigger", "Edit" }
                     MenubarContent { class: "menubar-content",
                         MenubarItem {
+                            index: 0usize,
                             class: "menubar-item",
                             value: "cut".to_string(),
                             on_select: move |value| {
@@ -52,6 +56,7 @@ pub(super) fn Demo() -> Element {
                             "Cut"
                         }
                         MenubarItem {
+                            index: 1usize,
                             class: "menubar-item",
                             value: "copy".to_string(),
                             on_select: move |value| {
@@ -60,6 +65,7 @@ pub(super) fn Demo() -> Element {
                             "Copy"
                         }
                         MenubarItem {
+                            index: 2usize,
                             class: "menubar-item",
                             value: "paste".to_string(),
                             on_select: move |value| {
