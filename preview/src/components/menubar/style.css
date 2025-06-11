@@ -20,6 +20,7 @@
     cursor: pointer;
     color: var(--text-color);
     border-radius: calc(.5rem - .25rem);
+    transition: background-color 100ms ease-out;
 }
 
 .menubar-menu[data-state="open"] .menubar-trigger {
@@ -41,6 +42,7 @@
 .menubar-trigger:focus-visible {
     color: var(--bright-text-color);
     background: var(--hover-background-color);
+    outline: none;
 }
 @media (prefers-color-scheme: dark) {
     .menubar-trigger:hover:not([data-disabled="true"]),
@@ -50,7 +52,6 @@
 }
 
 .menubar-content {
-    display: none;
     position: absolute;
     top: 100%;
     left: 0;
@@ -61,7 +62,9 @@
     border-radius: .5rem;
     padding: .25rem;
     box-shadow: inset 0 0 0 1px var(--dim-border-color);
-    animation: menubarSlideIn 0.1s ease-out;
+    z-index: 1000;
+    transform-origin: top;
+    will-change: transform, opacity;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -71,8 +74,17 @@
     }
 }
 
-.menubar-menu[data-state="open"] .menubar-content {
-    display: block;
+.menubar-content[data-state="closed"] {
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+    transition: opacity 150ms ease-in, transform 150ms ease-in;
+}
+
+.menubar-content[data-state="open"] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity 200ms ease-out, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .menubar-item {
@@ -92,6 +104,7 @@
 .menubar-item:focus-visible {
     color: var(--bright-text-color);
     background: var(--hover-background-color);
+    outline: none;
 }
 @media (prefers-color-scheme: dark) {
     .menubar-item:hover:not([data-disabled="true"]),
@@ -103,16 +116,4 @@
 [data-disabled="true"] {
     opacity: 0.5;
     cursor: not-allowed;
-}
-
-@keyframes menubarSlideIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
 }

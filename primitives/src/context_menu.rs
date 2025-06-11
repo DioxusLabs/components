@@ -19,62 +19,46 @@ struct ContextMenuCtx {
 
 impl ContextMenuCtx {
     fn set_focus(&mut self, index: Option<usize>) {
-        if let Some(idx) = index {
-            self.recent_focus.set(idx);
-        }
         self.current_focus.set(index);
+        if let Some(index) = index {
+            self.recent_focus.set(index);
+        }
+        if (self.open)() != index.is_some() {
+            (self.set_open)(index.is_some());
+        }
     }
 
     fn focus_next(&mut self) {
-        let count = *self.item_count.read();
-        if count == 0 {
-            return;
-        }
-
-        let next = match *self.current_focus.read() {
-            Some(current) => (current + 1) % count,
+        let focus = match (self.current_focus)() {
+            Some(current_focus) => (current_focus + 1) % self.item_count.cloned(),
             None => 0,
         };
-        self.set_focus(Some(next));
+        self.set_focus(Some(focus));
     }
 
     fn focus_prev(&mut self) {
-        let count = *self.item_count.read();
-        if count == 0 {
-            return;
-        }
-
-        let prev = match *self.current_focus.read() {
-            Some(current) => {
-                if current == 0 {
-                    count - 1
-                } else {
-                    current - 1
-                }
-            }
-            None => count - 1,
+        let item_count = self.item_count.cloned();
+        let focus = match (self.current_focus)() {
+            Some(current_focus) if current_focus > 0 => current_focus - 1,
+            Some(_) | None => item_count.saturating_sub(1),
         };
-        self.set_focus(Some(prev));
+        self.set_focus(Some(focus));
     }
 
     fn focus_first(&mut self) {
-        if *self.item_count.read() > 0 {
-            self.set_focus(Some(0));
-        }
+        self.set_focus(Some(0));
     }
 
     fn focus_last(&mut self) {
-        let count = *self.item_count.read();
-        if count > 0 {
-            self.set_focus(Some(count - 1));
-        }
+        let last = (self.item_count)().saturating_sub(1);
+        self.set_focus(Some(last));
     }
 
     // Focus management helper - no actual focus restoration since we don't have NodeRef
     fn restore_trigger_focus(&mut self) {
         // In a real implementation with DOM access, we would focus the trigger element here
         // For now, we just reset the focus state
-        self.current_focus.set(None);
+        self.set_focus(None);
     }
 }
 
@@ -115,28 +99,6 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
         current_focus: Signal::new(None),
     });
 
-    let handle_click = move |event: Event<MouseData>| {
-        if open() {
-            let coords = event.data().client_coordinates();
-            let click_x = coords.x as i32;
-            let click_y = coords.y as i32;
-            let (menu_x, menu_y) = position();
-
-            // Simple boundary check
-            let menu_width = 200; // Approximate menu width
-            let menu_height = 200; // Approximate menu height
-
-            if click_x < menu_x
-                || click_x > menu_x + menu_width
-                || click_y < menu_y
-                || click_y > menu_y + menu_height
-            {
-                set_open.call(false);
-                ctx.restore_trigger_focus();
-            }
-        }
-    };
-
     // Handle escape key to close the menu
     let handle_keydown = move |event: Event<KeyboardData>| {
         if open() && event.key() == Key::Escape {
@@ -148,12 +110,11 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
 
     rsx! {
         div {
-            onclick: handle_click,
+            tabindex: 0, // Make the menu container focusable
             onkeydown: handle_keydown,
             "data-state": if open() { "open" } else { "closed" },
             "data-disabled": (props.disabled)(),
             ..props.attributes,
-
             {props.children}
         }
     }
@@ -172,12 +133,12 @@ pub fn ContextMenuTrigger(props: ContextMenuTriggerProps) -> Element {
 
     let handle_context_menu = move |event: Event<MouseData>| {
         if !(ctx.disabled)() {
-            event.prevent_default();
             ctx.position.set((
                 event.data().client_coordinates().x as i32,
                 event.data().client_coordinates().y as i32,
             ));
             ctx.set_open.call(true);
+            event.prevent_default();
         }
     };
 
@@ -203,17 +164,40 @@ pub struct ContextMenuContentProps {
 pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
     let mut ctx: ContextMenuCtx = use_context();
     let position = ctx.position;
+    let (x, y) = position();
 
-    let style = use_memo(move || {
-        let (x, y) = position();
-        format!("position: fixed; left: {x}px; top: {y}px;")
-    });
+    let open = ctx.open;
 
-    // When menu opens, focus the first item
-    let is_open = (ctx.open)();
+    let onkeydown = move |event: Event<KeyboardData>| {
+        match event.key() {
+            Key::Escape => ctx.restore_trigger_focus(),
+            Key::ArrowDown => {
+                ctx.focus_next();
+            }
+            Key::ArrowUp => {
+                if open() {
+                    ctx.focus_prev();
+                }
+            }
+            Key::Home => ctx.focus_first(),
+            Key::End => ctx.focus_last(),
+            _ => return,
+        }
+        event.prevent_default();
+    };
+
+    let mut menu_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
+    let focused = move || open() && ctx.current_focus.read().is_none();
+    // If the menu is open, but no item is focused, focus the div itself to capture events
     use_effect(move || {
-        if is_open {
-            ctx.focus_first();
+        let Some(menu) = menu_ref() else {
+            return;
+        };
+        if focused() {
+            spawn(async move {
+                // Focus the menu itself to capture keyboard events
+                _ = menu.set_focus(true).await;
+            });
         }
     });
 
@@ -221,27 +205,18 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
         div {
             role: "menu",
             aria_orientation: "vertical",
-            style: "{style}",
-            "data-state": if (ctx.open)() { "open" } else { "closed" },
-            hidden: !(ctx.open)(),
-            onclick: move |e| e.stop_propagation(),
-            onkeydown: move |event: Event<KeyboardData>| {
-                let mut prevent_default = true;
-                match event.key() {
-                    Key::ArrowDown => ctx.focus_next(),
-                    Key::ArrowUp => ctx.focus_prev(),
-                    Key::Home => ctx.focus_first(),
-                    Key::End => ctx.focus_last(),
-                    Key::Escape => {
-                        ctx.set_open.call(false);
-                        ctx.restore_trigger_focus();
-                    }
-                    _ => prevent_default = false,
-                }
-                if prevent_default {
-                    event.prevent_default();
+            position: "fixed",
+            left: "{x}px",
+            top: "{y}px",
+            tabindex: if focused() { "0" } else { "-1" },
+            "data-state": if open() { "open" } else { "closed" },
+            onkeydown,
+            onblur: move |_| {
+                if focused() {
+                    ctx.restore_trigger_focus();
                 }
             },
+            onmounted: move |evt| menu_ref.set(Some(evt.data())),
             ..props.attributes,
 
             {props.children}
@@ -275,6 +250,7 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
     let mut ctx: ContextMenuCtx = use_context();
 
     let disabled = use_memo(move || (props.disabled)() || (ctx.disabled)());
+    let focused = move || (ctx.current_focus)() == Some((props.index)());
 
     // Register this item with the menu
     use_effect(move || {
@@ -284,26 +260,31 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
     // Cleanup when the component is unmounted
     use_effect_cleanup(move || {
         ctx.item_count -= 1;
-        if (ctx.current_focus)() == Some((props.index)()) {
+        if focused() {
             ctx.set_focus(None);
         }
     });
 
-    // Determine if this item is currently focused
-    let tab_index = use_memo(move || {
-        if (ctx.current_focus)() == Some((props.index)()) {
-            "0"
-        } else {
-            "-1"
+    let mut item_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
+    use_effect(move || {
+        let Some(item) = item_ref() else {
+            return;
+        };
+        if focused() {
+            spawn(async move {
+                _ = item.set_focus(true).await;
+            });
         }
     });
+
+    // Determine if this item is currently focused
+    let tab_index = use_memo(move || if focused() { "0" } else { "-1" });
 
     let handle_click = {
         let value = (props.value)().clone();
         move |_| {
             if !disabled() {
                 props.on_select.call(value.clone());
-                ctx.set_open.call(false);
                 ctx.restore_trigger_focus();
             }
         }
@@ -313,13 +294,13 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
         let value = (props.value)().clone();
         move |event: Event<KeyboardData>| {
             // Check for Enter or Space key
-            if event.key() == Key::Enter || event.key().to_string() == " " {
-                event.prevent_default();
+            if event.key() == Key::Enter || event.key() == Key::Character(" ".to_string()) {
                 if !disabled() {
                     props.on_select.call(value.clone());
-                    ctx.set_open.call(false);
                     ctx.restore_trigger_focus();
                 }
+                event.prevent_default();
+                event.stop_propagation();
             }
         }
     };
@@ -328,9 +309,14 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
         div {
             role: "menuitem",
             tabindex: tab_index,
-            onclick: handle_click,
+            onpointerdown: handle_click,
             onkeydown: handle_keydown,
-            onfocus: move |_| ctx.set_focus(Some((props.index)())),
+            onblur: move |_| {
+                if focused() {
+                    ctx.set_focus(None);
+                }
+            },
+            onmounted: move |evt| item_ref.set(Some(evt.data())),
             aria_disabled: disabled(),
             "data-disabled": disabled(),
             ..props.attributes,

@@ -25,6 +25,9 @@ pub(super) fn Demo() -> Element {
                     class: "context-menu-item",
                     value: "edit".to_string(),
                     index: 0usize,
+                    on_select: move |value| {
+                        tracing::info!("Selected item: {}", value);
+                    },
                     "Edit"
                 }
                 ContextMenuItem {
@@ -32,18 +35,27 @@ pub(super) fn Demo() -> Element {
                     value: "undo".to_string(),
                     index: 1usize,
                     disabled: true,
+                    on_select: move |value| {
+                        tracing::info!("Selected item: {}", value);
+                    },
                     "Undo"
                 }
                 ContextMenuItem {
                     class: "context-menu-item",
                     value: "duplicate".to_string(),
-                    index: 1usize,
+                    index: 2usize,
+                    on_select: move |value| {
+                        tracing::info!("Selected item: {}", value);
+                    },
                     "Duplicate"
                 }
                 ContextMenuItem {
                     class: "context-menu-item",
                     value: "delete".to_string(),
-                    index: 2usize,
+                    index: 3usize,
+                    on_select: move |value| {
+                        tracing::info!("Selected item: {}", value);
+                    },
                     "Delete"
                 }
             }

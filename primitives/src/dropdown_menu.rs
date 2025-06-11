@@ -20,33 +20,35 @@ impl DropdownMenuContext {
         if let Some(id) = id {
             self.recent_focus.set(id);
         }
+        if (self.open)() != id.is_some() {
+            (self.set_open)(id.is_some());
+        }
     }
 
     fn focus_next(&mut self) {
-        if let Some(current_focus) = (self.current_focus)() {
-            let new_focus = (current_focus + 1) % (self.item_count)();
-            self.current_focus.set(Some(new_focus));
-        }
+        let focus = match (self.current_focus)() {
+            Some(current_focus) => (current_focus + 1) % self.item_count.cloned(),
+            None => 0,
+        };
+        self.set_focus(Some(focus));
     }
 
     fn focus_prev(&mut self) {
-        if let Some(current_focus) = (self.current_focus)() {
-            let new_focus = if current_focus == 0 {
-                (self.item_count)().saturating_sub(1)
-            } else {
-                current_focus - 1
-            };
-            self.current_focus.set(Some(new_focus));
-        }
+        let item_count = self.item_count.cloned();
+        let focus = match (self.current_focus)() {
+            Some(current_focus) if current_focus > 0 => current_focus - 1,
+            Some(_) | None => item_count.saturating_sub(1),
+        };
+        self.set_focus(Some(focus));
     }
 
     fn focus_first(&mut self) {
-        self.current_focus.set(Some(0));
+        self.set_focus(Some(0));
     }
 
     fn focus_last(&mut self) {
         let last = (self.item_count)().saturating_sub(1);
-        self.current_focus.set(Some(last));
+        self.set_focus(Some(last));
     }
 }
 
@@ -73,24 +75,49 @@ pub struct DropdownMenuProps {
 pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
     let (open, set_open) = use_controlled(props.open, props.default_open, props.on_open_change);
 
+    let disabled = props.disabled;
     let mut ctx = use_context_provider(|| DropdownMenuContext {
         open: open.into(),
         set_open,
-        disabled: props.disabled,
+        disabled,
         item_count: Signal::new(0),
         recent_focus: Signal::new(0),
         current_focus: Signal::new(None),
     });
+
+    // Handle escape key to close the menu
+    let handle_keydown = move |event: Event<KeyboardData>| {
+        if disabled() {
+            return;
+        }
+        match event.key() {
+            Key::Enter => {
+                let new_open = !(ctx.open)();
+                ctx.set_open.call(new_open);
+            }
+            Key::Escape => ctx.set_open.call(false),
+            Key::ArrowDown => {
+                ctx.focus_next();
+            }
+            Key::ArrowUp => {
+                if open() {
+                    ctx.focus_prev();
+                }
+            }
+            Key::Home => ctx.focus_first(),
+            Key::End => ctx.focus_last(),
+            _ => return,
+        }
+        event.prevent_default();
+    };
 
     rsx! {
         div {
             role: "menu",
             "data-state": if open() { "open" } else { "closed" },
             "data-disabled": (props.disabled)(),
-
-            onfocusout: move |_| ctx.set_focus(None),
+            onkeydown: handle_keydown,
             ..props.attributes,
-
             {props.children}
         }
     }
@@ -105,7 +132,7 @@ pub struct DropdownMenuTriggerProps {
 
 #[component]
 pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
-    let ctx: DropdownMenuContext = use_context();
+    let mut ctx: DropdownMenuContext = use_context();
 
     rsx! {
         button {
@@ -119,6 +146,11 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
             onclick: move |_| {
                 let new_open = !(ctx.open)();
                 ctx.set_open.call(new_open);
+            },
+            onblur: move |_| {
+                if ctx.current_focus.read().is_none() {
+                    ctx.set_focus(None);
+                }
             },
 
             ..props.attributes,
@@ -137,14 +169,11 @@ pub struct DropdownMenuContentProps {
 #[component]
 pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
     let ctx: DropdownMenuContext = use_context();
-    let open = ctx.open;
 
     rsx! {
         div {
             role: "menu",
-            "data-state": if open() { "open" } else { "closed" },
-            hidden: !open(),
-
+            "data-state": if (ctx.open)() { "open" } else { "closed" },
             ..props.attributes,
             {props.children}
         }
@@ -174,64 +203,63 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
     use_effect(move || {
         ctx.item_count += 1;
     });
-
-    // Cleanup when the component is unmounted
     use_effect_cleanup(move || {
         ctx.item_count -= 1;
         if (ctx.current_focus)() == Some((props.index)()) {
-            ctx.set_focus(None);
+            ctx.current_focus.set(None);
         }
     });
 
-    let tab_index = use_memo(move || {
-        if (ctx.current_focus)() == Some((props.index)()) {
-            "0"
-        } else {
-            "-1"
+    let disabled = move || (ctx.disabled)() || (props.disabled)();
+    let focused = move || (ctx.current_focus)() == Some((props.index)());
+
+    let mut item_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
+    use_effect(move || {
+        let Some(item) = item_ref() else {
+            return;
+        };
+        if focused() {
+            spawn(async move {
+                _ = item.set_focus(true).await;
+            });
         }
     });
 
     rsx! {
         div {
             role: "menuitem",
-            tabindex: tab_index,
-            "data-disabled": (ctx.disabled)() || (props.disabled)(),
+            "data-disabled": disabled(),
+            tabindex: if focused() { "0" } else { "-1" },
 
-            onclick: {
-                let value = (props.value)().clone();
-                move |_| {
-                    if !(ctx.disabled)() && !(props.disabled)() {
-                        props.on_select.call(value.clone());
+            onclick: move |e: Event<MouseData>| {
+                e.stop_propagation();
+                if !disabled() {
+                    props.on_select.call((props.value)());
+                    ctx.set_open.call(false);
+                }
+            },
+
+            onkeydown: move |event: Event<KeyboardData>| {
+                if event.key() == Key::Enter || event.key() == Key::Character(" ".to_string()) {
+                    if !disabled() {
+                        props.on_select.call((props.value)());
                         ctx.set_open.call(false);
                     }
+                    event.prevent_default();
+                    event.stop_propagation();
                 }
             },
 
-            onfocus: move |_| ctx.set_focus(Some((props.index)())),
+            onmounted: move |node| {
+                item_ref.set(Some(node.data()));
+            },
 
-            onkeydown: {
-                let value = (props.value)().clone();
-                move |event: Event<KeyboardData>| {
-                    let mut prevent_default = true;
-                    match event.key() {
-                        Key::Enter => {
-                            if !(ctx.disabled)() && !(props.disabled)() {
-                                props.on_select.call(value.clone());
-                                ctx.set_open.call(false);
-                            }
-                        }
-                        Key::Escape => ctx.set_open.call(false),
-                        Key::ArrowUp => ctx.focus_prev(),
-                        Key::ArrowDown => ctx.focus_next(),
-                        Key::Home => ctx.focus_first(),
-                        Key::End => ctx.focus_last(),
-                        _ => prevent_default = false,
-                    }
-                    if prevent_default {
-                        event.prevent_default();
-                    }
+            onblur: move |_| {
+                if focused() {
+                    ctx.set_focus(None);
                 }
             },
+
 
             ..props.attributes,
             {props.children}
