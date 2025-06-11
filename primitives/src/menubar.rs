@@ -108,8 +108,7 @@ impl MenubarMenuContext {
         let item_count = self.item_count.cloned();
         match &mut *current_focus {
             Some(current_focus) if *current_focus > 0 => *current_focus -= 1,
-            Some(current_focus) => *current_focus = item_count - 1,
-            None => *current_focus = Some(item_count - 1),
+            Some(_) | None => *current_focus = Some(item_count - 1),
         }
     }
 }
@@ -333,9 +332,25 @@ pub fn MenubarItem(props: MenubarItemProps) -> Element {
                     }
                 }
             },
+
+            onkeydown: {
+                let value = props.value.clone();
+                move |event: Event<KeyboardData>| {
+                    if event.key() == Key::Enter {
+                        if !disabled() {
+                            props.on_select.call(value.clone());
+                            ctx.set_open_menu.call(None);
+                        }
+                        event.prevent_default();
+                        event.stop_propagation();
+                    }
+                }
+            },
+
             onmounted: move |node| {
                 item_ref.set(Some(node.data()));
             },
+
             onblur: move |_| {
                 if focused() {
                     menu_ctx.current_focus.set(None);
