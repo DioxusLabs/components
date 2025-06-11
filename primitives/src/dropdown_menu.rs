@@ -240,7 +240,7 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
             },
 
             onkeydown: move |event: Event<KeyboardData>| {
-                if event.key() == Key::Enter {
+                if event.key() == Key::Enter || event.key() == Key::Character(" ".to_string()) {
                     if !disabled() {
                         props.on_select.call((props.value)());
                         ctx.set_open.call(false);

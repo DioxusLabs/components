@@ -336,7 +336,7 @@ pub fn MenubarItem(props: MenubarItemProps) -> Element {
             onkeydown: {
                 let value = props.value.clone();
                 move |event: Event<KeyboardData>| {
-                    if event.key() == Key::Enter {
+                    if event.key() == Key::Enter || event.key() == Key::Character(" ".to_string()) {
                         if !disabled() {
                             props.on_select.call(value.clone());
                             ctx.set_open_menu.call(None);
