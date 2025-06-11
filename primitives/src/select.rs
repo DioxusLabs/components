@@ -5,7 +5,7 @@ use dioxus_lib::prelude::*;
 pub struct SelectProps {
     /// The controlled value of the select
     #[props(default)]
-    value: Option<Signal<Option<String>>>,
+    value: ReadOnlySignal<Option<Option<String>>>,
 
     /// The default value of the select
     #[props(default)]
@@ -56,7 +56,7 @@ pub struct SelectProps {
 #[component]
 pub fn Select(props: SelectProps) -> Element {
     // Use internal state for value if not controlled
-    let mut internal_value = use_signal(|| props.value.map(|x| x()).unwrap_or(props.default_value));
+    let mut internal_value = use_signal(|| props.value.cloned().unwrap_or(props.default_value));
 
     // Generate unique IDs for accessibility if not provided
     let select_id = use_unique_id();
@@ -73,7 +73,7 @@ pub fn Select(props: SelectProps) -> Element {
     };
 
     // Get the current value (either controlled or internal)
-    let current_value = props.value.map(|v| v()).unwrap_or_else(|| internal_value());
+    let current_value = props.value.cloned().unwrap_or_else(&*internal_value);
 
     // Determine if a value is selected for ARIA
     let has_selection = current_value.is_some();

@@ -52,7 +52,7 @@ impl DropdownMenuContext {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuProps {
-    open: Option<Signal<bool>>,
+    open: ReadOnlySignal<Option<bool>>,
 
     #[props(default)]
     default_open: bool,

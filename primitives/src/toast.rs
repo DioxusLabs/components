@@ -2,6 +2,7 @@ use crate::{
     portal::{PortalIn, PortalOut, use_portal},
     use_unique_id,
 };
+use dioxus::dioxus_core::DynamicNode;
 use dioxus_lib::prelude::*;
 use dioxus_time::use_timeout;
 use std::collections::VecDeque;
@@ -58,6 +59,9 @@ pub struct ToastProviderProps {
 
     #[props(default = ReadOnlySignal::new(Signal::new(10)))]
     max_toasts: ReadOnlySignal<usize>,
+
+    #[props(default = Callback::new(|props: ToastPropsWithOwner| rsx! { {DynamicNode::Component(props.into_vcomponent(Toast))} }))]
+    render_toast: Callback<ToastPropsWithOwner, Element>,
 
     children: Element,
 }
@@ -152,6 +156,7 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
         let toasts_vec = toasts.read();
         toasts_vec.iter().cloned().collect::<Vec<_>>()
     });
+    let length = toast_list.len();
 
     rsx! {
         // Render children
@@ -164,26 +169,32 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
                 aria_live: "polite",
                 aria_label: "Notifications",
                 class: "toast-container",
+                style: "--toast-count: {length}",
 
                 // Render all toasts
-                for toast in toast_list().iter() {
-                    Toast {
+                for (index, toast) in toast_list.read().iter().rev().enumerate() {
+                    Fragment {
                         key: "{toast.id}",
-                        id: toast.id,
-                        title: toast.title.clone(),
-                        description: toast.description.clone(),
-                        toast_type: toast.toast_type,
-                        permanent: toast.permanent,
-                        on_close: {
-                            let toast_id = toast.id;
-                            let remove_toast = ctx.remove_toast;
-                            move |_| {
-                                remove_toast.call(toast_id);
-                            }
-                        },
-
-                        // Only pass duration to non-permanent toasts
-                        duration: if toast.permanent { None } else { toast.duration },
+                        {
+                            props.render_toast.call(ToastProps::builder().id(toast.id)
+                                .index(index)
+                                .title(toast.title.clone())
+                                .description(toast.description.clone())
+                                .toast_type(toast.toast_type)
+                                .permanent(toast.permanent)
+                                .on_close({
+                                    let toast_id = toast.id;
+                                    let remove_toast = ctx.remove_toast;
+                                    move |_| {
+                                        remove_toast.call(toast_id);
+                                    }
+                                })
+                                // Only pass duration to non-permanent toasts
+                                .duration(if toast.permanent { None } else { toast.duration })
+                                .attributes(vec![])
+                                .build()
+                            )
+                        }
                     }
                 }
             }
@@ -198,6 +209,7 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ToastProps {
     id: usize,
+    index: usize,
     title: String,
     description: Option<String>,
     toast_type: ToastType,
@@ -245,7 +257,11 @@ pub fn Toast(props: ToastProps) -> Element {
             role: "alert",
             class: "toast",
             "data-type": props.toast_type.as_str(),
-            "data-permanent": props.permanent.to_string(),
+            "data-permanent": props.permanent,
+            "data-toast-even": (props.index % 2 == 0).then_some("true"),
+            "data-toast-odd": (props.index % 2 == 1).then_some("true"),
+            "data-top": (props.index == 0).then_some("true"),
+            style: "--toast-index: {props.index}",
             ..props.attributes,
 
             div { class: "toast-content",

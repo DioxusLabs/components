@@ -137,7 +137,7 @@ pub struct ToggleGroupProps {
     #[props(default)]
     default_pressed: HashSet<usize>,
 
-    pressed: Option<Signal<HashSet<usize>>>,
+    pressed: ReadOnlySignal<Option<HashSet<usize>>>,
 
     #[props(default)]
     on_pressed_change: Callback<HashSet<usize>>,
@@ -204,11 +204,8 @@ pub struct ToggleItemProps {
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
-    // Extending props onto another component doesn't work so we need this.
-    //#[props(extends = GlobalAttributes)]
-    //attributes: Vec<Attribute>,
-    id: Option<String>,
-    class: Option<String>,
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 
     children: Element,
 }
@@ -281,14 +278,12 @@ pub fn ToggleItem(props: ToggleItemProps) -> Element {
             disabled: (ctx.disabled)() || (props.disabled)(),
             "data-orientation": ctx.orientation(),
 
-            pressed,
+            pressed: pressed(),
             on_pressed_change: move |pressed| {
                 ctx.set_pressed(props.index, pressed);
             },
 
-            id: props.id,
-            class: props.class,
-            //..props.attributes,
+            attributes: props.attributes.clone(),
 
             {props.children}
         }

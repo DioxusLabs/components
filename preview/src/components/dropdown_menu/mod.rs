@@ -14,30 +14,40 @@ pub(super) fn Demo() -> Element {
             DropdownMenuContent { class: "dropdown-menu-content",
                 DropdownMenuItem {
                     class: "dropdown-menu-item",
-                    value: "item1".to_string(),
+                    value: "edit".to_string(),
                     index: 0usize,
                     on_select: move |value| {
                         tracing::info!("Selected: {}", value);
                     },
-                    "Item 1"
+                    "Edit"
                 }
                 DropdownMenuItem {
                     class: "dropdown-menu-item",
-                    value: "item2".to_string(),
+                    value: "undo".to_string(),
                     index: 1usize,
+                    disabled: true,
                     on_select: move |value| {
                         tracing::info!("Selected: {}", value);
                     },
-                    "Item 2"
+                    "Undo"
                 }
                 DropdownMenuItem {
                     class: "dropdown-menu-item",
-                    value: "item3".to_string(),
+                    value: "duplicate".to_string(),
                     index: 2usize,
                     on_select: move |value| {
                         tracing::info!("Selected: {}", value);
                     },
-                    "Item 3"
+                    "Duplicate"
+                }
+                DropdownMenuItem {
+                    class: "dropdown-menu-item",
+                    value: "delete".to_string(),
+                    index: 3usize,
+                    on_select: move |value| {
+                        tracing::info!("Selected: {}", value);
+                    },
+                    "Delete"
                 }
             }
         }

@@ -15,6 +15,8 @@ pub struct SeparatorProps {
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+
+    children: Element,
 }
 
 #[component]
@@ -30,6 +32,7 @@ pub fn Separator(props: SeparatorProps) -> Element {
             aria_orientation: if !props.decorative { orientation },
             "data-orientation": orientation,
             ..props.attributes,
+            {props.children}
         }
     }
 }

@@ -54,7 +54,7 @@ struct CheckboxCtx {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct CheckboxProps {
-    checked: Option<Signal<CheckboxState>>,
+    checked: ReadOnlySignal<Option<CheckboxState>>,
 
     #[props(default = CheckboxState::Unchecked)]
     default_checked: CheckboxState,

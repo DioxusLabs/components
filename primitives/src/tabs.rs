@@ -1,5 +1,6 @@
 use crate::{use_controlled, use_effect_cleanup};
 use dioxus_lib::prelude::*;
+use std::rc::Rc;
 
 #[derive(Clone, Copy)]
 struct TabsContext {
@@ -66,7 +67,7 @@ impl TabsContext {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct TabsProps {
-    value: Option<Signal<String>>,
+    value: ReadOnlySignal<Option<String>>,
 
     #[props(default)]
     default_value: String,
@@ -136,6 +137,10 @@ pub struct TabTriggerProps {
     id: Option<String>,
     class: Option<String>,
 
+    #[props(extends = GlobalAttributes)]
+    #[props(extends = button)]
+    attributes: Vec<Attribute>,
+
     children: Element,
 }
 
@@ -171,6 +176,21 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
         "-1"
     });
 
+    let mut tab_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    use_effect(move || {
+        let Some(tab) = tab_ref() else {
+            return;
+        };
+        let current_focus = (ctx.current_focus)();
+        let index = (props.index)();
+        let is_focused = current_focus == Some(index);
+        if is_focused {
+            spawn(async move {
+                let _ = tab.set_focus(true).await;
+            });
+        }
+    });
+
     rsx! {
         button {
             role: "tab",
@@ -183,6 +203,9 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
             "data-disabled": (ctx.disabled)() || (props.disabled)(),
             disabled: (ctx.disabled)() || (props.disabled)(),
 
+            onmounted: move |evt| {
+                tab_ref.set(Some(evt.data()));
+            },
             onclick: move |_| {
                 let value = props.value.clone();
                 if !selected() {
@@ -209,6 +232,8 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
                     event.prevent_default();
                 }
             },
+
+            ..props.attributes,
 
             {props.children}
         }

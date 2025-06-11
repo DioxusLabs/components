@@ -1,9 +1,8 @@
 use dioxus::prelude::*;
-use dioxus_primitives::{
-    separator::Separator,
-    tabs::{TabContent, TabTrigger, Tabs},
-};
+use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs};
+
 mod components;
+
 #[derive(Clone, PartialEq)]
 struct ComponentDemoData {
     name: &'static str,
@@ -57,11 +56,28 @@ fn Navbar() -> Element {
                 }
             }
             div { class: "navbar-links",
-                Link { to: Route::Home, class: "navbar-link", "Home" }
                 Link {
                     to: "https://docs.rs/crate/dioxus-components/latest",
                     class: "navbar-link",
-                    "docs.rs"
+                    "Docs.rs"
+                }
+                Link {
+                    to: "https://github.com/DioxusLabs/components",
+                    class: "navbar-link",
+                    img {
+                        class: "light-mode-only",
+                        src: asset!("/assets/github-mark/github-mark.svg"),
+                        alt: "GitHub",
+                        width: "24",
+                        height: "24",
+                    }
+                    img {
+                        class: "dark-mode-only",
+                        src: asset!("/assets/github-mark/github-mark-white.svg"),
+                        alt: "GitHub",
+                        width: "24",
+                        height: "24",
+                    }
                 }
             }
         }
@@ -79,12 +95,12 @@ fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
     let mut copied = use_signal(|| false);
     rsx! {
         pre {
-            class: "code-block code-block-dark",
+            class: "code-block dark-mode-only",
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.dark,
         }
         pre {
-            class: "code-block code-block-light",
+            class: "code-block light-mode-only",
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.light,
         }
@@ -119,12 +135,56 @@ fn CopyIcon() -> Element {
 fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCode) -> Element {
     let mut collapsed = use_signal(|| true);
 
+    let expand = rsx! {
+        button {
+            width: "100%",
+            height: "2rem",
+            color: "var(--text-color)",
+            background_color: "rgba(0, 0, 0, 0)",
+            border_radius: "0 0 0.5rem 0.5rem",
+            border: "none",
+            text_align: "center",
+            onclick: move |_| {
+                collapsed.toggle();
+            },
+            if collapsed() {
+                svg {
+                    fill: "none",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    stroke: "var(--text-color)",
+                    stroke_linecap: "round",
+                    stroke_linejoin: "round",
+                    stroke_width: "2",
+                    width: "20px",
+                    height: "20px",
+                    view_box: "0 0 24 24",
+                    polyline { points: "6 9 12 15 18 9" }
+                }
+            } else {
+                svg {
+                    fill: "none",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    stroke: "var(--text-color)",
+                    stroke_linecap: "round",
+                    stroke_linejoin: "round",
+                    stroke_width: "2",
+                    width: "20px",
+                    height: "20px",
+                    view_box: "0 0 24 24",
+                    polyline { points: "6 15 12 9 18 15" }
+                }
+            }
+        }
+    };
+
     rsx! {
         Tabs {
             class: "tabs",
             default_value: "main.rs",
             border_bottom_left_radius: "0.5rem",
             border_bottom_right_radius: "0.5rem",
+            horizontal: true,
+            width: "100%",
             div { class: "tabs-list",
                 TabTrigger { class: "tabs-trigger", value: "main.rs", index: 0usize, "main.rs" }
                 TabTrigger {
@@ -147,6 +207,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     width: "100%",
                     position: "relative",
                     CodeBlock { source: rs_highlighted, collapsed: collapsed() }
+                    {expand.clone()}
                 }
                 TabContent {
                     class: "tabs-content",
@@ -154,23 +215,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     width: "100%",
                     position: "relative",
                     CodeBlock { source: css_highlighted, collapsed: collapsed() }
-                }
-                button {
-                    width: "100%",
-                    height: "2rem",
-                    color: "var(--text-color)",
-                    background_color: "rgba(0, 0, 0, 0)",
-                    border_radius: "0 0 0.5rem 0.5rem",
-                    border: "none",
-                    text_align: "center",
-                    onclick: move |_| {
-                        collapsed.toggle();
-                    },
-                    if collapsed() {
-                        "↓"
-                    } else {
-                        "↑"
-                    }
+                    {expand}
                 }
             }
         }
@@ -214,10 +259,6 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
             div { class: "component-preview",
                 div { class: "component-preview-contents",
                     div { class: "component-preview-frame", Comp {} }
-                    Separator {
-                        class: "component-preview-separator",
-                        horizontal: true,
-                    }
                     div { class: "component-code",
                         ComponentCode { rs_highlighted, css_highlighted }
                     }
@@ -232,7 +273,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
 
 #[component]
 fn Home() -> Element {
-    let mut search = use_signal(|| String::new());
+    let mut search = use_signal(String::new);
 
     rsx! {
         div { id: "hero",

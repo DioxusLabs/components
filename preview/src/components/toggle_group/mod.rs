@@ -7,10 +7,10 @@ pub(super) fn Demo() -> Element {
             rel: "stylesheet",
             href: asset!("/src/components/toggle_group/style.css"),
         }
-        ToggleGroup { class: "toggle-group", horizontal: true,
-            ToggleItem { class: "toggle-item", index: 0usize, "Align Left" }
-            ToggleItem { class: "toggle-item", index: 1usize, "Align Middle" }
-            ToggleItem { class: "toggle-item", index: 2usize, "Align Right" }
+        ToggleGroup { class: "toggle-group", horizontal: true, allow_multiple_pressed: true,
+            ToggleItem { class: "toggle-item", index: 0usize, em { "B" } }
+            ToggleItem { class: "toggle-item", index: 1usize, i { "I" } }
+            ToggleItem { class: "toggle-item", index: 2usize, u { "U" } }
         }
     }
 }

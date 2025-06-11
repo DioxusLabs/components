@@ -19,7 +19,14 @@ Calendar {
     // The calendar header should contain the navigation controls and the title for the calendar.
     CalendarHeader {
         // The calendar navigation handles switching between months and years within the calendar view.
-        CalendarNavigation {} 
+        CalendarNavigation {
+            // The previous month button allows users to navigate to the previous month.
+            PreviousMonthButton {}
+            // The title displays the current month and year of the calendar view.
+            CalendarTitle {}
+            // The next month button allows users to navigate to the next month.
+            NextMonthButton {}
+        }
     }
     // The calendar grid displays the days of the month in a grid layout.
     CalendarGrid {}

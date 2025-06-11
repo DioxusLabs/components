@@ -39,7 +39,7 @@ pub fn Progress(props: ProgressProps) -> Element {
             "data-state": state,
             "data-value": props.value.cloned().map(|v| v.to_string()),
             "data-max": props.max,
-            style: percentage().map(|p| format!("--progress-value: {}%", p)),
+            style: percentage().map(|p| format!("--progress-value: {p}%")),
             ..props.attributes,
 
             {props.children}
@@ -52,11 +52,12 @@ pub fn Progress(props: ProgressProps) -> Element {
 pub struct ProgressIndicatorProps {
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    children: Element,
 }
 
 #[component]
 pub fn ProgressIndicator(props: ProgressIndicatorProps) -> Element {
     rsx! {
-        div { ..props.attributes }
+        div { ..props.attributes, {props.children} }
     }
 }

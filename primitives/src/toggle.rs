@@ -3,7 +3,7 @@ use dioxus_lib::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleProps {
-    pressed: Option<Signal<bool>>,
+    pressed: ReadOnlySignal<Option<bool>>,
 
     #[props(default)]
     default_pressed: bool,

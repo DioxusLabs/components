@@ -35,7 +35,7 @@ pub struct CollapsibleProps {
     /// The controlled `open` state of the collapsible.
     ///
     /// If this is provided, you must use `on_open_change`.
-    open: Option<Signal<bool>>,
+    open: ReadOnlySignal<Option<bool>>,
 
     /// A callback for when the open state changes.
     ///

@@ -1,60 +1,61 @@
-.context-menu-example {
-    padding: 20px;
-}
-
-.context-menu-trigger {
-    padding: 20px;
-    background: var(--brighter-background-color);
-    border: 1px solid var(--dim-border-color);
-    border-radius: 4px;
-    cursor: context-menu;
-    user-select: none;
-}
-
 .context-menu-content {
-    min-width: 220px;
-    background: var(--brighter-background-color);
-    border-radius: 6px;
-    padding: 5px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--dim-border-color);
-    z-index: 1000;
-    transform-origin: var(--radix-context-menu-content-transform-origin);
-    will-change: transform, opacity;
+  min-width: 220px;
+  background: var(--background-color);
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+  box-shadow: 0 0 0 1px var(--dim-border-color);
+  animation: slideIn 0.1s ease-out;
 }
 
-.context-menu-content[data-state="closed"] {
-    pointer-events: none;
-    opacity: 0;
-    transform: scale(0.95) translateY(-2px);
-    transition: opacity 150ms ease-in, transform 150ms ease-in;
+@media (prefers-color-scheme: dark) {
+  .context-menu-content {
+    background: var(--focused-background-color);
+    box-shadow: 0 0 0 1px var(--hover-border-color);
+  }
 }
 
-.context-menu-content[data-state="open"] {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    transition: opacity 200ms ease-out, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+.context-menu-content[hidden] {
+  display: none;
 }
 
 .context-menu-item {
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    user-select: none;
-    outline: none;
-    font-size: 14px;
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
-    transition: background-color 100ms ease-out;
+  padding: 8px 12px;
+  border-radius: calc(0.5rem - 0.25rem);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
 }
 
-.context-menu-item:hover {
-    background: var(--hover-background-color);
+.context-menu-item[data-disabled="true"] {
+  color: var(--muted-text-color);
+  cursor: not-allowed;
 }
 
-.context-menu-item:focus {
-    background: var(--focused-background-color);
+.context-menu-item:hover:not([data-disabled="true"]),
+.context-menu-item:focus-visible {
+  color: var(--bright-text-color);
+  background: var(--hover-background-color);
 }
 
-/* Remove old keyframes - now using CSS transitions for smoother animations */
+@media (prefers-color-scheme: dark) {
+  .context-menu-item:hover:not([data-disabled="true"]),
+  .context-menu-item:focus-visible {
+    background: var(--hover-border-color);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

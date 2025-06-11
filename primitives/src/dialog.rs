@@ -4,10 +4,13 @@ use crate::{use_controlled, use_id_or, use_unique_id};
 
 #[derive(Clone, Copy)]
 struct DialogCtx {
+    #[allow(unused)]
     open: Memo<bool>,
+    #[allow(unused)]
     set_open: Callback<bool>,
 
     // Whether the dialog is a modal and should capture focus.
+    #[allow(unused)]
     is_modal: ReadOnlySignal<bool>,
     dialog_labelledby: Signal<String>,
     dialog_describedby: Signal<String>,
@@ -20,13 +23,16 @@ pub struct DialogProps {
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
     is_modal: ReadOnlySignal<bool>,
 
-    open: Option<Signal<bool>>,
+    open: ReadOnlySignal<Option<bool>>,
 
     #[props(default)]
     default_open: bool,
 
     #[props(default)]
     on_open_change: Callback<bool>,
+
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 
     children: Element,
 }
@@ -52,32 +58,19 @@ pub fn Dialog(props: DialogProps) -> Element {
         let is_open = open();
         let is_modal = (props.is_modal)();
 
-        let js = eval(
-            r#"
-            let id = await dioxus.recv();
-            let is_open = await dioxus.recv();
-            let is_modal = await dioxus.recv();
+        eval(&format!(
+            r#"let dialog = document.getElementById("{id}");
 
-            let dialog = document.getElementById(id);
-
-            if (is_open) {
-                switch (is_modal) {
-                    case true:
-                        dialog.showModal();
-                        break;
-                    case false:
-                        dialog.show();
-                        break;
-                }
-            } else {
-                dialog.close(); 
-            }
-            "#,
-        );
-
-        let _ = js.send(id());
-        let _ = js.send(is_open);
-        let _ = js.send(is_modal);
+            if ({is_open}) {{
+                if ({is_modal}) {{
+                    dialog.showModal();
+                }} else {{
+                    dialog.show();
+                }}
+            }} else {{
+                dialog.close();
+            }}"#
+        ));
     });
 
     rsx! {
@@ -86,6 +79,7 @@ pub fn Dialog(props: DialogProps) -> Element {
             aria_modal: props.is_modal,
             aria_labelledby: ctx.dialog_labelledby,
             aria_describedby: ctx.dialog_describedby,
+            ..props.attributes,
 
             {props.children}
         }
@@ -95,6 +89,8 @@ pub fn Dialog(props: DialogProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogTitleProps {
     id: ReadOnlySignal<Option<String>>,
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 }
 
@@ -106,6 +102,7 @@ pub fn DialogTitle(props: DialogTitleProps) -> Element {
     rsx! {
         h2 {
             id: id,
+            ..props.attributes,
             {props.children}
         }
     }
@@ -114,6 +111,8 @@ pub fn DialogTitle(props: DialogTitleProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogDescriptionProps {
     id: ReadOnlySignal<Option<String>>,
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 }
 
@@ -125,6 +124,7 @@ pub fn DialogDescription(props: DialogDescriptionProps) -> Element {
     rsx! {
         p {
             id: id,
+            ..props.attributes,
             {props.children}
         }
     }

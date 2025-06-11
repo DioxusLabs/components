@@ -23,6 +23,7 @@ examples!(
     context_menu,
     checkbox,
     dropdown_menu,
+    dialog,
     hover_card,
     menubar,
     progress,

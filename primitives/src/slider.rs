@@ -1,8 +1,11 @@
 use crate::use_controlled;
+use dioxus::html::geometry::euclid::Vector2D;
+use dioxus::html::geometry::{ClientPoint, ClientSpace};
+use dioxus::html::input_data::MouseButton;
 use dioxus_lib::html::geometry::Pixels;
 use dioxus_lib::html::geometry::euclid::Rect;
 use dioxus_lib::prelude::*;
-use std::ops::RangeInclusive;
+use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SliderValue {
@@ -13,16 +16,85 @@ pub enum SliderValue {
 impl std::fmt::Display for SliderValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SliderValue::Single(v) => write!(f, "{}", v),
-            SliderValue::Range(start, end) => write!(f, "{}, {}", start, end),
+            SliderValue::Single(v) => write!(f, "{v}"),
+            SliderValue::Range(start, end) => write!(f, "{start}, {end}"),
         }
     }
 }
 
+#[derive(Debug)]
+struct Pointer {
+    id: i32,
+    position: ClientPoint,
+    last_position: Option<ClientPoint>,
+}
+
+impl Pointer {
+    fn delta(&self) -> Vector2D<f64, ClientSpace> {
+        if let Some(last_position) = self.last_position {
+            self.position - last_position
+        } else {
+            Vector2D::zero()
+        }
+    }
+}
+
+static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
+    let runtime = Runtime::current().unwrap();
+    queue_effect(move || {
+        runtime.spawn(ScopeId::ROOT, async move {
+            let mut pointer_updates = dioxus::document::eval(
+                "window.addEventListener('pointerdown', (e) => {
+                    dioxus.send(['down', [e.pointerId, e.pageX, e.pageY]]);
+                });
+                window.addEventListener('pointermove', (e) => {
+                    dioxus.send(['move', [e.pointerId, e.pageX, e.pageY]]);
+                });
+                window.addEventListener('pointerup', (e) => {
+                    dioxus.send(['up', [e.pointerId, e.pageX, e.pageY]]);
+                });",
+            );
+
+            while let Ok((event_type, (pointer_id, x, y))) =
+                pointer_updates.recv::<(String, (i32, f64, f64))>().await
+            {
+                let position = ClientPoint::new(x, y);
+
+                match event_type.as_str() {
+                    "down" => {
+                        // Add a new pointer
+                        POINTERS.write().push(Pointer {
+                            id: pointer_id,
+                            position,
+                            last_position: None,
+                        });
+                    }
+                    "move" => {
+                        // Update the position of an existing pointer
+                        if let Some(pointer) =
+                            POINTERS.write().iter_mut().find(|p| p.id == pointer_id)
+                        {
+                            pointer.last_position = Some(pointer.position);
+                            pointer.position = position;
+                        }
+                    }
+                    "up" => {
+                        // Remove the pointer
+                        POINTERS.write().retain(|p| p.id != pointer_id);
+                    }
+                    _ => {}
+                }
+            }
+        });
+    });
+
+    Vec::new()
+});
+
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderProps {
     /// The controlled value of the slider
-    value: Option<Signal<SliderValue>>,
+    value: ReadOnlySignal<Option<SliderValue>>,
 
     /// The default value when uncontrolled
     #[props(default = SliderValue::Single(0.0))]
@@ -75,7 +147,6 @@ pub fn Slider(props: SliderProps) -> Element {
     } else {
         "vertical"
     };
-    let range = props.min..=props.max;
 
     let mut dragging = use_signal(|| false);
 
@@ -88,12 +159,63 @@ pub fn Slider(props: SliderProps) -> Element {
         disabled: props.disabled,
         horizontal: props.horizontal,
         inverted: props.inverted,
-        range,
         dragging: dragging.into(),
     });
 
     let mut rect = use_signal(|| None);
-    let mut div_element = use_signal(|| None);
+    let mut div_element: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    let mut granular_value = use_hook(|| CopyValue::new(props.default_value.clone()));
+
+    let size = rect().map(|r: Rect<f64, Pixels>| {
+        if props.horizontal {
+            r.width()
+        } else {
+            r.height()
+        }
+    });
+
+    let mut current_pointer_id: Signal<Option<i32>> = use_signal(|| None);
+
+    use_effect(move || {
+        let pointers = POINTERS.read();
+
+        if !dragging() {
+            return;
+        }
+
+        let Some(size) = size else {
+            tracing::warn!("Slider size is not (yet) set");
+            return;
+        };
+
+        let Some(active_pointer_id) = current_pointer_id() else {
+            tracing::warn!("Current pointer ID is not set");
+            return;
+        };
+
+        let Some(pointer) = pointers.iter().find(|p| p.id == active_pointer_id) else {
+            current_pointer_id.take();
+            return;
+        };
+        let delta = pointer.delta();
+
+        let delta_pos = if ctx.horizontal { delta.x } else { delta.y } as f64;
+
+        let delta = delta_pos / size * ctx.range_size();
+
+        let current_value = match granular_value.cloned() {
+            SliderValue::Single(v) => v,
+            SliderValue::Range(start, _) => {
+                // TODO: Handle range sliders
+                start
+            }
+        };
+        let new = current_value + delta;
+        granular_value.set(SliderValue::Single(new));
+        let clamped = new.clamp(ctx.min, ctx.max);
+        let stepped = (clamped / ctx.step).round() * ctx.step;
+        ctx.set_value.call(SliderValue::Single(stepped));
+    });
 
     rsx! {
         div {
@@ -118,63 +240,62 @@ pub fn Slider(props: SliderProps) -> Element {
                     rect.set(Some(r));
                 }
             },
-            onmousemove: move |e| {
-                if !dragging() || (ctx.disabled)() {
-                    return;
-                }
-                let Some(rect) = rect() else {
-                    tracing::warn!("Slider rect is not (yet) set");
-                    return;
-                };
-
-                let current_pos = if ctx.horizontal {
-                    e.data().client_coordinates().x
-                } else {
-                    e.data().client_coordinates().y
-                } as f64;
-
-                let new_value = get_value_from_pointer(
-                    current_pos,
-                    &rect,
-                    ctx.min,
-                    ctx.max,
-                    ctx.inverted,
-                );
-
-                let stepped = (new_value / ctx.step).round() * ctx.step;
-                ctx.set_value.call(SliderValue::Single(stepped));
-            },
-
-            onmousedown: move |e| {
+            onpointerdown: move |evt| {
                 if (ctx.disabled)() {
                     return;
                 }
-                let Some(rect) = rect() else {
-                    tracing::warn!("Slider rect is not (yet) set");
+
+                // Prevent default to avoid loosing focus on the range
+                evt.prevent_default();
+                evt.stop_propagation();
+
+                if current_pointer_id.read().is_some() || evt.trigger_button() != Some(MouseButton::Primary) {
                     return;
-                };
+                }
 
+                current_pointer_id.set(Some(evt.data().pointer_id()));
+                POINTERS.write().push(Pointer {
+                    id: evt.data().pointer_id(),
+                    position: evt.client_coordinates(),
+                    last_position: None,
+                });
 
-                dragging.set(true);
-                let current_pos = if ctx.horizontal {
-                    e.data().client_coordinates().x
-                } else {
-                    e.data().client_coordinates().y
-                } as f64;
+                // Handle pointer interaction
+                spawn(async move {
+                    let Some(div_element) = div_element() else {
+                        tracing::warn!("Slider div element is not (yet) set");
+                        return;
+                    };
 
-                let new_value = get_value_from_pointer(
-                    current_pos,
-                    &rect,
-                    ctx.min,
-                    ctx.max,
-                    ctx.inverted,
-                );
+                    // Update the bounding rect of the slider in case it moved
+                    if let Ok(r) = div_element.get_client_rect().await {
+                        rect.set(Some(r));
 
-                let stepped = (new_value / ctx.step).round() * ctx.step;
-                ctx.set_value.call(SliderValue::Single(stepped));
+                        let size = if props.horizontal {
+                            r.width()
+                        } else {
+                            r.height()
+                        };
+
+                        // Get the mouse position relative to the slider
+                        let top_left = r.origin;
+                        let relative_pos = evt.client_coordinates() - top_left.cast_unit();
+
+                        let offset = if ctx.horizontal {
+                            relative_pos.x
+                        } else {
+                            relative_pos.y
+                        };
+                        let new = (offset / size) * ctx.range_size() + ctx.min;
+                        granular_value.set(SliderValue::Single(new));
+                        let stepped = (new / ctx.step).round() * ctx.step;
+                        ctx.set_value.call(SliderValue::Single(stepped));
+                    }
+
+                    dragging.set(true);
+                });
             },
 
-            onmouseup: move |_| dragging.set(false),
             ..props.attributes,
 
             {props.children}
@@ -212,6 +333,7 @@ pub fn SliderTrack(props: SliderTrackProps) -> Element {
 pub struct SliderRangeProps {
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    children: Element,
 }
 
 #[component]
@@ -245,6 +367,7 @@ pub fn SliderRange(props: SliderRangeProps) -> Element {
             "data-orientation": orientation,
             style,
             ..props.attributes,
+            {props.children}
         }
     }
 }
@@ -257,6 +380,7 @@ pub struct SliderThumbProps {
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    children: Element,
 }
 
 #[component]
@@ -277,10 +401,26 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
 
     let percent = ((value() - ctx.min) / (ctx.max - ctx.min) * 100.0).clamp(0.0, 100.0);
     let style = if ctx.horizontal {
-        format!("left: {}%", percent)
+        format!("left: {percent}%")
     } else {
-        format!("bottom: {}%", percent)
+        format!("bottom: {percent}%")
     };
+
+    let mut button_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+
+    use_effect(move || {
+        let button_ref = button_ref();
+        if let Some(button) = button_ref {
+            // Focus the button while dragging
+            let disabled = ctx.disabled.cloned();
+            let dragging = ctx.dragging.cloned();
+            if !disabled && dragging {
+                spawn(async move {
+                    _ = button.set_focus(true).await;
+                });
+            }
+        }
+    });
 
     rsx! {
         button {
@@ -295,63 +435,56 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
             "data-dragging": ctx.dragging,
             style,
             tabindex: 0,
+            onmounted: move |evt| {
+                // Store the mounted data for focus management
+                button_ref.set(Some(evt.data()));
+            },
+            onmousedown: move |evt| {
+                // Don't focus the button. The dragging state will handle focus
+                evt.prevent_default();
+            },
+            ontouchstart: move |evt| {
+                // Don't focus the button. The dragging state will handle focus
+                evt.prevent_default();
+            },
+            onkeydown: move |evt| async move {
+                if (ctx.disabled)() {
+                    return;
+                }
+
+                let key = evt.data().key();
+                let mut step = ctx.step;
+                if evt.data().modifiers().shift() {
+                    // If shift is pressed, increase the step size
+                    step *= 10.0;
+                }
+
+                // Handle keyboard navigation
+                let mut new_value = match key {
+                    Key::ArrowUp | Key::ArrowRight => {
+                        value() + step
+                    }
+                    Key::ArrowDown | Key::ArrowLeft => {
+                        value() - step
+                    }
+                    _ => return,
+                };
+
+                // Clamp the new value to the range
+                new_value = new_value.clamp(ctx.min, ctx.max);
+                let stepped_value = (new_value / ctx.step).round() * ctx.step;
+
+                // Update the value
+                ctx.set_value.call(SliderValue::Single(stepped_value));
+            },
             ..props.attributes,
+            {props.children}
         }
     }
 }
 
-/// Performs a linear scale transformation between two ranges.
-///
-/// # Arguments
-///
-/// * `input` - Input range [min, max]
-/// * `output` - Output range [min, max]
-///
-/// # Returns
-///
-/// A function that maps values from the input range to the output range
-fn linear_scale(input: [f64; 2], output: [f64; 2]) -> impl Fn(f64) -> f64 {
-    let [in_min, in_max] = input;
-    let [out_min, out_max] = output;
-
-    move |x: f64| {
-        // Calculate position in input range (0.0 ~ 1.0)
-        let normalized = (x - in_min) / (in_max - in_min);
-
-        // Convert to output range
-        out_min + normalized * (out_max - out_min)
-    }
-}
-
-/// Calculates a value based on pointer position within a rectangle.
-///
-/// # Arguments
-///
-/// * `pointer_position` - The position of the pointer
-/// * `rect` - The rectangle reference area
-/// * `min` - The minimum value in the output range
-/// * `max` - The maximum value in the output range
-/// * `inverted` - Whether to invert the output range
-///
-/// # Returns
-///
-/// The calculated value within the range
-fn get_value_from_pointer(
-    pointer_position: f64,
-    rect: &Rect<f64, Pixels>,
-    min: f64,
-    max: f64,
-    inverted: bool,
-) -> f64 {
-    let input = [0.0, rect.width()];
-    let output = if !inverted { [min, max] } else { [max, min] };
-    let value = linear_scale(input, output);
-
-    value(pointer_position - rect.origin.x)
-}
-
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 struct SliderContext {
     value: Memo<SliderValue>,
     set_value: Callback<SliderValue>,
@@ -361,6 +494,20 @@ struct SliderContext {
     disabled: ReadOnlySignal<bool>,
     horizontal: bool,
     inverted: bool,
-    range: RangeInclusive<f64>,
     dragging: ReadOnlySignal<bool>,
+}
+
+impl SliderContext {
+    fn range(&self) -> [f64; 2] {
+        if !self.inverted {
+            [self.min, self.max]
+        } else {
+            [self.max, self.min]
+        }
+    }
+
+    fn range_size(&self) -> f64 {
+        let [range_min, range_max] = self.range();
+        range_max - range_min
+    }
 }

@@ -1,10 +1,12 @@
 .menubar {
     display: flex;
-    gap: 4px;
-    padding: 4px;
-    border: 1px solid var(--dim-border-color);
-    border-radius: 4px;
+    gap: .25rem;
+    padding: .25rem;
+    border: none;
+    box-shadow: inset 0 0 0 1px var(--dim-border-color);
+    border-radius: .5rem;
     background: var(--background-color);
+    box-sizing: border-box;
 }
 
 .menubar-menu {
@@ -17,12 +19,34 @@
     background: none;
     cursor: pointer;
     color: var(--text-color);
-    border-radius: 4px;
-    transition: background-color 100ms ease-out;
+    border-radius: calc(.5rem - .25rem);
 }
 
-.menubar-trigger:hover {
+.menubar-menu[data-state="open"] .menubar-trigger {
+    color: var(--bright-text-color);
+    background-color: var(--hover-background-color);
+}
+@media (prefers-color-scheme: dark) {
+    .menubar-menu[data-state="open"] .menubar-trigger {
+        background-color: var(--hover-border-color);
+    }
+}
+
+.menubar-trigger[data-disabled="true"] {
+    color: var(--muted-text-color);
+    cursor: not-allowed;
+}
+
+.menubar-trigger:hover:not([data-disabled="true"]),
+.menubar-trigger:focus-visible {
+    color: var(--bright-text-color);
     background: var(--hover-background-color);
+}
+@media (prefers-color-scheme: dark) {
+    .menubar-trigger:hover:not([data-disabled="true"]),
+    .menubar-trigger:focus-visible {
+        background: var(--hover-border-color);
+    }
 }
 
 .menubar-content {
@@ -30,14 +54,20 @@
     top: 100%;
     left: 0;
     min-width: 200px;
+    margin-left: -.25rem;
+    margin-top: .5rem;
     background: var(--background-color);
-    border: 1px solid var(--dim-border-color);
-    border-radius: 4px;
-    padding: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    transform-origin: top;
-    will-change: transform, opacity;
+    border-radius: .5rem;
+    padding: .25rem;
+    box-shadow: inset 0 0 0 1px var(--dim-border-color);
+    animation: menubarSlideIn 0.1s ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+    .menubar-content {
+        background: var(--focused-background-color);
+        box-shadow: inset 0 0 0 1px var(--hover-border-color);
+    }
 }
 
 .menubar-content[data-state="closed"] {
@@ -57,12 +87,25 @@
     display: block;
     padding: 8px 12px;
     cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 100ms ease-out;
+    font-size: 14px;
+    border-radius: calc(.5rem - .25rem);
 }
 
-.menubar-item:hover {
+.menubar-item[data-disabled="true"] {
+    color: var(--muted-text-color);
+    cursor: not-allowed;
+}
+
+.menubar-item:hover:not([data-disabled="true"]),
+.menubar-item:focus-visible {
+    color: var(--bright-text-color);
     background: var(--hover-background-color);
+}
+@media (prefers-color-scheme: dark) {
+    .menubar-item:hover:not([data-disabled="true"]),
+    .menubar-item:focus-visible {
+        background: var(--hover-border-color);
+    }
 }
 
 [data-disabled="true"] {
@@ -70,4 +113,14 @@
     cursor: not-allowed;
 }
 
-/* Remove old keyframes - now using CSS transitions for smoother animations */
+@keyframes menubarSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
