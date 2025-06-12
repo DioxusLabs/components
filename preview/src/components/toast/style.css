@@ -15,7 +15,10 @@
   margin-top: -4rem;
   overflow: hidden;
   transition: transform 0.2s ease, margin-top 0.2s ease, opacity 0.2s ease;
-  transform: scale(calc(100% - var(--toast-index) * 5%), calc(100% - var(--toast-index) * 2%));
+  transform: scale(
+    calc(100% - var(--toast-index) * 5%),
+    calc(100% - var(--toast-index) * 2%)
+  );
   box-sizing: border-box;
   z-index: calc(var(--toast-count) - var(--toast-index));
   opacity: calc(1 - var(--toast-hidden));
@@ -37,30 +40,46 @@
   }
 }
 
-.toast-container:not(:hover) .toast[data-toast-even]:not([data-top]) {
+.toast-container:not(:hover):not(:focus-within)
+  .toast[data-toast-even]:not([data-top]) {
   animation: slide-up-even 0.2s ease-out;
 }
-.toast-container:not(:hover) .toast[data-toast-odd]:not([data-top]) {
+.toast-container:not(:hover):not(:focus-within)
+  .toast[data-toast-odd]:not([data-top]) {
   animation: slide-up-odd 0.2s ease-out;
 }
 
 @keyframes slide-up-even {
   from {
-    transform: translateY(0.5rem) scale(calc(100% - var(--toast-index) * 5%), calc(100% - var(--toast-index) * 2%));
+    transform: translateY(0.5rem)
+      scale(
+        calc(100% - var(--toast-index) * 5%),
+        calc(100% - var(--toast-index) * 2%)
+      );
   }
   to {
     transform: translateY(0)
-      scale(calc(100% - var(--toast-index) * 5%), calc(100% - var(--toast-index) * 2%));
+      scale(
+        calc(100% - var(--toast-index) * 5%),
+        calc(100% - var(--toast-index) * 2%)
+      );
   }
 }
 
 @keyframes slide-up-odd {
   from {
-    transform: translateY(0.5rem) scale(calc(100% - var(--toast-index) * 5%), calc(100% - var(--toast-index) * 2%));
+    transform: translateY(0.5rem)
+      scale(
+        calc(100% - var(--toast-index) * 5%),
+        calc(100% - var(--toast-index) * 2%)
+      );
   }
   to {
     transform: translateY(0)
-      scale(calc(100% - var(--toast-index) * 5%), calc(100% - var(--toast-index) * 2%));
+      scale(
+        calc(100% - var(--toast-index) * 5%),
+        calc(100% - var(--toast-index) * 2%)
+      );
   }
 }
 
@@ -68,22 +87,32 @@
   animation: slide-in 0.2s ease-out;
 }
 
-.toast-container:hover .toast[data-top] {
+.toast-container:hover .toast[data-top],
+.toast-container:focus-within .toast[data-top] {
   animation: slide-in 0 ease-out;
 }
 
 @keyframes slide-in {
   from {
-    transform: translateY(100%) scale(calc(110% - var(--toast-index) * 5%), calc(110% - var(--toast-index) * 2%));
+    transform: translateY(100%)
+      scale(
+        calc(110% - var(--toast-index) * 5%),
+        calc(110% - var(--toast-index) * 2%)
+      );
     opacity: 0;
   }
   to {
-    transform: translateY(0) scale(calc(100% - var(--toast-index) * 5%), calc(100% - var(--toast-index) * 2%));
+    transform: translateY(0)
+      scale(
+        calc(100% - var(--toast-index) * 5%),
+        calc(100% - var(--toast-index) * 2%)
+      );
     opacity: 1;
   }
 }
 
-.toast-container:hover .toast {
+.toast-container:hover .toast,
+.toast-container:focus-within .toast {
   margin-top: var(--toast-padding);
   transform: scale(calc(100%));
   opacity: 1;

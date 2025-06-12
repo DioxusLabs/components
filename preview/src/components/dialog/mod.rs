@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_primitives::{dialog::{Dialog, DialogDescription, DialogTitle}};
+use dioxus_primitives::dialog::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
 
 #[component]
 pub(super) fn Demo() -> Element {
@@ -16,23 +16,27 @@ pub(super) fn Demo() -> Element {
             onclick: move |_| open.set(true),
             "Show Dialog"
         }
-        Dialog {
-            class: "dialog",
+        DialogRoot {
+            class: "dialog-backdrop",
             open: open(),
             on_open_change: move |v| open.set(v),
-            button {
-                class: "dialog-close",
-                aria_label: "Close",
-                onclick: move |_| open.set(false),
-                "×"
-            }
-            DialogTitle {
-                class: "dialog-title",
-                "Item information"
-            }
-            DialogDescription {
-                class: "dialog-description",
-                "Here is some additional information about the item."
+            DialogContent {
+                class: "dialog",
+                button {
+                    class: "dialog-close",
+                    aria_label: "Close",
+                    tabindex: if open() { "0" } else { "-1" },
+                    onclick: move |_| open.set(false),
+                    "×"
+                }
+                DialogTitle {
+                    class: "dialog-title",
+                    "Item information"
+                }
+                DialogDescription {
+                    class: "dialog-description",
+                    "Here is some additional information about the item."
+                }
             }
         }
     }

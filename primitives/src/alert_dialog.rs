@@ -17,7 +17,8 @@
 //
 // You can pass on_click to AlertDialogAction/Cancel for custom logic.
 
-use crate::use_unique_id;
+use crate::{FOCUS_TRAP_JS, use_id_or, use_unique_id};
+use dioxus::document;
 use dioxus_lib::prelude::*;
 
 #[derive(Clone)]
@@ -36,6 +37,8 @@ pub struct AlertDialogRootProps {
     open: ReadOnlySignal<Option<bool>>,
     #[props(default)]
     on_open_change: Callback<bool>,
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 }
 
@@ -44,12 +47,9 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
     let labelledby = use_unique_id().to_string();
     let describedby = use_unique_id().to_string();
     let mut open_signal = use_signal(|| props.default_open);
-    let set_open = Callback::new({
-        let user_on_open_change = props.on_open_change;
-        move |v: bool| {
-            open_signal.set(v);
-            user_on_open_change.call(v);
-        }
+    let set_open = use_callback(move |v: bool| {
+        open_signal.set(v);
+        props.on_open_change.call(v);
     });
     let open = use_memo(move || (props.open)().unwrap_or_else(&*open_signal));
     use_context_provider(|| AlertDialogCtx {
@@ -58,63 +58,85 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
         labelledby,
         describedby,
     });
+
+    // Add a escape key listener to the document when the dialog is open. We can't
+    // just add this to the dialog itself because it might not be focused if the user
+    // is highlighting text or interacting with another element.
+    use_effect(move || {
+        let mut escape = document::eval(
+            "document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    dioxus.send(true);
+                }
+            });",
+        );
+        spawn(async move {
+            while let Ok(true) = escape.recv().await {
+                set_open.call(false);
+            }
+        });
+    });
+
     rsx! {
-        {props.children}
+        div {
+            class: "alert-dialog-overlay",
+            aria_hidden: (!open()).then_some("true"),
+            "data-state": if open() { "open" } else { "closed" },
+            ..props.attributes,
+            {props.children}
+        }
     }
 }
 
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogContentProps {
-    #[props(default)]
-    style: Option<String>,
+    id: ReadOnlySignal<Option<String>>,
+
     #[props(default)]
     class: Option<String>,
+
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 }
 
 #[component]
 pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
-    // TODO: Implement focus trap so Tab/Shift+Tab cycles focus within the dialog.
-    // This is important for accessibility. Currently, focus can escape the dialog and close the dialog.
-    // See: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/#keyboard-interaction
     let ctx: AlertDialogCtx = use_context();
-    let on_keydown = use_callback(move |e: Event<KeyboardData>| {
-        if e.key() == Key::Escape {
-            ctx.set_open.call(false);
-            e.prevent_default();
-        }
+
+    let open = ctx.open;
+
+    let gen_id = use_unique_id();
+    let id = use_id_or(gen_id, props.id);
+    use_effect(move || {
+        document::eval(&format!(
+            r#"let dialog = document.getElementById("{id}");
+            let is_open = {open};
+
+            if (is_open) {{
+                dialog.trap = window.createFocusTrap(dialog);
+            }}
+            if (!is_open && dialog.trap) {{
+                dialog.trap.remove();
+                dialog.trap = null;
+            }}"#
+        ));
     });
 
-    let on_focusout = use_callback(move |_e: Event<FocusData>| {
-        ctx.set_open.call(false);
-    });
-    let on_backdrop_click = use_callback(move |_| ctx.set_open.call(false));
-    if !(ctx.open)() {
-        return rsx! {};
-    }
     rsx! {
-        div {
-            class: "alert-dialog-backdrop",
-            style: "position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1000;",
-            onclick: on_backdrop_click,
+        document::Script {
+            src: FOCUS_TRAP_JS,
+            defer: true,
         }
         div {
+            id,
             role: "alertdialog",
             aria_modal: "true",
             aria_labelledby: ctx.labelledby.clone(),
             aria_describedby: ctx.describedby.clone(),
-            tabindex: "0",
             class: props.class.clone().unwrap_or_else(|| "alert-dialog".to_string()),
-            style: props
-                .style
-                .clone()
-                .unwrap_or_else(|| {
-                    "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1001;"
-                        .to_string()
-                }),
-            autofocus: true,
-            onfocusout: on_focusout,
-            onkeydown: on_keydown,
+            ..props.attributes,
             {props.children}
         }
     }
@@ -178,6 +200,7 @@ pub struct AlertDialogActionProps {
 #[component]
 pub fn AlertDialogAction(props: AlertDialogActionProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
+    let open = ctx.open;
     let set_open = ctx.set_open;
     let user_on_click = props.on_click;
     let on_click = use_callback(move |evt: MouseEvent| {
@@ -189,6 +212,7 @@ pub fn AlertDialogAction(props: AlertDialogActionProps) -> Element {
     rsx! {
         button {
             r#type: props.r#type.clone(),
+            tabindex: if open() { "0" } else { "-1" },
             onclick: on_click,
             ..props.attributes,
             {props.children}
@@ -210,6 +234,7 @@ pub struct AlertDialogCancelProps {
 #[component]
 pub fn AlertDialogCancel(props: AlertDialogCancelProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
+    let open = ctx.open;
     let set_open = ctx.set_open;
     let user_on_click = props.on_click;
     let on_click = use_callback(move |evt: MouseEvent| {
@@ -218,11 +243,12 @@ pub fn AlertDialogCancel(props: AlertDialogCancelProps) -> Element {
             cb.call(evt.clone());
         }
     });
+
     rsx! {
         button {
             r#type: props.r#type.clone(),
+            tabindex: if open() { "0" } else { "-1" },
             onclick: on_click,
-            autofocus: true,
             ..props.attributes,
             {props.children}
         }

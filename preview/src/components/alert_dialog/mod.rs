@@ -17,7 +17,10 @@ pub(super) fn Demo() -> Element {
             onclick: move |_| open.set(true),
             "Show Alert Dialog"
         }
-        AlertDialogRoot { open: open(), on_open_change: move |v| open.set(v),
+        AlertDialogRoot {
+            open: open(),
+            on_open_change: move |v| open.set(v),
+            class: "alert-dialog-backdrop",
             AlertDialogContent { class: "alert-dialog",
                 AlertDialogTitle { "Delete item" }
                 AlertDialogDescription { "Are you sure you want to delete this item? This action cannot be undone." }

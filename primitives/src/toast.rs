@@ -49,6 +49,7 @@ struct ToastCtx {
     toasts: Signal<VecDeque<ToastItem>>,
     add_toast: AddToastCallback,
     remove_toast: Callback<usize>,
+    focus_region: Callback,
 }
 
 // Toast provider props
@@ -72,19 +73,10 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
     let mut toasts = use_signal(VecDeque::new);
     let portal = use_portal();
 
-    // Create context first so we can reference it in the callbacks
-    let add_toast = use_callback(|_| {}); // Temporary placeholder
-    let remove_toast = use_callback(|_| {}); // Temporary placeholder
-    let ctx = ToastCtx {
-        toasts,
-        add_toast,
-        remove_toast,
-    };
-
     // Remove toast callback
     let remove_toast = use_callback(move |id: usize| {
         let mut toasts_vec = toasts.write();
-        if let Some(pos) = toasts_vec.iter().position(|t| t.id == id) {
+        if let Some(pos) = toasts_vec.iter().position(|t: &ToastItem| t.id == id) {
             toasts_vec.remove(pos);
         }
     });
@@ -143,20 +135,44 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
         },
     );
 
-    // Update the context with the real callbacks
-    let mut ctx = ctx;
-    ctx.add_toast = add_toast;
-    ctx.remove_toast = remove_toast;
-
-    // Provide the context
-    let ctx = use_context_provider(|| ctx);
-
     // Create a stable list of toasts for rendering outside of RSX
     let toast_list = use_memo(move || {
         let toasts_vec = toasts.read();
         toasts_vec.iter().cloned().collect::<Vec<_>>()
     });
     let length = toast_list.len();
+
+    let mut region_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
+
+    let focus_region = use_callback(move |_| {
+        let Some(region_ref) = region_ref() else {
+            return;
+        };
+        spawn(async move {
+            _ = region_ref.set_focus(true).await;
+        });
+    });
+
+    // Mount the first toast when the user presses f6
+    use_effect(move || {
+        let mut eval = dioxus::document::eval(
+            "document.addEventListener('keydown', (event) => { if (event.key === 'F6') { dioxus.send(true) } });",
+        );
+        spawn(async move {
+            while let Ok(true) = eval.recv().await {
+                // Focus the first toast when F6 is pressed
+                focus_region(())
+            }
+        });
+    });
+
+    // Provide the context
+    let ctx = use_context_provider(|| ToastCtx {
+        toasts,
+        add_toast,
+        remove_toast,
+        focus_region,
+    });
 
     rsx! {
         // Render children
@@ -166,34 +182,41 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
         PortalIn { portal,
             div {
                 role: "region",
-                aria_live: "polite",
-                aria_label: "Notifications",
+                aria_label: "{length} notifications",
+                tabindex: "-1",
                 class: "toast-container",
                 style: "--toast-count: {length}",
+                onmounted: move |e| {
+                    region_ref.set(Some(e.data()));
+                },
 
-                // Render all toasts
-                for (index, toast) in toast_list.read().iter().rev().enumerate() {
-                    Fragment {
-                        key: "{toast.id}",
-                        {
-                            props.render_toast.call(ToastProps::builder().id(toast.id)
-                                .index(index)
-                                .title(toast.title.clone())
-                                .description(toast.description.clone())
-                                .toast_type(toast.toast_type)
-                                .permanent(toast.permanent)
-                                .on_close({
-                                    let toast_id = toast.id;
-                                    let remove_toast = ctx.remove_toast;
-                                    move |_| {
-                                        remove_toast.call(toast_id);
-                                    }
-                                })
-                                // Only pass duration to non-permanent toasts
-                                .duration(if toast.permanent { None } else { toast.duration })
-                                .attributes(vec![])
-                                .build()
-                            )
+                ol {
+                    display: "contents",
+                    // Render all toasts
+                    for (index, toast) in toast_list.read().iter().rev().enumerate() {
+                        li {
+                            key: "{toast.id}",
+                            display: "contents",
+                            {
+                                props.render_toast.call(ToastProps::builder().id(toast.id)
+                                    .index(index)
+                                    .title(toast.title.clone())
+                                    .description(toast.description.clone())
+                                    .toast_type(toast.toast_type)
+                                    .permanent(toast.permanent)
+                                    .on_close({
+                                        let toast_id = toast.id;
+                                        let remove_toast = ctx.remove_toast;
+                                        move |_| {
+                                            remove_toast.call(toast_id);
+                                        }
+                                    })
+                                    // Only pass duration to non-permanent toasts
+                                    .duration(if toast.permanent { None } else { toast.duration })
+                                    .attributes(vec![])
+                                    .build()
+                                )
+                            }
                         }
                     }
                 }
@@ -227,7 +250,12 @@ pub struct ToastProps {
 #[component]
 pub fn Toast(props: ToastProps) -> Element {
     let toast_id = use_unique_id();
-    let id = use_memo(move || format!("toast-{}", toast_id()));
+    let id = use_memo(move || format!("toast-{toast_id}"));
+    let label_id = format!("{id}-label");
+    let description_id = props
+        .description
+        .as_ref()
+        .map(|_| format!("{id}-description"));
 
     // Get the context at the top level of the component
     let ctx = use_context::<ToastCtx>();
@@ -254,7 +282,12 @@ pub fn Toast(props: ToastProps) -> Element {
     rsx! {
         div {
             id,
-            role: "alert",
+            role: "alertdialog",
+            aria_labelledby: "{label_id}",
+            aria_describedby: description_id,
+            aria_modal: "false",
+            tabindex: "0",
+
             class: "toast",
             "data-type": props.toast_type.as_str(),
             "data-permanent": props.permanent,
@@ -265,18 +298,32 @@ pub fn Toast(props: ToastProps) -> Element {
             ..props.attributes,
 
             div { class: "toast-content",
+                role: "alert",
+                aria_atomic: "true",
 
-                div { class: "toast-title", {props.title.clone()} }
+                div {
+                    id: label_id,
+                    class: "toast-title",
+                    {props.title.clone()}
+                }
 
                 if let Some(description) = &props.description {
-                    div { class: "toast-description", {description.clone()} }
+                    div {
+                        id: description_id.clone(),
+                        class: "toast-description",
+                        {description.clone()}
+                    }
                 }
             }
 
             button {
                 class: "toast-close",
-                aria_label: "Close",
-                onclick: move |e| props.on_close.call(e),
+                aria_label: "close",
+                onclick: move |e| {
+                    // Focus the region again after closing
+                    ctx.focus_region.call(());
+                    props.on_close.call(e);
+                },
                 "×"
             }
         }
