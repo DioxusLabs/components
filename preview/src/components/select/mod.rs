@@ -10,6 +10,7 @@ pub(super) fn Demo() -> Element {
         Select {
             class: "select",
             placeholder: "Select a fruit...",
+            aria_label: "Select Demo",
             SelectGroup { label: "Fruits".to_string(),
                 SelectOption { value: "apple".to_string(), "Apple" }
                 SelectOption { value: "banana".to_string(), "Banana" }

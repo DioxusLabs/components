@@ -71,7 +71,6 @@ jobs:
       - uses: browser-actions/setup-firefox@latest
       - run: cargo test --workspace
 
-  
   fmt:
     if: github.event.pull_request.draft == false
     name: Rustfmt

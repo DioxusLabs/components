@@ -83,13 +83,13 @@ pub fn HoverCardTrigger(props: HoverCardTriggerProps) -> Element {
     let id = use_id_or(trigger_id, props.id);
 
     // Handle mouse events
-    let handle_mouse_enter = move |_: Event<MouseData>| {
+    let open_event = move || {
         if !(ctx.disabled)() {
             ctx.set_open.call(true);
         }
     };
 
-    let handle_mouse_leave = move |_: Event<MouseData>| {
+    let close_event = move || {
         if !(ctx.disabled)() {
             ctx.set_open.call(false);
         }
@@ -99,15 +99,19 @@ pub fn HoverCardTrigger(props: HoverCardTriggerProps) -> Element {
         div {
             id,
             class: "hover-card-trigger",
+            tabindex: "0", // Make the trigger focusable
 
             // Mouse events
-            onmouseenter: handle_mouse_enter,
-            onmouseleave: handle_mouse_leave,
+            onmouseenter: move |_| open_event(),
+            onmouseleave: move |_| close_event(),
+
+            // Focus events
+            onfocus: move |_| open_event(),
+            onblur: move |_| close_event(),
 
             // ARIA attributes
-            aria_haspopup: "dialog",
-            aria_expanded: (ctx.open)(),
-            aria_controls: ctx.content_id.peek().clone(),
+            role: "button",
+            aria_describedby: (ctx.open)().then(|| ctx.content_id.cloned()),
 
             ..props.attributes,
             {props.children}

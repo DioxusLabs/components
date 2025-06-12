@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs};
+use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs, TabList};
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
@@ -9,7 +9,7 @@ pub(super) fn Demo() -> Element {
             default_value: "tab1".to_string(),
             horizontal: true,
             max_width: "16rem",
-            div { class: "tabs-list",
+            TabList { class: "tabs-list",
                 TabTrigger {
                     class: "tabs-trigger",
                     value: "tab1".to_string(),
@@ -29,7 +29,10 @@ pub(super) fn Demo() -> Element {
                     "Tab 3"
                 }
             }
-            TabContent { class: "tabs-content", value: "tab1".to_string(),
+            TabContent {
+                index: 0usize,
+                class: "tabs-content",
+                value: "tab1".to_string(),
                 div {
                     width: "100%",
                     height: "5rem",
@@ -39,7 +42,10 @@ pub(super) fn Demo() -> Element {
                     "Tab 1 Content"
                 }
             }
-            TabContent { class: "tabs-content", value: "tab2".to_string(),
+            TabContent {
+                index: 1usize,
+                class: "tabs-content",
+                value: "tab2".to_string(),
                 div {
                     width: "100%",
                     height: "5rem",
@@ -49,7 +55,10 @@ pub(super) fn Demo() -> Element {
                     "Tab 2 Content"
                 }
             }
-            TabContent { class: "tabs-content", value: "tab3".to_string(),
+            TabContent {
+                index: 2usize,
+                class: "tabs-content",
+                value: "tab3".to_string(),
                 div {
                     width: "100%",
                     height: "5rem",

@@ -14,6 +14,7 @@ pub(super) fn Demo() -> Element {
             border_radius: "0.5em",
             padding: "0 1em 1em 1em",
             direction: ScrollDirection::Vertical,
+            tabindex: "0",
             div { class: "scroll-content",
                 for i in 1..=20 {
                     p {

@@ -7,7 +7,10 @@ pub(super) fn Demo() -> Element {
             rel: "stylesheet",
             href: asset!("/src/components/checkbox/style.css"),
         }
-        Checkbox { class: "checkbox", name: "tos-check",
+        Checkbox {
+            class: "checkbox",
+            name: "tos-check",
+            aria_label: "Demo Checkbox",
             CheckboxIndicator {
                 class: "checkbox-indicator",
                 svg {

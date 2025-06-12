@@ -1,3 +1,11 @@
 target
 
 **/.claude/settings.local.json
+node_modules
+
+# Playwright
+/test-results/
+/playwright/playwright-report/
+/playwright/test-results/
+/blob-report/
+/playwright/.cache/

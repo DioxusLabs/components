@@ -13,7 +13,7 @@ pub(super) fn Demo() -> Element {
             style: "padding: 50px; display: flex; flex-direction: row; flex-wrap: wrap; gap: 40px; justify-content: center; align-items: center;",
             HoverCard { class: "hover-card",
                 HoverCardTrigger { class: "hover-card-trigger",
-                    "@johndoe"
+                    i { "Dioxus" }
                 }
                 HoverCardContent { class: "hover-card-content", side: HoverCardSide::Bottom,
                     div {

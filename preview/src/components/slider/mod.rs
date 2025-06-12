@@ -10,10 +10,13 @@ pub(super) fn Demo() -> Element {
         }
         Slider {
             class: "slider",
+            label: "Demo Slider",
             horizontal: true,
             SliderTrack { class: "slider-track",
                 SliderRange { class: "slider-range" }
-                SliderThumb { class: "slider-thumb" }
+                SliderThumb {
+                    class: "slider-thumb"
+                }
             }
         }
     }

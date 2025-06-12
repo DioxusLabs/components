@@ -159,6 +159,41 @@ impl CalendarDate {
     pub fn day_of_the_week(&self) -> u32 {
         day_of_the_week(self.year, self.month, self.day)
     }
+
+    /// Get a human-readable ARIA label for this date
+    pub fn aria_label(&self) -> String {
+        let month_names = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ];
+        let day_names = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+        ];
+        let day_of_week = self.day_of_the_week();
+        format!(
+            "{}, {} {}, {}",
+            day_names[day_of_week as usize],
+            month_names[(self.month - 1) as usize],
+            self.day,
+            self.year
+        )
+    }
 }
 
 #[test]
@@ -676,7 +711,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             ..props.attributes,
 
             // Day headers
-            thead { role: "row",
+            thead { aria_hidden: "true",
                 tr {
                     class: "calendar-grid-header",
                     // Day name headers
@@ -694,6 +729,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                 // Display all days in a grid
                 for row in &*days_grid.read() {
                     tr {
+                        role: "row",
                         class: "calendar-grid-week",
                         for date in row.iter().copied() {
                             td {
@@ -773,6 +809,7 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
             class: "calendar-grid-cell",
             r#type: "button",
             tabindex: (!in_current_month).then_some("-1"),
+            aria_label: props.date.aria_label(),
             "data-today": is_today,
             "data-selected": is_selected(),
             "data-month": "{month}",
@@ -785,66 +822,6 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
             onmounted: move |e| day_ref.set(Some(e.data())),
             ..attributes,
             {day.to_string()}
-        }
-    }
-}
-
-// Calendar Cell component props
-#[derive(Props, Clone, PartialEq)]
-pub struct CalendarCellProps {
-    /// The date for this cell
-    date: CalendarDate,
-
-    /// Whether this date is selected
-    #[props(default)]
-    is_selected: bool,
-
-    /// Whether this date is today
-    #[props(default)]
-    is_today: bool,
-
-    /// Whether this date is disabled
-    #[props(default)]
-    is_disabled: bool,
-
-    /// Click handler
-    #[props(default)]
-    onclick: EventHandler<MouseEvent>,
-
-    #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
-}
-
-// Calendar Cell component
-#[component]
-pub fn CalendarCell(props: CalendarCellProps) -> Element {
-    let _ctx: CalendarContext = use_context();
-
-    // Determine cell state classes
-    let state_class = if props.is_selected {
-        "calendar-grid-cell-selected"
-    } else if props.is_today {
-        "calendar-grid-cell-today"
-    } else {
-        ""
-    };
-
-    rsx! {
-        button {
-            role: "gridcell",
-            class: "calendar-grid-cell {state_class}",
-            "aria-selected": props.is_selected,
-            "aria-disabled": props.is_disabled,
-            r#type: "button",
-            disabled: props.is_disabled,
-            "data-selected": props.is_selected,
-            "data-today": props.is_today,
-            "data-disabled": props.is_disabled,
-            tabindex: if props.is_selected { "0" } else { "-1" },
-            onclick: props.onclick,
-            ..props.attributes,
-
-            {props.date.day.to_string()}
         }
     }
 }
