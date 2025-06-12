@@ -68,7 +68,7 @@ pub fn Switch(props: SwitchProps) -> Element {
         // Hidden input for form submission
         input {
             r#type: "checkbox",
-            "aria-hidden": true,
+            aria_hidden: true,
             tabindex: -1,
             name: props.name,
             value: props.value,

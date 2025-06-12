@@ -23,6 +23,7 @@ pub(super) fn Demo() -> Element {
             button {
                 class: "dialog-close",
                 aria_label: "Close",
+                autofocus: true,
                 onclick: move |_| open.set(false),
                 "×"
             }

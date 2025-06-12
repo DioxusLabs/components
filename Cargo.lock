@@ -879,7 +879,7 @@ dependencies = [
  "global-hotkey",
  "infer",
  "jni",
- "lazy-js-bundle",
+ "lazy-js-bundle 0.7.0-alpha.1",
  "libc",
  "muda",
  "ndk",
@@ -946,7 +946,7 @@ dependencies = [
  "futures-channel",
  "futures-util",
  "generational-box",
- "lazy-js-bundle",
+ "lazy-js-bundle 0.7.0-alpha.1",
  "serde",
  "serde_json",
  "tracing",
@@ -1050,7 +1050,7 @@ dependencies = [
  "futures-channel",
  "generational-box",
  "keyboard-types",
- "lazy-js-bundle",
+ "lazy-js-bundle 0.7.0-alpha.1",
  "rustversion",
  "serde",
  "serde_json",
@@ -1080,7 +1080,7 @@ dependencies = [
  "dioxus-core-types",
  "dioxus-html",
  "js-sys",
- "lazy-js-bundle",
+ "lazy-js-bundle 0.7.0-alpha.1",
  "rustc-hash 2.1.1",
  "serde",
  "sledgehammer_bindgen",
@@ -1171,6 +1171,7 @@ dependencies = [
  "dioxus",
  "dioxus-lib",
  "dioxus-time",
+ "lazy-js-bundle 0.6.2",
  "tracing",
 ]
 
@@ -1325,7 +1326,7 @@ dependencies = [
  "generational-box",
  "gloo-timers",
  "js-sys",
- "lazy-js-bundle",
+ "lazy-js-bundle 0.7.0-alpha.1",
  "rustc-hash 2.1.1",
  "serde",
  "serde-wasm-bindgen",
@@ -2651,6 +2652,12 @@ dependencies = [
  "matches",
  "selectors",
 ]
+
+[[package]]
+name = "lazy-js-bundle"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e49596223b9d9d4947a14a25c142a6e7d8ab3f27eb3ade269d238bb8b5c267e2"
 
 [[package]]
 name = "lazy-js-bundle"
