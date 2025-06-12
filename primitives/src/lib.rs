@@ -1,5 +1,9 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use dioxus::{
+    document,
+    prelude::{Asset, asset, manganis},
+};
 use dioxus_lib::prelude::*;
 
 pub mod accordion;
@@ -29,6 +33,8 @@ pub mod toggle;
 pub mod toggle_group;
 pub mod toolbar;
 pub mod tooltip;
+
+pub(crate) const FOCUS_TRAP_JS: Asset = asset!("/src/js/focus-trap.js");
 
 /// Generate a runtime-unique id.
 fn use_unique_id() -> Signal<String> {

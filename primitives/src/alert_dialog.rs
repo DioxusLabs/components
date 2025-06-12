@@ -17,14 +17,9 @@
 //
 // You can pass on_click to AlertDialogAction/Cancel for custom logic.
 
-use crate::{use_id_or, use_unique_id};
-use dioxus::{
-    document,
-    prelude::{Asset, asset, manganis},
-};
+use crate::{FOCUS_TRAP_JS, use_id_or, use_unique_id};
+use dioxus::document;
 use dioxus_lib::prelude::*;
-
-const FOCUS_TRAP_JS: Asset = asset!("/src/js/focus-trap.js");
 
 #[derive(Clone)]
 struct AlertDialogCtx {
@@ -97,10 +92,10 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogContentProps {
     id: ReadOnlySignal<Option<String>>,
-    #[props(default)]
-    style: Option<String>,
+
     #[props(default)]
     class: Option<String>,
+
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
     children: Element,
@@ -141,13 +136,6 @@ pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
             aria_labelledby: ctx.labelledby.clone(),
             aria_describedby: ctx.describedby.clone(),
             class: props.class.clone().unwrap_or_else(|| "alert-dialog".to_string()),
-            style: props
-                .style
-                .clone()
-                .unwrap_or_else(|| {
-                    "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1001;"
-                        .to_string()
-                }),
             ..props.attributes,
             {props.children}
         }
@@ -256,26 +244,11 @@ pub fn AlertDialogCancel(props: AlertDialogCancelProps) -> Element {
         }
     });
 
-    // Focus the button when the dialog opens
-    let mut button_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
-    use_effect(move || {
-        let Some(button) = button_ref() else {
-            return;
-        };
-        if open() {
-            spawn(async move {
-                _ = button.set_focus(true).await;
-            });
-        }
-    });
     rsx! {
         button {
             r#type: props.r#type.clone(),
             tabindex: if open() { "0" } else { "-1" },
             onclick: on_click,
-            onmounted: move |e| {
-                button_ref.set(Some(e.data()));
-            },
             ..props.attributes,
             {props.children}
         }
