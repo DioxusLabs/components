@@ -24,7 +24,6 @@ class FocusTrap {
   private container: HTMLElement;
   private restoreFocusElement: HTMLElement;
   private nodeWalker: TreeWalker;
-  private preventFocusOutside: (event: FocusEvent) => void;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -42,12 +41,6 @@ class FocusTrap {
       }
     );
     this.focusNext();
-    this.preventFocusOutside = (event: FocusEvent) => {
-      const relatedTarget = event.relatedTarget as HTMLElement | null;
-      if (relatedTarget && !this.container.contains(relatedTarget)) {
-        event.preventDefault();
-      }
-    };
     this.container.addEventListener("keydown", (event) => {
       if (event.key === "Tab") {
         if (event.shiftKey) {
@@ -61,31 +54,15 @@ class FocusTrap {
   }
 
   remove() {
-    this.removeOnBlur();
     this.restoreFocusElement.focus();
   }
 
   focusChild(child: HTMLElement) {
     // Focus the element
     child.focus();
-    // Add a blur callback that only allows the focus to change if the new focus is within the container
-    child.addEventListener("blur", this.preventFocusOutside);
-  }
-
-  removeOnBlur() {
-    // Remove the blur callback from the currently focused element
-    const currentFocusedElement = this.nodeWalker
-      .currentNode as HTMLElement | null;
-    if (currentFocusedElement) {
-      currentFocusedElement.removeEventListener(
-        "blur",
-        this.preventFocusOutside
-      );
-    }
   }
 
   focusNext() {
-    this.removeOnBlur();
     // Move to the next focusable element
     const nextNode = this.nodeWalker.nextNode() as HTMLElement | null;
     if (nextNode) {
@@ -101,7 +78,6 @@ class FocusTrap {
   }
 
   focusPrevious() {
-    this.removeOnBlur();
     // Move to the previous focusable element
     const previousNode = this.nodeWalker.previousNode() as HTMLElement | null;
     if (previousNode) {
