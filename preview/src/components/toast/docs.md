@@ -1,4 +1,4 @@
-The Toast component is used to display brief messages to the user, typically for notifications or alerts.
+The Toast component is used to display brief messages to the user, typically for notifications or alerts. The toast messages can be focused with the keyboard with the `f6` key.
 
 ## Component Structure
 

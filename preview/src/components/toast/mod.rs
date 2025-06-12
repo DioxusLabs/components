@@ -33,12 +33,12 @@ fn ToastButton() -> Element {
                             description: Some(
                                 "Some info you need".to_string(),
                             ),
-                            duration: Some(Duration::from_secs(10)),
+                            duration: Some(Duration::from_secs(60)),
                             permanent: false,
                         }),
                     );
             },
-            "Info (10s)"
+            "Info (60s)"
         }
         style {
             ""
