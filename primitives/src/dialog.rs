@@ -136,8 +136,8 @@ pub fn DialogContent(props: DialogProps) -> Element {
             id,
             role: "alertdialog",
             aria_modal: "true",
-            aria_labelledby: ctx.dialog_labelledby.clone(),
-            aria_describedby: ctx.dialog_describedby.clone(),
+            aria_labelledby: ctx.dialog_labelledby,
+            aria_describedby: ctx.dialog_describedby,
             class: props.class.clone().unwrap_or_else(|| "alert-dialog".to_string()),
             onclick: move |e| {
                 // Prevent the click event from propagating to the overlay.

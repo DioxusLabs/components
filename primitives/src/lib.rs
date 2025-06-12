@@ -1,9 +1,6 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use dioxus::{
-    document,
-    prelude::{Asset, asset, manganis},
-};
+use dioxus::prelude::{Asset, asset, manganis};
 use dioxus_lib::prelude::*;
 
 pub mod accordion;

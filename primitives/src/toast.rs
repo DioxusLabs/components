@@ -250,12 +250,12 @@ pub struct ToastProps {
 #[component]
 pub fn Toast(props: ToastProps) -> Element {
     let toast_id = use_unique_id();
-    let id = use_memo(move || format!("toast-{}", toast_id()));
-    let label_id = format!("{}-label", id);
+    let id = use_memo(move || format!("toast-{toast_id}"));
+    let label_id = format!("{id}-label");
     let description_id = props
         .description
         .as_ref()
-        .map(|_| format!("{}-description", id));
+        .map(|_| format!("{id}-description"));
 
     // Get the context at the top level of the component
     let ctx = use_context::<ToastCtx>();
