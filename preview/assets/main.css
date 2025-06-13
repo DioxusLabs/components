@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
-
 /* Theme style variables */
 :root {
   --highlight-color-main: #dd7230;
@@ -7,62 +5,14 @@
   --highlight-color-tertiary: #2b7fff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --dark: initial;
-    --light: ;
-  }
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --dark: ;
-    --light: initial;
-  }
-}
-
-.dark {
+html[data-theme="dark"] {
   --dark: initial;
   --light: ;
 }
 
-.light {
+html[data-theme="light"] {
   --dark: ;
   --light: initial;
-}
-
-:root {
-  --background-color: var(--dark, #000) var(--light, #fff);
-  --brighter-background-color: var(--dark, #0e0e0e) var(--light, #fbfbfb);
-  --muted-background-color: var(--dark, #0a0a0a) var(--light, #fff);
-  --dim-background-color: var(--dark, #141313) var(--light, #f8f8f8);
-  --hover-background-color: var(--dark, #1a1a1a) var(--light, #f5f5f5);
-  --hover-border-color: var(--dark, #3e3e3e) var(--light, #b0b0b0);
-  --hover-border-color-more: var(--dark, #5d5d5d) var(--light, #d0d0d0);
-  --focused-background-color: var(--dark, #262626) var(--light, #f5f5f5);
-  --contrast-background-color: var(--dark, #e6e6e6) var(--light, #0d0d0d);
-  --bright-text-color: var(--dark, #fafafa) var(--light, #000);
-  --text-color: var(--dark, #d4d4d4) var(--light, #111);
-  --dim-text-color: var(--dark, rgb(220, 220, 220))
-    var(--light, rgb(43, 43, 43));
-  --border-color: var(--dark, #fff) var(--light, #000);
-  --dim-border-color: var(--dark, #232323) var(--light, #e5e5e5);
-  --muted-text-color: var(--dark, #a1a1a1) var(--light, #848484);
-  --focused-border-color: var(--dark, #2b7fff) var(--light, #2b7fff);
-  --success-background-color: var(--dark, #02271c) var(--light, #ecfdf5);
-  --success-text-color: var(--dark, #b6fae3) var(--light, #10b981);
-  --warning-background-color: var(--dark, #342203) var(--light, #fffbeb);
-  --warning-text-color: var(--dark, #feeac7) var(--light, #f59e0b);
-  --error-background-color: var(--dark, #a22e2e) var(--light, #ef4444);
-  --error-background-color-focused: var(--dark, #9b1c1c) var(--light, #dc2626);
-  --error-border-color: var(--dark, var(--error-background-color))
-    var(--light, var(--error-background-color));
-  --error-text-color: var(--dark, var(--dim-text-color))
-    var(--light, var(--text-color));
-  --info-background-color: var(--dark, var(--focused-background-color))
-    var(--light, var(--background-color));
-  --info-text-color: var(--dark, var(--hover-border-color))
-    var(--light, var(--dim-text-color));
 }
 
 .dark-mode-only {
@@ -71,17 +21,6 @@
 
 .light-mode-only {
   display: var(--dark, none) var(--light, initial);
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  color: var(--text-color);
-  background-color: var(--background-color);
-  font-family: "Inter", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
 }
 
 .navbar {
@@ -101,7 +40,7 @@ body {
   text-decoration: none;
   font-size: 1.2em;
   font-weight: bold;
-  padding: 0.5em 1em;
+  padding: 0.5em none;
 }
 
 .navbar-link:hover {
