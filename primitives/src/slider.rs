@@ -128,6 +128,9 @@ pub struct SliderProps {
     #[props(default)]
     on_value_change: Callback<SliderValue>,
 
+    /// The label for the slider (for accessibility)
+    label: ReadOnlySignal<Option<String>>,
+
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
@@ -160,6 +163,7 @@ pub fn Slider(props: SliderProps) -> Element {
         horizontal: props.horizontal,
         inverted: props.inverted,
         dragging: dragging.into(),
+        label: props.label,
     });
 
     let mut rect = use_signal(|| None);
@@ -422,6 +426,8 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
         }
     });
 
+    let aria_label = ctx.label;
+
     rsx! {
         button {
             r#type: "button",
@@ -430,6 +436,7 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
             aria_valuemax: ctx.max,
             aria_valuenow: value,
             aria_orientation: orientation,
+            aria_label,
             "data-disabled": ctx.disabled,
             "data-orientation": orientation,
             "data-dragging": ctx.dragging,
@@ -495,6 +502,7 @@ struct SliderContext {
     horizontal: bool,
     inverted: bool,
     dragging: ReadOnlySignal<bool>,
+    label: ReadOnlySignal<Option<String>>,
 }
 
 impl SliderContext {

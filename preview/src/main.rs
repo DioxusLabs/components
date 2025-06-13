@@ -202,6 +202,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 justify_content: "center",
                 align_items: "center",
                 TabContent {
+                    index: 0usize,
                     class: "tabs-content",
                     value: "main.rs",
                     width: "100%",
@@ -210,6 +211,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     {expand.clone()}
                 }
                 TabContent {
+                    index: 1usize,
                     class: "tabs-content",
                     value: "style.css",
                     width: "100%",
@@ -276,27 +278,30 @@ fn Home() -> Element {
     let mut search = use_signal(String::new);
 
     rsx! {
-        div { id: "hero",
-            h1 { "Dioxus Primitives" }
-            h2 {
-                b { "Accessible" }
-                ", "
-                i { "unstyled" }
-                " foundational components for Dioxus."
-            }
-            div { id: "hero-search-container",
-                input {
-                    id: "hero-search-input",
-                    r#type: "search",
-                    placeholder: "Search components...",
-                    value: search,
-                    oninput: move |e| {
-                        search.set(e.value());
-                    },
+        main {
+            role: "main",
+            div { id: "hero",
+                h1 { "Dioxus Primitives" }
+                h2 {
+                    b { "Accessible" }
+                    ", "
+                    i { "unstyled" }
+                    " foundational components for Dioxus."
+                }
+                div { id: "hero-search-container",
+                    input {
+                        id: "hero-search-input",
+                        r#type: "search",
+                        placeholder: "Search components...",
+                        value: search,
+                        oninput: move |e| {
+                            search.set(e.value());
+                        },
+                    }
                 }
             }
+            ComponentGallery { search }
         }
-        ComponentGallery { search }
     }
 }
 
@@ -314,6 +319,7 @@ fn ComponentGallery(search: String) -> Element {
                             margin: "0.5rem",
                             top: "0",
                             right: "0",
+                            aria_label: "{name} details",
                             to: Route::ComponentDemo {
                                 component_name: name.to_string(),
                             },

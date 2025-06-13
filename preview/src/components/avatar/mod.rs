@@ -16,6 +16,7 @@ pub(super) fn Demo() -> Element {
                     on_state_change: move |state| {
                         avatar_state.set(format!("Avatar 1: {state:?}"));
                     },
+                    aria_label: "Basic avatar",
                     AvatarImage {
                         class: "avatar-image",
                         src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
@@ -31,6 +32,7 @@ pub(super) fn Demo() -> Element {
                     on_state_change: move |state| {
                         avatar_state.set(format!("Avatar 2: {state:?}"));
                     },
+                    aria_label: "Error avatar",
                     AvatarImage {
                         class: "avatar-image",
                         src: "https://invalid-url.example/image.jpg",
@@ -46,6 +48,7 @@ pub(super) fn Demo() -> Element {
                     on_state_change: move |state| {
                         avatar_state.set(format!("Avatar 4: {state:?}"));
                     },
+                    aria_label: "Large avatar",
                     AvatarImage {
                         class: "avatar-image",
                         src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif()),

@@ -12,6 +12,7 @@ pub(super) fn Demo() -> Element {
             Switch {
                 class: "switch",
                 checked: checked(),
+                aria_label: "Switch Demo",
                 on_checked_change: move |new_checked| {
                     checked.set(new_checked);
                     tracing::info!("Switch toggled: {new_checked}");

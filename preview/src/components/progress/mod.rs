@@ -23,7 +23,10 @@ pub(super) fn Demo() -> Element {
             rel: "stylesheet",
             href: asset!("/src/components/progress/style.css"),
         }
-        Progress { class: "progress", value: progress() as f64,
+        Progress {
+            aria_label: "Progressbar Demo",
+            class: "progress",
+            value: progress() as f64,
             ProgressIndicator { class: "progress-indicator" }
         }
     }

@@ -95,10 +95,8 @@ pub fn Select(props: SelectProps) -> Element {
             onchange: handle_change,
 
             // ARIA attributes
-            role: "combobox",
             aria_haspopup: "listbox",
             aria_expanded: "false", // Native select handles expansion state
-            aria_autocomplete: "none",
             aria_required: (props.required)().to_string(),
             aria_label: props.aria_label.clone(),
             aria_labelledby: props.aria_labelledby.clone(),
@@ -115,7 +113,6 @@ pub fn Select(props: SelectProps) -> Element {
                     value: "",
                     selected: true,
                     disabled: true,
-                    role: "option",
                     aria_selected: "false",
                     {props.placeholder}
                 }
@@ -169,7 +166,6 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
             disabled: (props.disabled)(),
 
             // ARIA attributes
-            role: "option",
             aria_selected: "false", // Will be set to true by the browser when selected
             aria_disabled: (props.disabled)().to_string(),
             aria_label: props.aria_label.clone(),

@@ -1,4 +1,4 @@
-use crate::{use_controlled, use_effect_cleanup};
+use crate::{use_controlled, use_effect_cleanup, use_unique_id};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone, Copy)]
@@ -12,6 +12,9 @@ struct DropdownMenuContext {
     item_count: Signal<usize>,
     recent_focus: Signal<usize>,
     current_focus: Signal<Option<usize>>,
+
+    // Unique ID for the trigger button
+    trigger_id: Signal<String>,
 }
 
 impl DropdownMenuContext {
@@ -76,6 +79,7 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
     let (open, set_open) = use_controlled(props.open, props.default_open, props.on_open_change);
 
     let disabled = props.disabled;
+    let trigger_id = use_unique_id();
     let mut ctx = use_context_provider(|| DropdownMenuContext {
         open: open.into(),
         set_open,
@@ -83,6 +87,7 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
         item_count: Signal::new(0),
         recent_focus: Signal::new(0),
         current_focus: Signal::new(None),
+        trigger_id,
     });
 
     // Handle escape key to close the menu
@@ -113,7 +118,6 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 
     rsx! {
         div {
-            role: "menu",
             "data-state": if open() { "open" } else { "closed" },
             "data-disabled": (props.disabled)(),
             onkeydown: handle_keydown,
@@ -136,12 +140,13 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
 
     rsx! {
         button {
+            id: "{ctx.trigger_id}",
             r#type: "button",
             "data-state": if (ctx.open)() { "open" } else { "closed" },
             "data-disabled": (ctx.disabled)(),
             disabled: (ctx.disabled)(),
             aria_expanded: ctx.open,
-            aria_haspopup: "menu",
+            aria_haspopup: "listbox",
 
             onclick: move |_| {
                 let new_open = !(ctx.open)();
@@ -172,7 +177,8 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
 
     rsx! {
         div {
-            role: "menu",
+            role: "listbox",
+            aria_labelledby: "{ctx.trigger_id}",
             "data-state": if (ctx.open)() { "open" } else { "closed" },
             ..props.attributes,
             {props.children}
@@ -227,7 +233,7 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
 
     rsx! {
         div {
-            role: "menuitem",
+            role: "option",
             "data-disabled": disabled(),
             tabindex: if focused() { "0" } else { "-1" },
 

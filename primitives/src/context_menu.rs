@@ -145,6 +145,7 @@ pub fn ContextMenuTrigger(props: ContextMenuTriggerProps) -> Element {
     rsx! {
         div {
             oncontextmenu: handle_context_menu,
+            role: "button",
             aria_haspopup: "menu",
             aria_expanded: (ctx.open)(),
             ..props.attributes,

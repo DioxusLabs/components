@@ -1,4 +1,4 @@
-use crate::{use_controlled, use_effect_cleanup};
+use crate::{use_controlled, use_effect_cleanup, use_id_or, use_unique_id};
 use dioxus_lib::prelude::*;
 use std::rc::Rc;
 
@@ -18,6 +18,9 @@ struct TabsContext {
     horizontal: ReadOnlySignal<bool>,
     roving_focus: ReadOnlySignal<bool>,
     roving_loop: ReadOnlySignal<bool>,
+
+    // ARIA attributes
+    tab_content_ids: Signal<Vec<String>>,
 }
 
 impl TabsContext {
@@ -110,15 +113,35 @@ pub fn Tabs(props: TabsProps) -> Element {
         horizontal: props.horizontal,
         roving_focus: props.roving_focus,
         roving_loop: props.roving_loop,
+        tab_content_ids: Signal::new(Vec::new()),
     });
 
     rsx! {
         div {
-            role: "tablist",
             "data-orientation": if (props.horizontal)() { "horizontal" } else { "vertical" },
             "data-disabled": (props.disabled)(),
 
             onfocusout: move |_| ctx.set_focus(None),
+            ..props.attributes,
+
+            {props.children}
+        }
+    }
+}
+
+#[derive(Props, Clone, PartialEq)]
+pub struct TabListProps {
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+
+    children: Element,
+}
+
+#[component]
+pub fn TabList(props: TabListProps) -> Element {
+    rsx! {
+        div {
+            role: "tablist",
             ..props.attributes,
 
             {props.children}
@@ -199,6 +222,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
             tabindex: tab_index,
 
             aria_selected: selected,
+            aria_controls: (ctx.tab_content_ids)().get((props.index)()).cloned(),
             "data-state": if selected() { "active" } else { "inactive" },
             "data-disabled": (ctx.disabled)() || (props.disabled)(),
             disabled: (ctx.disabled)() || (props.disabled)(),
@@ -244,8 +268,11 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
 pub struct TabContentProps {
     value: String,
 
-    id: Option<String>,
+    id: ReadOnlySignal<Option<String>>,
     class: Option<String>,
+
+    index: ReadOnlySignal<usize>,
+
     #[props(extends = GlobalAttributes)]
     #[props(extends = div)]
     attributes: Vec<Attribute>,
@@ -255,13 +282,24 @@ pub struct TabContentProps {
 
 #[component]
 pub fn TabContent(props: TabContentProps) -> Element {
-    let ctx: TabsContext = use_context();
+    let mut ctx: TabsContext = use_context();
     let selected = use_memo(move || (ctx.value)() == props.value);
+    let uuid = use_unique_id();
+    let id = use_id_or(uuid, props.id);
+
+    use_effect(move || {
+        let mut tab_ids = ctx.tab_content_ids.write();
+        let index = (props.index)();
+        while tab_ids.len() <= index {
+            tab_ids.push(String::new());
+        }
+        tab_ids[index] = id();
+    });
 
     rsx! {
         div {
             role: "tabpanel",
-            id: props.id,
+            id,
             class: props.class,
 
             tabindex: "0",
