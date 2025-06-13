@@ -68,7 +68,8 @@
 }
 
 .dialog-trigger {
-  background-color: var(--background-color);
+  background-color: var(--light, var(--background-color)) 
+    var(--dark, var(--dim-background-color));
   color: var(--text-color);
   border: 1px solid var(--dim-border-color);
   border-radius: 0.5rem;
@@ -76,12 +77,6 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-@media (prefers-color-scheme: dark) {
-  .dialog-trigger {
-    background-color: var(--dim-background-color);
-  }
 }
 
 .dialog-trigger:hover {

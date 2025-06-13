@@ -79,7 +79,8 @@
 }
 
 .alert-dialog-cancel {
-  background-color: var(--background-color);
+  background-color: var(--light, var(--background-color)) 
+    var(--dark, var(--dim-background-color));
   color: var(--text-color);
   border: 1px solid var(--dim-border-color);
   border-radius: 0.5rem;
@@ -87,12 +88,6 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-@media (prefers-color-scheme: dark) {
-  .alert-dialog-cancel {
-    background-color: var(--dim-background-color);
-  }
 }
 
 .alert-dialog-cancel:hover {
@@ -123,7 +118,8 @@
 }
 
 .alert-dialog-trigger {
-  background-color: var(--background-color);
+  background-color: var(--light, var(--background-color)) 
+    var(--dark, var(--dim-background-color));
   color: var(--text-color);
   border: 1px solid var(--dim-border-color);
   border-radius: 0.5rem;
@@ -131,12 +127,6 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-@media (prefers-color-scheme: dark) {
-  .alert-dialog-trigger {
-    background-color: var(--dim-background-color);
-  }
 }
 
 .alert-dialog-trigger:hover {

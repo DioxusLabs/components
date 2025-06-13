@@ -5,7 +5,7 @@
 }
 
 .dropdown-menu-trigger {
-  background-color: var(--background-color);
+  background-color: var(--dark, var(--dim-background-color)) var(--light, var(--background-color));
   color: var(--text-color);
   box-shadow: inset 0 0 0 1px var(--dim-border-color);
   border: none;
@@ -14,12 +14,6 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-@media (prefers-color-scheme: dark) {
-  .dropdown-menu-trigger {
-    background-color: var(--dim-background-color);
-  }
 }
 
 .dropdown-menu-trigger:hover {
@@ -37,23 +31,18 @@
   left: 0;
   margin-top: 4px;
   min-width: 200px;
-  background: var(--background-color);
+  background: var(--dark, var(--focused-background-color))
+    var(--light, var(--background-color));
   border-radius: 0.5rem;
   padding: 0.25rem;
-  box-shadow: inset 0 0 0 1px var(--dim-border-color);
+  box-shadow: inset 0 0 0 1px var(--dark, var(--hover-border-color))
+    var(--light, var(--dim-border-color));
   animation: slideIn 0.1s ease-out;
   z-index: 1000;
   /* Animation properties */
   opacity: 0;
   transform: translateY(-8px) scale(0.95);
   transition: all 0.2s ease;
-}
-
-@media (prefers-color-scheme: dark) {
-  .dropdown-menu-content {
-    background: var(--focused-background-color);
-    box-shadow: inset 0 0 0 1px var(--hover-border-color);
-  }
 }
 
 /* Open state animations */
@@ -89,12 +78,6 @@
 .dropdown-menu-item:hover:not([data-disabled="true"]),
 .dropdown-menu-item:focus-visible {
   color: var(--bright-text-color);
-  background: var(--hover-background-color);
-}
-
-@media (prefers-color-scheme: dark) {
-  .dropdown-menu-item:hover:not([data-disabled="true"]),
-  .dropdown-menu-item:focus-visible {
-    background: var(--hover-border-color);
-  }
+  background: var(--dark, var(--hover-border-color))
+    var(--light, var(--hover-background-color));
 }

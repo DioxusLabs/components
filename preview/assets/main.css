@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-
 /* Theme style variables */
 :root {
   --highlight-color-main: #dd7230;
@@ -7,89 +5,22 @@
   --highlight-color-tertiary: #2b7fff;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background-color: #fff;
-    --brighter-background-color: #fbfbfb;
-    --muted-background-color: #fff;
-    --dim-background-color: #F8F8F8;
-    --hover-background-color: #f5f5f5;
-    --hover-border-color: #b0b0b0;
-    --hover-border-color-more: #d0d0d0;
-    --focused-background-color: #f5f5f5;
-    --contrast-background-color: #0d0d0d;
-    --bright-text-color: #000;
-    --text-color: #111;
-    --dim-text-color: rgb(43, 43, 43);
-    --border-color: #000;
-    --dim-border-color: #E5E5E5;
-    --muted-text-color: #848484;
-    --focused-border-color: #2b7fff;
-    --success-background-color: #ecfdf5;
-    --success-text-color: #10b981;
-    --warning-background-color: #fffbeb;
-    --warning-text-color: #f59e0b;
-    --error-background-color: #ef4444;
-    --error-background-color-focused: #dc2626;
-    --error-border-color: var(--error-background-color);
-    --error-text-color: var(--text-color);
-    --info-background-color: var(--background-color);
-    --info-text-color: var(--dim-text-color);
-  }
+html[data-theme="dark"] {
+  --dark: initial;
+  --light: ;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-color: #000;
-    --brighter-background-color: #0e0e0e;
-    --muted-background-color: #0A0A0A;
-    --dim-background-color: #141313;
-    --hover-background-color: #1a1a1a;
-    --hover-border-color: #3E3E3E;
-    --hover-border-color-more: #5D5D5D;
-    --focused-background-color: #262626;
-    --contrast-background-color: #e6e6e6;
-    --bright-text-color: #fAfAfA;
-    --text-color: #D4D4D4;
-    --dim-text-color: rgb(220, 220, 220);
-    --border-color: #fff;
-    --dim-border-color: #232323;
-    --muted-text-color: #A1A1A1;
-    --focused-border-color: #2b7fff;
-    --success-background-color: #02271c;
-    --success-text-color: #b6fae3;
-    --warning-background-color: #342203;
-    --warning-text-color: #feeac7;
-    --error-background-color: #a22e2e;
-    --error-background-color-focused: #9b1c1c;
-    --error-border-color: var(--error-background-color);
-    --error-text-color: var(--dim-text-color);
-    --info-background-color: var(--focused-background-color);
-    --info-text-color: var(--hover-border-color);
-  }
+html[data-theme="light"] {
+  --dark: ;
+  --light: initial;
 }
 
-@media (prefers-color-scheme: light) {
-  .dark-mode-only {
-    display: none;
-  }
+.dark-mode-only {
+  display: var(--dark, initial) var(--light, none);
 }
 
-@media (prefers-color-scheme: dark) {
-  .light-mode-only {
-    display: none;
-  }
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  color: var(--text-color);
-  background-color: var(--background-color);
-  font-family: "Inter", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
+.light-mode-only {
+  display: var(--dark, none) var(--light, initial);
 }
 
 .navbar {
@@ -97,7 +28,7 @@ body {
   align-items: center;
   justify-content: space-between;
   position: sticky;
-  padding: .5rem 1rem;
+  padding: 0.5rem 1rem;
   top: 0;
   z-index: 1000;
   background-color: var(--background-color);
@@ -109,7 +40,7 @@ body {
   text-decoration: none;
   font-size: 1.2em;
   font-weight: bold;
-  padding: 0.5em 1em;
+  padding: 0.5em none;
 }
 
 .navbar-link:hover {
@@ -133,13 +64,13 @@ body {
 /* Code block styles */
 .code-block {
   font-family: "Courier New", Courier, monospace;
-  border-radius: .5rem;
+  border-radius: 0.5rem;
   overflow: scroll;
   width: 100%;
   height: 100%;
   max-height: 80vh;
   box-sizing: border-box;
-  padding: .5rem;
+  padding: 0.5rem;
   margin: 0;
 }
 
@@ -157,6 +88,13 @@ body {
   -webkit-user-select: none;
 }
 
+.dark-mode-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
 .copy-button {
   display: flex;
   align-items: center;
@@ -167,7 +105,7 @@ body {
   background: none;
   color: var(--text-color);
   border: none;
-  border-radius: .5rem;
+  border-radius: 0.5rem;
   cursor: pointer;
 }
 
