@@ -33,6 +33,9 @@ export default defineConfig({
     trace: "on-first-retry",
   },
 
+  // Each test is given 20 minutes.
+  timeout: 20 * 60 * 1000,
+
   /* Configure projects for major browsers */
   projects: [
     {
@@ -52,20 +55,19 @@ export default defineConfig({
 
     /* Test against mobile viewports. */
     {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      name: "Mobile Chrome",
+      use: { ...devices["Pixel 5"] },
     },
     {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      name: "Mobile Safari",
+      use: { ...devices["iPhone 12"] },
     },
   ],
 
   /* Run your local dev server before starting the tests */
   webServer: {
     cwd: path.join(process.cwd(), "../preview"),
-    command:
-      'dx serve --platform web',
+    command: "dx serve --platform web",
     port: 8080,
     timeout: 50 * 60 * 1000,
     reuseExistingServer: !process.env.CI,
