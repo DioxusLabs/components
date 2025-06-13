@@ -155,6 +155,7 @@ fn DarkModeToggle() -> Element {
                 is_dark_mode.toggle();
                 _ = document::eval("document.documentElement.setAttribute('data-theme', 'light');");
             },
+            aria_label: "Enable light mode",
             DarkModeIcon {}
         }
         button {
@@ -163,6 +164,7 @@ fn DarkModeToggle() -> Element {
                 is_dark_mode.toggle();
                 _ = document::eval("document.documentElement.setAttribute('data-theme', 'dark');");
             },
+            aria_label: "Enable dark mode",
             LightModeIcon {}
         }
     }
