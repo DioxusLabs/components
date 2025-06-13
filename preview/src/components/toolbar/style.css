@@ -11,16 +11,6 @@
     border-radius: .5rem;
 }
 
-/* .toolbar button {
-    padding: 8px 12px;
-    border: 1px solid var(--dim-border-color);
-    border-radius: 4px;
-    color: var(--text-color);
-    background-color: var(--background-color);
-    cursor: pointer;
-    font-size: 14px;
-} */
-
 .toolbar button {
     padding: 8px 12px;
     border: none;
@@ -33,15 +23,9 @@
 .toolbar button:hover:not([disabled]),
 .toolbar button:focus-visible {
     color: var(--bright-text-color);
-    background: var(--hover-background-color);
+    background: var(--light, var(--hover-background-color)) 
+        var(--dark, var(--hover-border-color));
 }
-@media (prefers-color-scheme: dark) {
-    .toolbar button:hover:not([disabled]),
-    .toolbar button:focus-visible {
-        background: var(--hover-border-color);
-    }
-}
-
 
 .toolbar button:disabled {
     color: var(--muted-text-color);

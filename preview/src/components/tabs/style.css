@@ -14,14 +14,9 @@
     padding: .25rem;
     border: none;
     border-radius: .5rem;
-    background: var(--dim-background-color);
+    background: var(--light, var(--dim-background-color)) 
+        var(--dark, var(--focused-background-color));
     box-sizing: border-box;
-}
-
-@media (prefers-color-scheme: dark) {
-    .tabs-list {
-        background: var(--focused-background-color);
-    }
 }
 
 .tabs-trigger {
@@ -35,15 +30,9 @@
 
 .tabs-trigger[data-state="active"] {
     color: var(--bright-text-color);
-    background-color: var(--background-color);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
-}
-
-@media (prefers-color-scheme: dark) {
-    .tabs-trigger[data-state="active"] {
-        box-shadow: inset 0 0 0 1px var(--hover-border-color);
-        background-color: var(--dim-border-color);
-    }
+    background-color: var(--light, var(--background-color)) var(--dark, var(--dim-border-color));
+    box-shadow: var(--dark, inset 0 0 0 1px var(--hover-border-color)) 
+        var(--light, 0 1px 2px rgba(0, 0, 0, 0.18));
 }
 
 .tabs-trigger[data-disabled="true"] {
@@ -58,20 +47,12 @@
 
 .tabs-content {
     width: 100%;
-    background: var(--background-color);
+    background: var(--light, var(--background-color)) var(--dark, var(--dim-background-color));
     border-radius: .5rem;
     padding: .25rem;
-    border: 1px solid var(--dim-border-color);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    border: 1px solid var(--light, var(--dim-border-color)) var(--dark, var(--hover-border-color));
+    box-shadow: var(--light, 0 1px 2px rgba(0, 0, 0, 0.18)) var(--dark, none);
     box-sizing: border-box;
-}
-
-@media (prefers-color-scheme: dark) {
-    .tabs-content {
-        border: none;
-        background: var(--dim-background-color);
-        box-shadow: inset 0 0 0 1px var(--hover-border-color);
-    }
 }
 
 .tabs-content[data-state="inactive"] {

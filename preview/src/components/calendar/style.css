@@ -29,19 +29,13 @@
   justify-content: center;
   width: 1.75rem;
   height: 1.75rem;
-  background-color: transparent;
+  background-color: var(--light, transparent)
+    var(--dark, var(--dim-background-color));
   color: var(--muted-text-color);
   border: 1px solid var(--dim-border-color);
   border-radius: 0.5rem;
   font-size: 1rem;
   cursor: pointer;
-}
-
-@media (prefers-color-scheme: dark) {
-  .calendar-nav-prev,
-  .calendar-nav-next {
-    background-color: var(--dim-background-color);
-  }
 }
 
 .calendar-nav-prev:hover,
@@ -115,17 +109,11 @@
   background-color: var(--contrast-background-color);
   color: var(--background-color);
 }
-@media (prefers-color-scheme: dark) {
-  .calendar-grid-cell[data-month="current"][data-selected="true"]:hover {
-    background-color: var(--focused-background-color);
-    color: var(--muted-background-color);
-  }
-}
-@media (prefers-color-scheme: light) {
-  .calendar-grid-cell[data-month="current"][data-selected="true"]:hover {
-    background-color: var(--contrast-background-color);
-    font-weight: 520;
-  }
+.calendar-grid-cell[data-month="current"][data-selected="true"]:hover {
+  background-color: var(--light, var(--contrast-background-color))
+    var(--dark, var(--focused-background-color));
+  color: var(--light, var(--background-color)) var(--dark, var(--muted-background-color));
+  font-weight: var(--light, 520) var(--dark, inherit);
 }
 
 .calendar-grid-cell[data-month="current"][data-today="true"]:not(

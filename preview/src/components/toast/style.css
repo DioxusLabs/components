@@ -28,16 +28,15 @@
   padding: 12px 16px;
   border-radius: 0.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border: 1px solid var(--dim-border-color);
+  border: 1px solid var(--light, var(--dim-border-color))
+    var(--dark, var(--hover-border-color));
+  filter: var(--light, none)
+    var(
+      --dark,
+      brightness(calc(0.5 + 0.5 * (1 - ((var(--toast-index) + 1) / 4))))
+    );
   box-sizing: border-box;
   --toast-hidden: calc(min(max(0, var(--toast-index) - 2), 1));
-}
-
-@media (prefers-color-scheme: dark) {
-  .toast {
-    border: 1px solid var(--hover-border-color);
-    filter: brightness(calc(0.5 + 0.5 * (1 - ((var(--toast-index) + 1) / 4))));
-  }
 }
 
 .toast-container:not(:hover):not(:focus-within)

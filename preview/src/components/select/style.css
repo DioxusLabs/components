@@ -14,15 +14,10 @@
   appearance: none;
   position: absolute;
   align-items: center;
+  background-color: var(--light, var(--background-color)) 
+    var(--dark, var(--dim-background-color));
 }
 
 .select:not([aria-activedescendant]) {
   color: var(--muted-text-color);
-}
-
-@media (prefers-color-scheme: dark) {
-  .select {
-    background-color: var(--dim-background-color);
-    background-color: var(--dim-background-color);
-  }
 }

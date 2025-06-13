@@ -25,12 +25,8 @@
 
 .menubar-menu[data-state="open"] .menubar-trigger {
     color: var(--bright-text-color);
-    background-color: var(--hover-background-color);
-}
-@media (prefers-color-scheme: dark) {
-    .menubar-menu[data-state="open"] .menubar-trigger {
-        background-color: var(--hover-border-color);
-    }
+    background-color: var(--light, var(--hover-background-color)) 
+        var(--dark, var(--hover-border-color));
 }
 
 .menubar-trigger[data-disabled="true"] {
@@ -41,14 +37,9 @@
 .menubar-trigger:hover:not([data-disabled="true"]),
 .menubar-trigger:focus-visible {
     color: var(--bright-text-color);
-    background: var(--hover-background-color);
+    background: var(--light, var(--hover-background-color)) 
+        var(--dark, var(--hover-border-color));
     outline: none;
-}
-@media (prefers-color-scheme: dark) {
-    .menubar-trigger:hover:not([data-disabled="true"]),
-    .menubar-trigger:focus-visible {
-        background: var(--hover-border-color);
-    }
 }
 
 .menubar-content {
@@ -58,20 +49,14 @@
     min-width: 200px;
     margin-left: -.25rem;
     margin-top: .5rem;
-    background: var(--background-color);
+    background: var(--light, var(--background-color)) 
+        var(--dark, var(--focused-background-color));
     border-radius: .5rem;
     padding: .25rem;
-    box-shadow: inset 0 0 0 1px var(--dim-border-color);
+    box-shadow: inset 0 0 0 1px var(--light, var(--dim-border-color)) var(--dark, var(--hover-border-color));
     z-index: 1000;
     transform-origin: top;
     will-change: transform, opacity;
-}
-
-@media (prefers-color-scheme: dark) {
-    .menubar-content {
-        background: var(--focused-background-color);
-        box-shadow: inset 0 0 0 1px var(--hover-border-color);
-    }
 }
 
 .menubar-content[data-state="closed"] {
@@ -103,14 +88,9 @@
 .menubar-item:hover:not([data-disabled="true"]),
 .menubar-item:focus-visible {
     color: var(--bright-text-color);
-    background: var(--hover-background-color);
+    background: var(--light, var(--hover-background-color)) 
+        var(--dark, var(--hover-border-color));
     outline: none;
-}
-@media (prefers-color-scheme: dark) {
-    .menubar-item:hover:not([data-disabled="true"]),
-    .menubar-item:focus-visible {
-        background: var(--hover-border-color);
-    }
 }
 
 [data-disabled="true"] {

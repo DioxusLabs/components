@@ -24,27 +24,16 @@
   display: block;
   width: calc(1.15rem - 2px);
   height: calc(1.15rem - 2px);
-  background-color: var(--background-color);
+  background-color: var(--light, var(--background-color)) var(--dark, var(--contrast-background-color));
   border-radius: 9999px;
   transition: transform 150ms;
   transform: translateX(1px);
   will-change: transform;
 }
 
-@media (prefers-color-scheme: dark) {
-  .switch-thumb {
-    background-color: var(--contrast-background-color);
-  }
-}
-
 .switch[data-state="checked"] .switch-thumb {
   transform: translateX(calc(2rem - 1px - (1.15rem - 2px)));
-}
-
-@media (prefers-color-scheme: dark) {
-  .switch[data-state="checked"] .switch-thumb {
-    background-color: var(--dim-background-color);
-  }
+  background-color: var(--light, var(--background-color)) var(--dark, var(--dim-background-color));
 }
 
 /* Only apply disabled styles when data-disabled is "true" */
