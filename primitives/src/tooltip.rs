@@ -1,4 +1,4 @@
-use crate::{use_controlled, use_unique_id};
+use crate::{ContentAlign, ContentSide, use_controlled, use_unique_id};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone, Copy)]
@@ -114,6 +114,7 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
     rsx! {
         div {
             id: props.id.clone(),
+            tabindex: "0",
             // Mouse events
             onmouseenter: handle_mouse_enter,
             onmouseleave: handle_mouse_leave,
@@ -137,53 +138,17 @@ pub struct TooltipContentProps {
     id: Option<String>,
 
     /// Side of the trigger to place the tooltip
-    #[props(default = TooltipSide::Top)]
-    side: TooltipSide,
+    #[props(default = ContentSide::Top)]
+    side: ContentSide,
 
     /// Alignment of the tooltip relative to the trigger
-    #[props(default = TooltipAlign::Center)]
-    align: TooltipAlign,
+    #[props(default = ContentAlign::Center)]
+    align: ContentAlign,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
     children: Element,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum TooltipSide {
-    Top,
-    Right,
-    Bottom,
-    Left,
-}
-
-impl TooltipSide {
-    fn as_str(self) -> &'static str {
-        match self {
-            TooltipSide::Top => "top",
-            TooltipSide::Right => "right",
-            TooltipSide::Bottom => "bottom",
-            TooltipSide::Left => "left",
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum TooltipAlign {
-    Start,
-    Center,
-    End,
-}
-
-impl TooltipAlign {
-    fn as_str(self) -> &'static str {
-        match self {
-            TooltipAlign::Start => "start",
-            TooltipAlign::Center => "center",
-            TooltipAlign::End => "end",
-        }
-    }
 }
 
 #[component]

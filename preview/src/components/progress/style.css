@@ -1,11 +1,11 @@
 .progress {
     position: relative;
     overflow: hidden;
-    background: var(--focused-background-color);
-    border-radius: 9999px;
     width: 200px;
     height: .5rem;
     box-sizing: border-box;
+    border-radius: 9999px;
+    background: var(--focused-background-color);
 }
 
 .progress[data-state='indeterminate'] .progress-indicator {
@@ -14,16 +14,17 @@
 }
 
 .progress-indicator {
+    width: var(--progress-value, 0%);
     height: 100%;
     background-color: var(--bright-text-color);
     transition: width 250ms ease;
-    width: var(--progress-value, 0%);
 }
 
 @keyframes indeterminate {
     0% {
         transform: translateX(-100%);
     }
+
     100% {
         transform: translateX(200%);
     }

@@ -1,51 +1,47 @@
 .toggle-group {
-  margin: 50px 50px;
   width: fit-content;
+  margin: 50px;
 }
 
 .toggle-item {
-  border-radius: 0px;
-  outline: none;
-  border: none;
-  font-size: 14px;
-  padding: 10px;
   min-width: 35px;
-  color: var(--text-color);
-  background-color: var(--background-color);
-
-  transition: background-color 200ms ease, border 200ms ease;
-
+  padding: 10px;
+  border: none;
+  border-radius: 0;
   border-top: 1px solid var(--dim-border-color);
   border-right: 1px solid var(--dim-border-color);
   border-bottom: 1px solid var(--dim-border-color);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-size: 14px;
+  outline: none;
+  transition: background-color 200ms ease, border 200ms ease;
 }
 
 .toggle-item:hover, .toggle-item:focus {
-  cursor: pointer;
   background-color: var(--hover-background-color);
+  cursor: pointer;
 }
 
 .toggle-item[data-state="on"] {
-  color: var(--bright-text-color);
-  background-color: var(--hover-border-color);
   border-top: 1px solid var(--hover-border-color-more);
   border-right: 1px solid var(--hover-border-color-more);
   border-bottom: 1px solid var(--hover-border-color-more);
+  background-color: var(--hover-border-color);
+  color: var(--bright-text-color);
 }
+
 .toggle-item:first-child[data-state="on"] {
   border: 1px solid var(--hover-border-color-more);
 }
 
 .toggle-item:first-child {
-  border-top-left-radius: 10px;
+  border: 1px solid var(--dim-border-color);
   border-bottom-left-radius: 10px;
+  border-top-left-radius: 10px;
 }
 
 .toggle-item:last-child {
-  border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
-}
-
-.toggle-item:first-child {
-  border: 1px solid var(--dim-border-color);
+  border-top-right-radius: 10px;
 }

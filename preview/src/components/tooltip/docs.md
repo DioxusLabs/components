@@ -13,9 +13,9 @@ Tooltip {
     // The TooltipContent contains the content that will be displayed when the user hovers over the trigger.
     TooltipContent {
         // The side of the TooltipTrigger where the content will be displayed. Can be one of Top, Right, Bottom, or Left.
-        side: TooltipSide::Top,
+        side: ContentSide::Top,
         // The alignment of the TooltipContent relative to the TooltipTrigger. Can be one of Start, Center, or End.
-        align: TooltipAlign::Center,
+        align: ContentAlign::Center,
         // The content of the tooltip, which can include text, images, or any other elements.
         {children}
     }

@@ -12,48 +12,47 @@
   position: absolute;
   z-index: 1000;
   min-width: 200px;
-  border-radius: .5rem;
-  min-width: 200px;
-  border-radius: .5rem;
   padding: 5px;
+  border: 1px solid var(--light, var(--dim-border-color)) var(--dark, var(--hover-border-color));
+  border-radius: .5rem;
+  animation: hover-card-fade-in 0.1s ease-out;
   background: var(--light, var(--background-color)) var(--dark, var(--focused-background-color));
+
    /* Semi transparent shadow effect in light mode */
   box-shadow: var(--light, 0 2px 10px #0000001a) var(--dark, none);
-  border: 1px solid var(--light, var(--dim-border-color)) var(--dark, var(--hover-border-color));
-  animation: hoverCardFadeIn 0.1s ease-out;
 }
 
 /* Positioning based on side */
 .hover-card-content[data-side="top"] {
   position: absolute;
   bottom: 100%;
-  margin-bottom: 10px;
   left: 50%;
+  margin-bottom: 10px;
   transform: translateX(-50%);
 }
 
 .hover-card-content[data-side="right"] {
   position: absolute;
-  left: 100%;
   top: 50%;
-  transform: translateY(-50%);
+  left: 100%;
   margin-left: 10px;
+  transform: translateY(-50%);
 }
 
 .hover-card-content[data-side="bottom"] {
   position: absolute;
   top: 100%;
-  margin-top: 10px;
   left: 50%;
+  margin-top: 10px;
   transform: translateX(-50%);
 }
 
 .hover-card-content[data-side="left"] {
   position: absolute;
-  right: 100%;
   top: 50%;
-  transform: translateY(-50%);
+  right: 100%;
   margin-right: 10px;
+  transform: translateY(-50%);
 }
 
 /* Alignment styles for top and bottom */
@@ -71,8 +70,8 @@
 
 .hover-card-content[data-side="top"][data-align="end"],
 .hover-card-content[data-side="bottom"][data-align="end"] {
-  left: auto;
   right: 0;
+  left: auto;
   transform: none;
 }
 
@@ -97,15 +96,13 @@
 }
 
 /* Animation */
-@keyframes hoverCardFadeIn {
+@keyframes hover-card-fade-in {
   from {
     opacity: 0;
-    transform: scale(0.95);
   }
 
   to {
     opacity: 1;
-    transform: scale(1);
   }
 }
 

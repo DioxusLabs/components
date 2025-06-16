@@ -29,7 +29,7 @@ pub fn use_portal() -> PortalId {
             }
         };
 
-        let sig = Signal::new_in_scope(Ok(VNode::placeholder()), ScopeId::ROOT);
+        let sig = Signal::new_in_scope(VNode::empty(), ScopeId::ROOT);
         ctx.portals.write().insert(id, sig);
 
         (sig, PortalId(id))

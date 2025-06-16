@@ -14,77 +14,81 @@
   max-width: 250px;
   padding: 8px 12px;
   border-radius: 0.5rem;
+  animation: tooltip-fade-in 0.2s ease-in-out;
   background-color: var(--text-color);
   color: var(--background-color);
   font-size: 14px;
   line-height: 1.4;
-  animation: tooltipFadeIn 0.2s ease-in-out;
 }
 
 .tooltip-content::after {
-  content: " ";
   position: absolute;
-  rotate: 45deg;
-  margin-left: -0.25rem;
   border-width: 0.25rem;
   border-style: solid;
+  margin-left: -0.25rem;
+  content: " ";
+  rotate: 45deg;
 }
 
 /* Positioning based on side */
 .tooltip-content[data-side="top"] {
   position: absolute;
   bottom: 100%;
-  margin-bottom: 8px;
   left: 50%;
+  margin-bottom: 8px;
   transform: translateX(-50%);
 }
+
 .tooltip-content[data-side="top"]::after {
   top: calc(100% - 0.25rem);
   left: 50%;
-  border-radius: 0 0 0.1rem 0;
   border-color: var(--text-color);
+  border-radius: 0 0 0.1rem;
 }
 
 .tooltip-content[data-side="right"] {
   position: absolute;
-  left: 100%;
   top: 50%;
-  transform: translateY(-50%);
+  left: 100%;
   margin-left: 8px;
+  transform: translateY(-50%);
 }
+
 .tooltip-content[data-side="right"]::after {
   top: calc(50% - 0.25rem);
   left: 0;
-  border-radius: 0 0 0 0.1rem;
   border-color: var(--text-color);
+  border-radius: 0 0 0 0.1rem;
 }
 
 .tooltip-content[data-side="bottom"] {
   position: absolute;
   top: 100%;
-  margin-top: 8px;
   left: 50%;
+  margin-top: 8px;
   transform: translateX(-50%);
 }
+
 .tooltip-content[data-side="bottom"]::after {
   bottom: calc(100% - 0.25rem);
   left: 50%;
-  border-radius: 0.1rem 0 0 0;
   border-color: var(--text-color);
+  border-radius: 0.1rem 0 0;
 }
 
 .tooltip-content[data-side="left"] {
   position: absolute;
-  right: 100%;
   top: 50%;
-  transform: translateY(-50%);
+  right: 100%;
   margin-right: 8px;
+  transform: translateY(-50%);
 }
+
 .tooltip-content[data-side="left"]::after {
   top: calc(50% - 0.25rem);
   right: -0.25rem;
-  border-radius: 0 0.1rem 0 0;
   border-color: var(--text-color);
+  border-radius: 0 0.1rem 0 0;
 }
 
 /* Alignment styles for top and bottom */
@@ -96,8 +100,8 @@
 
 .tooltip-content[data-side="top"][data-align="end"],
 .tooltip-content[data-side="bottom"][data-align="end"] {
-  left: auto;
   right: 0;
+  left: auto;
   transform: none;
 }
 
@@ -122,15 +126,13 @@
 }
 
 /* Animation */
-@keyframes tooltipFadeIn {
+@keyframes tooltip-fade-in {
   from {
     opacity: 0;
-    transform: scale(0.95);
   }
 
   to {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -149,14 +151,14 @@
 
 .tooltip button {
   padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  user-select: none;
-  outline: none;
-  font-size: 14px;
-  background-color: var(--brighter-background-color);
   border: 1px solid var(--dim-border-color);
+  border-radius: 4px;
+  background-color: var(--brighter-background-color);
   color: var(--text-color);
+  cursor: pointer;
+  font-size: 14px;
+  outline: none;
+  user-select: none;
 }
 
 .tooltip button:hover {

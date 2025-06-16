@@ -24,7 +24,7 @@ fn ToastButton() -> Element {
             href: asset!("/src/components/alert_dialog/style.css"),
         }
         button {
-            class: "alert-dialog-trigger",
+            class: "toast-trigger",
             onclick: move |_| {
                 toast_api
                     .info(

@@ -24,23 +24,23 @@ html[data-theme="light"] {
 }
 
 .navbar {
+  position: sticky;
+  z-index: 1000;
+  top: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
   padding: 0.5rem 1rem;
-  top: 0;
-  z-index: 1000;
-  background-color: var(--background-color);
   border-bottom: 1px solid var(--dim-border-color);
+  background-color: var(--background-color);
 }
 
 .navbar-link {
+  padding: 0.5em 0;
   color: var(--text-color);
-  text-decoration: none;
   font-size: 1.2em;
   font-weight: bold;
-  padding: 0.5em none;
+  text-decoration: none;
 }
 
 .navbar-link:hover {
@@ -54,58 +54,57 @@ html[data-theme="light"] {
 
 .navbar-brand {
   display: flex;
-  text-decoration: none;
   align-items: center;
+  color: var(--text-color);
   font-size: 1.5em;
   font-weight: bold;
-  color: var(--text-color);
+  text-decoration: none;
 }
 
 /* Code block styles */
 .code-block {
-  font-family: "Courier New", Courier, monospace;
-  border-radius: 0.5rem;
   overflow: scroll;
   width: 100%;
   height: 100%;
   max-height: 80vh;
   box-sizing: border-box;
   padding: 0.5rem;
+  border-radius: 0.5rem;
   margin: 0;
+  font-family: "Courier New", Courier, monospace;
 }
 
 .code-block[data-collapsed="true"] {
+  overflow: hidden;
   height: 10em;
   backdrop-filter: blur(1px);
   mask: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 1) 60%,
-    rgba(0, 0, 0, 0) 100%
+    rgb(0 0 0 / 100%) 0%,
+    rgb(0 0 0 / 100%) 60%,
+    rgb(0 0 0 / 0%) 100%
   );
-  overflow: hidden;
   user-select: none;
-  -webkit-user-select: none;
 }
 
 .dark-mode-toggle {
-  background: none;
   border: none;
-  cursor: pointer;
+  background: none;
   color: var(--text-color);
+  cursor: pointer;
 }
 
 .copy-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: absolute;
   top: 0.5em;
   right: 0.5em;
-  background: none;
-  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   border-radius: 0.5rem;
+  background: none;
+  color: var(--text-color);
   cursor: pointer;
 }
 
@@ -118,73 +117,65 @@ html[data-theme="light"] {
 }
 
 /* Demo frame styles */
-.component-title {
-  font-size: 1.5em;
-  margin: 0.5em 0;
-  text-transform: capitalize;
-}
-
 .component-preview {
   display: flex;
+  width: 100vw;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100vw;
 }
 
 .component-preview-contents {
   display: flex;
+  width: 75vw;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   margin: 20px 0;
-  width: 75vw;
 }
 
 .component-preview-frame {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   min-height: 25vh;
   max-height: 100%;
-  border-top-right-radius: 0.5em;
-  border-top-left-radius: 0.5em;
-  padding: 20px;
   box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
   border: 1px solid var(--dim-border-color);
+  border-radius: 0.5em;
   background-color: var(--muted-background-color);
-  border-radius: 8px;
 }
 
 /* component info styles */
 .component-title {
-  font-size: 2em;
   width: 100%;
-  text-align: center;
-  margin-bottom: 20px;
   margin-top: 20px;
+  margin-bottom: 20px;
+  font-size: 2em;
+  text-align: center;
   text-transform: capitalize;
 }
 
 .component-description {
-  font-size: 1em;
   margin: 5vw;
+  font-size: 1em;
 }
 
 .component-code {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   min-height: 25vh;
   max-height: 100%;
-  border-top-right-radius: 0.5em;
-  border-top-left-radius: 0.5em;
-  padding-top: 2rem;
   box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2rem;
+  border-top-left-radius: 0.5em;
+  border-top-right-radius: 0.5em;
 }
 
 /* Masonry styles */
@@ -193,26 +184,27 @@ html[data-theme="light"] {
   flex-wrap: wrap;
   padding: 0 0 0 1rem;
 }
+
 .masonry-with-columns .masonry-preview-frame {
   display: flex;
+  max-width: calc(100vw - 2rem);
+  min-height: 10rem;
+  box-sizing: border-box;
+  flex: 1 0 auto;
   flex-direction: column;
   align-items: center;
-  min-height: 10rem;
-  max-width: calc(100vw - 2rem);
-  margin: 0 1rem 1rem 0;
   padding: 3rem;
-  flex: 1 0 auto;
-  border-radius: 0.5rem;
   border: 1px solid var(--dim-border-color);
+  border-radius: 0.5rem;
+  margin: 0 1rem 1rem 0;
   background-color: var(--muted-background-color);
-  box-sizing: border-box;
 }
 
 .masonry-with-columns .masonry-component-frame {
   display: flex;
+  width: 100%;
+  height: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  width: 100%;
 }

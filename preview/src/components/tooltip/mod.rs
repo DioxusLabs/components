@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
-use dioxus_primitives::tooltip::{Tooltip, TooltipContent, TooltipTrigger};
+use dioxus_primitives::{tooltip::{Tooltip, TooltipContent, TooltipTrigger}, ContentSide};
+
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
@@ -9,10 +10,10 @@ pub(super) fn Demo() -> Element {
         }
         Tooltip { class: "tooltip",
             TooltipTrigger { class: "tooltip-trigger",
-                button { "Rich content" }
+                "Rich content"
             }
             TooltipContent {
-                side: dioxus_primitives::tooltip::TooltipSide::Left,
+                side: ContentSide::Left,
                 class: "tooltip-content",
                 style: "width: 200px;",
                 h4 { style: "margin-top: 0; margin-bottom: 8px;", "Tooltip title" }

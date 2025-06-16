@@ -1,30 +1,29 @@
 .toolbar {
     display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
+    flex-flow: row wrap;
     align-items: center;
     justify-content: space-between;
+    padding: .25rem;
     border: none;
+    border-radius: .5rem;
     box-shadow: inset 0 0 0 1px var(--dim-border-color);
     gap: .25rem;
-    padding: .25rem;
-    border-radius: .5rem;
 }
 
 .toolbar button {
     padding: 8px 12px;
     border: none;
-    background: none;
-    cursor: pointer;
-    color: var(--text-color);
     border-radius: calc(.5rem - .25rem);
+    background: none;
+    color: var(--text-color);
+    cursor: pointer;
 }
 
 .toolbar button:hover:not([disabled]),
 .toolbar button:focus-visible {
-    color: var(--bright-text-color);
     background: var(--light, var(--hover-background-color)) 
         var(--dark, var(--hover-border-color));
+    color: var(--bright-text-color);
 }
 
 .toolbar button:disabled {
@@ -41,11 +40,11 @@
 .toolbar-separator {
     width: 1px;
     height: 24px;
-    background-color: var(--dim-border-color);
     margin: 0 5px;
+    background-color: var(--dim-border-color);
 }
 
 .toolbar-content p {
-    margin: 0;
     padding: 0;
+    margin: 0;
 }

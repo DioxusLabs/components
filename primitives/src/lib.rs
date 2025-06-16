@@ -16,6 +16,7 @@ pub mod dropdown_menu;
 pub mod hover_card;
 pub mod label;
 pub mod menubar;
+pub mod popover;
 mod portal;
 pub mod progress;
 pub mod radio_group;
@@ -95,4 +96,40 @@ fn use_controlled<T: Clone + PartialEq>(
 /// Run some cleanup code when the component is unmounted if the effect was run.
 fn use_effect_cleanup<F: FnOnce() + 'static>(#[allow(unused)] cleanup: F) {
     web!(use_drop(cleanup))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ContentSide {
+    Top,
+    Right,
+    Bottom,
+    Left,
+}
+
+impl ContentSide {
+    fn as_str(self) -> &'static str {
+        match self {
+            ContentSide::Top => "top",
+            ContentSide::Right => "right",
+            ContentSide::Bottom => "bottom",
+            ContentSide::Left => "left",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ContentAlign {
+    Start,
+    Center,
+    End,
+}
+
+impl ContentAlign {
+    fn as_str(self) -> &'static str {
+        match self {
+            ContentAlign::Start => "start",
+            ContentAlign::Center => "center",
+            ContentAlign::End => "end",
+        }
+    }
 }
