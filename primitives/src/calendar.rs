@@ -819,6 +819,11 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
                     handle_day_select(day);
                 }
             },
+            onfocus: move |_| {
+                if in_current_month {
+                    ctx.focused_date.set(Some(date));
+                }
+            },
             onmounted: move |e| day_ref.set(Some(e.data())),
             ..attributes,
             {day.to_string()}

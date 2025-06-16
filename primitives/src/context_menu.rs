@@ -59,7 +59,7 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
 
     use_effect(move || {
         let focused = focus.any_focused();
-        if (ctx.open)() != focused {
+        if *ctx.open.peek() != focused {
             (ctx.set_open)(focused);
         }
     });
@@ -153,7 +153,7 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
     };
 
     let mut menu_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
-    let focused = move || open() && ctx.focus.any_focused();
+    let focused = move || open() && !ctx.focus.any_focused();
     // If the menu is open, but no item is focused, focus the div itself to capture events
     use_effect(move || {
         let Some(menu) = menu_ref() else {

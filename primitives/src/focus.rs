@@ -27,7 +27,7 @@ pub(crate) fn use_focus_entry(index: impl Readable<Target = usize> + Copy + 'sta
     use_effect_cleanup(move || {
         ctx.item_count -= 1;
         if (ctx.current_focus)() == Some(index.cloned()) {
-            ctx.current_focus.set(None);
+            ctx.set_focus(None);
         }
     });
 }
@@ -43,11 +43,11 @@ pub(crate) fn use_focus_control(
     index: impl Readable<Target = usize> + Copy + 'static,
 ) -> impl FnMut(MountedEvent) {
     let ctx: FocusState = use_context();
-    let mut toggle_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    let mut controlled_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
     use_effect(move || {
         let is_focused = ctx.is_focused(index.cloned());
         if is_focused {
-            if let Some(md) = toggle_ref() {
+            if let Some(md) = controlled_ref() {
                 spawn(async move {
                     let _ = md.set_focus(true).await;
                 });
@@ -55,7 +55,7 @@ pub(crate) fn use_focus_control(
         }
     });
 
-    move |data: Event<MountedData>| toggle_ref.set(Some(data.data()))
+    move |data: Event<MountedData>| controlled_ref.set(Some(data.data()))
 }
 
 #[derive(Clone, Copy)]
@@ -75,30 +75,28 @@ impl FocusState {
     }
 
     pub(crate) fn focus_next(&mut self) {
-        if let Some(current_focus) = (self.current_focus)() {
-            let mut new_focus = current_focus.saturating_add(1);
+        let current_focus = self.recent_focus();
+        let mut new_focus = current_focus.saturating_add(1);
 
-            let item_count = (self.item_count)();
-            if new_focus >= item_count {
-                match (self.roving_loop)() {
-                    true => new_focus = 0,
-                    false => new_focus = item_count.saturating_sub(1),
-                }
+        let item_count = (self.item_count)();
+        if new_focus >= item_count {
+            match (self.roving_loop)() {
+                true => new_focus = 0,
+                false => new_focus = item_count.saturating_sub(1),
             }
-
-            self.current_focus.set(Some(new_focus));
         }
+
+        self.set_focus(Some(new_focus));
     }
 
     pub(crate) fn focus_prev(&mut self) {
-        if let Some(current_focus) = (self.current_focus)() {
-            let mut new_focus = current_focus.saturating_sub(1);
-            if current_focus == 0 && (self.roving_loop)() {
-                new_focus = (self.item_count)().saturating_sub(1);
-            }
-
-            self.current_focus.set(Some(new_focus));
+        let current_focus = self.recent_focus();
+        let mut new_focus = current_focus.saturating_sub(1);
+        if current_focus == 0 && (self.roving_loop)() {
+            new_focus = (self.item_count)().saturating_sub(1);
         }
+
+        self.set_focus(Some(new_focus));
     }
 
     pub(crate) fn focus_first(&mut self) {

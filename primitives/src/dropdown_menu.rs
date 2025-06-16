@@ -57,7 +57,7 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 
     use_effect(move || {
         let focused = focus.any_focused();
-        if (ctx.open)() != focused {
+        if *ctx.open.peek() != focused {
             (ctx.set_open)(focused);
         }
     });
