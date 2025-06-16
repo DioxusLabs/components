@@ -1,1 +1,8 @@
-{ "extends": ["stylelint-config-standard"] }
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "number-max-precision": null,
+    "no-descending-specificity": null
+  },
+  "ignoreFiles": ["assets/prism.css", "**/*.js"]
+}
