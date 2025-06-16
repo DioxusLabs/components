@@ -39,6 +39,7 @@
     var(--light, var(--dim-border-color));
   animation: slideIn 0.1s ease-out;
   z-index: 1000;
+
   /* Animation properties */
   opacity: 0;
   transform: translateY(-8px) scale(0.95);

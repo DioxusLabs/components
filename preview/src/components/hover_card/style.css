@@ -13,14 +13,13 @@
   z-index: 1000;
   min-width: 200px;
   border-radius: .5rem;
-  min-width: 200px;
-  border-radius: .5rem;
   padding: 5px;
   background: var(--light, var(--background-color)) var(--dark, var(--focused-background-color));
+
    /* Semi transparent shadow effect in light mode */
   box-shadow: var(--light, 0 2px 10px #0000001a) var(--dark, none);
   border: 1px solid var(--light, var(--dim-border-color)) var(--dark, var(--hover-border-color));
-  animation: hoverCardFadeIn 0.1s ease-out;
+  animation: hover-card-fade-in 0.1s ease-out;
 }
 
 /* Positioning based on side */
@@ -97,7 +96,7 @@
 }
 
 /* Animation */
-@keyframes hoverCardFadeIn {
+@keyframes hover-card-fade-in {
   from {
     opacity: 0;
   }

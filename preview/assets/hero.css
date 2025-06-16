@@ -42,8 +42,6 @@
 
 #hero-search-input {
   width: 100%;
-  margin: 20px 0;
-  padding: 10px;
   color: var(--text-color);
   border: 1px solid var(--dim-border-color);
   border-radius: .5rem;

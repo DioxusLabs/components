@@ -18,7 +18,7 @@
   color: var(--background-color);
   font-size: 14px;
   line-height: 1.4;
-  animation: tooltipFadeIn 0.2s ease-in-out;
+  animation: tooltip-fade-in 0.2s ease-in-out;
 }
 
 .tooltip-content::after {
@@ -38,10 +38,11 @@
   left: 50%;
   transform: translateX(-50%);
 }
+
 .tooltip-content[data-side="top"]::after {
   top: calc(100% - 0.25rem);
   left: 50%;
-  border-radius: 0 0 0.1rem 0;
+  border-radius: 0 0 0.1rem;
   border-color: var(--text-color);
 }
 
@@ -52,6 +53,7 @@
   transform: translateY(-50%);
   margin-left: 8px;
 }
+
 .tooltip-content[data-side="right"]::after {
   top: calc(50% - 0.25rem);
   left: 0;
@@ -66,10 +68,11 @@
   left: 50%;
   transform: translateX(-50%);
 }
+
 .tooltip-content[data-side="bottom"]::after {
   bottom: calc(100% - 0.25rem);
   left: 50%;
-  border-radius: 0.1rem 0 0 0;
+  border-radius: 0.1rem 0 0;
   border-color: var(--text-color);
 }
 
@@ -80,6 +83,7 @@
   transform: translateY(-50%);
   margin-right: 8px;
 }
+
 .tooltip-content[data-side="left"]::after {
   top: calc(50% - 0.25rem);
   right: -0.25rem;
@@ -122,7 +126,7 @@
 }
 
 /* Animation */
-@keyframes tooltipFadeIn {
+@keyframes tooltip-fade-in {
   from {
     opacity: 0;
   }

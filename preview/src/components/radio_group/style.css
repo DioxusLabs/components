@@ -15,7 +15,7 @@
   color: var(--text-color);
   background-color: transparent;
 
-  &:before {
+  &::before {
     content: "";
     display: block;
     width: 1rem;
@@ -32,16 +32,16 @@
     outline: none;
   }
 
-  &:focus-visible:before {
+  &:focus-visible::before {
     box-shadow: 0 0 0 2px var(--focused-border-color);
   }
 
-  &[data-state="checked"]:before {
+  &[data-state="checked"]::before {
     border: 0.25rem solid var(--light, var(--background-color)) var(--dark, var(--dim-background-color));
     background: var(--text-color);
   }
 
-  &[data-disabled="true"]:before {
+  &[data-disabled="true"]::before {
     opacity: 0.5;
     cursor: not-allowed;
   }
