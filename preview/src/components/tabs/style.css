@@ -1,38 +1,38 @@
 .tabs {
-    width: 100%;
     display: flex;
+    width: 100%;
     flex-direction: column;
     gap: .5rem;
 }
 
 .tabs-list {
     display: flex;
-    flex-direction: row;
-    flex: 1;
-    gap: .25rem;
     width: fit-content;
+    box-sizing: border-box;
+    flex: 1;
+    flex-direction: row;
     padding: .25rem;
     border: none;
     border-radius: .5rem;
     background: var(--light, var(--dim-background-color)) 
         var(--dark, var(--focused-background-color));
-    box-sizing: border-box;
+    gap: .25rem;
 }
 
 .tabs-trigger {
     padding: 4px 8px;
     border: none;
-    background: none;
-    cursor: pointer;
-    color: var(--muted-text-color);
     border-radius: calc(.5rem - .25rem);
+    background: none;
+    color: var(--muted-text-color);
+    cursor: pointer;
 }
 
 .tabs-trigger[data-state="active"] {
-    color: var(--bright-text-color);
     background-color: var(--light, var(--background-color)) var(--dark, var(--dim-border-color));
     box-shadow: var(--dark, inset 0 0 0 1px var(--hover-border-color)) 
         var(--light, 0 1px 2px rgb(0 0 0 / 18%));
+    color: var(--bright-text-color);
 }
 
 .tabs-trigger[data-disabled="true"] {
@@ -47,12 +47,12 @@
 
 .tabs-content {
     width: 100%;
-    background: var(--light, var(--background-color)) var(--dark, var(--dim-background-color));
-    border-radius: .5rem;
+    box-sizing: border-box;
     padding: .25rem;
     border: 1px solid var(--light, var(--dim-border-color)) var(--dark, var(--hover-border-color));
+    border-radius: .5rem;
+    background: var(--light, var(--background-color)) var(--dark, var(--dim-background-color));
     box-shadow: var(--light, 0 1px 2px rgb(0 0 0 / 18%)) var(--dark, none);
-    box-sizing: border-box;
 }
 
 .tabs-content[data-state="inactive"] {

@@ -1,12 +1,12 @@
 .menubar {
     display: flex;
-    gap: .25rem;
+    box-sizing: border-box;
     padding: .25rem;
     border: none;
-    box-shadow: inset 0 0 0 1px var(--dim-border-color);
     border-radius: .5rem;
     background: var(--background-color);
-    box-sizing: border-box;
+    box-shadow: inset 0 0 0 1px var(--dim-border-color);
+    gap: .25rem;
 }
 
 .menubar-menu {
@@ -16,17 +16,17 @@
 .menubar-trigger {
     padding: 8px 12px;
     border: none;
-    background: none;
-    cursor: pointer;
-    color: var(--text-color);
     border-radius: calc(.5rem - .25rem);
+    background: none;
+    color: var(--text-color);
+    cursor: pointer;
     transition: background-color 100ms ease-out;
 }
 
 .menubar-menu[data-state="open"] .menubar-trigger {
-    color: var(--bright-text-color);
     background-color: var(--light, var(--hover-background-color)) 
         var(--dark, var(--hover-border-color));
+    color: var(--bright-text-color);
 }
 
 .menubar-trigger[data-disabled="true"] {
@@ -36,32 +36,32 @@
 
 .menubar-trigger:hover:not([data-disabled="true"]),
 .menubar-trigger:focus-visible {
-    color: var(--bright-text-color);
     background: var(--light, var(--hover-background-color)) 
         var(--dark, var(--hover-border-color));
+    color: var(--bright-text-color);
     outline: none;
 }
 
 .menubar-content {
     position: absolute;
+    z-index: 1000;
     top: 100%;
     left: 0;
     min-width: 200px;
-    margin-left: -.25rem;
+    padding: .25rem;
+    border-radius: .5rem;
     margin-top: .5rem;
+    margin-left: -.25rem;
     background: var(--light, var(--background-color)) 
         var(--dark, var(--focused-background-color));
-    border-radius: .5rem;
-    padding: .25rem;
     box-shadow: inset 0 0 0 1px var(--light, var(--dim-border-color)) var(--dark, var(--hover-border-color));
-    z-index: 1000;
     transform-origin: top;
     will-change: transform, opacity;
 }
 
 .menubar-content[data-state="closed"] {
-    pointer-events: none;
     opacity: 0;
+    pointer-events: none;
     transform: translateY(-4px) scale(0.98);
     transition: opacity 150ms ease-in, transform 150ms ease-in;
 }
@@ -75,9 +75,9 @@
 .menubar-item {
     display: block;
     padding: 8px 12px;
+    border-radius: calc(.5rem - .25rem);
     cursor: pointer;
     font-size: 14px;
-    border-radius: calc(.5rem - .25rem);
 }
 
 .menubar-item[data-disabled="true"] {
@@ -87,13 +87,13 @@
 
 .menubar-item:hover:not([data-disabled="true"]),
 .menubar-item:focus-visible {
-    color: var(--bright-text-color);
     background: var(--light, var(--hover-background-color)) 
         var(--dark, var(--hover-border-color));
+    color: var(--bright-text-color);
     outline: none;
 }
 
 [data-disabled="true"] {
-    opacity: 0.5;
     cursor: not-allowed;
+    opacity: 0.5;
 }

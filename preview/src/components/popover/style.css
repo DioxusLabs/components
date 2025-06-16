@@ -4,21 +4,21 @@
 }
 
 .popover-content {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
   position: fixed;
-  max-width: calc(100% - 2rem);
-  transform: translate(-50%, -50%);
-  box-sizing: border-box;
+  z-index: 1000;
+  display: flex;
   min-width: 200px;
+  max-width: calc(100% - 2rem);
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: .25rem;
+  border-radius: .5rem;
   margin-top: .5rem;
   background: var(--light, var(--background-color)) 
       var(--dark, var(--focused-background-color));
-  border-radius: .5rem;
-  padding: .25rem;
   box-shadow: inset 0 0 0 1px var(--light, var(--dim-border-color)) var(--dark, var(--hover-border-color));
-  z-index: 1000;
+  text-align: center;
+  transform: translate(-50%, -50%);
   transform-origin: top;
   will-change: transform, opacity;
 }
@@ -46,61 +46,61 @@
 .popover-content[data-side="top"] {
   position: absolute;
   bottom: 100%;
-  margin-bottom: 8px;
   left: 50%;
+  margin-bottom: 8px;
   transform: translateX(-50%);
 }
 
 .popover-content[data-side="top"]::after {
   top: calc(100% - 0.25rem);
   left: 50%;
-  border-radius: 0 0 0.1rem;
   border-color: var(--text-color);
+  border-radius: 0 0 0.1rem;
 }
 
 .popover-content[data-side="right"] {
   position: absolute;
-  left: 100%;
   top: 50%;
-  transform: translateY(-50%);
+  left: 100%;
   margin-left: 8px;
+  transform: translateY(-50%);
 }
 
 .popover-content[data-side="right"]::after {
   top: calc(50% - 0.25rem);
   left: 0;
-  border-radius: 0 0 0 0.1rem;
   border-color: var(--text-color);
+  border-radius: 0 0 0 0.1rem;
 }
 
 .popover-content[data-side="bottom"] {
   position: absolute;
   top: 100%;
-  margin-top: 8px;
   left: 50%;
+  margin-top: 8px;
   transform: translateX(-50%);
 }
 
 .popover-content[data-side="bottom"]::after {
   bottom: calc(100% - 0.25rem);
   left: 50%;
-  border-radius: 0.1rem 0 0;
   border-color: var(--text-color);
+  border-radius: 0.1rem 0 0;
 }
 
 .popover-content[data-side="left"] {
   position: absolute;
-  right: 100%;
   top: 50%;
-  transform: translateY(-50%);
+  right: 100%;
   margin-right: 8px;
+  transform: translateY(-50%);
 }
 
 .popover-content[data-side="left"]::after {
   top: calc(50% - 0.25rem);
   right: -0.25rem;
-  border-radius: 0 0.1rem 0 0;
   border-color: var(--text-color);
+  border-radius: 0 0.1rem 0 0;
 }
 
 /* Alignment styles for top and bottom */
@@ -112,8 +112,8 @@
 
 .popover-content[data-side="top"][data-align="end"],
 .popover-content[data-side="bottom"][data-align="end"] {
-  left: auto;
   right: 0;
+  left: auto;
   transform: none;
 }
 
@@ -138,16 +138,16 @@
 }
 
 .popover-content-title {
+  margin: 0;
+  color: var(--text-color);
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-color);
-  margin: 0;
 }
 
 .popover-content-description {
-  font-size: 1rem;
-  color: var(--muted-text-color);
   margin: 0;
+  color: var(--muted-text-color);
+  font-size: 1rem;
 }
 
 .popover-content-actions {
@@ -163,20 +163,20 @@
   }
 
   .popover-content {
-    text-align: left;
     max-width: 32rem;
+    text-align: left;
   }
 }
 
 .popover-content-cancel {
+  padding: 8px 18px;
+  border: 1px solid var(--dim-border-color);
+  border-radius: 0.5rem;
   background-color: var(--light, var(--background-color))
     var(--dark, var(--dim-background-color));
   color: var(--text-color);
-  border: 1px solid var(--dim-border-color);
-  border-radius: 0.5rem;
-  padding: 8px 18px;
-  font-size: 1rem;
   cursor: pointer;
+  font-size: 1rem;
   transition: all 0.2s ease;
 }
 
@@ -189,13 +189,13 @@
 }
 
 .popover-content-action {
-  background-color: var(--error-background-color);
-  color: var(--error-text-color);
+  padding: 8px 18px;
   border: 1px solid var(--error-border-color);
   border-radius: 0.5rem;
-  padding: 8px 18px;
-  font-size: 1rem;
+  background-color: var(--error-background-color);
+  color: var(--error-text-color);
   cursor: pointer;
+  font-size: 1rem;
   transition: all 0.2s ease;
 }
 
@@ -208,14 +208,14 @@
 }
 
 .popover-trigger {
+  padding: 8px 18px;
+  border: 1px solid var(--dim-border-color);
+  border-radius: 0.5rem;
   background-color: var(--light, var(--background-color))
     var(--dark, var(--dim-background-color));
   color: var(--text-color);
-  border: 1px solid var(--dim-border-color);
-  border-radius: 0.5rem;
-  padding: 8px 18px;
-  font-size: 1rem;
   cursor: pointer;
+  font-size: 1rem;
   transition: all 0.2s ease;
 }
 
@@ -228,14 +228,14 @@
 }
 
 .popover-button {
+  padding: 8px 18px;
+  border: 1px solid var(--dim-border-color);
+  border-radius: 0.5rem;
   background-color: var(--light, var(--background-color))
     var(--dark, var(--dim-background-color));
   color: var(--text-color);
-  border: 1px solid var(--dim-border-color);
-  border-radius: 0.5rem;
-  padding: 8px 18px;
-  font-size: 1rem;
   cursor: pointer;
+  font-size: 1rem;
   transition: all 0.2s ease;
 }
 

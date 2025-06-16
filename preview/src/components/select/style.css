@@ -1,19 +1,19 @@
 /* Select Styles */
 .select {
+  position: absolute;
   max-width: 300px;
+  align-items: center;
   padding: 8px 16px;
-  color: var(--text-color);
-  box-shadow: inset 0 0 0 1px var(--dim-border-color);
   border: none;
   border-radius: 0.5rem;
+  appearance: none;
+  background-color: var(--light, var(--background-color)) 
+    var(--dark, var(--dim-background-color));
+  box-shadow: inset 0 0 0 1px var(--dim-border-color);
+  color: var(--text-color);
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s ease;
-  appearance: none;
-  position: absolute;
-  align-items: center;
-  background-color: var(--light, var(--background-color)) 
-    var(--dark, var(--dim-background-color));
 }
 
 .select:not([aria-activedescendant]) {

@@ -5,20 +5,20 @@
 }
 
 .dropdown-menu-trigger {
-  background-color: var(--dark, var(--dim-background-color)) var(--light, var(--background-color));
-  color: var(--text-color);
-  box-shadow: inset 0 0 0 1px var(--dim-border-color);
+  padding: 8px 18px;
   border: none;
   border-radius: 0.5rem;
-  padding: 8px 18px;
-  font-size: 1rem;
+  background-color: var(--dark, var(--dim-background-color)) var(--light, var(--background-color));
+  box-shadow: inset 0 0 0 1px var(--dim-border-color);
+  color: var(--text-color);
   cursor: pointer;
+  font-size: 1rem;
   transition: all 0.2s ease;
 }
 
 .dropdown-menu-trigger:hover {
-  color: var(--bright-text-color);
   background: var(--hover-background-color);
+  color: var(--bright-text-color);
 }
 
 .dropdown-menu-trigger:focus-visible {
@@ -27,18 +27,18 @@
 
 .dropdown-menu-content {
   position: absolute;
+  z-index: 1000;
   top: 100%;
   left: 0;
-  margin-top: 4px;
   min-width: 200px;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  margin-top: 4px;
+  animation: slideIn 0.1s ease-out;
   background: var(--dark, var(--focused-background-color))
     var(--light, var(--background-color));
-  border-radius: 0.5rem;
-  padding: 0.25rem;
   box-shadow: inset 0 0 0 1px var(--dark, var(--hover-border-color))
     var(--light, var(--dim-border-color));
-  animation: slideIn 0.1s ease-out;
-  z-index: 1000;
 
   /* Animation properties */
   opacity: 0;
@@ -55,20 +55,20 @@
 /* Closed state animations */
 .dropdown-menu-content[data-state="closed"] {
   opacity: 0;
-  transform: translateY(-8px) scale(0.95);
   pointer-events: none;
+  transform: translateY(-8px) scale(0.95);
 }
 
 .dropdown-menu-item {
-  padding: 8px 12px;
-  border-radius: calc(0.5rem - 0.25rem);
-  cursor: pointer;
-  user-select: none;
-  outline: none;
-  font-size: 14px;
-  color: var(--text-color);
   display: flex;
   align-items: center;
+  padding: 8px 12px;
+  border-radius: calc(0.5rem - 0.25rem);
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 14px;
+  outline: none;
+  user-select: none;
 }
 
 .dropdown-menu-item[data-disabled="true"] {
@@ -78,7 +78,7 @@
 
 .dropdown-menu-item:hover:not([data-disabled="true"]),
 .dropdown-menu-item:focus-visible {
-  color: var(--bright-text-color);
   background: var(--dark, var(--hover-border-color))
     var(--light, var(--hover-background-color));
+  color: var(--bright-text-color);
 }
