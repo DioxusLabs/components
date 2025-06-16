@@ -43,7 +43,6 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
   transform: translate(-50%, -50%);
-  animation: none;
   box-sizing: border-box;
 }
 
@@ -85,16 +84,6 @@
 
 .dialog-trigger:focus-visible {
   box-shadow: 0 0 0 2px var(--focused-border-color);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
 
 .dialog-close {

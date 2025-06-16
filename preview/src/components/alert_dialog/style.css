@@ -136,13 +136,3 @@
 .alert-dialog-trigger:focus-visible {
   box-shadow: 0 0 0 2px var(--focused-border-color);
 }
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
