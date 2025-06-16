@@ -804,11 +804,19 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
         }
     });
 
+    let focusable_date = (ctx.focused_date)()
+        .or_else(&*ctx.selected_date)
+        .unwrap_or_else(&*ctx.view_date);
+
     rsx! {
         button {
             class: "calendar-grid-cell",
             r#type: "button",
-            tabindex: (!in_current_month).then_some("-1"),
+            tabindex: if date == focusable_date {
+                "0"
+            } else {
+                "-1"
+            },
             aria_label: props.date.aria_label(),
             "data-today": is_today,
             "data-selected": is_selected(),
