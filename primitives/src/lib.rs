@@ -18,6 +18,8 @@ pub mod label;
 pub mod menubar;
 pub mod popover;
 mod portal;
+mod focus;
+pub mod navbar;
 pub mod progress;
 pub mod radio_group;
 pub mod scroll_area;
