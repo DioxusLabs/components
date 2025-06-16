@@ -9,7 +9,7 @@ pub(super) fn Demo() -> Element {
         }
         Tooltip { class: "tooltip",
             TooltipTrigger { class: "tooltip-trigger",
-                button { "Rich content" }
+                "Rich content"
             }
             TooltipContent {
                 side: dioxus_primitives::tooltip::TooltipSide::Left,

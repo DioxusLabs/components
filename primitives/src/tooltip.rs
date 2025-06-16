@@ -114,6 +114,7 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
     rsx! {
         div {
             id: props.id.clone(),
+            tabindex: "0",
             // Mouse events
             onmouseenter: handle_mouse_enter,
             onmouseleave: handle_mouse_leave,
