@@ -42,7 +42,7 @@ pub fn Menubar(props: MenubarProps) -> Element {
     });
     use_effect(move || {
         let index = ctx.focus.current_focus();
-        if ctx.open_menu.read().is_some() {
+        if ctx.open_menu.peek().is_some() {
             ctx.set_open_menu.call(index);
         }
     });
@@ -105,7 +105,7 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
         }
     });
 
-    use_focus_entry(props.index);
+    use_focus_entry(ctx.focus, menu_ctx.index);
 
     let disabled = move || (ctx.disabled)() || (props.disabled)();
 
@@ -172,7 +172,7 @@ pub struct MenubarTriggerProps {
 pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
     let mut ctx: MenubarContext = use_context();
     let menu_ctx: MenubarMenuContext = use_context();
-    let onmounted = use_focus_control(menu_ctx.index);
+    let onmounted = use_focus_control(ctx.focus, menu_ctx.index);
 
     rsx! {
         button {

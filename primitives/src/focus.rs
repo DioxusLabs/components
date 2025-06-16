@@ -19,8 +19,10 @@ pub(crate) fn use_focus_provider(roving_loop: ReadOnlySignal<bool>) -> FocusStat
     })
 }
 
-pub(crate) fn use_focus_entry(index: impl Readable<Target = usize> + Copy + 'static) {
-    let mut ctx: FocusState = use_context();
+pub(crate) fn use_focus_entry(
+    mut ctx: FocusState,
+    index: impl Readable<Target = usize> + Copy + 'static,
+) {
     use_effect(move || {
         ctx.item_count += 1;
     });
@@ -35,14 +37,15 @@ pub(crate) fn use_focus_entry(index: impl Readable<Target = usize> + Copy + 'sta
 pub(crate) fn use_focus_controlled_item(
     index: impl Readable<Target = usize> + Copy + 'static,
 ) -> impl FnMut(MountedEvent) {
-    use_focus_entry(index);
-    use_focus_control(index)
+    let ctx: FocusState = use_context();
+    use_focus_entry(ctx, index);
+    use_focus_control(ctx, index)
 }
 
 pub(crate) fn use_focus_control(
+    ctx: FocusState,
     index: impl Readable<Target = usize> + Copy + 'static,
 ) -> impl FnMut(MountedEvent) {
-    let ctx: FocusState = use_context();
     let mut controlled_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
     use_effect(move || {
         let is_focused = ctx.is_focused(index.cloned());
