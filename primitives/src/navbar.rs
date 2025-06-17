@@ -316,7 +316,7 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
         )
     };
 
-    let onmounted = use_focus_controlled_item(props.index);
+    let mut onmounted = use_focus_controlled_item(props.index);
 
     props.attributes.push(onkeydown({
         let value = props.value.clone();
@@ -341,12 +341,6 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
                 nav_ctx.focus.blur();
             }
             ctx.focus.set_focus(None);
-        }
-    }));
-
-    props.attributes.push(onfocus(move |_| {
-        if nav_ctx.is_none() {
-            ctx.focus.set_focus(Some(props.index.cloned()));
         }
     }));
 
@@ -382,7 +376,12 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
                 }
             },
 
-            onmounted,
+            onmounted: move |evt: MountedEvent| {
+                onmounted(evt.clone());
+                if let Some(onmounted) = &props.onmounted {
+                    onmounted.call(evt);
+                }
+            },
 
             attributes: props.attributes,
             {props.children}
