@@ -26,28 +26,28 @@ pub(super) fn Demo() -> Element {
                         NavbarItem {
                             index: 0usize,
                             class: "navbar-item",
-                            value: "new".to_string(),
+                            value: "calendar".to_string(),
                             to: Route::ComponentDemo { component_name: "calendar".into() },
                             "Calendar"
                         }
                         NavbarItem {
                             index: 1usize,
                             class: "navbar-item",
-                            value: "open".to_string(),
+                            value: "slider".to_string(),
                             to: Route::ComponentDemo { component_name: "slider".into() },
                             "Slider"
                         }
                         NavbarItem {
                             index: 2usize,
                             class: "navbar-item",
-                            value: "save".to_string(),
+                            value: "checkbox".to_string(),
                             to: Route::ComponentDemo { component_name: "checkbox".into() },
                             "Checkbox"
                         }
                         NavbarItem {
                             index: 3usize,
                             class: "navbar-item",
-                            value: "save".to_string(),
+                            value: "radio_group".to_string(),
                             to: Route::ComponentDemo { component_name: "radio_group".into() },
                             "Radio Group"
                         }
@@ -67,39 +67,46 @@ pub(super) fn Demo() -> Element {
                         NavbarItem {
                             index: 0usize,
                             class: "navbar-item",
-                            value: "cut".to_string(),
+                            value: "toast".to_string(),
                             to: Route::ComponentDemo { component_name: "toast".into() },
                             "Toast"
                         }
                         NavbarItem {
                             index: 1usize,
                             class: "navbar-item",
-                            value: "copy".to_string(),
+                            value: "tabs".to_string(),
                             to: Route::ComponentDemo { component_name: "tabs".into() },
                             "Tabs"
                         }
                         NavbarItem {
                             index: 2usize,
                             class: "navbar-item",
-                            value: "paste".to_string(),
+                            value: "dialog".to_string(),
                             to: Route::ComponentDemo { component_name: "dialog".into() },
                             "Dialog"
                         }
                         NavbarItem {
                             index: 3usize,
                             class: "navbar-item",
-                            value: "delete".to_string(),
+                            value: "alert_dialog".to_string(),
                             to: Route::ComponentDemo { component_name: "alert_dialog".into() },
                             "Alert Dialog"
                         }
                         NavbarItem {
                             index: 4usize,
                             class: "navbar-item",
-                            value: "select".to_string(),
+                            value: "tooltip".to_string(),
                             to: Route::ComponentDemo { component_name: "tooltip".into() },
                             "Tooltip"
                         }
                     }
+                }
+                NavbarItem {
+                    index: 2usize,
+                    class: "navbar-item",
+                    value: "home".to_string(),
+                    to: Route::Home,
+                    "Home"
                 }
             }
         }

@@ -107,13 +107,13 @@ struct HighlightedCode {
 fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
     let mut copied = use_signal(|| false);
     rsx! {
-        pre {
-            class: "code-block dark-mode-only",
+        div {
+            class: "code-block dark-code-block",
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.dark,
         }
-        pre {
-            class: "code-block light-mode-only",
+        div {
+            class: "code-block light-code-block",
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.light,
         }

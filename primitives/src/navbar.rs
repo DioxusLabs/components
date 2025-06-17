@@ -34,7 +34,7 @@ pub fn Navbar(props: NavbarProps) -> Element {
     let set_open_nav = use_callback(move |idx| open_nav.set(idx));
 
     let focus = use_focus_provider(props.roving_loop);
-    let ctx = use_context_provider(|| NavbarContext {
+    let mut ctx = use_context_provider(|| NavbarContext {
         open_nav,
         set_open_nav,
         disabled: props.disabled,
@@ -60,6 +60,17 @@ pub fn Navbar(props: NavbarProps) -> Element {
             div {
                 role: "menubar",
                 "data-disabled": (props.disabled)(),
+                onkeydown: move |event: Event<KeyboardData>| {
+                    match event.key() {
+                        Key::Escape => ctx.set_open_nav.call(None),
+                        Key::ArrowLeft => ctx.focus.focus_prev(),
+                        Key::ArrowRight => ctx.focus.focus_next(),
+                        Key::Home => ctx.focus.focus_first(),
+                        Key::End => ctx.focus.focus_last(),
+                        _ => return,
+                    }
+                    event.prevent_default();
+                },
 
                 ..props.attributes,
 
@@ -153,9 +164,6 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
                     Key::Enter if !disabled() => {
                         ctx.set_open_nav.call((!is_open()).then(&*props.index));
                     }
-                    Key::Escape => ctx.set_open_nav.call(None),
-                    Key::ArrowLeft => ctx.focus.focus_prev(),
-                    Key::ArrowRight => ctx.focus.focus_next(),
                     Key::ArrowDown if !disabled() => {
                         if is_open() {
                             nav_ctx.focus_next();
@@ -168,8 +176,6 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
                             nav_ctx.focus_prev();
                         }
                     },
-                    Key::Home => ctx.focus.focus_first(),
-                    Key::End => ctx.focus.focus_last(),
                     _ => return,
                 }
                 event.prevent_default();
@@ -300,10 +306,15 @@ pub struct NavbarItemProps {
 #[component]
 pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
     let mut ctx: NavbarContext = use_context();
-    let mut nav_ctx: NavbarNavContext = use_context();
+    let mut nav_ctx: Option<NavbarNavContext> = try_use_context();
 
     let disabled = move || (ctx.disabled)() || (props.disabled)();
-    let focused = move || nav_ctx.focus.is_focused(props.index.cloned()) && (nav_ctx.is_open)();
+    let focused = move || {
+        nav_ctx.map_or_else(
+            || ctx.focus.is_focused(props.index.cloned()),
+            |nav_ctx| nav_ctx.focus.is_focused(props.index.cloned()) && (nav_ctx.is_open)(),
+        )
+    };
 
     let onmounted = use_focus_controlled_item(props.index);
 
@@ -326,10 +337,28 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
 
     props.attributes.push(onblur(move |_| {
         if focused() {
-            nav_ctx.focus.blur();
+            if let Some(nav_ctx) = &mut nav_ctx {
+                nav_ctx.focus.blur();
+            }
             ctx.focus.set_focus(None);
         }
     }));
+
+    props.attributes.push(onfocus(move |_| {
+        if nav_ctx.is_none() {
+            ctx.focus.set_focus(Some(props.index.cloned()));
+        }
+    }));
+
+    let tabindex = if focused() {
+        "0"
+    } else {
+        if nav_ctx.is_none() && ctx.focus.recent_focus() == props.index.cloned() {
+            "0"
+        } else {
+            "-1"
+        }
+    };
 
     rsx! {
         Link {
@@ -341,7 +370,7 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
             to: props.to,
             role: "menuitem",
             "data-disabled": disabled(),
-            tabindex: if focused() { "0" } else { "-1" },
+            tabindex,
 
             onclick: {
                 let value = props.value.clone();
