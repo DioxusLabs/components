@@ -47,7 +47,7 @@ fn NavigationLayout() -> Element {
 #[component]
 fn Navbar() -> Element {
     rsx! {
-        nav { class: "navbar",
+        nav { class: "preview-navbar",
             Link { to: Route::Home, class: "navbar-brand",
                 img {
                     src: asset!("/assets/dioxus_color.svg"),

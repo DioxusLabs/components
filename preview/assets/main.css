@@ -23,7 +23,7 @@ html[data-theme="light"] {
   display: var(--dark, none) var(--light, initial);
 }
 
-.navbar {
+.preview-navbar {
   position: sticky;
   z-index: 1000;
   top: 0;

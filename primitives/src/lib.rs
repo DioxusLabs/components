@@ -19,6 +19,7 @@ pub mod menubar;
 pub mod popover;
 mod portal;
 mod focus;
+#[cfg(feature = "router")]
 pub mod navbar;
 pub mod progress;
 pub mod radio_group;

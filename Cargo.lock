@@ -1170,6 +1170,7 @@ version = "0.0.1"
 dependencies = [
  "dioxus",
  "dioxus-lib",
+ "dioxus-router",
  "dioxus-time",
  "lazy-js-bundle 0.6.2",
  "tracing",

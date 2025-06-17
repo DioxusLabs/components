@@ -1,14 +1,8 @@
-use dioxus_lib::prelude::*;
-
 use crate::focus::{
     FocusState, use_focus_control, use_focus_controlled_item, use_focus_entry, use_focus_provider,
 };
-
-#[derive(Clone, Copy, PartialEq)]
-enum MovementDirection {
-    End,
-    Start,
-}
+use dioxus_lib::prelude::*;
+use dioxus_router::prelude::*;
 
 #[derive(Clone, Copy)]
 struct NavbarContext {
@@ -16,7 +10,6 @@ struct NavbarContext {
     open_nav: Signal<Option<usize>>,
     set_open_nav: Callback<Option<usize>>,
     disabled: ReadOnlySignal<bool>,
-    last_movement: Signal<MovementDirection>,
 
     // Focus state
     focus: FocusState,
@@ -39,7 +32,6 @@ pub struct NavbarProps {
 pub fn Navbar(props: NavbarProps) -> Element {
     let mut open_nav = use_signal(|| None);
     let set_open_nav = use_callback(move |idx| open_nav.set(idx));
-    let mut last_movement = use_signal(|| MovementDirection::End);
 
     let focus = use_focus_provider(props.roving_loop);
     let ctx = use_context_provider(|| NavbarContext {
@@ -47,7 +39,6 @@ pub fn Navbar(props: NavbarProps) -> Element {
         set_open_nav,
         disabled: props.disabled,
         focus,
-        last_movement,
     });
     use_effect(move || {
         let index = ctx.focus.current_focus();
@@ -56,31 +47,10 @@ pub fn Navbar(props: NavbarProps) -> Element {
         }
     });
 
-    // Keep track of the current and last open nav index to determine movement direction
-    let mut last_open_nav = use_signal(|| None);
-    use_effect(move || {
-        let current_open_nav = ctx.open_nav.cloned();
-        {
-            let last_open_nav = *last_open_nav.peek();
-            match (last_open_nav, current_open_nav) {
-                (Some(last), Some(current)) if last < current => {
-                    last_movement.set(MovementDirection::End)
-                }
-                (Some(last), Some(current)) if last > current => {
-                    last_movement.set(MovementDirection::Start)
-                }
-                (Some(_), None) => last_movement.set(MovementDirection::End),
-                (None, Some(_)) => last_movement.set(MovementDirection::Start),
-                _ => {}
-            }
-        }
-        last_open_nav.set(current_open_nav);
-    });
-
-    let aria_label = props.attributes.iter().find_map(|attr| {
-        (attr.name == "aria-label")
-            .then(|| attr.value.clone())
-    });
+    let aria_label = props
+        .attributes
+        .iter()
+        .find_map(|attr| (attr.name == "aria-label").then(|| attr.value.clone()));
 
     rsx! {
         div {
@@ -252,19 +222,19 @@ pub struct NavbarContentProps {
 pub fn NavbarContent(props: NavbarContentProps) -> Element {
     let ctx: NavbarContext = use_context();
     let nav_ctx: NavbarNavContext = use_context();
-    let open = nav_ctx.is_open.cloned();
-    let last_movement = ctx.last_movement.cloned();
-    let direction = match last_movement {
-        MovementDirection::End => "end",
-        MovementDirection::Start => "start",
+    let index = nav_ctx.index.cloned();
+    let open_direction = match (ctx.open_nav)() {
+        Some(open_index) if open_index > index => "start",
+        Some(open_index) if open_index < index => "end",
+        Some(_) => "open",
+        None => "closed",
     };
-    let movement = if open { "in" } else { "out" };
 
     rsx! {
         div {
             role: "menubar",
             "data-state": if (nav_ctx.is_open)() { "open" } else { "closed" },
-            "data-movement": "{direction}-{movement}",
+            "data-open-menu-direction": "{open_direction}",
             ..props.attributes,
             {props.children}
         }
@@ -283,13 +253,52 @@ pub struct NavbarItemProps {
     #[props(default)]
     on_select: Callback<String>,
 
+    /// The class attribute for the `a` tag.
+    pub class: Option<String>,
+
+    /// A class to apply to the generate HTML anchor tag if the `target` route is active.
+    pub active_class: Option<String>,
+
+    /// The children to render within the generated HTML anchor tag.
+    pub children: Element,
+
+    /// When [`true`], the `target` route will be opened in a new tab.
+    ///
+    /// This does not change whether the [`Link`] is active or not.
+    #[props(default)]
+    pub new_tab: bool,
+
+    /// The onclick event handler.
+    pub onclick: Option<EventHandler<MouseEvent>>,
+
+    /// The onmounted event handler.
+    /// Fired when the `<a>` element is mounted.
+    pub onmounted: Option<EventHandler<MountedEvent>>,
+
+    #[props(default)]
+    /// Whether the default behavior should be executed if an `onclick` handler is provided.
+    ///
+    /// 1. When `onclick` is [`None`] (default if not specified), `onclick_only` has no effect.
+    /// 2. If `onclick_only` is [`false`] (default if not specified), the provided `onclick` handler
+    ///    will be executed after the links regular functionality.
+    /// 3. If `onclick_only` is [`true`], only the provided `onclick` handler will be executed.
+    pub onclick_only: bool,
+
+    /// The rel attribute for the generated HTML anchor tag.
+    ///
+    /// For external `a`s, this defaults to `noopener noreferrer`.
+    pub rel: Option<String>,
+
+    /// The navigation target. Roughly equivalent to the href attribute of an HTML anchor tag.
+    #[props(into)]
+    pub to: NavigationTarget,
+
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
-    children: Element,
 }
 
 #[component]
-pub fn NavbarItem(props: NavbarItemProps) -> Element {
+pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
     let mut ctx: NavbarContext = use_context();
     let mut nav_ctx: NavbarNavContext = use_context();
 
@@ -298,46 +307,58 @@ pub fn NavbarItem(props: NavbarItemProps) -> Element {
 
     let onmounted = use_focus_controlled_item(props.index);
 
+    props.attributes.push(onkeydown({
+        let value = props.value.clone();
+        let to = props.to.clone();
+        move |event: Event<KeyboardData>| {
+            if event.key() == Key::Enter || event.key() == Key::Character(" ".to_string()) {
+                if !disabled() {
+                    props.on_select.call(value.clone());
+                    ctx.set_open_nav.call(None);
+                    let navigator = navigator();
+                    navigator.push(to.clone());
+                }
+                event.prevent_default();
+                event.stop_propagation();
+            }
+        }
+    }));
+
+    props.attributes.push(onblur(move |_| {
+        if focused() {
+            nav_ctx.focus.blur();
+            ctx.focus.set_focus(None);
+        }
+    }));
+
     rsx! {
-        div {
+        Link {
+            class: props.class,
+            active_class: props.active_class,
+            new_tab: props.new_tab,
+            onclick_only: props.onclick_only,
+            rel: props.rel,
+            to: props.to,
             role: "menuitem",
             "data-disabled": disabled(),
             tabindex: if focused() { "0" } else { "-1" },
 
             onclick: {
                 let value = props.value.clone();
-                move |_| {
+                move |evt| {
                     if !disabled() {
                         props.on_select.call(value.clone());
                         ctx.set_open_nav.call(None);
                     }
-                }
-            },
-
-            onkeydown: {
-                let value = props.value.clone();
-                move |event: Event<KeyboardData>| {
-                    if event.key() == Key::Enter || event.key() == Key::Character(" ".to_string()) {
-                        if !disabled() {
-                            props.on_select.call(value.clone());
-                            ctx.set_open_nav.call(None);
-                        }
-                        event.prevent_default();
-                        event.stop_propagation();
+                    if let Some(onclick) = &props.onclick {
+                        onclick.call(evt);
                     }
                 }
             },
 
             onmounted,
 
-            onblur: move |_| {
-                if focused() {
-                    nav_ctx.focus.blur();
-                    ctx.focus.set_focus(None);
-                }
-            },
-
-            ..props.attributes,
+            attributes: props.attributes,
             {props.children}
         }
     }
