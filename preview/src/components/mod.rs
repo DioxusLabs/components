@@ -26,6 +26,7 @@ examples!(
     dropdown_menu,
     hover_card,
     menubar,
+    navbar,
     popover,
     progress,
     radio_group,
