@@ -63,7 +63,6 @@ html[data-theme="light"] {
 
 /* Code block styles */
 .code-block {
-  white-space: pre;
   overflow: scroll;
   width: 100%;
   max-width: calc(100vw - 2rem);
@@ -74,6 +73,7 @@ html[data-theme="light"] {
   border-radius: 0.5rem;
   margin: 0;
   font-family: "Courier New", Courier, monospace;
+  white-space: pre;
 }
 
 .dark-code-block {

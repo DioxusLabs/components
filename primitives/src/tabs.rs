@@ -140,7 +140,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
         "-1"
     });
 
-    let onmounted = use_focus_controlled_item(props.index.clone());
+    let onmounted = use_focus_controlled_item(props.index);
 
     rsx! {
         button {

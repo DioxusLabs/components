@@ -46,12 +46,12 @@
 
 /* Include the top margin in the navbar content pointer events */
 .navbar-content::before {
-  content: "";
   position: absolute;
   top: -0.5rem;
   left: 0;
   width: 100%;
   height: 0.5rem;
+  content: "";
 }
 
 .navbar-content {
@@ -63,7 +63,6 @@
   padding: 0.25rem;
   border-radius: 0.5rem;
   margin-top: 0.5rem;
-
   background: var(--light, var(--background-color))
     var(--dark, var(--focused-background-color));
   box-shadow: inset 0 0 0 1px var(--light, var(--dim-border-color))
@@ -105,9 +104,9 @@
   display: block;
   padding: 8px 12px;
   border-radius: calc(0.5rem - 0.25rem);
+  color: var(--text-color);
   cursor: pointer;
   font-size: 14px;
-  color: var(--text-color);
   text-decoration: none;
 }
 
