@@ -15,6 +15,12 @@ html[data-theme="light"] {
   --light: initial;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 .dark-mode-only {
   display: var(--dark, initial) var(--light, none);
 }
@@ -28,6 +34,8 @@ html[data-theme="light"] {
   z-index: 1000;
   top: 0;
   display: flex;
+  width: 100%;
+  box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 1rem;
