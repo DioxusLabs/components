@@ -238,7 +238,7 @@ pub fn NavbarContent(props: NavbarContentProps) -> Element {
 
     rsx! {
         div {
-            role: "menubar",
+            role: "menu",
             "data-state": if (nav_ctx.is_open)() { "open" } else { "closed" },
             "data-open-menu-direction": "{open_direction}",
             ..props.attributes,
