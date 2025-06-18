@@ -542,7 +542,7 @@ pub fn SelectList(props: SelectListProps) -> Element {
             *focused_item = options.read().iter().map(|opt| opt.tab_index).min();
         };
 
-        let select_current_item = move || {
+        let mut select_current_item = move || {
             // If the select is open, select the focused item
             if open() {
                 if let Some(focused_index) = focused_item.cloned() {
@@ -550,6 +550,7 @@ pub fn SelectList(props: SelectListProps) -> Element {
                     if let Some(option) = options.iter().find(|opt| opt.tab_index == focused_index)
                     {
                         set_value(Some(option.value.clone()));
+                        open.set(false);
                     }
                 }
             }
