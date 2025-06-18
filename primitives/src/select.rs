@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    focus::{self, FocusState, use_focus_controlled_item, use_focus_provider},
+    focus::{FocusState, use_focus_controlled_item, use_focus_provider},
     use_controlled, use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::html::input_data::MouseButton;
@@ -568,13 +568,9 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
             ..props.attributes,
 
             // Add placeholder option if needed
-            match &ctx.value.cloned() {
-                Some(value) => rsx! {
-                    "{value}"
-                },
-                None => rsx! {
-                    "{ctx.placeholder}"
-                }
+            span {
+                "data-placeholder": ctx.value.read().is_none(),
+                {ctx.value.cloned().unwrap_or_else(|| ctx.placeholder.cloned())}
             }
 
             // Render children (options)
@@ -790,11 +786,13 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
     }
 }
 
+#[derive(Clone, Copy)]
+struct SelectGroupContext {
+    labeled_by: Signal<Option<String>>,
+}
+
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectGroupProps {
-    /// Label for the option group
-    label: String,
-
     /// Whether the group is disabled
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
@@ -802,14 +800,6 @@ pub struct SelectGroupProps {
     /// Optional ID for the group
     #[props(default)]
     id: ReadOnlySignal<Option<String>>,
-
-    /// Optional label for the group (for accessibility)
-    #[props(default)]
-    aria_label: Option<String>,
-
-    /// Optional description role for the group (for accessibility)
-    #[props(default)]
-    aria_roledescription: Option<String>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -819,25 +809,52 @@ pub struct SelectGroupProps {
 
 #[component]
 pub fn SelectGroup(props: SelectGroupProps) -> Element {
-    // Generate a unique ID for this group
-    let group_id = use_unique_id();
-
-    // Use use_id_or to handle the ID
-    let id = use_id_or(group_id, props.id);
-
     let ctx: SelectContext = use_context();
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
+
+    let labeled_by = use_signal(|| None);
+
+    use_context_provider(|| SelectGroupContext { labeled_by });
 
     rsx! {
         div {
             role: "group",
-            id,
 
             // ARIA attributes
             aria_disabled: disabled,
-            aria_label: props.aria_label.clone(),
-            aria_roledescription: props.aria_roledescription.clone(),
+            aria_labelledby: labeled_by,
 
+            ..props.attributes,
+            {props.children}
+        }
+    }
+}
+
+#[derive(Props, Clone, PartialEq)]
+pub struct SelectGroupLabelProps {
+    id: ReadOnlySignal<Option<String>>,
+
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+
+    children: Element,
+}
+
+#[component]
+pub fn SelectGroupLabel(props: SelectGroupLabelProps) -> Element {
+    let mut ctx: SelectGroupContext = use_context();
+
+    let id = use_unique_id();
+    let id = use_id_or(id, props.id);
+
+    use_effect(move || {
+        ctx.labeled_by.set(Some(id()));
+    });
+
+    rsx! {
+        div {
+            // Set the ID for the label
+            id,
             ..props.attributes,
             {props.children}
         }
