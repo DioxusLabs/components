@@ -86,7 +86,7 @@
 }
 
 .select-option:hover:not([data-disabled="true"]),
-.select-option:focus-visible {
+.select-option[data-focused="true"] {
   background: var(--light, var(--hover-background-color))
     var(--dark, var(--hover-border-color));
   color: var(--bright-text-color);

@@ -20,81 +20,100 @@ struct SelectContext {
     set_value: Callback<Option<String>>,
     // A list of options with their states
     options: Signal<Vec<OptionState>>,
-    // A list of [physical key codes, virtual key codes] to guess the keyboard layout
-    known_key_positions: Signal<Vec<[char; 2]>>,
+    // The current best guess of the keyboard layout
+    // based on the known key positions
+    keyboard_layout: Memo<KeyboardLayout>,
+    // The currently active value based on the typeahead buffer and focused item
+    active_value: Memo<Option<String>>,
 }
 
-impl SelectContext {
-    fn guess_keyboard_layout(&self) -> KeyboardLayout {
-        let known_key_positions = self.known_key_positions.read();
-
-        KeyboardLayout::guess(&*known_key_positions)
+fn best_match(
+    keyboard_layout: &KeyboardLayout,
+    typeahead: &str,
+    options: &Vec<OptionState>,
+) -> Option<String> {
+    if typeahead.is_empty() {
+        return None;
     }
 
-    fn current_match(&self) -> Option<String> {
-        let typeahead = self.typeahead_buffer.read();
-        if typeahead.is_empty() {
-            return None;
-        }
+    let typeahead_characters: Box<[_]> = typeahead.chars().collect();
 
-        let typeahead = &*typeahead;
+    let best_match = options
+        .iter()
+        .map(|opt| {
+            let value = &opt.value;
+            let value_characters: Box<[_]> = value.chars().collect();
+            // Only use the the start of the value characters
+            let value_characters =
+                &value_characters[..value_characters.len().min(typeahead_characters.len())];
+            // Only use the end of the typeahead characters
+            let typeahead_characters = &typeahead_characters[typeahead_characters
+                .len()
+                .saturating_sub(value_characters.len())..];
 
-        let typeahead_characters: Box<[_]> = typeahead.chars().collect();
-        let keyboard_layout = self.guess_keyboard_layout();
+            let distance =
+                levenshtein_distance(&typeahead_characters, &value_characters, |a, b| {
+                    keyboard_layout.substitution_cost(a, b)
+                });
+            let max_distance =
+                (typeahead_characters.len() as f32).max(value_characters.len() as f32);
+            let distance = distance / max_distance;
 
-        let best_match = self
-            .options
-            .read()
-            .iter()
-            .map(|opt| {
-                let value = opt.value.read();
-                let value = &*value;
-                let value_characters: Box<[_]> = value.chars().collect();
+            (distance, value.clone())
+        })
+        .min_by(|(d1, _), (d2, _)| f32::total_cmp(d1, d2))
+        .map(|(_, value)| value);
 
-                let distance =
-                    levenshtein_distance(&typeahead_characters, &value_characters, |a, b| {
-                        keyboard_layout.substitution_cost(a, b)
-                    });
-
-                (distance, value.clone())
-            })
-            .max_by(|(d1, _), (d2, _)| f32::total_cmp(d1, d2))
-            .map(|(_, value)| value);
-
-        best_match
-    }
+    best_match
 }
 
+// The recency bias of the levenshtein distance function
+fn recency_bias(char_index: usize, total_length: usize) -> f32 {
+    ((char_index as f32 + 1.5).ln() / (total_length as f32 + 1.5).ln()).powi(2)
+}
+
+// We use a weighted Levenshtein distance to account for the recency of characters
+// More recent characters have a higher weight, while older characters have a lower weight
+// The first few characters in the value are weighted more heavily
+//
+// When substitution is required, the substitution is cheaper for characters that are closer together on the keyboard
 fn levenshtein_distance(
-    s1: &[char],
-    s2: &[char],
+    typeahead: &[char],
+    value: &[char],
     substitution_cost: impl Fn(char, char) -> f32,
 ) -> f32 {
-    let mut dp = vec![vec![0.0; s2.len() + 1]; s1.len() + 1];
+    let mut dp = vec![vec![0.0; value.len() + 1]; typeahead.len() + 1];
 
-    for i in 0..=s1.len() {
-        dp[i][0] = i as f32;
+    // Weight more recent typeahead characters heavily
+    for i in 0..=typeahead.len() {
+        dp[i][0] = i as f32 * recency_bias(i, typeahead.len());
     }
-    for j in 0..=s2.len() {
-        dp[0][j] = j as f32;
+    for j in 0..=value.len() {
+        dp[0][j] = j as f32 * 0.5f32.max(1.0 - recency_bias(j, value.len()));
     }
 
-    for i in 1..=s1.len() {
-        for j in 1..=s2.len() {
-            let cost = if s1[i - 1] == s2[j - 1] {
+    for i in 1..=typeahead.len() {
+        for j in 1..=value.len() {
+            let cost = if typeahead[i - 1] == value[j - 1] {
                 0.0
             } else {
-                substitution_cost(s1[i - 1], s2[j - 1])
+                substitution_cost(typeahead[i - 1], value[j - 1])
             };
 
             dp[i][j] = f32::min(
-                f32::min(dp[i - 1][j] + 1.0, dp[i][j - 1] + 1.0),
+                f32::min(
+                    // Insertion
+                    dp[i - 1][j] + recency_bias(i, typeahead.len()),
+                    // Deletion
+                    dp[i][j - 1] + 0.5f32.max(1.0 - recency_bias(i, typeahead.len())),
+                ),
+                // Substitution
                 dp[i - 1][j - 1] + cost,
             );
         }
     }
 
-    dp[s1.len()][s2.len()]
+    dp[typeahead.len()][value.len()]
 }
 
 #[test]
@@ -103,17 +122,23 @@ fn test_levenshtein_distance() {
     let s2: Vec<char> = "sitting".chars().collect();
 
     let distance = levenshtein_distance(&s1, &s2, |a, b| if a == b { 0.0 } else { 1.0 });
-    assert_eq!(distance, 3.0); // kitten -> sitting requires 3 edits
+    assert_eq!(distance, 2.5); // kitten -> sitting requires 3 edits, but the distance is scaled by recency bias
 
     let s1: Vec<char> = "kitten".chars().collect();
     let s2: Vec<char> = "litten".chars().collect();
     let keyboard_layout = KeyboardLayout::Qwerty;
-    let distance = levenshtein_distance(&s1, &s2, |a, b| keyboard_layout.substitution_cost(a, b));
-    assert_eq!(distance, 0.071428575); // Using QWERTY layout, the distance is lower than 1.0 because the characters are close on the keyboard
+    let qwerty_distance =
+        levenshtein_distance(&s1, &s2, |a, b| keyboard_layout.substitution_cost(a, b));
 
     let keyboard_layout = KeyboardLayout::ColemakDH;
-    let distance = levenshtein_distance(&s1, &s2, |a, b| keyboard_layout.substitution_cost(a, b));
-    assert_eq!(distance, 0.21428572); // Using ColemakDH layout, the distance is higher because the characters are further apart on the keyboard
+    let colemack_distance =
+        levenshtein_distance(&s1, &s2, |a, b| keyboard_layout.substitution_cost(a, b));
+    println!("QWERTY distance: {}", qwerty_distance);
+    println!("ColemakDH distance: {}", colemack_distance);
+    assert!(
+        qwerty_distance < colemack_distance,
+        "ColemakDH should have a higher distance than QWERTY for the same characters"
+    );
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -121,6 +146,10 @@ enum KeyboardLayout {
     Qwerty,
     ColemakDH,
     Colemak,
+    Dvorak,
+    Workman,
+    Azerty,
+    Qwertz,
     Unknown,
 }
 
@@ -129,15 +158,19 @@ impl KeyboardLayout {
         (KeyboardLayout::Qwerty, QWERTY_KEYBOARD_LAYOUT),
         (KeyboardLayout::ColemakDH, COLEMACK_DH_KEYBOARD_LAYOUT),
         (KeyboardLayout::Colemak, COLEMAK_KEYBOARD_LAYOUT),
+        (KeyboardLayout::Dvorak, DVORAK_KEYBOARD_LAYOUT),
+        (KeyboardLayout::Workman, WORKMAN_KEYBOARD_LAYOUT),
+        (KeyboardLayout::Azerty, AZERTY_KEYBOARD_LAYOUT),
+        (KeyboardLayout::Qwertz, QWERTZ_KEYBOARD_LAYOUT),
     ];
 
-    fn guess(known_key_positions: &[[char; 2]]) -> Self {
+    fn guess(known_key_positions: &HashMap<char, char>) -> Self {
         if known_key_positions.is_empty() {
             return Self::Unknown;
         }
 
         let mut matching = Self::KNOWN_KEYBOARD_LAYOUTS.to_vec();
-        for [physical_position, virtual_position] in known_key_positions {
+        for (physical_position, virtual_position) in known_key_positions {
             let position_in_qwerty = Self::Qwerty.char_position(*physical_position);
 
             let Some(position_in_qwerty) = position_in_qwerty else {
@@ -163,6 +196,10 @@ impl KeyboardLayout {
     }
 
     fn substitution_cost(&self, a: char, b: char) -> f32 {
+        if a == b {
+            return 0.0;
+        }
+
         let position_a = self.char_position(a);
         let position_b = self.char_position(b);
 
@@ -171,7 +208,7 @@ impl KeyboardLayout {
                 let row_diff = (row_a as f32 - row_b as f32).abs();
                 let col_diff = (col_a as f32 - col_b as f32).abs();
                 // Use Manhattan distance for simplicity and scale to a max of 1.0
-                (row_diff + col_diff) / 14.0
+                0.5 + (row_diff + col_diff) / 28.0
             }
             _ => 1.0,
         }
@@ -182,6 +219,10 @@ impl KeyboardLayout {
             KeyboardLayout::Qwerty => &QWERTY_KEYBOARD_LAYOUT,
             KeyboardLayout::ColemakDH => &COLEMACK_DH_KEYBOARD_LAYOUT,
             KeyboardLayout::Colemak => &COLEMAK_KEYBOARD_LAYOUT,
+            KeyboardLayout::Dvorak => &DVORAK_KEYBOARD_LAYOUT,
+            KeyboardLayout::Workman => &WORKMAN_KEYBOARD_LAYOUT,
+            KeyboardLayout::Azerty => &AZERTY_KEYBOARD_LAYOUT,
+            KeyboardLayout::Qwertz => &QWERTZ_KEYBOARD_LAYOUT,
             KeyboardLayout::Unknown => return None,
         };
 
@@ -240,6 +281,7 @@ fn code_to_char(code: Code) -> Option<char> {
     }
 }
 
+// QWERTY
 static QWERTY_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -247,6 +289,7 @@ static QWERTY_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
     ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'],
 ];
 
+// Colemak-DH
 static COLEMACK_DH_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['q', 'w', 'f', 'p', 'b', 'j', 'l', 'u', 'y', ';'],
@@ -254,6 +297,7 @@ static COLEMACK_DH_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
     ['x', 'c', 'd', 'v', 'z', 'k', 'h', ',', '.', '/'],
 ];
 
+// Colemak (mod-dhm standard)
 static COLEMAK_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['q', 'w', 'f', 'p', 'g', 'j', 'l', 'u', 'y', ';'],
@@ -261,21 +305,53 @@ static COLEMAK_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
     ['z', 'x', 'c', 'v', 'b', 'k', 'm', ',', '.', '/'],
 ];
 
+// Dvorak
+static DVORAK_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+    ['\'', ',', '.', 'p', 'y', 'f', 'g', 'c', 'r', 'l'],
+    ['a', 'o', 'e', 'u', 'i', 'd', 'h', 't', 'n', 's'],
+    [';', 'q', 'j', 'k', 'x', 'b', 'm', 'w', 'v', 'z'],
+];
+
+// Workman
+static WORKMAN_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+    ['q', 'd', 'r', 'w', 'b', 'j', 'f', 'u', 'p', ';'],
+    ['a', 's', 'h', 't', 'g', 'y', 'n', 'e', 'o', 'i'],
+    ['z', 'x', 'm', 'c', 'v', 'k', 'l', ',', '.', '/'],
+];
+
+// AZERTY (France)
+static AZERTY_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+    ['a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+    ['q', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm'],
+    ['w', 'x', 'c', 'v', 'b', 'n', ',', ';', ':', '!'],
+];
+
+// QWERTZ (Germany/Switzerland)
+static QWERTZ_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+    ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'],
+    ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';'],
+    ['y', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'],
+];
+
 #[test]
 fn test_detect_keyboard_layout() {
     // Default to an unknown layout
-    let layout = KeyboardLayout::guess(&[]);
+    let layout = KeyboardLayout::guess(&[].into());
     assert_eq!(layout, KeyboardLayout::Unknown);
 
     // If any keys match, use the query layout
-    let layout = KeyboardLayout::guess(&[['q', 'q']]);
+    let layout = KeyboardLayout::guess(&[('q', 'q')].into());
     assert_eq!(layout, KeyboardLayout::Qwerty);
 
     // Otherwise, guess a good layout
-    let layout = KeyboardLayout::guess(&[['d', 's']]);
+    let layout = KeyboardLayout::guess(&[('d', 's')].into());
     assert_eq!(layout, KeyboardLayout::ColemakDH);
 
-    let layout = KeyboardLayout::guess(&[['d', 's'], ['g', 'd']]);
+    let layout = KeyboardLayout::guess(&[('d', 's'), ('g', 'd')].into());
     assert_eq!(layout, KeyboardLayout::Colemak);
 }
 
@@ -284,13 +360,14 @@ struct OptionMatch {
     value: String,
 }
 
+#[derive(Clone, Debug)]
 struct OptionState {
     /// The tab index of the option
-    tab_index: ReadOnlySignal<usize>,
+    tab_index: usize,
     /// The value of the option
-    value: ReadOnlySignal<String>,
+    value: String,
     /// The id of the option
-    id: ReadOnlySignal<String>,
+    id: String,
 }
 
 #[derive(Props, Clone, PartialEq)]
@@ -339,7 +416,35 @@ pub fn Select(props: SelectProps) -> Element {
     let mut typeahead_buffer = use_signal(|| String::new());
     let focused_item = use_signal(|| None);
     let options = use_signal(Default::default);
-    let mut known_key_positions = use_signal(Vec::new);
+    let mut known_key_positions = use_signal(Default::default);
+
+    let keyboard_layout = use_memo(move || {
+        let known_key_positions = known_key_positions.read();
+
+        KeyboardLayout::guess(&*known_key_positions)
+    });
+
+    let best_match = use_memo(move || {
+        let typeahead = typeahead_buffer.read();
+        let options = options.read();
+        let keyboard_layout = keyboard_layout.read();
+
+        best_match(&keyboard_layout, &typeahead, &options)
+    });
+
+    let active_value = use_memo(move || {
+        if let Some(focused_item) = focused_item.cloned() {
+            let value = options.read().iter().find_map(|opt| {
+                if opt.tab_index == focused_item {
+                    Some(opt.value.clone())
+                } else {
+                    None
+                }
+            });
+            return value;
+        }
+        best_match()
+    });
 
     use_context_provider(|| SelectContext {
         typeahead_buffer,
@@ -348,7 +453,8 @@ pub fn Select(props: SelectProps) -> Element {
         set_value,
         options,
         focused_item,
-        known_key_positions,
+        keyboard_layout,
+        active_value,
     });
 
     let current_value = value();
@@ -359,14 +465,30 @@ pub fn Select(props: SelectProps) -> Element {
         if let (Some(code), Key::Character(key)) = (code_to_char(code), &key) {
             let chars = key.chars().collect::<Vec<_>>();
             if let &[key_as_char] = chars.as_slice() {
-                known_key_positions.write().push([code, key_as_char]);
+                known_key_positions.write().insert(code, key_as_char);
             }
         }
 
         match key {
             Key::Character(new_text) => {
+                let mut typeahead_buffer = typeahead_buffer.write();
                 // Add character to typeahead buffer
-                typeahead_buffer.write().push_str(&new_text);
+                typeahead_buffer.push_str(&new_text);
+                // Trim the typeahead buffer to the maximum length of the options
+                let longest_option_length = options
+                    .read()
+                    .iter()
+                    .map(|opt| opt.value.chars().count())
+                    .max()
+                    .unwrap_or_default();
+                let overflow_length = typeahead_buffer.len().saturating_sub(longest_option_length);
+                if overflow_length > 0 {
+                    *typeahead_buffer = typeahead_buffer
+                        .chars()
+                        .skip(overflow_length)
+                        .take(longest_option_length)
+                        .collect::<String>();
+                }
             }
             _ => {}
         }
@@ -483,9 +605,9 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
     let mut ctx: SelectContext = use_context();
     use_effect(move || {
         let option_state = OptionState {
-            tab_index: index,
-            value,
-            id: id.into(),
+            tab_index: index(),
+            value: value.cloned(),
+            id: id(),
         };
 
         // Add the option to the context's options
@@ -493,16 +615,19 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
     });
 
     use_effect_cleanup(move || {
-        ctx.options
-            .write()
-            .retain(|opt| &*opt.id.read() != &*id.read());
+        ctx.options.write().retain(|opt| &*opt.id != &*id.read());
     });
+
+    let active_value = ctx.active_value.read();
+    let focused = active_value.as_ref() == Some(&*props.value.read());
 
     rsx! {
         div {
             role: "option",
             id,
             tabindex: "-1",
+
+            "data-focused": focused,
 
             // ARIA attributes
             aria_selected: ctx.value.read().as_ref() == Some(&props.value.read()),
