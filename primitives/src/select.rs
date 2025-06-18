@@ -1,9 +1,6 @@
-use std::{collections::HashMap, fmt::Write};
+use std::collections::HashMap;
 
-use crate::{
-    focus::{FocusState, use_focus_provider},
-    use_controlled, use_effect_cleanup, use_id_or, use_unique_id,
-};
+use crate::{use_controlled, use_effect_cleanup, use_id_or, use_unique_id};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone, Copy)]
@@ -20,9 +17,8 @@ struct SelectContext {
     set_value: Callback<Option<String>>,
     // A list of options with their states
     options: Signal<Vec<OptionState>>,
-    // The current best guess of the keyboard layout
-    // based on the known key positions
-    keyboard_layout: Memo<KeyboardLayout>,
+    // Known key positions for the keyboard layout
+    known_key_positions: Signal<HashMap<char, char>>,
 }
 
 fn best_match(
@@ -409,7 +405,7 @@ pub fn Select(props: SelectProps) -> Element {
     let mut typeahead_buffer = use_signal(|| String::new());
     let mut focused_item = use_signal(|| None);
     let options = use_signal(Default::default);
-    let mut known_key_positions = use_signal(Default::default);
+    let known_key_positions = use_signal(Default::default);
 
     let keyboard_layout = use_memo(move || {
         let known_key_positions = known_key_positions.read();
@@ -439,7 +435,7 @@ pub fn Select(props: SelectProps) -> Element {
         set_value,
         options,
         focused_item,
-        keyboard_layout,
+        known_key_positions,
     });
 
     // Clear the typeahead buffer when the select is closed
@@ -451,93 +447,6 @@ pub fn Select(props: SelectProps) -> Element {
 
     let current_value = value();
 
-    let onkeydown = move |event: KeyboardEvent| {
-        let key = event.key();
-        let code = event.code();
-        if let (Some(code), Key::Character(key)) = (code_to_char(code), &key) {
-            let chars = key.chars().collect::<Vec<_>>();
-            if let &[key_as_char] = chars.as_slice() {
-                known_key_positions.write().insert(code, key_as_char);
-            }
-        }
-
-        let mut arrow_key_navigation = |event: KeyboardEvent| {
-            // Clear the typeahead buffer
-                typeahead_buffer.take();
-                event.prevent_default();
-                event.stop_propagation();
-
-        };
-
-        let mut focus_last_item = move || {
-            let mut focused_item = focused_item.write();
-            *focused_item = options.read().iter().map(|opt| opt.tab_index).max();
-        };
-
-        let mut focus_first_item = move || {
-            let mut focused_item = focused_item.write();
-            *focused_item = options.read().iter().map(|opt| opt.tab_index).min();
-        };
-
-        match key {
-            Key::Character(new_text) => {
-                let mut typeahead_buffer = typeahead_buffer.write();
-                // Add character to typeahead buffer
-                typeahead_buffer.push_str(&new_text);
-                // Trim the typeahead buffer to the maximum length of the options
-                let longest_option_length = options
-                    .read()
-                    .iter()
-                    .map(|opt| opt.value.chars().count())
-                    .max()
-                    .unwrap_or_default();
-                let overflow_length = typeahead_buffer.len().saturating_sub(longest_option_length);
-                if overflow_length > 0 {
-                    *typeahead_buffer = typeahead_buffer
-                        .chars()
-                        .skip(overflow_length)
-                        .take(longest_option_length)
-                        .collect::<String>();
-                }
-            }
-            Key::ArrowUp => {
-                arrow_key_navigation(event);
-
-                // Move focus up
-                let mut focused_item = focused_item.write();
-                if let Some(item) = *focused_item {
-                    if item > 0 {
-                        *focused_item = Some(item - 1);
-                        return;
-                    }
-                }
-                focus_last_item();
-            }
-            Key::End => {
-                arrow_key_navigation(event);
-                focus_last_item();
-            }
-            Key::ArrowDown => {
-                arrow_key_navigation(event);
-
-                // Move focus down
-                let mut focused_item = focused_item.write();
-                if let Some(item) = *focused_item {
-                    if item < options.read().len() - 1 {
-                        *focused_item = Some(item + 1);
-                        return;
-                    }
-                }
-                focus_first_item();
-            }
-            Key::Home => {
-                arrow_key_navigation(event);
-                focus_first_item();
-            }
-            _ => {}
-        }
-    };
-
     rsx! {
         button {
             // Standard HTML attributes
@@ -545,7 +454,6 @@ pub fn Select(props: SelectProps) -> Element {
             disabled: (props.disabled)(),
 
             onclick: move |_| open.toggle(),
-            onkeydown,
 
             // Data attributes
             "data-state": if open() { "open" } else { "closed" },
@@ -587,16 +495,156 @@ pub fn SelectList(props: SelectListProps) -> Element {
     let ctx: SelectContext = use_context();
 
     let active_option_id = use_signal(|| String::new());
-    let open: bool = ctx.open.cloned();
+    let mut open = ctx.open;
+    let mut listbox_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
+
+    use_effect(move || {
+        let Some(listbox_ref) = listbox_ref() else {
+            return;
+        };
+        if open() {
+            spawn(async move {
+                _ = listbox_ref.set_focus(true);
+            });
+        }
+    });
+
+    let mut known_key_positions = ctx.known_key_positions;
+    let mut focused_item = ctx.focused_item;
+    let options = ctx.options;
+    let set_value = ctx.set_value;
+    let mut typeahead_buffer = ctx.typeahead_buffer;
+
+    let onkeydown = move |event: KeyboardEvent| {
+        let key = event.key();
+        let code = event.code();
+        if let (Some(code), Key::Character(key)) = (code_to_char(code), &key) {
+            let chars = key.chars().collect::<Vec<_>>();
+            if let &[key_as_char] = chars.as_slice() {
+                known_key_positions.write().insert(code, key_as_char);
+            }
+        }
+
+        let mut arrow_key_navigation = |event: KeyboardEvent| {
+            // Clear the typeahead buffer
+            typeahead_buffer.take();
+            event.prevent_default();
+            event.stop_propagation();
+        };
+
+        let mut focus_last_item = move || {
+            let mut focused_item = focused_item.write();
+            *focused_item = options.read().iter().map(|opt| opt.tab_index).max();
+        };
+
+        let mut focus_first_item = move || {
+            let mut focused_item = focused_item.write();
+            *focused_item = options.read().iter().map(|opt| opt.tab_index).min();
+        };
+
+        let select_current_item = move || {
+            // If the select is open, select the focused item
+            if open() {
+                if let Some(focused_index) = focused_item.cloned() {
+                    let options = options.read();
+                    if let Some(option) = options.iter().find(|opt| opt.tab_index == focused_index)
+                    {
+                        set_value(Some(option.value.clone()));
+                    }
+                }
+            }
+        };
+
+        match key {
+            Key::Character(new_text) => {
+                if new_text == " " {
+                    select_current_item();
+                    event.prevent_default();
+                    event.stop_propagation();
+                    return;
+                }
+
+                let mut typeahead_buffer = typeahead_buffer.write();
+                // Add character to typeahead buffer
+                typeahead_buffer.push_str(&new_text);
+                // Trim the typeahead buffer to the maximum length of the options
+                let longest_option_length = options
+                    .read()
+                    .iter()
+                    .map(|opt| opt.value.chars().count())
+                    .max()
+                    .unwrap_or_default();
+                let overflow_length = typeahead_buffer.len().saturating_sub(longest_option_length);
+                if overflow_length > 0 {
+                    *typeahead_buffer = typeahead_buffer
+                        .chars()
+                        .skip(overflow_length)
+                        .take(longest_option_length)
+                        .collect::<String>();
+                }
+            }
+            Key::ArrowUp => {
+                arrow_key_navigation(event);
+
+                // Move focus up
+                {
+                    let mut focused_item = focused_item.write();
+                    if let Some(item) = *focused_item {
+                        if item > 0 {
+                            *focused_item = Some(item - 1);
+                            return;
+                        }
+                    }
+                }
+                focus_last_item();
+            }
+            Key::End => {
+                arrow_key_navigation(event);
+                focus_last_item();
+            }
+            Key::ArrowDown => {
+                arrow_key_navigation(event);
+
+                // Move focus down
+                {
+                    let mut focused_item = focused_item.write();
+                    if let Some(item) = *focused_item {
+                        if item < options.read().len() - 1 {
+                            *focused_item = Some(item + 1);
+                            return;
+                        }
+                    }
+                }
+                focus_first_item();
+            }
+            Key::Home => {
+                arrow_key_navigation(event);
+                focus_first_item();
+            }
+            Key::Enter => {
+                select_current_item();
+                open.toggle();
+            }
+            _ => {}
+        }
+    };
+
+    let is_open = open();
 
     rsx! {
         div {
             role: "listbox",
             aria_activedescendant: active_option_id,
-            tabindex: if open { "0" } else { "-1" },
+            tabindex: if is_open { "0" } else { "-1" },
 
             // Data attributes
-            "data-state": if open { "open" } else { "closed" },
+            "data-state": if is_open { "open" } else { "closed" },
+
+            onmounted: move |evt| listbox_ref.set(Some(evt.data())),
+            onkeydown,
+            onblur: move |_| {
+                open.set(false);
+            },
 
             ..props.attributes,
             {props.children}
@@ -715,7 +763,7 @@ pub struct SelectGroupProps {
 #[component]
 pub fn SelectGroup(props: SelectGroupProps) -> Element {
     // Generate a unique ID for this group
-    let group_id = use_signal(|| format!("group-{}", props.label.to_lowercase().replace(" ", "-")));
+    let group_id = use_unique_id();
 
     // Use use_id_or to handle the ID
     let id = use_id_or(group_id, props.id);
