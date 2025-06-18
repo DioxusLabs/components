@@ -5,25 +5,24 @@
 .select-trigger {
   position: relative;
   display: flex;
+  box-sizing: border-box;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  box-sizing: border-box;
   padding: 0.25rem;
-  border: none;
-  border-radius: 0.5rem;
   padding: 8px 12px;
   border: none;
+  border-radius: 0.5rem;
   border-radius: calc(0.5rem);
   background: none;
-  color: var(--text-color);
-  cursor: pointer;
-  transition: background-color 100ms ease-out;
   background: var(--light, var(--background-color))
     var(--dark, var(--dim-background-color));
   box-shadow: inset 0 0 0 1px var(--light, var(--dim-border-color))
     var(--dark, var(--hover-border-color));
+  color: var(--text-color);
+  cursor: pointer;
   gap: 0.25rem;
+  transition: background-color 100ms ease-out;
 }
 
 .select-trigger span[data-placeholder="true"] {
@@ -54,10 +53,6 @@
   stroke-width: 2;
 }
 
-.select-list {
-  position: relative;
-}
-
 .select[data-disabled="true"] .select-trigger {
   color: var(--muted-text-color);
   cursor: not-allowed;
@@ -77,6 +72,7 @@
   top: 100%;
   left: 0;
   min-width: 100%;
+  box-sizing: border-box;
   padding: 0.25rem;
   border-radius: 0.5rem;
   margin-top: 0.25rem;
@@ -86,7 +82,6 @@
     var(--dark, var(--hover-border-color));
   transform-origin: top;
   will-change: transform, opacity;
-  box-sizing: border-box;
 }
 
 .select-list[data-state="closed"] {
