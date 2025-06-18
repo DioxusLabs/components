@@ -692,6 +692,12 @@ pub fn SelectList(props: SelectListProps) -> Element {
     }
 }
 
+#[derive(Clone, Copy)]
+struct SelectOptionContext {
+    /// If the option is selected
+    selected: Memo<bool>,
+}
+
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectOptionProps {
     /// The value of the option
@@ -753,6 +759,9 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
     let onmounted = use_focus_controlled_item(props.index);
     let focused = move || ctx.focus_state.is_focused(index());
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
+    let selected = use_memo(move || ctx.value.read().as_ref() == Some(&props.value.read()));
+
+    use_context_provider(|| SelectOptionContext { selected });
 
     rsx! {
         div {
@@ -762,7 +771,7 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
             onmounted,
 
             // ARIA attributes
-            aria_selected: ctx.value.read().as_ref() == Some(&props.value.read()),
+            aria_selected: selected(),
             aria_disabled: disabled,
             aria_label: props.aria_label.clone(),
             aria_roledescription: props.aria_roledescription.clone(),
@@ -783,6 +792,22 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
             ..props.attributes,
             {props.children}
         }
+    }
+}
+
+#[derive(Props, Clone, PartialEq)]
+pub struct SelectItemIndicatorProps {
+    children: Element,
+}
+
+#[component]
+pub fn SelectItemIndicator(props: SelectItemIndicatorProps) -> Element {
+    let ctx: SelectOptionContext = use_context();
+    if !(ctx.selected)() {
+        return rsx! {};
+    }
+    rsx! {
+        {props.children}
     }
 }
 

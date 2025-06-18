@@ -24,7 +24,7 @@
   gap: 0.25rem;
 }
 
-.select-trigger [data-placeholder="true"] {
+.select-trigger span[data-placeholder="true"] {
   color: var(--muted-text-color);
 }
 
@@ -36,7 +36,16 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2;
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.select-check-icon {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: var(--muted-text-color);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .select-list {
@@ -89,7 +98,9 @@
 }
 
 .select-option {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 8px 12px;
   border-radius: calc(0.5rem - 0.25rem);
   cursor: pointer;
@@ -112,7 +123,7 @@
 .select-group-label {
   padding: 4px 12px;
   color: var(--muted-text-color);
-  font-size: .75rem;
+  font-size: 0.75rem;
 }
 
 [data-disabled="true"] {

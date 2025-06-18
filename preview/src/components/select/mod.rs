@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_primitives::select::{
-    Select, SelectGroup, SelectGroupLabel, SelectList, SelectOption, SelectTrigger,
+    Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+    SelectTrigger,
 };
 #[component]
 pub(super) fn Demo() -> Element {
@@ -37,30 +38,70 @@ pub(super) fn Demo() -> Element {
                         class: "select-option",
                         value: "apple".to_string(),
                         "Apple"
+                        SelectItemIndicator {
+                            svg {
+                                class: "select-check-icon",
+                                view_box: "0 0 24 24",
+                                xmlns: "http://www.w3.org/2000/svg",
+                                path { d: "M5 13l4 4L19 7" }
+                            }
+                        }
                     }
                     SelectOption {
                         index: 1usize,
                         class: "select-option",
                         value: "banana".to_string(),
                         "Banana"
+                        SelectItemIndicator {
+                            svg {
+                                class: "select-check-icon",
+                                view_box: "0 0 24 24",
+                                xmlns: "http://www.w3.org/2000/svg",
+                                path { d: "M5 13l4 4L19 7" }
+                            }
+                        }
                     }
                     SelectOption {
                         index: 2usize,
                         class: "select-option",
                         value: "orange".to_string(),
                         "Orange"
+                        SelectItemIndicator {
+                            svg {
+                                class: "select-check-icon",
+                                view_box: "0 0 24 24",
+                                xmlns: "http://www.w3.org/2000/svg",
+                                path { d: "M5 13l4 4L19 7" }
+                            }
+                        }
                     }
                     SelectOption {
                         index: 3usize,
                         class: "select-option",
                         value: "strawberry".to_string(),
                         "Strawberry"
+                        SelectItemIndicator {
+                            svg {
+                                class: "select-check-icon",
+                                view_box: "0 0 24 24",
+                                xmlns: "http://www.w3.org/2000/svg",
+                                path { d: "M5 13l4 4L19 7" }
+                            }
+                        }
                     }
                     SelectOption {
                         index: 4usize,
                         class: "select-option",
                         value: "watermelon".to_string(),
                         "Watermelon"
+                        SelectItemIndicator {
+                            svg {
+                                class: "select-check-icon",
+                                view_box: "0 0 24 24",
+                                xmlns: "http://www.w3.org/2000/svg",
+                                path { d: "M5 13l4 4L19 7" }
+                            }
+                        }
                     }
                 }
                 SelectGroup {
@@ -74,6 +115,14 @@ pub(super) fn Demo() -> Element {
                         class: "select-option",
                         value: "other".to_string(),
                         "Other"
+                        SelectItemIndicator {
+                            svg {
+                                class: "select-check-icon",
+                                view_box: "0 0 24 24",
+                                xmlns: "http://www.w3.org/2000/svg",
+                                path { d: "M5 13l4 4L19 7" }
+                            }
+                        }
                     }
                 }
             }
