@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs};
+use dioxus_primitives::tabs::{TabContent, TabList, TabTrigger, Tabs};
 
 mod components;
 
@@ -109,16 +109,19 @@ fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
     rsx! {
         div {
             class: "code-block dark-code-block",
+            tabindex: "0",
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.dark,
         }
         div {
             class: "code-block light-code-block",
+            tabindex: "0",
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.light,
         }
         button {
             class: "copy-button",
+            aria_label: "Copy code",
             "data-copied": copied,
             "onclick": "navigator.clipboard.writeText(this.parentNode.firstChild.innerText);",
             onclick: move |_| copied.set(true),
@@ -218,6 +221,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
 
     let expand = rsx! {
         button {
+            aria_label: if collapsed() { "Expand code" } else { "Collapse code" },
             width: "100%",
             height: "2rem",
             color: "var(--text-color)",
@@ -266,7 +270,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
             border_bottom_right_radius: "0.5rem",
             horizontal: true,
             width: "100%",
-            div { class: "tabs-list",
+            TabList { class: "tabs-list",
                 TabTrigger { class: "tabs-trigger", value: "main.rs", index: 0usize, "main.rs" }
                 TabTrigger {
                     class: "tabs-trigger",
