@@ -1,5 +1,9 @@
 .select {
   position: relative;
+}
+
+.select-trigger {
+  position: relative;
   display: flex;
   box-sizing: border-box;
   padding: 0.25rem;
@@ -21,19 +25,19 @@
   position: relative;
 }
 
-.select[data-state="open"] {
+.select[data-state="open"] .select-trigger {
   background-color: var(--light, var(--hover-background-color))
     var(--dark, var(--hover-border-color));
   color: var(--bright-text-color);
 }
 
-.select[data-disabled="true"] {
+.select[data-disabled="true"] .select-trigger {
   color: var(--muted-text-color);
   cursor: not-allowed;
 }
 
-.select:hover:not([data-disabled="true"]),
-.select:focus-visible {
+.select-trigger:hover:not([data-disabled="true"]),
+.select-trigger:focus-visible {
   background: var(--light, var(--hover-background-color))
     var(--dark, var(--hover-border-color));
   color: var(--bright-text-color);
@@ -86,7 +90,7 @@
 }
 
 .select-option:hover:not([data-disabled="true"]),
-.select-option[data-focused="true"] {
+.select-option:focus-visible {
   background: var(--light, var(--hover-background-color))
     var(--dark, var(--hover-border-color));
   color: var(--bright-text-color);

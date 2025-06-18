@@ -1,14 +1,16 @@
 use std::collections::HashMap;
 
-use crate::{use_controlled, use_effect_cleanup, use_id_or, use_unique_id};
+use crate::{
+    focus::{self, FocusState, use_focus_controlled_item, use_focus_provider},
+    use_controlled, use_effect_cleanup, use_id_or, use_unique_id,
+};
+use dioxus::html::input_data::MouseButton;
 use dioxus_lib::prelude::*;
 
 #[derive(Clone, Copy)]
 struct SelectContext {
     // The typeahead buffer for searching options
     typeahead_buffer: Signal<String>,
-    // The focused item in the select
-    focused_item: Signal<Option<usize>>,
     // If the select is open
     open: Signal<bool>,
     // The currently selected value
@@ -19,6 +21,60 @@ struct SelectContext {
     options: Signal<Vec<OptionState>>,
     // Known key positions for the keyboard layout
     known_key_positions: Signal<HashMap<char, char>>,
+    // The ID of the list for ARIA attributes
+    list_id: Signal<Option<String>>,
+    // The focus state for the select
+    focus_state: FocusState,
+    // Whether the select is disabled
+    disabled: ReadOnlySignal<bool>,
+    // The placeholder text
+    placeholder: ReadOnlySignal<String>,
+}
+
+impl SelectContext {
+    fn select_current_item(&mut self) {
+        // If the select is open, select the focused item
+        if self.open.cloned() {
+            if let Some(focused_index) = self.focus_state.current_focus() {
+                let options = self.options.read();
+                if let Some(option) = options.iter().find(|opt| opt.tab_index == focused_index) {
+                    self.set_value.call(Some(option.value.clone()));
+                    self.open.set(false);
+                }
+            }
+        }
+    }
+
+    fn add_to_known_key_positions(&mut self, code: &Code, key: &Key) {
+        if let (Some(code), Key::Character(key)) = (code_to_char(&code), &key) {
+            let chars = key.chars().collect::<Vec<_>>();
+            if let &[key_as_char] = chars.as_slice() {
+                self.known_key_positions.write().insert(code, key_as_char);
+            }
+        }
+    }
+
+    fn add_to_typeahead_buffer(&mut self, new_text: &str) {
+        let mut typeahead_buffer = self.typeahead_buffer.write();
+        // Add character to typeahead buffer
+        typeahead_buffer.push_str(&new_text);
+        // Trim the typeahead buffer to the maximum length of the options
+        let longest_option_length = self
+            .options
+            .read()
+            .iter()
+            .map(|opt| opt.value.chars().count())
+            .max()
+            .unwrap_or_default();
+        let overflow_length = typeahead_buffer.len().saturating_sub(longest_option_length);
+        if overflow_length > 0 {
+            *typeahead_buffer = typeahead_buffer
+                .chars()
+                .skip(overflow_length)
+                .take(longest_option_length)
+                .collect::<String>();
+        }
+    }
 }
 
 fn best_match(
@@ -229,7 +285,7 @@ impl KeyboardLayout {
     }
 }
 
-fn code_to_char(code: Code) -> Option<char> {
+fn code_to_char(code: &Code) -> Option<char> {
     match code {
         Code::Digit1 => Some('1'),
         Code::Digit2 => Some('2'),
@@ -386,8 +442,11 @@ pub struct SelectProps {
     name: ReadOnlySignal<String>,
 
     /// Optional placeholder text
-    #[props(default = String::from("Select an option"))]
-    placeholder: String,
+    #[props(default = ReadOnlySignal::new(Signal::new(String::from("Select an option"))))]
+    placeholder: ReadOnlySignal<String>,
+
+    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
+    roving_loop: ReadOnlySignal<bool>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -400,12 +459,12 @@ pub fn Select(props: SelectProps) -> Element {
     let (value, set_value) =
         use_controlled(props.value, props.default_value, props.on_value_change);
 
-    let mut open = use_signal(|| false);
+    let open = use_signal(|| false);
 
     let mut typeahead_buffer = use_signal(|| String::new());
-    let mut focused_item = use_signal(|| None);
     let options = use_signal(Default::default);
     let known_key_positions = use_signal(Default::default);
+    let list_id = use_signal(|| None);
 
     let keyboard_layout = use_memo(move || {
         let known_key_positions = known_key_positions.read();
@@ -421,21 +480,13 @@ pub fn Select(props: SelectProps) -> Element {
         best_match(&keyboard_layout, &typeahead, &options)
     });
 
+    let mut focus_state = use_focus_provider(props.roving_loop);
+
     // Set the focused item to the best match if it exists
     use_effect(move || {
         if let Some(focused_value) = &*best_match.read() {
-            focused_item.set(Some(*focused_value));
+            focus_state.set_focus(Some(*focused_value));
         }
-    });
-
-    use_context_provider(|| SelectContext {
-        typeahead_buffer,
-        open: open.clone(),
-        value,
-        set_value,
-        options,
-        focused_item,
-        known_key_positions,
     });
 
     // Clear the typeahead buffer when the select is closed
@@ -445,34 +496,84 @@ pub fn Select(props: SelectProps) -> Element {
         }
     });
 
-    let current_value = value();
+    use_context_provider(|| SelectContext {
+        typeahead_buffer,
+        open: open.clone(),
+        value,
+        set_value,
+        options,
+        known_key_positions,
+        list_id,
+        focus_state,
+        disabled: props.disabled,
+        placeholder: props.placeholder,
+    });
+
+    rsx! {
+        div {
+            // Data attributes
+            "data-state": if open() { "open" } else { "closed" },
+            ..props.attributes,
+            {props.children}
+        }
+    }
+}
+
+#[derive(Props, Clone, PartialEq)]
+pub struct SelectTriggerProps {
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+
+    children: Element,
+}
+
+#[component]
+pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
+    let mut ctx: SelectContext = use_context();
+
+    let mut open = ctx.open;
 
     rsx! {
         button {
             // Standard HTML attributes
-            name: props.name,
-            disabled: (props.disabled)(),
+            disabled: (ctx.disabled)(),
 
-            onclick: move |_| open.toggle(),
-
-            // Data attributes
-            "data-state": if open() { "open" } else { "closed" },
+            onclick: move |_| {
+                open.toggle();
+            },
+            onkeydown: move |event| {
+                match event.key() {
+                    Key::ArrowUp => {
+                        open.set(true);
+                        ctx.focus_state.focus_last();
+                        event.prevent_default();
+                        event.stop_propagation();
+                    }
+                    Key::ArrowDown => {
+                        open.set(true);
+                        ctx.focus_state.focus_first();
+                        event.prevent_default();
+                        event.stop_propagation();
+                    }
+                    _ => {}
+                }
+            },
 
             // ARIA attributes
             aria_haspopup: "listbox",
             aria_expanded: open(),
-            aria_required: (props.required)().to_string(),
+            aria_controls: ctx.list_id,
 
             // Pass through other attributes
             ..props.attributes,
 
             // Add placeholder option if needed
-            match &current_value {
+            match &ctx.value.cloned() {
                 Some(value) => rsx! {
                     "{value}"
                 },
                 None => rsx! {
-                    "{props.placeholder}"
+                    "{ctx.placeholder}"
                 }
             }
 
@@ -484,6 +585,10 @@ pub fn Select(props: SelectProps) -> Element {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectListProps {
+    /// The ID of the list for ARIA attributes
+    #[props(default)]
+    id: ReadOnlySignal<Option<String>>,
+
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
@@ -492,159 +597,97 @@ pub struct SelectListProps {
 
 #[component]
 pub fn SelectList(props: SelectListProps) -> Element {
-    let ctx: SelectContext = use_context();
+    let mut ctx: SelectContext = use_context();
 
-    let active_option_id = use_signal(|| String::new());
+    let id = use_unique_id();
+    let id = use_id_or(id, props.id);
+    use_effect(move || {
+        ctx.list_id.set(Some(id()));
+    });
+
     let mut open = ctx.open;
     let mut listbox_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
+    let focused = move || open() && !ctx.focus_state.any_focused();
 
     use_effect(move || {
         let Some(listbox_ref) = listbox_ref() else {
             return;
         };
-        if open() {
+        if focused() {
             spawn(async move {
                 _ = listbox_ref.set_focus(true);
             });
         }
     });
 
-    let mut known_key_positions = ctx.known_key_positions;
-    let mut focused_item = ctx.focused_item;
-    let options = ctx.options;
-    let set_value = ctx.set_value;
-    let mut typeahead_buffer = ctx.typeahead_buffer;
-
     let onkeydown = move |event: KeyboardEvent| {
         let key = event.key();
         let code = event.code();
-        if let (Some(code), Key::Character(key)) = (code_to_char(code), &key) {
-            let chars = key.chars().collect::<Vec<_>>();
-            if let &[key_as_char] = chars.as_slice() {
-                known_key_positions.write().insert(code, key_as_char);
-            }
-        }
+        ctx.add_to_known_key_positions(&code, &key);
 
         let mut arrow_key_navigation = |event: KeyboardEvent| {
             // Clear the typeahead buffer
-            typeahead_buffer.take();
+            ctx.typeahead_buffer.take();
             event.prevent_default();
             event.stop_propagation();
-        };
-
-        let mut focus_last_item = move || {
-            let mut focused_item = focused_item.write();
-            *focused_item = options.read().iter().map(|opt| opt.tab_index).max();
-        };
-
-        let mut focus_first_item = move || {
-            let mut focused_item = focused_item.write();
-            *focused_item = options.read().iter().map(|opt| opt.tab_index).min();
-        };
-
-        let mut select_current_item = move || {
-            // If the select is open, select the focused item
-            if open() {
-                if let Some(focused_index) = focused_item.cloned() {
-                    let options = options.read();
-                    if let Some(option) = options.iter().find(|opt| opt.tab_index == focused_index)
-                    {
-                        set_value(Some(option.value.clone()));
-                        open.set(false);
-                    }
-                }
-            }
         };
 
         match key {
             Key::Character(new_text) => {
                 if new_text == " " {
-                    select_current_item();
+                    ctx.select_current_item();
                     event.prevent_default();
                     event.stop_propagation();
                     return;
                 }
 
-                let mut typeahead_buffer = typeahead_buffer.write();
-                // Add character to typeahead buffer
-                typeahead_buffer.push_str(&new_text);
-                // Trim the typeahead buffer to the maximum length of the options
-                let longest_option_length = options
-                    .read()
-                    .iter()
-                    .map(|opt| opt.value.chars().count())
-                    .max()
-                    .unwrap_or_default();
-                let overflow_length = typeahead_buffer.len().saturating_sub(longest_option_length);
-                if overflow_length > 0 {
-                    *typeahead_buffer = typeahead_buffer
-                        .chars()
-                        .skip(overflow_length)
-                        .take(longest_option_length)
-                        .collect::<String>();
-                }
+                ctx.add_to_typeahead_buffer(&new_text);
             }
             Key::ArrowUp => {
                 arrow_key_navigation(event);
 
-                // Move focus up
-                {
-                    let mut focused_item = focused_item.write();
-                    if let Some(item) = *focused_item {
-                        if item > 0 {
-                            *focused_item = Some(item - 1);
-                            return;
-                        }
-                    }
-                }
-                focus_last_item();
+                ctx.focus_state.focus_prev();
             }
             Key::End => {
                 arrow_key_navigation(event);
-                focus_last_item();
+
+                ctx.focus_state.focus_last();
             }
             Key::ArrowDown => {
                 arrow_key_navigation(event);
 
-                // Move focus down
-                {
-                    let mut focused_item = focused_item.write();
-                    if let Some(item) = *focused_item {
-                        if item < options.read().len() - 1 {
-                            *focused_item = Some(item + 1);
-                            return;
-                        }
-                    }
-                }
-                focus_first_item();
+                ctx.focus_state.focus_next();
             }
             Key::Home => {
                 arrow_key_navigation(event);
-                focus_first_item();
+
+                ctx.focus_state.focus_first();
             }
             Key::Enter => {
-                select_current_item();
-                open.toggle();
+                ctx.select_current_item();
+                open.set(false);
+                event.prevent_default();
+                event.stop_propagation();
             }
             _ => {}
         }
     };
 
-    let is_open = open();
-
     rsx! {
         div {
+            id,
             role: "listbox",
-            aria_activedescendant: active_option_id,
-            tabindex: if is_open { "0" } else { "-1" },
+            tabindex: if focused() { "0" } else { "-1" },
 
             // Data attributes
-            "data-state": if is_open { "open" } else { "closed" },
+            "data-state": if open() { "open" } else { "closed" },
 
             onmounted: move |evt| listbox_ref.set(Some(evt.data())),
             onkeydown,
             onblur: move |_| {
-                open.set(false);
+                if focused() {
+                    open.set(false);
+                }
             },
 
             ..props.attributes,
@@ -711,22 +754,35 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
         ctx.options.write().retain(|opt| &*opt.id != &*id.read());
     });
 
-    let focused_item = ctx.focused_item.read();
-    let focused = *focused_item == Some(index());
+    let onmounted = use_focus_controlled_item(props.index);
+    let focused = move || ctx.focus_state.is_focused(index());
+    let disabled = ctx.disabled.cloned() || props.disabled.cloned();
 
     rsx! {
         div {
             role: "option",
             id,
-            tabindex: "-1",
-
-            "data-focused": focused,
+            tabindex: if focused() { "0" } else { "-1" },
+            onmounted,
 
             // ARIA attributes
             aria_selected: ctx.value.read().as_ref() == Some(&props.value.read()),
-            aria_disabled: (props.disabled)().to_string(),
+            aria_disabled: disabled,
             aria_label: props.aria_label.clone(),
             aria_roledescription: props.aria_roledescription.clone(),
+
+            onpointerdown: move |event| {
+                if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
+                    ctx.set_value.call(Some(props.value.read().clone()));
+                    ctx.open.set(false);
+                }
+            },
+            onblur: move |_| {
+                if focused() {
+                    ctx.focus_state.blur();
+                    ctx.open.set(false);
+                }
+            },
 
             ..props.attributes,
             {props.children}
@@ -769,13 +825,16 @@ pub fn SelectGroup(props: SelectGroupProps) -> Element {
     // Use use_id_or to handle the ID
     let id = use_id_or(group_id, props.id);
 
+    let ctx: SelectContext = use_context();
+    let disabled = ctx.disabled.cloned() || props.disabled.cloned();
+
     rsx! {
         div {
             role: "group",
             id,
 
             // ARIA attributes
-            aria_disabled: (props.disabled)().to_string(),
+            aria_disabled: disabled,
             aria_label: props.aria_label.clone(),
             aria_roledescription: props.aria_roledescription.clone(),
 

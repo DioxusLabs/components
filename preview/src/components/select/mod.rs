@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_primitives::select::{Select, SelectGroup, SelectList, SelectOption};
+use dioxus_primitives::select::{Select, SelectGroup, SelectList, SelectOption, SelectTrigger};
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
@@ -10,9 +10,13 @@ pub(super) fn Demo() -> Element {
         Select {
             class: "select",
             placeholder: "Select a fruit...",
-            aria_label: "Select Demo",
+            SelectTrigger {
+                class: "select-trigger",
+                aria_label: "Select Trigger",
+            }
             SelectList {
                 class: "select-list",
+                aria_label: "Select Demo",
                 SelectGroup {
                     class: "select-group",
                     label: "Fruits".to_string(),
