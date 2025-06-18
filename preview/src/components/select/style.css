@@ -19,8 +19,8 @@
   color: var(--text-color);
   cursor: pointer;
   transition: background-color 100ms ease-out;
-  background: var(--dim-background-color);
-  box-shadow: inset 0 0 0 1px var(--hover-border-color);
+  background: var(--light, var(--background-color)) var(--dark, var(--dim-background-color));
+  box-shadow: inset 0 0 0 1px var(--light, var(--dim-border-color)) var(--dark, var(--hover-border-color));
   gap: 0.25rem;
 }
 
