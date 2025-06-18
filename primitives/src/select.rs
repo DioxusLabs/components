@@ -93,22 +93,8 @@ fn best_match(
         .map(|opt| {
             let value = &opt.value;
             let value_characters: Box<[_]> = value.chars().collect();
-            // Only use the the start of the value characters
-            let value_characters =
-                &value_characters[..value_characters.len().min(typeahead_characters.len())];
-            // Only use the end of the typeahead characters
-            let typeahead_characters = &typeahead_characters[typeahead_characters
-                .len()
-                .saturating_sub(value_characters.len())..];
-
             let distance =
-                levenshtein_distance(&typeahead_characters, &value_characters, |a, b| {
-                    keyboard_layout.substitution_cost(a, b)
-                });
-            let max_distance =
-                (typeahead_characters.len() as f32).max(value_characters.len() as f32);
-            let distance = distance / max_distance;
-
+                normalized_distance(&typeahead_characters, &value_characters, keyboard_layout);
             (distance, opt.tab_index)
         })
         .min_by(|(d1, _), (d2, _)| f32::total_cmp(d1, d2))
@@ -117,9 +103,27 @@ fn best_match(
     best_match
 }
 
+fn normalized_distance(
+    typeahead_characters: &[char],
+    value_characters: &[char],
+    keyboard_layout: &KeyboardLayout,
+) -> f32 {
+    // Only use the the start of the value characters
+    let value_characters =
+        &value_characters[..value_characters.len().min(typeahead_characters.len())];
+    // Only use the end of the typeahead characters
+    let typeahead_characters = &typeahead_characters[typeahead_characters
+        .len()
+        .saturating_sub(value_characters.len())..];
+
+    levenshtein_distance(&typeahead_characters, &value_characters, |a, b| {
+        keyboard_layout.substitution_cost(a, b)
+    })
+}
+
 // The recency bias of the levenshtein distance function
 fn recency_bias(char_index: usize, total_length: usize) -> f32 {
-    ((char_index as f32 + 1.5).ln() / (total_length as f32 + 1.5).ln()).powi(2)
+    ((char_index as f32 + 1.5).ln() / (total_length as f32 + 1.5).ln()).powi(4)
 }
 
 // We use a weighted Levenshtein distance to account for the recency of characters
@@ -134,12 +138,17 @@ fn levenshtein_distance(
 ) -> f32 {
     let mut dp = vec![vec![0.0; value.len() + 1]; typeahead.len() + 1];
 
-    // Weight more recent typeahead characters heavily
-    for i in 0..=typeahead.len() {
-        dp[i][0] = i as f32 * recency_bias(i, typeahead.len());
-    }
+    let mut prev = 0.0;
     for j in 0..=value.len() {
-        dp[0][j] = j as f32 * 0.5f32.max(1.0 - recency_bias(j, value.len()));
+        let new = prev + (1.0 - recency_bias(j, value.len())) * 0.5;
+        prev = new;
+        dp[0][j] = new;
+    }
+    let mut prev = 0.0;
+    for i in 0..=typeahead.len() {
+        let new = prev + recency_bias(i, typeahead.len()) * 0.5;
+        prev = new;
+        dp[i][0] = new;
     }
 
     for i in 1..=typeahead.len() {
@@ -152,18 +161,23 @@ fn levenshtein_distance(
 
             dp[i][j] = f32::min(
                 f32::min(
-                    // Insertion
+                    // Insertion is cheaper for old characters in the typeahead
                     dp[i - 1][j] + recency_bias(i, typeahead.len()),
-                    // Deletion
-                    dp[i][j - 1] + 0.5f32.max(1.0 - recency_bias(i, typeahead.len())),
+                    // Deletion is cheaper for untyped characters in the value
+                    dp[i][j - 1] + (1.0 - recency_bias(j, value.len())),
                 ),
                 // Substitution
-                dp[i - 1][j - 1] + cost,
+                dp[i - 1][j - 1] + cost * 2.0 * recency_bias(i, typeahead.len()),
             );
         }
     }
 
-    dp[typeahead.len()][value.len()]
+    let result = dp[typeahead.len()][value.len()];
+
+    let max_possible = dp[typeahead.len()][0].max(dp[0][value.len()]);
+
+    // Normalize the result to a range of 0.0 to 1.0
+    result / max_possible
 }
 
 #[test]
@@ -172,7 +186,7 @@ fn test_levenshtein_distance() {
     let s2: Vec<char> = "sitting".chars().collect();
 
     let distance = levenshtein_distance(&s1, &s2, |a, b| if a == b { 0.0 } else { 1.0 });
-    assert_eq!(distance, 2.5); // kitten -> sitting requires 3 edits, but the distance is scaled by recency bias
+    assert_eq!(distance, 0.5158963); // kitten -> sitting requires 3 edits, but the distance is scaled by recency bias and normalized
 
     let s1: Vec<char> = "kitten".chars().collect();
     let s2: Vec<char> = "litten".chars().collect();
@@ -188,6 +202,33 @@ fn test_levenshtein_distance() {
     assert!(
         qwerty_distance < colemack_distance,
         "ColemakDH should have a higher distance than QWERTY for the same characters"
+    );
+}
+
+#[test]
+fn test_normalized_distance() {
+    let typeahead: Vec<char> = "goodhe".chars().collect();
+    let string1: Vec<char> = "hello".chars().collect();
+    let string2: Vec<char> = "goodbye".chars().collect();
+    let distance1 = normalized_distance(&typeahead, &string1, &KeyboardLayout::ColemakDH);
+    println!("Distance from 'goodhe' to 'hello': {}", distance1);
+    let distance2 = normalized_distance(&typeahead, &string2, &KeyboardLayout::ColemakDH);
+    println!("Distance from 'goodhe' to 'goodbye': {}", distance2);
+    assert!(
+        distance1 < distance2,
+        "Distance to 'hello' should be less than distance to 'goodbye'"
+    );
+
+    let typeahead: Vec<char> = "orangwat".chars().collect();
+    let string1: Vec<char> = "watermelon".chars().collect();
+    let string2: Vec<char> = "orange".chars().collect();
+    let distance1 = normalized_distance(&typeahead, &string1, &KeyboardLayout::ColemakDH);
+    println!("Distance from 'orangwat' to 'watermelon': {}", distance1);
+    let distance2 = normalized_distance(&typeahead, &string2, &KeyboardLayout::ColemakDH);
+    println!("Distance from 'orangwat' to 'orange': {}", distance2);
+    assert!(
+        distance1 < distance2,
+        "Distance to 'watermelon' should be less than distance to 'orange'"
     );
 }
 
