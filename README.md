@@ -46,11 +46,11 @@ We're still in the early days - Many components are still being created and stab
 - [x] Label
 - [x] Menubar
 - [ ] Navigation Menu
-- [ ] Popover
+- [x] Popover
 - [x] Progress
 - [x] Radio Group
 - [x] Scroll Area
-- [x] Select
+- [ ] Select
 - [x] Separator
 - [x] Slider
 - [x] Switch
