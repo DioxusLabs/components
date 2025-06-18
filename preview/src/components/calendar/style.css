@@ -112,8 +112,9 @@
 .calendar-grid-cell[data-month="current"][data-selected="true"]:hover {
   background-color: var(--light, var(--contrast-background-color))
     var(--dark, var(--focused-background-color));
-  color: var(--light, var(--background-color)) var(--dark, var(--muted-background-color));
-  font-weight: var(--light, 520) var(--dark, inherit);
+  color: var(--light, var(--background-color))
+    var(--dark, var(--bright-text-color));
+  font-weight: var(--light, 550) var(--dark, inherit);
 }
 
 .calendar-grid-cell[data-month="current"][data-today="true"]:not(
