@@ -23,15 +23,13 @@ struct SelectContext {
     // The current best guess of the keyboard layout
     // based on the known key positions
     keyboard_layout: Memo<KeyboardLayout>,
-    // The currently active value based on the typeahead buffer and focused item
-    active_value: Memo<Option<String>>,
 }
 
 fn best_match(
     keyboard_layout: &KeyboardLayout,
     typeahead: &str,
     options: &Vec<OptionState>,
-) -> Option<String> {
+) -> Option<usize> {
     if typeahead.is_empty() {
         return None;
     }
@@ -59,7 +57,7 @@ fn best_match(
                 (typeahead_characters.len() as f32).max(value_characters.len() as f32);
             let distance = distance / max_distance;
 
-            (distance, value.clone())
+            (distance, opt.tab_index)
         })
         .min_by(|(d1, _), (d2, _)| f32::total_cmp(d1, d2))
         .map(|(_, value)| value);
@@ -355,11 +353,6 @@ fn test_detect_keyboard_layout() {
     assert_eq!(layout, KeyboardLayout::Colemak);
 }
 
-struct OptionMatch {
-    range: std::ops::Range<usize>,
-    value: String,
-}
-
 #[derive(Clone, Debug)]
 struct OptionState {
     /// The tab index of the option
@@ -414,7 +407,7 @@ pub fn Select(props: SelectProps) -> Element {
     let mut open = use_signal(|| false);
 
     let mut typeahead_buffer = use_signal(|| String::new());
-    let focused_item = use_signal(|| None);
+    let mut focused_item = use_signal(|| None);
     let options = use_signal(Default::default);
     let mut known_key_positions = use_signal(Default::default);
 
@@ -432,18 +425,11 @@ pub fn Select(props: SelectProps) -> Element {
         best_match(&keyboard_layout, &typeahead, &options)
     });
 
-    let active_value = use_memo(move || {
-        if let Some(focused_item) = focused_item.cloned() {
-            let value = options.read().iter().find_map(|opt| {
-                if opt.tab_index == focused_item {
-                    Some(opt.value.clone())
-                } else {
-                    None
-                }
-            });
-            return value;
+    // Set the focused item to the best match if it exists
+    use_effect(move || {
+        if let Some(focused_value) = &*best_match.read() {
+            focused_item.set(Some(*focused_value));
         }
-        best_match()
     });
 
     use_context_provider(|| SelectContext {
@@ -454,7 +440,13 @@ pub fn Select(props: SelectProps) -> Element {
         options,
         focused_item,
         keyboard_layout,
-        active_value,
+    });
+
+    // Clear the typeahead buffer when the select is closed
+    use_effect(move || {
+        if !open() {
+            typeahead_buffer.take();
+        }
     });
 
     let current_value = value();
@@ -468,6 +460,24 @@ pub fn Select(props: SelectProps) -> Element {
                 known_key_positions.write().insert(code, key_as_char);
             }
         }
+
+        let mut arrow_key_navigation = |event: KeyboardEvent| {
+            // Clear the typeahead buffer
+                typeahead_buffer.take();
+                event.prevent_default();
+                event.stop_propagation();
+
+        };
+
+        let mut focus_last_item = move || {
+            let mut focused_item = focused_item.write();
+            *focused_item = options.read().iter().map(|opt| opt.tab_index).max();
+        };
+
+        let mut focus_first_item = move || {
+            let mut focused_item = focused_item.write();
+            *focused_item = options.read().iter().map(|opt| opt.tab_index).min();
+        };
 
         match key {
             Key::Character(new_text) => {
@@ -489,6 +499,40 @@ pub fn Select(props: SelectProps) -> Element {
                         .take(longest_option_length)
                         .collect::<String>();
                 }
+            }
+            Key::ArrowUp => {
+                arrow_key_navigation(event);
+
+                // Move focus up
+                let mut focused_item = focused_item.write();
+                if let Some(item) = *focused_item {
+                    if item > 0 {
+                        *focused_item = Some(item - 1);
+                        return;
+                    }
+                }
+                focus_last_item();
+            }
+            Key::End => {
+                arrow_key_navigation(event);
+                focus_last_item();
+            }
+            Key::ArrowDown => {
+                arrow_key_navigation(event);
+
+                // Move focus down
+                let mut focused_item = focused_item.write();
+                if let Some(item) = *focused_item {
+                    if item < options.read().len() - 1 {
+                        *focused_item = Some(item + 1);
+                        return;
+                    }
+                }
+                focus_first_item();
+            }
+            Key::Home => {
+                arrow_key_navigation(event);
+                focus_first_item();
             }
             _ => {}
         }
@@ -618,8 +662,8 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
         ctx.options.write().retain(|opt| &*opt.id != &*id.read());
     });
 
-    let active_value = ctx.active_value.read();
-    let focused = active_value.as_ref() == Some(&*props.value.read());
+    let focused_item = ctx.focused_item.read();
+    let focused = *focused_item == Some(index());
 
     rsx! {
         div {
