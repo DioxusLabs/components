@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_primitives::select::{Select, SelectGroup, SelectOption};
+use dioxus_primitives::select::{Select, SelectGroup, SelectList, SelectOption};
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
@@ -11,15 +11,52 @@ pub(super) fn Demo() -> Element {
             class: "select",
             placeholder: "Select a fruit...",
             aria_label: "Select Demo",
-            SelectGroup { label: "Fruits".to_string(),
-                SelectOption { value: "apple".to_string(), "Apple" }
-                SelectOption { value: "banana".to_string(), "Banana" }
-                SelectOption { value: "orange".to_string(), "Orange" }
-                SelectOption { value: "strawberry".to_string(), "Strawberry" }
-                SelectOption { value: "watermelon".to_string(), "Watermelon" }
-            }
-            SelectGroup { label: "Other".to_string(),
-                SelectOption { value: "other".to_string(), "Other" }
+            SelectList {
+                class: "select-list",
+                SelectGroup {
+                    class: "select-group",
+                    label: "Fruits".to_string(),
+                    SelectOption {
+                        index: 0usize,
+                        class: "select-option",
+                        value: "apple".to_string(),
+                        "Apple"
+                    }
+                    SelectOption {
+                        index: 1usize,
+                        class: "select-option",
+                        value: "banana".to_string(),
+                        "Banana"
+                    }
+                    SelectOption {
+                        index: 2usize,
+                        class: "select-option",
+                        value: "orange".to_string(),
+                        "Orange"
+                    }
+                    SelectOption {
+                        index: 3usize,
+                        class: "select-option",
+                        value: "strawberry".to_string(),
+                        "Strawberry"
+                    }
+                    SelectOption {
+                        index: 4usize,
+                        class: "select-option",
+                        value: "watermelon".to_string(),
+                        "Watermelon"
+                    }
+                }
+                SelectGroup {
+                    class: "select-group",
+                    label: "Other".to_string(),
+                    SelectOption {
+                        index: 5usize,
+                        class: "select-option",
+                        value: "other".to_string(),
+                        "Other"
+                    }
+                }
             }
         }
     }
