@@ -46,7 +46,7 @@ impl SelectContext {
     }
 
     fn add_to_known_key_positions(&mut self, code: &Code, key: &Key) {
-        if let (Some(code), Key::Character(key)) = (code_to_char(&code), &key) {
+        if let (Some(code), Key::Character(key)) = (code_to_char(code), &key) {
             let chars = key.chars().collect::<Vec<_>>();
             if let &[key_as_char] = chars.as_slice() {
                 self.known_key_positions.write().insert(code, key_as_char);
@@ -57,7 +57,7 @@ impl SelectContext {
     fn add_to_typeahead_buffer(&mut self, new_text: &str) {
         let mut typeahead_buffer = self.typeahead_buffer.write();
         // Add character to typeahead buffer
-        typeahead_buffer.push_str(&new_text);
+        typeahead_buffer.push_str(new_text);
         // Trim the typeahead buffer to the maximum length of the options
         let longest_option_length = self
             .options
@@ -80,7 +80,7 @@ impl SelectContext {
 fn best_match(
     keyboard_layout: &KeyboardLayout,
     typeahead: &str,
-    options: &Vec<OptionState>,
+    options: &[OptionState],
 ) -> Option<usize> {
     if typeahead.is_empty() {
         return None;
@@ -88,7 +88,7 @@ fn best_match(
 
     let typeahead_characters: Box<[_]> = typeahead.chars().collect();
 
-    let best_match = options
+    options
         .iter()
         .map(|opt| {
             let value = &opt.value;
@@ -98,9 +98,7 @@ fn best_match(
             (distance, opt.tab_index)
         })
         .min_by(|(d1, _), (d2, _)| f32::total_cmp(d1, d2))
-        .map(|(_, value)| value);
-
-    best_match
+        .map(|(_, value)| value)
 }
 
 fn normalized_distance(
@@ -116,7 +114,7 @@ fn normalized_distance(
         .len()
         .saturating_sub(value_characters.len())..];
 
-    levenshtein_distance(&typeahead_characters, &value_characters, |a, b| {
+    levenshtein_distance(typeahead_characters, value_characters, |a, b| {
         keyboard_layout.substitution_cost(a, b)
     })
 }
@@ -145,10 +143,10 @@ fn levenshtein_distance(
         dp[0][j] = new;
     }
     let mut prev = 0.0;
-    for i in 0..=typeahead.len() {
+    for (i, row) in dp.iter_mut().enumerate().take(typeahead.len() + 1) {
         let new = prev + recency_bias(i, typeahead.len()) * 0.5;
         prev = new;
-        dp[i][0] = new;
+        row[0] = new;
     }
 
     for i in 1..=typeahead.len() {
@@ -502,15 +500,15 @@ pub fn Select(props: SelectProps) -> Element {
 
     let open = use_signal(|| false);
 
-    let mut typeahead_buffer = use_signal(|| String::new());
-    let options = use_signal(Default::default);
+    let mut typeahead_buffer = use_signal(String::new);
+    let options = use_signal(Vec::default);
     let known_key_positions = use_signal(Default::default);
     let list_id = use_signal(|| None);
 
     let keyboard_layout = use_memo(move || {
         let known_key_positions = known_key_positions.read();
 
-        KeyboardLayout::guess(&*known_key_positions)
+        KeyboardLayout::guess(&known_key_positions)
     });
 
     let best_match = use_memo(move || {
@@ -539,7 +537,7 @@ pub fn Select(props: SelectProps) -> Element {
 
     use_context_provider(|| SelectContext {
         typeahead_buffer,
-        open: open.clone(),
+        open,
         value,
         set_value,
         options,
@@ -778,7 +776,7 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
     let id = use_id_or(option_id, props.id);
 
     let index = props.index;
-    let value = props.value.clone();
+    let value = props.value;
 
     // Push this option to the context
     let mut ctx: SelectContext = use_context();
@@ -794,7 +792,7 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
     });
 
     use_effect_cleanup(move || {
-        ctx.options.write().retain(|opt| &*opt.id != &*id.read());
+        ctx.options.write().retain(|opt| *opt.id != *id.read());
     });
 
     let onmounted = use_focus_controlled_item(props.index);
