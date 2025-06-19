@@ -188,12 +188,10 @@ pub fn Slider(props: SliderProps) -> Element {
         }
 
         let Some(size) = size else {
-            tracing::warn!("Slider size is not (yet) set");
             return;
         };
 
         let Some(active_pointer_id) = current_pointer_id() else {
-            tracing::warn!("Current pointer ID is not set");
             return;
         };
 
@@ -237,7 +235,6 @@ pub fn Slider(props: SliderProps) -> Element {
             onresize: move |_| async move {
                 // Update the rect on resize
                 let Some(div_element) = div_element() else {
-                    tracing::warn!("Slider div element is not (yet) set");
                     return;
                 };
                 if let Ok(r) = div_element.get_client_rect().await {
@@ -267,7 +264,6 @@ pub fn Slider(props: SliderProps) -> Element {
                 // Handle pointer interaction
                 spawn(async move {
                     let Some(div_element) = div_element() else {
-                        tracing::warn!("Slider div element is not (yet) set");
                         return;
                     };
 

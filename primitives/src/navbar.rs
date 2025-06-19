@@ -117,7 +117,7 @@ pub struct NavbarNavProps {
 
 #[component]
 pub fn NavbarNav(props: NavbarNavProps) -> Element {
-    let ctx: NavbarContext = use_context();
+    let mut ctx: NavbarContext = use_context();
     let is_open = use_memo(move || (ctx.open_nav)() == Some(props.index.cloned()));
     let focus = use_focus_provider(ctx.focus.roving_loop);
     let mut nav_ctx = use_context_provider(|| NavbarNavContext {
@@ -143,6 +143,21 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
             "data-state": if is_open() { "open" } else { "closed" },
             "data-disabled": (ctx.disabled)() || (props.disabled)(),
 
+            onmouseenter: move |_| {
+                if !disabled() {
+                    let index = Some(nav_ctx.index.cloned());
+                    if (ctx.open_nav)().is_some() {
+                        ctx.focus.set_focus(index);
+                    } else {
+                        ctx.set_open_nav.call(index);
+                    }
+                }
+            },
+            onmouseleave: move |_| {
+                if is_open() {
+                    ctx.focus.set_focus(None);
+                }
+            },
             onkeydown: move |event: Event<KeyboardData>| {
                 match event.key() {
                     Key::Enter if !disabled() => {
@@ -194,31 +209,12 @@ pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
             onmounted,
             onpointerdown: move |_| {
                 if !disabled() {
-                    tracing::info!("NavbarTrigger onpointerdown");
                     let new_open = if is_open() { None } else { Some(nav_ctx.index.cloned()) };
                     ctx.set_open_nav.call(new_open);
                 }
             },
-            onmouseenter: move |_| {
-                if !disabled() {
-                    tracing::info!("NavbarTrigger onmouseenter");
-                    let index = Some(nav_ctx.index.cloned());
-                    if (ctx.open_nav)().is_some() {
-                        ctx.focus.set_focus(index);
-                    } else {
-                        ctx.set_open_nav.call(index);
-                    }
-                }
-            },
-            onmouseleave: move |_| {
-                if is_open() {
-                    tracing::debug!("NavbarTrigger onmouseleave");
-                    ctx.focus.set_focus(None);
-                }
-            },
             onblur: move |_| {
                 if is_focused() {
-                    tracing::debug!("NavbarTrigger onblur");
                     ctx.focus.set_focus(None);
                     ctx.set_open_nav.call(None);
                 }
@@ -349,6 +345,12 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
         }
     }));
 
+    props.attributes.push(onpointerdown(move |_| {
+        if let Some(mut nav_ctx) = nav_ctx {
+            nav_ctx.focus.set_focus(Some(props.index.cloned()));
+        }
+    }));
+
     props.attributes.push(onblur(move |_| {
         if focused() {
             if let Some(nav_ctx) = &mut nav_ctx {
@@ -380,13 +382,13 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
 
             onclick: {
                 let value = props.value.clone();
-                move |evt| {
+                move |mouse_event| {
                     if !disabled() {
                         props.on_select.call(value.clone());
                         ctx.set_open_nav.call(None);
                     }
-                    if let Some(onclick) = &props.onclick {
-                        onclick.call(evt);
+                    if let Some(onclick) = props.onclick {
+                        onclick.call(mouse_event);
                     }
                 }
             },
