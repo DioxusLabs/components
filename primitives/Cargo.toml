@@ -1,7 +1,8 @@
 [package]
 name = "dioxus-primitives"
 version = "0.0.1"
-edition = "2024"
+edition = "2021"
+rust-version = "1.80.0"
 readme = "../README.md"
 keywords = ["gui", "dioxus", "components", "primitives"]
 categories = ["gui", "wasm"]

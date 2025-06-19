@@ -1,7 +1,7 @@
 use dioxus::document;
 use dioxus_lib::prelude::*;
 
-use crate::{FOCUS_TRAP_JS, use_controlled, use_id_or, use_unique_id};
+use crate::{use_controlled, use_id_or, use_unique_id, FOCUS_TRAP_JS};
 
 #[derive(Clone, Copy)]
 struct DialogCtx {

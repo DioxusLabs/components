@@ -1,5 +1,5 @@
 use crate::{
-    focus::{FocusState, use_focus_controlled_item, use_focus_provider},
+    focus::{use_focus_controlled_item, use_focus_provider, FocusState},
     toggle::Toggle,
     use_controlled,
 };

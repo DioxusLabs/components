@@ -1,5 +1,5 @@
 use crate::{
-    focus::{FocusState, use_focus_controlled_item, use_focus_provider},
+    focus::{use_focus_controlled_item, use_focus_provider, FocusState},
     use_controlled,
 };
 use dioxus_lib::prelude::*;
@@ -67,9 +67,13 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
     // If the context menu is open, prevent pointer and scroll events outside of it
     use_effect(move || {
         if ctx.open.cloned() {
-            dioxus::document::eval("document.body.style.pointerEvents = 'none'; document.documentElement.style.overflow = 'hidden';");
+            dioxus::document::eval(
+                "document.body.style.pointerEvents = 'none'; document.documentElement.style.overflow = 'hidden';",
+            );
         } else {
-            dioxus::document::eval("document.body.style.pointerEvents = 'auto'; document.documentElement.style.overflow = 'auto';");
+            dioxus::document::eval(
+                "document.body.style.pointerEvents = 'auto'; document.documentElement.style.overflow = 'auto';",
+            );
         }
     });
 

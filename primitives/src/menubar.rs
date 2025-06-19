@@ -1,7 +1,7 @@
 use dioxus_lib::prelude::*;
 
 use crate::focus::{
-    FocusState, use_focus_control, use_focus_controlled_item, use_focus_entry, use_focus_provider,
+    use_focus_control, use_focus_controlled_item, use_focus_entry, use_focus_provider, FocusState,
 };
 
 #[derive(Clone, Copy)]
@@ -103,7 +103,7 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
         index: props.index,
         focus,
         is_open,
-        disabled: props.disabled.clone(),
+        disabled: props.disabled,
     });
 
     use_effect(move || {
