@@ -12,9 +12,14 @@ repository = "https://github.com/DioxusLabs/components"
 
 [dependencies]
 dioxus-lib.workspace = true
+dioxus-router = { workspace = true, optional = true }
 dioxus.workspace = true
 dioxus-time = "=0.1.0-alpha.1"
 tracing.workspace = true
 
 [build-dependencies]
 lazy-js-bundle = "0.6.2"
+
+[features]
+default = ["router"]
+router = ["dioxus-router"]

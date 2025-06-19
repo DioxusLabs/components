@@ -1,4 +1,7 @@
-use crate::{use_controlled, use_effect_cleanup, use_unique_id};
+use crate::{
+    focus::{FocusState, use_focus_controlled_item, use_focus_provider},
+    use_controlled, use_unique_id,
+};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone, Copy)]
@@ -8,51 +11,11 @@ struct DropdownMenuContext {
     set_open: Callback<bool>,
     disabled: ReadOnlySignal<bool>,
 
-    // Keyboard nav data
-    item_count: Signal<usize>,
-    recent_focus: Signal<usize>,
-    current_focus: Signal<Option<usize>>,
+    // Focus state
+    focus: FocusState,
 
     // Unique ID for the trigger button
     trigger_id: Signal<String>,
-}
-
-impl DropdownMenuContext {
-    fn set_focus(&mut self, id: Option<usize>) {
-        self.current_focus.set(id);
-        if let Some(id) = id {
-            self.recent_focus.set(id);
-        }
-        if (self.open)() != id.is_some() {
-            (self.set_open)(id.is_some());
-        }
-    }
-
-    fn focus_next(&mut self) {
-        let focus = match (self.current_focus)() {
-            Some(current_focus) => (current_focus + 1) % self.item_count.cloned(),
-            None => 0,
-        };
-        self.set_focus(Some(focus));
-    }
-
-    fn focus_prev(&mut self) {
-        let item_count = self.item_count.cloned();
-        let focus = match (self.current_focus)() {
-            Some(current_focus) if current_focus > 0 => current_focus - 1,
-            Some(_) | None => item_count.saturating_sub(1),
-        };
-        self.set_focus(Some(focus));
-    }
-
-    fn focus_first(&mut self) {
-        self.set_focus(Some(0));
-    }
-
-    fn focus_last(&mut self) {
-        let last = (self.item_count)().saturating_sub(1);
-        self.set_focus(Some(last));
-    }
 }
 
 #[derive(Props, Clone, PartialEq)]
@@ -68,6 +31,9 @@ pub struct DropdownMenuProps {
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
+    roving_loop: ReadOnlySignal<bool>,
+
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
@@ -80,14 +46,20 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 
     let disabled = props.disabled;
     let trigger_id = use_unique_id();
+    let focus = use_focus_provider(props.roving_loop);
     let mut ctx = use_context_provider(|| DropdownMenuContext {
         open: open.into(),
         set_open,
         disabled,
-        item_count: Signal::new(0),
-        recent_focus: Signal::new(0),
-        current_focus: Signal::new(None),
+        focus,
         trigger_id,
+    });
+
+    use_effect(move || {
+        let focused = focus.any_focused();
+        if *ctx.open.peek() != focused {
+            (ctx.set_open)(focused);
+        }
     });
 
     // Handle escape key to close the menu
@@ -102,15 +74,15 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
             }
             Key::Escape => ctx.set_open.call(false),
             Key::ArrowDown => {
-                ctx.focus_next();
+                ctx.focus.focus_next();
             }
             Key::ArrowUp => {
                 if open() {
-                    ctx.focus_prev();
+                    ctx.focus.focus_prev();
                 }
             }
-            Key::Home => ctx.focus_first(),
-            Key::End => ctx.focus_last(),
+            Key::Home => ctx.focus.focus_first(),
+            Key::End => ctx.focus.focus_last(),
             _ => return,
         }
         event.prevent_default();
@@ -153,8 +125,8 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
                 ctx.set_open.call(new_open);
             },
             onblur: move |_| {
-                if ctx.current_focus.read().is_none() {
-                    ctx.set_focus(None);
+                if !ctx.focus.any_focused() {
+                    ctx.focus.blur();
                 }
             },
 
@@ -206,30 +178,10 @@ pub struct DropdownMenuItemProps {
 pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
     let mut ctx: DropdownMenuContext = use_context();
 
-    use_effect(move || {
-        ctx.item_count += 1;
-    });
-    use_effect_cleanup(move || {
-        ctx.item_count -= 1;
-        if (ctx.current_focus)() == Some((props.index)()) {
-            ctx.current_focus.set(None);
-        }
-    });
-
     let disabled = move || (ctx.disabled)() || (props.disabled)();
-    let focused = move || (ctx.current_focus)() == Some((props.index)());
+    let focused = move || ctx.focus.is_focused((props.index)());
 
-    let mut item_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
-    use_effect(move || {
-        let Some(item) = item_ref() else {
-            return;
-        };
-        if focused() {
-            spawn(async move {
-                _ = item.set_focus(true).await;
-            });
-        }
-    });
+    let onmounted = use_focus_controlled_item(props.index);
 
     rsx! {
         div {
@@ -256,13 +208,11 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
                 }
             },
 
-            onmounted: move |node| {
-                item_ref.set(Some(node.data()));
-            },
+            onmounted,
 
             onblur: move |_| {
                 if focused() {
-                    ctx.set_focus(None);
+                    ctx.focus.blur();
                 }
             },
 

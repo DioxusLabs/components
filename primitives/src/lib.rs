@@ -13,9 +13,12 @@ pub mod collapsible;
 pub mod context_menu;
 pub mod dialog;
 pub mod dropdown_menu;
+mod focus;
 pub mod hover_card;
 pub mod label;
 pub mod menubar;
+#[cfg(feature = "router")]
+pub mod navbar;
 pub mod popover;
 mod portal;
 pub mod progress;

@@ -1,6 +1,8 @@
-use crate::{use_controlled, use_effect_cleanup, use_id_or, use_unique_id};
+use crate::{
+    focus::{FocusState, use_focus_controlled_item, use_focus_provider},
+    use_controlled, use_id_or, use_unique_id,
+};
 use dioxus_lib::prelude::*;
-use std::rc::Rc;
 
 #[derive(Clone, Copy)]
 struct TabsContext {
@@ -9,63 +11,15 @@ struct TabsContext {
     set_value: Callback<String>,
     disabled: ReadOnlySignal<bool>,
 
-    // Keyboard nav data
-    item_count: Signal<usize>,
-    recent_focus: Signal<usize>,
-    current_focus: Signal<Option<usize>>,
+    // Focus state
+    focus: FocusState,
 
     // Orientation
     horizontal: ReadOnlySignal<bool>,
     roving_focus: ReadOnlySignal<bool>,
-    roving_loop: ReadOnlySignal<bool>,
 
     // ARIA attributes
     tab_content_ids: Signal<Vec<String>>,
-}
-
-impl TabsContext {
-    fn set_focus(&mut self, id: Option<usize>) {
-        self.current_focus.set(id);
-        if let Some(id) = id {
-            self.recent_focus.set(id);
-        }
-    }
-
-    fn focus_next(&mut self) {
-        if let Some(current_focus) = (self.current_focus)() {
-            let mut new_focus = current_focus.saturating_add(1);
-            let item_count = (self.item_count)();
-
-            if new_focus >= item_count {
-                match (self.roving_loop)() {
-                    true => new_focus = 0,
-                    false => new_focus = item_count.saturating_sub(1),
-                }
-            }
-
-            self.current_focus.set(Some(new_focus));
-        }
-    }
-
-    fn focus_prev(&mut self) {
-        if let Some(current_focus) = (self.current_focus)() {
-            let mut new_focus = current_focus.saturating_sub(1);
-            if current_focus == 0 && (self.roving_loop)() {
-                new_focus = (self.item_count)().saturating_sub(1);
-            }
-
-            self.current_focus.set(Some(new_focus));
-        }
-    }
-
-    fn focus_start(&mut self) {
-        self.current_focus.set(Some(0));
-    }
-
-    fn focus_end(&mut self) {
-        let new_focus = (self.item_count)().saturating_sub(1);
-        self.current_focus.set(Some(new_focus));
-    }
 }
 
 #[derive(Props, Clone, PartialEq)]
@@ -101,18 +55,16 @@ pub fn Tabs(props: TabsProps) -> Element {
     let (value, set_value) =
         use_controlled(props.value, props.default_value, props.on_value_change);
 
+    let focus = use_focus_provider(props.roving_loop);
     let mut ctx = use_context_provider(|| TabsContext {
         value: value.into(),
         set_value,
         disabled: props.disabled,
 
-        item_count: Signal::new(0),
-        recent_focus: Signal::new(0),
-        current_focus: Signal::new(None),
+        focus,
 
         horizontal: props.horizontal,
         roving_focus: props.roving_focus,
-        roving_loop: props.roving_loop,
         tab_content_ids: Signal::new(Vec::new()),
     });
 
@@ -121,7 +73,7 @@ pub fn Tabs(props: TabsProps) -> Element {
             "data-orientation": if (props.horizontal)() { "horizontal" } else { "vertical" },
             "data-disabled": (props.disabled)(),
 
-            onfocusout: move |_| ctx.set_focus(None),
+            onfocusout: move |_| ctx.focus.blur(),
             ..props.attributes,
 
             {props.children}
@@ -171,17 +123,6 @@ pub struct TabTriggerProps {
 pub fn TabTrigger(props: TabTriggerProps) -> Element {
     let mut ctx: TabsContext = use_context();
 
-    use_effect(move || {
-        ctx.item_count += 1;
-    });
-
-    use_effect_cleanup(move || {
-        ctx.item_count -= 1;
-        if (ctx.current_focus)() == Some((props.index)()) {
-            ctx.set_focus(None);
-        }
-    });
-
     let value = props.value.clone();
     let selected = use_memo(move || (ctx.value)() == value);
 
@@ -193,26 +134,13 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
         if selected() {
             return "0";
         }
-        if (ctx.current_focus)() == Some((props.index)()) {
+        if ctx.focus.is_focused(props.index.cloned()) {
             return "0";
         }
         "-1"
     });
 
-    let mut tab_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
-    use_effect(move || {
-        let Some(tab) = tab_ref() else {
-            return;
-        };
-        let current_focus = (ctx.current_focus)();
-        let index = (props.index)();
-        let is_focused = current_focus == Some(index);
-        if is_focused {
-            spawn(async move {
-                let _ = tab.set_focus(true).await;
-            });
-        }
-    });
+    let onmounted = use_focus_controlled_item(props.index);
 
     rsx! {
         button {
@@ -227,9 +155,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
             "data-disabled": (ctx.disabled)() || (props.disabled)(),
             disabled: (ctx.disabled)() || (props.disabled)(),
 
-            onmounted: move |evt| {
-                tab_ref.set(Some(evt.data()));
-            },
+            onmounted,
             onclick: move |_| {
                 let value = props.value.clone();
                 if !selected() {
@@ -237,19 +163,19 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
                 }
             },
 
-            onfocus: move |_| ctx.set_focus(Some((props.index)())),
+            onfocus: move |_| ctx.focus.set_focus(Some((props.index)())),
 
             onkeydown: move |event: Event<KeyboardData>| {
                 let key = event.key();
                 let horizontal = (ctx.horizontal)();
                 let mut prevent_default = true;
                 match key {
-                    Key::ArrowUp if !horizontal => ctx.focus_prev(),
-                    Key::ArrowDown if !horizontal => ctx.focus_next(),
-                    Key::ArrowLeft if horizontal => ctx.focus_prev(),
-                    Key::ArrowRight if horizontal => ctx.focus_next(),
-                    Key::Home => ctx.focus_start(),
-                    Key::End => ctx.focus_end(),
+                    Key::ArrowUp if !horizontal => ctx.focus.focus_prev(),
+                    Key::ArrowDown if !horizontal => ctx.focus.focus_next(),
+                    Key::ArrowLeft if horizontal => ctx.focus.focus_prev(),
+                    Key::ArrowRight if horizontal => ctx.focus.focus_next(),
+                    Key::Home => ctx.focus.focus_first(),
+                    Key::End => ctx.focus.focus_last(),
                     _ => prevent_default = false,
                 };
                 if prevent_default {
