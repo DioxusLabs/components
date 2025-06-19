@@ -37,8 +37,7 @@ body {
   --contrast-background-color: var(--dark, #e6e6e6) var(--light, #0d0d0d);
   --bright-text-color: var(--dark, #fafafa) var(--light, #000);
   --text-color: var(--dark, #d4d4d4) var(--light, #111);
-  --dim-text-color: var(--dark, rgb(220 220 220))
-    var(--light, rgb(43 43 43));
+  --dim-text-color: var(--dark, rgb(220 220 220)) var(--light, rgb(43 43 43));
   --border-color: var(--dark, #fff) var(--light, #000);
   --dim-border-color: var(--dark, #232323) var(--light, #e5e5e5);
   --muted-text-color: var(--dark, #a1a1a1) var(--light, #848484);
@@ -57,4 +56,21 @@ body {
     var(--light, var(--background-color));
   --info-text-color: var(--dark, var(--hover-border-color))
     var(--light, var(--dim-text-color));
+}
+
+/* Modern browsers with `scrollbar-*` support */
+@supports (scrollbar-width: auto) {
+  :not(:hover) {
+    scrollbar-color: rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
+  }
+  :hover {
+    scrollbar-color: var(--contrast-background-color) rgba(0, 0, 0, 0);
+  }
+}
+
+/* Legacy browsers with `::-webkit-scrollbar-*` support */
+@supports selector(::-webkit-scrollbar) {
+  :root::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
