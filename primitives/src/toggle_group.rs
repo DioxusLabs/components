@@ -132,6 +132,7 @@ pub fn ToggleGroup(props: ToggleGroupProps) -> Element {
             onfocusout: move |_| ctx.focus.set_focus(None),
 
             "data-orientation": ctx.orientation(),
+            "data-allow-multiple-pressed": ctx.allow_multiple_pressed,
             ..props.attributes,
 
             {props.children}
