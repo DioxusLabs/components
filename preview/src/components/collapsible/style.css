@@ -1,5 +1,6 @@
 .collapsible-trigger {
   display: flex;
+  overflow: hidden;
   width: 100%;
   box-sizing: border-box;
   flex-direction: row;
@@ -13,7 +14,6 @@
   color: var(--text-color);
   outline: none;
   text-align: left;
-  overflow: hidden;
 }
 
 .collapsible-trigger:focus-visible {

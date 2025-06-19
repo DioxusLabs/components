@@ -1,12 +1,12 @@
 .toggle {
   display: inline-flex;
   width: fit-content;
+  min-width: 2rem;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  min-width: 2rem;
-  padding-left: 0.5rem;
   padding-right: 0.5rem;
+  padding-left: 0.5rem;
   border: none;
   border-radius: 0.5rem;
   background-color: transparent;
