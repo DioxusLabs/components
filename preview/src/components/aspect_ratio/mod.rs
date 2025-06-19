@@ -9,8 +9,8 @@ pub(super) fn Demo() -> Element {
         }
         div {
             class: "aspect-ratio-container",
-            width: "10em",
-            min_width: "30vw",
+            width: "20rem",
+            max_width: "30vw",
             AspectRatio { ratio: 4.0 / 3.0,
                 div {
                     background: "linear-gradient(to bottom right, var(--hover-background-color), var(--dim-background-color))",
