@@ -21,10 +21,13 @@ examples!(
     avatar,
     calendar,
     checkbox,
+    collapsible,
     context_menu,
     dialog,
     dropdown_menu,
     hover_card,
+    input,
+    label,
     menubar,
     navbar,
     popover,
@@ -38,6 +41,7 @@ examples!(
     tabs,
     toast,
     toggle_group,
+    toggle,
     toolbar,
     tooltip
 );

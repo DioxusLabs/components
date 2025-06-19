@@ -63,11 +63,9 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
         aria_controls_id,
     });
 
-    let state = open_state(open());
-
     rsx! {
         div {
-            "data-state": state,
+            "data-open": open,
             "data-disabled": props.disabled,
             ..props.attributes,
 
@@ -92,12 +90,11 @@ pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
     let id = use_id_or(ctx.aria_controls_id, props.id);
 
     let open = ctx.open;
-    let state = open_state(open());
 
     rsx! {
         div {
             id: id,
-            "data-state": state,
+            "data-open": open,
             "data-disabled": ctx.disabled,
             ..props.attributes,
 
@@ -121,13 +118,12 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
     let ctx: CollapsibleCtx = use_context();
 
     let open = ctx.open;
-    let state = open_state(open());
 
     rsx! {
 
         button {
             type: "button",
-            "data-state": state,
+            "data-open": open,
             "data-disabled": ctx.disabled,
             disabled: ctx.disabled,
 
@@ -142,12 +138,5 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
             ..props.attributes,
             {props.children}
         }
-    }
-}
-
-fn open_state(open: bool) -> &'static str {
-    match open {
-        true => "open",
-        false => "closed",
     }
 }

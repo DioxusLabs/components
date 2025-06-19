@@ -209,7 +209,7 @@ pub fn HoverCardContent(props: HoverCardContentProps) -> Element {
         div {
             id: id,
             class: "hover-card-content",
-            role: "dialog",
+            role: "tooltip",
             "data-state": if is_open { "open" } else { "closed" },
             "data-side": props.side.as_str(),
             "data-align": props.align.as_str(),

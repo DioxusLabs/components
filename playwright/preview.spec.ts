@@ -18,3 +18,22 @@ test.describe("homepage", () => {
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 });
+
+
+test.describe("details", () => {
+  test("should not have any automatically detectable accessibility issues", async ({
+    page,
+  }) => {
+    await page.goto("http://127.0.0.1:8080/component/calendar", { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
+
+    // Wait for the page to fully load
+    let componentSection = page.locator(".component-demo");
+    await componentSection.waitFor({ state: "visible" });
+
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .disableRules("color-contrast")
+      .analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
+  });
+});
