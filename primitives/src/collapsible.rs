@@ -63,7 +63,6 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
         aria_controls_id,
     });
 
-
     rsx! {
         div {
             "data-open": open,
