@@ -1,7 +1,7 @@
 use dioxus_lib::prelude::*;
 
 use crate::focus::{
-    FocusState, use_focus_control, use_focus_controlled_item, use_focus_entry, use_focus_provider,
+    use_focus_control, use_focus_controlled_item, use_focus_entry, use_focus_provider, FocusState,
 };
 
 #[derive(Clone, Copy)]
@@ -34,7 +34,7 @@ pub fn Menubar(props: MenubarProps) -> Element {
     let set_open_menu = use_callback(move |idx| open_menu.set(idx));
 
     let focus = use_focus_provider(props.roving_loop);
-    let ctx = use_context_provider(|| MenubarContext {
+    let mut ctx = use_context_provider(|| MenubarContext {
         open_menu,
         set_open_menu,
         disabled: props.disabled,
@@ -51,6 +51,11 @@ pub fn Menubar(props: MenubarProps) -> Element {
         div {
             role: "menubar",
             "data-disabled": (props.disabled)(),
+            tabindex: (!ctx.focus.any_focused()).then_some("0"),
+            // If the menu receives focus, focus the most recently focused menu item
+            onfocus: move |_| {
+                ctx.focus.set_focus(Some(ctx.focus.recent_focus()));
+            },
 
             ..props.attributes,
 
@@ -64,6 +69,7 @@ struct MenubarMenuContext {
     index: ReadOnlySignal<usize>,
     focus: FocusState,
     is_open: Memo<bool>,
+    disabled: ReadOnlySignal<bool>,
 }
 
 impl MenubarMenuContext {
@@ -97,6 +103,7 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
         index: props.index,
         focus,
         is_open,
+        disabled: props.disabled,
     });
 
     use_effect(move || {
@@ -114,19 +121,6 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
             role: "menu",
             "data-state": if is_open() { "open" } else { "closed" },
             "data-disabled": (ctx.disabled)() || (props.disabled)(),
-
-            onclick: move |_| {
-                if !disabled() {
-                    let new_open = if is_open() { None } else { Some(props.index.cloned()) };
-                    ctx.set_open_menu.call(new_open);
-                }
-            },
-
-            onpointerenter: move |_| {
-                if !disabled() && (ctx.open_menu)().is_some() {
-                    ctx.focus.set_focus(Some(props.index.cloned()));
-                }
-            },
 
             onkeydown: move |event: Event<KeyboardData>| {
                 match event.key() {
@@ -173,18 +167,36 @@ pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
     let mut ctx: MenubarContext = use_context();
     let menu_ctx: MenubarMenuContext = use_context();
     let onmounted = use_focus_control(ctx.focus, menu_ctx.index);
+    let disabled = move || (ctx.disabled)() || (menu_ctx.disabled)();
+    let is_open = menu_ctx.is_open;
+    let index = menu_ctx.index;
+    let is_focused = move || {
+        ctx.focus.current_focus() == Some(menu_ctx.index.cloned()) && !menu_ctx.focus.any_focused()
+    };
 
     rsx! {
         button {
             onmounted,
-            onfocus: move |_| ctx.focus.set_focus(Some(menu_ctx.index.cloned())),
+            onpointerup: move |_| {
+                if !disabled() {
+                    let new_open = if is_open() { None } else { Some(index.cloned()) };
+                    ctx.set_open_menu.call(new_open);
+                    ctx.focus.set_focus(Some(index.cloned()));
+                }
+            },
+            onmouseenter: move |_| {
+                if !disabled() && (ctx.open_menu)().is_some() {
+                    ctx.focus.set_focus(Some(index.cloned()));
+                }
+            },
             onblur: move |_| {
-                if ctx.focus.current_focus() == Some(menu_ctx.index.cloned()) && !menu_ctx.focus.any_focused() {
+                if is_focused() {
                     ctx.focus.set_focus(None);
+                    ctx.set_open_menu.call(None);
                 }
             },
             role: "menuitem",
-            tabindex: if ctx.focus.recent_focus() == menu_ctx.index.cloned() { "0" } else { "-1" },
+            tabindex: if is_focused() { "0" } else { "-1" },
             ..props.attributes,
             {props.children}
         }
@@ -245,7 +257,7 @@ pub fn MenubarItem(props: MenubarItemProps) -> Element {
             "data-disabled": disabled(),
             tabindex: if focused() { "0" } else { "-1" },
 
-            onclick: {
+            onpointerdown: {
                 let value = props.value.clone();
                 move |_| {
                     if !disabled() {
@@ -275,6 +287,7 @@ pub fn MenubarItem(props: MenubarItemProps) -> Element {
                 if focused() {
                     menu_ctx.focus.blur();
                     ctx.focus.set_focus(None);
+                    ctx.set_open_menu.call(None);
                 }
             },
 

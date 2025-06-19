@@ -1,4 +1,4 @@
-use crate::{ContentAlign, ContentSide, use_controlled, use_unique_id};
+use crate::{use_controlled, use_unique_id, ContentAlign, ContentSide};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone, Copy)]

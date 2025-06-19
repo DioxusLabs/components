@@ -17,7 +17,7 @@
 //
 // You can pass on_click to AlertDialogAction/Cancel for custom logic.
 
-use crate::{FOCUS_TRAP_JS, use_id_or, use_unique_id};
+use crate::{use_id_or, use_unique_id, FOCUS_TRAP_JS};
 use dioxus::document;
 use dioxus_lib::prelude::*;
 

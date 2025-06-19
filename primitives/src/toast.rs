@@ -1,5 +1,5 @@
 use crate::{
-    portal::{PortalIn, PortalOut, use_portal},
+    portal::{use_portal, PortalIn, PortalOut},
     use_unique_id,
 };
 use dioxus::dioxus_core::DynamicNode;

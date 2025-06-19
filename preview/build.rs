@@ -35,7 +35,7 @@ fn highlight_file_to(file_path: &std::path::Path, theme: &str) -> String {
     use std::io::BufRead;
     use syntect::easy::HighlightFile;
     use syntect::highlighting::{Style, ThemeSet};
-    use syntect::html::{IncludeBackground, styled_line_to_highlighted_html};
+    use syntect::html::{styled_line_to_highlighted_html, IncludeBackground};
     use syntect::parsing::SyntaxSet;
     static SYNTAX_SET: OnceLock<SyntaxSet> = OnceLock::new();
     static THEME_SET: OnceLock<ThemeSet> = OnceLock::new();
