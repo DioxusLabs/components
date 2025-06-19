@@ -317,7 +317,7 @@ fn ComponentDemo(component_name: String) -> Element {
         .cloned()
     else {
         return rsx! {
-            div { class: "component-demo-not-found",
+            main { class: "component-demo-not-found",
                 h3 { "Component not found" }
                 p { "The requested component does not exist." }
             }
@@ -341,8 +341,8 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     } = demo;
     let name = name.replace("_", " ");
     rsx! {
-        div { class: "component-demo",
-            h3 { class: "component-title", {name} }
+        main { class: "component-demo",
+            h1 { class: "component-title", {name} }
             div { class: "component-preview",
                 div { class: "component-preview-contents",
                     div { class: "component-preview-frame", Comp {} }
