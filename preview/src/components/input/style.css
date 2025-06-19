@@ -1,0 +1,40 @@
+/* Input Styles */
+.input {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 0.5rem;
+  border-radius: calc(0.5rem);
+  background: none;
+  background: var(--light, var(--background-color))
+    var(--dark, var(--dim-background-color));
+  box-shadow: inset 0 0 0 1px var(--light, var(--dim-border-color))
+    var(--dark, var(--hover-border-color));
+  color: var(--text-color);
+  cursor: pointer;
+  gap: 0.25rem;
+  transition: background-color 100ms ease-out;
+}
+
+.input::placeholder {
+  color: var(--muted-text-color);
+}
+
+.input:disabled {
+  color: var(--muted-text-color);
+  cursor: not-allowed;
+}
+
+.input:hover:not(:disabled),
+.input:focus-visible {
+  background: var(--light, var(--hover-background-color))
+    var(--dark, var(--focused-background-color));
+  color: var(--bright-text-color);
+  outline: none;
+}
