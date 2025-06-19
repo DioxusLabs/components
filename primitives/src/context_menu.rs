@@ -64,6 +64,15 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
         }
     });
 
+    // If the context menu is open, prevent pointer and scroll events outside of it
+    use_effect(move || {
+        if ctx.open.cloned() {
+            dioxus::document::eval("document.body.style.pointerEvents = 'none'; document.documentElement.style.overflow = 'hidden';");
+        } else {
+            dioxus::document::eval("document.body.style.pointerEvents = 'auto'; document.documentElement.style.overflow = 'auto';");
+        }
+    });
+
     // Handle escape key to close the menu
     let handle_keydown = move |event: Event<KeyboardData>| {
         if open() && event.key() == Key::Escape {
@@ -175,6 +184,7 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
             left: "{x}px",
             top: "{y}px",
             tabindex: if focused() { "0" } else { "-1" },
+            pointer_events: open().then_some("auto"),
             "data-state": if open() { "open" } else { "closed" },
             onkeydown,
             onblur: move |_| {
