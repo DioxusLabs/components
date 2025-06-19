@@ -27,28 +27,28 @@ pub(super) fn Demo() -> Element {
                             index: 0usize,
                             class: "navbar-item",
                             value: "calendar".to_string(),
-                            to: Route::ComponentDemo { component_name: "calendar".into() },
+                            to: Route::component("calendar"),
                             "Calendar"
                         }
                         NavbarItem {
                             index: 1usize,
                             class: "navbar-item",
                             value: "slider".to_string(),
-                            to: Route::ComponentDemo { component_name: "slider".into() },
+                            to: Route::component("slider"),
                             "Slider"
                         }
                         NavbarItem {
                             index: 2usize,
                             class: "navbar-item",
                             value: "checkbox".to_string(),
-                            to: Route::ComponentDemo { component_name: "checkbox".into() },
+                            to: Route::component("checkbox"),
                             "Checkbox"
                         }
                         NavbarItem {
                             index: 3usize,
                             class: "navbar-item",
                             value: "radio_group".to_string(),
-                            to: Route::ComponentDemo { component_name: "radio_group".into() },
+                            to: Route::component("radio_group"),
                             "Radio Group"
                         }
                     }
@@ -68,35 +68,35 @@ pub(super) fn Demo() -> Element {
                             index: 0usize,
                             class: "navbar-item",
                             value: "toast".to_string(),
-                            to: Route::ComponentDemo { component_name: "toast".into() },
+                            to: Route::component("toast"),
                             "Toast"
                         }
                         NavbarItem {
                             index: 1usize,
                             class: "navbar-item",
                             value: "tabs".to_string(),
-                            to: Route::ComponentDemo { component_name: "tabs".into() },
+                            to: Route::component("tabs"),
                             "Tabs"
                         }
                         NavbarItem {
                             index: 2usize,
                             class: "navbar-item",
                             value: "dialog".to_string(),
-                            to: Route::ComponentDemo { component_name: "dialog".into() },
+                            to: Route::component("dialog"),
                             "Dialog"
                         }
                         NavbarItem {
                             index: 3usize,
                             class: "navbar-item",
                             value: "alert_dialog".to_string(),
-                            to: Route::ComponentDemo { component_name: "alert_dialog".into() },
+                            to: Route::component("alert_dialog"),
                             "Alert Dialog"
                         }
                         NavbarItem {
                             index: 4usize,
                             class: "navbar-item",
                             value: "tooltip".to_string(),
-                            to: Route::ComponentDemo { component_name: "tooltip".into() },
+                            to: Route::component("tooltip"),
                             "Tooltip"
                         }
                     }
@@ -105,7 +105,7 @@ pub(super) fn Demo() -> Element {
                     index: 2usize,
                     class: "navbar-item",
                     value: "home".to_string(),
-                    to: Route::Home,
+                    to: Route::home(),
                     "Home"
                 }
             }
