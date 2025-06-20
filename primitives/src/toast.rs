@@ -191,12 +191,12 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
                 },
 
                 ol {
-                    display: "contents",
+                    class: "toast-list",
                     // Render all toasts
                     for (index, toast) in toast_list.read().iter().rev().enumerate() {
                         li {
                             key: "{toast.id}",
-                            display: "contents",
+                            class: "toast-item",
                             {
                                 props.render_toast.call(ToastProps::builder().id(toast.id)
                                     .index(index)
