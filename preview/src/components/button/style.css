@@ -15,7 +15,7 @@
   color: var(--background-color);
 }
 .button[data-style="primary"]:hover {
-  background-color: var(--text-color);
+  background-color: var(--bright-text-color);
 }
 
 .button[data-style="secondary"] {
