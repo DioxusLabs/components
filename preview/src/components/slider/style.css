@@ -19,7 +19,7 @@
     box-sizing: border-box;
     flex-grow: 1;
     border-radius: 9999px;
-    background: var(--focused-background-color);
+    background: var(--primary-color-5);
 }
 
 .slider[data-orientation="vertical"] .slider-track {
@@ -31,7 +31,7 @@
     position: absolute;
     height: 100%;
     border-radius: 9999px;
-    background-color: var(--contrast-background-color);
+    background-color: var(--secondary-color-2);
 }
 
 .slider[data-orientation="vertical"] .slider-range {
@@ -45,9 +45,9 @@
     display: block;
     width: 16px;
     height: 16px;
-    border: 1px solid var(--contrast-background-color);
+    border: 1px solid var(--secondary-color-2);
     border-radius: 50%;
-    background-color: var(--brighter-background-color);
+    background-color: var(--primary-color-1);
     cursor: pointer;
     transform: translate(-50%, -50%);
     transition: border-color 150ms;
@@ -61,7 +61,7 @@
 .slider-thumb:focus-visible[data-dragging="true"],
 .slider-thumb:focus-visible,
 .slider-thumb:hover {
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--hover-border-color) 50%,transparent);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary-color-7) 50%,transparent);
     transition: box-shadow 150ms;
 }
 

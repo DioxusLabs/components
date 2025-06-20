@@ -7,7 +7,7 @@
 
 .avatar-label {
     margin: 0;
-    color: var(--text-color);
+    color: var(--secondary-color-4);
     font-size: 0.875rem;
 }
 
@@ -22,7 +22,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 3.40282e+38px;
-    color: var(--text-color);
+    color: var(--secondary-color-4);
     cursor: pointer;
     font-weight: 500;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -59,7 +59,7 @@
 }
 
 .avatar[data-state="empty"] {
-    background: var(--muted-background-color);
+    background: var(--primary-color-2);
 }
 
 @keyframes pulse {
@@ -82,12 +82,12 @@
     height: 100%;
     align-items: center;
     justify-content: center;
-    background: var(--background-color);
-    color: var(--text-color);
+    background: var(--primary-color);
+    color: var(--secondary-color-4);
     font-size: 1.5rem;
 }
 
 .avatar[data-state="error"] .avatar-fallback {
-    background: var(--dim-background-color);
-    color: var(--text-color);
+    background: var(--primary-color-3);
+    color: var(--secondary-color-4);
 }

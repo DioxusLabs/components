@@ -5,7 +5,7 @@
     height: .5rem;
     box-sizing: border-box;
     border-radius: 9999px;
-    background: var(--focused-background-color);
+    background: var(--primary-color-5);
 }
 
 .progress[data-state='indeterminate'] .progress-indicator {
@@ -16,7 +16,7 @@
 .progress-indicator {
     width: var(--progress-value, 0%);
     height: 100%;
-    background-color: var(--bright-text-color);
+    background-color: var(--secondary-color-1);
     transition: width 250ms ease;
 }
 

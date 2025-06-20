@@ -10,17 +10,17 @@
   border: none;
   border-radius: 0.5rem;
   background-color: transparent;
-  color: var(--text-color);
+  color: var(--secondary-color-4);
   font-size: 14px;
   outline: none;
 }
 
 .toggle:hover, .toggle:focus-visible {
-  background-color: var(--hover-background-color);
+  background-color: var(--primary-color-4);
   cursor: pointer;
 }
 
 .toggle[data-state="on"] {
-  background-color: var(--hover-border-color);
-  color: var(--bright-text-color);
+  background-color: var(--primary-color-7);
+  color: var(--secondary-color-1);
 }

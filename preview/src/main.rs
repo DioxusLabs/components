@@ -224,7 +224,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
             aria_label: if collapsed() { "Expand code" } else { "Collapse code" },
             width: "100%",
             height: "2rem",
-            color: "var(--text-color)",
+            color: "var(--secondary-color-4)",
             background_color: "rgba(0, 0, 0, 0)",
             border_radius: "0 0 0.5rem 0.5rem",
             border: "none",
@@ -236,7 +236,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 svg {
                     fill: "none",
                     xmlns: "http://www.w3.org/2000/svg",
-                    stroke: "var(--text-color)",
+                    stroke: "var(--secondary-color-4)",
                     stroke_linecap: "round",
                     stroke_linejoin: "round",
                     stroke_width: "2",
@@ -249,7 +249,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 svg {
                     fill: "none",
                     xmlns: "http://www.w3.org/2000/svg",
-                    stroke: "var(--text-color)",
+                    stroke: "var(--secondary-color-4)",
                     stroke_linecap: "round",
                     stroke_linejoin: "round",
                     stroke_width: "2",
@@ -278,6 +278,12 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     index: 1usize,
                     "style.css"
                 }
+                TabTrigger {
+                    class: "tabs-trigger",
+                    value: "theme.css",
+                    index: 2usize,
+                    "theme.css"
+                }
             }
             div {
                 width: "100%",
@@ -302,7 +308,16 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     width: "100%",
                     position: "relative",
                     CodeBlock { source: css_highlighted, collapsed: collapsed() }
-                    {expand}
+                    {expand.clone()}
+                }
+                TabContent {
+                    index: 2usize,
+                    class: "tabs-content",
+                    value: "theme.css",
+                    width: "100%",
+                    position: "relative",
+                    CodeBlock { source: THEME_CSS, collapsed: collapsed() }
+                    {expand.clone()}
                 }
             }
         }
@@ -346,6 +361,15 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
             div { class: "component-preview",
                 div { class: "component-preview-contents",
                     div { class: "component-preview-frame", Comp {} }
+                    div { class: "component-installation",
+                        h2 { "Installation" }
+                        ol { class: "component-installation-list",
+                            li { "If you haven't already, add the theme.css file to your project and import it in the root of your app." }
+                            li { "Add the style.css file to your project." }
+                            li { "Create a component based on the main.rs below." }
+                            li { "Modify your components and styles as needed." }
+                        }
+                    }
                     div { class: "component-code",
                         ComponentCode { rs_highlighted, css_highlighted }
                     }
@@ -427,9 +451,20 @@ fn GotoIcon(mut props: LinkProps) -> Element {
             xmlns: "http://www.w3.org/2000/svg",
             path {
                 d: "M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h14v-7h2v7q0 .825-.587 1.413T19 21zm4.7-5.3l-1.4-1.4L17.6 5H14V3h7v7h-2V6.4z",
-                fill: "var(--text-color)",
+                fill: "var(--secondary-color-4)",
             }
         }
     };
     Link(props)
 }
+
+const THEME_CSS: HighlightedCode = HighlightedCode {
+    light: include_str!(concat!(
+        env!("OUT_DIR"),
+        "/theme.css.base16-ocean.light.html"
+    )),
+    dark: include_str!(concat!(
+        env!("OUT_DIR"),
+        "/theme.css.base16-ocean.dark.html"
+    )),
+};

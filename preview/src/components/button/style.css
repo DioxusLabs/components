@@ -11,44 +11,44 @@
 }
 
 .button[data-style="primary"] {
-  background-color: var(--contrast-background-color);
-  color: var(--background-color);
+  background-color: var(--secondary-color-2);
+  color: var(--primary-color);
 }
 .button[data-style="primary"]:hover {
-  background-color: var(--bright-text-color);
+  background-color: var(--secondary-color-1);
 }
 
 .button[data-style="secondary"] {
-  background-color: var(--focused-background-color);
-  color: var(--bright-text-color);
+  background-color: var(--primary-color-5);
+  color: var(--secondary-color-1);
 }
 .button[data-style="secondary"]:hover {
-  background-color: var(--hover-background-color);
+  background-color: var(--primary-color-4);
 }
 
 .button[data-style="ghost"] {
   background-color: transparent;
-  color: var(--text-color);
+  color: var(--secondary-color-4);
 }
 .button[data-style="ghost"]:hover {
-  background-color: var(--focused-background-color);
-  color: var(--bright-text-color);
+  background-color: var(--primary-color-5);
+  color: var(--secondary-color-1);
 }
 
 .button[data-style="outline"] {
-  border: 1px solid var(--dim-border-color);
-  background-color: var(--light, var(--background-color))
-    var(--dark, var(--dim-background-color));
-  color: var(--text-color);
+  border: 1px solid var(--primary-color-6);
+  background-color: var(--light, var(--primary-color))
+    var(--dark, var(--primary-color-3));
+  color: var(--secondary-color-4);
 }
 .button[data-style="outline"]:hover {
-  background-color: var(--hover-background-color);
+  background-color: var(--primary-color-4);
 }
 
 .button[data-style="destructive"] {
-  background-color: var(--error-background-color);
-  color: var(--error-text-color);
+  background-color: var(--primary-error-color);
+  color: var(--contrast-error-color);
 }
 .button[data-style="destructive"]:hover {
-  background-color: var(--error-background-color-focused);
+  background-color: var(--secondary-error-color);
 }

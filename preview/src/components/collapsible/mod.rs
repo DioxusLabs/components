@@ -30,22 +30,22 @@ pub(super) fn Demo() -> Element {
                 flex_direction: "column",
                 gap: "0.5rem",
                 max_width: "20rem",
-                color: "var(--dim-text-color)",
+                color: "var(--secondary-color-3)",
                 div {
-                    border: "1px solid var(--dim-border-color)",
+                    border: "1px solid var(--primary-color-6)",
                     border_radius: "0.5rem",
                     padding: "1rem",
                     "Added a new feature to the collapsible component",
                 }
                 CollapsibleContent { class: "collapsible-content",
                     div {
-                        border: "1px solid var(--dim-border-color)",
+                        border: "1px solid var(--primary-color-6)",
                         border_radius: "0.5rem",
                         padding: "1rem",
                         "Fixed a bug in the collapsible component",
                     }
                     div {
-                        border: "1px solid var(--dim-border-color)",
+                        border: "1px solid var(--primary-color-6)",
                         border_radius: "0.5rem",
                         padding: "1rem",
                         "Updated the documentation for the collapsible component",

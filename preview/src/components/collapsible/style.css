@@ -11,7 +11,7 @@
   padding-bottom: 1rem;
   border: none;
   background-color: transparent;
-  color: var(--text-color);
+  color: var(--secondary-color-4);
   outline: none;
   text-align: left;
 }
@@ -33,7 +33,7 @@
   width: 1rem;
   height: 1rem;
   fill: none;
-  stroke: var(--dim-text-color);
+  stroke: var(--secondary-color-3);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2;
