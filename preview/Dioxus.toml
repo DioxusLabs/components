@@ -1,6 +1,0 @@
-[application]
-name = "Dioxus Preview"
-version = "0.1.0"
-
-[web.app]
-base_path = "components"

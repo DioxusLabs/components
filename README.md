@@ -69,7 +69,14 @@ We're still in the early days - Many components are still being created and stab
 You can run the `preview` app with:
 
 ```
-dx serve -p preview
+cargo run -p preview --features desktop
+```
+
+or for the web build
+
+```
+cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 76ffcab
+dx serve -p preview --platform web
 ```
 
 ## License

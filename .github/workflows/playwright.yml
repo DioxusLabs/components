@@ -49,8 +49,6 @@ jobs:
       with:
         cache-all-crates: "true"
         cache-on-failure: "true"
-    - name: Clear base path
-      run: rm -f preview/Dioxus.toml
     - name: Install dx
       run: cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 76ffcab
     - name: Install dependencies

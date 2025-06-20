@@ -43,16 +43,8 @@ jobs:
           cache-on-failure: "false"
       - name: Install CLI
         run: cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 76ffcab
-      - name: Set base path
-        run: |
-            echo "[application]
-            name = \"Dioxus Preview\"
-            version = \"0.1.0\"
-
-            [web.app]
-            base_path = \"components/pr-preview/pr-${{ github.event.pull_request.number }}/\"" > preview/Dioxus.toml
       - name: Build
-        run: cd preview && dx build --platform web --release
+        run: cd preview && dx build --platform web --release --base-path "components/pr-preview/pr-${{ github.event.pull_request.number }}/"
       - name: Copy output
         run: cp -r target/dx/preview/release/web/public docs
       - name: Deploy 🚀

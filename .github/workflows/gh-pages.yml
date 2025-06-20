@@ -32,7 +32,7 @@ jobs:
       - name: Install CLI
         run: cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 76ffcab
       - name: Build
-        run: cd preview && dx build --platform web --release
+        run: cd preview && dx build --platform web --release --base-path "components"
       - name: Copy output
         run: cp -r target/dx/preview/release/web/public docs
       - name: Add gh pages 404
