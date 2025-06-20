@@ -19,6 +19,7 @@ examples!(
     alert_dialog,
     aspect_ratio,
     avatar,
+    button,
     calendar,
     checkbox,
     collapsible,

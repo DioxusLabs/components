@@ -21,10 +21,11 @@ fn ToastButton() -> Element {
         // Additional styles just for the trigger button
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/alert_dialog/style.css"),
+            href: asset!("/src/components/button/style.css"),
         }
         button {
-            class: "toast-trigger",
+            class: "button",
+            "data-style": "outline",
             onclick: move |_| {
                 toast_api
                     .info(
@@ -39,9 +40,6 @@ fn ToastButton() -> Element {
                     );
             },
             "Info (60s)"
-        }
-        style {
-            ""
         }
     }
 }

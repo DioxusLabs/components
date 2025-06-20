@@ -10,8 +10,13 @@ pub(super) fn Demo() -> Element {
             rel: "stylesheet",
             href: asset!("/src/components/dialog/style.css"),
         }
+        document::Link {
+            rel: "stylesheet",
+            href: asset!("/src/components/button/style.css"),
+        }
         button {
-            class: "dialog-trigger",
+            class: "button",
+            "data-style": "outline",
             style: "margin-bottom: 1.5rem;",
             onclick: move |_| open.set(true),
             "Show Dialog"

@@ -5,7 +5,7 @@ The input element is used to accept a text input from the user. It can be styled
 ```rust
 input {
     // Global html attributes
-    width: "10rem",
+    class: "input",
     // Children
     {children}
 }
