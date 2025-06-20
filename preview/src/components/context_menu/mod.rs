@@ -12,8 +12,8 @@ pub(super) fn Demo() -> Element {
         ContextMenu {
             ContextMenuTrigger {
                 padding: "20px",
-                background: "var(--background-color)",
-                border: "1px dashed var(--dim-border-color)",
+                background: "var(--primary-color)",
+                border: "1px dashed var(--primary-color-6)",
                 border_radius: ".5rem",
                 cursor: "context-menu",
                 user_select: "none",

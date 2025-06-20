@@ -8,17 +8,17 @@
   padding: 8px 18px;
   border: none;
   border-radius: 0.5rem;
-  background-color: var(--dark, var(--dim-background-color)) var(--light, var(--background-color));
-  box-shadow: inset 0 0 0 1px var(--dim-border-color);
-  color: var(--text-color);
+  background-color: var(--dark, var(--primary-color-3)) var(--light, var(--primary-color));
+  box-shadow: inset 0 0 0 1px var(--primary-color-6);
+  color: var(--secondary-color-4);
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.2s ease;
 }
 
 .dropdown-menu-trigger:hover {
-  background: var(--hover-background-color);
-  color: var(--bright-text-color);
+  background: var(--primary-color-4);
+  color: var(--secondary-color-1);
 }
 
 .dropdown-menu-trigger:focus-visible {
@@ -35,10 +35,10 @@
   border-radius: 0.5rem;
   margin-top: 4px;
   animation: slideIn 0.1s ease-out;
-  background: var(--dark, var(--focused-background-color))
-    var(--light, var(--background-color));
-  box-shadow: inset 0 0 0 1px var(--dark, var(--hover-border-color))
-    var(--light, var(--dim-border-color));
+  background: var(--dark, var(--primary-color-5))
+    var(--light, var(--primary-color));
+  box-shadow: inset 0 0 0 1px var(--dark, var(--primary-color-7))
+    var(--light, var(--primary-color-6));
 
   /* Animation properties */
   opacity: 0;
@@ -64,7 +64,7 @@
   align-items: center;
   padding: 8px 12px;
   border-radius: calc(0.5rem - 0.25rem);
-  color: var(--text-color);
+  color: var(--secondary-color-4);
   cursor: pointer;
   font-size: 14px;
   outline: none;
@@ -72,13 +72,13 @@
 }
 
 .dropdown-menu-item[data-disabled="true"] {
-  color: var(--muted-text-color);
+  color: var(--secondary-color-5);
   cursor: not-allowed;
 }
 
 .dropdown-menu-item:hover:not([data-disabled="true"]),
 .dropdown-menu-item:focus-visible {
-  background: var(--dark, var(--hover-border-color))
-    var(--light, var(--hover-background-color));
-  color: var(--bright-text-color);
+  background: var(--dark, var(--primary-color-7))
+    var(--light, var(--primary-color-4));
+  color: var(--secondary-color-1);
 }

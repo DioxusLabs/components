@@ -15,8 +15,8 @@
   padding: 8px 12px;
   border-radius: 0.5rem;
   animation: tooltip-fade-in 0.2s ease-in-out;
-  background-color: var(--text-color);
-  color: var(--background-color);
+  background-color: var(--secondary-color-4);
+  color: var(--primary-color);
   font-size: 14px;
   line-height: 1.4;
 }
@@ -42,7 +42,7 @@
 .tooltip-content[data-side="top"]::after {
   top: calc(100% - 0.25rem);
   left: 50%;
-  border-color: var(--text-color);
+  border-color: var(--secondary-color-4);
   border-radius: 0 0 0.1rem;
 }
 
@@ -57,7 +57,7 @@
 .tooltip-content[data-side="right"]::after {
   top: calc(50% - 0.25rem);
   left: 0;
-  border-color: var(--text-color);
+  border-color: var(--secondary-color-4);
   border-radius: 0 0 0 0.1rem;
 }
 
@@ -72,7 +72,7 @@
 .tooltip-content[data-side="bottom"]::after {
   bottom: calc(100% - 0.25rem);
   left: 50%;
-  border-color: var(--text-color);
+  border-color: var(--secondary-color-4);
   border-radius: 0.1rem 0 0;
 }
 
@@ -87,7 +87,7 @@
 .tooltip-content[data-side="left"]::after {
   top: calc(50% - 0.25rem);
   right: -0.25rem;
-  border-color: var(--text-color);
+  border-color: var(--secondary-color-4);
   border-radius: 0 0.1rem 0 0;
 }
 

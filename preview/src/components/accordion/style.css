@@ -10,7 +10,7 @@
   padding-bottom: 1rem;
   border: none;
   background-color: transparent;
-  color: var(--text-color);
+  color: var(--secondary-color-4);
   outline: none;
   text-align: left;
 }
@@ -60,7 +60,7 @@
 .accordion-item {
   overflow: hidden;
   box-sizing: border-box;
-  border-bottom: 1px solid var(--dim-border-color);
+  border-bottom: 1px solid var(--primary-color-6);
   margin-top: 1px;
 }
 
@@ -76,7 +76,7 @@
   width: 20px;
   height: 20px;
   fill: none;
-  stroke: var(--text-color);
+  stroke: var(--secondary-color-4);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2;

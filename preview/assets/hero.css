@@ -9,7 +9,7 @@
 
 #hero>h1, #hero>h2 {
   margin: 10px 0;
-  color: var(--text-color);
+  color: var(--secondary-color-4);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 1.5rem;
   font-weight: 500;
@@ -44,11 +44,11 @@
   width: 100%;
   box-sizing: border-box;
   padding: 10px 20px;
-  border: 1px solid var(--dim-border-color);
+  border: 1px solid var(--primary-color-6);
   border-radius: .5rem;
   margin: 2em auto;
-  background-color: var(--brighter-background-color);
-  color: var(--text-color);
+  background-color: var(--primary-color-1);
+  color: var(--secondary-color-4);
 }
 
 #hero-search-input:focus-visible {

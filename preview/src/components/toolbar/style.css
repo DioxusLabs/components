@@ -6,7 +6,7 @@
     padding: .25rem;
     border: none;
     border-radius: .5rem;
-    box-shadow: inset 0 0 0 1px var(--dim-border-color);
+    box-shadow: inset 0 0 0 1px var(--primary-color-6);
     gap: .25rem;
 }
 
@@ -15,19 +15,19 @@
     border: none;
     border-radius: calc(.5rem - .25rem);
     background: none;
-    color: var(--text-color);
+    color: var(--secondary-color-4);
     cursor: pointer;
 }
 
 .toolbar button:hover:not([disabled]),
 .toolbar button:focus-visible {
-    background: var(--light, var(--hover-background-color)) 
-        var(--dark, var(--hover-border-color));
-    color: var(--bright-text-color);
+    background: var(--light, var(--primary-color-4)) 
+        var(--dark, var(--primary-color-7));
+    color: var(--secondary-color-1);
 }
 
 .toolbar button:disabled {
-    color: var(--muted-text-color);
+    color: var(--secondary-color-5);
     cursor: not-allowed;
 }
 
@@ -41,7 +41,7 @@
     width: 1px;
     height: 24px;
     margin: 0 5px;
-    background-color: var(--dim-border-color);
+    background-color: var(--primary-color-6);
 }
 
 .toolbar-content p {

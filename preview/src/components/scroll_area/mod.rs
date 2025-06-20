@@ -10,7 +10,7 @@ pub(super) fn Demo() -> Element {
         ScrollArea {
             width: "10em",
             height: "10em",
-            border: "1px solid var(--dim-border-color)",
+            border: "1px solid var(--primary-color-6)",
             border_radius: "0.5em",
             padding: "0 1em 1em 1em",
             direction: ScrollDirection::Vertical,

@@ -14,8 +14,8 @@
     padding: .25rem;
     border: none;
     border-radius: .5rem;
-    background: var(--light, var(--dim-background-color)) 
-        var(--dark, var(--focused-background-color));
+    background: var(--light, var(--primary-color-3)) 
+        var(--dark, var(--primary-color-5));
     gap: .25rem;
 }
 
@@ -24,34 +24,34 @@
     border: none;
     border-radius: calc(.5rem - .25rem);
     background: none;
-    color: var(--muted-text-color);
+    color: var(--secondary-color-5);
     cursor: pointer;
 }
 
 .tabs-trigger[data-state="active"] {
-    background-color: var(--light, var(--background-color)) var(--dark, var(--dim-border-color));
-    box-shadow: var(--dark, inset 0 0 0 1px var(--hover-border-color)) 
+    background-color: var(--light, var(--primary-color)) var(--dark, var(--primary-color-6));
+    box-shadow: var(--dark, inset 0 0 0 1px var(--primary-color-7)) 
         var(--light, 0 1px 2px rgb(0 0 0 / 18%));
-    color: var(--bright-text-color);
+    color: var(--secondary-color-1);
 }
 
 .tabs-trigger[data-disabled="true"] {
-    color: var(--muted-text-color);
+    color: var(--secondary-color-5);
     cursor: not-allowed;
 }
 
 .tabs-trigger:hover:not([data-disabled="true"]),
 .tabs-trigger:focus-visible {
-    color: var(--dim-text-color);
+    color: var(--secondary-color-3);
 }
 
 .tabs-content {
     width: 100%;
     box-sizing: border-box;
     padding: .25rem;
-    border: 1px solid var(--light, var(--dim-border-color)) var(--dark, var(--hover-border-color));
+    border: 1px solid var(--light, var(--primary-color-6)) var(--dark, var(--primary-color-7));
     border-radius: .5rem;
-    background: var(--light, var(--background-color)) var(--dark, var(--dim-background-color));
+    background: var(--light, var(--primary-color)) var(--dark, var(--primary-color-3));
     box-shadow: var(--light, 0 1px 2px rgb(0 0 0 / 18%)) var(--dark, none);
 }
 
