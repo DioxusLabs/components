@@ -4,18 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dioxus Componentsdioxus | ⛺</title>
-  <link rel="preload" as="script" href="/components/assets/preview-dxh68129047d35d88e9.js" crossorigin><link rel="preload" as="fetch" type="application/wasm" href="/components/assets/assets/preview_bg-dxhb54aef96cf8a1b8.wasm" crossorigin></head>
+  <link rel="preload" as="script" href="/components/assets/preview-dxh14a203ae904226.js" crossorigin><link rel="preload" as="fetch" type="application/wasm" href="/components/assets/assets/preview_bg-dxh686e7f4a547c9a7.wasm" crossorigin></head>
   <body>
     <div id="main"></div>
    <script>
   // We can't use a module script here because we need to start the script immediately when streaming
-  import("/components/assets/preview-dxh68129047d35d88e9.js").then(
+  import("/components/assets/preview-dxh14a203ae904226.js").then(
     ({ default: init, initSync, __wbg_get_imports }) => {
       // export initSync in case a split module needs to initialize
       window.__wasm_split_main_initSync = initSync;
 
       // Actually perform the load
-      init({module_or_path: "/components/assets/preview_bg-dxhb54aef96cf8a1b8.wasm"}).then((wasm) => {
+      init({module_or_path: "/components/assets/preview_bg-dxh686e7f4a547c9a7.wasm"}).then((wasm) => {
         // assign this module to be accessible globally
         window.__dx_mainWasm = wasm;
         window.__dx_mainInit = init;
