@@ -26,10 +26,40 @@ fn App() -> Element {
 #[derive(Routable, Clone, PartialEq)]
 pub(crate) enum Route {
     #[layout(NavigationLayout)]
-    #[route("/")]
-    Home,
-    #[route("/component/:component_name")]
-    ComponentDemo { component_name: String },
+    #[route("/?:iframe")]
+    Home { iframe: bool },
+    #[route("/component/:component_name?:iframe")]
+    ComponentDemo {
+        component_name: String,
+        iframe: bool,
+    },
+}
+
+impl Route {
+    fn iframe(&self) -> bool {
+        match self {
+            Route::Home { iframe } => *iframe,
+            Route::ComponentDemo { iframe, .. } => *iframe,
+        }
+    }
+
+    fn in_iframe() -> bool {
+        let route: Self = router().current();
+        route.iframe()
+    }
+
+    fn home() -> Self {
+        let iframe = Self::in_iframe();
+        Self::Home { iframe }
+    }
+
+    fn component(component_name: impl ToString) -> Self {
+        let iframe = Self::in_iframe();
+        Self::ComponentDemo {
+            component_name: component_name.to_string(),
+            iframe,
+        }
+    }
 }
 
 #[component]
@@ -46,9 +76,41 @@ fn NavigationLayout() -> Element {
 
 #[component]
 fn Navbar() -> Element {
+    let in_iframe = Route::in_iframe();
+    let in_component = matches!(router().current(), Route::ComponentDemo { .. });
+    if in_iframe {
+        return rsx! {
+            nav {
+                class: "preview-navbar",
+                border: "none",
+                padding: "1rem",
+                justify_content: if !in_component { "flex-end" },
+                if in_component {
+                    Link { to: Route::home(), class: "navbar-brand",
+                        aria_label: "Back",
+                        svg {
+                            view_box: "0 0 24 24",
+                            xmlns: "http://www.w3.org/2000/svg",
+                            width: "2rem",
+                            height: "2rem",
+                            fill: "none",
+                            stroke: "var(--text-color)",
+                            stroke_linecap: "round",
+                            stroke_linejoin: "round",
+                            stroke_width: 2,
+                            path {
+                                d: "M15 18 L9 12 L15 6",
+                            }
+                        }
+                    }
+                }
+                DarkModeToggle {}
+            }
+        };
+    }
     rsx! {
         nav { class: "preview-navbar",
-            Link { to: Route::Home, class: "navbar-brand",
+            Link { to: Route::home(), class: "navbar-brand",
                 img {
                     src: asset!("/assets/dioxus_color.svg"),
                     alt: "Dioxus Logo",
@@ -325,7 +387,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
 }
 
 #[component]
-fn ComponentDemo(component_name: String) -> Element {
+fn ComponentDemo(iframe: bool, component_name: String) -> Element {
     let Some(demo) = components::DEMOS
         .iter()
         .find(|demo| demo.name == component_name)
@@ -383,7 +445,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
 }
 
 #[component]
-fn Home() -> Element {
+fn Home(iframe: bool) -> Element {
     let mut search = use_signal(String::new);
 
     rsx! {
@@ -429,9 +491,7 @@ fn ComponentGallery(search: String) -> Element {
                             top: "0",
                             right: "0",
                             aria_label: "{name} details",
-                            to: Route::ComponentDemo {
-                                component_name: name.to_string(),
-                            },
+                            to: Route::component(name),
                         }
                         div { class: "masonry-component-frame", Comp {} }
                     }
