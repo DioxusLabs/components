@@ -278,6 +278,12 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     index: 1usize,
                     "style.css"
                 }
+                TabTrigger {
+                    class: "tabs-trigger",
+                    value: "theme.css",
+                    index: 2usize,
+                    "theme.css"
+                }
             }
             div {
                 width: "100%",
@@ -302,7 +308,16 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     width: "100%",
                     position: "relative",
                     CodeBlock { source: css_highlighted, collapsed: collapsed() }
-                    {expand}
+                    {expand.clone()}
+                }
+                TabContent {
+                    index: 2usize,
+                    class: "tabs-content",
+                    value: "theme.css",
+                    width: "100%",
+                    position: "relative",
+                    CodeBlock { source: THEME_CSS, collapsed: collapsed() }
+                    {expand.clone()}
                 }
             }
         }
@@ -346,6 +361,15 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
             div { class: "component-preview",
                 div { class: "component-preview-contents",
                     div { class: "component-preview-frame", Comp {} }
+                    div { class: "component-installation",
+                        h2 { "Installation" }
+                        ol { class: "component-installation-list",
+                            li { "If you haven't already, add the theme.css file to your project and import it in the root of your app." }
+                            li { "Add the style.css file to your project." }
+                            li { "Create a component based on the main.rs below." }
+                            li { "Modify your components and styles as needed." }
+                        }
+                    }
                     div { class: "component-code",
                         ComponentCode { rs_highlighted, css_highlighted }
                     }
@@ -433,3 +457,14 @@ fn GotoIcon(mut props: LinkProps) -> Element {
     };
     Link(props)
 }
+
+const THEME_CSS: HighlightedCode = HighlightedCode {
+    light: include_str!(concat!(
+        env!("OUT_DIR"),
+        "/theme.css.base16-ocean.light.html"
+    )),
+    dark: include_str!(concat!(
+        env!("OUT_DIR"),
+        "/theme.css.base16-ocean.dark.html"
+    )),
+};

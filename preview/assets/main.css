@@ -15,7 +15,8 @@ html[data-theme="light"] {
   --light: initial;
 }
 
-html, body {
+html,
+body {
   padding: 0;
   margin: 0;
   overflow-x: hidden;
@@ -178,6 +179,21 @@ html, body {
 
 .component-description {
   margin: 5vw;
+  font-size: 1em;
+}
+
+.component-installation {
+  width: 100%;
+  padding: 1rem;
+}
+
+.component-installation-list {
+  list-style-type: decimal;
+  padding-left: 2rem;
+}
+
+.component-installation-list li {
+  margin-bottom: 0.5rem;
   font-size: 1em;
 }
 

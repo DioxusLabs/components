@@ -1,8 +1,10 @@
 use std::sync::OnceLock;
+
 fn main() {
     let out_dir = std::env::var("OUT_DIR").unwrap();
     let out_dir = std::path::PathBuf::from(out_dir);
     println!("cargo:rerun-if-changed=src/components");
+    // Process all markdown files and highlight code files in each component folder
     for folder in std::fs::read_dir("src/components").unwrap().flatten() {
         if !folder.file_type().unwrap().is_dir() {
             continue;
@@ -30,8 +32,18 @@ fn main() {
             }
         }
     }
+
+    // Process the main theme.css file
+    let theme_css_path = std::path::PathBuf::from("assets/theme.css");
+    for theme in ["base16-ocean.dark", "base16-ocean.light"] {
+        let html = highlight_file_to(&theme_css_path, theme);
+        let out_file_path = out_dir.join(format!("theme.css.{theme}.html"));
+        std::fs::write(out_file_path, html).unwrap();
+    }
 }
+
 fn highlight_file_to(file_path: &std::path::Path, theme: &str) -> String {
+    println!("cargo:rerun-if-changed={}", file_path.display());
     use std::io::BufRead;
     use syntect::easy::HighlightFile;
     use syntect::highlighting::{Style, ThemeSet};
@@ -58,7 +70,9 @@ fn highlight_file_to(file_path: &std::path::Path, theme: &str) -> String {
     }
     all_html
 }
+
 fn process_markdown_to_html(markdown_path: &std::path::Path) -> String {
+    println!("cargo:rerun-if-changed={}", markdown_path.display());
     use pulldown_cmark::{Options, Parser};
     let markdown_input =
         std::fs::read_to_string(markdown_path).expect("Failed to read markdown file");
