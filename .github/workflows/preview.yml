@@ -42,7 +42,7 @@ jobs:
           cache-all-crates: "true"
           cache-on-failure: "false"
       - name: Install CLI
-        run: cargo install dioxus-cli@0.7.0-alpha.1
+        run: cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 76ffcab
       - name: Set base path
         run: |
             echo "[application]

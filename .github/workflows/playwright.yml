@@ -52,7 +52,7 @@ jobs:
     - name: Clear base path
       run: rm -f preview/Dioxus.toml
     - name: Install dx
-      run: cargo install dioxus-cli@0.7.0-alpha.1
+      run: cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 76ffcab
     - name: Install dependencies
       run: cd ./playwright && npm ci
     - name: Install Playwright Browsers
