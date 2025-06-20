@@ -11,6 +11,10 @@ pub(super) fn Demo() -> Element {
             rel: "stylesheet",
             href: asset!("/src/components/popover/style.css"),
         }
+        document::Link {
+            rel: "stylesheet",
+            href: asset!("/src/components/button/style.css"),
+        }
         PopoverRoot {
             open: open(),
             on_open_change: move |v| open.set(v),
@@ -30,7 +34,8 @@ pub(super) fn Demo() -> Element {
                     "Delete Item?"
                 }
                 button {
-                    class: "popover-button",
+                    class: "button",
+                    "data-style": "outline",
                     onclick: move |_| {
                         open.set(false);
                         confirmed.set(true);
@@ -38,7 +43,8 @@ pub(super) fn Demo() -> Element {
                     "Confirm"
                 }
                 button {
-                    class: "popover-button",
+                    class: "button",
+                    "data-style": "outline",
                     onclick: move |_| {
                         open.set(false);
                         confirmed.set(true);

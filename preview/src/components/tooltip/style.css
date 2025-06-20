@@ -148,23 +148,3 @@
 .tooltip-content[data-state="open"] {
   display: block;
 }
-
-.tooltip button {
-  padding: 8px 12px;
-  border: 1px solid var(--dim-border-color);
-  border-radius: 4px;
-  background-color: var(--brighter-background-color);
-  color: var(--text-color);
-  cursor: pointer;
-  font-size: 14px;
-  outline: none;
-  user-select: none;
-}
-
-.tooltip button:hover {
-  background: var(--hover-background-color);
-}
-
-.tooltip button:focus-visible {
-  background: var(--focused-background-color);
-}

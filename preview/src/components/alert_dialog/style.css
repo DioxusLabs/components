@@ -116,23 +116,3 @@
 .alert-dialog-action:focus-visible {
   box-shadow: 0 0 0 2px var(--focused-border-color);
 }
-
-.alert-dialog-trigger {
-  padding: 8px 18px;
-  border: 1px solid var(--dim-border-color);
-  border-radius: 0.5rem;
-  background-color: var(--light, var(--background-color)) 
-    var(--dark, var(--dim-background-color));
-  color: var(--text-color);
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-}
-
-.alert-dialog-trigger:hover {
-  background-color: var(--hover-background-color);
-}
-
-.alert-dialog-trigger:focus-visible {
-  box-shadow: 0 0 0 2px var(--focused-border-color);
-}

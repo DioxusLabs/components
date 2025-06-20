@@ -226,23 +226,3 @@
 .popover-trigger:focus-visible {
   box-shadow: 0 0 0 2px var(--focused-border-color);
 }
-
-.popover-button {
-  padding: 8px 18px;
-  border: 1px solid var(--dim-border-color);
-  border-radius: 0.5rem;
-  background-color: var(--light, var(--background-color))
-    var(--dark, var(--dim-background-color));
-  color: var(--text-color);
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-}
-
-.popover-button:hover {
-  background-color: var(--hover-background-color);
-}
-
-.popover-button:focus-visible {
-  box-shadow: 0 0 0 2px var(--focused-border-color);
-}
