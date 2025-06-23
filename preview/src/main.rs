@@ -94,7 +94,7 @@ fn Navbar() -> Element {
                             width: "2rem",
                             height: "2rem",
                             fill: "none",
-                            stroke: "var(--text-color)",
+                            stroke: "var(--secondary-color-4)",
                             stroke_linecap: "round",
                             stroke_linejoin: "round",
                             stroke_width: 2,
