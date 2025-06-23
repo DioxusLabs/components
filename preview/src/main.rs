@@ -26,44 +26,69 @@ fn App() -> Element {
 #[derive(Routable, Clone, PartialEq)]
 pub(crate) enum Route {
     #[layout(NavigationLayout)]
-    #[route("/?:iframe")]
-    Home { iframe: bool },
-    #[route("/component/:component_name?:iframe")]
+    #[route("/?:iframe&:dark_mode")]
+    Home {
+        iframe: Option<bool>,
+        dark_mode: Option<bool>,
+    },
+    #[route("/component/:component_name?:iframe&:dark_mode")]
     ComponentDemo {
         component_name: String,
-        iframe: bool,
+        iframe: Option<bool>,
+        dark_mode: Option<bool>,
     },
 }
 
 impl Route {
-    fn iframe(&self) -> bool {
+    fn iframe(&self) -> Option<bool> {
         match self {
-            Route::Home { iframe } => *iframe,
+            Route::Home { iframe, .. } => *iframe,
             Route::ComponentDemo { iframe, .. } => *iframe,
         }
     }
 
-    fn in_iframe() -> bool {
+    fn in_iframe() -> Option<bool> {
         let route: Self = router().current();
         route.iframe()
     }
 
+    fn dark_mode(&self) -> Option<bool> {
+        match self {
+            Route::Home { dark_mode, .. } => *dark_mode,
+            Route::ComponentDemo { dark_mode, .. } => *dark_mode,
+        }
+    }
+
+    fn in_dark_mode() -> Option<bool> {
+        let route: Self = router().current();
+        route.dark_mode()
+    }
+
     fn home() -> Self {
         let iframe = Self::in_iframe();
-        Self::Home { iframe }
+        let dark_mode = Self::in_dark_mode();
+        Self::Home { iframe, dark_mode }
     }
 
     fn component(component_name: impl ToString) -> Self {
         let iframe = Self::in_iframe();
+        let dark_mode = Self::in_dark_mode();
         Self::ComponentDemo {
             component_name: component_name.to_string(),
             iframe,
+            dark_mode,
         }
     }
 }
 
 #[component]
 fn NavigationLayout() -> Element {
+    use_effect(move || {
+        if let Some(dark_mode) = Route::in_dark_mode() {
+            set_theme(dark_mode);
+        }
+    });
+
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/theme.css") }
@@ -76,7 +101,7 @@ fn NavigationLayout() -> Element {
 
 #[component]
 fn Navbar() -> Element {
-    let in_iframe = Route::in_iframe();
+    let in_iframe = Route::in_iframe().unwrap_or_default();
     let in_component = matches!(router().current(), Route::ComponentDemo { .. });
     if in_iframe {
         return rsx! {
@@ -84,7 +109,7 @@ fn Navbar() -> Element {
                 class: "preview-navbar",
                 border: "none",
                 padding: "1rem",
-                justify_content: if !in_component { "flex-end" },
+                justify_content: "flex-start",
                 if in_component {
                     Link { to: Route::home(), class: "navbar-brand",
                         aria_label: "Back",
@@ -104,7 +129,6 @@ fn Navbar() -> Element {
                         }
                     }
                 }
-                DarkModeToggle {}
             }
         };
     }
@@ -209,16 +233,21 @@ fn CopyIcon() -> Element {
     }
 }
 
+fn set_theme(dark_mode: bool) {
+    let theme = if dark_mode { "dark" } else { "light" };
+    _ = document::eval(&format!(
+        "document.documentElement.setAttribute('data-theme', '{}');",
+        theme
+    ));
+}
+
 #[component]
 fn DarkModeToggle() -> Element {
-    let mut is_dark_mode = use_signal(|| false);
-
     rsx! {
         button {
             class: "dark-mode-toggle dark-mode-only",
             onclick: move |_| {
-                is_dark_mode.toggle();
-                _ = document::eval("document.documentElement.setAttribute('data-theme', 'light');");
+                set_theme(false);
             },
             aria_label: "Enable light mode",
             DarkModeIcon {}
@@ -226,8 +255,7 @@ fn DarkModeToggle() -> Element {
         button {
             class: "dark-mode-toggle light-mode-only",
             onclick: move |_| {
-                is_dark_mode.toggle();
-                _ = document::eval("document.documentElement.setAttribute('data-theme', 'dark');");
+                set_theme(true);
             },
             aria_label: "Enable dark mode",
             LightModeIcon {}
@@ -387,7 +415,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
 }
 
 #[component]
-fn ComponentDemo(iframe: bool, component_name: String) -> Element {
+fn ComponentDemo(iframe: Option<bool>, dark_mode: Option<bool>, component_name: String) -> Element {
     let Some(demo) = components::DEMOS
         .iter()
         .find(|demo| demo.name == component_name)
@@ -445,7 +473,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
 }
 
 #[component]
-fn Home(iframe: bool) -> Element {
+fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
     let mut search = use_signal(String::new);
 
     rsx! {
