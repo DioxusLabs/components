@@ -83,6 +83,12 @@ impl Route {
 
 #[component]
 fn NavigationLayout() -> Element {
+    use_effect(move || {
+        if let Some(dark_mode) = Route::in_dark_mode() {
+            set_theme(dark_mode);
+        }
+    });
+
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/theme.css") }
@@ -227,22 +233,16 @@ fn CopyIcon() -> Element {
     }
 }
 
+fn set_theme(dark_mode: bool) {
+    let theme = if dark_mode { "dark" } else { "light" };
+    _ = document::eval(&format!(
+        "document.documentElement.setAttribute('data-theme', '{}');",
+        theme
+    ));
+}
+
 #[component]
 fn DarkModeToggle() -> Element {
-    fn set_theme(dark_mode: bool) {
-        let theme = if dark_mode { "dark" } else { "light" };
-        _ = document::eval(&format!(
-            "document.documentElement.setAttribute('data-theme', '{}');",
-            theme
-        ));
-    }
-
-    use_effect(move || {
-        if let Some(dark_mode) = Route::in_dark_mode() {
-            set_theme(dark_mode);
-        }
-    });
-
     rsx! {
         button {
             class: "dark-mode-toggle dark-mode-only",
