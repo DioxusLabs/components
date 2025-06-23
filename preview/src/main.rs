@@ -231,7 +231,10 @@ fn CopyIcon() -> Element {
 fn DarkModeToggle() -> Element {
     fn set_theme(dark_mode: bool) {
         let theme = if dark_mode { "dark" } else { "light" };
-        _ = document::eval(&format!("document.documentElement.setAttribute('data-theme', '{}');", theme));
+        _ = document::eval(&format!(
+            "document.documentElement.setAttribute('data-theme', '{}');",
+            theme
+        ));
     }
 
     use_effect(move || {
