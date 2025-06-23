@@ -103,7 +103,7 @@ fn Navbar() -> Element {
                 class: "preview-navbar",
                 border: "none",
                 padding: "1rem",
-                justify_content: if !in_component { "flex-end" },
+                justify_content: "flex-start",
                 if in_component {
                     Link { to: Route::home(), class: "navbar-brand",
                         aria_label: "Back",
@@ -123,7 +123,6 @@ fn Navbar() -> Element {
                         }
                     }
                 }
-                DarkModeToggle {}
             }
         };
     }
