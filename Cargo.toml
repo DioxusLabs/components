@@ -34,3 +34,12 @@ inherits = "dev"
 
 [profile.android-dev]
 inherits = "dev"
+
+# Same as in the Stable section
+[profile.release]
+opt-level = "z"
+debug = false
+lto = true
+codegen-units = 1
+panic = "abort"
+incremental = false
