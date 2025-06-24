@@ -31,9 +31,9 @@ pub(crate) enum Route {
         iframe: Option<bool>,
         dark_mode: Option<bool>,
     },
-    #[route("/component/:component_name?:iframe&:dark_mode")]
+    #[route("/component/?:name&:iframe&:dark_mode")]
     ComponentDemo {
-        component_name: String,
+        name: String,
         iframe: Option<bool>,
         dark_mode: Option<bool>,
     },
@@ -70,11 +70,11 @@ impl Route {
         Self::Home { iframe, dark_mode }
     }
 
-    fn component(component_name: impl ToString) -> Self {
+    fn component(name: impl ToString) -> Self {
         let iframe = Self::in_iframe();
         let dark_mode = Self::in_dark_mode();
         Self::ComponentDemo {
-            component_name: component_name.to_string(),
+            name: name.to_string(),
             iframe,
             dark_mode,
         }
@@ -430,10 +430,10 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
 }
 
 #[component]
-fn ComponentDemo(iframe: Option<bool>, dark_mode: Option<bool>, component_name: String) -> Element {
+fn ComponentDemo(iframe: Option<bool>, dark_mode: Option<bool>, name: String) -> Element {
     let Some(demo) = components::DEMOS
         .iter()
-        .find(|demo| demo.name == component_name)
+        .find(|demo| demo.name == name)
         .cloned()
     else {
         return rsx! {
