@@ -89,6 +89,22 @@ fn NavigationLayout() -> Element {
         }
     });
 
+    // Send the route to the parent window if in an iframe
+    let mut initial_route = use_hook(|| CopyValue::new(true));
+    use_effect(move || {
+        let route: Route = router().current();
+
+        // Only send route changes, not the initial route
+        if initial_route() || !Route::in_iframe().unwrap_or_default() {
+            initial_route.set(false);
+            return;
+        }
+
+        document::eval(&format!(
+            "window.top.postMessage({{ 'route': '{route}' }}, '*');"
+        ));
+    });
+
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/theme.css") }
@@ -236,8 +252,7 @@ fn CopyIcon() -> Element {
 fn set_theme(dark_mode: bool) {
     let theme = if dark_mode { "dark" } else { "light" };
     _ = document::eval(&format!(
-        "document.documentElement.setAttribute('data-theme', '{}');",
-        theme
+        "document.documentElement.setAttribute('data-theme', '{theme}');",
     ));
 }
 
