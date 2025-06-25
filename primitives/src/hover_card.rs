@@ -205,10 +205,7 @@ pub fn HoverCardContent(props: HoverCardContentProps) -> Element {
         }
     };
 
-    let render = use_animated_open(
-        id,
-        ctx.open,
-    );
+    let render = use_animated_open(id, ctx.open);
 
     rsx! {
         if render() {

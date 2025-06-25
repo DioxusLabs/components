@@ -4,7 +4,8 @@ use crate::{
     focus::{
         use_focus_control, use_focus_controlled_item, use_focus_entry, use_focus_provider,
         FocusState,
-    }, use_animated_open, use_id_or, use_unique_id
+    },
+    use_animated_open, use_id_or, use_unique_id,
 };
 
 #[derive(Clone, Copy)]

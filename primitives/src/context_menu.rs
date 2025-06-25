@@ -1,5 +1,6 @@
 use crate::{
-    focus::{use_focus_controlled_item, use_focus_provider, FocusState}, use_animated_open, use_controlled, use_id_or, use_unique_id
+    focus::{use_focus_controlled_item, use_focus_provider, FocusState},
+    use_animated_open, use_controlled, use_id_or, use_unique_id,
 };
 use dioxus_lib::prelude::*;
 
@@ -184,10 +185,7 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
     let unique_id = use_unique_id();
     let id = use_id_or(unique_id, props.id);
 
-    let render = use_animated_open(
-        id,
-        open,
-    );
+    let render = use_animated_open(id, open);
 
     rsx! {
         if render() {
