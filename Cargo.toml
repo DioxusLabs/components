@@ -19,9 +19,9 @@ dioxus-sync = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
 dioxus-time = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
 dioxus-util = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
 dioxus-window = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
-dioxus = { git = "https://github.com/dioxuslabs/dioxus", rev = "76ffcab" }
-dioxus-lib = { git = "https://github.com/dioxuslabs/dioxus", rev = "76ffcab" }
-dioxus-router = { git = "https://github.com/dioxuslabs/dioxus", rev = "76ffcab" }
+dioxus = { git = "https://github.com/dioxuslabs/dioxus", rev = "0dd0f05d" }
+dioxus-lib = { git = "https://github.com/dioxuslabs/dioxus", rev = "0dd0f05d" }
+dioxus-router = { git = "https://github.com/dioxuslabs/dioxus", rev = "0dd0f05d" }
 
 [profile]
 

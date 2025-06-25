@@ -50,7 +50,7 @@ jobs:
         cache-all-crates: "true"
         cache-on-failure: "true"
     - name: Install dx
-      run: cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 76ffcab
+      run: cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 0dd0f05d
     - name: Install dependencies
       run: cd ./playwright && npm ci
     - name: Install Playwright Browsers

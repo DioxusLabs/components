@@ -75,7 +75,7 @@ cargo run -p preview --features desktop
 or for the web build
 
 ```
-cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 76ffcab
+cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 0dd0f05d
 dx serve -p preview --platform web
 ```
 

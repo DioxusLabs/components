@@ -30,7 +30,7 @@ jobs:
           cache-all-crates: "true"
           cache-on-failure: "false"
       - name: Install CLI
-        run: cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 76ffcab
+        run: cargo install dioxus-cli --git https://github.com/dioxuslabs/dioxus --rev 0dd0f05d
       - name: Build
         run: cd preview && dx build --platform web --release --base-path "components"
       - name: Copy output
