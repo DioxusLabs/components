@@ -1,7 +1,10 @@
 use dioxus::document;
 use dioxus_lib::prelude::*;
 
-use crate::{use_controlled, use_id_or, use_unique_id, ContentAlign, ContentSide, FOCUS_TRAP_JS};
+use crate::{
+    use_animated_open, use_controlled, use_id_or, use_unique_id, ContentAlign, ContentSide,
+    FOCUS_TRAP_JS,
+};
 
 #[derive(Clone, Copy)]
 struct PopoverCtx {
@@ -127,23 +130,27 @@ pub fn PopoverContent(props: PopoverProps) -> Element {
         ));
     });
 
+    let render = use_animated_open(id, ctx.open);
+
     rsx! {
-        document::Script {
-            src: FOCUS_TRAP_JS,
-            defer: true,
-        }
-        div {
-            id,
-            role: "dialog",
-            aria_modal: "true",
-            aria_labelledby: ctx.labelledby,
-            aria_hidden: (!is_open).then_some("true"),
-            class: props.class.clone().unwrap_or_else(|| "alert-dialog".to_string()),
-            "data-state": if is_open { "open" } else { "closed" },
-            "data-side": props.side.as_str(),
-            "data-align": props.align.as_str(),
-            ..props.attributes,
-            {props.children}
+        if render() {
+            document::Script {
+                src: FOCUS_TRAP_JS,
+                defer: true,
+            }
+            div {
+                id,
+                role: "dialog",
+                aria_modal: "true",
+                aria_labelledby: ctx.labelledby,
+                aria_hidden: (!is_open).then_some("true"),
+                class: props.class.clone().unwrap_or_else(|| "alert-dialog".to_string()),
+                "data-state": if is_open { "open" } else { "closed" },
+                "data-side": props.side.as_str(),
+                "data-align": props.align.as_str(),
+                ..props.attributes,
+                {props.children}
+            }
         }
     }
 }

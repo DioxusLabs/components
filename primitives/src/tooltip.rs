@@ -1,4 +1,6 @@
-use crate::{use_controlled, use_unique_id, ContentAlign, ContentSide};
+use crate::{
+    use_animated_open, use_controlled, use_id_or, use_unique_id, ContentAlign, ContentSide,
+};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone, Copy)]
@@ -135,7 +137,7 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
 pub struct TooltipContentProps {
     /// Optional ID for the tooltip content
     #[props(default)]
-    id: Option<String>,
+    id: ReadOnlySignal<Option<String>>,
 
     /// Side of the trigger to place the tooltip
     #[props(default = ContentSide::Top)]
@@ -153,24 +155,30 @@ pub struct TooltipContentProps {
 
 #[component]
 pub fn TooltipContent(props: TooltipContentProps) -> Element {
-    let ctx: TooltipCtx = use_context();
+    let mut ctx: TooltipCtx = use_context();
+
+    let unique_id = use_unique_id();
+    let id = use_id_or(unique_id, props.id);
+
+    use_effect(move || {
+        ctx.tooltip_id.set(id());
+    });
 
     // Only render if the tooltip is open
-    let is_open = (ctx.open)();
-    if !is_open {
-        return rsx!({});
-    }
+    let render = use_animated_open(id, ctx.open);
 
     // Create the tooltip content
     rsx! {
-        div {
-            id: props.id.clone().unwrap_or_else(|| ctx.tooltip_id.peek().clone()),
-            role: "tooltip",
-            "data-state": if is_open { "open" } else { "closed" },
-            "data-side": props.side.as_str(),
-            "data-align": props.align.as_str(),
-            ..props.attributes,
-            {props.children}
+        if render() {
+            div {
+                id,
+                role: "tooltip",
+                "data-state": if ctx.open.cloned() { "open" } else { "closed" },
+                "data-side": props.side.as_str(),
+                "data-align": props.align.as_str(),
+                ..props.attributes,
+                {props.children}
+            }
         }
     }
 }

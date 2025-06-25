@@ -1,7 +1,10 @@
 use dioxus_lib::prelude::*;
 
-use crate::focus::{
-    use_focus_control, use_focus_controlled_item, use_focus_entry, use_focus_provider, FocusState,
+use crate::{
+    focus::{
+        use_focus_control, use_focus_controlled_item, use_focus_entry, use_focus_provider,
+        FocusState,
+    }, use_animated_open, use_id_or, use_unique_id
 };
 
 #[derive(Clone, Copy)]
@@ -205,6 +208,7 @@ pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarContentProps {
+    id: ReadOnlySignal<Option<String>>,
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
     children: Element,
@@ -214,12 +218,20 @@ pub struct MenubarContentProps {
 pub fn MenubarContent(props: MenubarContentProps) -> Element {
     let menu_ctx: MenubarMenuContext = use_context();
 
+    let unique_id = use_unique_id();
+    let id = use_id_or(unique_id, props.id);
+
+    let render = use_animated_open(id, menu_ctx.is_open);
+
     rsx! {
-        div {
-            role: "menu",
-            "data-state": if (menu_ctx.is_open)() { "open" } else { "closed" },
-            ..props.attributes,
-            {props.children}
+        if render() {
+            div {
+                id,
+                role: "menu",
+                "data-state": if (menu_ctx.is_open)() { "open" } else { "closed" },
+                ..props.attributes,
+                {props.children}
+            }
         }
     }
 }

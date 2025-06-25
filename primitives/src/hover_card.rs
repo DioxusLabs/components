@@ -1,4 +1,4 @@
-use crate::{use_controlled, use_id_or, use_unique_id};
+use crate::{use_animated_open, use_controlled, use_id_or, use_unique_id};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone)]
@@ -205,21 +205,28 @@ pub fn HoverCardContent(props: HoverCardContentProps) -> Element {
         }
     };
 
+    let render = use_animated_open(
+        id,
+        ctx.open,
+    );
+
     rsx! {
-        div {
-            id: id,
-            class: "hover-card-content",
-            role: "tooltip",
-            "data-state": if is_open { "open" } else { "closed" },
-            "data-side": props.side.as_str(),
-            "data-align": props.align.as_str(),
+        if render() {
+            div {
+                id,
+                class: "hover-card-content",
+                role: "tooltip",
+                "data-state": if is_open { "open" } else { "closed" },
+                "data-side": props.side.as_str(),
+                "data-align": props.align.as_str(),
 
-            // Mouse events to keep the hover card open when hovered
-            onmouseenter: handle_mouse_enter,
-            onmouseleave: handle_mouse_leave,
+                // Mouse events to keep the hover card open when hovered
+                onmouseenter: handle_mouse_enter,
+                onmouseleave: handle_mouse_leave,
 
-            ..props.attributes,
-            {props.children}
+                ..props.attributes,
+                {props.children}
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 use crate::{
-    focus::{use_focus_controlled_item, use_focus_provider, FocusState},
-    use_controlled,
+    focus::{use_focus_controlled_item, use_focus_provider, FocusState}, use_animated_open, use_controlled, use_id_or, use_unique_id
 };
 use dioxus_lib::prelude::*;
 
@@ -134,6 +133,8 @@ pub fn ContextMenuTrigger(props: ContextMenuTriggerProps) -> Element {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuContentProps {
+    id: ReadOnlySignal<Option<String>>,
+
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
     children: Element,
@@ -180,26 +181,37 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
         }
     });
 
-    rsx! {
-        div {
-            role: "menu",
-            aria_orientation: "vertical",
-            position: "fixed",
-            left: "{x}px",
-            top: "{y}px",
-            tabindex: if focused() { "0" } else { "-1" },
-            pointer_events: open().then_some("auto"),
-            "data-state": if open() { "open" } else { "closed" },
-            onkeydown,
-            onblur: move |_| {
-                if focused() {
-                    ctx.focus.blur();
-                }
-            },
-            onmounted: move |evt| menu_ref.set(Some(evt.data())),
-            ..props.attributes,
+    let unique_id = use_unique_id();
+    let id = use_id_or(unique_id, props.id);
 
-            {props.children}
+    let render = use_animated_open(
+        id,
+        open,
+    );
+
+    rsx! {
+        if render() {
+            div {
+                id,
+                role: "menu",
+                aria_orientation: "vertical",
+                position: "fixed",
+                left: "{x}px",
+                top: "{y}px",
+                tabindex: if focused() { "0" } else { "-1" },
+                pointer_events: open().then_some("auto"),
+                "data-state": if open() { "open" } else { "closed" },
+                onkeydown,
+                onblur: move |_| {
+                    if focused() {
+                        ctx.focus.blur();
+                    }
+                },
+                onmounted: move |evt| menu_ref.set(Some(evt.data())),
+                ..props.attributes,
+
+                {props.children}
+            }
         }
     }
 }

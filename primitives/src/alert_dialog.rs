@@ -17,7 +17,7 @@
 //
 // You can pass on_click to AlertDialogAction/Cancel for custom logic.
 
-use crate::{use_id_or, use_unique_id, FOCUS_TRAP_JS};
+use crate::{use_animated_open, use_id_or, use_unique_id, FOCUS_TRAP_JS};
 use dioxus::document;
 use dioxus_lib::prelude::*;
 
@@ -31,6 +31,7 @@ struct AlertDialogCtx {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogRootProps {
+    id: ReadOnlySignal<Option<String>>,
     #[props(default)]
     default_open: bool,
     #[props(default)]
@@ -78,13 +79,19 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
         });
     });
 
+    let id = use_unique_id();
+    let id = use_id_or(id, props.id);
+    let render_element = use_animated_open(id, open);
+
     rsx! {
-        div {
-            class: "alert-dialog-overlay",
-            aria_hidden: (!open()).then_some("true"),
-            "data-state": if open() { "open" } else { "closed" },
-            ..props.attributes,
-            {props.children}
+        if render_element() {
+            div {
+                id,
+                class: "alert-dialog-overlay",
+                "data-state": if open() { "open" } else { "closed" },
+                ..props.attributes,
+                {props.children}
+            }
         }
     }
 }

@@ -101,6 +101,44 @@ fn use_effect_cleanup<F: FnOnce() + 'static>(#[allow(unused)] cleanup: F) {
     web!(use_drop(cleanup))
 }
 
+fn use_animated_open(
+    id: impl Readable<Target = String> + Copy + 'static,
+    open: impl Readable<Target = bool> + Copy + 'static,
+) -> impl Fn() -> bool {
+    let animating = use_signal(|| false);
+
+    // Show in dom is a few frames behind the open signal to allow for the animation to start.
+    // If it does start, we wait for the animation to finish before showing removing the element from the DOM.
+    let mut show_in_dom = use_signal(|| false);
+
+    use_effect(move || {
+        let open = open.cloned();
+        if open {
+            show_in_dom.set(open);
+        } else {
+            spawn(async move {
+                let id = id.cloned();
+                let script = format!(
+                    "const element = document.getElementById('{id}');
+                    if (element && element.getAnimations().length > 0) {{
+                        console.log('found animations:', element.getAnimations());
+                        Promise.all(element.getAnimations().map((animation) => animation.finished)).then(() => {{
+                            console.log('Animation event ended');
+                            dioxus.send(true);
+                        }});
+                    }} else {{
+                        dioxus.send(true);
+                    }}"
+                );
+                _ = dioxus::document::eval(&script).recv::<bool>().await;
+                show_in_dom.set(open);
+            });
+        }
+    });
+
+    move || show_in_dom() || animating()
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ContentSide {
     Top,

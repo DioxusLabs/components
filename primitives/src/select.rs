@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    focus::{use_focus_controlled_item, use_focus_provider, FocusState},
-    use_controlled, use_effect_cleanup, use_id_or, use_unique_id,
+    focus::{use_focus_controlled_item, use_focus_provider, FocusState}, use_animated_open, use_controlled, use_effect_cleanup, use_id_or, use_unique_id
 };
 use dioxus::html::input_data::MouseButton;
 use dioxus_lib::prelude::*;
@@ -707,26 +706,30 @@ pub fn SelectList(props: SelectListProps) -> Element {
             _ => {}
         }
     };
+    
+    let render = use_animated_open(id, open);
 
     rsx! {
-        div {
-            id,
-            role: "listbox",
-            tabindex: if focused() { "0" } else { "-1" },
-
-            // Data attributes
-            "data-state": if open() { "open" } else { "closed" },
-
-            onmounted: move |evt| listbox_ref.set(Some(evt.data())),
-            onkeydown,
-            onblur: move |_| {
-                if focused() {
-                    open.set(false);
-                }
-            },
-
-            ..props.attributes,
-            {props.children}
+        if render() {
+            div {
+                id,
+                role: "listbox",
+                tabindex: if focused() { "0" } else { "-1" },
+    
+                // Data attributes
+                "data-state": if open() { "open" } else { "closed" },
+    
+                onmounted: move |evt| listbox_ref.set(Some(evt.data())),
+                onkeydown,
+                onblur: move |_| {
+                    if focused() {
+                        open.set(false);
+                    }
+                },
+    
+                ..props.attributes,
+                {props.children}
+            }
         }
     }
 }
