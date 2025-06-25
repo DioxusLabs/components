@@ -207,7 +207,6 @@ struct HighlightedCode {
 
 #[component]
 fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
-    let mut copied = use_signal(|| false);
     rsx! {
         div {
             class: "code-block dark-code-block",
@@ -221,16 +220,31 @@ fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.light,
         }
+        CopyButton {
+            position: "absolute",
+            top: "0.5em",
+            right: "0.5em",
+        }
+    }
+}
+
+#[component]
+fn CopyButton(#[props(extends=GlobalAttributes)] attributes: Vec<Attribute>) -> Element {
+    let mut copied = use_signal(|| false);
+
+    rsx! {
         button {
             class: "copy-button",
             aria_label: "Copy code",
             "data-copied": copied,
             "onclick": "navigator.clipboard.writeText(this.parentNode.firstChild.innerText);",
             onclick: move |_| copied.set(true),
+            ..attributes,
             if copied() {
-                "Copied!"
+                CheckIcon {}
+            } else {
+                CopyIcon {}
             }
-            CopyIcon {}
         }
     }
 }
@@ -240,11 +254,29 @@ fn CopyIcon() -> Element {
     rsx! {
         svg {
             width: "24",
-            height: "24",
+            height: "25",
+            view_box: "0 0 24 25",
             stroke_width: "1.5",
-            fill: "none",
+            fill: "currentColor",
+            stroke: "none",
+            // Clipboard image from octicons (MIT) https://github.com/primer/octicons/blob/v2.0.0/svg/clippy.svg
+            path { d: "M18 20h2v3c0 1-1 2-2 2H2c-.998 0-2-1-2-2V5c0-.911.755-1.667 1.667-1.667h5A3.323 3.323 0 0110 0a3.323 3.323 0 013.333 3.333h5C19.245 3.333 20 4.09 20 5v8.333h-2V9H2v14h16v-3zM3 7h14c0-.911-.793-1.667-1.75-1.667H13.5c-.957 0-1.75-.755-1.75-1.666C11.75 2.755 10.957 2 10 2s-1.75.755-1.75 1.667c0 .911-.793 1.666-1.75 1.666H4.75C3.793 5.333 3 6.09 3 7z" }
+            path { d: "M4 19h6v2H4zM12 11H4v2h8zM4 17h4v-2H4zM15 15v-3l-4.5 4.5L15 21v-3l8.027-.032L23 15z" }
+        }
+    }
+}
+
+#[component]
+fn CheckIcon() -> Element {
+    rsx! {
+        svg {
+            width: "24",
+            height: "25",
+            view_box: "0 0 24 25",
+            stroke_width: "2",
             stroke: "currentColor",
-            path { d: "M8 16c0 1.886 0 2.828.586 3.414C9.172 20 10.114 20 12 20h4c1.886 0 2.828 0 3.414-.586C20 18.828 20 17.886 20 16v-4c0-1.886 0-2.828-.586-3.414C18.828 8 17.886 8 16 8m-8 8h4c1.886 0 2.828 0 3.414-.586C16 14.828 16 13.886 16 12V8m-8 8c-1.886 0-2.828 0-3.414-.586C4 14.828 4 13.886 4 12V8c0-1.886 0-2.828.586-3.414C5.172 4 6.114 4 8 4h4c1.886 0 2.828 0 3.414.586C16 5.172 16 6.114 16 8" }
+            xmlns: "http://www.w3.org/2000/svg",
+            path { d: "M5 13l4 4L19 7" }
         }
     }
 }
@@ -502,6 +534,7 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                     i { "unstyled" }
                     " foundational components for Dioxus."
                 }
+                Installation {}
                 div { id: "hero-search-container",
                     input {
                         id: "hero-search-input",
@@ -515,6 +548,17 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                 }
             }
             ComponentGallery { search }
+        }
+    }
+}
+
+#[component]
+fn Installation() -> Element {
+    rsx! {
+        div {
+            id: "hero-installation",
+            "cargo install dioxus-components"
+            CopyButton {}
         }
     }
 }

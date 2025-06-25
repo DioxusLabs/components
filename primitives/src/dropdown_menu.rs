@@ -1,6 +1,6 @@
 use crate::{
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
-    use_controlled, use_unique_id,
+    use_animated_open, use_controlled, use_id_or, use_unique_id,
 };
 use dioxus_lib::prelude::*;
 
@@ -138,6 +138,7 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
 
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuContentProps {
+    id: ReadOnlySignal<Option<String>>,
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
     children: Element,
@@ -147,13 +148,20 @@ pub struct DropdownMenuContentProps {
 pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
     let ctx: DropdownMenuContext = use_context();
 
+    let unique_id = use_unique_id();
+    let id = use_id_or(unique_id, props.id);
+    let render = use_animated_open(id, ctx.open);
+
     rsx! {
-        div {
-            role: "listbox",
-            aria_labelledby: "{ctx.trigger_id}",
-            "data-state": if (ctx.open)() { "open" } else { "closed" },
-            ..props.attributes,
-            {props.children}
+        if render() {
+            div {
+                id,
+                role: "listbox",
+                aria_labelledby: "{ctx.trigger_id}",
+                "data-state": if (ctx.open)() { "open" } else { "closed" },
+                ..props.attributes,
+                {props.children}
+            }
         }
     }
 }

@@ -54,3 +54,19 @@
 #hero-search-input:focus-visible {
   box-shadow: 0 0 0 2px var(--focused-border-color);
 }
+
+#hero-installation {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+  border: 1px solid var(--primary-color-6);
+  border-radius: .5rem;
+  padding: .5em 1em;
+  margin: 1em auto;
+}
+
+#hero-installation:hover {
+  background-color: var(--primary-color-3);
+}

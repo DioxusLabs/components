@@ -1,4 +1,4 @@
-use crate::{use_effect_cleanup, use_id_or, use_unique_id};
+use crate::{use_animated_open, use_effect_cleanup, use_id_or, use_unique_id};
 use dioxus_lib::prelude::*;
 use std::rc::Rc;
 
@@ -304,16 +304,18 @@ pub fn AccordionContent(props: AccordionContentProps) -> Element {
     let item: Item = use_context();
     let id = use_id_or(item.aria_id, props.id);
     let ctx: AccordionContext = use_context();
-    let open = ctx.is_open(item.id);
+    let open = use_memo(move || ctx.is_open(item.id));
+
+    let render_element = use_animated_open(id, open);
 
     rsx! {
-        div {
-            id: id,
-            class: props.class,
-            style: props.style,
-            "data-open": open,
+        if render_element() {
+            div {
+                id: id,
+                class: props.class,
+                style: props.style,
+                "data-open": open,
 
-            if open {
                 {props.children}
             }
         }

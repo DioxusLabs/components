@@ -1,7 +1,7 @@
 use dioxus::document;
 use dioxus_lib::prelude::*;
 
-use crate::{use_controlled, use_id_or, use_unique_id, FOCUS_TRAP_JS};
+use crate::{use_animated_open, use_controlled, use_id_or, use_unique_id, FOCUS_TRAP_JS};
 
 #[derive(Clone, Copy)]
 struct DialogCtx {
@@ -72,16 +72,24 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
         });
     });
 
+    let unique_id = use_unique_id();
+    let id = use_id_or(unique_id, props.id);
+
+    let render = use_animated_open(id, open);
+
     rsx! {
-        div {
-            class: "dialog-overlay",
-            aria_hidden: (!open()).then_some("true"),
-            onclick: move |_| {
-                set_open.call(false);
-            },
-            "data-state": if open() { "open" } else { "closed" },
-            ..props.attributes,
-            {props.children}
+        if render() {
+            div {
+                id,
+                class: "dialog-overlay",
+                aria_hidden: (!open()).then_some("true"),
+                onclick: move |_| {
+                    set_open.call(false);
+                },
+                "data-state": if open() { "open" } else { "closed" },
+                ..props.attributes,
+                {props.children}
+            }
         }
     }
 }

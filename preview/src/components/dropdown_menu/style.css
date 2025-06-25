@@ -8,16 +8,17 @@
   padding: 8px 18px;
   border: none;
   border-radius: 0.5rem;
-  background-color: var(--dark, var(--primary-color-3)) var(--light, var(--primary-color));
+  background-color: var(--dark, var(--primary-color-3))
+    var(--light, var(--primary-color));
   box-shadow: inset 0 0 0 1px var(--primary-color-6);
   color: var(--secondary-color-4);
   cursor: pointer;
   font-size: 1rem;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .dropdown-menu-trigger:hover {
-  background: var(--primary-color-4);
+  background-color: var(--primary-color-4);
   color: var(--secondary-color-1);
 }
 
@@ -35,7 +36,7 @@
   border-radius: 0.5rem;
   margin-top: 4px;
   animation: slideIn 0.1s ease-out;
-  background: var(--dark, var(--primary-color-5))
+  background-color: var(--dark, var(--primary-color-5))
     var(--light, var(--primary-color));
   box-shadow: inset 0 0 0 1px var(--dark, var(--primary-color-7))
     var(--light, var(--primary-color-6));
@@ -43,20 +44,38 @@
   /* Animation properties */
   opacity: 0;
   transform: translateY(-8px) scale(0.95);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-/* Open state animations */
-.dropdown-menu-content[data-state="open"] {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-/* Closed state animations */
 .dropdown-menu-content[data-state="closed"] {
-  opacity: 0;
   pointer-events: none;
-  transform: translateY(-8px) scale(0.95);
+  animation: dropdown-menu-content-animate-out 150ms ease-in forwards;
+}
+
+@keyframes dropdown-menu-content-animate-out {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-2px);
+  }
+}
+
+.dropdown-menu-content[data-state="open"] {
+  animation: dropdown-menu-content-animate-in 150ms ease-out forwards;
+}
+
+@keyframes dropdown-menu-content-animate-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .dropdown-menu-item {
