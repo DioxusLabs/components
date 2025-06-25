@@ -177,7 +177,7 @@
   color: var(--secondary-color-4);
   cursor: pointer;
   font-size: 1rem;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .popover-content-cancel:hover {
@@ -196,7 +196,7 @@
   color: var(--contrast-error-color);
   cursor: pointer;
   font-size: 1rem;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .popover-content-action:hover {
@@ -216,7 +216,7 @@
   color: var(--secondary-color-4);
   cursor: pointer;
   font-size: 1rem;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .popover-trigger:hover {

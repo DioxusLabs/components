@@ -25,7 +25,6 @@
     color: var(--secondary-color-4);
     cursor: pointer;
     font-weight: 500;
-    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .avatar-image {
