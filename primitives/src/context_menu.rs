@@ -38,6 +38,7 @@ pub struct ContextMenuProps {
     #[props(default)]
     on_open_change: Callback<bool>,
 
+    /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
     roving_loop: ReadOnlySignal<bool>,
 

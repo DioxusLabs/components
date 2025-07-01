@@ -487,6 +487,7 @@ pub struct SelectProps {
     #[props(default = ReadOnlySignal::new(Signal::new(String::from("Select an option"))))]
     placeholder: ReadOnlySignal<String>,
 
+    /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
     roving_loop: ReadOnlySignal<bool>,
 

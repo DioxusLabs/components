@@ -23,23 +23,30 @@ struct DropdownMenuContext {
 /// The props for the [`DropdownMenu`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuProps {
+    /// Whether the dropdown menu is open. If not provided, the component will be uncontrolled and use `default_open`.
     open: ReadOnlySignal<Option<bool>>,
 
+    /// Default open state if the component is not controlled.
     #[props(default)]
     default_open: bool,
 
+    /// Callback when the open state changes. This is called when the dropdown menu is opened or closed.
     #[props(default)]
     on_open_change: Callback<bool>,
 
+    /// Whether the dropdown menu is disabled. If true, the menu will not open and items will not be selectable.
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
     roving_loop: ReadOnlySignal<bool>,
 
+    /// Additional attributes to apply to the dropdown menu element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the dropdown menu, which should include a [`DropdownMenuTrigger`] and a [`DropdownMenuContent`].
     children: Element,
 }
 
