@@ -1,3 +1,5 @@
+//! Defines the [`Toolbar`] component and its sub-components, which provide a container to group related buttons and controls with keyboard navigation.
+
 use dioxus_lib::prelude::*;
 use std::rc::Rc;
 
@@ -52,6 +54,40 @@ pub struct ToolbarProps {
     children: Element,
 }
 
+/// # Toolbar
+///
+/// The `Toolbar` component creates an container for grouping related buttons and controls. It supports keyboard navigation with arrow keys between adjacent [`ToolbarButton`]s.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::toolbar::{Toolbar, ToolbarButton, ToolbarSeparator};
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Toolbar { aria_label: "Text formatting",
+///             ToolbarButton {
+///                 index: 0usize,
+///                 on_click: move |_| tracing::info!("Bold clicked"),
+///                 "Bold"
+///             }
+///             ToolbarSeparator {}
+///             ToolbarButton {
+///                 index: 1usize,
+///                 on_click: move |_| tracing::info!("Italic clicked"),
+///                 "Italic"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Toolbar`] component defines the following data attributes you can use to control styling:
+/// - `data-orientation`: Indicates the orientation of the toolbar. Values are `horizontal` or `vertical`.
+/// - `data-disabled`: Indicates if the toolbar is disabled. Values are `true` or `false`.
 #[component]
 pub fn Toolbar(props: ToolbarProps) -> Element {
     let mut ctx = use_context_provider(|| ToolbarCtx {
@@ -78,7 +114,7 @@ pub fn Toolbar(props: ToolbarProps) -> Element {
 /// The props for the [`ToolbarButton`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToolbarButtonProps {
-    /// Index of the button in the toolbar
+    /// Index of the button in the toolbar. This is used to define the focus order for keyboard navigation.
     index: ReadOnlySignal<usize>,
 
     /// Whether the button is disabled
@@ -95,6 +131,41 @@ pub struct ToolbarButtonProps {
     children: Element,
 }
 
+/// # ToolbarButton
+///
+/// A button component within a [`Toolbar`] with focus controlled by the toolbar context for keyboard navigation.
+///
+/// This must be used inside a [`Toolbar`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::toolbar::{Toolbar, ToolbarButton, ToolbarSeparator};
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Toolbar { aria_label: "Text formatting",
+///             ToolbarButton {
+///                 index: 0usize,
+///                 on_click: move |_| tracing::info!("Bold clicked"),
+///                 "Bold"
+///             }
+///             ToolbarSeparator {}
+///             ToolbarButton {
+///                 index: 1usize,
+///                 on_click: move |_| tracing::info!("Italic clicked"),
+///                 "Italic"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`ToolbarButton`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the button is disabled. Values are `true` or `false`.
 #[component]
 pub fn ToolbarButton(props: ToolbarButtonProps) -> Element {
     let mut ctx: ToolbarCtx = use_context();
@@ -188,10 +259,46 @@ pub struct ToolbarSeparatorProps {
     #[props(default = false)]
     decorative: bool,
 
+    /// Additional attributes for the separator
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 }
 
+/// # ToolbarSeparator
+///
+/// A separator within a [`Toolbar`] that helps divide different sections. The separator can be horizontal or vertical and can be marked as decorative.
+///
+/// This must be used inside a [`Toolbar`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::toolbar::{Toolbar, ToolbarButton, ToolbarSeparator};
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Toolbar { aria_label: "Text formatting",
+///             ToolbarButton {
+///                 index: 0usize,
+///                 on_click: move |_| tracing::info!("Bold clicked"),
+///                 "Bold"
+///             }
+///             ToolbarSeparator {}
+///             ToolbarButton {
+///                 index: 1usize,
+///                 on_click: move |_| tracing::info!("Italic clicked"),
+///                 "Italic"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`ToolbarSeparator`] component defines the following data attributes you can use to control styling:
+/// - `data-orientation`: Indicates the orientation of the separator. Values are `horizontal` or `vertical`.
 #[component]
 pub fn ToolbarSeparator(props: ToolbarSeparatorProps) -> Element {
     let ctx: ToolbarCtx = use_context();
