@@ -7,34 +7,34 @@ use dioxus_lib::prelude::*;
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleProps {
     /// The controlled pressed state of the toggle.
-    pressed: ReadOnlySignal<Option<bool>>,
+    pub pressed: ReadOnlySignal<Option<bool>>,
 
     /// The default pressed state when uncontrolled.
     #[props(default)]
-    default_pressed: bool,
+    pub default_pressed: bool,
 
     /// Whether the toggle is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Callback fired when the pressed state changes.
     #[props(default)]
-    on_pressed_change: Callback<bool>,
-
-    /// Additional attributes to apply to the toggle element.
-    #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub on_pressed_change: Callback<bool>,
 
     // https://github.com/DioxusLabs/dioxus/issues/2467
     /// Callback fired when the toggle is mounted.
     #[props(default)]
-    onmounted: Callback<Event<MountedData>>,
+    pub onmounted: Callback<Event<MountedData>>,
     /// Callback fired when the toggle receives focus.
     #[props(default)]
-    onfocus: Callback<Event<FocusData>>,
+    pub onfocus: Callback<Event<FocusData>>,
     /// Callback fired when a key is pressed on the toggle.
     #[props(default)]
-    onkeydown: Callback<Event<KeyboardData>>,
+    pub onkeydown: Callback<Event<KeyboardData>>,
+
+    /// Additional attributes to apply to the toggle element.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
 
     /// The children of the toggle component.
     children: Element,

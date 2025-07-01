@@ -461,35 +461,35 @@ struct OptionState {
 pub struct SelectProps {
     /// The controlled value of the select
     #[props(default)]
-    value: ReadOnlySignal<Option<Option<String>>>,
+    pub value: ReadOnlySignal<Option<Option<String>>>,
 
     /// The default value of the select
     #[props(default)]
-    default_value: Option<String>,
+    pub default_value: Option<String>,
 
     /// Callback when the value changes
     #[props(default)]
-    on_value_change: Callback<Option<String>>,
+    pub on_value_change: Callback<Option<String>>,
 
     /// Whether the select is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether the select is required
     #[props(default)]
-    required: ReadOnlySignal<bool>,
+    pub required: ReadOnlySignal<bool>,
 
     /// Name of the select for form submission
     #[props(default)]
-    name: ReadOnlySignal<String>,
+    pub name: ReadOnlySignal<String>,
 
     /// Optional placeholder text
     #[props(default = ReadOnlySignal::new(Signal::new(String::from("Select an option"))))]
-    placeholder: ReadOnlySignal<String>,
+    pub placeholder: ReadOnlySignal<String>,
 
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -615,9 +615,11 @@ pub fn Select(props: SelectProps) -> Element {
 /// The props for the [`SelectTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectTriggerProps {
+    /// Additional attributes for the trigger button
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children to render inside the trigger
     children: Element,
 }
 
@@ -729,11 +731,13 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
 pub struct SelectListProps {
     /// The ID of the list for ARIA attributes
     #[props(default)]
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the list
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children to render inside the list
     children: Element,
 }
 
@@ -901,26 +905,26 @@ struct SelectOptionContext {
 pub struct SelectOptionProps {
     /// The value of the option. This will be used both to pass to the [`SelectProps::on_value_change`] callback
     /// and for typeahead search.
-    value: ReadOnlySignal<String>,
+    pub value: ReadOnlySignal<String>,
 
     /// Whether the option is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Optional ID for the option
     #[props(default)]
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
     /// The index of the option in the list. This is used to define the focus order for keyboard navigation.
-    index: ReadOnlySignal<usize>,
+    pub index: ReadOnlySignal<usize>,
 
     /// Optional label for the option (for accessibility)
     #[props(default)]
-    aria_label: Option<String>,
+    pub aria_label: Option<String>,
 
     /// Optional description role for the option (for accessibility)
     #[props(default)]
-    aria_roledescription: Option<String>,
+    pub aria_roledescription: Option<String>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -1046,6 +1050,7 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
 /// The props for the [`SelectItemIndicator`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectItemIndicatorProps {
+    /// The children to render inside the indicator
     children: Element,
 }
 
@@ -1118,15 +1123,17 @@ struct SelectGroupContext {
 pub struct SelectGroupProps {
     /// Whether the group is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Optional ID for the group
     #[props(default)]
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the group
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children to render inside the group
     children: Element,
 }
 
@@ -1203,11 +1210,14 @@ pub fn SelectGroup(props: SelectGroupProps) -> Element {
 /// The props for the [`SelectGroupLabel`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectGroupLabelProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// Optional ID for the label
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the label
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children to render inside the label
     children: Element,
 }
 

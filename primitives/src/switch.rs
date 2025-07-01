@@ -7,31 +7,31 @@ use dioxus_lib::prelude::*;
 #[derive(Props, Clone, PartialEq)]
 pub struct SwitchProps {
     /// The controlled checked state of the switch.
-    checked: ReadOnlySignal<Option<bool>>,
+    pub checked: ReadOnlySignal<Option<bool>>,
 
     /// The default checked state when uncontrolled.
     #[props(default = false)]
-    default_checked: bool,
+    pub default_checked: bool,
 
     /// Whether the switch is disabled.
     #[props(default = ReadOnlySignal::new(Signal::new(false)))]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether the switch is required in a form.
     #[props(default)]
-    required: ReadOnlySignal<bool>,
+    pub required: ReadOnlySignal<bool>,
 
     /// The name attribute for form submission.
     #[props(default)]
-    name: ReadOnlySignal<String>,
+    pub name: ReadOnlySignal<String>,
 
     /// The value attribute for form submission.
     #[props(default = ReadOnlySignal::new(Signal::new(String::from("on"))))]
-    value: ReadOnlySignal<String>,
+    pub value: ReadOnlySignal<String>,
 
     /// Callback fired when the checked state changes.
     #[props(default)]
-    on_checked_change: Callback<bool>,
+    pub on_checked_change: Callback<bool>,
 
     /// Additional attributes to apply to the switch element.
     #[props(extends = GlobalAttributes)]

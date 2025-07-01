@@ -83,30 +83,30 @@ impl ToggleGroupCtx {
 pub struct ToggleGroupProps {
     /// The default pressed items if the component is not controlled.
     #[props(default)]
-    default_pressed: HashSet<usize>,
+    pub default_pressed: HashSet<usize>,
 
     /// The currently pressed items. This can be used to drive the component when controlled.
-    pressed: ReadOnlySignal<Option<HashSet<usize>>>,
+    pub pressed: ReadOnlySignal<Option<HashSet<usize>>>,
 
     /// Callback to handle changes in pressed state
     #[props(default)]
-    on_pressed_change: Callback<HashSet<usize>>,
+    pub on_pressed_change: Callback<HashSet<usize>>,
 
     /// Whether the toggle group is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// If multiple items can be pressed at the same time. If this is false, only one item can be pressed at a time (radio-style).
     #[props(default)]
-    allow_multiple_pressed: ReadOnlySignal<bool>,
+    pub allow_multiple_pressed: ReadOnlySignal<bool>,
 
     /// Whether the toggle group is horizontal or vertical.
     #[props(default)]
-    horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadOnlySignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
     /// Additional attributes to apply to the toggle group element
     #[props(extends = GlobalAttributes)]
@@ -183,7 +183,7 @@ pub struct ToggleItemProps {
 
     /// Whether the toggle item is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Additional attributes to apply to the toggle item element
     #[props(extends = GlobalAttributes)]

@@ -28,27 +28,27 @@ struct TabsContext {
 #[derive(Props, Clone, PartialEq)]
 pub struct TabsProps {
     /// The controlled value of the active tab.
-    value: ReadOnlySignal<Option<String>>,
+    pub value: ReadOnlySignal<Option<String>>,
 
     /// The default active tab value when uncontrolled.
     #[props(default)]
-    default_value: String,
+    pub default_value: String,
 
     /// Callback fired when the active tab changes.
     #[props(default)]
-    on_value_change: Callback<String>,
+    pub on_value_change: Callback<String>,
 
     /// Whether the tabs are disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether the tabs are horizontal.
     #[props(default)]
-    horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadOnlySignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
     /// Additional attributes to apply to the tabs element.
     #[props(extends = GlobalAttributes)]
@@ -224,10 +224,10 @@ pub struct TabTriggerProps {
     /// Additional attributes to apply to the tab trigger element.
     #[props(extends = GlobalAttributes)]
     #[props(extends = button)]
-    pub attributes: Vec<Attribute>,
+    attributes: Vec<Attribute>,
 
     /// The children of the tab trigger component.
-    pub children: Element,
+    children: Element,
 }
 
 /// # TabTrigger
@@ -356,12 +356,12 @@ pub struct TabContentProps {
     pub value: String,
 
     /// The ID of the tab content element.
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
     /// The class of the tab content element.
-    class: Option<String>,
+    pub class: Option<String>,
 
     /// The index of the tab content. This is used to define the focus order for keyboard navigation.
-    index: ReadOnlySignal<usize>,
+    pub index: ReadOnlySignal<usize>,
 
     /// Additional attributes to apply to the tab content element.
     #[props(extends = GlobalAttributes)]

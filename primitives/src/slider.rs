@@ -97,46 +97,48 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderProps {
     /// The controlled value of the slider
-    value: ReadOnlySignal<Option<SliderValue>>,
+    pub value: ReadOnlySignal<Option<SliderValue>>,
 
     /// The default value when uncontrolled
     #[props(default = SliderValue::Single(0.0))]
-    default_value: SliderValue,
+    pub default_value: SliderValue,
 
     /// The minimum value
     #[props(default = 0.0)]
-    min: f64,
+    pub min: f64,
 
     /// The maximum value
     #[props(default = 100.0)]
-    max: f64,
+    pub max: f64,
 
     /// The step value
     #[props(default = 1.0)]
-    step: f64,
+    pub step: f64,
 
     /// Whether the slider is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Orientation of the slider
     #[props(default = true)]
-    horizontal: bool,
+    pub horizontal: bool,
 
     /// Inverts the order of the values
     #[props(default)]
-    inverted: bool,
+    pub inverted: bool,
 
     /// Callback when value changes
     #[props(default)]
-    on_value_change: Callback<SliderValue>,
+    pub on_value_change: Callback<SliderValue>,
 
     /// The label for the slider (for accessibility)
-    label: ReadOnlySignal<Option<String>>,
+    pub label: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the slider
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the slider
     children: Element,
 }
 
@@ -334,8 +336,10 @@ pub fn Slider(props: SliderProps) -> Element {
 /// The props for the [`SliderTrack`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderTrackProps {
+    /// Additional attributes to apply to the track element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the track which should include a [`SliderThumb`]
     children: Element,
 }
 
@@ -395,8 +399,10 @@ pub fn SliderTrack(props: SliderTrackProps) -> Element {
 /// The props for the [`SliderRange`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderRangeProps {
+    /// Additional attributes to apply to the range element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the range element
     children: Element,
 }
 
@@ -474,10 +480,12 @@ pub fn SliderRange(props: SliderRangeProps) -> Element {
 pub struct SliderThumbProps {
     /// Which thumb this is in a range slider
     #[props(default)]
-    index: Option<usize>,
+    pub index: Option<usize>,
 
+    /// Additional attributes to apply to the thumb element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the thumb element
     children: Element,
 }
 

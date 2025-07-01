@@ -62,15 +62,19 @@ struct ToastCtx {
 /// The props for the [`ToastProvider`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToastProviderProps {
+    /// The default duration for non-permanent toasts. Defaults to 5 seconds
     #[props(default = ReadOnlySignal::new(Signal::new(Some(Duration::from_secs(5)))))]
-    default_duration: ReadOnlySignal<Option<Duration>>,
+    pub default_duration: ReadOnlySignal<Option<Duration>>,
 
+    /// The maximum number of toasts to display at once. Defaults to 10.
     #[props(default = ReadOnlySignal::new(Signal::new(10)))]
-    max_toasts: ReadOnlySignal<usize>,
+    pub max_toasts: ReadOnlySignal<usize>,
 
+    /// The callback to render a toast. Defaults to rendering the [`Toast`] component.
     #[props(default = Callback::new(|props: ToastPropsWithOwner| rsx! { {DynamicNode::Component(props.into_vcomponent(Toast))} }))]
-    render_toast: Callback<ToastPropsWithOwner, Element>,
+    pub render_toast: Callback<ToastPropsWithOwner, Element>,
 
+    /// The children of the toast provider component.
     children: Element,
 }
 
@@ -280,21 +284,29 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
     }
 }
 
-// Toast props
 /// The props for the [`Toast`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToastProps {
-    id: usize,
-    index: usize,
-    title: String,
-    description: Option<String>,
-    toast_type: ToastType,
-    on_close: Callback<MouseEvent>,
+    /// The unique identifier for the toast.
+    pub id: usize,
+    /// The index of the toast in the list.
+    pub index: usize,
+    /// The title of the toast.
+    pub title: String,
+    /// An optional description for the toast.
+    pub description: Option<String>,
+    /// The type of toast.
+    pub toast_type: ToastType,
+    /// Callback to handle the close action of the toast.
+    pub on_close: Callback<MouseEvent>,
+    /// Whether the toast is permanent (not auto-dismissed).
     #[props(default = false)]
-    permanent: bool,
+    pub permanent: bool,
 
-    duration: Option<Duration>,
+    /// The duration for which the toast is displayed.
+    pub duration: Option<Duration>,
 
+    /// Additional attributes to apply to the toast element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 }

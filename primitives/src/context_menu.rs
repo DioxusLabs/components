@@ -25,25 +25,27 @@ struct ContextMenuCtx {
 pub struct ContextMenuProps {
     /// Whether the context menu is disabled
     #[props(default = ReadOnlySignal::new(Signal::new(false)))]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether the context menu is open
-    open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadOnlySignal<Option<bool>>,
 
     /// Default open state
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
 
     /// Callback when open state changes
     #[props(default)]
-    on_open_change: Callback<bool>,
+    pub on_open_change: Callback<bool>,
 
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
+    /// Additional attributes for the context menu element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the context menu component.
     children: Element,
 }
 
@@ -153,8 +155,10 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
 /// The props for the [`ContextMenuTrigger`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuTriggerProps {
+    /// Additional attributes for the context menu trigger element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the context menu trigger.
     children: Element,
 }
 
@@ -231,10 +235,13 @@ pub fn ContextMenuTrigger(props: ContextMenuTriggerProps) -> Element {
 /// The props for the [`ContextMenuContent`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuContentProps {
+    /// The ID of the context menu content element.
     id: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the context menu content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the context menu content.
     children: Element,
 }
 
@@ -365,20 +372,22 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
 pub struct ContextMenuItemProps {
     /// Whether the item is disabled
     #[props(default = ReadOnlySignal::new(Signal::new(false)))]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// The value of the menu item
-    value: ReadOnlySignal<String>,
+    pub value: ReadOnlySignal<String>,
 
     /// The index of the item in the menu
-    index: ReadOnlySignal<usize>,
+    pub index: ReadOnlySignal<usize>,
 
     /// Callback when the item is selected
     #[props(default)]
-    on_select: Callback<String>,
+    pub on_select: Callback<String>,
 
+    /// Additional attributes for the context menu item element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the context menu item
     children: Element,
 }
 

@@ -303,51 +303,52 @@ struct CalendarContext {
 pub struct CalendarProps {
     /// The selected date
     #[props(default)]
-    selected_date: ReadOnlySignal<Option<CalendarDate>>,
+    pub selected_date: ReadOnlySignal<Option<CalendarDate>>,
 
     /// Callback when selected date changes
     #[props(default)]
-    on_date_change: Callback<Option<CalendarDate>>,
+    pub on_date_change: Callback<Option<CalendarDate>>,
 
     /// The month being viewed
-    view_date: ReadOnlySignal<CalendarDate>,
+    pub view_date: ReadOnlySignal<CalendarDate>,
 
     /// The current date (used for highlighting today)
     #[props(default = CalendarDate::today())]
-    today: CalendarDate,
+    pub today: CalendarDate,
 
     /// Callback when view date changes
     #[props(default)]
-    on_view_change: Callback<CalendarDate>,
+    pub on_view_change: Callback<CalendarDate>,
 
     /// Whether the calendar is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Dates that should be disabled/unselectable
     #[props(default = ReadOnlySignal::new(Signal::new(Vec::new())))]
-    disabled_dates: ReadOnlySignal<Vec<CalendarDate>>,
+    pub disabled_dates: ReadOnlySignal<Vec<CalendarDate>>,
 
     /// Minimum selectable date
     #[props(default = ReadOnlySignal::new(Signal::new(None)))]
-    min_date: ReadOnlySignal<Option<CalendarDate>>,
+    pub min_date: ReadOnlySignal<Option<CalendarDate>>,
 
     /// Maximum selectable date
     #[props(default = ReadOnlySignal::new(Signal::new(None)))]
-    max_date: ReadOnlySignal<Option<CalendarDate>>,
+    pub max_date: ReadOnlySignal<Option<CalendarDate>>,
 
     /// Optional ID for the calendar
     #[props(default)]
-    id: Option<String>,
+    pub id: Option<String>,
 
     /// First day of the week (1 = Monday, 7 = Sunday)
     #[props(default = 1)]
-    first_day_of_week: u32,
+    pub first_day_of_week: u32,
 
+    /// Additional attributes to extend the calendar element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
-    /// Child components
+    /// The children of the calendar element
     children: Element,
 }
 
@@ -490,10 +491,11 @@ pub struct CalendarHeaderProps {
     #[props(default)]
     id: Option<String>,
 
+    /// Additional attributes to extend the header element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
-    /// Child components
+    /// The children of the header element
     children: Element,
 }
 
@@ -556,10 +558,11 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
 /// The props for the [`CalendarNavigation`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarNavigationProps {
+    /// Optional ID for the navigation
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
-    /// Child components (optional)
+    /// The children of the navigation element
     #[props(default)]
     children: Element,
 }
@@ -619,9 +622,11 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
 /// The props for the [`CalendarPreviousMonthButton`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarPreviousMonthButtonProps {
+    /// Additional attributes to apply to the button
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the button element
     children: Element,
 }
 
@@ -696,9 +701,11 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
 /// The props for the [`CalendarNextMonthButton`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarNextMonthButtonProps {
+    /// Additional attributes to apply to the button
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the button element
     children: Element,
 }
 
@@ -773,6 +780,7 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
 /// The props for the [`CalendarMonthTitle`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarMonthTitleProps {
+    /// Additional attributes to apply to the title element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 }
@@ -861,22 +869,23 @@ pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
 pub struct CalendarGridProps {
     /// Optional ID for the grid
     #[props(default)]
-    id: Option<String>,
+    pub id: Option<String>,
 
     /// Whether to show week numbers
     #[props(default)]
-    show_week_numbers: bool,
+    pub show_week_numbers: bool,
 
     /// Day labels (Sun, Mon, etc.)
     #[props(default = vec!["Su".to_string(), "Mo".to_string(), "Tu".to_string(), "We".to_string(), "Th".to_string(), "Fr".to_string(), "Sa".to_string()])]
-    day_labels: Vec<String>,
+    pub day_labels: Vec<String>,
 
     /// The callback that will be used to render each day in the grid
     #[props(default = Callback::new(|date: CalendarDate| {
         rsx! { CalendarDay { date } }
     }))]
-    render_day: Callback<CalendarDate, Element>,
+    pub render_day: Callback<CalendarDate, Element>,
 
+    /// Additional attributes to apply to the grid element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 }

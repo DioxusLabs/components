@@ -22,22 +22,29 @@ struct DialogCtx {
 /// The props for the [`DialogRoot`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogRootProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The ID of the dialog root element.
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// Whether the dialog is modal. If true, it will trap focus within the dialog when open.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    is_modal: ReadOnlySignal<bool>,
+    pub is_modal: ReadOnlySignal<bool>,
 
-    open: ReadOnlySignal<Option<bool>>,
+    /// The controlled `open` state of the dialog.
+    pub open: ReadOnlySignal<Option<bool>>,
 
+    /// The default `open` state of the dialog if it is not controlled.
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
 
+    /// A callback that is called when the open state changes.
     #[props(default)]
-    on_open_change: Callback<bool>,
+    pub on_open_change: Callback<bool>,
 
+    /// Additional attributes to apply to the dialog root element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the dialog root component.
     children: Element,
 }
 
@@ -146,13 +153,17 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
 /// The props for the [`Dialog`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The ID of the dialog content element.
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// The class to apply to the dialog content element.
     #[props(default)]
-    class: Option<String>,
+    pub class: Option<String>,
 
+    /// Additional attributes to apply to the dialog content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the dialog content.
     children: Element,
 }
 
@@ -258,9 +269,12 @@ pub fn DialogContent(props: DialogProps) -> Element {
 /// The props for the [`DialogTitle`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogTitleProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The ID of the dialog title element.
+    pub id: ReadOnlySignal<Option<String>>,
+    /// Additional attributes for the dialog title element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the dialog title.
     children: Element,
 }
 
@@ -323,9 +337,12 @@ pub fn DialogTitle(props: DialogTitleProps) -> Element {
 /// The props for the [`DialogDescription`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogDescriptionProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The ID of the dialog description element.
+    pub id: ReadOnlySignal<Option<String>>,
+    /// Additional attributes for the dialog description element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the dialog description.
     children: Element,
 }
 

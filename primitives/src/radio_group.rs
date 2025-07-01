@@ -73,35 +73,35 @@ impl RadioGroupCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct RadioGroupProps {
     /// The controlled value of the selected radio item.
-    value: ReadOnlySignal<Option<String>>,
+    pub value: ReadOnlySignal<Option<String>>,
 
     /// The default selected value when uncontrolled.
     #[props(default)]
-    default_value: String,
+    pub default_value: String,
 
     /// Callback fired when the selected value changes.
     #[props(default)]
-    on_value_change: Callback<String>,
+    pub on_value_change: Callback<String>,
 
     /// Whether the radio group is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether the radio group is required in a form.
     #[props(default)]
-    required: ReadOnlySignal<bool>,
+    pub required: ReadOnlySignal<bool>,
 
     /// The name attribute for form submission.
     #[props(default)]
-    name: ReadOnlySignal<String>,
+    pub name: ReadOnlySignal<String>,
 
     /// Whether the radio group is horizontal.
     #[props(default)]
-    horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadOnlySignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
     /// Additional attributes to apply to the radio group element.
     #[props(extends = GlobalAttributes)]
@@ -186,14 +186,19 @@ pub fn RadioGroup(props: RadioGroupProps) -> Element {
 /// The props for the [`RadioItem`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct RadioItemProps {
-    value: ReadOnlySignal<String>,
-    index: ReadOnlySignal<usize>,
+    /// The value of the radio item. This will be passed to [`RadioGroupProps::on_value_change`] when selected.
+    pub value: ReadOnlySignal<String>,
+    /// The index of the radio item within the [`RadioGroup`]. This is used to order the items for keyboard navigation.
+    pub index: ReadOnlySignal<usize>,
 
+    /// Whether the radio item is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
-    id: Option<String>,
-    class: Option<String>,
+    /// Optional ID for the radio item element.
+    pub id: Option<String>,
+    /// Optional class for the radio item element.
+    pub class: Option<String>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,

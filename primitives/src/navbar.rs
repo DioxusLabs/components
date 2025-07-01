@@ -26,11 +26,11 @@ struct NavbarContext {
 pub struct NavbarProps {
     /// Whether the navbar is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
     /// Additional attributes to apply to the navbar element.
     #[props(extends = GlobalAttributes)]
@@ -186,11 +186,11 @@ impl NavbarNavContext {
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarNavProps {
     /// The index of this nav item in the navbar. This is used to define the focus order for keyboard navigation.
-    index: ReadOnlySignal<usize>,
+    pub index: ReadOnlySignal<usize>,
 
     /// Whether this nav item is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Additional attributes to apply to the nav element.
     #[props(extends = GlobalAttributes)]
@@ -454,7 +454,7 @@ pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarContentProps {
     /// The id of the content element.
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
     /// Additional attributes to apply to the content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -569,27 +569,24 @@ pub fn NavbarContent(props: NavbarContentProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarItemProps {
     /// The index of this item within the nav. This is used to define the focus order for keyboard navigation.
-    index: ReadOnlySignal<usize>,
+    pub index: ReadOnlySignal<usize>,
 
     /// The value associated with this nav item. This will be passed to the [`Self::on_select`] callback when the item is selected.
-    value: String,
+    pub value: String,
 
     /// Whether this nav item is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Callback fired when the item is selected. The [`Self::value`] will be passed to this callback when the item is selected.
     #[props(default)]
-    on_select: Callback<String>,
+    pub on_select: Callback<String>,
 
     /// The class attribute for the `a` tag.
     pub class: Option<String>,
 
     /// A class to apply to the generate HTML anchor tag if the `target` route is active.
     pub active_class: Option<String>,
-
-    /// The children to render within the generated HTML anchor tag.
-    pub children: Element,
 
     /// When [`true`], the `target` route will be opened in a new tab.
     ///
@@ -625,6 +622,9 @@ pub struct NavbarItemProps {
     /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+
+    /// The children to render within the generated HTML anchor tag.
+    children: Element,
 }
 
 /// # NavbarItem

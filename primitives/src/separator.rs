@@ -7,12 +7,12 @@ use dioxus_lib::prelude::*;
 pub struct SeparatorProps {
     /// Horizontal if true, vertical if false.
     #[props(default = true)]
-    horizontal: bool,
+    pub horizontal: bool,
 
     /// If the separator is decorative and should not be classified
     /// as a separator to the ARIA standard.
     #[props(default = false)]
-    decorative: bool,
+    pub decorative: bool,
 
     /// Additional attributes to apply to the separator element.
     #[props(extends = GlobalAttributes)]

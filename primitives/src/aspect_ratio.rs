@@ -7,12 +7,14 @@ use dioxus_lib::prelude::*;
 pub struct AspectRatioProps {
     /// The desired ratio. E.g. 16.0 / 9.0
     #[props(default = 1.0)]
-    ratio: f64,
+    pub ratio: f64,
 
-    children: Element,
-
+    /// Additional attributes to apply to the aspect ratio container.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+
+    /// The children to render inside the aspect ratio container.
+    children: Element,
 }
 
 /// # AspectRatio

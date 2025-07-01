@@ -26,11 +26,11 @@ struct MenubarContext {
 pub struct MenubarProps {
     /// Whether the menubar is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
     /// Additional attributes to apply to the menubar element.
     #[props(extends = GlobalAttributes)]
@@ -164,11 +164,11 @@ impl MenubarMenuContext {
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarMenuProps {
     /// The index of this menu in the menubar. This is used to define the focus order for keyboard navigation.
-    index: ReadOnlySignal<usize>,
+    pub index: ReadOnlySignal<usize>,
 
     /// Whether this menu is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Additional attributes to apply to the menu element.
     #[props(extends = GlobalAttributes)]
@@ -427,7 +427,7 @@ pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarContentProps {
     /// The id of the content element.
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
     /// Additional attributes to apply to the content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -529,18 +529,18 @@ pub fn MenubarContent(props: MenubarContentProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarItemProps {
     /// The index of this item within the [`MenubarContent`]. This is used to define the focus order for keyboard navigation.
-    index: ReadOnlySignal<usize>,
+    pub index: ReadOnlySignal<usize>,
 
     /// The value associated with this menu item. This value will be passed to the [`Self::on_select`] callback when the item is selected.
-    value: String,
+    pub value: String,
 
     /// Whether this menu item is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Callback fired when the item is selected. The [`Self::value`] will be passed as an argument.
     #[props(default)]
-    on_select: Callback<String>,
+    pub on_select: Callback<String>,
 
     /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]

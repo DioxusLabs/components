@@ -15,13 +15,18 @@ struct AlertDialogCtx {
 /// The props for the [`AlertDialogRoot`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogRootProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The id of the alert dialog root element. If not provided, a unique id will be generated.
+    pub id: ReadOnlySignal<Option<String>>,
+    /// Whether the alert dialog should be open by default. This is only used if the `open` signal is not provided.
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
+    /// The open state of the alert dialog. If this is provided, it will be used to control the open state of the dialog.
     #[props(default)]
-    open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadOnlySignal<Option<bool>>,
+    /// Callback to handle changes in the open state of the dialog.
     #[props(default)]
-    on_open_change: Callback<bool>,
+    pub on_open_change: Callback<bool>,
+    /// Additional attributes to extend the root element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
     children: Element,
@@ -126,13 +131,17 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
 /// The props for the [`AlertDialogContent`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogContentProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The id of the alert dialog content element. If not provided, a unique id will be generated.
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// The class to apply to the alert dialog content element.
     #[props(default)]
-    class: Option<String>,
+    pub class: Option<String>,
 
+    /// Additional attributes to extend the content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the alert dialog content element.
     children: Element,
 }
 
@@ -220,8 +229,10 @@ pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
 /// The props for the [`AlertDialogTitle`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogTitleProps {
+    /// Additional attributes to extend the title element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the title element.
     children: Element,
 }
 
@@ -275,8 +286,10 @@ pub fn AlertDialogTitle(props: AlertDialogTitleProps) -> Element {
 /// The props for the [`AlertDialogDescription`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogDescriptionProps {
+    /// Additional attributes to extend the description element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the description element.
     children: Element,
 }
 
@@ -330,8 +343,10 @@ pub fn AlertDialogDescription(props: AlertDialogDescriptionProps) -> Element {
 /// The props for the [`AlertDialogActions`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogActionsProps {
+    /// Additional attributes to extend the actions element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the actions element.
     children: Element,
 }
 
@@ -386,10 +401,12 @@ pub fn AlertDialogActions(props: AlertDialogActionsProps) -> Element {
 pub struct AlertDialogActionProps {
     /// The click event handler for the action button.
     #[props(default)]
-    on_click: Option<EventHandler<MouseEvent>>,
-    children: Element,
+    pub on_click: Option<EventHandler<MouseEvent>>,
+    /// Additional attributes to extend the action button element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the action button.
+    children: Element,
 }
 
 /// # AlertDialogAction
@@ -458,9 +475,11 @@ pub fn AlertDialogAction(props: AlertDialogActionProps) -> Element {
 pub struct AlertDialogCancelProps {
     /// The click event handler for the cancel button.
     #[props(default)]
-    on_click: Option<EventHandler<MouseEvent>>,
+    pub on_click: Option<EventHandler<MouseEvent>>,
+    /// Additional attributes to extend the cancel button element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the cancel button.
     children: Element,
 }
 

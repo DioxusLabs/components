@@ -38,19 +38,21 @@ impl ToolbarCtx {
 pub struct ToolbarProps {
     /// Whether the toolbar is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether the toolbar is horizontal (true) or vertical (false)
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadOnlySignal<bool>,
 
     /// ARIA label for the toolbar
     #[props(default)]
-    aria_label: Option<String>,
+    pub aria_label: Option<String>,
 
+    /// Additional attributes for the toolbar
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the toolbar, which should include multiple [`ToolbarButton`] components.
     children: Element,
 }
 
@@ -115,19 +117,21 @@ pub fn Toolbar(props: ToolbarProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ToolbarButtonProps {
     /// Index of the button in the toolbar. This is used to define the focus order for keyboard navigation.
-    index: ReadOnlySignal<usize>,
+    pub index: ReadOnlySignal<usize>,
 
     /// Whether the button is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Callback when the button is clicked
     #[props(default)]
-    on_click: Callback<()>,
+    pub on_click: Callback<()>,
 
+    /// Additional attributes for the button
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the button
     children: Element,
 }
 
@@ -252,12 +256,12 @@ pub fn ToolbarButton(props: ToolbarButtonProps) -> Element {
 pub struct ToolbarSeparatorProps {
     /// Whether the separator is horizontal (true) or vertical (false)
     #[props(default)]
-    horizontal: Option<bool>,
+    pub horizontal: Option<bool>,
 
     /// If the separator is decorative and should not be classified
     /// as a separator to the ARIA standard.
     #[props(default = false)]
-    decorative: bool,
+    pub decorative: bool,
 
     /// Additional attributes for the separator
     #[props(extends = GlobalAttributes)]

@@ -7,15 +7,15 @@ use dioxus_lib::prelude::*;
 pub struct ScrollAreaProps {
     /// The scroll direction.
     #[props(default)]
-    direction: ReadOnlySignal<ScrollDirection>,
+    pub direction: ReadOnlySignal<ScrollDirection>,
 
     /// Whether the scrollbars should be always visible.
     #[props(default)]
-    always_show_scrollbars: ReadOnlySignal<bool>,
+    pub always_show_scrollbars: ReadOnlySignal<bool>,
 
     /// The scroll type.
     #[props(default)]
-    scroll_type: ReadOnlySignal<ScrollType>,
+    pub scroll_type: ReadOnlySignal<ScrollType>,
 
     /// Additional attributes to apply to the scroll area element.
     #[props(extends = GlobalAttributes)]

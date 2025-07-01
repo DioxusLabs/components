@@ -59,29 +59,38 @@ struct CheckboxCtx {
 /// The props for the [`Checkbox`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CheckboxProps {
-    checked: ReadOnlySignal<Option<CheckboxState>>,
+    /// The controlled state of the checkbox.
+    pub checked: ReadOnlySignal<Option<CheckboxState>>,
 
+    /// The default state of the checkbox when it is not controlled.
     #[props(default = CheckboxState::Unchecked)]
-    default_checked: CheckboxState,
+    pub default_checked: CheckboxState,
 
+    /// Whether the checkbox is required in a form.
     #[props(default)]
-    required: ReadOnlySignal<bool>,
+    pub required: ReadOnlySignal<bool>,
 
+    /// Whether the checkbox is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
+    /// The name of the checkbox, used in forms.
     #[props(default)]
-    name: ReadOnlySignal<String>,
+    pub name: ReadOnlySignal<String>,
 
+    /// The value of the checkbox, which can be used in forms.
     #[props(default = ReadOnlySignal::new(Signal::new(String::from("on"))))]
-    value: ReadOnlySignal<String>,
+    pub value: ReadOnlySignal<String>,
 
+    /// Callback that is called when the checked state changes.
     #[props(default)]
-    on_checked_change: Callback<CheckboxState>,
+    pub on_checked_change: Callback<CheckboxState>,
 
+    /// Additional attributes to apply to the checkbox element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children to render inside the checkbox.
     children: Element,
 }
 

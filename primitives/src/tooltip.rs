@@ -20,23 +20,25 @@ struct TooltipCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct TooltipProps {
     /// Whether the tooltip is open
-    open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadOnlySignal<Option<bool>>,
 
-    /// Default open state
+    /// Default open state when uncontrolled
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
 
     /// Callback when open state changes
     #[props(default)]
-    on_open_change: Callback<bool>,
+    pub on_open_change: Callback<bool>,
 
     /// Whether the tooltip is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
+    /// Additional attributes for the tooltip
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the tooltip component, which should include a [`TooltipTrigger`] and a [`TooltipContent`].
     children: Element,
 }
 
@@ -102,11 +104,13 @@ pub fn Tooltip(props: TooltipProps) -> Element {
 pub struct TooltipTriggerProps {
     /// Optional ID for the trigger element
     #[props(default)]
-    id: Option<String>,
+    pub id: Option<String>,
 
+    /// Additional attributes for the trigger element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the trigger element
     children: Element,
 }
 
@@ -202,19 +206,21 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
 pub struct TooltipContentProps {
     /// Optional ID for the tooltip content
     #[props(default)]
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
     /// Side of the trigger to place the tooltip
     #[props(default = ContentSide::Top)]
-    side: ContentSide,
+    pub side: ContentSide,
 
     /// Alignment of the tooltip relative to the trigger
     #[props(default = ContentAlign::Center)]
-    align: ContentAlign,
+    pub align: ContentAlign,
 
+    /// Additional attributes for the tooltip content element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the tooltip content
     children: Element,
 }
 

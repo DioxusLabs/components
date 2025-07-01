@@ -162,36 +162,41 @@ impl AccordionContext {
 /// The props for the [`Accordion`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AccordionProps {
-    id: Option<String>,
-    class: Option<String>,
-    style: Option<String>,
-    children: Element,
+    /// The id of the accordion root element.
+    pub id: Option<String>,
+    /// The class of the accordion root element.
+    pub class: Option<String>,
+    /// The style of the accordion root element.
+    pub style: Option<String>,
 
     /// Whether multiple accordion items are allowed to be open at once.
     ///
     /// Defaults to false.
     #[props(default)]
-    allow_multiple_open: ReadOnlySignal<bool>,
+    pub allow_multiple_open: ReadOnlySignal<bool>,
 
     /// Set whether the accordion is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether the accordion can be fully collapsed.
     ///
     /// Setting this to true will allow all accordion items to close. Defaults to true.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    collapsible: ReadOnlySignal<bool>,
+    pub collapsible: ReadOnlySignal<bool>,
 
     /// Whether the accordion is horizontal.
     ///
     /// Settings this to true will use left/right keybinds for navigation instead of up/down. Defaults to false.
     #[props(default)]
-    horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadOnlySignal<bool>,
 
     /// Attributes to extend the root element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+
+    /// The children of the accordion, which should contain [`AccordionItem`] components.
+    children: Element,
 }
 
 /// # Accordion
@@ -275,32 +280,35 @@ pub fn Accordion(props: AccordionProps) -> Element {
 /// The props for the [`AccordionItem`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AccordionItemProps {
-    #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
-    children: Element,
-
     /// Whether the accordion item is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether this accordion item should be opened by default.
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
 
     /// Callback for when the accordion's open/closed state changes.
     ///
     /// The new value is provided.
     #[props(default)]
-    on_change: Callback<bool, ()>,
+    pub on_change: Callback<bool, ()>,
 
     /// Callback for when the trigger is clicked.
     #[props(default)]
-    on_trigger_click: Callback,
+    pub on_trigger_click: Callback,
 
     /// The index of the accordion item within the [`Accordion`].
     ///
     /// This is required to implement keyboard navigation and focus management.
-    index: usize,
+    pub index: usize,
+
+    /// Additional attributes to extend the item element.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+
+    /// The children of the accordion item.
+    children: Element,
 }
 
 /// # Accordion Item
@@ -382,9 +390,12 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
 /// The props for the [`AccordionContent`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AccordionContentProps {
-    id: ReadOnlySignal<Option<String>>,
-    class: Option<String>,
-    style: Option<String>,
+    /// The id of the accordion content element.
+    pub id: ReadOnlySignal<Option<String>>,
+    /// Additional attributes to extend the content element.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+    /// The children of the accordion content element.
     children: Element,
 }
 
@@ -438,9 +449,8 @@ pub fn AccordionContent(props: AccordionContentProps) -> Element {
         if render_element() {
             div {
                 id: id,
-                class: props.class,
-                style: props.style,
                 "data-open": open,
+                ..props.attributes,
 
                 {props.children}
             }
@@ -451,9 +461,12 @@ pub fn AccordionContent(props: AccordionContentProps) -> Element {
 /// The props for the [`AccordionTrigger`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AccordionTriggerProps {
-    id: Option<String>,
-    class: Option<String>,
-    style: Option<String>,
+    /// THe id of the accordion trigger element.
+    pub id: Option<String>,
+    /// Additional attributes to extend the trigger element.
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+    /// The children of the accordion trigger element.
     children: Element,
 }
 
@@ -509,8 +522,6 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
     rsx! {
         button {
             id: props.id,
-            class: props.class,
-            style: props.style,
             disabled: is_disabled,
             tabindex: "0",
 
@@ -553,6 +564,8 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
                     false => ctx.set_open(item.id),
                 }
             },
+
+            ..props.attributes,
 
             {props.children}
         }

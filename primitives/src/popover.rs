@@ -26,18 +26,18 @@ struct PopoverCtx {
 pub struct PopoverRootProps {
     /// Whether the popover is a modal and should capture focus.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    is_modal: ReadOnlySignal<bool>,
+    pub is_modal: ReadOnlySignal<bool>,
 
     /// The controlled open state of the popover.
-    open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadOnlySignal<Option<bool>>,
 
     /// The default open state when uncontrolled.
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
 
     /// Callback fired when the open state changes.
     #[props(default)]
-    on_open_change: Callback<bool>,
+    pub on_open_change: Callback<bool>,
 
     /// Additional attributes to apply to the popover root element.
     #[props(extends = GlobalAttributes)]
@@ -141,19 +141,19 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverProps {
     /// The id of the popover content element.
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
     /// CSS class for the popover content.
     #[props(default)]
-    class: Option<String>,
+    pub class: Option<String>,
 
     /// Side of the trigger to place the popover.
     #[props(default = ContentSide::Bottom)]
-    side: ContentSide,
+    pub side: ContentSide,
 
     /// Alignment of the popover relative to the trigger.
     #[props(default = ContentAlign::Center)]
-    align: ContentAlign,
+    pub align: ContentAlign,
 
     /// Additional attributes to apply to the content element.
     #[props(extends = GlobalAttributes)]
@@ -274,7 +274,7 @@ pub fn PopoverContent(props: PopoverProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverTitleProps {
     /// The id of the title element.
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
     /// Additional attributes to apply to the title element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,

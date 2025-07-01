@@ -6,11 +6,11 @@ use dioxus_lib::prelude::*;
 #[derive(Props, Clone, PartialEq)]
 pub struct ProgressProps {
     /// The current progress value, between 0 and max.
-    value: ReadOnlySignal<Option<f64>>,
+    pub value: ReadOnlySignal<Option<f64>>,
 
     /// The maximum value. Defaults to 100.
     #[props(default = ReadOnlySignal::new(Signal::new(100.0)))]
-    max: ReadOnlySignal<f64>,
+    pub max: ReadOnlySignal<f64>,
 
     /// Additional attributes to apply to the progress element.
     #[props(extends = GlobalAttributes)]

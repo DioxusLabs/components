@@ -36,10 +36,10 @@ pub struct HoverCardProps {
 
     /// Additional attributes for the hover card
     #[props(extends = GlobalAttributes)]
-    pub attributes: Vec<Attribute>,
+    attributes: Vec<Attribute>,
 
     /// The children of the hover card
-    pub children: Element,
+    children: Element,
 }
 
 /// # HoverCard
@@ -113,11 +113,13 @@ pub fn HoverCard(props: HoverCardProps) -> Element {
 pub struct HoverCardTriggerProps {
     /// Optional ID for the trigger element
     #[props(default)]
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the hover card trigger
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the hover card trigger
     children: Element,
 }
 
@@ -225,10 +227,10 @@ pub struct HoverCardContentProps {
 
     /// Additional attributes for the hover card content
     #[props(extends = GlobalAttributes)]
-    pub attributes: Vec<Attribute>,
+    attributes: Vec<Attribute>,
 
     /// The children of the hover card content
-    pub children: Element,
+    children: Element,
 }
 
 /// # HoverCardContent

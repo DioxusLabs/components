@@ -27,22 +27,22 @@ pub struct CollapsibleProps {
     ///
     /// This will be overridden if the component is controlled.
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
 
     /// The disabled state of the collapsible.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// The controlled `open` state of the collapsible.
     ///
     /// If this is provided, you must use `on_open_change`.
-    open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadOnlySignal<Option<bool>>,
 
     /// A callback for when the open state changes.
     ///
     /// The provided argument is a bool of whether the collapsible is open or closed.
     #[props(default)]
-    on_open_change: Callback<bool>,
+    pub on_open_change: Callback<bool>,
 
     /// Additional attributes for the collapsible element.
     #[props(extends = GlobalAttributes)]
@@ -111,10 +111,13 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
 /// The props for the [`CollapsibleContent`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CollapsibleContentProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The ID of the collapsible content element.
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the collapsible content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the collapsible content.
     children: Element,
 }
 
@@ -177,8 +180,10 @@ pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
 /// The props for the [`CollapsibleTrigger`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CollapsibleTriggerProps {
+    /// Additional attributes for the collapsible trigger element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the collapsible trigger.
     children: Element,
 }
 

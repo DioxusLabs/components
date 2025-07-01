@@ -24,23 +24,23 @@ struct DropdownMenuContext {
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuProps {
     /// Whether the dropdown menu is open. If not provided, the component will be uncontrolled and use `default_open`.
-    open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadOnlySignal<Option<bool>>,
 
     /// Default open state if the component is not controlled.
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
 
     /// Callback when the open state changes. This is called when the dropdown menu is opened or closed.
     #[props(default)]
-    on_open_change: Callback<bool>,
+    pub on_open_change: Callback<bool>,
 
     /// Whether the dropdown menu is disabled. If true, the menu will not open and items will not be selectable.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
     /// Additional attributes to apply to the dropdown menu element.
     #[props(extends = GlobalAttributes)]
@@ -156,8 +156,10 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 /// The props for the [`DropdownMenuTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuTriggerProps {
+    /// Additional attributes to apply to the trigger button element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the trigger button
     children: Element,
 }
 
@@ -240,9 +242,12 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
 /// The props for the [`DropdownMenuContent`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuContentProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The ID of the dropdown menu content element. If not provided, a unique ID will be generated.
+    pub id: ReadOnlySignal<Option<String>>,
+    /// Additional attributes to apply to the dropdown menu content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the dropdown menu content, which should include one or more [`DropdownMenuItem`] components.
     children: Element,
 }
 
@@ -332,9 +337,9 @@ pub struct DropdownMenuItemProps {
 
     /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]
-    pub attributes: Vec<Attribute>,
+    attributes: Vec<Attribute>,
     /// The children of the item, which will be rendered inside the item element.
-    pub children: Element,
+    children: Element,
 }
 
 /// # DropdownMenuTrigger
