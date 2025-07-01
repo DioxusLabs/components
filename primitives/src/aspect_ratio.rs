@@ -23,7 +23,7 @@ pub struct AspectRatioProps {
 /// 
 /// ```rust
 /// use dioxus::prelude::*;
-/// use dioxus_primitives::AspectRatio;
+/// use dioxus_primitives::aspect_ratio::AspectRatio;
 /// fn App() -> Element {
 ///     rsx! {
 ///         AspectRatio { ratio: 16.0 / 9.0,

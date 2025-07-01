@@ -62,7 +62,7 @@ pub struct AvatarProps {
 /// use dioxus_primitives::avatar::{Avatar, AvatarFallback, AvatarImage};
 ///
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Avatar {
 ///             aria_label: "Basic avatar",
@@ -157,7 +157,7 @@ pub struct AvatarFallbackProps {
 /// use dioxus_primitives::avatar::{Avatar, AvatarFallback, AvatarImage};
 ///
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Avatar {
 ///             aria_label: "Basic avatar",
@@ -218,7 +218,7 @@ pub struct AvatarImageProps {
 /// use dioxus_primitives::avatar::{Avatar, AvatarFallback, AvatarImage};
 ///
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Avatar {
 ///             aria_label: "Basic avatar",

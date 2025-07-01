@@ -5,20 +5,25 @@ use std::{
     rc::Rc,
 };
 
-// Calendar date representation
+/// A date in the calendar, representing a specific day, month, and year.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct CalendarDate {
+    /// The year of the date
     pub year: i32,
-    pub month: u32, // 1-12
-    pub day: u32,   // 1-31
+    /// The month of the date (1-12)
+    pub month: u32,
+    /// The day of the date (1-31)
+    pub day: u32,
 }
 
 impl CalendarDate {
+    /// Create a new CalendarDate with the specified year, month, and day.
     pub fn new(year: i32, month: u32, day: u32) -> Self {
         Self { year, month, day }
     }
 
-    pub fn today() -> Self {
+    /// Create a CalendarDate representing today's date. This is a placeholder implementation.
+    pub(crate) fn today() -> Self {
         // In a real implementation, we would use chrono or time crate
         // For now, let's use a placeholder date
         Self {
@@ -26,11 +31,6 @@ impl CalendarDate {
             month: 5,
             day: 15,
         }
-    }
-
-    pub fn format(&self, _format: &str) -> String {
-        // Simple formatting - in a real implementation we would use a date library
-        format!("{}-{:02}-{:02}", self.year, self.month, self.day)
     }
 
     /// Get the number of days in the month
@@ -43,6 +43,7 @@ impl CalendarDate {
         day_of_the_week(self.year, self.month, 1)
     }
 
+    /// Get the week number of the month (0 indexed)
     pub fn week(&self) -> u32 {
         let month_start_day = self.month_start_day_of_the_week();
         (self.day - 1 + month_start_day) / 7
@@ -90,12 +91,12 @@ impl CalendarDate {
         new
     }
 
-    // Check if this date is the same as another date
+    /// Check if this date is the same as another date
     pub fn is_same_day(&self, other: &Self) -> bool {
         self.year == other.year && self.month == other.month && self.day == other.day
     }
 
-    // Check if this date is in the same month as another date
+    /// Check if this date is in the same month as another date
     pub fn is_same_month(&self, other: &Self) -> bool {
         self.year == other.year && self.month == other.month
     }
@@ -273,14 +274,6 @@ impl fmt::Display for CalendarDate {
     }
 }
 
-// Calendar view mode
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum CalendarMode {
-    Day,
-    Month,
-    Year,
-}
-
 // Calendar context for child components
 #[allow(dead_code)]
 #[derive(Clone)]
@@ -291,8 +284,6 @@ struct CalendarContext {
     focused_date: Signal<Option<CalendarDate>>,
     view_date: ReadOnlySignal<CalendarDate>,
     set_view_date: Callback<CalendarDate>,
-    mode: ReadOnlySignal<CalendarMode>,
-    set_mode: Callback<CalendarMode>,
 
     // Configuration
     disabled: ReadOnlySignal<bool>,
@@ -305,7 +296,7 @@ struct CalendarContext {
     calendar_id: ReadOnlySignal<String>,
 }
 
-// Main Calendar component props
+/// The props for the [`Calendar`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarProps {
     /// The selected date
@@ -326,14 +317,6 @@ pub struct CalendarProps {
     /// Callback when view date changes
     #[props(default)]
     on_view_change: Callback<CalendarDate>,
-
-    /// The calendar mode (day, month, year)
-    #[props(default = CalendarMode::Month)]
-    mode: CalendarMode,
-
-    /// Callback when mode changes
-    #[props(default)]
-    on_mode_change: Callback<CalendarMode>,
 
     /// Whether the calendar is disabled
     #[props(default)]
@@ -366,16 +349,55 @@ pub struct CalendarProps {
     children: Element,
 }
 
-// Main Calendar component
+/// # Calendar
+///
+/// The [`Calendar`] component provides an accessible calendar interface with arrow key navigation, month switching, and date selection.
+///
+/// # Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::calendar::{
+///     Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut selected_date = use_signal(|| None::<CalendarDate>);
+///     let mut view_date = use_signal(|| CalendarDate::new(2025, 6, 5));
+///     rsx! {
+///         Calendar {
+///             selected_date: selected_date(),
+///             on_date_change: move |date| {
+///                 tracing::info!("Selected date: {:?}", date);
+///                 selected_date.set(date);
+///             },
+///             view_date: view_date(),
+///             on_view_change: move |new_view: CalendarDate| {
+///                 tracing::info!("View changed to: {}-{}", new_view.year, new_view.month);
+///                 view_date.set(new_view);
+///             },
+///             CalendarHeader {
+///                 CalendarNavigation {
+///                     CalendarPreviousMonthButton {
+///                         "<"
+///                     }
+///                     CalendarMonthTitle {}
+///                     CalendarNextMonthButton {
+///                         ">"
+///                     }
+///                 }
+///             }
+///             CalendarGrid {}
+///         }
+///     }
+/// }
+/// ```
+///
+/// # Styling
+///
+/// The [`Calendar`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the calendar is disabled. Possible values are `true` or `false`.
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
-    // State for calendar mode
-    let mut mode = use_signal(|| props.mode);
-    let set_mode = use_callback(move |new_mode: CalendarMode| {
-        mode.set(new_mode);
-        props.on_mode_change.call(new_mode);
-    });
-
     // Generate a unique ID for the calendar
     let calendar_id = match props.id {
         Some(ref id) => use_signal(|| id.clone()),
@@ -389,8 +411,6 @@ pub fn Calendar(props: CalendarProps) -> Element {
         focused_date: Signal::new(props.selected_date.cloned()),
         view_date: props.view_date,
         set_view_date: props.on_view_change,
-        mode: mode.into(),
-        set_mode,
         disabled: props.disabled,
         disabled_dates: props.disabled_dates,
         min_date: props.min_date,
@@ -461,7 +481,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
     }
 }
 
-// Calendar Header component props
+/// The props for the [`CalendarHeader`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarHeaderProps {
     /// Optional ID for the header
@@ -475,11 +495,50 @@ pub struct CalendarHeaderProps {
     children: Element,
 }
 
-// Calendar Header component
+/// # CalendarHeader
+///
+/// The [`CalendarHeader`] component displays the header for the calendar. It typically contains the [`CalendarNavigation`] component
+///
+/// # Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::calendar::{
+///     Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut selected_date = use_signal(|| None::<CalendarDate>);
+///     let mut view_date = use_signal(|| CalendarDate::new(2025, 6, 5));
+///     rsx! {
+///         Calendar {
+///             selected_date: selected_date(),
+///             on_date_change: move |date| {
+///                 tracing::info!("Selected date: {:?}", date);
+///                 selected_date.set(date);
+///             },
+///             view_date: view_date(),
+///             on_view_change: move |new_view: CalendarDate| {
+///                 tracing::info!("View changed to: {}-{}", new_view.year, new_view.month);
+///                 view_date.set(new_view);
+///             },
+///             CalendarHeader {
+///                 CalendarNavigation {
+///                     CalendarPreviousMonthButton {
+///                         "<"
+///                     }
+///                     CalendarMonthTitle {}
+///                     CalendarNextMonthButton {
+///                         ">"
+///                     }
+///                 }
+///             }
+///             CalendarGrid {}
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
-    let _ctx: CalendarContext = use_context();
-
     rsx! {
         div {
             role: "heading",
@@ -492,7 +551,7 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
     }
 }
 
-// Calendar Navigation component props
+/// The props for the [`CalendarNavigation`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarNavigationProps {
     #[props(extends = GlobalAttributes)]
@@ -503,18 +562,59 @@ pub struct CalendarNavigationProps {
     children: Element,
 }
 
-// Calendar Navigation component
+/// # CalendarNavigation
+///
+/// The [`CalendarNavigation`] component provides a container for navigation buttons in the calendar header.
+/// It typically contains the [`CalendarPreviousMonthButton`], [`CalendarNextMonthButton`], and [`CalendarMonthTitle`] components.
+///
+/// # Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::calendar::{
+///     Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut selected_date = use_signal(|| None::<CalendarDate>);
+///     let mut view_date = use_signal(|| CalendarDate::new(2025, 6, 5));
+///     rsx! {
+///         Calendar {
+///             selected_date: selected_date(),
+///             on_date_change: move |date| {
+///                 tracing::info!("Selected date: {:?}", date);
+///                 selected_date.set(date);
+///             },
+///             view_date: view_date(),
+///             on_view_change: move |new_view: CalendarDate| {
+///                 tracing::info!("View changed to: {}-{}", new_view.year, new_view.month);
+///                 view_date.set(new_view);
+///             },
+///             CalendarHeader {
+///                 CalendarNavigation {
+///                     CalendarPreviousMonthButton {
+///                         "<"
+///                     }
+///                     CalendarMonthTitle {}
+///                     CalendarNextMonthButton {
+///                         ">"
+///                     }
+///                 }
+///             }
+///             CalendarGrid {}
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
     rsx! {
         div { class: "calendar-navigation", ..props.attributes,
-
             {props.children}
         }
     }
 }
 
-/// Next month navigation button component props
+/// The props for the [`CalendarPreviousMonthButton`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarPreviousMonthButtonProps {
     #[props(extends = GlobalAttributes)]
@@ -523,7 +623,50 @@ pub struct CalendarPreviousMonthButtonProps {
     children: Element,
 }
 
-/// Next month navigation button component
+/// # CalendarPreviousMonthButton
+///
+/// The [`CalendarPreviousMonthButton`] component provides a button to navigate to the previous month in the calendar.
+///
+/// This must be used inside a [`Calendar`] component.
+///
+/// # Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::calendar::{
+///     Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut selected_date = use_signal(|| None::<CalendarDate>);
+///     let mut view_date = use_signal(|| CalendarDate::new(2025, 6, 5));
+///     rsx! {
+///         Calendar {
+///             selected_date: selected_date(),
+///             on_date_change: move |date| {
+///                 tracing::info!("Selected date: {:?}", date);
+///                 selected_date.set(date);
+///             },
+///             view_date: view_date(),
+///             on_view_change: move |new_view: CalendarDate| {
+///                 tracing::info!("View changed to: {}-{}", new_view.year, new_view.month);
+///                 view_date.set(new_view);
+///             },
+///             CalendarHeader {
+///                 CalendarNavigation {
+///                     CalendarPreviousMonthButton {
+///                         "<"
+///                     }
+///                     CalendarMonthTitle {}
+///                     CalendarNextMonthButton {
+///                         ">"
+///                     }
+///                 }
+///             }
+///             CalendarGrid {}
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> Element {
     let ctx: CalendarContext = use_context();
@@ -548,7 +691,7 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
     }
 }
 
-/// Next month navigation button component props
+/// The props for the [`CalendarNextMonthButton`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarNextMonthButtonProps {
     #[props(extends = GlobalAttributes)]
@@ -557,7 +700,50 @@ pub struct CalendarNextMonthButtonProps {
     children: Element,
 }
 
-/// Next month navigation button component
+/// # CalendarNextMonthButton
+///
+/// The [`CalendarNextMonthButton`] component provides a button to navigate to the next month in the calendar.
+///
+/// This must be used inside a [`Calendar`] component.
+///
+/// # Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::calendar::{
+///     Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut selected_date = use_signal(|| None::<CalendarDate>);
+///     let mut view_date = use_signal(|| CalendarDate::new(2025, 6, 5));
+///     rsx! {
+///         Calendar {
+///             selected_date: selected_date(),
+///             on_date_change: move |date| {
+///                 tracing::info!("Selected date: {:?}", date);
+///                 selected_date.set(date);
+///             },
+///             view_date: view_date(),
+///             on_view_change: move |new_view: CalendarDate| {
+///                 tracing::info!("View changed to: {}-{}", new_view.year, new_view.month);
+///                 view_date.set(new_view);
+///             },
+///             CalendarHeader {
+///                 CalendarNavigation {
+///                     CalendarPreviousMonthButton {
+///                         "<"
+///                     }
+///                     CalendarMonthTitle {}
+///                     CalendarNextMonthButton {
+///                         ">"
+///                     }
+///                 }
+///             }
+///             CalendarGrid {}
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     let ctx: CalendarContext = use_context();
@@ -582,14 +768,58 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     }
 }
 
-/// Calendar Month Title component props
+/// The props for the [`CalendarMonthTitle`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarMonthTitleProps {
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 }
 
-/// Calendar Month Title component
+/// # CalendarMonthTitle
+///
+/// The [`CalendarMonthTitle`] component displays the title of the current month in the calendar. It will contain
+/// the month and year information as text in the children.
+///
+/// This must be used inside a [`Calendar`] component.
+///
+/// # Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::calendar::{
+///     Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut selected_date = use_signal(|| None::<CalendarDate>);
+///     let mut view_date = use_signal(|| CalendarDate::new(2025, 6, 5));
+///     rsx! {
+///         Calendar {
+///             selected_date: selected_date(),
+///             on_date_change: move |date| {
+///                 tracing::info!("Selected date: {:?}", date);
+///                 selected_date.set(date);
+///             },
+///             view_date: view_date(),
+///             on_view_change: move |new_view: CalendarDate| {
+///                 tracing::info!("View changed to: {}-{}", new_view.year, new_view.month);
+///                 view_date.set(new_view);
+///             },
+///             CalendarHeader {
+///                 CalendarNavigation {
+///                     CalendarPreviousMonthButton {
+///                         "<"
+///                     }
+///                     CalendarMonthTitle {}
+///                     CalendarNextMonthButton {
+///                         ">"
+///                     }
+///                 }
+///             }
+///             CalendarGrid {}
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
     let ctx: CalendarContext = use_context();
@@ -624,7 +854,7 @@ pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
     }
 }
 
-// Calendar Grid component props
+/// The props for the [`CalendarGrid`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarGridProps {
     /// Optional ID for the grid
@@ -649,7 +879,57 @@ pub struct CalendarGridProps {
     attributes: Vec<Attribute>,
 }
 
-// Calendar Grid component
+/// # CalendarGrid
+///
+/// The [`CalendarGrid`] component displays the grid of days for the current month in the calendar.
+///
+/// This must be used inside a [`Calendar`] component.
+///
+/// # Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::calendar::{
+///     Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut selected_date = use_signal(|| None::<CalendarDate>);
+///     let mut view_date = use_signal(|| CalendarDate::new(2025, 6, 5));
+///     rsx! {
+///         Calendar {
+///             selected_date: selected_date(),
+///             on_date_change: move |date| {
+///                 tracing::info!("Selected date: {:?}", date);
+///                 selected_date.set(date);
+///             },
+///             view_date: view_date(),
+///             on_view_change: move |new_view: CalendarDate| {
+///                 tracing::info!("View changed to: {}-{}", new_view.year, new_view.month);
+///                 view_date.set(new_view);
+///             },
+///             CalendarHeader {
+///                 CalendarNavigation {
+///                     CalendarPreviousMonthButton {
+///                         "<"
+///                     }
+///                     CalendarMonthTitle {}
+///                     CalendarNextMonthButton {
+///                         ">"
+///                     }
+///                 }
+///             }
+///             CalendarGrid {}
+///         }
+///     }
+/// }
+/// ```
+/// 
+/// ## Styling
+///
+/// The [`CalendarGrid`] component renders days in a grid that can be styled using CSS. They define the following data attributes:
+/// - `data-today`: If the date is today. Possible values are `true` or `false`
+/// - `data-selected`: If the date is selected. Possible values are `true` or `false`
+/// - `data-month`: The relative month of the date. Possible values are `last`, `current`, or `next`
 #[component]
 pub fn CalendarGrid(props: CalendarGridProps) -> Element {
     let ctx: CalendarContext = use_context();
