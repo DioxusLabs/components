@@ -7,17 +7,17 @@ use dioxus_lib::html::geometry::Pixels;
 use dioxus_lib::prelude::*;
 use std::rc::Rc;
 
+/// The value of the slider. Currently this can only be a single value, but support for ranges is planned.
 #[derive(Debug, Clone, PartialEq)]
 pub enum SliderValue {
+    /// A single value for the slider
     Single(f64),
-    Range(f64, f64),
 }
 
 impl std::fmt::Display for SliderValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SliderValue::Single(v) => write!(f, "{v}"),
-            SliderValue::Range(start, end) => write!(f, "{start}, {end}"),
         }
     }
 }
@@ -208,10 +208,6 @@ pub fn Slider(props: SliderProps) -> Element {
 
         let current_value = match granular_value.cloned() {
             SliderValue::Single(v) => v,
-            SliderValue::Range(start, _) => {
-                // TODO: Handle range sliders
-                start
-            }
         };
         let new = current_value + delta;
         granular_value.set(SliderValue::Single(new));
@@ -351,7 +347,6 @@ pub fn SliderRange(props: SliderRangeProps) -> Element {
     let style = use_memo(move || {
         let (start, end) = match (ctx.value)() {
             SliderValue::Single(v) => (ctx.min, v),
-            SliderValue::Range(start, end) => (start, end),
         };
 
         let start_percent = ((start - ctx.min) / (ctx.max - ctx.min) * 100.0).clamp(0.0, 100.0);
@@ -398,8 +393,6 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
 
     let value = use_memo(move || match ((ctx.value)(), props.index) {
         (SliderValue::Single(v), _) => v,
-        (SliderValue::Range(start, _), Some(0)) => start,
-        (SliderValue::Range(_, end), Some(1)) => end,
         _ => ctx.min,
     });
 
