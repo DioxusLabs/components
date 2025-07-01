@@ -1,3 +1,5 @@
+#![warn(missing_docs)]
+
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use dioxus::prelude::{asset, manganis, Asset};

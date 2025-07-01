@@ -1,9 +1,10 @@
+//! Defines the [`Accordion`] component and its sub-components.
+
 use crate::{use_animated_open, use_effect_cleanup, use_id_or, use_unique_id};
 use dioxus_lib::prelude::*;
 use std::rc::Rc;
 
 // TODO: controlled version
-// TODO: docs
 // TODO: rewrite this to use collapsible
 // TODO: keyboard should skip disabled items when focusing.
 
@@ -158,6 +159,7 @@ impl AccordionContext {
     }
 }
 
+/// The props for the [`Accordion`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AccordionProps {
     id: Option<String>,
@@ -192,6 +194,55 @@ pub struct AccordionProps {
     attributes: Vec<Attribute>,
 }
 
+/// # Accordion
+///
+/// The accordion component displays a list of collapsible items, allowing users to expand or collapse sections of content.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::accordion::{
+///     Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+/// };
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Accordion {
+///             allow_multiple_open: false,
+///             horizontal: false,
+///             for i in 0..4 {
+///                 AccordionItem {
+///                     index: i,
+///                     on_change: move |open| {
+///                         tracing::info!("{open};");
+///                     },
+///                     on_trigger_click: move || {
+///                         tracing::info!("trigger");
+///                     },
+///                     AccordionTrigger {
+///                         "the quick brown fox"
+///                     }
+///                     AccordionContent {
+///                         div { padding_bottom: "1rem",
+///                             p {
+///                                 padding: "0",
+///                                 "Jumped over the lazy dog."
+///                             }
+///                         }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Accordion`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the accordion is disabled. values are `true` or `false`.
 #[component]
 pub fn Accordion(props: AccordionProps) -> Element {
     let mut ctx = use_context_provider(|| {
@@ -221,11 +272,11 @@ pub fn Accordion(props: AccordionProps) -> Element {
     }
 }
 
+/// The props for the [`AccordionItem`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AccordionItemProps {
-    id: Option<String>,
-    class: Option<String>,
-    style: Option<String>,
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
     children: Element,
 
     /// Whether the accordion item is disabled.
@@ -246,10 +297,49 @@ pub struct AccordionItemProps {
     #[props(default)]
     on_trigger_click: Callback,
 
-    /// Required index for tracking component ordering.
+    /// The index of the accordion item within the [`Accordion`].
+    ///
+    /// This is required to implement keyboard navigation and focus management.
     index: usize,
 }
 
+/// # Accordion Item
+///
+/// The accordion item component represents a single item within an accordion, which can be expanded or collapsed to show or hide its content.
+///
+/// The [`AccordionItem`] component must be used underneath the [`Accordion`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::accordion::{
+///     Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+/// };
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Accordion {
+///             AccordionItem {
+///                 index: 0,
+///                 AccordionTrigger {
+///                     "the quick brown fox"
+///                 }
+///                 AccordionContent {
+///                     "Jumped over the lazy dog."
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`AccordionItem`] component defines the following data attributes you can use to control styling:
+/// - `data-open`: Indicates if the accordion item is open. values are `true` or `false`.
+/// - `data-disabled`: Indicates if the accordion is disabled. values are `true` or `false`.
 #[component]
 pub fn AccordionItem(props: AccordionItemProps) -> Element {
     let mut ctx: AccordionContext = use_context();
@@ -280,17 +370,16 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
 
     rsx! {
         div {
-            id: props.id,
-            class: props.class,
-            style: props.style,
             "data-open": ctx.is_open(item.id),
             "data-disabled": ctx.is_disabled() || item.is_disabled(),
+            ..props.attributes,
 
             {props.children}
         }
     }
 }
 
+/// The props for the [`AccordionContent`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AccordionContentProps {
     id: ReadOnlySignal<Option<String>>,
@@ -299,6 +388,43 @@ pub struct AccordionContentProps {
     children: Element,
 }
 
+/// # Accordion Content
+///
+/// The accordion content component represents the content of an accordion item that can be
+/// expanded or collapsed. The contents will only be displayed when the [`AccordionItem`] is open.
+/// 
+/// This must be used underneath the [`AccordionItem`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::accordion::{
+///     Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+/// };
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Accordion {
+///             AccordionItem {
+///                 index: 0,
+///                 AccordionTrigger {
+///                     "the quick brown fox"
+///                 }
+///                 AccordionContent {
+///                     "Jumped over the lazy dog."
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`AccordionContent`] component defines the following data attributes you can use to control styling:
+/// - `data-open`: Indicates if the accordion item is open. values are `true` or `false`.
 #[component]
 pub fn AccordionContent(props: AccordionContentProps) -> Element {
     let item: Item = use_context();
@@ -322,6 +448,7 @@ pub fn AccordionContent(props: AccordionContentProps) -> Element {
     }
 }
 
+/// The props for the [`AccordionTrigger`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AccordionTriggerProps {
     id: Option<String>,
@@ -330,6 +457,37 @@ pub struct AccordionTriggerProps {
     children: Element,
 }
 
+/// # Accordion Trigger
+///
+/// The accordion trigger component is a button that toggles the open/closed state of an [`AccordionItem`].
+///
+/// The [`AccordionTrigger`] component must be used underneath the [`AccordionItem`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::accordion::{
+///     Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+/// };
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Accordion {
+///             AccordionItem {
+///                 index: 0,
+///                 AccordionTrigger {
+///                     "the quick brown fox"
+///                 }
+///                 AccordionContent {
+///                     "Jumped over the lazy dog."
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
     let mut ctx: AccordionContext = use_context();
