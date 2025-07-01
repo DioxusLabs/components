@@ -1,6 +1,7 @@
 use crate::use_controlled;
 use dioxus_lib::prelude::*;
 
+/// The props for the [`Toggle`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleProps {
     pressed: ReadOnlySignal<Option<bool>>,

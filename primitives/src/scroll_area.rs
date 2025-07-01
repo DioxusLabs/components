@@ -1,5 +1,6 @@
 use dioxus_lib::prelude::*;
 
+/// The props for the [`ScrollArea`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ScrollAreaProps {
     /// The scroll direction.

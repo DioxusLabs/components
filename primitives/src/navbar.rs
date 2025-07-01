@@ -19,6 +19,7 @@ struct NavbarContext {
     focus: FocusState,
 }
 
+/// The props for the [`Navbar`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarProps {
     #[props(default)]
@@ -107,6 +108,7 @@ impl NavbarNavContext {
     }
 }
 
+/// The props for the [`NavbarNav`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarNavProps {
     index: ReadOnlySignal<usize>,
@@ -190,6 +192,7 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
     }
 }
 
+/// The props for the [`NavbarTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarTriggerProps {
     #[props(extends = GlobalAttributes)]
@@ -231,6 +234,7 @@ pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
     }
 }
 
+/// The props for the [`NavbarContent`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarContentProps {
     id: ReadOnlySignal<Option<String>>,
@@ -270,6 +274,7 @@ pub fn NavbarContent(props: NavbarContentProps) -> Element {
     }
 }
 
+/// The props for the [`NavbarItem`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarItemProps {
     index: ReadOnlySignal<usize>,

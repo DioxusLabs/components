@@ -454,6 +454,7 @@ struct OptionState {
     id: String,
 }
 
+/// The props for the [`Select`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectProps {
     /// The controlled value of the select
@@ -558,6 +559,7 @@ pub fn Select(props: SelectProps) -> Element {
     }
 }
 
+/// The props for the [`SelectTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectTriggerProps {
     #[props(extends = GlobalAttributes)]
@@ -618,6 +620,7 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
     }
 }
 
+/// The props for the [`SelectList`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectListProps {
     /// The ID of the list for ARIA attributes
@@ -741,6 +744,7 @@ struct SelectOptionContext {
     selected: Memo<bool>,
 }
 
+/// The props for the [`SelectOption`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectOptionProps {
     /// The value of the option
@@ -838,6 +842,7 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
     }
 }
 
+/// The props for the [`SelectItemIndicator`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectItemIndicatorProps {
     children: Element,
@@ -859,6 +864,7 @@ struct SelectGroupContext {
     labeled_by: Signal<Option<String>>,
 }
 
+/// The props for the [`SelectGroup`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectGroupProps {
     /// Whether the group is disabled
@@ -898,6 +904,7 @@ pub fn SelectGroup(props: SelectGroupProps) -> Element {
     }
 }
 
+/// The props for the [`SelectGroupLabel`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectGroupLabelProps {
     id: ReadOnlySignal<Option<String>>,

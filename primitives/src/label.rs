@@ -1,5 +1,6 @@
 use dioxus_lib::prelude::*;
 
+/// The props for the [`Label`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct LabelProps {
     html_for: ReadOnlySignal<String>,

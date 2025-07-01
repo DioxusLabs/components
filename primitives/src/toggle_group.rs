@@ -76,6 +76,7 @@ impl ToggleGroupCtx {
     }
 }
 
+/// The props for the [`ToggleGroup`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleGroupProps {
     #[props(default)]
@@ -140,6 +141,7 @@ pub fn ToggleGroup(props: ToggleGroupProps) -> Element {
     }
 }
 
+/// The props for the [`ToggleItem`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleItemProps {
     index: ReadOnlySignal<usize>,

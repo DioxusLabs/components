@@ -19,6 +19,7 @@ struct PopoverCtx {
     labelledby: Signal<String>,
 }
 
+/// The props for the [`PopoverRoot`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverRootProps {
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
@@ -79,6 +80,7 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
     }
 }
 
+/// The props for the [`Popover`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverProps {
     id: ReadOnlySignal<Option<String>>,
@@ -155,6 +157,7 @@ pub fn PopoverContent(props: PopoverProps) -> Element {
     }
 }
 
+/// The props for the [`PopoverTitle`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverTitleProps {
     id: ReadOnlySignal<Option<String>>,
@@ -163,6 +166,7 @@ pub struct PopoverTitleProps {
     children: Element,
 }
 
+/// The props for the [`PopoverTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverTriggerProps {
     /// Whether to use ARIA attributes

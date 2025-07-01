@@ -1,6 +1,7 @@
 use crate::use_controlled;
 use dioxus_lib::prelude::*;
 
+/// The props for the [`Switch`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SwitchProps {
     checked: ReadOnlySignal<Option<bool>>,
@@ -79,6 +80,7 @@ pub fn Switch(props: SwitchProps) -> Element {
     }
 }
 
+/// The props for the [`SwitchThumb`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SwitchThumbProps {
     #[props(extends = GlobalAttributes)]

@@ -14,6 +14,7 @@ struct TooltipCtx {
     tooltip_id: Signal<String>,
 }
 
+/// The props for the [`Tooltip`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct TooltipProps {
     /// Whether the tooltip is open
@@ -59,6 +60,7 @@ pub fn Tooltip(props: TooltipProps) -> Element {
     }
 }
 
+/// The props for the [`TooltipTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct TooltipTriggerProps {
     /// Optional ID for the trigger element
@@ -133,6 +135,7 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
     }
 }
 
+/// The props for the [`TooltipContent`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct TooltipContentProps {
     /// Optional ID for the tooltip content

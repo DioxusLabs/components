@@ -53,6 +53,7 @@ struct ToastCtx {
 }
 
 // Toast provider props
+/// The props for the [`ToastProvider`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToastProviderProps {
     #[props(default = ReadOnlySignal::new(Signal::new(Some(Duration::from_secs(5)))))]
@@ -229,6 +230,7 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
 }
 
 // Toast props
+/// The props for the [`Toast`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToastProps {
     id: usize,

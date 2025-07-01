@@ -67,6 +67,7 @@ impl RadioGroupCtx {
     }
 }
 
+/// The props for the [`RadioGroup`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct RadioGroupProps {
     value: ReadOnlySignal<Option<String>>,
@@ -133,6 +134,7 @@ pub fn RadioGroup(props: RadioGroupProps) -> Element {
     }
 }
 
+/// The props for the [`RadioItem`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct RadioItemProps {
     value: ReadOnlySignal<String>,

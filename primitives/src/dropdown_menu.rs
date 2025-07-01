@@ -18,6 +18,7 @@ struct DropdownMenuContext {
     trigger_id: Signal<String>,
 }
 
+/// The props for the [`DropdownMenu`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuProps {
     open: ReadOnlySignal<Option<bool>>,
@@ -99,6 +100,7 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
     }
 }
 
+/// The props for the [`DropdownMenuTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuTriggerProps {
     #[props(extends = GlobalAttributes)]
@@ -136,6 +138,7 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
     }
 }
 
+/// The props for the [`DropdownMenuContent`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuContentProps {
     id: ReadOnlySignal<Option<String>>,
@@ -166,6 +169,7 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
     }
 }
 
+/// The props for the [`DropdownMenuItem`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuItemProps {
     value: ReadOnlySignal<String>,

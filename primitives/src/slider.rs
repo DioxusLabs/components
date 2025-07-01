@@ -91,6 +91,7 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
     Vec::new()
 });
 
+/// The props for the [`Slider`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderProps {
     /// The controlled value of the slider
@@ -303,6 +304,7 @@ pub fn Slider(props: SliderProps) -> Element {
     }
 }
 
+/// The props for the [`SliderTrack`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderTrackProps {
     #[props(extends = GlobalAttributes)]
@@ -329,6 +331,7 @@ pub fn SliderTrack(props: SliderTrackProps) -> Element {
     }
 }
 
+/// The props for the [`SliderRange`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderRangeProps {
     #[props(extends = GlobalAttributes)]
@@ -372,6 +375,7 @@ pub fn SliderRange(props: SliderRangeProps) -> Element {
     }
 }
 
+/// The props for the [`SliderThumb`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderThumbProps {
     /// Which thumb this is in a range slider

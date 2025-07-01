@@ -22,6 +22,7 @@ struct TabsContext {
     tab_content_ids: Signal<Vec<String>>,
 }
 
+/// The props for the [`Tabs`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct TabsProps {
     value: ReadOnlySignal<Option<String>>,
@@ -81,6 +82,7 @@ pub fn Tabs(props: TabsProps) -> Element {
     }
 }
 
+/// The props for the [`TabList`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct TabListProps {
     #[props(extends = GlobalAttributes)]
@@ -101,6 +103,7 @@ pub fn TabList(props: TabListProps) -> Element {
     }
 }
 
+/// The props for the [`TabTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct TabTriggerProps {
     value: String,
@@ -190,6 +193,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
     }
 }
 
+/// The props for the [`TabContent`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct TabContentProps {
     value: String,

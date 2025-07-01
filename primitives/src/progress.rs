@@ -1,5 +1,6 @@
 use dioxus_lib::prelude::*;
 
+/// The props for the [`Progress`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ProgressProps {
     /// The current progress value, between 0 and max
@@ -48,6 +49,7 @@ pub fn Progress(props: ProgressProps) -> Element {
 }
 
 /// The indicator that represents the progress visually
+/// The props for the [`ProgressIndicator`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ProgressIndicatorProps {
     #[props(extends = GlobalAttributes)]

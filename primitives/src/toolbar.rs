@@ -31,6 +31,7 @@ impl ToolbarCtx {
     }
 }
 
+/// The props for the [`Toolbar`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToolbarProps {
     /// Whether the toolbar is disabled
@@ -74,6 +75,7 @@ pub fn Toolbar(props: ToolbarProps) -> Element {
     }
 }
 
+/// The props for the [`ToolbarButton`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToolbarButtonProps {
     /// Index of the button in the toolbar
@@ -174,6 +176,7 @@ pub fn ToolbarButton(props: ToolbarButtonProps) -> Element {
     }
 }
 
+/// The props for the [`ToolbarSeparator`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToolbarSeparatorProps {
     /// Whether the separator is horizontal (true) or vertical (false)

@@ -2,6 +2,7 @@ use dioxus_lib::prelude::*;
 
 // TODO: Docs
 
+/// The props for the [`Separator`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SeparatorProps {
     /// Horizontal if true, vertical if false.

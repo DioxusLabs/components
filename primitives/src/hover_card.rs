@@ -12,6 +12,7 @@ struct HoverCardCtx {
     content_id: Signal<String>,
 }
 
+/// The props for the [`HoverCard`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct HoverCardProps {
     /// Whether the hover card is open
@@ -60,6 +61,7 @@ pub fn HoverCard(props: HoverCardProps) -> Element {
     }
 }
 
+/// The props for the [`HoverCardTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct HoverCardTriggerProps {
     /// Optional ID for the trigger element
@@ -155,6 +157,7 @@ impl HoverCardAlign {
     }
 }
 
+/// The props for the [`HoverCardContent`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct HoverCardContentProps {
     /// Optional ID for the hover card content

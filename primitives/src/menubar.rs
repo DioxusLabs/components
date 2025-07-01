@@ -19,6 +19,7 @@ struct MenubarContext {
     focus: FocusState,
 }
 
+/// The props for the [`Menubar`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarProps {
     #[props(default)]
@@ -86,6 +87,7 @@ impl MenubarMenuContext {
     }
 }
 
+/// The props for the [`MenubarMenu`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarMenuProps {
     index: ReadOnlySignal<usize>,
@@ -159,6 +161,7 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
     }
 }
 
+/// The props for the [`MenubarTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarTriggerProps {
     #[props(extends = GlobalAttributes)]
@@ -207,6 +210,7 @@ pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
     }
 }
 
+/// The props for the [`MenubarContent`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarContentProps {
     id: ReadOnlySignal<Option<String>>,
@@ -237,6 +241,7 @@ pub fn MenubarContent(props: MenubarContentProps) -> Element {
     }
 }
 
+/// The props for the [`MenubarItem`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarItemProps {
     index: ReadOnlySignal<usize>,
