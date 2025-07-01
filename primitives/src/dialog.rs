@@ -1,4 +1,4 @@
-//! Defines the [`Dialog`] component and its sub-components.
+//! Defines the [`DialogRoot`] component and its sub-components.
 
 use dioxus::document;
 use dioxus_lib::prelude::*;
@@ -150,7 +150,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
     }
 }
 
-/// The props for the [`Dialog`] component
+/// The props for the [`DialogRoot`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogProps {
     /// The ID of the dialog content element.

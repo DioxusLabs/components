@@ -553,7 +553,7 @@ pub struct MenubarItemProps {
 /// # MenubarItem
 ///
 /// The `MenubarItem` component represents a selectable item within a menu. In addition to calling the
-/// [`Self::on_select`] callback, the menu will close when the item is selected.
+/// [`MenubarItemProps::on_select`] callback, the menu will close when the item is selected.
 ///
 /// This must be used inside a [`MenubarContent`] component.
 ///

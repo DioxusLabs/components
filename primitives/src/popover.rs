@@ -270,18 +270,6 @@ pub fn PopoverContent(props: PopoverProps) -> Element {
     }
 }
 
-/// The props for the [`PopoverTitle`] component.
-#[derive(Props, Clone, PartialEq)]
-pub struct PopoverTitleProps {
-    /// The id of the title element.
-    pub id: ReadOnlySignal<Option<String>>,
-    /// Additional attributes to apply to the title element.
-    #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
-    /// The children of the title component.
-    children: Element,
-}
-
 /// The props for the [`PopoverTrigger`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverTriggerProps {
