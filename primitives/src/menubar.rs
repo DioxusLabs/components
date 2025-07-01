@@ -1,3 +1,5 @@
+//! Defines the [`Menubar`] component and its sub-components.
+
 use dioxus_lib::prelude::*;
 
 use crate::{
@@ -19,20 +21,91 @@ struct MenubarContext {
     focus: FocusState,
 }
 
-/// The props for the [`Menubar`] component
+/// The props for the [`Menubar`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarProps {
+    /// Whether the menubar is disabled.
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
     roving_loop: ReadOnlySignal<bool>,
 
+    /// Additional attributes to apply to the menubar element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the menubar component.
     children: Element,
 }
 
+/// # Menubar
+///
+/// The `Menubar` component creates a menu bar that allows users to define multiple grouped dropdowns.
+/// Each dropdown menu is represented by a [`MenubarMenu`] component with an associated trigger and content.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::menubar::{
+///     Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
+/// };
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Menubar {
+///             MenubarMenu { index: 0usize,
+///                 MenubarTrigger { "File" }
+///                 MenubarContent {
+///                     MenubarItem {
+///                         index: 0usize,
+///                         value: "new".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "New"
+///                     }
+///                     MenubarItem {
+///                         index: 1usize,
+///                         value: "open".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Open"
+///                     }
+///                 }
+///             }
+///             MenubarMenu { index: 1usize,
+///                 MenubarTrigger { "Edit" }
+///                 MenubarContent {
+///                     MenubarItem {
+///                         index: 0usize,
+///                         value: "cut".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Cut"
+///                     }
+///                     MenubarItem {
+///                         index: 1usize,
+///                         value: "copy".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Copy"
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Menubar`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the menubar is disabled. Values are `true` or `false`.
 #[component]
 pub fn Menubar(props: MenubarProps) -> Element {
     let mut open_menu = use_signal(|| None);
@@ -87,19 +160,94 @@ impl MenubarMenuContext {
     }
 }
 
-/// The props for the [`MenubarMenu`] component
+/// The props for the [`MenubarMenu`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarMenuProps {
+    /// The index of this menu in the menubar. This is used to define the focus order for keyboard navigation.
     index: ReadOnlySignal<usize>,
 
+    /// Whether this menu is disabled.
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Additional attributes to apply to the menu element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the menu component.
     children: Element,
 }
 
+/// # MenubarMenu
+///
+/// The `MenubarMenu` component represents a single menu within a menubar. It contains a [`MenubarTrigger`]
+/// to open the menu and a [`MenubarContent`] that holds the menu items. Each menu must define an index
+/// to establish its position within the menubar.
+///
+/// This must be used inside a [`Menubar`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::menubar::{
+///     Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
+/// };
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Menubar {
+///             MenubarMenu { index: 0usize,
+///                 MenubarTrigger { "File" }
+///                 MenubarContent {
+///                     MenubarItem {
+///                         index: 0usize,
+///                         value: "new".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "New"
+///                     }
+///                     MenubarItem {
+///                         index: 1usize,
+///                         value: "open".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Open"
+///                     }
+///                 }
+///             }
+///             MenubarMenu { index: 1usize,
+///                 MenubarTrigger { "Edit" }
+///                 MenubarContent {
+///                     MenubarItem {
+///                         index: 0usize,
+///                         value: "cut".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Cut"
+///                     }
+///                     MenubarItem {
+///                         index: 1usize,
+///                         value: "copy".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Copy"
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`MenubarMenu`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates if the menu is open or closed. Values are `open` or `closed`.
+/// - `data-disabled`: Indicates if the menu is disabled. Values are `true` or `false`.
 #[component]
 pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
     let mut ctx: MenubarContext = use_context();
@@ -161,14 +309,79 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
     }
 }
 
-/// The props for the [`MenubarTrigger`] component
+/// The props for the [`MenubarTrigger`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarTriggerProps {
+    /// Additional attributes to apply to the trigger element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the trigger component.
     children: Element,
 }
 
+/// # MenubarTrigger
+///
+/// The `MenubarTrigger` component is a button that opens and closes a [`MenubarMenu`] when clicked.
+/// 
+/// This must be used inside a [`MenubarMenu`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::menubar::{
+///     Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
+/// };
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Menubar {
+///             MenubarMenu { index: 0usize,
+///                 MenubarTrigger { "File" }
+///                 MenubarContent {
+///                     MenubarItem {
+///                         index: 0usize,
+///                         value: "new".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "New"
+///                     }
+///                     MenubarItem {
+///                         index: 1usize,
+///                         value: "open".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Open"
+///                     }
+///                 }
+///             }
+///             MenubarMenu { index: 1usize,
+///                 MenubarTrigger { "Edit" }
+///                 MenubarContent {
+///                     MenubarItem {
+///                         index: 0usize,
+///                         value: "cut".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Cut"
+///                     }
+///                     MenubarItem {
+///                         index: 1usize,
+///                         value: "copy".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Copy"
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
     let mut ctx: MenubarContext = use_context();
@@ -210,15 +423,86 @@ pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
     }
 }
 
-/// The props for the [`MenubarContent`] component
+/// The props for the [`MenubarContent`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarContentProps {
+    /// The id of the content element.
     id: ReadOnlySignal<Option<String>>,
+    /// Additional attributes to apply to the content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the content component.
     children: Element,
 }
 
+/// # MenubarContent
+///
+/// The `MenubarContent` component defines the content of a [`MenubarMenu`]. It will only be rendered if the menu is open.
+/// 
+/// This must be used inside a [`MenubarMenu`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::menubar::{
+///     Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
+/// };
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Menubar {
+///             MenubarMenu { index: 0usize,
+///                 MenubarTrigger { "File" }
+///                 MenubarContent {
+///                     MenubarItem {
+///                         index: 0usize,
+///                         value: "new".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "New"
+///                     }
+///                     MenubarItem {
+///                         index: 1usize,
+///                         value: "open".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Open"
+///                     }
+///                 }
+///             }
+///             MenubarMenu { index: 1usize,
+///                 MenubarTrigger { "Edit" }
+///                 MenubarContent {
+///                     MenubarItem {
+///                         index: 0usize,
+///                         value: "cut".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Cut"
+///                     }
+///                     MenubarItem {
+///                         index: 1usize,
+///                         value: "copy".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Copy"
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`MenubarContent`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates if the menu is open or closed. Values are `open` or `closed`.
 #[component]
 pub fn MenubarContent(props: MenubarContentProps) -> Element {
     let menu_ctx: MenubarMenuContext = use_context();
@@ -241,24 +525,100 @@ pub fn MenubarContent(props: MenubarContentProps) -> Element {
     }
 }
 
-/// The props for the [`MenubarItem`] component
+/// The props for the [`MenubarItem`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarItemProps {
+    /// The index of this item within the [`MenubarContent`]. This is used to define the focus order for keyboard navigation.
     index: ReadOnlySignal<usize>,
 
+    /// The value associated with this menu item. This value will be passed to the [`Self::on_select`] callback when the item is selected.
     value: String,
 
+    /// Whether this menu item is disabled.
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Callback fired when the item is selected. The [`Self::value`] will be passed as an argument.
     #[props(default)]
     on_select: Callback<String>,
 
+    /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+
+    /// The children of the item component.
     children: Element,
 }
 
+/// # MenubarItem
+///
+/// The `MenubarItem` component represents a selectable item within a menu. In addition to calling the
+/// [`Self::on_select`] callback, the menu will close when the item is selected.
+/// 
+/// This must be used inside a [`MenubarContent`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::menubar::{
+///     Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
+/// };
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Menubar {
+///             MenubarMenu { index: 0usize,
+///                 MenubarTrigger { "File" }
+///                 MenubarContent {
+///                     MenubarItem {
+///                         index: 0usize,
+///                         value: "new".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "New"
+///                     }
+///                     MenubarItem {
+///                         index: 1usize,
+///                         value: "open".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Open"
+///                     }
+///                 }
+///             }
+///             MenubarMenu { index: 1usize,
+///                 MenubarTrigger { "Edit" }
+///                 MenubarContent {
+///                     MenubarItem {
+///                         index: 0usize,
+///                         value: "cut".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Cut"
+///                     }
+///                     MenubarItem {
+///                         index: 1usize,
+///                         value: "copy".to_string(),
+///                         on_select: move |value| {
+///                             tracing::info!("Selected value: {}", value);
+///                         },
+///                         "Copy"
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`MenubarItem`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the item is disabled. Values are `true` or `false`.
 #[component]
 pub fn MenubarItem(props: MenubarItemProps) -> Element {
     let mut ctx: MenubarContext = use_context();
