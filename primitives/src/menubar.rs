@@ -52,7 +52,7 @@ pub struct MenubarProps {
 ///     Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
 /// };
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Menubar {
 ///             MenubarMenu { index: 0usize,
@@ -193,7 +193,7 @@ pub struct MenubarMenuProps {
 ///     Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
 /// };
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Menubar {
 ///             MenubarMenu { index: 0usize,
@@ -333,7 +333,7 @@ pub struct MenubarTriggerProps {
 ///     Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
 /// };
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Menubar {
 ///             MenubarMenu { index: 0usize,
@@ -449,7 +449,7 @@ pub struct MenubarContentProps {
 ///     Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
 /// };
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Menubar {
 ///             MenubarMenu { index: 0usize,
@@ -565,7 +565,7 @@ pub struct MenubarItemProps {
 ///     Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
 /// };
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Menubar {
 ///             MenubarMenu { index: 0usize,

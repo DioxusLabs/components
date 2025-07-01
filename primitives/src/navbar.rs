@@ -1,3 +1,5 @@
+//! Defines the [`Navbar`] component and its sub-components.
+
 use crate::{
     focus::{
         use_focus_control, use_focus_controlled_item, use_focus_entry, use_focus_provider,
@@ -19,20 +21,93 @@ struct NavbarContext {
     focus: FocusState,
 }
 
-/// The props for the [`Navbar`] component
+/// The props for the [`Navbar`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarProps {
+    /// Whether the navbar is disabled.
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
     roving_loop: ReadOnlySignal<bool>,
 
+    /// Additional attributes to apply to the navbar element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the navbar component.
     children: Element,
 }
 
+/// # Navbar
+///
+/// The `Navbar` component creates a navigation bar that allows users to navigate through different sections with keyboard and pointer interactions.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::navbar::{Navbar, NavbarContent, NavbarItem, NavbarNav, NavbarTrigger};
+/// use crate::Route;
+/// 
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Navbar {
+///             aria_label: "Components",
+///             NavbarNav { index: 0usize,
+///                 NavbarTrigger {
+///                     "Inputs"
+///                 }
+///                 NavbarContent {
+///                     NavbarItem {
+///                         index: 0usize,
+///                         value: "calendar".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=calendar",
+///                         "Calendar"
+///                     }
+///                     NavbarItem {
+///                         index: 1usize,
+///                         value: "slider".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=slider",
+///                         "Slider"
+///                     }
+///                 }
+///             }
+///             NavbarNav { index: 1usize,
+///                 NavbarTrigger {
+///                     "Information"
+///                 }
+///                 NavbarContent {
+///                     NavbarItem {
+///                         index: 0usize,
+///                         value: "toast".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=toast",
+///                         "Toast"
+///                     }
+///                     NavbarItem {
+///                         index: 1usize,
+///                         value: "tabs".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=tabs",
+///                         "Tabs"
+///                     }
+///                 }
+///             }
+///             NavbarItem {
+///                 index: 2usize,
+///                 value: "home".to_string(),
+///                 to: "https://dioxuslabs.github.io/components",
+///                 "Home"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Navbar`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the navbar is disabled. Values are `true` or `false`.
 #[component]
 pub fn Navbar(props: NavbarProps) -> Element {
     let mut open_nav = use_signal(|| None);
@@ -108,19 +183,95 @@ impl NavbarNavContext {
     }
 }
 
-/// The props for the [`NavbarNav`] component
+/// The props for the [`NavbarNav`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarNavProps {
+    /// The index of this nav item in the navbar. This is used to define the focus order for keyboard navigation.
     index: ReadOnlySignal<usize>,
 
+    /// Whether this nav item is disabled.
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Additional attributes to apply to the nav element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the nav component.
     children: Element,
 }
 
+/// # NavbarNav
+///
+/// The `NavbarNav` component represents a single navigation dropdown within a navbar. It contains a [`NavbarTrigger`] and [`NavbarContent`] that can be opened and closed.
+/// 
+/// This must be used inside a [`Navbar`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::navbar::{Navbar, NavbarContent, NavbarItem, NavbarNav, NavbarTrigger};
+/// use crate::Route;
+/// 
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Navbar {
+///             aria_label: "Components",
+///             NavbarNav { index: 0usize,
+///                 NavbarTrigger {
+///                     "Inputs"
+///                 }
+///                 NavbarContent {
+///                     NavbarItem {
+///                         index: 0usize,
+///                         value: "calendar".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=calendar",
+///                         "Calendar"
+///                     }
+///                     NavbarItem {
+///                         index: 1usize,
+///                         value: "slider".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=slider",
+///                         "Slider"
+///                     }
+///                 }
+///             }
+///             NavbarNav { index: 1usize,
+///                 NavbarTrigger {
+///                     "Information"
+///                 }
+///                 NavbarContent {
+///                     NavbarItem {
+///                         index: 0usize,
+///                         value: "toast".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=toast",
+///                         "Toast"
+///                     }
+///                     NavbarItem {
+///                         index: 1usize,
+///                         value: "tabs".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=tabs",
+///                         "Tabs"
+///                     }
+///                 }
+///             }
+///             NavbarItem {
+///                 index: 2usize,
+///                 value: "home".to_string(),
+///                 to: "https://dioxuslabs.github.io/components",
+///                 "Home"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`NavbarNav`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates if the nav is open or closed. Values are `open` or `closed`.
+/// - `data-disabled`: Indicates if the nav is disabled. Values are `true` or `false`.
 #[component]
 pub fn NavbarNav(props: NavbarNavProps) -> Element {
     let mut ctx: NavbarContext = use_context();
@@ -192,14 +343,82 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
     }
 }
 
-/// The props for the [`NavbarTrigger`] component
+/// The props for the [`NavbarTrigger`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarTriggerProps {
+    /// Additional attributes to apply to the trigger element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the trigger component.
     children: Element,
 }
 
+/// # NavbarTrigger
+///
+/// The `NavbarTrigger` component is a button that opens and closes a [`NavbarNav`]. It controls if the associated [`NavbarContent`] is visible or not.
+/// 
+/// This must be used inside a [`NavbarNav`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::navbar::{Navbar, NavbarContent, NavbarItem, NavbarNav, NavbarTrigger};
+/// use crate::Route;
+/// 
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Navbar {
+///             aria_label: "Components",
+///             NavbarNav { index: 0usize,
+///                 NavbarTrigger {
+///                     "Inputs"
+///                 }
+///                 NavbarContent {
+///                     NavbarItem {
+///                         index: 0usize,
+///                         value: "calendar".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=calendar",
+///                         "Calendar"
+///                     }
+///                     NavbarItem {
+///                         index: 1usize,
+///                         value: "slider".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=slider",
+///                         "Slider"
+///                     }
+///                 }
+///             }
+///             NavbarNav { index: 1usize,
+///                 NavbarTrigger {
+///                     "Information"
+///                 }
+///                 NavbarContent {
+///                     NavbarItem {
+///                         index: 0usize,
+///                         value: "toast".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=toast",
+///                         "Toast"
+///                     }
+///                     NavbarItem {
+///                         index: 1usize,
+///                         value: "tabs".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=tabs",
+///                         "Tabs"
+///                     }
+///                 }
+///             }
+///             NavbarItem {
+///                 index: 2usize,
+///                 value: "home".to_string(),
+///                 to: "https://dioxuslabs.github.io/components",
+///                 "Home"
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
     let mut ctx: NavbarContext = use_context();
@@ -234,15 +453,91 @@ pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
     }
 }
 
-/// The props for the [`NavbarContent`] component
+/// The props for the [`NavbarContent`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarContentProps {
+    /// The id of the content element.
     id: ReadOnlySignal<Option<String>>,
+    /// Additional attributes to apply to the content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the content component.
     children: Element,
 }
 
+/// # NavbarContent
+///
+/// The `NavbarContent` component defines the content of a [`NavbarNav`] that appears when the
+/// [`NavbarTrigger`] is activated. It contains the [`NavbarItem`]s inside the navbar dropdown.
+/// 
+/// This must be used inside a [`NavbarNav`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::navbar::{Navbar, NavbarContent, NavbarItem, NavbarNav, NavbarTrigger};
+/// use crate::Route;
+/// 
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Navbar {
+///             aria_label: "Components",
+///             NavbarNav { index: 0usize,
+///                 NavbarTrigger {
+///                     "Inputs"
+///                 }
+///                 NavbarContent {
+///                     NavbarItem {
+///                         index: 0usize,
+///                         value: "calendar".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=calendar",
+///                         "Calendar"
+///                     }
+///                     NavbarItem {
+///                         index: 1usize,
+///                         value: "slider".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=slider",
+///                         "Slider"
+///                     }
+///                 }
+///             }
+///             NavbarNav { index: 1usize,
+///                 NavbarTrigger {
+///                     "Information"
+///                 }
+///                 NavbarContent {
+///                     NavbarItem {
+///                         index: 0usize,
+///                         value: "toast".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=toast",
+///                         "Toast"
+///                     }
+///                     NavbarItem {
+///                         index: 1usize,
+///                         value: "tabs".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=tabs",
+///                         "Tabs"
+///                     }
+///                 }
+///             }
+///             NavbarItem {
+///                 index: 2usize,
+///                 value: "home".to_string(),
+///                 to: "https://dioxuslabs.github.io/components",
+///                 "Home"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`NavbarContent`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates if the nav is open or closed. Values are `open` or `closed`.
+/// - `data-open-menu-direction`: Indicates the direction of the open menu relative to this content. Values are `start`, `end`, `open`, or `closed`.
 #[component]
 pub fn NavbarContent(props: NavbarContentProps) -> Element {
     let ctx: NavbarContext = use_context();
@@ -274,16 +569,20 @@ pub fn NavbarContent(props: NavbarContentProps) -> Element {
     }
 }
 
-/// The props for the [`NavbarItem`] component
+/// The props for the [`NavbarItem`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarItemProps {
+    /// The index of this item within the nav. This is used to define the focus order for keyboard navigation.
     index: ReadOnlySignal<usize>,
 
+    /// The value associated with this nav item. This will be passed to the [`Self::on_select`] callback when the item is selected.
     value: String,
 
+    /// Whether this nav item is disabled.
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Callback fired when the item is selected. The [`Self::value`] will be passed to this callback when the item is selected.
     #[props(default)]
     on_select: Callback<String>,
 
@@ -327,10 +626,83 @@ pub struct NavbarItemProps {
     #[props(into)]
     pub to: NavigationTarget,
 
+    /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 }
 
+/// # NavbarItem
+///
+/// The `NavbarItem` component represents a link within a navbar. It accepts a superset of the props
+/// from the [`Link`] component.
+///
+/// This must be used inside a [`NavbarContent`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::navbar::{Navbar, NavbarContent, NavbarItem, NavbarNav, NavbarTrigger};
+/// use crate::Route;
+/// 
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Navbar {
+///             aria_label: "Components",
+///             NavbarNav { index: 0usize,
+///                 NavbarTrigger {
+///                     "Inputs"
+///                 }
+///                 NavbarContent {
+///                     NavbarItem {
+///                         index: 0usize,
+///                         value: "calendar".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=calendar",
+///                         "Calendar"
+///                     }
+///                     NavbarItem {
+///                         index: 1usize,
+///                         value: "slider".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=slider",
+///                         "Slider"
+///                     }
+///                 }
+///             }
+///             NavbarNav { index: 1usize,
+///                 NavbarTrigger {
+///                     "Information"
+///                 }
+///                 NavbarContent {
+///                     NavbarItem {
+///                         index: 0usize,
+///                         value: "toast".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=toast",
+///                         "Toast"
+///                     }
+///                     NavbarItem {
+///                         index: 1usize,
+///                         value: "tabs".to_string(),
+///                         to: "https://dioxuslabs.github.io/components/component/?name=tabs",
+///                         "Tabs"
+///                     }
+///                 }
+///             }
+///             NavbarItem {
+///                 index: 2usize,
+///                 value: "home".to_string(),
+///                 to: "https://dioxuslabs.github.io/components",
+///                 "Home"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`NavbarItem`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the item is disabled. Values are `true` or `false`.
 #[component]
 pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
     let mut ctx: NavbarContext = use_context();
