@@ -16,7 +16,7 @@ pub enum CheckboxState {
 }
 
 impl CheckboxState {
-    fn to_aria_checked(&self) -> &str {
+    fn to_aria_checked(self) -> &'static str {
         match self {
             CheckboxState::Checked => "true",
             CheckboxState::Indeterminate => "mixed",
@@ -24,7 +24,7 @@ impl CheckboxState {
         }
     }
 
-    fn to_data_state(&self) -> &str {
+    fn to_data_state(self) -> &'static str {
         match self {
             CheckboxState::Checked => "checked",
             CheckboxState::Indeterminate => "indeterminate",

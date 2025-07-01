@@ -239,9 +239,7 @@ pub fn Slider(props: SliderProps) -> Element {
 
         let delta = delta_pos / size * ctx.range_size();
 
-        let current_value = match granular_value.cloned() {
-            SliderValue::Single(v) => v,
-        };
+        let SliderValue::Single(current_value) = granular_value.cloned();
         let new = current_value + delta;
         granular_value.set(SliderValue::Single(new));
         let clamped = new.clamp(ctx.min, ctx.max);
