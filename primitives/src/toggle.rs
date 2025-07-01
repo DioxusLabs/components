@@ -1,34 +1,70 @@
+//! Defines the [`Toggle`] component for creating toggle buttons.
+
 use crate::use_controlled;
 use dioxus_lib::prelude::*;
 
-/// The props for the [`Toggle`] component
+/// The props for the [`Toggle`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleProps {
+    /// The controlled pressed state of the toggle.
     pressed: ReadOnlySignal<Option<bool>>,
 
+    /// The default pressed state when uncontrolled.
     #[props(default)]
     default_pressed: bool,
 
+    /// Whether the toggle is disabled.
     #[props(default)]
     disabled: ReadOnlySignal<bool>,
 
+    /// Callback fired when the pressed state changes.
     #[props(default)]
     on_pressed_change: Callback<bool>,
 
+    /// Additional attributes to apply to the toggle element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
     // https://github.com/DioxusLabs/dioxus/issues/2467
+    /// Callback fired when the toggle is mounted.
     #[props(default)]
     onmounted: Callback<Event<MountedData>>,
+    /// Callback fired when the toggle receives focus.
     #[props(default)]
     onfocus: Callback<Event<FocusData>>,
+    /// Callback fired when a key is pressed on the toggle.
     #[props(default)]
     onkeydown: Callback<Event<KeyboardData>>,
 
+    /// The children of the toggle component.
     children: Element,
 }
 
+/// # Toggle
+///
+/// The `Toggle` component is a button that can be on or off.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::toggle::Toggle;
+/// 
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Toggle { width: "2rem", height: "2rem",
+///             em { "B" }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Toggle`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the state of the toggle. Values are `on` or `off`.
+/// - `data-disabled`: Indicates if the toggle is disabled. Values are `true` or `false`.
 #[component]
 pub fn Toggle(props: ToggleProps) -> Element {
     let (pressed, set_pressed) = use_controlled(

@@ -352,17 +352,23 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
 /// The props for the [`TabContent`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct TabContentProps {
-    value: String,
+    /// The value of the tab content, which must match the `value` prop of the corresponding [`TabTrigger`].
+    pub value: String,
 
+    /// The ID of the tab content element.
     id: ReadOnlySignal<Option<String>>,
+    /// The class of the tab content element.
     class: Option<String>,
 
+    /// The index of the tab content. This is used to define the focus order for keyboard navigation.
     index: ReadOnlySignal<usize>,
 
+    /// Additional attributes to apply to the tab content element.
     #[props(extends = GlobalAttributes)]
     #[props(extends = div)]
     attributes: Vec<Attribute>,
 
+    /// The children of the tab content element.
     children: Element,
 }
 
