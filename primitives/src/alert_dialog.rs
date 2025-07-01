@@ -27,22 +27,21 @@ pub struct AlertDialogRootProps {
     children: Element,
 }
 
-
 /// # AlertDialogRoot
-/// 
+///
 /// The entry point for the alert dialog. It manages the open state of the dialog and provides context to its children. You
 /// can use it to create a backdrop for the dialog if needed. The contents will only be rendered when the dialog is open.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::alert_dialog::*;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| open.set(true),
@@ -66,7 +65,7 @@ pub struct AlertDialogRootProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
 ///
 /// The [`AlertDialogRoot`] component defines the following data attributes you can use to control styling:
@@ -137,24 +136,23 @@ pub struct AlertDialogContentProps {
     children: Element,
 }
 
-
 /// # AlertDialogContent
-/// 
+///
 /// The content of the alert dialog. Any interactive content in the dialog should be placed
 /// inside this component. It will trap focus within the dialog while it is open
-/// 
+///
 /// This must be used inside an [`AlertDialogRoot`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::alert_dialog::*;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| open.set(true),
@@ -228,21 +226,21 @@ pub struct AlertDialogTitleProps {
 }
 
 /// # AlertDialogTitle
-/// 
+///
 /// The title of the alert dialog. This will be used to label the dialog for accessibility purposes.
-/// 
+///
 /// This must be used inside an [`AlertDialogRoot`] component and should be placed inside an [`AlertDialogContent`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::alert_dialog::*;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| open.set(true),
@@ -289,15 +287,15 @@ pub struct AlertDialogDescriptionProps {
 /// This must be used inside an [`AlertDialogRoot`] component and should be placed inside an [`AlertDialogContent`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::alert_dialog::*;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| open.set(true),
@@ -337,7 +335,6 @@ pub struct AlertDialogActionsProps {
     children: Element,
 }
 
-
 /// # AlertDialogActions
 ///
 /// The actions of the alert dialog. This will be used to group the actions.
@@ -345,15 +342,15 @@ pub struct AlertDialogActionsProps {
 /// This must be used inside an [`AlertDialogRoot`] component and should be placed inside an [`AlertDialogContent`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::alert_dialog::*;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| open.set(true),
@@ -402,15 +399,15 @@ pub struct AlertDialogActionProps {
 /// This must be used inside an [`AlertDialogRoot`] component and should be placed inside an [`AlertDialogContent`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::alert_dialog::*;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| open.set(true),
@@ -467,7 +464,6 @@ pub struct AlertDialogCancelProps {
     children: Element,
 }
 
-
 /// # AlertDialogCancel
 ///
 /// An cancel button for the alert dialog. In addition to running the `on_click` callback, it will also close the dialog when clicked.
@@ -475,15 +471,15 @@ pub struct AlertDialogCancelProps {
 /// This must be used inside an [`AlertDialogRoot`] component and should be placed inside an [`AlertDialogContent`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::alert_dialog::*;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| open.set(true),

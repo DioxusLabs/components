@@ -16,11 +16,11 @@ pub struct AspectRatioProps {
 }
 
 /// # AspectRatio
-/// 
+///
 /// A component that maintains a specific aspect ratio for its children.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::aspect_ratio::AspectRatio;

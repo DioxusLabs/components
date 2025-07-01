@@ -25,7 +25,7 @@ pub struct LabelProps {
 /// use dioxus_primitives::label::Label;
 ///
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Label {
 ///             html_for: "name",

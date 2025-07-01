@@ -1,6 +1,8 @@
 //! Defines the [`HoverCard`] component and its subcomponents.
 
-use crate::{use_animated_open, use_controlled, use_id_or, use_unique_id, ContentAlign, ContentSide};
+use crate::{
+    use_animated_open, use_controlled, use_id_or, use_unique_id, ContentAlign, ContentSide,
+};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone)]
@@ -48,9 +50,13 @@ pub struct HoverCardProps {
 ///
 /// ```rust
 /// use dioxus::prelude::*;
-/// use dioxus_primitives::hover_card::{
-///     HoverCard, HoverCardContent, HoverCardSide, HoverCardTrigger,
+/// use dioxus_primitives::{
+///     ContentAlign, ContentSide,
+///     hover_card::{
+///         HoverCard, HoverCardContent, HoverCardTrigger,
+///     }
 /// };
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -59,7 +65,7 @@ pub struct HoverCardProps {
 ///                 i { "Dioxus" }
 ///             }
 ///             HoverCardContent {
-///                 side: HoverCardSide::Bottom,
+///                 side: ContentSide::Bottom,
 ///                 div {
 ///                     padding: "1rem",
 ///                     "Dioxus is"
@@ -125,8 +131,11 @@ pub struct HoverCardTriggerProps {
 ///
 /// ```rust
 /// use dioxus::prelude::*;
-/// use dioxus_primitives::hover_card::{
-///     HoverCard, HoverCardContent, HoverCardSide, HoverCardTrigger,
+/// use dioxus_primitives::{
+///     ContentAlign, ContentSide,
+///     hover_card::{
+///         HoverCard, HoverCardContent, HoverCardTrigger,
+///     }
 /// };
 /// #[component]
 /// fn Demo() -> Element {
@@ -136,7 +145,7 @@ pub struct HoverCardTriggerProps {
 ///                 i { "Dioxus" }
 ///             }
 ///             HoverCardContent {
-///                 side: HoverCardSide::Bottom,
+///                 side: ContentSide::Bottom,
 ///                 div {
 ///                     padding: "1rem",
 ///                     "Dioxus is"
@@ -232,9 +241,13 @@ pub struct HoverCardContentProps {
 ///
 /// ```rust
 /// use dioxus::prelude::*;
-/// use dioxus_primitives::hover_card::{
-///     HoverCard, HoverCardContent, HoverCardSide, HoverCardTrigger,
+/// use dioxus_primitives::{
+///     ContentAlign, ContentSide,
+///     hover_card::{
+///         HoverCard, HoverCardContent, HoverCardTrigger,
+///     }
 /// };
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -243,7 +256,7 @@ pub struct HoverCardContentProps {
 ///                 i { "Dioxus" }
 ///             }
 ///             HoverCardContent {
-///                 side: HoverCardSide::Bottom,
+///                 side: ContentSide::Bottom,
 ///                 div {
 ///                     padding: "1rem",
 ///                     "Dioxus is"

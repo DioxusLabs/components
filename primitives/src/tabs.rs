@@ -69,7 +69,7 @@ pub struct TabsProps {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs, TabList};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Tabs {
 ///             default_value: "tab1".to_string(),
@@ -151,7 +151,7 @@ pub struct TabListProps {
 /// # TabList
 ///
 /// The `TabList` component contains a list of [`TabTrigger`] components that allow users to switch between different tabs.
-/// 
+///
 /// This must be used inside a [`Tabs`] component.
 ///
 /// ## Example
@@ -160,7 +160,7 @@ pub struct TabListProps {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs, TabList};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Tabs {
 ///             default_value: "tab1".to_string(),
@@ -233,15 +233,15 @@ pub struct TabTriggerProps {
 /// # TabTrigger
 ///
 /// The `TabTrigger` component is a button that switches to the [`TabContent`] with the same `value` when clicked.
-/// 
+///
 /// This must be used inside a [`TabList`] component.
-/// 
+///
 /// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs, TabList};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Tabs {
 ///             default_value: "tab1".to_string(),
@@ -272,9 +272,9 @@ pub struct TabTriggerProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
-/// 
+///
 /// The [`TabTrigger`] component defines the following data attributes you can use to control styling:
 /// - `data-state`: Indicates the state of the tab trigger. Values are `active` or `inactive`.
 /// - `data-disabled`: Indicates if the tab trigger is disabled. Values are `true` or `false`.
@@ -377,13 +377,13 @@ pub struct TabContentProps {
 /// The content of a tab panel. This component will only be rendered when its corresponding [`TabTrigger`] is active.
 ///
 /// This should be used inside a [`Tabs`] component.
-/// 
+///
 /// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs, TabList};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Tabs {
 ///             default_value: "tab1".to_string(),
@@ -414,9 +414,9 @@ pub struct TabContentProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
-/// 
+///
 /// The [`TabTrigger`] component defines the following data attributes you can use to control styling:
 /// - `data-state`: Indicates the state of the tab trigger. Values are `active` or `inactive`.
 #[component]

@@ -70,7 +70,7 @@ impl Default for ScrollType {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::scroll_area::{ScrollArea, ScrollDirection};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         ScrollArea {
 ///             width: "10em",

@@ -322,7 +322,7 @@ pub struct MenubarTriggerProps {
 /// # MenubarTrigger
 ///
 /// The `MenubarTrigger` component is a button that opens and closes a [`MenubarMenu`] when clicked.
-/// 
+///
 /// This must be used inside a [`MenubarMenu`] component.
 ///
 /// ## Example
@@ -438,7 +438,7 @@ pub struct MenubarContentProps {
 /// # MenubarContent
 ///
 /// The `MenubarContent` component defines the content of a [`MenubarMenu`]. It will only be rendered if the menu is open.
-/// 
+///
 /// This must be used inside a [`MenubarMenu`] component.
 ///
 /// ## Example
@@ -554,7 +554,7 @@ pub struct MenubarItemProps {
 ///
 /// The `MenubarItem` component represents a selectable item within a menu. In addition to calling the
 /// [`Self::on_select`] callback, the menu will close when the item is selected.
-/// 
+///
 /// This must be used inside a [`MenubarContent`] component.
 ///
 /// ## Example

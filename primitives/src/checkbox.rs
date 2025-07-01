@@ -165,12 +165,12 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
 }
 
 /// # CheckboxIndicator
-/// 
+///
 /// The indicator for the [`Checkbox`] component, which visually represents the checkbox state. The
 /// children will only be rendered when the checkbox is checked.
-/// 
+///
 /// This must be used inside a [`Checkbox`] component.
-/// 
+///
 /// ## Example
 ///
 /// ```rust

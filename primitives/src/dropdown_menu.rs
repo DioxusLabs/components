@@ -61,7 +61,7 @@ pub struct DropdownMenuProps {
 ///     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 /// };
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         DropdownMenu { default_open: false,
 ///             DropdownMenuTrigger { "Open Menu" }
@@ -174,7 +174,7 @@ pub struct DropdownMenuTriggerProps {
 ///     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 /// };
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         DropdownMenu { default_open: false,
 ///             DropdownMenuTrigger { "Open Menu" }
@@ -259,7 +259,7 @@ pub struct DropdownMenuContentProps {
 ///     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 /// };
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         DropdownMenu { default_open: false,
 ///             DropdownMenuTrigger { "Open Menu" }
@@ -350,7 +350,7 @@ pub struct DropdownMenuItemProps {
 ///     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 /// };
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         DropdownMenu { default_open: false,
 ///             DropdownMenuTrigger { "Open Menu" }

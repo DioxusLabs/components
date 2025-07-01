@@ -49,7 +49,7 @@ pub struct ToggleProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::toggle::Toggle;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {

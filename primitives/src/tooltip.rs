@@ -51,7 +51,7 @@ pub struct TooltipProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::{tooltip::{Tooltip, TooltipContent, TooltipTrigger}, ContentSide};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -121,7 +121,7 @@ pub struct TooltipTriggerProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::{tooltip::{Tooltip, TooltipContent, TooltipTrigger}, ContentSide};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -230,7 +230,7 @@ pub struct TooltipContentProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::{tooltip::{Tooltip, TooltipContent, TooltipTrigger}, ContentSide};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {

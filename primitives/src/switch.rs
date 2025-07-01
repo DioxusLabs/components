@@ -51,7 +51,7 @@ pub struct SwitchProps {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::switch::{Switch, SwitchThumb};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     let mut checked = use_signal(|| false);
 ///     rsx! {
 ///         Switch {
@@ -131,17 +131,17 @@ pub struct SwitchThumbProps {
 /// # SwitchThumb
 ///
 /// The `SwitchThumb` component represents the visual thumb indicator that moves when the switch is toggled.
-/// 
+///
 /// This must be used inside a [`Switch`] component.
 ///
 /// ## Example
 ///
 /// ```rust
-/// 
+///
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::switch::{Switch, SwitchThumb};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     let mut checked = use_signal(|| false);
 ///     rsx! {
 ///         Switch {

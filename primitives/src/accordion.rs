@@ -392,7 +392,7 @@ pub struct AccordionContentProps {
 ///
 /// The accordion content component represents the content of an accordion item that can be
 /// expanded or collapsed. The contents will only be displayed when the [`AccordionItem`] is open.
-/// 
+///
 /// This must be used underneath the [`AccordionItem`] component.
 ///
 /// ## Example

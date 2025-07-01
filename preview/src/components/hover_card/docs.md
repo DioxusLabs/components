@@ -13,9 +13,9 @@ HoverCard {
     // The HoverCardContent contains the content that will be displayed when the user hovers over the trigger.
     HoverCardContent {
         // The side of the HoverCardTrigger where the content will be displayed. Can be one Top, Right, Bottom, or Left.
-        side: HoverCardSide::Bottom,
+        side: ContentSide::Bottom,
         // The alignment of the HoverCardContent relative to the HoverCardTrigger. Can be one of Start, Center, or End.
-        align: HoverCardAlign::Start,
+        align: ContentAlign::Start,
         // The content of the hover card, which can include text, images, or any other elements.
         {children}
     }

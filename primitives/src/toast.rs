@@ -88,7 +88,7 @@ pub struct ToastProviderProps {
 /// use std::time::Duration;
 ///
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         ToastProvider { ToastButton {} }
 ///     }
@@ -314,7 +314,7 @@ pub struct ToastProps {
 /// use std::time::Duration;
 ///
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         ToastProvider { ToastButton {} }
 ///     }
@@ -332,7 +332,7 @@ pub struct ToastProps {
 ///                         "Custom Toast".to_string(),
 ///                         ToastOptions::new()
 ///                             .description("Some info you need")
-///                             .duration(Some(Duration::from_secs(60)))
+///                             .duration(Duration::from_secs(60))
 ///                     );
 ///             },
 ///             "Info (60s)"
@@ -520,22 +520,22 @@ impl Toasts {
 }
 
 /// # use_toast
-/// 
+///
 /// The `use_toast` hook provides access to the [`Toast`] api from the nearest [`ToastProvider`] which lets you
 /// dispatch toasts from anywhere in your component tree.
-/// 
+///
 /// This must be called under a [`ToastProvider`] component.
-/// 
+///
 /// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::toast::{ToastOptions, ToastProvider, use_toast};
 /// use std::time::Duration;
-/// 
+///
 /// #[component]
 /// fn ToastButton() -> Element {
 ///     let toast_api = use_toast();
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| {
@@ -558,7 +558,7 @@ pub fn use_toast() -> Toasts {
 }
 
 /// Consume the toast context from the context
-/// 
+///
 /// This must be called under a [`ToastProvider`] component.
 pub fn consume_toast() -> Toasts {
     let ctx = consume_context::<ToastCtx>();

@@ -53,7 +53,7 @@ pub struct ContextMenuProps {
 /// use the [`ContextMenuTrigger`] to open the menu on a right-click, and the [`ContextMenuContent`] to define the menu item.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::context_menu::{
@@ -89,7 +89,7 @@ pub struct ContextMenuProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
 ///
 /// The [`ContextMenu`] component defines the following data attributes you can use to control styling:
@@ -158,15 +158,14 @@ pub struct ContextMenuTriggerProps {
     children: Element,
 }
 
-
 /// # ContextMenuTrigger
 ///
 /// The [`ContextMenuTrigger`] component is used to define the element that will trigger the context menu when right-clicked.
-/// 
+///
 /// This must be used inside a [`ContextMenu`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::context_menu::{
@@ -243,11 +242,11 @@ pub struct ContextMenuContentProps {
 ///
 /// The [`ContextMenuContent`] component is used to define the content of the context menu. It is only rendered
 /// when the context menu is open.
-/// 
+///
 /// This must be used inside a [`ContextMenu`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::context_menu::{
@@ -283,7 +282,7 @@ pub struct ContextMenuContentProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
 ///
 /// The [`ContextMenuContent`] component defines the following data attributes you can use to control styling:
@@ -387,13 +386,13 @@ pub struct ContextMenuItemProps {
 ///
 /// The [`ContextMenuItem`] component defines an individual item in the context menu. You must define an index that
 /// controls the order items are focused when navigating the menu with the keyboard.
-/// 
+///
 /// When an item is selected with either the pointer or the keyboard, the menu is closed and the `on_select` callback is called with the item's value.
-/// 
+///
 /// This must be used inside a [`ContextMenuContent`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::context_menu::{
@@ -429,7 +428,7 @@ pub struct ContextMenuItemProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
 ///
 /// The [`ContextMenuItem`] component defines the following data attributes you can use to control styling:

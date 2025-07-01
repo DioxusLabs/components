@@ -58,11 +58,11 @@ pub struct PopoverRootProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::popover::*;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         PopoverRoot {
 ///             open: open(),
@@ -167,7 +167,7 @@ pub struct PopoverProps {
 ///
 /// The `PopoverContent` component defines the content of the popover. This component will
 /// only be rendered if the popover is open, and it will handle focus trapping if the popover is modal.
-/// 
+///
 /// This must be used inside a [`PopoverRoot`] component.
 ///
 /// ## Example
@@ -175,11 +175,11 @@ pub struct PopoverProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::popover::*;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         PopoverRoot {
 ///             open: open(),
@@ -296,7 +296,7 @@ pub struct PopoverTriggerProps {
 /// # PopoverTrigger
 ///
 /// The `PopoverTrigger` is a button that toggles the visibility of the [`PopoverContent`].
-/// 
+///
 /// This must be used inside a [`PopoverRoot`] component.
 ///
 /// ## Example
@@ -304,11 +304,11 @@ pub struct PopoverTriggerProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::popover::*;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         PopoverRoot {
 ///             open: open(),

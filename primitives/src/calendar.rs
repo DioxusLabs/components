@@ -923,7 +923,7 @@ pub struct CalendarGridProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
 ///
 /// The [`CalendarGrid`] component renders days in a grid that can be styled using CSS. They define the following data attributes:

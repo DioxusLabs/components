@@ -30,7 +30,7 @@ pub struct ProgressProps {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::progress::{Progress, ProgressIndicator};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Progress {
 ///             aria_label: "Progressbar Demo",
@@ -42,7 +42,7 @@ pub struct ProgressProps {
 /// ```
 ///
 /// ## Styling
-/// 
+///
 /// The [`Progress`] component defines the following data attributes you can use to control styling:
 /// - `data-state`: Indicates the state of the progress. Values are `loading` or `indeterminate`.
 /// - `data-value`: The current progress value between 0 and max.
@@ -95,7 +95,7 @@ pub struct ProgressIndicatorProps {
 /// # ProgressIndicator
 ///
 /// The `ProgressIndicator` component represents the visual indicator that shows the progress completion.
-/// 
+///
 /// This must be used inside a [`Progress`] component.
 ///
 /// ## Example
@@ -104,7 +104,7 @@ pub struct ProgressIndicatorProps {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::progress::{Progress, ProgressIndicator};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Progress {
 ///             aria_label: "Progressbar Demo",

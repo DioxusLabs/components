@@ -670,7 +670,7 @@ pub struct SelectTriggerProps {
 /// ```
 ///
 /// ## Styling
-/// 
+///
 /// The [`SelectTrigger`] component defines a span with a `data-placeholder` attribute if a placeholder is set.
 #[component]
 pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
@@ -1050,14 +1050,14 @@ pub struct SelectItemIndicatorProps {
 }
 
 /// # SelectItemIndicator
-/// 
+///
 /// The `SelectItemIndicator` component is used to render an indicator for a selected item within a [`SelectList`]. The
 /// children will only be rendered if the option is selected.
-/// 
+///
 /// This must be used inside a [`SelectOption`] component.
-/// 
+///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::select::{
@@ -1131,11 +1131,11 @@ pub struct SelectGroupProps {
 }
 
 /// # SelectGroup
-/// 
+///
 /// The `SelectGroup` component is used to group related options within a [`SelectList`]. It provides a way to organize options into logical sections.
-/// 
+///
 /// This must be used inside a [`SelectList`] component.
-/// 
+///
 /// ## Example
 ///
 /// ```rust
@@ -1212,15 +1212,15 @@ pub struct SelectGroupLabelProps {
 }
 
 /// # SelectGroupLabel
-/// 
+///
 /// The `SelectGroupLabel` component is used to render a label for a group of options within a [`SelectList`].
-/// 
+///
 /// This must be used inside a [`SelectGroup`] component.
-/// 
+///
 /// ## Example
-/// 
+///
 /// ```rust
-/// 
+///
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::select::{
 ///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,

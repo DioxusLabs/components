@@ -120,7 +120,7 @@ pub struct RadioGroupProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::radio_group::{RadioGroup, RadioItem};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -201,17 +201,17 @@ pub struct RadioItemProps {
 }
 
 /// # RadioItem
-/// 
+///
 /// The `RadioItem` component represents a single radio button within a [`RadioGroup`]. Only one radio item can be selected at a time within a group.
-/// 
+///
 /// This must be used inside a [`RadioGroup`] component.
-/// 
+///
 /// ## Example
 ///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::radio_group::{RadioGroup, RadioItem};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {

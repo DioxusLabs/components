@@ -64,7 +64,7 @@ pub struct ToolbarProps {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::toolbar::{Toolbar, ToolbarButton, ToolbarSeparator};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Toolbar { aria_label: "Text formatting",
 ///             ToolbarButton {
@@ -143,7 +143,7 @@ pub struct ToolbarButtonProps {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::toolbar::{Toolbar, ToolbarButton, ToolbarSeparator};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Toolbar { aria_label: "Text formatting",
 ///             ToolbarButton {
@@ -276,7 +276,7 @@ pub struct ToolbarSeparatorProps {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::toolbar::{Toolbar, ToolbarButton, ToolbarSeparator};
 /// #[component]
-/// pub(super) fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///     rsx! {
 ///         Toolbar { aria_label: "Text formatting",
 ///             ToolbarButton {

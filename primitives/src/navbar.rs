@@ -48,8 +48,7 @@ pub struct NavbarProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::navbar::{Navbar, NavbarContent, NavbarItem, NavbarNav, NavbarTrigger};
-/// use crate::Route;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -203,7 +202,7 @@ pub struct NavbarNavProps {
 /// # NavbarNav
 ///
 /// The `NavbarNav` component represents a single navigation dropdown within a navbar. It contains a [`NavbarTrigger`] and [`NavbarContent`] that can be opened and closed.
-/// 
+///
 /// This must be used inside a [`Navbar`] component.
 ///
 /// ## Example
@@ -211,8 +210,7 @@ pub struct NavbarNavProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::navbar::{Navbar, NavbarContent, NavbarItem, NavbarNav, NavbarTrigger};
-/// use crate::Route;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -356,7 +354,7 @@ pub struct NavbarTriggerProps {
 /// # NavbarTrigger
 ///
 /// The `NavbarTrigger` component is a button that opens and closes a [`NavbarNav`]. It controls if the associated [`NavbarContent`] is visible or not.
-/// 
+///
 /// This must be used inside a [`NavbarNav`] component.
 ///
 /// ## Example
@@ -364,8 +362,7 @@ pub struct NavbarTriggerProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::navbar::{Navbar, NavbarContent, NavbarItem, NavbarNav, NavbarTrigger};
-/// use crate::Route;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -469,7 +466,7 @@ pub struct NavbarContentProps {
 ///
 /// The `NavbarContent` component defines the content of a [`NavbarNav`] that appears when the
 /// [`NavbarTrigger`] is activated. It contains the [`NavbarItem`]s inside the navbar dropdown.
-/// 
+///
 /// This must be used inside a [`NavbarNav`] component.
 ///
 /// ## Example
@@ -477,8 +474,7 @@ pub struct NavbarContentProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::navbar::{Navbar, NavbarContent, NavbarItem, NavbarNav, NavbarTrigger};
-/// use crate::Route;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -643,8 +639,7 @@ pub struct NavbarItemProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::navbar::{Navbar, NavbarContent, NavbarItem, NavbarNav, NavbarTrigger};
-/// use crate::Route;
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {

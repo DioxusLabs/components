@@ -57,11 +57,11 @@ pub struct CollapsibleProps {
 /// The [`Collapsible`] component is a container that can be expanded or collapsed to show or hide its content.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -78,7 +78,7 @@ pub struct CollapsibleProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
 ///
 /// The [`Collapsible`] component defines the following data attributes you can use to control styling:
@@ -118,7 +118,6 @@ pub struct CollapsibleContentProps {
     children: Element,
 }
 
-
 /// # CollapsibleContent
 ///
 /// The [`CollapsibleContent`] component defines the content of a collapsible section. The
@@ -127,11 +126,11 @@ pub struct CollapsibleContentProps {
 /// This must be used inside a [`Collapsible`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -148,7 +147,7 @@ pub struct CollapsibleContentProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
 ///
 /// The [`CollapsibleContent`] component defines the following data attributes you can use to control styling:
@@ -183,19 +182,18 @@ pub struct CollapsibleTriggerProps {
     children: Element,
 }
 
-
 /// # CollapsibleTrigger
 ///
 /// The [`CollapsibleTrigger`] component is the button or element that toggles the visibility of the collapsible content.
-/// 
+///
 /// This must be used inside a [`Collapsible`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
@@ -212,7 +210,7 @@ pub struct CollapsibleTriggerProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
 ///
 /// The [`CollapsibleTrigger`] component defines the following data attributes you can use to control styling:

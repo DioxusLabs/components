@@ -42,20 +42,20 @@ pub struct DialogRootProps {
 }
 
 /// # DialogRoot
-/// 
+///
 /// The entry point for the dialog. It manages the open state of the dialog and provides context to its children. You
 /// can use it to create a backdrop for the dialog if needed. The contents will only be rendered when the dialog is open.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::dialog::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| open.set(true),
@@ -82,7 +82,7 @@ pub struct DialogRootProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
 ///
 /// The [`DialogRoot`] component defines the following data attributes you can use to control styling:
@@ -157,22 +157,22 @@ pub struct DialogProps {
 }
 
 /// # DialogContent
-/// 
+///
 /// The content of the dialog. Any interactive content in the dialog should be placed
 /// inside this component. It will trap focus within the dialog while it is open
 ///
 /// This must be used inside an [`DialogRoot`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::dialog::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| open.set(true),
@@ -199,7 +199,7 @@ pub struct DialogProps {
 ///     }
 /// }
 /// ```
-/// 
+///
 /// ## Styling
 ///
 /// The [`DialogRoot`] component defines the following data attributes you can use to control styling:
@@ -271,15 +271,15 @@ pub struct DialogTitleProps {
 /// This must be used inside an [`DialogRoot`] component and should be placed inside an [`DialogContent`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::dialog::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| open.set(true),
@@ -320,7 +320,6 @@ pub fn DialogTitle(props: DialogTitleProps) -> Element {
     }
 }
 
-
 /// The props for the [`DialogDescription`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogDescriptionProps {
@@ -330,7 +329,6 @@ pub struct DialogDescriptionProps {
     children: Element,
 }
 
-
 /// # DialogDescription
 ///
 /// The description of the dialog. This will be used to describe the dialog for accessibility purposes.
@@ -338,15 +336,15 @@ pub struct DialogDescriptionProps {
 /// This must be used inside an [`DialogRoot`] component and should be placed inside an [`DialogContent`] component.
 ///
 /// ## Example
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::dialog::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
-/// 
+///
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut open = use_signal(|| false);
-/// 
+///
 ///     rsx! {
 ///         button {
 ///             onclick: move |_| open.set(true),
