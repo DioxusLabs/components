@@ -1,3 +1,5 @@
+//! Defines the [`Calendar`] component and its sub-components, which provide a calendar interface with date selection and navigation.
+
 use crate::use_unique_id;
 use dioxus_lib::prelude::*;
 use std::{
