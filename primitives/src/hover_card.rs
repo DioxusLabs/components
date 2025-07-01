@@ -1,6 +1,6 @@
 //! Defines the [`HoverCard`] component and its subcomponents.
 
-use crate::{use_animated_open, use_controlled, use_id_or, use_unique_id};
+use crate::{use_animated_open, use_controlled, use_id_or, use_unique_id, ContentAlign, ContentSide};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone)]
@@ -195,51 +195,6 @@ pub fn HoverCardTrigger(props: HoverCardTriggerProps) -> Element {
     }
 }
 
-/// The side where the hover card content will be displayed relative to the trigger
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum HoverCardSide {
-    /// The hover card will appear above the trigger
-    Top,
-    /// The hover card will appear to the right of the trigger
-    Right,
-    /// The hover card will appear below the trigger
-    Bottom,
-    /// The hover card will appear to the left of the trigger
-    Left,
-}
-
-impl HoverCardSide {
-    fn as_str(&self) -> &'static str {
-        match self {
-            HoverCardSide::Top => "top",
-            HoverCardSide::Right => "right",
-            HoverCardSide::Bottom => "bottom",
-            HoverCardSide::Left => "left",
-        }
-    }
-}
-
-/// The alignment of the hover card content relative to the trigger
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum HoverCardAlign {
-    /// The hover card will be aligned to the start of the trigger
-    Start,
-    /// The hover card will be centered relative to the trigger
-    Center,
-    /// The hover card will be aligned to the end of the trigger
-    End,
-}
-
-impl HoverCardAlign {
-    fn as_str(&self) -> &'static str {
-        match self {
-            HoverCardAlign::Start => "start",
-            HoverCardAlign::Center => "center",
-            HoverCardAlign::End => "end",
-        }
-    }
-}
-
 /// The props for the [`HoverCardContent`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct HoverCardContentProps {
@@ -248,12 +203,12 @@ pub struct HoverCardContentProps {
     pub id: ReadOnlySignal<Option<String>>,
 
     /// Side of the trigger to place the hover card
-    #[props(default = HoverCardSide::Top)]
-    pub side: HoverCardSide,
+    #[props(default = ContentSide::Top)]
+    pub side: ContentSide,
 
     /// Alignment of the hover card relative to the trigger
-    #[props(default = HoverCardAlign::Center)]
-    pub align: HoverCardAlign,
+    #[props(default = ContentAlign::Center)]
+    pub align: ContentAlign,
 
     /// Whether to force the hover card to stay open when hovered
     #[props(default = true)]
