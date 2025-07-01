@@ -1,3 +1,5 @@
+//! Defines the [`Tooltip`] component and its sub-components, which provide contextual information when hovering or focusing on elements.
+
 use crate::{
     use_animated_open, use_controlled, use_id_or, use_unique_id, ContentAlign, ContentSide,
 };
@@ -38,6 +40,41 @@ pub struct TooltipProps {
     children: Element,
 }
 
+/// # Tooltip
+///
+/// The `Tooltip` component provides contextual information when users hover or focus on an
+/// element. It consists of a [`TooltipTrigger`] that activates the tooltip and a [`TooltipContent`]
+/// that displays the message.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{tooltip::{Tooltip, TooltipContent, TooltipTrigger}, ContentSide};
+/// 
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Tooltip {
+///             TooltipTrigger {
+///                 "Rich content"
+///             }
+///             TooltipContent {
+///                 side: ContentSide::Left,
+///                 style: "width: 200px;",
+///                 h4 { style: "margin-top: 0; margin-bottom: 8px;", "Tooltip title" }
+///                 p { style: "margin: 0;", "This tooltip contains rich HTML content with styling." }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Tooltip`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the current state of the tooltip. Values are `open` or `closed`.
+/// - `data-disabled`: Indicates if the tooltip is disabled. Values are `true` or `false`.
 #[component]
 pub fn Tooltip(props: TooltipProps) -> Element {
     let (open, set_open) = use_controlled(props.open, props.default_open, props.on_open_change);
@@ -67,16 +104,41 @@ pub struct TooltipTriggerProps {
     #[props(default)]
     id: Option<String>,
 
-    /// Whether to use ARIA attributes
-    #[props(default = true)]
-    use_aria: bool,
-
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
     children: Element,
 }
 
+/// # TooltipTrigger
+///
+/// The trigger element for the [`Tooltip`] component. When users hover over or focus on this element, the tooltip content will be displayed.
+///
+/// This must be used inside a [`Tooltip`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{tooltip::{Tooltip, TooltipContent, TooltipTrigger}, ContentSide};
+/// 
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Tooltip {
+///             TooltipTrigger {
+///                 "Rich content"
+///             }
+///             TooltipContent {
+///                 side: ContentSide::Left,
+///                 style: "width: 200px;",
+///                 h4 { style: "margin-top: 0; margin-bottom: 8px;", "Tooltip title" }
+///                 p { style: "margin: 0;", "This tooltip contains rich HTML content with styling." }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
     let ctx: TooltipCtx = use_context();
@@ -128,7 +190,7 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
             // Keyboard events
             onkeydown: handle_keydown,
             // ARIA attributes
-            aria_describedby: if props.use_aria { ctx.tooltip_id.peek().clone() } else { String::new() },
+            aria_describedby: ctx.tooltip_id.cloned(),
             ..props.attributes,
             {props.children}
         }
@@ -156,6 +218,43 @@ pub struct TooltipContentProps {
     children: Element,
 }
 
+/// # TooltipContent
+///
+/// The content component for the [`Tooltip`] that displays the actual tooltip message. The content will only be
+/// rendered when the tooltip is open (as controlled by the [`TooltipTrigger`] component).
+///
+/// This must be used inside a [`Tooltip`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{tooltip::{Tooltip, TooltipContent, TooltipTrigger}, ContentSide};
+/// 
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Tooltip {
+///             TooltipTrigger {
+///                 "Rich content"
+///             }
+///             TooltipContent {
+///                 side: ContentSide::Left,
+///                 style: "width: 200px;",
+///                 h4 { style: "margin-top: 0; margin-bottom: 8px;", "Tooltip title" }
+///                 p { style: "margin: 0;", "This tooltip contains rich HTML content with styling." }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`TooltipContent`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the current state of the tooltip. Values are `open` or `closed`.
+/// - `data-side`: Indicates which side of the trigger the tooltip is positioned. Values are `top`, `right`, `bottom`, or `left`.
+/// - `data-align`: Indicates the alignment of the tooltip. Values are `start`, `center`, or `end`.
 #[component]
 pub fn TooltipContent(props: TooltipContentProps) -> Element {
     let mut ctx: TooltipCtx = use_context();
