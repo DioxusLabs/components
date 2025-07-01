@@ -1,7 +1,8 @@
+//! Defines the [`AspectRatio`] component, which maintains a specific aspect ratio for its children.
+
 use dioxus_lib::prelude::*;
 
-// TODO: Docs
-
+/// The props for the [`AspectRatio`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AspectRatioProps {
     /// The desired ratio. E.g. 16.0 / 9.0
@@ -14,6 +15,25 @@ pub struct AspectRatioProps {
     attributes: Vec<Attribute>,
 }
 
+/// # AspectRatio
+/// 
+/// A component that maintains a specific aspect ratio for its children.
+///
+/// ## Example
+/// 
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::AspectRatio;
+/// fn App() -> Element {
+///     rsx! {
+///         AspectRatio { ratio: 16.0 / 9.0,
+///             div { style: "background-color: lightblue; width: 100%; height: 100%;",
+///                 "This div maintains a 16:9 aspect ratio."
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn AspectRatio(props: AspectRatioProps) -> Element {
     let ratio = 100.0 / (props.ratio);
