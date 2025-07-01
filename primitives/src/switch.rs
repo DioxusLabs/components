@@ -1,35 +1,73 @@
+//! Defines the [`Switch`] component and its sub-components.
+
 use crate::use_controlled;
 use dioxus_lib::prelude::*;
 
-/// The props for the [`Switch`] component
+/// The props for the [`Switch`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct SwitchProps {
+    /// The controlled checked state of the switch.
     checked: ReadOnlySignal<Option<bool>>,
 
+    /// The default checked state when uncontrolled.
     #[props(default = false)]
     default_checked: bool,
 
+    /// Whether the switch is disabled.
     #[props(default = ReadOnlySignal::new(Signal::new(false)))]
     disabled: ReadOnlySignal<bool>,
 
+    /// Whether the switch is required in a form.
     #[props(default)]
     required: ReadOnlySignal<bool>,
 
+    /// The name attribute for form submission.
     #[props(default)]
     name: ReadOnlySignal<String>,
 
+    /// The value attribute for form submission.
     #[props(default = ReadOnlySignal::new(Signal::new(String::from("on"))))]
     value: ReadOnlySignal<String>,
 
+    /// Callback fired when the checked state changes.
     #[props(default)]
     on_checked_change: Callback<bool>,
 
+    /// Additional attributes to apply to the switch element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the switch component.
     children: Element,
 }
 
+/// # Switch
+///
+/// The `Switch` component is a toggle control that allows users to switch a state on or off.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::switch::{Switch, SwitchThumb};
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     let mut checked = use_signal(|| false);
+///     rsx! {
+///         Switch {
+///             checked: checked(),
+///             aria_label: "Switch Demo",
+///             SwitchThumb {}
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Switch`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the state of the switch. Values are `checked` or `unchecked`.
+/// - `data-disabled`: Indicates if the switch is disabled. Values are `true` or `false`.
 #[component]
 pub fn Switch(props: SwitchProps) -> Element {
     let (checked, set_checked) = use_controlled(
@@ -80,14 +118,40 @@ pub fn Switch(props: SwitchProps) -> Element {
     }
 }
 
-/// The props for the [`SwitchThumb`] component
+/// The props for the [`SwitchThumb`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct SwitchThumbProps {
+    /// Additional attributes to apply to the thumb element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the thumb component.
     children: Element,
 }
 
+/// # SwitchThumb
+///
+/// The `SwitchThumb` component represents the visual thumb indicator that moves when the switch is toggled.
+/// 
+/// This must be used inside a [`Switch`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// 
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::switch::{Switch, SwitchThumb};
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     let mut checked = use_signal(|| false);
+///     rsx! {
+///         Switch {
+///             checked: checked(),
+///             aria_label: "Switch Demo",
+///             SwitchThumb {}
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn SwitchThumb(props: SwitchThumbProps) -> Element {
     rsx! {
