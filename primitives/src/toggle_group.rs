@@ -73,7 +73,7 @@ impl ToggleGroupCtx {
         self.focus.focus_prev();
     }
 
-    fn is_roving_focus(&self) -> bool {
+    fn is_roving_loop(&self) -> bool {
         (self.roving_loop)()
     }
 }
@@ -235,7 +235,7 @@ pub fn ToggleItem(props: ToggleItemProps) -> Element {
 
     // Tab index for roving index
     let tab_index = use_memo(move || {
-        if !ctx.is_roving_focus() {
+        if !ctx.is_roving_loop() {
             return "0";
         }
 

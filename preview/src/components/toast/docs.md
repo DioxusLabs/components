@@ -13,10 +13,10 @@ ToastProvider {
             toast_api
                 .error(
                     "Critical Error".to_string(),
-                    Some(ToastOptions {
-                        permanent: true,
-                        ..Default::default()
-                    }),
+                    ToastOptions::new()
+                        .description("Some info you need")
+                        .duration(Duration::from_secs(60))
+                        .permanent(false),
                 );
         },
         "Show Toast"

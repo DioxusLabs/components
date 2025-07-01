@@ -353,7 +353,7 @@ pub struct CalendarProps {
 ///
 /// The [`Calendar`] component provides an accessible calendar interface with arrow key navigation, month switching, and date selection.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
@@ -499,7 +499,7 @@ pub struct CalendarHeaderProps {
 ///
 /// The [`CalendarHeader`] component displays the header for the calendar. It typically contains the [`CalendarNavigation`] component
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
@@ -567,7 +567,7 @@ pub struct CalendarNavigationProps {
 /// The [`CalendarNavigation`] component provides a container for navigation buttons in the calendar header.
 /// It typically contains the [`CalendarPreviousMonthButton`], [`CalendarNextMonthButton`], and [`CalendarMonthTitle`] components.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
@@ -629,7 +629,7 @@ pub struct CalendarPreviousMonthButtonProps {
 ///
 /// This must be used inside a [`Calendar`] component.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
@@ -706,7 +706,7 @@ pub struct CalendarNextMonthButtonProps {
 ///
 /// This must be used inside a [`Calendar`] component.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
@@ -782,7 +782,7 @@ pub struct CalendarMonthTitleProps {
 ///
 /// This must be used inside a [`Calendar`] component.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
@@ -885,7 +885,7 @@ pub struct CalendarGridProps {
 ///
 /// This must be used inside a [`Calendar`] component.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{

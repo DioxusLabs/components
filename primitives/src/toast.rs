@@ -1,3 +1,5 @@
+//! Defines the [`Toast`] component and its sub-components, which provide a notification system for displaying temporary messages to users.
+
 use crate::{
     portal::{use_portal, PortalIn, PortalOut},
     use_unique_id,
@@ -8,12 +10,16 @@ use dioxus_time::use_timeout;
 use std::collections::VecDeque;
 use std::time::Duration;
 
-// Toast types for different visual styles
+/// Toast types for different visual styles
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ToastType {
+    /// A success toast
     Success,
+    /// An error toast
     Error,
+    /// A warning toast
     Warning,
+    /// An info toast
     Info,
 }
 
@@ -30,7 +36,7 @@ impl ToastType {
 
 // A single toast item
 #[derive(Debug, Clone, PartialEq)]
-pub struct ToastItem {
+struct ToastItem {
     id: usize,
     title: String,
     description: Option<String>,
@@ -68,7 +74,52 @@ pub struct ToastProviderProps {
     children: Element,
 }
 
-// Toast provider component
+/// # ToastProvider
+///
+/// The provider component manages rendering any toasts sent by child components. This component should wrap all components that need access to the [`use_toast`] hook.
+///
+/// It provides a global `f6` shortcut to focus the toast region, allowing users to quickly access the most recent toast notifications.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::toast::{ToastOptions, ToastProvider, use_toast};
+/// use std::time::Duration;
+///
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         ToastProvider { ToastButton {} }
+///     }
+/// }
+///
+/// #[component]
+/// fn ToastButton() -> Element {
+///     let toast_api = use_toast();
+///
+///     rsx! {
+///         button {
+///             onclick: move |_| {
+///                 toast_api
+///                     .info(
+///                         "Custom Toast".to_string(),
+///                         ToastOptions::new()
+///                             .description("Some info you need")
+///                             .duration(Duration::from_secs(60))
+///                             .permanent(false),
+///                     );
+///             },
+///             "Info (60s)"
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`ToastProvider`] component renders toasts with the following css variables you can use to control styling:
+/// - `--data-toast-count`: The number of toasts currently displayed.
 #[component]
 pub fn ToastProvider(props: ToastProviderProps) -> Element {
     let mut toasts = use_signal(VecDeque::new);
@@ -248,7 +299,59 @@ pub struct ToastProps {
     attributes: Vec<Attribute>,
 }
 
-// Toast component
+/// # Toast
+///
+/// An individual toast notification with a message for the user. This is called automatically by the [`ToastProvider`] when a toast is added if you leave
+/// the default `render_toast` callback.
+///
+/// If you call this component manually, it must be used inside a [`ToastProvider`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::toast::{ToastOptions, ToastProvider, use_toast};
+/// use std::time::Duration;
+///
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         ToastProvider { ToastButton {} }
+///     }
+/// }
+///
+/// #[component]
+/// fn ToastButton() -> Element {
+///     let toast_api = use_toast();
+///
+///     rsx! {
+///         button {
+///             onclick: move |_| {
+///                 toast_api
+///                     .info(
+///                         "Custom Toast".to_string(),
+///                         ToastOptions::new()
+///                             .description("Some info you need")
+///                             .duration(Some(Duration::from_secs(60)))
+///                     );
+///             },
+///             "Info (60s)"
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Toast`] component defines the following data attributes you can use to control styling:
+/// - `data-type`: The type of toast. Values are `success`, `error`, `warning`, or `info`.
+/// - `data-permanent`: Indicates if the toast is permanent. Values are `true` or `false`.
+/// - `data-toast-even`: Present on even-indexed toasts for alternating styles.
+/// - `data-toast-odd`: Present on odd-indexed toasts for alternating styles.
+/// - `data-top`: Present on the topmost toast.
+///
+/// The [`Toast`] component renders toasts with the following css variables you can use to control styling:
+/// - `--toast-index`: The index of the toast in the list, used for z-indexing and positioning.
 #[component]
 pub fn Toast(props: ToastProps) -> Element {
     let toast_id = use_unique_id();
@@ -332,28 +435,54 @@ pub fn Toast(props: ToastProps) -> Element {
     }
 }
 
-// Toast options struct for easier API
+/// Options for customizing the behavior of toasts dispatched from the [`Toasts`] context.
 #[derive(Clone, Default)]
 pub struct ToastOptions {
-    pub description: Option<String>,
-    pub duration: Option<Duration>,
-    pub permanent: bool,
+    description: Option<String>,
+    duration: Option<Duration>,
+    permanent: bool,
 }
 
-// Type alias for the Toasts struct
-type AddToastFn = AddToastCallback;
+impl ToastOptions {
+    /// Create a new `ToastOptions` with an empty description, no duration, that is not permanent.
+    pub fn new() -> Self {
+        Self {
+            description: None,
+            duration: None,
+            permanent: false,
+        }
+    }
 
-// Simplified toast API
+    /// Set the description for the toast.
+    pub fn description(mut self, description: impl ToString) -> Self {
+        self.description = Some(description.to_string());
+        self
+    }
+
+    /// Set the duration for the toast.
+    pub fn duration(mut self, duration: Duration) -> Self {
+        self.duration = Some(duration);
+        self
+    }
+
+    /// Set whether the toast is permanent.
+    pub fn permanent(mut self, permanent: bool) -> Self {
+        self.permanent = permanent;
+        self
+    }
+}
+
+/// The toast context provided by the [`use_toast`] hook.
 #[derive(Clone, Copy)]
 pub struct Toasts {
-    add_toast: AddToastFn,
+    add_toast: AddToastCallback,
     // We keep remove_toast for potential future use
     #[allow(dead_code)]
     remove_toast: Callback<usize>,
 }
 
 impl Toasts {
-    // Show a toast with the given type and options
+    /// Send a toast to the associated [`ToastProvider`] with the given title, type, and options.
     pub fn show(&self, title: String, toast_type: ToastType, options: ToastOptions) {
         self.add_toast.call((
             title,
@@ -369,30 +498,68 @@ impl Toasts {
         ));
     }
 
-    // Convenience methods for different toast types
-    pub fn success(&self, title: String, options: Option<ToastOptions>) {
-        self.show(title, ToastType::Success, options.unwrap_or_default());
+    /// Create a new success toast with the given title and options.
+    pub fn success(&self, title: String, options: ToastOptions) {
+        self.show(title, ToastType::Success, options);
     }
 
-    pub fn error(&self, title: String, options: Option<ToastOptions>) {
-        self.show(title, ToastType::Error, options.unwrap_or_default());
+    /// Create a new error toast with the given title and options.
+    pub fn error(&self, title: String, options: ToastOptions) {
+        self.show(title, ToastType::Error, options);
     }
 
-    pub fn warning(&self, title: String, options: Option<ToastOptions>) {
-        self.show(title, ToastType::Warning, options.unwrap_or_default());
+    /// Create a new warning toast with the given title and options.
+    pub fn warning(&self, title: String, options: ToastOptions) {
+        self.show(title, ToastType::Warning, options);
     }
 
-    pub fn info(&self, title: String, options: Option<ToastOptions>) {
-        self.show(title, ToastType::Info, options.unwrap_or_default());
+    /// Create a new info toast with the given title and options.
+    pub fn info(&self, title: String, options: ToastOptions) {
+        self.show(title, ToastType::Info, options);
     }
 }
 
-// Hook to use the toast API
+/// # use_toast
+/// 
+/// The `use_toast` hook provides access to the [`Toast`] api from the nearest [`ToastProvider`] which lets you
+/// dispatch toasts from anywhere in your component tree.
+/// 
+/// This must be called under a [`ToastProvider`] component.
+/// 
+/// ## Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::toast::{ToastOptions, ToastProvider, use_toast};
+/// use std::time::Duration;
+/// 
+/// #[component]
+/// fn ToastButton() -> Element {
+///     let toast_api = use_toast();
+/// 
+///     rsx! {
+///         button {
+///             onclick: move |_| {
+///                 toast_api
+///                     .info(
+///                         "Custom Toast".to_string(),
+///                         ToastOptions::new()
+///                             .description("Some info you need")
+///                             .duration(Duration::from_secs(60))
+///                             .permanent(false),
+///                     );
+///             },
+///             "Info (60s)"
+///         }
+///     }
+/// }
+/// ```
 pub fn use_toast() -> Toasts {
     use_hook(consume_toast)
 }
 
-// Consume the toast API from the context
+/// Consume the toast context from the context
+/// 
+/// This must be called under a [`ToastProvider`] component.
 pub fn consume_toast() -> Toasts {
     let ctx = consume_context::<ToastCtx>();
     let add_toast = ctx.add_toast;

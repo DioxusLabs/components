@@ -54,7 +54,7 @@ pub struct DropdownMenuProps {
 ///
 /// The `DropdownMenu` component is a container for a [`DropdownMenuContent`] component activated by a [`DropdownMenuTrigger`] component.
 ///
-/// # Example
+/// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::dropdown_menu::{
