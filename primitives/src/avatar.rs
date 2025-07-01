@@ -1,3 +1,5 @@
+//! Defines the [`Avatar`] component and its subcomponents, which manage user profile images with fallback options.
+
 use dioxus_lib::prelude::*;
 
 /// Represents the different states an Avatar can be in
@@ -26,6 +28,7 @@ struct AvatarCtx {
     on_state_change: Option<EventHandler<AvatarState>>,
 }
 
+/// The props for the [`Avatar`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AvatarProps {
     /// Callback when image loads successfully
@@ -40,12 +43,43 @@ pub struct AvatarProps {
     #[props(default)]
     pub on_state_change: Option<EventHandler<AvatarState>>,
 
+    /// Additional attributes for the avatar element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 
+    /// The children of the Avatar component, which can include AvatarImage and AvatarFallback
     pub children: Element,
 }
 
+/// # Avatar
+///
+/// A component that displays a user profile image with fallback options.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::avatar::{Avatar, AvatarFallback, AvatarImage};
+///
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Avatar {
+///             aria_label: "Basic avatar",
+///             AvatarImage {
+///                 src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
+///                 alt: "ealmloff user avatar",
+///             }
+///             AvatarFallback { class: "avatar-fallback", "EA" }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Avatar`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the current state of the avatar. Possible values are `loading`, `loaded`, `error`, or `empty`.
 #[component]
 pub fn Avatar(props: AvatarProps) -> Element {
     // Internal state tracking
@@ -99,13 +133,43 @@ pub fn Avatar(props: AvatarProps) -> Element {
     }
 }
 
+/// The props for the [`AvatarFallback`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AvatarFallbackProps {
+    /// Additional attributes for the fallback element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
+    /// The children of the AvatarFallback component, typically text or an icon
     pub children: Element,
 }
 
+/// # AvatarFallback
+///
+/// A component that displays a fallback avatar when the image fails to load. The contents will only
+/// be rendered if the avatar is in an error or empty state.
+///
+/// This component must be used inside an [`Avatar`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::avatar::{Avatar, AvatarFallback, AvatarImage};
+///
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Avatar {
+///             aria_label: "Basic avatar",
+///             AvatarImage {
+///                 src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
+///                 alt: "ealmloff user avatar",
+///             }
+///             AvatarFallback { class: "avatar-fallback", "EA" }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn AvatarFallback(props: AvatarFallbackProps) -> Element {
     let mut ctx: AvatarCtx = use_context();
@@ -127,6 +191,7 @@ pub fn AvatarFallback(props: AvatarFallbackProps) -> Element {
     }
 }
 
+/// The props for the [`AvatarImage`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AvatarImageProps {
     /// The image source URL
@@ -136,10 +201,36 @@ pub struct AvatarImageProps {
     #[props(default)]
     pub alt: Option<String>,
 
+    /// Additional attributes for the image element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 }
 
+/// # AvatarImage
+///
+/// A component that displays a user profile image. If the image fails to load, it will stop rendering
+/// and the Avatar will switch to the error state, which can be handled by an [`AvatarFallback`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::avatar::{Avatar, AvatarFallback, AvatarImage};
+///
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Avatar {
+///             aria_label: "Basic avatar",
+///             AvatarImage {
+///                 src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
+///                 alt: "ealmloff user avatar",
+///             }
+///             AvatarFallback { class: "avatar-fallback", "EA" }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn AvatarImage(props: AvatarImageProps) -> Element {
     let mut ctx: AvatarCtx = use_context();
