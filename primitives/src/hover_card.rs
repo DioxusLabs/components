@@ -1,4 +1,8 @@
-use crate::{use_animated_open, use_controlled, use_id_or, use_unique_id};
+//! Defines the [`HoverCard`] component and its subcomponents.
+
+use crate::{
+    use_animated_open, use_controlled, use_id_or, use_unique_id, ContentAlign, ContentSide,
+};
 use dioxus_lib::prelude::*;
 
 #[derive(Clone)]
@@ -12,36 +16,80 @@ struct HoverCardCtx {
     content_id: Signal<String>,
 }
 
+/// The props for the [`HoverCard`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct HoverCardProps {
     /// Whether the hover card is open
-    open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadOnlySignal<Option<bool>>,
 
     /// Default open state
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
 
     /// Callback when open state changes
     #[props(default)]
-    on_open_change: Callback<bool>,
+    pub on_open_change: Callback<bool>,
 
     /// Whether the hover card is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
+    /// Additional attributes for the hover card
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the hover card
     children: Element,
 }
 
+/// # HoverCard
+///
+/// The `HoverCard` component wraps a [`HoverCardTrigger`] and a [`HoverCardContent`]. It provides a way to show additional information when hovering over an element.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{
+///     ContentAlign, ContentSide,
+///     hover_card::{
+///         HoverCard, HoverCardContent, HoverCardTrigger,
+///     }
+/// };
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         HoverCard {
+///             HoverCardTrigger {
+///                 i { "Dioxus" }
+///             }
+///             HoverCardContent {
+///                 side: ContentSide::Bottom,
+///                 div {
+///                     padding: "1rem",
+///                     "Dioxus is"
+///                     i { " the " }
+///                     "Rust framework for building fullstack web, desktop, and mobile apps. Iterate with live hotreloading, add server functions, and deploy in record time."
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`HoverCard`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the current state of the hover card. Values are `open` or `closed`.
+/// - `data-disabled`: Indicates whether the item is disabled. Values are `true` or `false`.
 #[component]
 pub fn HoverCard(props: HoverCardProps) -> Element {
     let (open, set_open) = use_controlled(props.open, props.default_open, props.on_open_change);
     // Generate a unique ID for the hover card content
     let content_id = use_unique_id();
 
-    let _ctx = use_context_provider(|| HoverCardCtx {
+    use_context_provider(|| HoverCardCtx {
         open,
         set_open,
         disabled: props.disabled,
@@ -60,18 +108,57 @@ pub fn HoverCard(props: HoverCardProps) -> Element {
     }
 }
 
+/// The props for the [`HoverCardTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct HoverCardTriggerProps {
     /// Optional ID for the trigger element
     #[props(default)]
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the hover card trigger
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the hover card trigger
     children: Element,
 }
 
+/// # HoverCardTrigger
+///
+/// The [`HoverCardTrigger`] component triggers the [`HoverCardContent`] to appear when hovered or focused.
+///
+/// This component must be used inside a [`HoverCard`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{
+///     ContentAlign, ContentSide,
+///     hover_card::{
+///         HoverCard, HoverCardContent, HoverCardTrigger,
+///     }
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         HoverCard {
+///             HoverCardTrigger {
+///                 i { "Dioxus" }
+///             }
+///             HoverCardContent {
+///                 side: ContentSide::Bottom,
+///                 div {
+///                     padding: "1rem",
+///                     "Dioxus is"
+///                     i { " the " }
+///                     "Rust framework for building fullstack web, desktop, and mobile apps. Iterate with live hotreloading, add server functions, and deploy in record time."
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn HoverCardTrigger(props: HoverCardTriggerProps) -> Element {
     let ctx: HoverCardCtx = use_context();
@@ -119,66 +206,77 @@ pub fn HoverCardTrigger(props: HoverCardTriggerProps) -> Element {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum HoverCardSide {
-    Top,
-    Right,
-    Bottom,
-    Left,
-}
-
-impl HoverCardSide {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            HoverCardSide::Top => "top",
-            HoverCardSide::Right => "right",
-            HoverCardSide::Bottom => "bottom",
-            HoverCardSide::Left => "left",
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum HoverCardAlign {
-    Start,
-    Center,
-    End,
-}
-
-impl HoverCardAlign {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            HoverCardAlign::Start => "start",
-            HoverCardAlign::Center => "center",
-            HoverCardAlign::End => "end",
-        }
-    }
-}
-
+/// The props for the [`HoverCardContent`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct HoverCardContentProps {
     /// Optional ID for the hover card content
     #[props(default)]
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
     /// Side of the trigger to place the hover card
-    #[props(default = HoverCardSide::Top)]
-    side: HoverCardSide,
+    #[props(default = ContentSide::Top)]
+    pub side: ContentSide,
 
     /// Alignment of the hover card relative to the trigger
-    #[props(default = HoverCardAlign::Center)]
-    align: HoverCardAlign,
+    #[props(default = ContentAlign::Center)]
+    pub align: ContentAlign,
 
     /// Whether to force the hover card to stay open when hovered
     #[props(default = true)]
-    force_mount: bool,
+    pub force_mount: bool,
 
+    /// Additional attributes for the hover card content
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the hover card content
     children: Element,
 }
 
+/// # HoverCardContent
+///
+/// The [`HoverCardContent`] component defines the content of the parent [`HoverCard`]. It is only rendered when the hover card is open or if [`HoverCardContentProps::force_mount`] is set to true.
+///
+/// This component must be used inside a [`HoverCard`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{
+///     ContentAlign, ContentSide,
+///     hover_card::{
+///         HoverCard, HoverCardContent, HoverCardTrigger,
+///     }
+/// };
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         HoverCard {
+///             HoverCardTrigger {
+///                 i { "Dioxus" }
+///             }
+///             HoverCardContent {
+///                 side: ContentSide::Bottom,
+///                 div {
+///                     padding: "1rem",
+///                     "Dioxus is"
+///                     i { " the " }
+///                     "Rust framework for building fullstack web, desktop, and mobile apps. Iterate with live hotreloading, add server functions, and deploy in record time."
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`HoverCardContent`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the current state of the hover card. Values are `open` or `closed`.
+/// - `data-side`: Indicates the side of the trigger where the hover card is placed. Values are `top`, `right`, `bottom`, or `left`.
+/// - `data-align`: Indicates the alignment of the hover card relative to the trigger. Values are `start`, `center`, or `end`.
 #[component]
 pub fn HoverCardContent(props: HoverCardContentProps) -> Element {
     let ctx: HoverCardCtx = use_context();

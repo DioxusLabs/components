@@ -1,7 +1,9 @@
 use dioxus::prelude::*;
-use dioxus_primitives::hover_card::{
-    HoverCard, HoverCardContent, HoverCardSide, HoverCardTrigger,
+use dioxus_primitives::{
+    hover_card::{HoverCard, HoverCardContent, HoverCardTrigger},
+    ContentSide,
 };
+
 #[component]
 pub(super) fn Demo() -> Element {
     rsx! {
@@ -15,7 +17,7 @@ pub(super) fn Demo() -> Element {
                 HoverCardTrigger { class: "hover-card-trigger",
                     i { "Dioxus" }
                 }
-                HoverCardContent { class: "hover-card-content", side: HoverCardSide::Bottom,
+                HoverCardContent { class: "hover-card-content", side: ContentSide::Bottom,
                     div {
                         padding: "1rem",
                         "Dioxus is"

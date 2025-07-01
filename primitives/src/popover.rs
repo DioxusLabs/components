@@ -1,3 +1,5 @@
+//! Defines the [`PopoverRoot`] component and its sub-components.
+
 use dioxus::document;
 use dioxus_lib::prelude::*;
 
@@ -19,25 +21,81 @@ struct PopoverCtx {
     labelledby: Signal<String>,
 }
 
+/// The props for the [`PopoverRoot`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverRootProps {
+    /// Whether the popover is a modal and should capture focus.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    is_modal: ReadOnlySignal<bool>,
+    pub is_modal: ReadOnlySignal<bool>,
 
-    open: ReadOnlySignal<Option<bool>>,
+    /// The controlled open state of the popover.
+    pub open: ReadOnlySignal<Option<bool>>,
 
+    /// The default open state when uncontrolled.
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
 
+    /// Callback fired when the open state changes.
     #[props(default)]
-    on_open_change: Callback<bool>,
+    pub on_open_change: Callback<bool>,
 
+    /// Additional attributes to apply to the popover root element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the popover root component.
     children: Element,
 }
 
+/// # PopoverRoot
+///
+/// The `PopoverRoot` component wraps all the popover components and manages the state. You can define a
+/// [`PopoverTrigger`] component to toggle the popover's open state, and a [`PopoverContent`] component
+/// to define the content that appears when the popover is open under this component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::popover::*;
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut open = use_signal(|| false);
+///
+///     rsx! {
+///         PopoverRoot {
+///             open: open(),
+///             on_open_change: move |v| open.set(v),
+///             PopoverTrigger {
+///                 "Show Popover"
+///             }
+///             PopoverContent {
+///                 gap: "0.25rem",
+///                 h3 {
+///                     padding_top: "0.25rem",
+///                     padding_bottom: "0.25rem",
+///                     width: "100%",
+///                     text_align: "center",
+///                     margin: 0,
+///                     "Delete Item?"
+///                 }
+///                 button {
+///                     onclick: move |_| {
+///                         open.set(false);;
+///                     },
+///                     "Yes!"
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`PopoverRoot`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates if the popover is open or closed. Values are `open` or `closed`.
 #[component]
 pub fn PopoverRoot(props: PopoverRootProps) -> Element {
     let labelledby = use_unique_id();
@@ -79,27 +137,84 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
     }
 }
 
+/// The props for the [`PopoverContent`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The id of the popover content element.
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// CSS class for the popover content.
     #[props(default)]
-    class: Option<String>,
+    pub class: Option<String>,
 
-    /// Side of the trigger to place the tooltip
+    /// Side of the trigger to place the popover.
     #[props(default = ContentSide::Bottom)]
-    side: ContentSide,
+    pub side: ContentSide,
 
-    /// Alignment of the tooltip relative to the trigger
+    /// Alignment of the popover relative to the trigger.
     #[props(default = ContentAlign::Center)]
-    align: ContentAlign,
+    pub align: ContentAlign,
 
+    /// Additional attributes to apply to the content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the popover content component.
     children: Element,
 }
 
+/// # PopoverContent
+///
+/// The `PopoverContent` component defines the content of the popover. This component will
+/// only be rendered if the popover is open, and it will handle focus trapping if the popover is modal.
+///
+/// This must be used inside a [`PopoverRoot`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::popover::*;
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut open = use_signal(|| false);
+///
+///     rsx! {
+///         PopoverRoot {
+///             open: open(),
+///             on_open_change: move |v| open.set(v),
+///             PopoverTrigger {
+///                 "Show Popover"
+///             }
+///             PopoverContent {
+///                 gap: "0.25rem",
+///                 h3 {
+///                     padding_top: "0.25rem",
+///                     padding_bottom: "0.25rem",
+///                     width: "100%",
+///                     text_align: "center",
+///                     margin: 0,
+///                     "Delete Item?"
+///                 }
+///                 button {
+///                     onclick: move |_| {
+///                         open.set(false);;
+///                     },
+///                     "Yes!"
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`PopoverContent`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates if the popover is open or closed. Values are `open` or `closed`.
+/// - `data-side`: Indicates the side where the popover is positioned relative to the trigger. Possible values are `top`, `right`, `bottom`, and `left`.
+/// - `data-align`: Indicates the alignment of the popover relative to the trigger. Possible values are `start`, `center`, and `end`.
 #[component]
 pub fn PopoverContent(props: PopoverProps) -> Element {
     let ctx: PopoverCtx = use_context();
@@ -144,7 +259,7 @@ pub fn PopoverContent(props: PopoverProps) -> Element {
                 aria_modal: "true",
                 aria_labelledby: ctx.labelledby,
                 aria_hidden: (!is_open).then_some("true"),
-                class: props.class.clone().unwrap_or_else(|| "alert-dialog".to_string()),
+                class: props.class.clone().unwrap_or_else(|| "popover-content".to_string()),
                 "data-state": if is_open { "open" } else { "closed" },
                 "data-side": props.side.as_str(),
                 "data-align": props.align.as_str(),
@@ -155,26 +270,61 @@ pub fn PopoverContent(props: PopoverProps) -> Element {
     }
 }
 
-#[derive(Props, Clone, PartialEq)]
-pub struct PopoverTitleProps {
-    id: ReadOnlySignal<Option<String>>,
-    #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
-    children: Element,
-}
-
+/// The props for the [`PopoverTrigger`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverTriggerProps {
-    /// Whether to use ARIA attributes
-    #[props(default = true)]
-    use_aria: bool,
-
+    /// Additional attributes to apply to the trigger element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the trigger component.
     children: Element,
 }
 
+/// # PopoverTrigger
+///
+/// The `PopoverTrigger` is a button that toggles the visibility of the [`PopoverContent`].
+///
+/// This must be used inside a [`PopoverRoot`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::popover::*;
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut open = use_signal(|| false);
+///
+///     rsx! {
+///         PopoverRoot {
+///             open: open(),
+///             on_open_change: move |v| open.set(v),
+///             PopoverTrigger {
+///                 "Show Popover"
+///             }
+///             PopoverContent {
+///                 gap: "0.25rem",
+///                 h3 {
+///                     padding_top: "0.25rem",
+///                     padding_bottom: "0.25rem",
+///                     width: "100%",
+///                     text_align: "center",
+///                     margin: 0,
+///                     "Delete Item?"
+///                 }
+///                 button {
+///                     onclick: move |_| {
+///                         open.set(false);;
+///                     },
+///                     "Yes!"
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn PopoverTrigger(props: PopoverTriggerProps) -> Element {
     let ctx: PopoverCtx = use_context();

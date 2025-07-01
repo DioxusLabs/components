@@ -1,3 +1,5 @@
+//! Defines the [`ContextMenu`] component and its subcomponents, which provide a context menu interface.
+
 use crate::{
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
     use_animated_open, use_controlled, use_id_or, use_unique_id,
@@ -18,31 +20,83 @@ struct ContextMenuCtx {
     focus: FocusState,
 }
 
+/// The props for the [`ContextMenu`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuProps {
     /// Whether the context menu is disabled
     #[props(default = ReadOnlySignal::new(Signal::new(false)))]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether the context menu is open
-    open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadOnlySignal<Option<bool>>,
 
     /// Default open state
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
 
     /// Callback when open state changes
     #[props(default)]
-    on_open_change: Callback<bool>,
+    pub on_open_change: Callback<bool>,
 
+    /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
+    /// Additional attributes for the context menu element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the context menu component.
     children: Element,
 }
 
+/// # ContextMenu
+///
+/// The [`ContextMenu`] component is a container that can be used to create a context menu. You can
+/// use the [`ContextMenuTrigger`] to open the menu on a right-click, and the [`ContextMenuContent`] to define the menu item.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::context_menu::{
+///     ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         ContextMenu {
+///             ContextMenuTrigger {
+///                 "right click here"
+///             }
+///             ContextMenuContent {
+///                 ContextMenuItem {
+///                     value: "edit".to_string(),
+///                     index: 0usize,
+///                     on_select: move |value| {
+///                         tracing::info!("Selected item: {}", value);
+///                     },
+///                     "Edit"
+///                 }
+///                 ContextMenuItem {
+///                     value: "undo".to_string(),
+///                     index: 1usize,
+///                     disabled: true,
+///                     on_select: move |value| {
+///                         tracing::info!("Selected item: {}", value);
+///                     },
+///                     "Undo"
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`ContextMenu`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates if the state of the context menu. Values are `open` or `closed`.
+/// - `data-disabled`: Indicates if the context menu is disabled. values are `true` or `false`.
 #[component]
 pub fn ContextMenu(props: ContextMenuProps) -> Element {
     let (open, set_open) = use_controlled(props.open, props.default_open, props.on_open_change);
@@ -98,13 +152,59 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
     }
 }
 
+/// The props for the [`ContextMenuTrigger`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuTriggerProps {
+    /// Additional attributes for the context menu trigger element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the context menu trigger.
     children: Element,
 }
 
+/// # ContextMenuTrigger
+///
+/// The [`ContextMenuTrigger`] component is used to define the element that will trigger the context menu when right-clicked.
+///
+/// This must be used inside a [`ContextMenu`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::context_menu::{
+///     ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         ContextMenu {
+///             ContextMenuTrigger {
+///                 "right click here"
+///             }
+///             ContextMenuContent {
+///                 ContextMenuItem {
+///                     value: "edit".to_string(),
+///                     index: 0usize,
+///                     on_select: move |value| {
+///                         tracing::info!("Selected item: {}", value);
+///                     },
+///                     "Edit"
+///                 }
+///                 ContextMenuItem {
+///                     value: "undo".to_string(),
+///                     index: 1usize,
+///                     disabled: true,
+///                     on_select: move |value| {
+///                         tracing::info!("Selected item: {}", value);
+///                     },
+///                     "Undo"
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn ContextMenuTrigger(props: ContextMenuTriggerProps) -> Element {
     let mut ctx: ContextMenuCtx = use_context();
@@ -132,15 +232,68 @@ pub fn ContextMenuTrigger(props: ContextMenuTriggerProps) -> Element {
     }
 }
 
+/// The props for the [`ContextMenuContent`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuContentProps {
+    /// The ID of the context menu content element.
     id: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the context menu content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the context menu content.
     children: Element,
 }
 
+/// # ContextMenuContent
+///
+/// The [`ContextMenuContent`] component is used to define the content of the context menu. It is only rendered
+/// when the context menu is open.
+///
+/// This must be used inside a [`ContextMenu`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::context_menu::{
+///     ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         ContextMenu {
+///             ContextMenuTrigger {
+///                 "right click here"
+///             }
+///             ContextMenuContent {
+///                 ContextMenuItem {
+///                     value: "edit".to_string(),
+///                     index: 0usize,
+///                     on_select: move |value| {
+///                         tracing::info!("Selected item: {}", value);
+///                     },
+///                     "Edit"
+///                 }
+///                 ContextMenuItem {
+///                     value: "undo".to_string(),
+///                     index: 1usize,
+///                     disabled: true,
+///                     on_select: move |value| {
+///                         tracing::info!("Selected item: {}", value);
+///                     },
+///                     "Undo"
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`ContextMenuContent`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates if the state of the context menu. Values are `open` or `closed`.
 #[component]
 pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
     let mut ctx: ContextMenuCtx = use_context();
@@ -214,27 +367,81 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
     }
 }
 
+/// The props for the [`ContextMenuItem`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuItemProps {
     /// Whether the item is disabled
     #[props(default = ReadOnlySignal::new(Signal::new(false)))]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// The value of the menu item
-    value: ReadOnlySignal<String>,
+    pub value: ReadOnlySignal<String>,
 
     /// The index of the item in the menu
-    index: ReadOnlySignal<usize>,
+    pub index: ReadOnlySignal<usize>,
 
     /// Callback when the item is selected
     #[props(default)]
-    on_select: Callback<String>,
+    pub on_select: Callback<String>,
 
+    /// Additional attributes for the context menu item element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the context menu item
     children: Element,
 }
 
+/// # ContextMenuItem
+///
+/// The [`ContextMenuItem`] component defines an individual item in the context menu. You must define an index that
+/// controls the order items are focused when navigating the menu with the keyboard.
+///
+/// When an item is selected with either the pointer or the keyboard, the menu is closed and the `on_select` callback is called with the item's value.
+///
+/// This must be used inside a [`ContextMenuContent`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::context_menu::{
+///     ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         ContextMenu {
+///             ContextMenuTrigger {
+///                 "right click here"
+///             }
+///             ContextMenuContent {
+///                 ContextMenuItem {
+///                     value: "edit".to_string(),
+///                     index: 0usize,
+///                     on_select: move |value| {
+///                         tracing::info!("Selected item: {}", value);
+///                     },
+///                     "Edit"
+///                 }
+///                 ContextMenuItem {
+///                     value: "undo".to_string(),
+///                     index: 1usize,
+///                     disabled: true,
+///                     on_select: move |value| {
+///                         tracing::info!("Selected item: {}", value);
+///                     },
+///                     "Undo"
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`ContextMenuItem`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the item is disabled. Possible values are `true` or `false`.
 #[component]
 pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
     let mut ctx: ContextMenuCtx = use_context();

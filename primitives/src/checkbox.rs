@@ -1,18 +1,22 @@
+//! Defines the [`Checkbox`] component and its subcomponents, which manage checkbox inputs with controlled state.
+
 use crate::{use_controlled, use_unique_id};
 use dioxus_lib::{document::eval, prelude::*};
 use std::ops::Not;
 
-// TODO: Docs
-
+/// The state of a [`Checkbox`] component.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CheckboxState {
+    /// The checkbox is checked.
     Checked,
+    /// The checkbox is in an indeterminate state, meaning it is neither checked nor unchecked.
     Indeterminate,
+    /// The checkbox is unchecked.
     Unchecked,
 }
 
 impl CheckboxState {
-    pub fn to_aria_checked(&self) -> &str {
+    fn to_aria_checked(self) -> &'static str {
         match self {
             CheckboxState::Checked => "true",
             CheckboxState::Indeterminate => "mixed",
@@ -20,7 +24,7 @@ impl CheckboxState {
         }
     }
 
-    pub fn to_data_state(&self) -> &str {
+    fn to_data_state(self) -> &'static str {
         match self {
             CheckboxState::Checked => "checked",
             CheckboxState::Indeterminate => "indeterminate",
@@ -52,34 +56,72 @@ struct CheckboxCtx {
     disabled: ReadOnlySignal<bool>,
 }
 
+/// The props for the [`Checkbox`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CheckboxProps {
-    checked: ReadOnlySignal<Option<CheckboxState>>,
+    /// The controlled state of the checkbox.
+    pub checked: ReadOnlySignal<Option<CheckboxState>>,
 
+    /// The default state of the checkbox when it is not controlled.
     #[props(default = CheckboxState::Unchecked)]
-    default_checked: CheckboxState,
+    pub default_checked: CheckboxState,
 
+    /// Whether the checkbox is required in a form.
     #[props(default)]
-    required: ReadOnlySignal<bool>,
+    pub required: ReadOnlySignal<bool>,
 
+    /// Whether the checkbox is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
+    /// The name of the checkbox, used in forms.
     #[props(default)]
-    name: ReadOnlySignal<String>,
+    pub name: ReadOnlySignal<String>,
 
+    /// The value of the checkbox, which can be used in forms.
     #[props(default = ReadOnlySignal::new(Signal::new(String::from("on"))))]
-    value: ReadOnlySignal<String>,
+    pub value: ReadOnlySignal<String>,
 
+    /// Callback that is called when the checked state changes.
     #[props(default)]
-    on_checked_change: Callback<CheckboxState>,
+    pub on_checked_change: Callback<CheckboxState>,
 
+    /// Additional attributes to apply to the checkbox element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children to render inside the checkbox.
     children: Element,
 }
 
+/// # Checkbox
+///
+/// The `Checkbox` component is a controlled checkbox input that allows users to toggle a state. It can be used in forms or standalone.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::checkbox::{Checkbox, CheckboxIndicator};
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Checkbox {
+///             name: "tos-check",
+///             aria_label: "Demo Checkbox",
+///             CheckboxIndicator {
+///                 "✅"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Checkbox`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: The state of the checkbox. Possible values are `checked`, `indeterminate`, or `unchecked`.
+/// - `data-disabled`: Indicates if the checkbox is disabled. values are `true` or `false`.
 #[component]
 pub fn Checkbox(props: CheckboxProps) -> Element {
     let (checked, set_checked) = use_controlled(
@@ -88,7 +130,7 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
         props.on_checked_change,
     );
 
-    let _ctx = use_context_provider(|| CheckboxCtx {
+    use_context_provider(|| CheckboxCtx {
         checked: checked.into(),
         disabled: props.disabled,
     });
@@ -131,6 +173,37 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
     }
 }
 
+/// # CheckboxIndicator
+///
+/// The indicator for the [`Checkbox`] component, which visually represents the checkbox state. The
+/// children will only be rendered when the checkbox is checked.
+///
+/// This must be used inside a [`Checkbox`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::checkbox::{Checkbox, CheckboxIndicator};
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Checkbox {
+///             name: "tos-check",
+///             aria_label: "Demo Checkbox",
+///             CheckboxIndicator {
+///                 "✅"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`CheckboxIndicator`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: The state of the checkbox. Possible values are `checked`, `indeterminate`, or `unchecked`.
+/// - `data-disabled`: Indicates if the checkbox is disabled. values are `true` or `false`.
 #[component]
 pub fn CheckboxIndicator(
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,

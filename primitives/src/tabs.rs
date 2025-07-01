@@ -1,3 +1,5 @@
+//! Defines the [`Tabs`] component and its sub-components.
+
 use crate::{
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
     use_controlled, use_id_or, use_unique_id,
@@ -16,40 +18,94 @@ struct TabsContext {
 
     // Orientation
     horizontal: ReadOnlySignal<bool>,
-    roving_focus: ReadOnlySignal<bool>,
+    roving_loop: ReadOnlySignal<bool>,
 
     // ARIA attributes
     tab_content_ids: Signal<Vec<String>>,
 }
 
+/// The props for the [`Tabs`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct TabsProps {
-    value: ReadOnlySignal<Option<String>>,
+    /// The controlled value of the active tab.
+    pub value: ReadOnlySignal<Option<String>>,
 
+    /// The default active tab value when uncontrolled.
     #[props(default)]
-    default_value: String,
+    pub default_value: String,
 
+    /// Callback fired when the active tab changes.
     #[props(default)]
-    on_value_change: Callback<String>,
+    pub on_value_change: Callback<String>,
 
+    /// Whether the tabs are disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
+    /// Whether the tabs are horizontal.
     #[props(default)]
-    horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadOnlySignal<bool>,
 
+    /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_focus: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
-
+    /// Additional attributes to apply to the tabs element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the tabs component.
     children: Element,
 }
 
+/// # Tabs
+///
+/// The `Tabs` component creates a tabbed interface that allows users to switch between different panels
+/// of content. The [`TabTrigger`] component is used to switch between the different [`TabContent`]s.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs, TabList};
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Tabs {
+///             default_value: "tab1".to_string(),
+///             horizontal: true,
+///             TabList {
+///                 TabTrigger {
+///                     value: "tab1".to_string(),
+///                     index: 0usize,
+///                     "Tab 1"
+///                 }
+///                 TabTrigger {
+///                     value: "tab2".to_string(),
+///                     index: 1usize,
+///                     "Tab 2"
+///                 }
+///             }
+///             TabContent {
+///                 index: 0usize,
+///                 value: "tab1".to_string(),
+///                 "Tab 1 Content"
+///             }
+///             TabContent {
+///                 index: 1usize,
+///                 value: "tab2".to_string(),
+///                 "Tab 2 Content"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Tabs`] component defines the following data attributes you can use to control styling:
+/// - `data-orientation`: Indicates the orientation of the tabs. Values are `horizontal` or `vertical`.
+/// - `data-disabled`: Indicates if the tabs are disabled. Values are `true` or `false`.
 #[component]
 pub fn Tabs(props: TabsProps) -> Element {
     let (value, set_value) =
@@ -64,7 +120,7 @@ pub fn Tabs(props: TabsProps) -> Element {
         focus,
 
         horizontal: props.horizontal,
-        roving_focus: props.roving_focus,
+        roving_loop: props.roving_loop,
         tab_content_ids: Signal::new(Vec::new()),
     });
 
@@ -81,14 +137,60 @@ pub fn Tabs(props: TabsProps) -> Element {
     }
 }
 
+/// The props for the [`TabList`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct TabListProps {
+    /// Additional attributes to apply to the tab list element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the tab list component.
     children: Element,
 }
 
+/// # TabList
+///
+/// The `TabList` component contains a list of [`TabTrigger`] components that allow users to switch between different tabs.
+///
+/// This must be used inside a [`Tabs`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs, TabList};
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Tabs {
+///             default_value: "tab1".to_string(),
+///             horizontal: true,
+///             TabList {
+///                 TabTrigger {
+///                     value: "tab1".to_string(),
+///                     index: 0usize,
+///                     "Tab 1"
+///                 }
+///                 TabTrigger {
+///                     value: "tab2".to_string(),
+///                     index: 1usize,
+///                     "Tab 2"
+///                 }
+///             }
+///             TabContent {
+///                 index: 0usize,
+///                 value: "tab1".to_string(),
+///                 "Tab 1 Content"
+///             }
+///             TabContent {
+///                 index: 1usize,
+///                 value: "tab2".to_string(),
+///                 "Tab 2 Content"
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn TabList(props: TabListProps) -> Element {
     rsx! {
@@ -101,24 +203,81 @@ pub fn TabList(props: TabListProps) -> Element {
     }
 }
 
+/// The props for the [`TabTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct TabTriggerProps {
-    value: String,
-    index: ReadOnlySignal<usize>,
+    /// The value of the tab trigger, which is used to identify the corresponding tab content. This
+    /// must match the `value` prop of the corresponding [`TabContent`].
+    pub value: String,
+    /// The index of the tab trigger. This is used to define the focus order for keyboard navigation.
+    pub index: ReadOnlySignal<usize>,
 
+    /// Whether the tab trigger is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
-    id: Option<String>,
-    class: Option<String>,
+    /// The ID of the tab trigger element.
+    pub id: Option<String>,
+    /// The class of the tab trigger element.
+    pub class: Option<String>,
 
+    /// Additional attributes to apply to the tab trigger element.
     #[props(extends = GlobalAttributes)]
     #[props(extends = button)]
     attributes: Vec<Attribute>,
 
+    /// The children of the tab trigger component.
     children: Element,
 }
 
+/// # TabTrigger
+///
+/// The `TabTrigger` component is a button that switches to the [`TabContent`] with the same `value` when clicked.
+///
+/// This must be used inside a [`TabList`] component.
+///
+/// ## Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs, TabList};
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Tabs {
+///             default_value: "tab1".to_string(),
+///             horizontal: true,
+///             TabList {
+///                 TabTrigger {
+///                     value: "tab1".to_string(),
+///                     index: 0usize,
+///                     "Tab 1"
+///                 }
+///                 TabTrigger {
+///                     value: "tab2".to_string(),
+///                     index: 1usize,
+///                     "Tab 2"
+///                 }
+///             }
+///             TabContent {
+///                 index: 0usize,
+///                 value: "tab1".to_string(),
+///                 "Tab 1 Content"
+///             }
+///             TabContent {
+///                 index: 1usize,
+///                 value: "tab2".to_string(),
+///                 "Tab 2 Content"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`TabTrigger`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the state of the tab trigger. Values are `active` or `inactive`.
+/// - `data-disabled`: Indicates if the tab trigger is disabled. Values are `true` or `false`.
 #[component]
 pub fn TabTrigger(props: TabTriggerProps) -> Element {
     let mut ctx: TabsContext = use_context();
@@ -127,7 +286,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
     let selected = use_memo(move || (ctx.value)() == value);
 
     let tab_index = use_memo(move || {
-        if !(ctx.roving_focus)() {
+        if !(ctx.roving_loop)() {
             return "0";
         }
 
@@ -190,22 +349,76 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
     }
 }
 
+/// The props for the [`TabContent`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct TabContentProps {
-    value: String,
+    /// The value of the tab content, which must match the `value` prop of the corresponding [`TabTrigger`].
+    pub value: String,
 
-    id: ReadOnlySignal<Option<String>>,
-    class: Option<String>,
+    /// The ID of the tab content element.
+    pub id: ReadOnlySignal<Option<String>>,
+    /// The class of the tab content element.
+    pub class: Option<String>,
 
-    index: ReadOnlySignal<usize>,
+    /// The index of the tab content. This is used to define the focus order for keyboard navigation.
+    pub index: ReadOnlySignal<usize>,
 
+    /// Additional attributes to apply to the tab content element.
     #[props(extends = GlobalAttributes)]
     #[props(extends = div)]
     attributes: Vec<Attribute>,
 
+    /// The children of the tab content element.
     children: Element,
 }
 
+/// # TabContent
+///
+/// The content of a tab panel. This component will only be rendered when its corresponding [`TabTrigger`] is active.
+///
+/// This should be used inside a [`Tabs`] component.
+///
+/// ## Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs, TabList};
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Tabs {
+///             default_value: "tab1".to_string(),
+///             horizontal: true,
+///             TabList {
+///                 TabTrigger {
+///                     value: "tab1".to_string(),
+///                     index: 0usize,
+///                     "Tab 1"
+///                 }
+///                 TabTrigger {
+///                     value: "tab2".to_string(),
+///                     index: 1usize,
+///                     "Tab 2"
+///                 }
+///             }
+///             TabContent {
+///                 index: 0usize,
+///                 value: "tab1".to_string(),
+///                 "Tab 1 Content"
+///             }
+///             TabContent {
+///                 index: 1usize,
+///                 value: "tab2".to_string(),
+///                 "Tab 2 Content"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`TabTrigger`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the state of the tab trigger. Values are `active` or `inactive`.
 #[component]
 pub fn TabContent(props: TabContentProps) -> Element {
     let mut ctx: TabsContext = use_context();

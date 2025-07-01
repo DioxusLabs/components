@@ -1,3 +1,6 @@
+#![doc = include_str!("../README.md")]
+#![warn(missing_docs)]
+
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use dioxus::prelude::{asset, manganis, Asset};
@@ -139,38 +142,47 @@ fn use_animated_open(
     move || show_in_dom() || animating()
 }
 
+/// The side where the content will be displayed relative to the trigger
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ContentSide {
+    /// The content will appear above the trigger
     Top,
+    /// The content will appear to the right of the trigger
     Right,
+    /// The content will appear below the trigger
     Bottom,
+    /// The content will appear to the left of the trigger
     Left,
 }
 
 impl ContentSide {
-    fn as_str(self) -> &'static str {
+    fn as_str(&self) -> &'static str {
         match self {
-            ContentSide::Top => "top",
-            ContentSide::Right => "right",
-            ContentSide::Bottom => "bottom",
-            ContentSide::Left => "left",
+            Self::Top => "top",
+            Self::Right => "right",
+            Self::Bottom => "bottom",
+            Self::Left => "left",
         }
     }
 }
 
+/// The alignment of the content relative to the trigger
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ContentAlign {
+    /// The content will be aligned to the start of the trigger
     Start,
+    /// The content will be centered relative to the trigger
     Center,
+    /// The content will be aligned to the end of the trigger
     End,
 }
 
 impl ContentAlign {
-    fn as_str(self) -> &'static str {
+    fn as_str(&self) -> &'static str {
         match self {
-            ContentAlign::Start => "start",
-            ContentAlign::Center => "center",
-            ContentAlign::End => "end",
+            Self::Start => "start",
+            Self::Center => "center",
+            Self::End => "end",
         }
     }
 }

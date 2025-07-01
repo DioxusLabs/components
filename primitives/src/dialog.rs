@@ -1,3 +1,5 @@
+//! Defines the [`DialogRoot`] component and its sub-components.
+
 use dioxus::document;
 use dioxus_lib::prelude::*;
 
@@ -17,27 +19,81 @@ struct DialogCtx {
     dialog_describedby: Signal<String>,
 }
 
+/// The props for the [`DialogRoot`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogRootProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The ID of the dialog root element.
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// Whether the dialog is modal. If true, it will trap focus within the dialog when open.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    is_modal: ReadOnlySignal<bool>,
+    pub is_modal: ReadOnlySignal<bool>,
 
-    open: ReadOnlySignal<Option<bool>>,
+    /// The controlled `open` state of the dialog.
+    pub open: ReadOnlySignal<Option<bool>>,
 
+    /// The default `open` state of the dialog if it is not controlled.
     #[props(default)]
-    default_open: bool,
+    pub default_open: bool,
 
+    /// A callback that is called when the open state changes.
     #[props(default)]
-    on_open_change: Callback<bool>,
+    pub on_open_change: Callback<bool>,
 
+    /// Additional attributes to apply to the dialog root element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the dialog root component.
     children: Element,
 }
 
+/// # DialogRoot
+///
+/// The entry point for the dialog. It manages the open state of the dialog and provides context to its children. You
+/// can use it to create a backdrop for the dialog if needed. The contents will only be rendered when the dialog is open.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::dialog::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut open = use_signal(|| false);
+///
+///     rsx! {
+///         button {
+///             onclick: move |_| open.set(true),
+///             "Show Dialog"
+///         }
+///         DialogRoot {
+///             open: open(),
+///             on_open_change: move |v| open.set(v),
+///             DialogContent {
+///                 button {
+///                     aria_label: "Close",
+///                     tabindex: if open() { "0" } else { "-1" },
+///                     onclick: move |_| open.set(false),
+///                     "×"
+///                 }
+///                 DialogTitle {
+///                     "Item information"
+///                 }
+///                 DialogDescription {
+///                     "Here is some additional information about the item."
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`DialogRoot`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates if the dialog is open or closed. It can be either "open" or "closed".
 #[component]
 pub fn DialogRoot(props: DialogRootProps) -> Element {
     let dialog_labelledby = use_unique_id();
@@ -94,18 +150,71 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
     }
 }
 
+/// The props for the [`DialogRoot`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The ID of the dialog content element.
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// The class to apply to the dialog content element.
     #[props(default)]
-    class: Option<String>,
+    pub class: Option<String>,
 
+    /// Additional attributes to apply to the dialog content element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the dialog content.
     children: Element,
 }
 
+/// # DialogContent
+///
+/// The content of the dialog. Any interactive content in the dialog should be placed
+/// inside this component. It will trap focus within the dialog while it is open
+///
+/// This must be used inside an [`DialogRoot`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::dialog::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut open = use_signal(|| false);
+///
+///     rsx! {
+///         button {
+///             onclick: move |_| open.set(true),
+///             "Show Dialog"
+///         }
+///         DialogRoot {
+///             open: open(),
+///             on_open_change: move |v| open.set(v),
+///             DialogContent {
+///                 button {
+///                     aria_label: "Close",
+///                     tabindex: if open() { "0" } else { "-1" },
+///                     onclick: move |_| open.set(false),
+///                     "×"
+///                 }
+///                 DialogTitle {
+///                     "Item information"
+///                 }
+///                 DialogDescription {
+///                     "Here is some additional information about the item."
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`DialogRoot`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates if the dialog is open or closed. It can be either "open" or "closed".
 #[component]
 pub fn DialogContent(props: DialogProps) -> Element {
     let ctx: DialogCtx = use_context();
@@ -142,11 +251,11 @@ pub fn DialogContent(props: DialogProps) -> Element {
         }
         div {
             id,
-            role: "alertdialog",
+            role: "dialog",
             aria_modal: "true",
             aria_labelledby: ctx.dialog_labelledby,
             aria_describedby: ctx.dialog_describedby,
-            class: props.class.clone().unwrap_or_else(|| "alert-dialog".to_string()),
+            class: props.class.clone().unwrap_or_else(|| "dialog".to_string()),
             onclick: move |e| {
                 // Prevent the click event from propagating to the overlay.
                 e.stop_propagation();
@@ -157,14 +266,60 @@ pub fn DialogContent(props: DialogProps) -> Element {
     }
 }
 
+/// The props for the [`DialogTitle`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogTitleProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The ID of the dialog title element.
+    pub id: ReadOnlySignal<Option<String>>,
+    /// Additional attributes for the dialog title element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the dialog title.
     children: Element,
 }
 
+/// # DialogTitle
+///
+/// The title of the dialog. This will be used to label the dialog for accessibility purposes.
+///
+/// This must be used inside an [`DialogRoot`] component and should be placed inside an [`DialogContent`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::dialog::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut open = use_signal(|| false);
+///
+///     rsx! {
+///         button {
+///             onclick: move |_| open.set(true),
+///             "Show Dialog"
+///         }
+///         DialogRoot {
+///             open: open(),
+///             on_open_change: move |v| open.set(v),
+///             DialogContent {
+///                 button {
+///                     aria_label: "Close",
+///                     tabindex: if open() { "0" } else { "-1" },
+///                     onclick: move |_| open.set(false),
+///                     "×"
+///                 }
+///                 DialogTitle {
+///                     "Item information"
+///                 }
+///                 DialogDescription {
+///                     "Here is some additional information about the item."
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn DialogTitle(props: DialogTitleProps) -> Element {
     let ctx: DialogCtx = use_context();
@@ -179,14 +334,60 @@ pub fn DialogTitle(props: DialogTitleProps) -> Element {
     }
 }
 
+/// The props for the [`DialogDescription`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogDescriptionProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// The ID of the dialog description element.
+    pub id: ReadOnlySignal<Option<String>>,
+    /// Additional attributes for the dialog description element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the dialog description.
     children: Element,
 }
 
+/// # DialogDescription
+///
+/// The description of the dialog. This will be used to describe the dialog for accessibility purposes.
+///
+/// This must be used inside an [`DialogRoot`] component and should be placed inside an [`DialogContent`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::dialog::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut open = use_signal(|| false);
+///
+///     rsx! {
+///         button {
+///             onclick: move |_| open.set(true),
+///             "Show Dialog"
+///         }
+///         DialogRoot {
+///             open: open(),
+///             on_open_change: move |v| open.set(v),
+///             DialogContent {
+///                 button {
+///                     aria_label: "Close",
+///                     tabindex: if open() { "0" } else { "-1" },
+///                     onclick: move |_| open.set(false),
+///                     "×"
+///                 }
+///                 DialogTitle {
+///                     "Item information"
+///                 }
+///                 DialogDescription {
+///                     "Here is some additional information about the item."
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn DialogDescription(props: DialogDescriptionProps) -> Element {
     let ctx: DialogCtx = use_context();

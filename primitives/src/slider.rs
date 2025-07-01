@@ -1,3 +1,5 @@
+//! Defines the [`Slider`] component and its sub-components, which provide a range input control for selecting a value within a specified range.
+
 use crate::use_controlled;
 use dioxus::html::geometry::euclid::Vector2D;
 use dioxus::html::geometry::{ClientPoint, ClientSpace};
@@ -7,17 +9,17 @@ use dioxus_lib::html::geometry::Pixels;
 use dioxus_lib::prelude::*;
 use std::rc::Rc;
 
+/// The value of the slider. Currently this can only be a single value, but support for ranges is planned.
 #[derive(Debug, Clone, PartialEq)]
 pub enum SliderValue {
+    /// A single value for the slider
     Single(f64),
-    Range(f64, f64),
 }
 
 impl std::fmt::Display for SliderValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SliderValue::Single(v) => write!(f, "{v}"),
-            SliderValue::Range(start, end) => write!(f, "{start}, {end}"),
         }
     }
 }
@@ -91,52 +93,86 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
     Vec::new()
 });
 
+/// The props for the [`Slider`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderProps {
     /// The controlled value of the slider
-    value: ReadOnlySignal<Option<SliderValue>>,
+    pub value: ReadOnlySignal<Option<SliderValue>>,
 
     /// The default value when uncontrolled
     #[props(default = SliderValue::Single(0.0))]
-    default_value: SliderValue,
+    pub default_value: SliderValue,
 
     /// The minimum value
     #[props(default = 0.0)]
-    min: f64,
+    pub min: f64,
 
     /// The maximum value
     #[props(default = 100.0)]
-    max: f64,
+    pub max: f64,
 
     /// The step value
     #[props(default = 1.0)]
-    step: f64,
+    pub step: f64,
 
     /// Whether the slider is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Orientation of the slider
     #[props(default = true)]
-    horizontal: bool,
+    pub horizontal: bool,
 
     /// Inverts the order of the values
     #[props(default)]
-    inverted: bool,
+    pub inverted: bool,
 
     /// Callback when value changes
     #[props(default)]
-    on_value_change: Callback<SliderValue>,
+    pub on_value_change: Callback<SliderValue>,
 
     /// The label for the slider (for accessibility)
-    label: ReadOnlySignal<Option<String>>,
+    pub label: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the slider
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the slider
     children: Element,
 }
 
+/// # Slider
+///
+/// The `Slider` component is a range input control that allows users to select a value along a
+/// [`SliderTrack`] by dragging a [`SliderThumb`] with the pointer or using the arrow keys.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::slider::{Slider, SliderRange, SliderThumb, SliderTrack};
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Slider {
+///             label: "Demo Slider",
+///             horizontal: true,
+///             SliderTrack {
+///                 SliderRange {}
+///                 SliderThumb {}
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Slider`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the slider is disabled. Values are `true` or `false`.
+/// - `data-orientation`: Indicates the orientation of the slider. Values are `horizontal` or `vertical`.
 #[component]
 pub fn Slider(props: SliderProps) -> Element {
     let (value, set_value) = use_controlled(
@@ -205,13 +241,7 @@ pub fn Slider(props: SliderProps) -> Element {
 
         let delta = delta_pos / size * ctx.range_size();
 
-        let current_value = match granular_value.cloned() {
-            SliderValue::Single(v) => v,
-            SliderValue::Range(start, _) => {
-                // TODO: Handle range sliders
-                start
-            }
-        };
+        let SliderValue::Single(current_value) = granular_value.cloned();
         let new = current_value + delta;
         granular_value.set(SliderValue::Single(new));
         let clamped = new.clamp(ctx.min, ctx.max);
@@ -303,13 +333,50 @@ pub fn Slider(props: SliderProps) -> Element {
     }
 }
 
+/// The props for the [`SliderTrack`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderTrackProps {
+    /// Additional attributes to apply to the track element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the track which should include a [`SliderThumb`]
     children: Element,
 }
 
+/// # SliderTrack
+///
+/// The track component for the [`Slider`] that represents the full range of the slider. This serves as the
+/// container for the [`SliderRange`] and provides the background track. Clicking along the track will update
+/// the value of the slider and move the [`SliderThumb`] to the new position.
+///
+/// This must be used inside a [`Slider`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::slider::{Slider, SliderRange, SliderThumb, SliderTrack};
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Slider {
+///             label: "Demo Slider",
+///             horizontal: true,
+///             SliderTrack {
+///                 SliderRange {}
+///                 SliderThumb {}
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`SliderTrack`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the slider is disabled. Values are `true` or `false`.
+/// - `data-orientation`: Indicates the orientation of the slider. Values are `horizontal` or `vertical`.
 #[component]
 pub fn SliderTrack(props: SliderTrackProps) -> Element {
     let ctx = use_context::<SliderContext>();
@@ -329,13 +396,50 @@ pub fn SliderTrack(props: SliderTrackProps) -> Element {
     }
 }
 
+/// The props for the [`SliderRange`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderRangeProps {
+    /// Additional attributes to apply to the range element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the range element
     children: Element,
 }
 
+/// # SliderRange
+///
+/// The range component for the [`Slider`] that visually represents the selected portion of the slider track.
+///
+/// This must be used inside a [`SliderTrack`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::slider::{Slider, SliderRange, SliderThumb, SliderTrack};
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Slider {
+///             label: "Demo Slider",
+///             horizontal: true,
+///             SliderTrack {
+///                 SliderRange {}
+///                 SliderThumb {}
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`SliderRange`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the slider is disabled. Values are `true` or `false`.
+/// - `data-orientation`: Indicates the orientation of the slider. Values are `horizontal` or `vertical`.
+///
+/// It automatically has the percentage based size and position styles applied based on the current slider value.
 #[component]
 pub fn SliderRange(props: SliderRangeProps) -> Element {
     let ctx = use_context::<SliderContext>();
@@ -348,7 +452,6 @@ pub fn SliderRange(props: SliderRangeProps) -> Element {
     let style = use_memo(move || {
         let (start, end) = match (ctx.value)() {
             SliderValue::Single(v) => (ctx.min, v),
-            SliderValue::Range(start, end) => (start, end),
         };
 
         let start_percent = ((start - ctx.min) / (ctx.max - ctx.min) * 100.0).clamp(0.0, 100.0);
@@ -372,17 +475,57 @@ pub fn SliderRange(props: SliderRangeProps) -> Element {
     }
 }
 
+/// The props for the [`SliderThumb`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderThumbProps {
     /// Which thumb this is in a range slider
     #[props(default)]
-    index: Option<usize>,
+    pub index: Option<usize>,
 
+    /// Additional attributes to apply to the thumb element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the thumb element
     children: Element,
 }
 
+/// # SliderThumb
+///
+/// The thumb component for the [`Slider`] that users can drag to change the slider value. It supports
+/// both mouse/touch interaction and keyboard navigation with arrow keys. Arrow keys will move the thumb
+/// by the step value by default, or by 10x the step value if the shift key is held down.
+///
+/// This must be used inside a [`SliderTrack`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::slider::{Slider, SliderRange, SliderThumb, SliderTrack};
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Slider {
+///             label: "Demo Slider",
+///             horizontal: true,
+///             SliderTrack {
+///                 SliderRange {}
+///                 SliderThumb {}
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`SliderThumb`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the slider is disabled. Values are `true` or `false`.
+/// - `data-orientation`: Indicates the orientation of the slider. Values are `horizontal` or `vertical`.
+/// - `data-dragging`: Indicates if the thumb is currently being dragged. Values are `true` or `false`.
+///
+/// It automatically has the percentage based position styles applied based on the current slider value.
 #[component]
 pub fn SliderThumb(props: SliderThumbProps) -> Element {
     let ctx = use_context::<SliderContext>();
@@ -394,9 +537,6 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
 
     let value = use_memo(move || match ((ctx.value)(), props.index) {
         (SliderValue::Single(v), _) => v,
-        (SliderValue::Range(start, _), Some(0)) => start,
-        (SliderValue::Range(_, end), Some(1)) => end,
-        _ => ctx.min,
     });
 
     let percent = ((value() - ctx.min) / (ctx.max - ctx.min) * 100.0).clamp(0.0, 100.0);

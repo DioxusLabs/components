@@ -1,3 +1,5 @@
+//! Defines the [`ToggleGroup`] component and its sub-components, which manage a group of toggle buttons with single or multiple selection.
+
 use crate::{
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
     toggle::Toggle,
@@ -21,7 +23,7 @@ struct ToggleGroupCtx {
     focus: FocusState,
 
     horizontal: ReadOnlySignal<bool>,
-    roving_focus: ReadOnlySignal<bool>,
+    roving_loop: ReadOnlySignal<bool>,
 }
 
 impl ToggleGroupCtx {
@@ -56,7 +58,7 @@ impl ToggleGroupCtx {
     }
 
     fn focus_next(&mut self) {
-        if !(self.roving_focus)() {
+        if !(self.roving_loop)() {
             return;
         }
 
@@ -64,49 +66,82 @@ impl ToggleGroupCtx {
     }
 
     fn focus_prev(&mut self) {
-        if !(self.roving_focus)() {
+        if !(self.roving_loop)() {
             return;
         }
 
         self.focus.focus_prev();
     }
 
-    fn is_roving_focus(&self) -> bool {
-        (self.roving_focus)()
+    fn is_roving_loop(&self) -> bool {
+        (self.roving_loop)()
     }
 }
 
+/// The props for the [`ToggleGroup`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleGroupProps {
+    /// The default pressed items if the component is not controlled.
     #[props(default)]
-    default_pressed: HashSet<usize>,
+    pub default_pressed: HashSet<usize>,
 
-    pressed: ReadOnlySignal<Option<HashSet<usize>>>,
+    /// The currently pressed items. This can be used to drive the component when controlled.
+    pub pressed: ReadOnlySignal<Option<HashSet<usize>>>,
 
+    /// Callback to handle changes in pressed state
     #[props(default)]
-    on_pressed_change: Callback<HashSet<usize>>,
+    pub on_pressed_change: Callback<HashSet<usize>>,
 
+    /// Whether the toggle group is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
+    /// If multiple items can be pressed at the same time. If this is false, only one item can be pressed at a time (radio-style).
     #[props(default)]
-    allow_multiple_pressed: ReadOnlySignal<bool>,
+    pub allow_multiple_pressed: ReadOnlySignal<bool>,
 
+    /// Whether the toggle group is horizontal or vertical.
     #[props(default)]
-    horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadOnlySignal<bool>,
 
+    /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_focus: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
-
+    /// Additional attributes to apply to the toggle group element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the toggle group, which should include multiple [`ToggleItem`] components.
     children: Element,
 }
 
+/// # ToggleGroup
+///
+/// The `ToggleGroup` component manages a group of toggle buttons. It supports both single (radio-style) and multiple selection modes with keyboard navigation.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::toggle_group::{ToggleGroup, ToggleItem};
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         ToggleGroup { horizontal: true, allow_multiple_pressed: true,
+///             ToggleItem { index: 0usize, em { "B" } }
+///             ToggleItem { index: 1usize, i { "I" } }
+///             ToggleItem { index: 2usize, u { "U" } }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`ToggleGroup`] component defines the following data attributes you can use to control styling:
+/// - `data-orientation`: Indicates the orientation of the toggle group. Values are `horizontal` or `vertical`.
+/// - `data-allow-multiple-pressed`: Indicates if multiple items can be pressed at the same time. Values are `true` or `false`.
 #[component]
 pub fn ToggleGroup(props: ToggleGroupProps) -> Element {
     let (pressed, set_pressed) = use_controlled(
@@ -124,7 +159,7 @@ pub fn ToggleGroup(props: ToggleGroupProps) -> Element {
 
         focus,
         horizontal: props.horizontal,
-        roving_focus: props.roving_focus,
+        roving_loop: props.roving_loop,
     });
 
     rsx! {
@@ -140,19 +175,53 @@ pub fn ToggleGroup(props: ToggleGroupProps) -> Element {
     }
 }
 
+/// The props for the [`ToggleItem`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleItemProps {
+    /// The index of the item within the [`ToggleGroup`]. This is used to order the items for keyboard navigation.
     index: ReadOnlySignal<usize>,
 
+    /// Whether the toggle item is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
+    /// Additional attributes to apply to the toggle item element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the toggle item
     children: Element,
 }
 
+/// # ToggleItem
+///
+/// An individual toggle button within a [`ToggleGroup`] component.
+///
+/// This must be used inside a [`ToggleGroup`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::toggle_group::{ToggleGroup, ToggleItem};
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         ToggleGroup { horizontal: true, allow_multiple_pressed: true,
+///             ToggleItem { index: 0usize, em { "B" } }
+///             ToggleItem { index: 1usize, i { "I" } }
+///             ToggleItem { index: 2usize, u { "U" } }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`ToggleItem`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the state of the toggle. Values are `on` or `off`.
+/// - `data-disabled`: Indicates if the toggle is disabled. Values are `true` or `false`.
+/// - `data-orientation`: Indicates the orientation of the toggle group. Values are `horizontal` or `vertical`.
 #[component]
 pub fn ToggleItem(props: ToggleItemProps) -> Element {
     let mut ctx: ToggleGroupCtx = use_context();
@@ -166,7 +235,7 @@ pub fn ToggleItem(props: ToggleItemProps) -> Element {
 
     // Tab index for roving index
     let tab_index = use_memo(move || {
-        if !ctx.is_roving_focus() {
+        if !ctx.is_roving_loop() {
             return "0";
         }
 

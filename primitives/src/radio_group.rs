@@ -1,3 +1,5 @@
+//! Defines the [`RadioGroup`] component and its sub-components.
+
 use std::collections::HashMap;
 
 use crate::{
@@ -19,7 +21,7 @@ struct RadioGroupCtx {
     focus: FocusState,
 
     horizontal: ReadOnlySignal<bool>,
-    roving_focus: ReadOnlySignal<bool>,
+    roving_loop: ReadOnlySignal<bool>,
 }
 
 impl RadioGroupCtx {
@@ -67,40 +69,88 @@ impl RadioGroupCtx {
     }
 }
 
+/// The props for the [`RadioGroup`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct RadioGroupProps {
-    value: ReadOnlySignal<Option<String>>,
+    /// The controlled value of the selected radio item.
+    pub value: ReadOnlySignal<Option<String>>,
 
+    /// The default selected value when uncontrolled.
     #[props(default)]
-    default_value: String,
+    pub default_value: String,
 
+    /// Callback fired when the selected value changes.
     #[props(default)]
-    on_value_change: Callback<String>,
+    pub on_value_change: Callback<String>,
 
+    /// Whether the radio group is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
+    /// Whether the radio group is required in a form.
     #[props(default)]
-    required: ReadOnlySignal<bool>,
+    pub required: ReadOnlySignal<bool>,
 
+    /// The name attribute for form submission.
     #[props(default)]
-    name: ReadOnlySignal<String>,
+    pub name: ReadOnlySignal<String>,
 
+    /// Whether the radio group is horizontal.
     #[props(default)]
-    horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadOnlySignal<bool>,
 
+    /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_focus: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
-
+    /// Additional attributes to apply to the radio group element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the radio group component.
     children: Element,
 }
 
+/// # RadioGroup
+///
+/// The `RadioGroup` component is a container for a group of [`RadioItem`] components that allows users to select a single option from a list of choices.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::radio_group::{RadioGroup, RadioItem};
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         RadioGroup {
+///             RadioItem {
+///                 value: "option1".to_string(),
+///                 index: 0usize,
+///                 "Blue"
+///             }
+///             RadioItem {
+///                 value: "option2".to_string(),
+///                 index: 1usize,
+///                 "Red"
+///             }
+///             RadioItem {
+///                 value: "option3".to_string(),
+///                 index: 2usize,
+///                 disabled: true,
+///                 "Green"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`RadioGroup`] component defines the following data attributes you can use to control styling:
+/// - `data-orientation`: Indicates the orientation of the radio group. Values are `horizontal` or `vertical`.
+/// - `data-disabled`: Indicates if the radio group is disabled. Values are `true` or `false`.
 #[component]
 pub fn RadioGroup(props: RadioGroupProps) -> Element {
     let (value, set_value) =
@@ -115,7 +165,7 @@ pub fn RadioGroup(props: RadioGroupProps) -> Element {
         values: Signal::new(Default::default()),
         focus,
         horizontal: props.horizontal,
-        roving_focus: props.roving_focus,
+        roving_loop: props.roving_loop,
     });
 
     rsx! {
@@ -133,22 +183,70 @@ pub fn RadioGroup(props: RadioGroupProps) -> Element {
     }
 }
 
+/// The props for the [`RadioItem`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct RadioItemProps {
-    value: ReadOnlySignal<String>,
-    index: ReadOnlySignal<usize>,
+    /// The value of the radio item. This will be passed to [`RadioGroupProps::on_value_change`] when selected.
+    pub value: ReadOnlySignal<String>,
+    /// The index of the radio item within the [`RadioGroup`]. This is used to order the items for keyboard navigation.
+    pub index: ReadOnlySignal<usize>,
 
+    /// Whether the radio item is disabled.
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
-    id: Option<String>,
-    class: Option<String>,
+    /// Optional ID for the radio item element.
+    pub id: Option<String>,
+    /// Optional class for the radio item element.
+    pub class: Option<String>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
     children: Element,
 }
 
+/// # RadioItem
+///
+/// The `RadioItem` component represents a single radio button within a [`RadioGroup`]. Only one radio item can be selected at a time within a group.
+///
+/// This must be used inside a [`RadioGroup`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::radio_group::{RadioGroup, RadioItem};
+///
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         RadioGroup {
+///             RadioItem {
+///                 value: "option1".to_string(),
+///                 index: 0usize,
+///                 "Blue"
+///             }
+///             RadioItem {
+///                 value: "option2".to_string(),
+///                 index: 1usize,
+///                 "Red"
+///             }
+///             RadioItem {
+///                 value: "option3".to_string(),
+///                 index: 2usize,
+///                 disabled: true,
+///                 "Green"
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`RadioItem`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the state of the radio item. Values are `checked` or `unchecked`.
+/// - `data-disabled`: Indicates if the radio item is disabled. Values are `true` or `false`.
 #[component]
 pub fn RadioItem(props: RadioItemProps) -> Element {
     let mut ctx: RadioGroupCtx = use_context();
@@ -166,7 +264,7 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
 
     // Tab index for roving index
     let tab_index = use_memo(move || {
-        if !(ctx.roving_focus)() {
+        if !(ctx.roving_loop)() {
             return "0";
         }
 

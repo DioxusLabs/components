@@ -527,7 +527,7 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
         main {
             role: "main",
             div { id: "hero",
-                h1 { "Dioxus Primitives" }
+                h1 { "Dioxus Components" }
                 h2 {
                     b { "Accessible" }
                     ", "

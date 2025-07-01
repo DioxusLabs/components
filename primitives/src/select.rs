@@ -1,3 +1,5 @@
+//! Defines the [`Select`] component and its sub-components, which provide a searchable select input with keyboard navigation.
+
 use std::collections::HashMap;
 
 use crate::{
@@ -454,38 +456,40 @@ struct OptionState {
     id: String,
 }
 
+/// The props for the [`Select`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectProps {
     /// The controlled value of the select
     #[props(default)]
-    value: ReadOnlySignal<Option<Option<String>>>,
+    pub value: ReadOnlySignal<Option<Option<String>>>,
 
     /// The default value of the select
     #[props(default)]
-    default_value: Option<String>,
+    pub default_value: Option<String>,
 
     /// Callback when the value changes
     #[props(default)]
-    on_value_change: Callback<Option<String>>,
+    pub on_value_change: Callback<Option<String>>,
 
     /// Whether the select is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Whether the select is required
     #[props(default)]
-    required: ReadOnlySignal<bool>,
+    pub required: ReadOnlySignal<bool>,
 
     /// Name of the select for form submission
     #[props(default)]
-    name: ReadOnlySignal<String>,
+    pub name: ReadOnlySignal<String>,
 
     /// Optional placeholder text
     #[props(default = ReadOnlySignal::new(Signal::new(String::from("Select an option"))))]
-    placeholder: ReadOnlySignal<String>,
+    pub placeholder: ReadOnlySignal<String>,
 
+    /// Whether focus should loop around when reaching the end.
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    roving_loop: ReadOnlySignal<bool>,
+    pub roving_loop: ReadOnlySignal<bool>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -493,6 +497,56 @@ pub struct SelectProps {
     children: Element,
 }
 
+/// # Select
+///
+/// The `Select` component is a searchable dropdown that allows users to choose from a list of options with keyboard navigation and typeahead search functionality.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///             }
+///             SelectList {
+///                 aria_label: "Select Demo",
+///                 SelectGroup {
+///                     SelectGroupLabel {
+///                         "Fruits"
+///                     }
+///                     SelectOption {
+///                         index: 0usize,
+///                         value: "apple".to_string(),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption {
+///                         index: 1usize,
+///                         value: "banana".to_string(),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`Select`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the current state of the select. Values are `open` or `closed`.
 #[component]
 pub fn Select(props: SelectProps) -> Element {
     let (value, set_value) =
@@ -558,14 +612,68 @@ pub fn Select(props: SelectProps) -> Element {
     }
 }
 
+/// The props for the [`SelectTrigger`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectTriggerProps {
+    /// Additional attributes for the trigger button
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children to render inside the trigger
     children: Element,
 }
 
+/// # SelectTrigger
+///
+/// The trigger button for the [`Select`] component which controls if the [`SelectList`] is rendered.
+///
+/// This must be used inside a [`Select`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///             }
+///             SelectList {
+///                 aria_label: "Select Demo",
+///                 SelectGroup {
+///                     SelectGroupLabel {
+///                         "Fruits"
+///                     }
+///                     SelectOption {
+///                         index: 0usize,
+///                         value: "apple".to_string(),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption {
+///                         index: 1usize,
+///                         value: "banana".to_string(),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`SelectTrigger`] component defines a span with a `data-placeholder` attribute if a placeholder is set.
 #[component]
 pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
     let mut ctx: SelectContext = use_context();
@@ -618,18 +726,69 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
     }
 }
 
+/// The props for the [`SelectList`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectListProps {
     /// The ID of the list for ARIA attributes
     #[props(default)]
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the list
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children to render inside the list
     children: Element,
 }
 
+/// # SelectList
+///
+/// The dropdown list container for the [`Select`] component that contains the
+/// [`SelectOption`]s. The list will only be rendered when the select is open.
+///
+/// This must be used inside a [`Select`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///             }
+///             SelectList {
+///                 aria_label: "Select Demo",
+///                 SelectGroup {
+///                     SelectGroupLabel {
+///                         "Fruits"
+///                     }
+///                     SelectOption {
+///                         index: 0usize,
+///                         value: "apple".to_string(),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption {
+///                         index: 1usize,
+///                         value: "banana".to_string(),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn SelectList(props: SelectListProps) -> Element {
     let mut ctx: SelectContext = use_context();
@@ -741,29 +900,31 @@ struct SelectOptionContext {
     selected: Memo<bool>,
 }
 
+/// The props for the [`SelectOption`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectOptionProps {
-    /// The value of the option
-    value: ReadOnlySignal<String>,
+    /// The value of the option. This will be used both to pass to the [`SelectProps::on_value_change`] callback
+    /// and for typeahead search.
+    pub value: ReadOnlySignal<String>,
 
     /// Whether the option is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Optional ID for the option
     #[props(default)]
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
-    /// The index of the option in the list
-    index: ReadOnlySignal<usize>,
+    /// The index of the option in the list. This is used to define the focus order for keyboard navigation.
+    pub index: ReadOnlySignal<usize>,
 
     /// Optional label for the option (for accessibility)
     #[props(default)]
-    aria_label: Option<String>,
+    pub aria_label: Option<String>,
 
     /// Optional description role for the option (for accessibility)
     #[props(default)]
-    aria_roledescription: Option<String>,
+    pub aria_roledescription: Option<String>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -771,6 +932,54 @@ pub struct SelectOptionProps {
     children: Element,
 }
 
+/// # SelectOption
+///
+/// An individual selectable option within a [`SelectList`] component. Each option represents
+/// a value that can be selected.
+///
+/// This must be used inside a [`SelectList`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///             }
+///             SelectList {
+///                 aria_label: "Select Demo",
+///                 SelectGroup {
+///                     SelectGroupLabel {
+///                         "Fruits"
+///                     }
+///                     SelectOption {
+///                         index: 0usize,
+///                         value: "apple".to_string(),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption {
+///                         index: 1usize,
+///                         value: "banana".to_string(),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn SelectOption(props: SelectOptionProps) -> Element {
     // Generate a unique ID for this option for accessibility
@@ -838,11 +1047,61 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
     }
 }
 
+/// The props for the [`SelectItemIndicator`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectItemIndicatorProps {
+    /// The children to render inside the indicator
     children: Element,
 }
 
+/// # SelectItemIndicator
+///
+/// The `SelectItemIndicator` component is used to render an indicator for a selected item within a [`SelectList`]. The
+/// children will only be rendered if the option is selected.
+///
+/// This must be used inside a [`SelectOption`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///             }
+///             SelectList {
+///                 aria_label: "Select Demo",
+///                 SelectGroup {
+///                     SelectGroupLabel {
+///                         "Fruits"
+///                     }
+///                     SelectOption {
+///                         index: 0usize,
+///                         value: "apple".to_string(),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption {
+///                         index: 1usize,
+///                         value: "banana".to_string(),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn SelectItemIndicator(props: SelectItemIndicatorProps) -> Element {
     let ctx: SelectOptionContext = use_context();
@@ -859,22 +1118,72 @@ struct SelectGroupContext {
     labeled_by: Signal<Option<String>>,
 }
 
+/// The props for the [`SelectGroup`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectGroupProps {
     /// Whether the group is disabled
     #[props(default)]
-    disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadOnlySignal<bool>,
 
     /// Optional ID for the group
     #[props(default)]
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the group
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children to render inside the group
     children: Element,
 }
 
+/// # SelectGroup
+///
+/// The `SelectGroup` component is used to group related options within a [`SelectList`]. It provides a way to organize options into logical sections.
+///
+/// This must be used inside a [`SelectList`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///             }
+///             SelectList {
+///                 aria_label: "Select Demo",
+///                 SelectGroup {
+///                     SelectGroupLabel {
+///                         "Fruits"
+///                     }
+///                     SelectOption {
+///                         index: 0usize,
+///                         value: "apple".to_string(),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption {
+///                         index: 1usize,
+///                         value: "banana".to_string(),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn SelectGroup(props: SelectGroupProps) -> Element {
     let ctx: SelectContext = use_context();
@@ -898,16 +1207,68 @@ pub fn SelectGroup(props: SelectGroupProps) -> Element {
     }
 }
 
+/// The props for the [`SelectGroupLabel`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectGroupLabelProps {
-    id: ReadOnlySignal<Option<String>>,
+    /// Optional ID for the label
+    pub id: ReadOnlySignal<Option<String>>,
 
+    /// Additional attributes for the label
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children to render inside the label
     children: Element,
 }
 
+/// # SelectGroupLabel
+///
+/// The `SelectGroupLabel` component is used to render a label for a group of options within a [`SelectList`].
+///
+/// This must be used inside a [`SelectGroup`] component.
+///
+/// ## Example
+///
+/// ```rust
+///
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///             }
+///             SelectList {
+///                 aria_label: "Select Demo",
+///                 SelectGroup {
+///                     SelectGroupLabel {
+///                         "Fruits"
+///                     }
+///                     SelectOption {
+///                         index: 0usize,
+///                         value: "apple".to_string(),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption {
+///                         index: 1usize,
+///                         value: "banana".to_string(),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn SelectGroupLabel(props: SelectGroupLabelProps) -> Element {
     let mut ctx: SelectGroupContext = use_context();

@@ -30,13 +30,10 @@ fn ToastButton() -> Element {
                 toast_api
                     .info(
                         "Custom Toast".to_string(),
-                        Some(ToastOptions {
-                            description: Some(
-                                "Some info you need".to_string(),
-                            ),
-                            duration: Some(Duration::from_secs(60)),
-                            permanent: false,
-                        }),
+                        ToastOptions::new()
+                            .description("Some info you need")
+                            .duration(Duration::from_secs(60))
+                            .permanent(false),
                     );
             },
             "Info (60s)"
