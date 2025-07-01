@@ -1,6 +1,8 @@
+//! Defines the [`ScrollArea`] component for creating scrollable areas with customizable scrollbars.
+
 use dioxus_lib::prelude::*;
 
-/// The props for the [`ScrollArea`] component
+/// The props for the [`ScrollArea`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ScrollAreaProps {
     /// The scroll direction.
@@ -15,15 +17,21 @@ pub struct ScrollAreaProps {
     #[props(default)]
     scroll_type: ReadOnlySignal<ScrollType>,
 
+    /// Additional attributes to apply to the scroll area element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the scroll area component.
     children: Element,
 }
 
+/// The direction in which scrolling is allowed.
 #[derive(Clone, Copy, PartialEq)]
 pub enum ScrollDirection {
+    /// Allow vertical scrolling only.
     Vertical,
+    /// Allow horizontal scrolling only.
     Horizontal,
+    /// Allow scrolling in both directions.
     Both,
 }
 
@@ -33,13 +41,14 @@ impl Default for ScrollDirection {
     }
 }
 
+/// The type of scrolling behavior.
 #[derive(Clone, Copy, PartialEq)]
 pub enum ScrollType {
-    /// Browser default scrolling
+    /// Browser default scrolling.
     Auto,
-    /// Always show scrollbars
+    /// Always show scrollbars.
     Always,
-    /// Hide scrollbars but enable scrolling
+    /// Hide scrollbars but enable scrolling.
     Hidden,
 }
 
@@ -49,6 +58,41 @@ impl Default for ScrollType {
     }
 }
 
+/// # ScrollArea
+///
+/// The `ScrollArea` component creates a scrollable area. If you don't
+/// have any focusable content within the scroll area, you should make the
+/// scroll area focusable by adding a `tabindex` attribute.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::scroll_area::{ScrollArea, ScrollDirection};
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         ScrollArea {
+///             width: "10em",
+///             height: "10em",
+///             direction: ScrollDirection::Vertical,
+///             tabindex: "0",
+///             div { class: "scroll-content",
+///                 for i in 1..=20 {
+///                     p {
+///                         "Scrollable content item {i}"
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+///
+/// The [`ScrollArea`] component defines the following data attributes you can use to control styling:
+/// - `data-scroll-direction`: Indicates the scroll direction. Values are `vertical`, `horizontal`, or `both`.
 #[component]
 pub fn ScrollArea(props: ScrollAreaProps) -> Element {
     let direction = props.direction;
