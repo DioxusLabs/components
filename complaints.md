@@ -8,7 +8,6 @@ https://github.com/DioxusLabs/dioxus/issues/3920
 
 It's verbose to set a `Signal` or `ReadOnlySignal`'s default value through props.
 ```rust
-/// The props for the [`Some`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SomeProps {
 
