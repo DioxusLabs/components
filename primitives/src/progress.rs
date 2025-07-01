@@ -1,21 +1,55 @@
+//! Defines the [`Progress`] component and its sub-components.
+
 use dioxus_lib::prelude::*;
 
-/// The props for the [`Progress`] component
+/// The props for the [`Progress`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ProgressProps {
-    /// The current progress value, between 0 and max
+    /// The current progress value, between 0 and max.
     value: ReadOnlySignal<Option<f64>>,
 
-    /// The maximum value. Defaults to 100
+    /// The maximum value. Defaults to 100.
     #[props(default = ReadOnlySignal::new(Signal::new(100.0)))]
     max: ReadOnlySignal<f64>,
 
+    /// Additional attributes to apply to the progress element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
+    /// The children of the progress component.
     children: Element,
 }
 
+/// # Progress
+///
+/// The `Progress` component shows the progress of an operation.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::progress::{Progress, ProgressIndicator};
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Progress {
+///             aria_label: "Progressbar Demo",
+///             value: 50.0,
+///             ProgressIndicator {}
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Styling
+/// 
+/// The [`Progress`] component defines the following data attributes you can use to control styling:
+/// - `data-state`: Indicates the state of the progress. Values are `loading` or `indeterminate`.
+/// - `data-value`: The current progress value between 0 and max.
+/// - `data-max`: The maximum progress value.
+///
+/// The [`Progress`] component defines the following css variables you can use to control styling:
+/// - `--progress-value`: A value between 0 and 100 representing the current progress percentage.
 #[component]
 pub fn Progress(props: ProgressProps) -> Element {
     // Calculate percentage for styling and "data-state"
@@ -48,15 +82,38 @@ pub fn Progress(props: ProgressProps) -> Element {
     }
 }
 
-/// The indicator that represents the progress visually
-/// The props for the [`ProgressIndicator`] component
+/// The props for the [`ProgressIndicator`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ProgressIndicatorProps {
+    /// Additional attributes to apply to the indicator element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
+    /// The children of the indicator component.
     children: Element,
 }
 
+/// # ProgressIndicator
+///
+/// The `ProgressIndicator` component represents the visual indicator that shows the progress completion.
+/// 
+/// This must be used inside a [`Progress`] component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::progress::{Progress, ProgressIndicator};
+/// #[component]
+/// pub(super) fn Demo() -> Element {
+///     rsx! {
+///         Progress {
+///             aria_label: "Progressbar Demo",
+///             value: 50.0,
+///             ProgressIndicator {}
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn ProgressIndicator(props: ProgressIndicatorProps) -> Element {
     rsx! {
