@@ -319,11 +319,10 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
                         ctx.set_open_nav.call((!is_open()).then(&*props.index));
                     }
                     Key::ArrowDown if !disabled() => {
-                        if is_open() {
-                            nav_ctx.focus_next();
-                        } else {
+                        if !is_open() {
                             ctx.set_open_nav.call(Some(props.index.cloned()));
                         }
+                        nav_ctx.focus_next();
                     },
                     Key::ArrowUp if !disabled() => {
                         if is_open() {

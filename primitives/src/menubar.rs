@@ -285,11 +285,10 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
                     Key::ArrowLeft => ctx.focus.focus_prev(),
                     Key::ArrowRight => ctx.focus.focus_next(),
                     Key::ArrowDown if !disabled() => {
-                        if is_open() {
-                            menu_ctx.focus_next();
-                        } else {
+                        if !is_open() {
                             ctx.set_open_menu.call(Some(props.index.cloned()));
                         }
+                        menu_ctx.focus_next();
                     },
                     Key::ArrowUp if !disabled() => {
                         if is_open() {
