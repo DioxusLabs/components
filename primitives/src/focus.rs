@@ -7,7 +7,7 @@ use crate::use_effect_cleanup;
 pub(crate) fn use_focus_provider(roving_loop: ReadOnlySignal<bool>) -> FocusState {
     use_context_provider(|| {
         let item_count = Signal::new(0);
-        let recent_focus = Signal::new(0);
+        let recent_focus = Signal::new(None);
         let current_focus = Signal::new(None);
 
         FocusState {
@@ -65,21 +65,23 @@ pub(crate) fn use_focus_control(
 pub(crate) struct FocusState {
     pub(crate) roving_loop: ReadOnlySignal<bool>,
     pub(crate) item_count: Signal<usize>,
-    pub(crate) recent_focus: Signal<usize>,
+    pub(crate) recent_focus: Signal<Option<usize>>,
     pub(crate) current_focus: Signal<Option<usize>>,
 }
 
 impl FocusState {
     pub(crate) fn set_focus(&mut self, index: Option<usize>) {
         if let Some(idx) = index {
-            self.recent_focus.set(idx);
+            self.recent_focus.set(Some(idx));
         }
         self.current_focus.set(index);
     }
 
     pub(crate) fn focus_next(&mut self) {
         let current_focus = self.recent_focus();
-        let mut new_focus = current_focus.saturating_add(1);
+        let mut new_focus = current_focus
+            .map(|x| x.saturating_add(1))
+            .unwrap_or_default();
 
         let item_count = (self.item_count)();
         if new_focus >= item_count {
@@ -94,8 +96,10 @@ impl FocusState {
 
     pub(crate) fn focus_prev(&mut self) {
         let current_focus = self.recent_focus();
-        let mut new_focus = current_focus.saturating_sub(1);
-        if current_focus == 0 && (self.roving_loop)() {
+        let mut new_focus = current_focus
+            .map(|x| x.saturating_sub(1))
+            .unwrap_or_default();
+        if current_focus.unwrap_or_default() == 0 && (self.roving_loop)() {
             new_focus = (self.item_count)().saturating_sub(1);
         }
 
@@ -125,14 +129,18 @@ impl FocusState {
 
     pub(crate) fn is_recent_focus(&self, id: usize) -> bool {
         let recent = (self.recent_focus)();
-        recent == id
+        recent == Some(id)
     }
 
     pub(crate) fn current_focus(&self) -> Option<usize> {
         (self.current_focus)()
     }
 
-    pub(crate) fn recent_focus(&self) -> usize {
+    pub(crate) fn recent_focus(&self) -> Option<usize> {
         (self.recent_focus)()
+    }
+
+    pub(crate) fn recent_focus_or_default(&self) -> usize {
+        (self.recent_focus)().unwrap_or_default()
     }
 }

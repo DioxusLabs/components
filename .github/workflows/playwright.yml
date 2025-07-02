@@ -31,10 +31,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  playwright-tests:
     if: github.event.pull_request.draft == false
-    timeout-minutes: 60
+    timeout-minutes: 30
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2, 3, 4]
+        shardTotal: [4]
     steps:
     # Do our best to cache the toolchain and node install steps
     - uses: actions/checkout@v4
@@ -57,10 +62,11 @@ jobs:
     - name: Install Playwright Browsers
       run: cd ./playwright && npx playwright install --with-deps
     - name: Run Playwright tests
-      run: cd ./playwright && npx playwright test
-    - uses: actions/upload-artifact@v4
+      run: cd ./playwright && npx playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+    - name: Upload blob report to GitHub Actions Artifacts
       if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
       with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+        name: blob-report-${{ matrix.shardIndex }}
+        path: blob-report
+        retention-days: 1

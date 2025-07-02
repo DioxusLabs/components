@@ -103,6 +103,7 @@
 }
 
 .select-list[data-state="open"] {
+  pointer-events: auto;
   animation: select-list-animate-in 150ms ease-out forwards;
 }
 

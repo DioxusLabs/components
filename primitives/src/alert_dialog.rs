@@ -116,6 +116,10 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
     let render_element = use_animated_open(id, open);
 
     rsx! {
+        document::Script {
+            src: FOCUS_TRAP_JS,
+            defer: true
+        }
         if render_element() {
             div {
                 id,
@@ -209,10 +213,6 @@ pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
     });
 
     rsx! {
-        document::Script {
-            src: FOCUS_TRAP_JS,
-            defer: true,
-        }
         div {
             id,
             role: "alertdialog",

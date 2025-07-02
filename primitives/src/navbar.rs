@@ -142,7 +142,7 @@ pub fn Navbar(props: NavbarProps) -> Element {
                 tabindex: (!ctx.focus.any_focused()).then_some("0"),
                 // If the menu receives focus, focus the most recently focused menu item
                 onfocus: move |_| {
-                    ctx.focus.set_focus(Some(ctx.focus.recent_focus()));
+                    ctx.focus.set_focus(Some(ctx.focus.recent_focus_or_default()));
                 },
                 onkeydown: move |event: Event<KeyboardData>| {
                     match event.key() {
@@ -319,11 +319,10 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
                         ctx.set_open_nav.call((!is_open()).then(&*props.index));
                     }
                     Key::ArrowDown if !disabled() => {
-                        if is_open() {
-                            nav_ctx.focus_next();
-                        } else {
+                        if !is_open() {
                             ctx.set_open_nav.call(Some(props.index.cloned()));
                         }
+                        nav_ctx.focus_next();
                     },
                     Key::ArrowUp if !disabled() => {
                         if is_open() {
@@ -746,12 +745,13 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
         }
     }));
 
-    let tabindex =
-        if focused() || (nav_ctx.is_none() && ctx.focus.recent_focus() == props.index.cloned()) {
-            "0"
-        } else {
-            "-1"
-        };
+    let tabindex = if focused()
+        || (nav_ctx.is_none() && ctx.focus.recent_focus_or_default() == props.index.cloned())
+    {
+        "0"
+    } else {
+        "-1"
+    };
 
     rsx! {
         Link {

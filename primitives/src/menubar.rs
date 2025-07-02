@@ -132,7 +132,7 @@ pub fn Menubar(props: MenubarProps) -> Element {
             tabindex: (!ctx.focus.any_focused()).then_some("0"),
             // If the menu receives focus, focus the most recently focused menu item
             onfocus: move |_| {
-                ctx.focus.set_focus(Some(ctx.focus.recent_focus()));
+                ctx.focus.set_focus(Some(ctx.focus.recent_focus_or_default()));
             },
 
             ..props.attributes,
@@ -285,11 +285,10 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
                     Key::ArrowLeft => ctx.focus.focus_prev(),
                     Key::ArrowRight => ctx.focus.focus_next(),
                     Key::ArrowDown if !disabled() => {
-                        if is_open() {
-                            menu_ctx.focus_next();
-                        } else {
+                        if !is_open() {
                             ctx.set_open_menu.call(Some(props.index.cloned()));
                         }
+                        menu_ctx.focus_next();
                     },
                     Key::ArrowUp if !disabled() => {
                         if is_open() {
