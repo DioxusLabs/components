@@ -54,6 +54,10 @@ export default defineConfig({
       name: "webkit",
       grepInvert: /mobile/,
       use: { ...devices["Desktop Safari"] },
+      // Webkit is slower, so we give it more time.
+      expect: {
+        timeout: 30 * 1000, // 30 seconds
+      },
     },
 
     /* Test against mobile viewports. */
