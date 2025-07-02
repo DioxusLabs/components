@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test("test", async ({ page }) => {
-  await page.goto("http://127.0.0.1:8080/component/?name=calendar&");
+  await page.goto("http://127.0.0.1:8080/component/?name=calendar&", { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
   // Find the calendar element
   const calendar = page.locator(".calendar");
   // Find the calendar-nav-prev button

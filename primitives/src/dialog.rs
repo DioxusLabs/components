@@ -249,7 +249,7 @@ pub fn DialogContent(props: DialogProps) -> Element {
     });
 
     rsx! {
-        
+
         div {
             id,
             role: "dialog",

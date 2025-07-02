@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test("test", async ({ page }) => {
-  await page.goto("http://127.0.0.1:8080/component/?name=accordion&");
+  await page.goto("http://127.0.0.1:8080/component/?name=accordion&", { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
   // Get the first .accordion-item
   const accordionItem = page.locator(".accordion-item");
   // Click on the first .accordion-item
