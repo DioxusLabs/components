@@ -82,7 +82,7 @@ jobs:
       with:
         node-version: lts/*
     - name: Install dependencies
-      run: npm ci
+      run: cd playwright && npm ci
 
     - name: Download blob reports from GitHub Actions Artifacts
       uses: actions/download-artifact@v4
@@ -92,7 +92,7 @@ jobs:
         merge-multiple: true
 
     - name: Merge into HTML Report
-      run: npx playwright merge-reports --reporter html ./all-blob-reports
+      run: cd playwright && npx playwright merge-reports --reporter html ./all-blob-reports
 
     - name: Upload HTML report
       uses: actions/upload-artifact@v4
