@@ -1095,9 +1095,15 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
         }
     });
 
+    let view_date = (ctx.view_date)();
     let focusable_date = (ctx.focused_date)()
-        .or_else(&*ctx.selected_date)
-        .unwrap_or_else(&*ctx.view_date);
+        .filter(|d| d.is_same_month(&view_date))
+        .or_else(|| {
+            ctx.selected_date
+                .cloned()
+                .filter(|d| d.is_same_month(&view_date))
+        })
+        .unwrap_or(view_date);
 
     rsx! {
         button {
