@@ -15,7 +15,7 @@ repository = "https://github.com/DioxusLabs/components"
 dioxus-lib.workspace = true
 dioxus-router = { workspace = true, optional = true }
 dioxus.workspace = true
-dioxus-time = "=0.1.0-alpha.1"
+dioxus-time = "=0.7.0-alpha.2"
 tracing.workspace = true
 
 [build-dependencies]
