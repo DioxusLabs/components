@@ -33,7 +33,7 @@ concurrency:
 jobs:
   playwright-tests:
     if: github.event.pull_request.draft == false
-    timeout-minutes: 60
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
