@@ -1,0 +1,15 @@
+import { test, expect } from '@playwright/test';
+
+test('test', async ({ page }) => {
+  await page.goto('http://127.0.0.1:8080/component/?name=checkbox&');
+  let checkbox = page.getByRole('checkbox', { name: 'Demo Checkbox' });
+  await expect(checkbox).toBeVisible();
+  // The checkbox should not be checked initially
+  await expect(checkbox).toHaveAttribute('data-state', 'unchecked');
+  // Clicking the checkbox should check it
+  await checkbox.click();
+  await expect(checkbox).toHaveAttribute('data-state', 'checked');
+  // Pressing space should also toggle the checkbox
+  await checkbox.press('Space');
+  await expect(checkbox).toHaveAttribute('data-state', 'unchecked');
+});
