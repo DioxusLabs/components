@@ -67,7 +67,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     cwd: path.join(process.cwd(), "../preview"),
-    command: "dx serve --platform web",
+    command: "dx run --platform web",
     port: 8080,
     timeout: 50 * 60 * 1000,
     reuseExistingServer: !process.env.CI,

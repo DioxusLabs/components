@@ -76,7 +76,7 @@ or for the web build
 
 ```
 cargo binstall dioxus-cli -y --force --version 0.7.0-alpha.2
-dx serve -p preview --platform web
+dx run -p preview --platform web
 ```
 
 ## License
