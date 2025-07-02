@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test('hover navigation', async ({ page }) => {
   await page.goto('http://127.0.0.1:8080/component/?name=navbar&', { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
+  // wait for the styles to load
+  await expect(page.getByRole('menuitem', { name: 'Inputs' })).toHaveCSS('border-width', '0px');
   await page.getByRole('menuitem', { name: 'Inputs' }).hover();
   const calendar = page.getByRole('menuitem', { name: 'Calendar' });
   // Move the mouse onto the calendar menu item
