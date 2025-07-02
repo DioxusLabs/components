@@ -745,12 +745,13 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
         }
     }));
 
-    let tabindex =
-        if focused() || (nav_ctx.is_none() && ctx.focus.recent_focus_or_default() == props.index.cloned()) {
-            "0"
-        } else {
-            "-1"
-        };
+    let tabindex = if focused()
+        || (nav_ctx.is_none() && ctx.focus.recent_focus_or_default() == props.index.cloned())
+    {
+        "0"
+    } else {
+        "-1"
+    };
 
     rsx! {
         Link {

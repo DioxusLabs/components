@@ -11,6 +11,9 @@ test('test', async ({ page }) => {
 
   // Assert the menu is focused
   await expect(selectMenu).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  const firstOption = selectMenu.getByRole('option', { name: 'apple' });
+  await expect(firstOption).toBeFocused();
 
   // Assert moving down with arrow keys moves focus to the next option
   await page.keyboard.press('ArrowDown');
@@ -19,7 +22,6 @@ test('test', async ({ page }) => {
 
   // Assert moving up with arrow keys moves focus back to the previous option
   await page.keyboard.press('ArrowUp');
-  const firstOption = selectMenu.getByRole('option', { name: 'apple' });
   await expect(firstOption).toBeFocused();
 
   // Assert pressing Enter selects the focused option
