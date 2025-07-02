@@ -863,6 +863,11 @@ pub fn SelectList(props: SelectListProps) -> Element {
                 event.prevent_default();
                 event.stop_propagation();
             }
+            Key::Escape => {
+                open.set(false);
+                event.prevent_default();
+                event.stop_propagation();
+            }
             _ => {}
         }
     };
