@@ -21,7 +21,7 @@ test("pointer navigation", async ({ page }) => {
 
   // Click the Cut menu item
   const cutItem = editMenuContent.getByRole("menuitem", { name: "Cut" });
-  await cutItem.click({ force: true });
+  await cutItem.click();
   // Assert the menu is closed after clicking a menu item
   await expect(fileMenuContent).toHaveCount(0);
 });
