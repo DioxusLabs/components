@@ -33,8 +33,8 @@ export default defineConfig({
     trace: "on-first-retry",
   },
 
-  // Each test is given 20 minutes.
-  timeout: 20 * 60 * 1000,
+  // Each test is given 10 minutes.
+  timeout: 10 * 60 * 1000,
 
   /* Configure projects for major browsers */
   projects: [
