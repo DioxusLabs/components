@@ -11,7 +11,6 @@ test('test', async ({ page }) => {
   await expect(cancelButton).toBeFocused();
   // Hitting tab should move to the confirm button
   await page.keyboard.press('Tab');
-  const confirmButton = page.getByRole('button', { name: 'Confirm' });
   // Hitting tab again should move focus back to the cancel button
   await page.keyboard.press('Tab');
   await expect(cancelButton).toBeFocused();
@@ -25,6 +24,7 @@ test('test', async ({ page }) => {
   // Assert the dialog is open again
   await expect(dialog).toHaveAttribute('data-state', 'open');
   // Click the confirm button
+  const confirmButton = page.getByRole('button', { name: 'Delete' });
   await confirmButton.click();
   // Assert the dialog is closed after confirming
   await expect(dialog).toHaveCount(0);
