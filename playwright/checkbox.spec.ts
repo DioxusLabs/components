@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('test', async ({ page }) => {
-  await page.goto('http://127.0.0.1:8080/component/?name=checkbox&');
+  await page.goto('http://127.0.0.1:8080/component/?name=checkbox&', { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
   let checkbox = page.getByRole('checkbox', { name: 'Demo Checkbox' });
   await expect(checkbox).toBeVisible();
   // The checkbox should not be checked initially

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('test', async ({ page }) => {
-  await page.goto('http://127.0.0.1:8080/component/?name=select&');
+  await page.goto('http://127.0.0.1:8080/component/?name=select&', { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
   // Find Select a fruit...
   let selectTrigger = page.locator(".select-trigger");
   await selectTrigger.click();

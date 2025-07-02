@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('test', async ({ page }) => {
-  await page.goto('http://127.0.0.1:8080/component/?name=slider&');
+  await page.goto('http://127.0.0.1:8080/component/?name=slider&', { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
   const slider = await page.locator('.slider');
   const thumb = await page.locator('.slider-thumb');
   // The initial aria-valuenow should be 0

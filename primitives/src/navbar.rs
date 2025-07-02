@@ -142,7 +142,7 @@ pub fn Navbar(props: NavbarProps) -> Element {
                 tabindex: (!ctx.focus.any_focused()).then_some("0"),
                 // If the menu receives focus, focus the most recently focused menu item
                 onfocus: move |_| {
-                    ctx.focus.set_focus(Some(ctx.focus.recent_focus()));
+                    ctx.focus.set_focus(Some(ctx.focus.recent_focus_or_default()));
                 },
                 onkeydown: move |event: Event<KeyboardData>| {
                     match event.key() {
@@ -746,7 +746,7 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
     }));
 
     let tabindex =
-        if focused() || (nav_ctx.is_none() && ctx.focus.recent_focus() == props.index.cloned()) {
+        if focused() || (nav_ctx.is_none() && ctx.focus.recent_focus_or_default() == props.index.cloned()) {
             "0"
         } else {
             "-1"

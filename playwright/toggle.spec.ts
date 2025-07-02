@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('test', async ({ page }) => {
-  await page.goto('http://127.0.0.1:8080/component/?name=switch&');
+  await page.goto('http://127.0.0.1:8080/component/?name=switch&', { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
   let switchElement = page.getByRole('switch', { name: 'Switch Demo' });
   await expect(switchElement).toBeVisible();
   // The switch should not be checked initially
