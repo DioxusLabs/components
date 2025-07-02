@@ -557,7 +557,7 @@ fn Installation() -> Element {
     rsx! {
         div {
             id: "hero-installation",
-            "cargo install dioxus-components"
+            "cargo add dioxus-components"
             CopyButton {}
         }
     }

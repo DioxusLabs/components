@@ -5,9 +5,9 @@ members = ["primitives", "preview"]
 [workspace.dependencies]
 dioxus-primitives = { path = "primitives" }
 
-dioxus = "0.7.0-alpha.1"
-dioxus-lib = "0.7.0-alpha.1"
-dioxus-router = { version = "0.7.0-alpha.1" }
+dioxus = "0.7.0-alpha.2"
+dioxus-lib = "0.7.0-alpha.2"
+dioxus-router = { version = "0.7.0-alpha.2" }
 tracing = { version = "0.1", features = ["std"] }
 
 [patch.crates-io]
@@ -19,9 +19,6 @@ dioxus-sync = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
 dioxus-time = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
 dioxus-util = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
 dioxus-window = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
-dioxus = { git = "https://github.com/dioxuslabs/dioxus", rev = "0dd0f05d" }
-dioxus-lib = { git = "https://github.com/dioxuslabs/dioxus", rev = "0dd0f05d" }
-dioxus-router = { git = "https://github.com/dioxuslabs/dioxus", rev = "0dd0f05d" }
 
 [profile]
 
