@@ -134,6 +134,10 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
     let render = use_animated_open(id, open);
 
     rsx! {
+        document::Script {
+            src: FOCUS_TRAP_JS,
+            defer: true
+        }
         if render() {
             div {
                 id,
@@ -245,10 +249,7 @@ pub fn DialogContent(props: DialogProps) -> Element {
     });
 
     rsx! {
-        document::Script {
-            src: FOCUS_TRAP_JS,
-            defer: true,
-        }
+        
         div {
             id,
             role: "dialog",

@@ -124,9 +124,7 @@ fn use_animated_open(
                 let script = format!(
                     "const element = document.getElementById('{id}');
                     if (element && element.getAnimations().length > 0) {{
-                        console.log('found animations:', element.getAnimations());
                         Promise.all(element.getAnimations().map((animation) => animation.finished)).then(() => {{
-                            console.log('Animation event ended');
                             dioxus.send(true);
                         }});
                     }} else {{

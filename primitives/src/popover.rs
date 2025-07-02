@@ -248,11 +248,11 @@ pub fn PopoverContent(props: PopoverProps) -> Element {
     let render = use_animated_open(id, ctx.open);
 
     rsx! {
+        document::Script {
+            src: FOCUS_TRAP_JS,
+            defer: true,
+        }
         if render() {
-            document::Script {
-                src: FOCUS_TRAP_JS,
-                defer: true,
-            }
             div {
                 id,
                 role: "dialog",
