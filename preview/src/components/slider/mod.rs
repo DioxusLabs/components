@@ -13,7 +13,7 @@ pub(super) fn Demo() -> Element {
 
         // Display the current value
         div {
-            style: "margin-bottom: 15px; font-size: 16px; font-weight: bold; color: var(--text-color)",
+            style: "margin-bottom: 15px; font-size: 16px; font-weight: bold;",
             "{current_value:.2}%"
         }
 
