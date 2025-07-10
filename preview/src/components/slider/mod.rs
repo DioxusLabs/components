@@ -37,6 +37,5 @@ pub(super) fn Demo() -> Element {
                 }
             }
         }
-	  }
     }
 }
