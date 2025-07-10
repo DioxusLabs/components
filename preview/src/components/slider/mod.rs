@@ -3,7 +3,6 @@ use dioxus_primitives::slider::{Slider, SliderRange, SliderThumb, SliderTrack, S
 
 #[component]
 pub(super) fn Demo() -> Element {
-
     let mut current_value = use_signal(|| 0.5);
     
     rsx! {
@@ -12,13 +11,9 @@ pub(super) fn Demo() -> Element {
             href: asset!("/src/components/slider/style.css"),
         }
 
-	  div {
-        class: "slider-container",
-
         // Display the current value
         div {
-            class: "slider-value-display",
-            style: "margin-bottom: 15px; font-size: 16px; font-weight: bold;",
+            style: "margin-bottom: 15px; font-size: 16px; font-weight: bold; color: var(--text-color)",
             "{current_value:.2}%"
         }
 
