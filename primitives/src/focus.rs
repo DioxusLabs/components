@@ -23,8 +23,8 @@ pub(crate) fn use_focus_entry(
     ctx: FocusState,
     index: impl Readable<Target = usize> + Copy + 'static,
 ) {
-    let enabled = use_signal(|| true);
-    use_focus_entry_disabled(ctx, index, enabled);
+    let disabled = use_signal(|| false);
+    use_focus_entry_disabled(ctx, index, disabled);
 }
 
 pub(crate) fn use_focus_entry_disabled(
@@ -55,7 +55,7 @@ pub(crate) fn use_focus_control(
     ctx: FocusState,
     index: impl Readable<Target = usize> + Copy + 'static,
 ) -> impl FnMut(MountedEvent) {
-    let disabled = use_signal(|| true);
+    let disabled = use_signal(|| false);
     use_focus_control_disabled(ctx, index, disabled)
 }
 
@@ -78,7 +78,7 @@ pub(crate) fn use_focus_control_disabled(
 pub(crate) fn use_focus_controlled_item(
     index: impl Readable<Target = usize> + Copy + 'static,
 ) -> impl FnMut(MountedEvent) {
-    let disabled = use_signal(|| true);
+    let disabled = use_signal(|| false);
     use_focus_controlled_item_disabled(index, disabled)
 }
 
