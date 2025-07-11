@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    focus::{use_focus_controlled_item, use_focus_provider, FocusState},
+    focus::{use_focus_controlled_item_disabled, use_focus_provider, FocusState},
     use_controlled,
 };
 use dioxus_lib::prelude::*;
@@ -283,7 +283,7 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
         "-1"
     });
 
-    let onmounted = use_focus_controlled_item(props.index);
+    let onmounted = use_focus_controlled_item_disabled(props.index, props.disabled);
 
     rsx! {
         button {

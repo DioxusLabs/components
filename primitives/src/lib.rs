@@ -107,7 +107,7 @@ fn use_effect_cleanup<F: FnOnce() + 'static>(#[allow(unused)] cleanup: F) {
 fn use_animated_open(
     id: impl Readable<Target = String> + Copy + 'static,
     open: impl Readable<Target = bool> + Copy + 'static,
-) -> impl Fn() -> bool {
+) -> impl Fn() -> bool + Copy {
     let animating = use_signal(|| false);
 
     // Show in dom is a few frames behind the open signal to allow for the animation to start.

@@ -20,45 +20,75 @@ pub(crate) fn use_focus_provider(roving_loop: ReadOnlySignal<bool>) -> FocusStat
 }
 
 pub(crate) fn use_focus_entry(
-    mut ctx: FocusState,
+    ctx: FocusState,
     index: impl Readable<Target = usize> + Copy + 'static,
 ) {
-    use_effect(move || {
-        ctx.item_count += 1;
-    });
-    use_effect_cleanup(move || {
-        ctx.item_count -= 1;
-        if (ctx.current_focus)() == Some(index.cloned()) {
-            ctx.set_focus(None);
-        }
-    });
+    let disabled = use_signal(|| false);
+    use_focus_entry_disabled(ctx, index, disabled);
 }
 
-pub(crate) fn use_focus_controlled_item(
+pub(crate) fn use_focus_entry_disabled(
+    mut ctx: FocusState,
     index: impl Readable<Target = usize> + Copy + 'static,
-) -> impl FnMut(MountedEvent) {
-    let ctx: FocusState = use_context();
-    use_focus_entry(ctx, index);
-    use_focus_control(ctx, index)
+    disabled: impl Readable<Target = bool> + 'static,
+) {
+    let mut item = use_hook(|| CopyValue::new(false));
+    use_effect(move || {
+        if disabled.cloned() {
+            if item.cloned() {
+                ctx.remove_item(index.cloned());
+                item.set(false);
+            }
+        } else {
+            ctx.add_item();
+            item.set(true);
+        }
+    });
+    use_effect_cleanup(move || {
+        if item.cloned() {
+            ctx.remove_item(index.cloned());
+        }
+    });
 }
 
 pub(crate) fn use_focus_control(
     ctx: FocusState,
     index: impl Readable<Target = usize> + Copy + 'static,
 ) -> impl FnMut(MountedEvent) {
+    let disabled = use_signal(|| false);
+    use_focus_control_disabled(ctx, index, disabled)
+}
+
+pub(crate) fn use_focus_control_disabled(
+    ctx: FocusState,
+    index: impl Readable<Target = usize> + Copy + 'static,
+    disabled: impl Readable<Target = bool> + 'static,
+) -> impl FnMut(MountedEvent) {
     let mut controlled_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
     use_effect(move || {
-        let is_focused = ctx.is_focused(index.cloned());
-        if is_focused {
-            if let Some(md) = controlled_ref() {
-                spawn(async move {
-                    let _ = md.set_focus(true).await;
-                });
-            }
+        if disabled.cloned() {
+            return;
         }
+        ctx.control_mount_focus(index.cloned(), controlled_ref);
     });
 
     move |data: Event<MountedData>| controlled_ref.set(Some(data.data()))
+}
+
+pub(crate) fn use_focus_controlled_item(
+    index: impl Readable<Target = usize> + Copy + 'static,
+) -> impl FnMut(MountedEvent) {
+    let disabled = use_signal(|| false);
+    use_focus_controlled_item_disabled(index, disabled)
+}
+
+pub(crate) fn use_focus_controlled_item_disabled(
+    index: impl Readable<Target = usize> + Copy + 'static,
+    disabled: impl Readable<Target = bool> + Copy + 'static,
+) -> impl FnMut(MountedEvent) {
+    let ctx: FocusState = use_context();
+    use_focus_entry_disabled(ctx, index, disabled);
+    use_focus_control_disabled(ctx, index, disabled)
 }
 
 #[derive(Clone, Copy)]
@@ -127,11 +157,6 @@ impl FocusState {
         (self.current_focus)().map(|x| x == id).unwrap_or(false)
     }
 
-    pub(crate) fn is_recent_focus(&self, id: usize) -> bool {
-        let recent = (self.recent_focus)();
-        recent == Some(id)
-    }
-
     pub(crate) fn current_focus(&self) -> Option<usize> {
         (self.current_focus)()
     }
@@ -142,5 +167,31 @@ impl FocusState {
 
     pub(crate) fn recent_focus_or_default(&self) -> usize {
         (self.recent_focus)().unwrap_or_default()
+    }
+
+    pub(crate) fn add_item(&mut self) {
+        self.item_count += 1;
+    }
+
+    pub(crate) fn remove_item(&mut self, index: usize) {
+        self.item_count -= 1;
+        if (self.current_focus)() == Some(index) {
+            self.set_focus(None);
+        }
+    }
+
+    pub(crate) fn control_mount_focus(
+        &self,
+        index: usize,
+        controlled_ref: Signal<Option<Rc<MountedData>>>,
+    ) {
+        let is_focused = self.is_focused(index);
+        if is_focused {
+            if let Some(md) = controlled_ref() {
+                spawn(async move {
+                    let _ = md.set_focus(true).await;
+                });
+            }
+        }
     }
 }
