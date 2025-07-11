@@ -224,7 +224,13 @@ pub fn PopoverContent(props: PopoverProps) -> Element {
 
     let gen_id = use_unique_id();
     let id = use_id_or(gen_id, props.id);
+
+    let render = use_animated_open(id, ctx.open);
+
     use_effect(move || {
+        if !render() {
+            return;
+        }
         let is_modal = is_modal();
         if !is_modal {
             // If the dialog is not modal, we don't need to trap focus.
@@ -245,12 +251,10 @@ pub fn PopoverContent(props: PopoverProps) -> Element {
         ));
     });
 
-    let render = use_animated_open(id, ctx.open);
-
     rsx! {
         document::Script {
             src: FOCUS_TRAP_JS,
-            defer: true,
+            defer: true
         }
         if render() {
             div {

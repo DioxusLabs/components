@@ -157,11 +157,6 @@ impl FocusState {
         (self.current_focus)().map(|x| x == id).unwrap_or(false)
     }
 
-    pub(crate) fn is_recent_focus(&self, id: usize) -> bool {
-        let recent = (self.recent_focus)();
-        recent == Some(id)
-    }
-
     pub(crate) fn current_focus(&self) -> Option<usize> {
         (self.current_focus)()
     }
