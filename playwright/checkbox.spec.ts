@@ -10,6 +10,6 @@ test('test', async ({ page }) => {
   await checkbox.click();
   await expect(checkbox).toHaveAttribute('data-state', 'checked');
   // Pressing space should also toggle the checkbox
-  await checkbox.press('Space');
+  await page.keyboard.press('Space');
   await expect(checkbox).toHaveAttribute('data-state', 'unchecked');
 });

@@ -1,5 +1,7 @@
 //! Defines the [`DropdownMenu`] component and its subcomponents.
 
+use std::rc::Rc;
+
 use crate::{
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
     use_animated_open, use_controlled, use_id_or, use_unique_id,
@@ -212,6 +214,7 @@ pub struct DropdownMenuTriggerProps {
 #[component]
 pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
     let mut ctx: DropdownMenuContext = use_context();
+    let mut element = use_signal(|| None::<Rc<MountedData>>);
 
     rsx! {
         button {
@@ -223,9 +226,18 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
             aria_expanded: ctx.open,
             aria_haspopup: "listbox",
 
+            onmounted: move |e: MountedEvent| {
+                element.set(Some(e.data()));
+            },
             onclick: move |_| {
                 let new_open = !(ctx.open)();
                 ctx.set_open.call(new_open);
+                // Focus the element on click. Safari does not do this automatically. https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/button#clicking_and_focus
+                if let Some(data) = element() {
+                    spawn(async move {
+                        _ = data.set_focus(true).await;
+                    });
+                }
             },
             onblur: move |_| {
                 if !ctx.focus.any_focused() {

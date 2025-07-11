@@ -10,6 +10,6 @@ test('test', async ({ page }) => {
   await switchElement.click();
   await expect(switchElement).toHaveAttribute('data-state', 'checked');
   // Pressing space should also toggle the switch
-  await switchElement.press('Space');
+  await page.keyboard.press('Space');
   await expect(switchElement).toHaveAttribute('data-state', 'unchecked');
 });

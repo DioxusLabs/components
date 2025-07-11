@@ -10,6 +10,6 @@ test('test', async ({ page }) => {
   await toggleElement.click();
   await expect(toggleElement).toHaveAttribute('data-state', 'on');
   // // Pressing space should also toggle the toggle
-  await toggleElement.press('Space');
+  await page.keyboard.press('Space');
   await expect(toggleElement).toHaveAttribute('data-state', 'off');
 });
