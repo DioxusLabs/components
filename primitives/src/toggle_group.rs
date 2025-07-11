@@ -239,7 +239,7 @@ pub fn ToggleItem(props: ToggleItemProps) -> Element {
             return "0";
         }
 
-        match ctx.focus.is_recent_focus(props.index.cloned()) {
+        match ctx.focus.recent_focus_or_default() == props.index.cloned() {
             true => "0",
             false => "-1",
         }
