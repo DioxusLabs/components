@@ -1,4 +1,5 @@
-use dioxus_lib::{prelude::*, warnings::Warning};
+use crate::dioxus_core::provide_root_context;
+use dioxus::prelude::*;
 use std::collections::HashMap;
 
 use crate::use_effect_cleanup;
@@ -48,12 +49,10 @@ pub fn use_portal() -> PortalId {
 #[component]
 pub fn PortalIn(portal: PortalId, children: Element) -> Element {
     if let Some(mut ctx) = try_use_context::<PortalCtx>() {
-        dioxus_lib::signals::warnings::signal_write_in_component_body::allow(|| {
-            let mut portals = ctx.portals.write();
-            if let Some(portal) = portals.get_mut(&portal.0) {
-                portal.set(children);
-            }
-        });
+        let mut portals = ctx.portals.write();
+        if let Some(portal) = portals.get_mut(&portal.0) {
+            portal.set(children);
+        }
     }
 
     rsx! {}

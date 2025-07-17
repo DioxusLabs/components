@@ -1,7 +1,7 @@
 //! Defines the [`Collapsible`] component and its sub-components.
 
 use crate::{use_controlled, use_id_or, use_unique_id};
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 // TODO: more docs
 

@@ -1,6 +1,6 @@
 //! Defines the [`Toolbar`] component and its sub-components, which provide a container to group related buttons and controls with keyboard navigation.
 
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 use std::rc::Rc;
 
 #[derive(Clone, Copy)]

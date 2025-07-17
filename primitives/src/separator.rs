@@ -1,6 +1,6 @@
 //! Defines the [`Separator`] component for creating visual or semantic separators.
 
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 /// The props for the [`Separator`] component.
 #[derive(Props, Clone, PartialEq)]

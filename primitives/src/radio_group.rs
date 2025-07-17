@@ -6,7 +6,7 @@ use crate::{
     focus::{use_focus_controlled_item_disabled, use_focus_provider, FocusState},
     use_controlled,
 };
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 #[derive(Clone, Copy)]
 struct RadioGroupCtx {

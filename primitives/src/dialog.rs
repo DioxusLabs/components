@@ -1,7 +1,7 @@
 //! Defines the [`DialogRoot`] component and its sub-components.
 
 use dioxus::document;
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 use crate::{use_animated_open, use_controlled, use_id_or, use_unique_id, FOCUS_TRAP_JS};
 

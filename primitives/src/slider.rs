@@ -1,12 +1,13 @@
 //! Defines the [`Slider`] component and its sub-components, which provide a range input control for selecting a value within a specified range.
 
+use crate::dioxus_core::{queue_effect, Runtime};
 use crate::use_controlled;
+use dioxus::html::geometry::euclid::Rect;
 use dioxus::html::geometry::euclid::Vector2D;
+use dioxus::html::geometry::Pixels;
 use dioxus::html::geometry::{ClientPoint, ClientSpace};
 use dioxus::html::input_data::MouseButton;
-use dioxus_lib::html::geometry::euclid::Rect;
-use dioxus_lib::html::geometry::Pixels;
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 use std::rc::Rc;
 
 /// The value of the slider. Currently this can only be a single value, but support for ranges is planned.

@@ -1,7 +1,7 @@
 //! Defines the [`Toggle`] component for creating toggle buttons.
 
 use crate::use_controlled;
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 /// The props for the [`Toggle`] component.
 #[derive(Props, Clone, PartialEq)]

@@ -4,7 +4,7 @@ use crate::{
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
     use_animated_open, use_controlled, use_id_or, use_unique_id,
 };
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 #[derive(Clone, Copy)]
 struct ContextMenuCtx {

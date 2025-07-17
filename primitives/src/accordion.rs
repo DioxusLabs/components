@@ -1,7 +1,8 @@
 //! Defines the [`Accordion`] component and its sub-components.
 
+use crate::dioxus_elements::Key;
 use crate::{use_animated_open, use_effect_cleanup, use_id_or, use_unique_id};
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 use std::rc::Rc;
 
 // TODO: controlled version

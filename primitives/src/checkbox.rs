@@ -1,7 +1,7 @@
 //! Defines the [`Checkbox`] component and its subcomponents, which manage checkbox inputs with controlled state.
 
 use crate::{use_controlled, use_unique_id};
-use dioxus_lib::{document::eval, prelude::*};
+use dioxus::{document::eval, prelude::*};
 use std::ops::Not;
 
 /// The state of a [`Checkbox`] component.

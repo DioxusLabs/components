@@ -3,8 +3,8 @@
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use dioxus::prelude::*;
 use dioxus::prelude::{asset, manganis, Asset};
-use dioxus_lib::prelude::*;
 
 pub mod accordion;
 pub mod alert_dialog;

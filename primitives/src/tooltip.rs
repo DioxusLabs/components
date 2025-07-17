@@ -3,7 +3,7 @@
 use crate::{
     use_animated_open, use_controlled, use_id_or, use_unique_id, ContentAlign, ContentSide,
 };
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 #[derive(Clone, Copy)]
 struct TooltipCtx {

@@ -5,7 +5,7 @@ use crate::{
     toggle::Toggle,
     use_controlled,
 };
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 use std::collections::HashSet;
 
 // Todo: docs, test controlled version

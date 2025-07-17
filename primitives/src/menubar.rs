@@ -1,6 +1,6 @@
 //! Defines the [`Menubar`] component and its sub-components.
 
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 use crate::{
     focus::{

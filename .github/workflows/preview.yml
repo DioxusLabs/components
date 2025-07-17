@@ -43,7 +43,7 @@ jobs:
           cache-on-failure: "false"
       - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
-        run: cargo binstall dioxus-cli -y --force --version 0.7.0-alpha.2
+        run: cargo binstall dioxus-cli -y --force --version 0.7.0-alpha.3
       - name: Build
         run: cd preview && dx build --platform web --release --base-path "components/pr-preview/pr-${{ github.event.pull_request.number }}/"
       - name: Copy output

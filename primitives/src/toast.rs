@@ -5,7 +5,7 @@ use crate::{
     use_unique_id,
 };
 use dioxus::dioxus_core::DynamicNode;
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 use dioxus_time::use_timeout;
 use std::collections::VecDeque;
 use std::time::Duration;

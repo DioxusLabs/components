@@ -1,6 +1,6 @@
 //! Defines the [`Label`] component
 
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 /// The props for the [`Label`] component
 #[derive(Props, Clone, PartialEq)]
