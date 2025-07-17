@@ -1,5 +1,6 @@
 use core::panic;
 
+use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
 use dioxus_primitives::tabs::{TabContent, TabList, TabTrigger, Tabs};
 

@@ -1,6 +1,6 @@
 //! Defines the [`Progress`] component and its sub-components.
 
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 /// The props for the [`Progress`] component.
 #[derive(Props, Clone, PartialEq)]

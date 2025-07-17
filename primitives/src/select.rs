@@ -7,7 +7,8 @@ use crate::{
     use_animated_open, use_controlled, use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::html::input_data::MouseButton;
-use dioxus_lib::prelude::*;
+use dioxus::prelude::Code;
+use dioxus::prelude::*;
 
 #[derive(Clone, Copy)]
 struct SelectContext {

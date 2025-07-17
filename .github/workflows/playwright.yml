@@ -56,7 +56,7 @@ jobs:
         cache-on-failure: "true"
     - uses: cargo-bins/cargo-binstall@main
     - name: Install CLI
-      run: cargo binstall dioxus-cli -y --force --version 0.7.0-alpha.2
+      run: cargo binstall dioxus-cli -y --force --version 0.7.0-alpha.3
     - name: Install dependencies
       run: cd ./playwright && npm ci
     - name: Install Playwright Browsers

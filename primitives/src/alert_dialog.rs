@@ -2,7 +2,7 @@
 
 use crate::{use_animated_open, use_id_or, use_unique_id, FOCUS_TRAP_JS};
 use dioxus::document;
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 #[derive(Clone)]
 struct AlertDialogCtx {

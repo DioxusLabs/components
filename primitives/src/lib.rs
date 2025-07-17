@@ -3,8 +3,8 @@
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use dioxus::prelude::*;
 use dioxus::prelude::{asset, manganis, Asset};
-use dioxus_lib::prelude::*;
 
 pub mod accordion;
 pub mod alert_dialog;
@@ -101,7 +101,7 @@ fn use_controlled<T: Clone + PartialEq>(
 
 /// Run some cleanup code when the component is unmounted if the effect was run.
 fn use_effect_cleanup<F: FnOnce() + 'static>(#[allow(unused)] cleanup: F) {
-    web!(use_drop(cleanup))
+    web!(crate::dioxus_core::use_drop(cleanup))
 }
 
 fn use_animated_open(

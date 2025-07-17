@@ -1,6 +1,6 @@
 //! Defines the [`Avatar`] component and its subcomponents, which manage user profile images with fallback options.
 
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 /// Represents the different states an Avatar can be in
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

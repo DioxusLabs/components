@@ -12,10 +12,9 @@ homepage = "https://dioxuslabs.com"
 repository = "https://github.com/DioxusLabs/components"
 
 [dependencies]
-dioxus-lib.workspace = true
 dioxus-router = { workspace = true, optional = true }
 dioxus.workspace = true
-dioxus-time = "=0.7.0-alpha.2"
+dioxus-time = "=0.7.0-alpha.3"
 tracing.workspace = true
 
 [build-dependencies]

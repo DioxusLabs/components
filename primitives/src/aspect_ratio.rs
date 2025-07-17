@@ -1,6 +1,6 @@
 //! Defines the [`AspectRatio`] component, which maintains a specific aspect ratio for its children.
 
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 /// The props for the [`AspectRatio`] component.
 #[derive(Props, Clone, PartialEq)]

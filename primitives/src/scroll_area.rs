@@ -1,6 +1,6 @@
 //! Defines the [`ScrollArea`] component for creating scrollable areas with customizable scrollbars.
 
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 
 /// The props for the [`ScrollArea`] component.
 #[derive(Props, Clone, PartialEq)]

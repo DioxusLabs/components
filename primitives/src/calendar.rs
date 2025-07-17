@@ -1,6 +1,6 @@
 //! Defines the [`Calendar`] component and its sub-components, which provide a calendar interface with date selection and navigation.
 
-use dioxus_lib::prelude::*;
+use dioxus::prelude::*;
 use std::{
     fmt::{self, Display},
     rc::Rc,
