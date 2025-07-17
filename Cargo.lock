@@ -2067,7 +2067,7 @@ dependencies = [
 [[package]]
 name = "dioxus-time"
 version = "0.7.0-alpha.3"
-source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#5e9048a565208502fb7402385f8f7724cb2ddc1d"
+source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#75c7258270649bd47945de592ef7d30b0ad42c2d"
 dependencies = [
  "dioxus",
  "futures",
@@ -9186,34 +9186,34 @@ dependencies = [
 [[patch.unused]]
 name = "dioxus-geolocation"
 version = "0.7.0-alpha.3"
-source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#5e9048a565208502fb7402385f8f7724cb2ddc1d"
+source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#75c7258270649bd47945de592ef7d30b0ad42c2d"
 
 [[patch.unused]]
 name = "dioxus-notification"
 version = "0.7.0-alpha.3"
-source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#5e9048a565208502fb7402385f8f7724cb2ddc1d"
+source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#75c7258270649bd47945de592ef7d30b0ad42c2d"
 
 [[patch.unused]]
 name = "dioxus-sdk"
 version = "0.7.0-alpha.3"
-source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#5e9048a565208502fb7402385f8f7724cb2ddc1d"
+source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#75c7258270649bd47945de592ef7d30b0ad42c2d"
 
 [[patch.unused]]
 name = "dioxus-sync"
 version = "0.7.0-alpha.3"
-source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#5e9048a565208502fb7402385f8f7724cb2ddc1d"
+source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#75c7258270649bd47945de592ef7d30b0ad42c2d"
 
 [[patch.unused]]
 name = "dioxus-util"
 version = "0.7.0-alpha.3"
-source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#5e9048a565208502fb7402385f8f7724cb2ddc1d"
+source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#75c7258270649bd47945de592ef7d30b0ad42c2d"
 
 [[patch.unused]]
 name = "dioxus-window"
 version = "0.7.0-alpha.3"
-source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#5e9048a565208502fb7402385f8f7724cb2ddc1d"
+source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#75c7258270649bd47945de592ef7d30b0ad42c2d"
 
 [[patch.unused]]
 name = "dioxus_storage"
 version = "0.7.0-alpha.3"
-source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#5e9048a565208502fb7402385f8f7724cb2ddc1d"
+source = "git+https://github.com/ealmloff/dioxus-std?branch=0.7#75c7258270649bd47945de592ef7d30b0ad42c2d"
