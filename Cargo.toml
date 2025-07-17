@@ -6,7 +6,6 @@ members = ["primitives", "preview"]
 dioxus-primitives = { path = "primitives" }
 
 dioxus = "=0.7.0-alpha.3"
-dioxus-router = { version = "=0.7.0-alpha.3" }
 tracing = { version = "0.1", features = ["std"] }
 
 [patch.crates-io]
