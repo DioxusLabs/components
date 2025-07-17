@@ -9,28 +9,8 @@ fn main() {
         if !folder.file_type().unwrap().is_dir() {
             continue;
         }
-        let folder_name = folder.file_name();
-        let folder_name = folder_name.to_string_lossy();
-        let out_folder = out_dir.join(&*folder_name);
-        std::fs::create_dir_all(&out_folder).unwrap();
-        for file in std::fs::read_dir(folder.path()).unwrap().flatten() {
-            if file.file_type().unwrap().is_dir() {
-                continue;
-            }
-            if file.path().extension() == Some(std::ffi::OsStr::new("md")) {
-                let markdown = process_markdown_to_html(&file.path());
-                let out_file_path = out_folder.join(file.file_name()).with_extension("html");
-                std::fs::write(out_file_path, markdown).unwrap();
-                continue;
-            }
-            let file_name = file.file_name();
-            let file_name = file_name.to_string_lossy();
-            for theme in ["base16-ocean.dark", "base16-ocean.light"] {
-                let html = highlight_file_to(&file.path(), theme);
-                let out_file_path = out_folder.join(format!("{file_name}.{theme}.html"));
-                std::fs::write(out_file_path, html).unwrap();
-            }
-        }
+        let folder_path = folder.path();
+        walk_highlight_dir(&folder_path, &out_dir).unwrap();
     }
 
     // Process the main theme.css file
@@ -40,6 +20,33 @@ fn main() {
         let out_file_path = out_dir.join(format!("theme.css.{theme}.html"));
         std::fs::write(out_file_path, html).unwrap();
     }
+}
+
+fn walk_highlight_dir(dir: &std::path::Path, out_dir: &std::path::Path) -> std::io::Result<()> {
+    let folder_name = dir.file_name().unwrap();
+    let folder_name = folder_name.to_string_lossy();
+    let out_folder = out_dir.join(&*folder_name);
+    std::fs::create_dir_all(&out_folder).unwrap();
+    for file in std::fs::read_dir(dir).unwrap().flatten() {
+        if file.file_type().unwrap().is_dir() {
+            walk_highlight_dir(&file.path(), &out_folder)?;
+            continue;
+        }
+        if file.path().extension() == Some(std::ffi::OsStr::new("md")) {
+            let markdown = process_markdown_to_html(&file.path());
+            let out_file_path = out_folder.join(file.file_name()).with_extension("html");
+            std::fs::write(out_file_path, markdown).unwrap();
+            continue;
+        }
+        let file_name = file.file_name();
+        let file_name = file_name.to_string_lossy();
+        for theme in ["base16-ocean.dark", "base16-ocean.light"] {
+            let html = highlight_file_to(&file.path(), theme);
+            let out_file_path = out_folder.join(format!("{file_name}.{theme}.html"));
+            std::fs::write(out_file_path, html).unwrap();
+        }
+    }
+    Ok(())
 }
 
 fn highlight_file_to(file_path: &std::path::Path, theme: &str) -> String {

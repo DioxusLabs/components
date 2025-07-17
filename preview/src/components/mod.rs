@@ -1,20 +1,51 @@
-use super::{ComponentDemoData, HighlightedCode};
+use super::{ComponentDemoData, ComponentVariantDemoData, HighlightedCode};
 macro_rules! examples {
-    ($($name:ident),*) => {
-        $(mod $name;)* pub (crate) static DEMOS: &[ComponentDemoData] = &[
+    ($($name:ident $([$($variant:ident),*])?),*) => {
+        $(
+            mod $name {
+                pub(crate) mod variants {
+                    pub(crate) mod main;
+                    $(
+                        $(
+                            pub(crate) mod $variant;
+                        )*
+                    )?
+                }
+            }
+        )*
+        pub (crate) static DEMOS: &[ComponentDemoData] = &[
             $(
                 ComponentDemoData {
                     name: stringify!($name),
                     docs: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/docs.html")),
-                    rs_highlighted: HighlightedCode {
-                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/mod.rs.base16-ocean.light.html")),
-                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/mod.rs.base16-ocean.dark.html")),
-                    },
-                    css_highlighted: HighlightedCode {
-                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.light.html")),
-                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.dark.html")),
-                    },
-                    component: $name::Demo,
+                    variants: &[
+                        ComponentVariantDemoData {
+                            rs_highlighted: HighlightedCode {
+                                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.light.html")),
+                                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.dark.html")),
+                            },
+                            css_highlighted: HighlightedCode {
+                                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/style.css.base16-ocean.light.html")),
+                                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/style.css.base16-ocean.dark.html")),
+                            },
+                            component: $name::variants::main::Demo,
+                        },
+                        $(
+                            $(
+                                ComponentVariantDemoData {
+                                    rs_highlighted: HighlightedCode {
+                                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.light.html")),
+                                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.dark.html")),
+                                    },
+                                    css_highlighted: HighlightedCode {
+                                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/style.css.base16-ocean.light.html")),
+                                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/style.css.base16-ocean.dark.html")),
+                                    },
+                                    component: $name::variants::$variant::Demo,
+                                },
+                            )*
+                        )?
+                    ]
                 },
             )*
         ];
@@ -26,7 +57,7 @@ examples!(
     aspect_ratio,
     avatar,
     button,
-    calendar,
+    calendar[simple],
     checkbox,
     collapsible,
     context_menu,

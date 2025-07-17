@@ -177,6 +177,15 @@ body {
   text-transform: capitalize;
 }
 
+.component-variants-title {
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+  text-align: center;
+  text-transform: capitalize;
+}
+
 .component-description {
   margin: 5vw;
   font-size: 1em;
