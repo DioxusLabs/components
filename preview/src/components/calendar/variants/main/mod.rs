@@ -59,6 +59,7 @@ fn MonthTitle() -> Element {
     rsx! {
         select {
             class: "calendar-month-select",
+            aria_label: "Month",
             onchange: move |e| {
                 let mut view_date = calendar.view_date();
                 view_date.month = e.value().parse().unwrap_or(view_date.month);
@@ -75,6 +76,7 @@ fn MonthTitle() -> Element {
 
         select {
             class: "calendar-year-select",
+            aria_label: "Year",
             onchange: move |e| {
                 let mut view_date = calendar.view_date();
                 view_date.year = e.value().parse().unwrap_or(view_date.year);

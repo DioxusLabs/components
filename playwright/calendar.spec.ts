@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test("test", async ({ page }) => {
   await page.goto("http://127.0.0.1:8080/component/?name=calendar&", { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
   // Find the calendar element
-  const calendar = page.locator(".calendar");
+  const calendar = page.locator(".calendar").nth(0);
   // Find the calendar-nav-prev button
   const prevButton = calendar.locator(".calendar-nav-prev");
   // Find the calendar-nav-next button
@@ -12,19 +12,19 @@ test("test", async ({ page }) => {
   // Assert the calendar is displayed
   await expect(calendar).toBeVisible();
   // Assert the current month is displayed
-  const currentMonth = calendar.locator(".calendar-month-title");
-  let currentMonthText = (await currentMonth.textContent()) || "";
+  const currentMonth = calendar.locator(".calendar-month-select");
+  let currentMonthText = await currentMonth.inputValue();
 
   // Click the previous button to go to the previous month
   await prevButton.click();
   // Assert the month has changed
-  let previousMonthText = await currentMonth.textContent();
+  let previousMonthText = await currentMonth.inputValue();
   expect(previousMonthText).not.toBe(currentMonthText);
 
   // Click the next button to go back to the current month
   await nextButton.click();
   // Assert the month has changed back to the current month
-  await expect(currentMonth).toHaveText(currentMonthText);
+  await expect(currentMonth).toHaveValue(currentMonthText);
 
   // Move focus to the calendar with tab
   await page.keyboard.press("Tab");
