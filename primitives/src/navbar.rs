@@ -8,7 +8,6 @@ use crate::{
     use_animated_open, use_id_or, use_unique_id,
 };
 use dioxus::prelude::*;
-use dioxus_router::*;
 
 #[derive(Clone, Copy)]
 struct NavbarContext {
