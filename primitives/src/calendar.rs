@@ -1,6 +1,5 @@
 //! Defines the [`Calendar`] component and its sub-components, which provide a calendar interface with date selection and navigation.
 
-use crate::use_unique_id;
 use dioxus_lib::prelude::*;
 use std::{
     fmt::{self, Display},
@@ -163,36 +162,56 @@ impl CalendarDate {
         day_of_the_week(self.year, self.month, self.day)
     }
 
+    /// The human-readable names of each month
+    pub const MONTH_LABELS: [&'static str; 12] = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December",
+    ];
+
+    /// Get a human-readable name for the month
+    pub fn month_name(&self) -> &str {
+        Self::MONTH_LABELS[self.month as usize - 1]
+    }
+
+    /// Abbreviated month names
+    pub const MONTH_ABBREVIATIONS: [&'static str; 12] = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ];
+
+    /// Get an abbreviated name for the month
+    pub fn month_abbreviation(&self) -> &str {
+        Self::MONTH_ABBREVIATIONS[self.month as usize - 1]
+    }
+
+    /// The human-readable names of each day of the week
+    pub const DAY_LABELS: [&'static str; 7] = [
+        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+    ];
+
+    /// Get a human-readable name for the day of the week
+    pub fn day_name(&self) -> &str {
+        Self::DAY_LABELS[self.day_of_the_week() as usize]
+    }
+
+    /// Abbreviated day names
+    pub const DAY_ABBREVIATIONS: [&'static str; 7] = [
+        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",
+    ];
+
+    /// Get an abbreviated name for the day of the week
+    pub fn day_abbreviation(&self) -> &str {
+        Self::DAY_ABBREVIATIONS[self.day_of_the_week() as usize]
+    }
+
     /// Get a human-readable ARIA label for this date
     pub fn aria_label(&self) -> String {
-        let month_names = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-        ];
-        let day_names = [
-            "Sunday",
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-        ];
-        let day_of_week = self.day_of_the_week();
+        let month_name = self.month_name();
+        let day_name = self.day_name();
         format!(
             "{}, {} {}, {}",
-            day_names[day_of_week as usize],
-            month_names[(self.month - 1) as usize],
+            day_name,
+            month_name,
             self.day,
             self.year
         )
@@ -276,10 +295,9 @@ impl fmt::Display for CalendarDate {
     }
 }
 
-// Calendar context for child components
-#[allow(dead_code)]
-#[derive(Clone)]
-struct CalendarContext {
+/// The context provided by the [`Calendar`] component to its children.
+#[derive(Copy, Clone)]
+pub struct CalendarContext {
     // State
     selected_date: ReadOnlySignal<Option<CalendarDate>>,
     set_selected_date: Callback<Option<CalendarDate>>,
@@ -289,13 +307,44 @@ struct CalendarContext {
 
     // Configuration
     disabled: ReadOnlySignal<bool>,
-    disabled_dates: ReadOnlySignal<Vec<CalendarDate>>,
-    min_date: ReadOnlySignal<Option<CalendarDate>>,
-    max_date: ReadOnlySignal<Option<CalendarDate>>,
     today: CalendarDate,
+}
 
-    // Accessibility
-    calendar_id: ReadOnlySignal<String>,
+impl CalendarContext {
+    /// Get the currently selected date
+    pub fn selected_date(&self) -> Option<CalendarDate> {
+        self.selected_date.cloned()
+    }
+
+    /// Set the selected date
+    pub fn set_selected_date(&self, date: Option<CalendarDate>) {
+        (self.set_selected_date)(date);
+    }
+
+    /// Get the currently focused date
+    pub fn focused_date(&self) -> Option<CalendarDate> {
+        self.focused_date.cloned()
+    }
+
+    /// Set the focused date
+    pub fn set_focused_date(&mut self, date: Option<CalendarDate>) {
+        self.focused_date.set(date);
+    }
+
+    /// Get the current view date
+    pub fn view_date(&self) -> CalendarDate {
+        self.view_date.cloned()
+    }
+
+    /// Set the view date
+    pub fn set_view_date(&self, date: CalendarDate) {
+        (self.set_view_date)(date);
+    }
+
+    /// Check if the calendar is disabled
+    pub fn is_disabled(&self) -> bool {
+        self.disabled.cloned()
+    }
 }
 
 /// The props for the [`Calendar`] component.
@@ -323,22 +372,6 @@ pub struct CalendarProps {
     /// Whether the calendar is disabled
     #[props(default)]
     pub disabled: ReadOnlySignal<bool>,
-
-    /// Dates that should be disabled/unselectable
-    #[props(default = ReadOnlySignal::new(Signal::new(Vec::new())))]
-    pub disabled_dates: ReadOnlySignal<Vec<CalendarDate>>,
-
-    /// Minimum selectable date
-    #[props(default = ReadOnlySignal::new(Signal::new(None)))]
-    pub min_date: ReadOnlySignal<Option<CalendarDate>>,
-
-    /// Maximum selectable date
-    #[props(default = ReadOnlySignal::new(Signal::new(None)))]
-    pub max_date: ReadOnlySignal<Option<CalendarDate>>,
-
-    /// Optional ID for the calendar
-    #[props(default)]
-    pub id: Option<String>,
 
     /// First day of the week (1 = Monday, 7 = Sunday)
     #[props(default = 1)]
@@ -401,12 +434,6 @@ pub struct CalendarProps {
 /// - `data-disabled`: Indicates if the calendar is disabled. Possible values are `true` or `false`.
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
-    // Generate a unique ID for the calendar
-    let calendar_id = match props.id {
-        Some(ref id) => use_signal(|| id.clone()),
-        None => use_unique_id(),
-    };
-
     // Create context provider for child components
     let mut ctx = use_context_provider(|| CalendarContext {
         selected_date: props.selected_date,
@@ -415,10 +442,6 @@ pub fn Calendar(props: CalendarProps) -> Element {
         view_date: props.view_date,
         set_view_date: props.on_view_change,
         disabled: props.disabled,
-        disabled_dates: props.disabled_dates,
-        min_date: props.min_date,
-        max_date: props.max_date,
-        calendar_id: calendar_id.into(),
         today: props.today,
     });
 
@@ -426,7 +449,6 @@ pub fn Calendar(props: CalendarProps) -> Element {
         div {
             role: "application",
             "aria-label": "Calendar",
-            id: props.id,
             "data-disabled": (props.disabled)(),
             onkeydown: move |e| {
                 let Some(focused_date) = (ctx.focused_date)() else {
@@ -836,21 +858,7 @@ pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
     // Format the current month and year
     let month_year = use_memo(move || {
         let view_date = (ctx.view_date)();
-        let month_names = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-        ];
-        let month_name = month_names[(view_date.month - 1) as usize];
+        let month_name = view_date.month_name();
         format!("{} {}", month_name, view_date.year)
     });
 

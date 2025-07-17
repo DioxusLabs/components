@@ -1,3 +1,5 @@
+use core::panic;
+
 use dioxus::prelude::*;
 use dioxus_primitives::tabs::{TabContent, TabList, TabTrigger, Tabs};
 
@@ -7,6 +9,11 @@ mod components;
 struct ComponentDemoData {
     name: &'static str,
     docs: &'static str,
+    variants: &'static [ComponentVariantDemoData],
+}
+
+#[derive(Clone, PartialEq)]
+struct ComponentVariantDemoData {
     rs_highlighted: HighlightedCode,
     css_highlighted: HighlightedCode,
     component: fn() -> Element,
@@ -109,7 +116,7 @@ fn NavigationLayout() -> Element {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/theme.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
-        document::Link { rel: "stylesheet", href: asset!("/src/components/tabs/style.css") }
+        document::Link { rel: "stylesheet", href: asset!("/src/components/tabs/variants/main/style.css") }
         Navbar {}
         Outlet::<Route> {}
     }
@@ -487,17 +494,37 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     let ComponentDemoData {
         name,
         docs,
-        rs_highlighted,
-        css_highlighted,
-        component: Comp,
+        variants
     } = demo;
     let name = name.replace("_", " ");
+    let [main, variants @ ..] = variants else {
+        unreachable!("Expected at least one variant for component: {}", name);
+    };
     rsx! {
         main { class: "component-demo",
             h1 { class: "component-title", {name} }
-            div { class: "component-preview",
-                div { class: "component-preview-contents",
-                    div { class: "component-preview-frame", Comp {} }
+            ComponentVariantHighlight { variant: main.clone(), include_installation: true }
+            div { class: "component-description",
+                div { dangerous_inner_html: docs }
+            }
+            if !variants.is_empty() {
+                h2 { class: "component-variants-title", "Variants" }
+                for variant in variants {
+                    ComponentVariantHighlight { variant: variant.clone(), include_installation: false }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn ComponentVariantHighlight(variant: ComponentVariantDemoData, include_installation: bool) -> Element {
+    let ComponentVariantDemoData { rs_highlighted, css_highlighted, component: Comp }  = variant;
+    rsx! {
+        div { class: "component-preview",
+            div { class: "component-preview-contents",
+                div { class: "component-preview-frame", Comp {} }
+                if include_installation {
                     div { class: "component-installation",
                         h2 { "Installation" }
                         ol { class: "component-installation-list",
@@ -507,13 +534,10 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
                             li { "Modify your components and styles as needed." }
                         }
                     }
-                    div { class: "component-code",
-                        ComponentCode { rs_highlighted, css_highlighted }
-                    }
                 }
-            }
-            div { class: "component-description",
-                div { dangerous_inner_html: docs }
+                div { class: "component-code",
+                    ComponentCode { rs_highlighted, css_highlighted }
+                }
             }
         }
     }
@@ -567,23 +591,33 @@ fn Installation() -> Element {
 fn ComponentGallery(search: String) -> Element {
     rsx! {
         div { class: "masonry-with-columns",
-            for ComponentDemoData { component : Comp , name , .. } in components::DEMOS.iter().cloned() {
-                if search.is_empty() || name.to_lowercase().contains(&search.to_lowercase()) {
-                    div { class: "masonry-preview-frame", position: "relative",
-                        h3 { class: "component-title", {name.replace("_", " ")} }
-                        GotoIcon {
-                            class: "goto-icon",
-                            position: "absolute",
-                            margin: "0.5rem",
-                            top: "0",
-                            right: "0",
-                            aria_label: "{name} details",
-                            to: Route::component(name),
-                        }
-                        div { class: "masonry-component-frame", Comp {} }
-                    }
+            for component in components::DEMOS.iter().cloned() {
+                if search.is_empty() || component.name.to_lowercase().contains(&search.to_lowercase()) {
+                    ComponentGalleryPreview { component }
                 }
             }
+        }
+    }
+}
+
+#[component]
+fn ComponentGalleryPreview(component: ComponentDemoData) -> Element {
+    let ComponentDemoData { name, variants, .. } = component;
+    let first_variant = &variants[0];
+    let Comp = first_variant.component;
+    rsx! {
+        div { class: "masonry-preview-frame", position: "relative",
+            h3 { class: "component-title", {name.replace("_", " ")} }
+            GotoIcon {
+                class: "goto-icon",
+                position: "absolute",
+                margin: "0.5rem",
+                top: "0",
+                right: "0",
+                aria_label: "{name} details",
+                to: Route::component(name),
+            }
+            div { class: "masonry-component-frame", Comp {} }
         }
     }
 }
