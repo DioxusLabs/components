@@ -164,8 +164,18 @@ impl CalendarDate {
 
     /// The human-readable names of each month
     pub const MONTH_LABELS: [&'static str; 12] = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
     ];
 
     /// Get a human-readable name for the month
@@ -175,8 +185,7 @@ impl CalendarDate {
 
     /// Abbreviated month names
     pub const MONTH_ABBREVIATIONS: [&'static str; 12] = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ];
 
     /// Get an abbreviated name for the month
@@ -186,7 +195,13 @@ impl CalendarDate {
 
     /// The human-readable names of each day of the week
     pub const DAY_LABELS: [&'static str; 7] = [
-        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
     ];
 
     /// Get a human-readable name for the day of the week
@@ -195,9 +210,8 @@ impl CalendarDate {
     }
 
     /// Abbreviated day names
-    pub const DAY_ABBREVIATIONS: [&'static str; 7] = [
-        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",
-    ];
+    pub const DAY_ABBREVIATIONS: [&'static str; 7] =
+        ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     /// Get an abbreviated name for the day of the week
     pub fn day_abbreviation(&self) -> &str {
@@ -208,13 +222,7 @@ impl CalendarDate {
     pub fn aria_label(&self) -> String {
         let month_name = self.month_name();
         let day_name = self.day_name();
-        format!(
-            "{}, {} {}, {}",
-            day_name,
-            month_name,
-            self.day,
-            self.year
-        )
+        format!("{}, {} {}, {}", day_name, month_name, self.day, self.year)
     }
 }
 

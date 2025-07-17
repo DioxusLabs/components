@@ -57,7 +57,7 @@ examples!(
     aspect_ratio,
     avatar,
     button,
-    calendar [simple],
+    calendar[simple],
     checkbox,
     collapsible,
     context_menu,

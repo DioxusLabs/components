@@ -494,7 +494,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     let ComponentDemoData {
         name,
         docs,
-        variants
+        variants,
     } = demo;
     let name = name.replace("_", " ");
     let [main, variants @ ..] = variants else {
@@ -518,8 +518,15 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
 }
 
 #[component]
-fn ComponentVariantHighlight(variant: ComponentVariantDemoData, include_installation: bool) -> Element {
-    let ComponentVariantDemoData { rs_highlighted, css_highlighted, component: Comp }  = variant;
+fn ComponentVariantHighlight(
+    variant: ComponentVariantDemoData,
+    include_installation: bool,
+) -> Element {
+    let ComponentVariantDemoData {
+        rs_highlighted,
+        css_highlighted,
+        component: Comp,
+    } = variant;
     rsx! {
         div { class: "component-preview",
             div { class: "component-preview-contents",
