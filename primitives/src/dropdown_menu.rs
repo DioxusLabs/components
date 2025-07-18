@@ -11,7 +11,7 @@ use dioxus::prelude::*;
 #[derive(Clone, Copy)]
 struct DropdownMenuContext {
     // State
-    open: ReadOnlySignal<bool>,
+    open: Memo<bool>,
     set_open: Callback<bool>,
     disabled: ReadOnlySignal<bool>,
 
@@ -104,7 +104,7 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
     let trigger_id = use_unique_id();
     let focus = use_focus_provider(props.roving_loop);
     let mut ctx = use_context_provider(|| DropdownMenuContext {
-        open: open.into(),
+        open,
         set_open,
         disabled,
         focus,

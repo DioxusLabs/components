@@ -9,7 +9,7 @@ use dioxus::prelude::*;
 #[derive(Clone, Copy)]
 struct ContextMenuCtx {
     // State
-    open: ReadOnlySignal<bool>,
+    open: Memo<bool>,
     set_open: Callback<bool>,
     disabled: ReadOnlySignal<bool>,
 
@@ -104,7 +104,7 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
 
     let focus = use_focus_provider(props.roving_loop);
     let mut ctx = use_context_provider(|| ContextMenuCtx {
-        open: open.into(),
+        open,
         set_open,
         disabled: props.disabled,
         position,
@@ -466,10 +466,12 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
 
     let handle_click = {
         let value = (props.value)().clone();
-        move |_| {
+        move |event: Event<PointerData>| {
             if !disabled() {
                 props.on_select.call(value.clone());
                 ctx.focus.blur();
+                event.prevent_default();
+                event.stop_propagation();
             }
         }
     };

@@ -6,7 +6,7 @@ use dioxus::prelude::*;
 
 #[derive(Clone)]
 struct AlertDialogCtx {
-    open: ReadOnlySignal<bool>,
+    open: Memo<bool>,
     set_open: Callback<bool>,
     labelledby: String,
     describedby: String,
@@ -86,7 +86,7 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
     });
     let open = use_memo(move || (props.open)().unwrap_or_else(&*open_signal));
     use_context_provider(|| AlertDialogCtx {
-        open: open.into(),
+        open,
         set_open,
         labelledby,
         describedby,

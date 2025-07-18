@@ -12,7 +12,7 @@ use dioxus::prelude::*;
 struct RadioGroupCtx {
     // State
     disabled: ReadOnlySignal<bool>,
-    value: ReadOnlySignal<String>,
+    value: Memo<String>,
     set_value: Callback<String>,
 
     // Keyboard nav data
@@ -158,7 +158,7 @@ pub fn RadioGroup(props: RadioGroupProps) -> Element {
 
     let focus = use_focus_provider(props.roving_loop);
     let mut ctx = use_context_provider(|| RadioGroupCtx {
-        value: value.into(),
+        value,
         set_value,
         disabled: props.disabled,
 
