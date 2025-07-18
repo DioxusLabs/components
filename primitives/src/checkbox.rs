@@ -52,7 +52,7 @@ impl Not for CheckboxState {
 
 #[derive(Clone, Copy)]
 struct CheckboxCtx {
-    checked: ReadOnlySignal<CheckboxState>,
+    checked: Memo<CheckboxState>,
     disabled: ReadOnlySignal<bool>,
 }
 
@@ -131,7 +131,7 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
     );
 
     use_context_provider(|| CheckboxCtx {
-        checked: checked.into(),
+        checked,
         disabled: props.disabled,
     });
 
