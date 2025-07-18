@@ -188,7 +188,6 @@ impl FocusState {
         let is_focused = self.is_focused(index);
         if is_focused {
             if let Some(md) = controlled_ref() {
-                tracing::info!("Setting focus to item {}", index);
                 spawn(async move {
                     let _ = md.set_focus(true).await;
                 });
