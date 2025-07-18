@@ -2,7 +2,7 @@
 
 use crate::{
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
-    use_animated_open, use_controlled, use_id_or, use_unique_id,
+    use_animated_open, use_controlled, use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::prelude::*;
 
@@ -119,8 +119,8 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
     });
 
     // If the context menu is open, prevent pointer and scroll events outside of it
-    use_effect(move || {
-        if ctx.open.cloned() {
+    let pointer_events_disabled = |disabled| {
+        if disabled {
             dioxus::document::eval(
                 "document.body.style.pointerEvents = 'none'; document.documentElement.style.overflow = 'hidden';",
             );
@@ -128,6 +128,15 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
             dioxus::document::eval(
                 "document.body.style.pointerEvents = 'auto'; document.documentElement.style.overflow = 'auto';",
             );
+        }
+    };
+    use_effect(move || {
+        pointer_events_disabled(ctx.open.cloned());
+    });
+    use_effect_cleanup(move || {
+        // If the context menu was open, reset pointer events
+        if ctx.open.cloned() {
+            pointer_events_disabled(false);
         }
     });
 
