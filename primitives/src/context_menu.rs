@@ -1,7 +1,8 @@
 //! Defines the [`ContextMenu`] component and its subcomponents, which provide a context menu interface.
 
 use crate::{
-    focus::{use_focus_controlled_item, use_focus_provider, FocusState}, use_animated_open, use_controlled, use_effect_cleanup, use_id_or, use_unique_id
+    focus::{use_focus_controlled_item, use_focus_provider, FocusState},
+    use_animated_open, use_controlled, use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::prelude::*;
 
