@@ -1,6 +1,6 @@
 //! Defines the [`Select`] component and its sub-components, which provide a searchable select input with keyboard navigation.
 
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
 use crate::{
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
@@ -11,17 +11,20 @@ use dioxus::prelude::Code;
 use dioxus::prelude::*;
 
 #[derive(Clone, Copy)]
-struct SelectContext {
+struct SelectContext<T: Clone + PartialEq + 'static> {
     // The typeahead buffer for searching options
     typeahead_buffer: Signal<String>,
     // If the select is open
     open: Signal<bool>,
     // The currently selected value
-    value: Memo<Option<String>>,
+    value: Memo<Option<T>>,
+    // The current selected value display
+    display: Memo<Option<String>>,
     // Set the value
-    set_value: Callback<Option<String>>,
+    set_value: Callback<Option<T>>,
+    set_display: Callback<Option<String>>,
     // A list of options with their states
-    options: Signal<Vec<OptionState>>,
+    options: Signal<Vec<OptionState<T>>>,
     // Known key positions for the keyboard layout
     known_key_positions: Signal<HashMap<char, char>>,
     // The ID of the list for ARIA attributes
@@ -34,7 +37,7 @@ struct SelectContext {
     placeholder: ReadOnlySignal<String>,
 }
 
-impl SelectContext {
+impl<T: Clone + PartialEq + 'static> SelectContext<T> {
     fn select_current_item(&mut self) {
         // If the select is open, select the focused item
         if self.open.cloned() {
@@ -66,7 +69,7 @@ impl SelectContext {
             .options
             .read()
             .iter()
-            .map(|opt| opt.value.chars().count())
+            .map(|opt| opt.display.chars().count())
             .max()
             .unwrap_or_default();
         let overflow_length = typeahead_buffer.len().saturating_sub(longest_option_length);
@@ -80,10 +83,10 @@ impl SelectContext {
     }
 }
 
-fn best_match(
+fn best_match<T: Clone + PartialEq + 'static>(
     keyboard_layout: &KeyboardLayout,
     typeahead: &str,
-    options: &[OptionState],
+    options: &[OptionState<T>],
 ) -> Option<usize> {
     if typeahead.is_empty() {
         return None;
@@ -94,7 +97,7 @@ fn best_match(
     options
         .iter()
         .map(|opt| {
-            let value = &opt.value;
+            let value = &opt.display;
             let value_characters: Box<[_]> = value.chars().collect();
             let distance =
                 normalized_distance(&typeahead_characters, &value_characters, keyboard_layout);
@@ -448,29 +451,33 @@ fn test_detect_keyboard_layout() {
 }
 
 #[derive(Clone, Debug)]
-struct OptionState {
+struct OptionState<T> {
     /// The tab index of the option
     tab_index: usize,
     /// The value of the option
-    value: String,
+    value: T,
+    /// The display value of the option
+    display: String,
     /// The id of the option
     id: String,
 }
 
 /// The props for the [`Select`] component
 #[derive(Props, Clone, PartialEq)]
-pub struct SelectProps {
+pub struct SelectProps<T: Clone + PartialEq + 'static> {
     /// The controlled value of the select
     #[props(default)]
-    pub value: ReadOnlySignal<Option<Option<String>>>,
+    pub value: ReadOnlySignal<Option<Option<T>>>,
 
     /// The default value of the select
     #[props(default)]
-    pub default_value: Option<String>,
+    pub default_value: Option<T>,
 
     /// Callback when the value changes
     #[props(default)]
-    pub on_value_change: Callback<Option<String>>,
+    pub on_value_change: Callback<Option<T>>,
+
+    pub on_display_change: Callback<Option<String>>,
 
     /// Whether the select is disabled
     #[props(default)]
@@ -549,9 +556,12 @@ pub struct SelectProps {
 /// The [`Select`] component defines the following data attributes you can use to control styling:
 /// - `data-state`: Indicates the current state of the select. Values are `open` or `closed`.
 #[component]
-pub fn Select(props: SelectProps) -> Element {
+pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element {
     let (value, set_value) =
         use_controlled(props.value, props.default_value, props.on_value_change);
+
+    // FIXME
+    let (display, sed_display) = use_controlled(props.placeholder, "foo bar".to_string(), props.on_display_change);
 
     let open = use_signal(|| false);
 
@@ -594,6 +604,7 @@ pub fn Select(props: SelectProps) -> Element {
         typeahead_buffer,
         open,
         value,
+        // display: ,
         set_value,
         options,
         known_key_positions,
@@ -676,8 +687,8 @@ pub struct SelectTriggerProps {
 ///
 /// The [`SelectTrigger`] component defines a span with a `data-placeholder` attribute if a placeholder is set.
 #[component]
-pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
-    let mut ctx: SelectContext = use_context();
+pub fn SelectTrigger<T: IntoDynNode + Display + PartialEq + Clone + 'static>(props: SelectTriggerProps) -> Element {
+    let mut ctx: SelectContext<T> = use_context();
 
     let mut open = ctx.open;
 
@@ -718,7 +729,7 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
             // Add placeholder option if needed
             span {
                 "data-placeholder": ctx.value.read().is_none(),
-                {ctx.value.cloned().unwrap_or_else(|| ctx.placeholder.cloned())}
+                {ctx.display.cloned().unwrap_or_else(|| ctx.placeholder.cloned())}
             }
 
             // Render children (options)
@@ -791,8 +802,8 @@ pub struct SelectListProps {
 /// }
 /// ```
 #[component]
-pub fn SelectList(props: SelectListProps) -> Element {
-    let mut ctx: SelectContext = use_context();
+pub fn SelectList<T: Display + PartialEq + Clone + 'static>(props: SelectListProps) -> Element {
+    let mut ctx: SelectContext<T> = use_context();
 
     let id = use_unique_id();
     let id = use_id_or(id, props.id);
@@ -908,10 +919,12 @@ struct SelectOptionContext {
 
 /// The props for the [`SelectOption`] component
 #[derive(Props, Clone, PartialEq)]
-pub struct SelectOptionProps {
+pub struct SelectOptionProps<T: Display + PartialEq + Clone + 'static> {
     /// The value of the option. This will be used both to pass to the [`SelectProps::on_value_change`] callback
     /// and for typeahead search.
-    pub value: ReadOnlySignal<String>,
+    pub value: ReadOnlySignal<T>,
+
+    pub display: ReadOnlySignal<String>,
 
     /// Whether the option is disabled
     #[props(default)]
@@ -987,7 +1000,9 @@ pub struct SelectOptionProps {
 /// }
 /// ```
 #[component]
-pub fn SelectOption(props: SelectOptionProps) -> Element {
+pub fn SelectOption<T: Display + PartialEq + Clone + 'static>(
+    props: SelectOptionProps<T>,
+) -> Element {
     // Generate a unique ID for this option for accessibility
     let option_id = use_unique_id();
 
@@ -996,13 +1011,15 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
 
     let index = props.index;
     let value = props.value;
+    let display = props.display;
 
     // Push this option to the context
-    let mut ctx: SelectContext = use_context();
+    let mut ctx: SelectContext<T> = use_context();
     use_effect(move || {
         let option_state = OptionState {
             tab_index: index(),
             value: value.cloned(),
+            display: display(),
             id: id(),
         };
 
@@ -1037,6 +1054,7 @@ pub fn SelectOption(props: SelectOptionProps) -> Element {
             onpointerdown: move |event| {
                 if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
                     ctx.set_value.call(Some(props.value.read().clone()));
+                    ctx.set_display.call(Some(props.display.read().clone()));
                     ctx.open.set(false);
                 }
             },
@@ -1191,8 +1209,8 @@ pub struct SelectGroupProps {
 /// }
 /// ```
 #[component]
-pub fn SelectGroup(props: SelectGroupProps) -> Element {
-    let ctx: SelectContext = use_context();
+pub fn SelectGroup<T: Display + PartialEq + Clone + 'static>(props: SelectGroupProps) -> Element {
+    let ctx: SelectContext<T> = use_context();
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
 
     let labeled_by = use_signal(|| None);
