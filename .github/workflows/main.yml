@@ -124,3 +124,4 @@ jobs:
         with:
           cache-all-crates: "true"
       - run: cargo clippy --workspace --examples --tests --all-features --all-targets -- -D warnings
+      - run: cargo build -p dioxus-primitives --all-features --target wasm32-unknown-unknown
