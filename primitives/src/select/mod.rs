@@ -29,7 +29,7 @@
 //! #[component]
 //! fn Demo() -> Element {
 //!     rsx! {
-//!         Select {
+//!         Select::<String> {
 //!             placeholder: "Select a fruit...",
 //!             SelectTrigger {
 //!                 aria_label: "Select Trigger",
@@ -39,13 +39,13 @@
 //!                 aria_label: "Select Demo",
 //!                 SelectGroup {
 //!                     SelectGroupLabel { "Fruits" }
-//!                     SelectOption {
+//!                     SelectOption::<String> {
 //!                         index: 0usize,
 //!                         value: "apple".to_string(),
 //!                         "Apple"
 //!                         SelectItemIndicator { "✔️" }
 //!                     }
-//!                     SelectOption {
+//!                     SelectOption::<String> {
 //!                         index: 1usize,
 //!                         value: "banana".to_string(),
 //!                         "Banana"

@@ -14,7 +14,7 @@ pub fn Demo() -> Element {
             class: "select",
             placeholder: "Select a fruit...",
             on_display_change: |_| {},
-            SelectTrigger::<String> {
+            SelectTrigger {
                 class: "select-trigger",
                 aria_label: "Select Trigger",
                 width: "12rem",
@@ -25,10 +25,10 @@ pub fn Demo() -> Element {
                     polyline { points: "6 9 12 15 18 9" }
                 }
             }
-            SelectList::<String> {
+            SelectList {
                 class: "select-list",
                 aria_label: "Select Demo",
-                SelectGroup::<String> {
+                SelectGroup {
                     class: "select-group",
                     SelectGroupLabel {
                         class: "select-group-label",
@@ -110,7 +110,7 @@ pub fn Demo() -> Element {
                         }
                     }
                 }
-                SelectGroup::<String> {
+                SelectGroup {
                     class: "select-group",
                     SelectGroupLabel {
                         class: "select-group-label",

@@ -14,7 +14,7 @@ use super::context::{
 
 /// Props for the main Select component
 #[derive(Props, Clone, PartialEq)]
-pub struct SelectProps<T: Clone + PartialEq + 'static> {
+pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
     /// The controlled value of the select
     #[props(default)]
     pub value: ReadOnlySignal<Option<Option<T>>>,
@@ -72,7 +72,7 @@ pub struct SelectProps<T: Clone + PartialEq + 'static> {
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
-///         Select {
+///         Select::<String> {
 ///             placeholder: "Select a fruit...",
 ///             on_display_change: |_| {},
 ///             SelectTrigger {
@@ -83,14 +83,14 @@ pub struct SelectProps<T: Clone + PartialEq + 'static> {
 ///                 aria_label: "Select Demo",
 ///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
-///                     SelectOption {
+///                     SelectOption::<String> {
 ///                         index: 0usize,
 ///                         value: "apple".to_string(),
 ///                         display: "Apple".to_string(), // Capitalized display text
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
-///                     SelectOption {
+///                     SelectOption::<String> {
 ///                         index: 1usize,
 ///                         value: "banana".to_string(),
 ///                         display: "Banana".to_string(), // Capitalized display text
@@ -200,10 +200,8 @@ pub struct SelectTriggerProps {
 ///
 /// This must be used inside a [`Select`] component.
 #[component]
-pub fn SelectTrigger<T: Clone + PartialEq + Display + 'static>(
-    props: SelectTriggerProps,
-) -> Element {
-    let mut ctx: SelectContext<T> = use_context();
+pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
+    let mut ctx: SelectContext = use_context();
     let mut open = ctx.open;
 
     rsx! {
@@ -274,8 +272,8 @@ pub struct SelectListProps {
 ///
 /// This must be used inside a [`Select`] component.
 #[component]
-pub fn SelectList<T: Clone + PartialEq + Display + 'static>(props: SelectListProps) -> Element {
-    let mut ctx: SelectContext<T> = use_context();
+pub fn SelectList(props: SelectListProps) -> Element {
+    let mut ctx: SelectContext = use_context();
 
     let id = use_unique_id();
     let id = use_id_or(id, props.id);
@@ -387,7 +385,7 @@ pub fn SelectList<T: Clone + PartialEq + Display + 'static>(props: SelectListPro
 
 /// The props for the [`SelectOption`] component
 #[derive(Props, Clone, PartialEq)]
-pub struct SelectOptionProps<T: Display + PartialEq + Clone + 'static> {
+pub struct SelectOptionProps<T: Display + PartialEq + Clone + 'static = String> {
     /// The programmatic value of the option. This is passed to [`SelectProps::on_value_change`] callback
     /// when selected and used internally for comparison. Should be machine-readable (e.g., "apple", "user_123").
     pub value: ReadOnlySignal<T>,
@@ -565,8 +563,8 @@ pub struct SelectGroupProps {
 ///
 /// This must be used inside a [`SelectList`] component.
 #[component]
-pub fn SelectGroup<T: Display + PartialEq + Clone + 'static>(props: SelectGroupProps) -> Element {
-    let ctx: SelectContext<T> = use_context();
+pub fn SelectGroup(props: SelectGroupProps) -> Element {
+    let ctx: SelectContext = use_context();
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
 
     let labeled_by = use_signal(|| None);
