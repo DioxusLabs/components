@@ -118,10 +118,27 @@ jobs:
           version: 1.0
       - uses: dtolnay/rust-toolchain@1.86.0
         with:
-          targets: wasm32-unknown-unknown
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
         with:
           cache-all-crates: "true"
       - run: cargo clippy --workspace --examples --tests --all-features --all-targets -- -D warnings
-      - run: cargo build -p dioxus-primitives --all-features --target wasm32-unknown-unknown
+
+  clippy-wasm32:
+    if: github.event.pull_request.draft == false
+    name: Building in wasm32-unknown-unknown target
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev libxdo-dev
+          version: 1.0
+      - uses: dtolnay/rust-toolchain@1.86.0
+        with:
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: "true"
+      - run: cargo clippy -p dioxus-primitives --all-features --target wasm32-unknown-unknown -- -D warnings
