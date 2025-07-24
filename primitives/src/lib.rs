@@ -61,7 +61,10 @@ fn use_unique_id() -> Signal<String> {
 }
 
 // Elements can only have one id so if the user provides their own, we must use it as the aria id.
-fn use_id_or<T: Clone + PartialEq + 'static>(mut gen_id: Signal<T>, user_id: ReadOnlySignal<Option<T>>) -> Memo<T> {
+fn use_id_or<T: Clone + PartialEq + 'static>(
+    mut gen_id: Signal<T>,
+    user_id: ReadOnlySignal<Option<T>>,
+) -> Memo<T> {
     // First, check if we have a user-provided ID
     let has_user_id = use_memo(move || user_id().is_some());
 

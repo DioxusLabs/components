@@ -10,10 +10,11 @@ pub fn Demo() -> Element {
             rel: "stylesheet",
             href: asset!("/src/components/select/variants/main/style.css"),
         }
-        Select {
+        Select::<String> {
             class: "select",
             placeholder: "Select a fruit...",
-            SelectTrigger {
+            on_display_change: |_| {},
+            SelectTrigger::<String> {
                 class: "select-trigger",
                 aria_label: "Select Trigger",
                 width: "12rem",
@@ -24,19 +25,20 @@ pub fn Demo() -> Element {
                     polyline { points: "6 9 12 15 18 9" }
                 }
             }
-            SelectList {
+            SelectList::<String> {
                 class: "select-list",
                 aria_label: "Select Demo",
-                SelectGroup {
+                SelectGroup::<String> {
                     class: "select-group",
                     SelectGroupLabel {
                         class: "select-group-label",
                         "Fruits"
                     }
-                    SelectOption {
+                    SelectOption::<String> {
                         index: 0usize,
                         class: "select-option",
                         value: "apple".to_string(),
+                        display: "Apple".to_string(),
                         "Apple"
                         SelectItemIndicator {
                             svg {
@@ -47,10 +49,11 @@ pub fn Demo() -> Element {
                             }
                         }
                     }
-                    SelectOption {
+                    SelectOption::<String> {
                         index: 1usize,
                         class: "select-option",
                         value: "banana".to_string(),
+                        display: "Banana".to_string(),
                         "Banana"
                         SelectItemIndicator {
                             svg {
@@ -61,10 +64,11 @@ pub fn Demo() -> Element {
                             }
                         }
                     }
-                    SelectOption {
+                    SelectOption::<String> {
                         index: 2usize,
                         class: "select-option",
                         value: "orange".to_string(),
+                        display: "Orange".to_string(),
                         "Orange"
                         SelectItemIndicator {
                             svg {
@@ -75,10 +79,11 @@ pub fn Demo() -> Element {
                             }
                         }
                     }
-                    SelectOption {
+                    SelectOption::<String> {
                         index: 3usize,
                         class: "select-option",
                         value: "strawberry".to_string(),
+                        display: "Strawberry".to_string(),
                         "Strawberry"
                         SelectItemIndicator {
                             svg {
@@ -89,10 +94,11 @@ pub fn Demo() -> Element {
                             }
                         }
                     }
-                    SelectOption {
+                    SelectOption::<String> {
                         index: 4usize,
                         class: "select-option",
                         value: "watermelon".to_string(),
+                        display: "Watermelon".to_string(),
                         "Watermelon"
                         SelectItemIndicator {
                             svg {
@@ -104,16 +110,17 @@ pub fn Demo() -> Element {
                         }
                     }
                 }
-                SelectGroup {
+                SelectGroup::<String> {
                     class: "select-group",
                     SelectGroupLabel {
                         class: "select-group-label",
                         "Other"
                     }
-                    SelectOption {
+                    SelectOption::<String> {
                         index: 5usize,
                         class: "select-option",
                         value: "other".to_string(),
+                        display: "Other".to_string(),
                         "Other"
                         SelectItemIndicator {
                             svg {
