@@ -11,7 +11,7 @@ strum = { version = "0.27.2", features = ["derive"] }
 tracing.workspace = true
 
 [build-dependencies]
-syntect = "5.0"
+syntect = "5.2"
 pulldown-cmark = "0.13.0"
 
 [features]

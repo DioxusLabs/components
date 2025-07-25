@@ -1,13 +1,13 @@
 //! Component definitions for the select primitive.
 
-pub mod select;
-pub mod trigger;
+pub mod group;
 pub mod list;
 pub mod option;
-pub mod group;
+pub mod select;
+pub mod trigger;
 
+pub use group::{SelectGroup, SelectGroupLabel, SelectGroupLabelProps, SelectGroupProps};
+pub use list::{SelectList, SelectListProps};
+pub use option::{SelectItemIndicator, SelectItemIndicatorProps, SelectOption, SelectOptionProps};
 pub use select::{Select, SelectProps};
 pub use trigger::{SelectTrigger, SelectTriggerProps};
-pub use list::{SelectList, SelectListProps};
-pub use option::{SelectOption, SelectOptionProps, SelectItemIndicator, SelectItemIndicatorProps};
-pub use group::{SelectGroup, SelectGroupProps, SelectGroupLabel, SelectGroupLabelProps};
