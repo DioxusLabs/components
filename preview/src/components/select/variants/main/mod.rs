@@ -3,17 +3,60 @@ use dioxus_primitives::select::{
     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
     SelectTrigger,
 };
+use strum::{EnumCount, IntoEnumIterator};
+
+#[derive(Debug, Clone, Copy, PartialEq, strum::EnumCount, strum::EnumIter, strum::Display)]
+enum Fruit {
+    Apple,
+    Banana,
+    Orange,
+    Strawberry,
+    Watermelon,
+}
+
+impl Fruit {
+    const fn emoji(&self) -> &'static str {
+        match self {
+            Fruit::Apple => "🍎",
+            Fruit::Banana => "🍌",
+            Fruit::Orange => "🍊",
+            Fruit::Strawberry => "🍓",
+            Fruit::Watermelon => "🍉",
+        }
+    }
+}
+
 #[component]
 pub fn Demo() -> Element {
+    let fruits = Fruit::iter().enumerate().map(|(i, f)| {
+        rsx! {
+            SelectOption::<Option<Fruit>> {
+                index: i,
+                class: "select-option",
+                value: Some(f),
+                display: f.to_string(),
+                {format!("{} {f}", f.emoji())}
+                SelectItemIndicator {
+                    svg {
+                        class: "select-check-icon",
+                        view_box: "0 0 24 24",
+                        xmlns: "http://www.w3.org/2000/svg",
+                        path { d: "M5 13l4 4L19 7" }
+                    }
+                }
+            }
+        }
+    });
+
     rsx! {
         document::Link {
             rel: "stylesheet",
             href: asset!("/src/components/select/variants/main/style.css"),
         }
-        Select {
+        Select::<Option<Fruit>> {
             class: "select",
             placeholder: "Select a fruit...",
-            SelectTrigger {
+            SelectTrigger::<Option<Fruit>> {
                 class: "select-trigger",
                 aria_label: "Select Trigger",
                 width: "12rem",
@@ -24,96 +67,28 @@ pub fn Demo() -> Element {
                     polyline { points: "6 9 12 15 18 9" }
                 }
             }
-            SelectList {
+            SelectList::<Option<Fruit>> {
                 class: "select-list",
                 aria_label: "Select Demo",
-                SelectGroup {
+                SelectGroup::<Option<Fruit>> {
                     class: "select-group",
                     SelectGroupLabel {
                         class: "select-group-label",
                         "Fruits"
                     }
-                    SelectOption {
-                        index: 0usize,
-                        class: "select-option",
-                        value: "apple".to_string(),
-                        "Apple"
-                        SelectItemIndicator {
-                            svg {
-                                class: "select-check-icon",
-                                view_box: "0 0 24 24",
-                                xmlns: "http://www.w3.org/2000/svg",
-                                path { d: "M5 13l4 4L19 7" }
-                            }
-                        }
-                    }
-                    SelectOption {
-                        index: 1usize,
-                        class: "select-option",
-                        value: "banana".to_string(),
-                        "Banana"
-                        SelectItemIndicator {
-                            svg {
-                                class: "select-check-icon",
-                                view_box: "0 0 24 24",
-                                xmlns: "http://www.w3.org/2000/svg",
-                                path { d: "M5 13l4 4L19 7" }
-                            }
-                        }
-                    }
-                    SelectOption {
-                        index: 2usize,
-                        class: "select-option",
-                        value: "orange".to_string(),
-                        "Orange"
-                        SelectItemIndicator {
-                            svg {
-                                class: "select-check-icon",
-                                view_box: "0 0 24 24",
-                                xmlns: "http://www.w3.org/2000/svg",
-                                path { d: "M5 13l4 4L19 7" }
-                            }
-                        }
-                    }
-                    SelectOption {
-                        index: 3usize,
-                        class: "select-option",
-                        value: "strawberry".to_string(),
-                        "Strawberry"
-                        SelectItemIndicator {
-                            svg {
-                                class: "select-check-icon",
-                                view_box: "0 0 24 24",
-                                xmlns: "http://www.w3.org/2000/svg",
-                                path { d: "M5 13l4 4L19 7" }
-                            }
-                        }
-                    }
-                    SelectOption {
-                        index: 4usize,
-                        class: "select-option",
-                        value: "watermelon".to_string(),
-                        "Watermelon"
-                        SelectItemIndicator {
-                            svg {
-                                class: "select-check-icon",
-                                view_box: "0 0 24 24",
-                                xmlns: "http://www.w3.org/2000/svg",
-                                path { d: "M5 13l4 4L19 7" }
-                            }
-                        }
-                    }
+                    {fruits}
                 }
-                SelectGroup {
+                SelectGroup::<Option<Fruit>> {
                     class: "select-group",
                     SelectGroupLabel {
                         class: "select-group-label",
                         "Other"
                     }
-                    SelectOption {
-                        index: 5usize,
+                    SelectOption::<Option<Fruit>> {
+                        index: Fruit::COUNT,
                         class: "select-option",
-                        value: "other".to_string(),
+                        value: None,
+                        display: "Other".to_string(),
                         "Other"
                         SelectItemIndicator {
                             svg {
