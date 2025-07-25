@@ -101,7 +101,7 @@ fn use_controlled<T: Clone + PartialEq>(
 
 /// Run some cleanup code when the component is unmounted if the effect was run.
 fn use_effect_cleanup<F: FnOnce() + 'static>(#[allow(unused)] cleanup: F) {
-    web!(crate::dioxus_core::use_drop(cleanup))
+    client!(crate::dioxus_core::use_drop(cleanup))
 }
 
 fn use_animated_open(
