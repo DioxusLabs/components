@@ -35,7 +35,7 @@ pub fn Demo() -> Element {
                 class: "select-option",
                 value: Some(f),
                 display: f.to_string(),
-                {format!("{}:{f}", f.emoji())}
+                {format!("{} {f}", f.emoji())}
                 SelectItemIndicator {
                     svg {
                         class: "select-check-icon",
@@ -53,10 +53,10 @@ pub fn Demo() -> Element {
             rel: "stylesheet",
             href: asset!("/src/components/select/variants/main/style.css"),
         }
-        Select::<String> {
+        Select::<Option<Fruit>> {
             class: "select",
             placeholder: "Select a fruit...",
-            SelectTrigger {
+            SelectTrigger::<Option<Fruit>> {
                 class: "select-trigger",
                 aria_label: "Select Trigger",
                 width: "12rem",
@@ -67,10 +67,10 @@ pub fn Demo() -> Element {
                     polyline { points: "6 9 12 15 18 9" }
                 }
             }
-            SelectList {
+            SelectList::<Option<Fruit>> {
                 class: "select-list",
                 aria_label: "Select Demo",
-                SelectGroup {
+                SelectGroup::<Option<Fruit>> {
                     class: "select-group",
                     SelectGroupLabel {
                         class: "select-group-label",
@@ -78,7 +78,7 @@ pub fn Demo() -> Element {
                     }
                     {fruits}
                 }
-                SelectGroup {
+                SelectGroup::<Option<Fruit>> {
                     class: "select-group",
                     SelectGroupLabel {
                         class: "select-group-label",

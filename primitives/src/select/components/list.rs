@@ -1,6 +1,6 @@
 //! SelectList component implementation.
 
-use crate::{use_animated_open, use_effect, use_unique_id, use_id_or};
+use crate::{use_animated_open, use_effect, use_id_or, use_unique_id};
 use dioxus::prelude::*;
 
 use super::super::context::SelectContext;
@@ -27,8 +27,8 @@ pub struct SelectListProps {
 ///
 /// This must be used inside a [`Select`] component.
 #[component]
-pub fn SelectList(props: SelectListProps) -> Element {
-    let mut ctx: SelectContext = use_context();
+pub fn SelectList<T: Clone + PartialEq + 'static>(props: SelectListProps) -> Element {
+    let mut ctx = use_context::<SelectContext<T>>();
 
     let id = use_unique_id();
     let id = use_id_or(id, props.id);

@@ -10,7 +10,7 @@ use super::super::context::{OptionState, SelectContext, SelectCursor, SelectOpti
 
 /// The props for the [`SelectOption`] component
 #[derive(Props, Clone, PartialEq)]
-pub struct SelectOptionProps<T: Clone + PartialEq + 'static = String> {
+pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
     /// The value of the option
     pub value: ReadOnlySignal<T>,
 

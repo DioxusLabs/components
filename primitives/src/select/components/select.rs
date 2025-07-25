@@ -1,14 +1,9 @@
 //! Main Select component implementation.
 
-use crate::{
-    use_controlled, use_effect,
-};
+use crate::{use_controlled, use_effect};
 use dioxus::prelude::*;
-use std::fmt::Display;
 
-use super::super::context::{
-    SelectContext, SelectCursor,
-};
+use super::super::context::{SelectContext, SelectCursor};
 use crate::focus::use_focus_provider;
 
 /// Props for the main Select component
@@ -74,13 +69,13 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
 ///             on_display_change: |_| {},
-///             SelectTrigger {
+///             SelectTrigger::<String> {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
 ///             }
-///             SelectList {
+///             SelectList::<String> {
 ///                 aria_label: "Select Demo",
-///                 SelectGroup {
+///                 SelectGroup::<String> {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
@@ -108,9 +103,7 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
 /// The [`Select`] component defines the following data attributes you can use to control styling:
 /// - `data-state`: Indicates the current state of the select. Values are `open` or `closed`.
 #[component]
-pub fn Select<T: Clone + PartialEq + Display + Default + 'static>(
-    props: SelectProps<T>,
-) -> Element {
+pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -> Element {
     let (value, set_value_internal) =
         use_controlled(props.value, props.default_value, props.on_value_change);
 
@@ -128,7 +121,7 @@ pub fn Select<T: Clone + PartialEq + Display + Default + 'static>(
                 display: current_display
                     .read()
                     .clone()
-                    .unwrap_or_else(|| format!("{}", val)),
+                    .unwrap_or_else(|| props.placeholder.cloned()),
             }
         } else {
             SelectCursor {

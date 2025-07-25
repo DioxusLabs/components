@@ -21,8 +21,8 @@ pub struct SelectTriggerProps {
 ///
 /// This must be used inside a [`Select`] component.
 #[component]
-pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
-    let mut ctx: SelectContext = use_context();
+pub fn SelectTrigger<T: Clone + PartialEq + 'static>(props: SelectTriggerProps) -> Element {
+    let mut ctx = use_context::<SelectContext<T>>();
     let mut open = ctx.open;
 
     rsx! {

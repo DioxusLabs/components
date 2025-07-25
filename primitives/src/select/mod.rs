@@ -31,23 +31,25 @@
 //!     rsx! {
 //!         Select::<String> {
 //!             placeholder: "Select a fruit...",
-//!             SelectTrigger {
+//!             SelectTrigger::<String> {
 //!                 aria_label: "Select Trigger",
 //!                 width: "12rem",
 //!             }
-//!             SelectList {
+//!             SelectList::<String> {
 //!                 aria_label: "Select Demo",
-//!                 SelectGroup {
+//!                 SelectGroup::<String> {
 //!                     SelectGroupLabel { "Fruits" }
 //!                     SelectOption::<String> {
 //!                         index: 0usize,
 //!                         value: "apple".to_string(),
+//!                         display: "Apple".to_string(),
 //!                         "Apple"
 //!                         SelectItemIndicator { "✔️" }
 //!                     }
 //!                     SelectOption::<String> {
 //!                         index: 1usize,
 //!                         value: "banana".to_string(),
+//!                         display: "Banana".to_string(),
 //!                         "Banana"
 //!                         SelectItemIndicator { "✔️" }
 //!                     }

@@ -1,6 +1,6 @@
 //! SelectGroup and SelectGroupLabel component implementations.
 
-use crate::{use_effect, use_unique_id, use_id_or};
+use crate::{use_effect, use_id_or, use_unique_id};
 use dioxus::prelude::*;
 
 use super::super::context::{SelectContext, SelectGroupContext};
@@ -30,8 +30,8 @@ pub struct SelectGroupProps {
 ///
 /// This must be used inside a [`SelectList`] component.
 #[component]
-pub fn SelectGroup(props: SelectGroupProps) -> Element {
-    let ctx: SelectContext = use_context();
+pub fn SelectGroup<T: Clone + PartialEq + 'static>(props: SelectGroupProps) -> Element {
+    let ctx = use_context::<SelectContext<T>>();
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
 
     let labeled_by = use_signal(|| None);

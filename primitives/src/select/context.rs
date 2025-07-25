@@ -19,7 +19,7 @@ pub(super) struct SelectCursor<V> {
 
 /// Main context for the select component containing all shared state
 #[derive(Clone, Copy)]
-pub(super) struct SelectContext<T: Clone + PartialEq + 'static = String> {
+pub(super) struct SelectContext<T: Clone + PartialEq + 'static> {
     /// The typeahead buffer for searching options
     pub typeahead_buffer: Signal<String>,
     /// If the select is open
