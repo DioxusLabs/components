@@ -1,16 +1,12 @@
 //! SelectOption and SelectItemIndicator component implementations.
 
 use crate::{
-    focus::use_focus_controlled_item,
-    use_effect, use_effect_cleanup, use_unique_id, use_id_or
+    focus::use_focus_controlled_item, use_effect, use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
-use std::fmt::Display;
 
-use super::super::context::{
-    OptionState, SelectContext, SelectCursor, SelectOptionContext,
-};
+use super::super::context::{OptionState, SelectContext, SelectCursor, SelectOptionContext};
 
 /// The props for the [`SelectOption`] component
 #[derive(Props, Clone, PartialEq)]
@@ -19,8 +15,7 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static = String> {
     pub value: ReadOnlySignal<T>,
 
     /// Optional display text (defaults to value.to_string())
-    #[props(default)]
-    pub display: Option<String>,
+    pub display: String,
 
     /// Whether the option is disabled
     #[props(default)]
@@ -61,9 +56,7 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static = String> {
 ///
 /// This must be used inside a [`SelectList`] component.
 #[component]
-pub fn SelectOption<T: Display + PartialEq + Clone + 'static>(
-    props: SelectOptionProps<T>,
-) -> Element {
+pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>) -> Element {
     // Generate a unique ID for this option for accessibility
     let option_id = use_unique_id();
 
@@ -72,12 +65,7 @@ pub fn SelectOption<T: Display + PartialEq + Clone + 'static>(
 
     let index = props.index;
     let value = props.value;
-    let display = use_memo(move || {
-        props
-            .display
-            .clone()
-            .unwrap_or_else(|| format!("{}", props.value.read()))
-    });
+    let display = use_memo(move || props.display.clone());
 
     // Push this option to the context
     let mut ctx: SelectContext<T> = use_context();
