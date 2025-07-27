@@ -49,6 +49,29 @@
 //! This behavior ensures the typeahead buffer remains intact during rapid typing while still
 //! clearing after a period of inactivity, providing a smooth and predictable user experience.
 //!
+//! ## Focus and Blur Handling
+//!
+//! The Select component uses a specific blur handling strategy to ensure smooth keyboard navigation
+//!
+//! ### Design Decision
+//!
+//! - **Blur handlers are only on the list container**, not on individual options
+//! - This prevents the dropdown from closing when navigating between options with keyboard
+//! - The list container's blur handler closes the dropdown when focus leaves the select entirely
+//!
+//! ### Why This Matters
+//!
+//! Without this design, keyboard navigation would be broken:
+//! ```text
+//! 1. User presses arrow key to move to next option
+//! 2. Current option loses focus (blur event)
+//! 3. Dropdown closes immediately (BUG!)
+//! 4. User can't navigate to next option
+//! ```
+//!
+//! By handling blur only at the container level, we ensure the dropdown stays open during
+//! option navigation and only closes when focus truly leaves the select component.
+//!
 //! ## Example
 //!
 //! ```rust

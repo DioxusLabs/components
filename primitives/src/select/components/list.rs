@@ -125,6 +125,10 @@ pub fn SelectList<T: Clone + PartialEq + 'static>(props: SelectListProps) -> Ele
 
                 onmounted: move |evt| listbox_ref.set(Some(evt.data())),
                 onkeydown,
+                // Handle blur events at the list level to close the dropdown when focus leaves
+                // the select entirely. This works in conjunction with NOT having blur handlers
+                // on individual options, which would incorrectly close the dropdown during
+                // keyboard navigation between options.
                 onblur: move |_| {
                     if focused() {
                         open.set(false);

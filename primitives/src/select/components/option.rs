@@ -116,12 +116,10 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                     ctx.open.set(false);
                 }
             },
-            onblur: move |_| {
-                if focused() {
-                    ctx.focus_state.blur();
-                    ctx.open.set(false);
-                }
-            },
+            // Note: We intentionally don't handle blur events on individual options.
+            // The blur handler on the list container (SelectList) manages closing the dropdown.
+            // Having blur handlers on options causes issues with keyboard navigation where
+            // moving between options would incorrectly close the dropdown.
 
             ..props.attributes,
             {props.children}
