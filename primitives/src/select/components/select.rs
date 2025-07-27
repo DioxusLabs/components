@@ -21,10 +21,6 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
     #[props(default)]
     pub on_value_change: Callback<Option<T>>,
 
-    /// Callback when the display text changes
-    #[props(default)]
-    pub on_display_change: Callback<Option<String>>,
-
     /// Whether the select is disabled
     #[props(default)]
     pub disabled: ReadOnlySignal<bool>,
@@ -68,7 +64,6 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
 ///     rsx! {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
-///             on_display_change: |_| {},
 ///             SelectTrigger::<String> {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
@@ -80,14 +75,14 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
 ///                         value: "apple".to_string(),
-///                         display: "Apple".to_string(), // Capitalized display text
+///                         text_value: "Apple".to_string(), // Capitalized display text
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
 ///                         index: 1usize,
 ///                         value: "banana".to_string(),
-///                         display: "Banana".to_string(), // Capitalized display text
+///                         text_value: "Banana".to_string(), // Capitalized display text
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
@@ -118,7 +113,7 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
         if let Some(val) = value() {
             SelectCursor {
                 value: val.clone(),
-                display: current_display
+                text_value: current_display
                     .read()
                     .clone()
                     .unwrap_or_else(|| props.placeholder.cloned()),
@@ -126,7 +121,7 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
         } else {
             SelectCursor {
                 value: T::default(),
-                display: props.placeholder.cloned(),
+                text_value: props.placeholder.cloned(),
             }
         }
     });
@@ -134,12 +129,10 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
     let set_value = use_callback(move |cursor_opt: Option<SelectCursor<T>>| {
         if let Some(cursor) = cursor_opt {
             set_value_internal.call(Some(cursor.value.clone()));
-            current_display.set(Some(cursor.display.clone()));
-            props.on_display_change.call(Some(cursor.display.clone()));
+            current_display.set(Some(cursor.text_value.clone()));
         } else {
             set_value_internal.call(None);
             current_display.set(None);
-            props.on_display_change.call(None);
         }
     });
 

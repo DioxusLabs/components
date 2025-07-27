@@ -18,7 +18,7 @@ pub(super) fn best_match<T: Clone + PartialEq + 'static>(
     options
         .iter()
         .map(|opt| {
-            let value = &opt.display;
+            let value = &opt.text_value;
             let value_characters: Box<[_]> = value.chars().collect();
             let distance =
                 normalized_distance(&typeahead_characters, &value_characters, keyboard_layout);
@@ -631,19 +631,19 @@ mod tests {
             OptionState {
                 tab_index: 0,
                 value: "apple",
-                display: "Apple".to_string(),
+                text_value: "Apple".to_string(),
                 id: "apple".to_string(),
             },
             OptionState {
                 tab_index: 1,
                 value: "banana",
-                display: "Banana".to_string(),
+                text_value: "Banana".to_string(),
                 id: "banana".to_string(),
             },
             OptionState {
                 tab_index: 2,
                 value: "cherry",
-                display: "Cherry".to_string(),
+                text_value: "Cherry".to_string(),
                 id: "cherry".to_string(),
             },
         ];
@@ -856,13 +856,13 @@ mod tests {
             OptionState {
                 tab_index: 0,
                 value: "apple",
-                display: "Apple".to_string(),
+                text_value: "Apple".to_string(),
                 id: "apple".to_string(),
             },
             OptionState {
                 tab_index: 1,
                 value: "арple", // Mixed Cyrillic/Latin
-                display: "Арple".to_string(),
+                text_value: "Арple".to_string(),
                 id: "arple".to_string(),
             },
         ];

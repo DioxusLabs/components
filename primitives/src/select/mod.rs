@@ -42,14 +42,14 @@
 //!                     SelectOption::<String> {
 //!                         index: 0usize,
 //!                         value: "apple".to_string(),
-//!                         display: "Apple".to_string(),
+//!                         text_value: "Apple".to_string(),
 //!                         "Apple"
 //!                         SelectItemIndicator { "✔️" }
 //!                     }
 //!                     SelectOption::<String> {
 //!                         index: 1usize,
 //!                         value: "banana".to_string(),
-//!                         display: "Banana".to_string(),
+//!                         text_value: "Banana".to_string(),
 //!                         "Banana"
 //!                         SelectItemIndicator { "✔️" }
 //!                     }

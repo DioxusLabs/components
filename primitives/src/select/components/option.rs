@@ -14,8 +14,8 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
     /// The value of the option
     pub value: ReadOnlySignal<T>,
 
-    /// Optional display text (defaults to value.to_string())
-    pub display: String,
+    /// Optional human-readable text, typehead
+    pub text_value: String,
 
     /// Whether the option is disabled
     #[props(default)]
@@ -65,7 +65,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
     let index = props.index;
     let value = props.value;
-    let display = use_memo(move || props.display.clone());
+    let text_value = use_memo(move || props.text_value.clone());
 
     // Push this option to the context
     let mut ctx: SelectContext<T> = use_context();
@@ -73,7 +73,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
         let option_state = OptionState {
             tab_index: index(),
             value: value.cloned(),
-            display: display.read().to_string(),
+            text_value: text_value.read().to_string(),
             id: id(),
         };
 
@@ -111,7 +111,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
                     ctx.set_value.call(Some(SelectCursor {
                         value: props.value.read().clone(),
-                        display: display.read().to_string(),
+                        text_value: text_value.read().to_string(),
                     }));
                     ctx.open.set(false);
                 }

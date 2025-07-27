@@ -34,7 +34,7 @@ pub fn Demo() -> Element {
                 index: i,
                 class: "select-option",
                 value: Some(f),
-                display: f.to_string(),
+                text_value: f.to_string(),
                 {format!("{} {f}", f.emoji())}
                 SelectItemIndicator {
                     svg {
@@ -88,7 +88,7 @@ pub fn Demo() -> Element {
                         index: Fruit::COUNT,
                         class: "select-option",
                         value: None,
-                        display: "Other".to_string(),
+                        text_value: "Other".to_string(),
                         "Other"
                         SelectItemIndicator {
                             svg {

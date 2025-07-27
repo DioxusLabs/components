@@ -14,7 +14,7 @@ pub(super) struct SelectCursor<V> {
     /// Typed value of the select
     pub value: V,
     /// Human-readable display of the select value
-    pub display: String,
+    pub text_value: String,
 }
 
 /// Main context for the select component containing all shared state
@@ -52,7 +52,7 @@ impl<T: Clone + PartialEq + 'static> SelectContext<T> {
                 if let Some(option) = options.iter().find(|opt| opt.tab_index == focused_index) {
                     self.set_value.call(Some(SelectCursor {
                         value: option.value.clone(),
-                        display: option.display.clone(),
+                        text_value: option.text_value.clone(),
                     }));
                 }
             }
@@ -110,7 +110,7 @@ pub(super) struct OptionState<T> {
     /// The value of the option
     pub value: T,
     /// Display text for the option
-    pub display: String,
+    pub text_value: String,
     /// Unique ID for the option
     pub id: String,
 }
