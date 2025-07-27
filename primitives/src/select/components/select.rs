@@ -2,6 +2,7 @@
 
 use crate::{use_controlled, use_effect};
 use dioxus::prelude::*;
+use dioxus_core::Task;
 
 use super::super::context::{SelectContext, SelectCursor};
 use crate::focus::use_focus_provider;
@@ -108,6 +109,7 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
     let adaptive_keyboard = use_signal(super::super::text_search::AdaptiveKeyboard::new);
     let list_id = use_signal(|| None);
     let mut current_display = use_signal(|| None);
+    let mut typeahead_clear_task: Signal<Option<Task>> = use_signal(|| None);
 
     let cursor = use_memo(move || {
         if let Some(val) = value() {
@@ -141,6 +143,11 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
     // Clear the typeahead buffer when the select is closed
     use_effect(move || {
         if !open() {
+            // Cancel any pending clear task
+            if let Some(task) = typeahead_clear_task.write().take() {
+                task.cancel();
+            }
+            // Clear the buffer immediately
             typeahead_buffer.take();
         }
     });
@@ -156,6 +163,7 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
         focus_state,
         disabled: props.disabled,
         placeholder: props.placeholder,
+        typeahead_clear_task,
     });
 
     rsx! {

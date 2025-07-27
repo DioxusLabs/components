@@ -2,6 +2,7 @@
 
 use crate::focus::FocusState;
 use dioxus::prelude::*;
+use dioxus_core::Task;
 use dioxus_time::sleep;
 
 use std::time::Duration;
@@ -40,6 +41,8 @@ pub(super) struct SelectContext<T: Clone + PartialEq + 'static> {
     pub disabled: ReadOnlySignal<bool>,
     /// The placeholder text
     pub placeholder: ReadOnlySignal<String>,
+    /// Task handle for clearing typeahead buffer
+    pub typeahead_clear_task: Signal<Option<Task>>,
 }
 
 impl<T: Clone + PartialEq + 'static> SelectContext<T> {
@@ -74,8 +77,10 @@ impl<T: Clone + PartialEq + 'static> SelectContext<T> {
 
     /// Add text to the typeahead buffer for searching
     pub fn add_to_typeahead_buffer(&mut self, text: &str) {
-        // Get the signal reference before borrowing mutably
-        let mut typeahead_buffer_signal = self.typeahead_buffer;
+        // Cancel any existing clear task to prevent race conditions
+        if let Some(existing_task) = self.typeahead_clear_task.write().take() {
+            existing_task.cancel();
+        }
 
         // Update the buffer and get the current content
         let typeahead = {
@@ -84,11 +89,23 @@ impl<T: Clone + PartialEq + 'static> SelectContext<T> {
             typeahead_buffer.clone()
         };
 
-        // Clear the typeahead buffer after 1 second
-        spawn(async move {
+        // Create references for the async closure
+        let mut typeahead_buffer_signal = self.typeahead_buffer;
+        let mut typeahead_clear_task_signal = self.typeahead_clear_task;
+
+        // Spawn a new task to clear the buffer after 1 second
+        let new_task = spawn(async move {
             sleep(Duration::from_millis(1000)).await;
+
+            // Clear the buffer
             typeahead_buffer_signal.write().clear();
+
+            // Remove our own task handle to indicate no task is active
+            typeahead_clear_task_signal.write().take();
         });
+
+        // Store the new task handle
+        self.typeahead_clear_task.write().replace(new_task);
 
         // Focus the best match using adaptive keyboard
         let options = self.options.read();

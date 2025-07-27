@@ -17,6 +17,38 @@
 //! - **Customizable**: Flexible styling through data attributes and CSS
 //! - **Focus Management**: Automatic focus handling and restoration
 //!
+//! ## Typeahead Buffer Behavior
+//!
+//! The Select component implements an intelligent typeahead search system with race condition prevention:
+//!
+//! ### How it Works
+//!
+//! When users type characters while the dropdown is open:
+//! 1. Each character is added to a typeahead buffer
+//! 2. The buffer is used to find and focus the best matching option
+//! 3. The buffer automatically clears after 1 second of inactivity
+//!
+//! ### Race Condition Prevention
+//!
+//! The component uses task cancellation to prevent a common race condition:
+//! - **Problem**: Without cancellation, rapid typing (e.g., "apple") would spawn multiple clear timers,
+//!   causing the first timer to clear the entire buffer after 1 second, losing later keystrokes.
+//! - **Solution**: Each new keystroke cancels any existing clear timer before starting a new one.
+//!   This ensures only the most recent timer remains active.
+//!
+//! ### Example Scenario
+//!
+//! ```text
+//! User types "app" quickly:
+//! - 0ms: Types 'a' → starts 1-second timer
+//! - 100ms: Types 'p' → cancels first timer, starts new 1-second timer
+//! - 200ms: Types 'p' → cancels second timer, starts new 1-second timer
+//! - 1200ms: Buffer clears (only the final timer executes)
+//! ```
+//!
+//! This behavior ensures the typeahead buffer remains intact during rapid typing while still
+//! clearing after a period of inactivity, providing a smooth and predictable user experience.
+//!
 //! ## Example
 //!
 //! ```rust
