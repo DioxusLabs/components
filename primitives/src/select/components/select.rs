@@ -113,14 +113,14 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
     let options = use_signal(Vec::default);
     let adaptive_keyboard = use_signal(super::super::text_search::AdaptiveKeyboard::new);
     let list_id = use_signal(|| None);
-    let mut current_display = use_signal(|| None);
+    let mut current_text_value = use_signal(|| None);
     let mut typeahead_clear_task: Signal<Option<Task>> = use_signal(|| None);
 
     let cursor = use_memo(move || {
         if let Some(val) = value() {
             SelectCursor {
                 value: val.clone(),
-                text_value: current_display
+                text_value: current_text_value
                     .read()
                     .clone()
                     .unwrap_or_else(|| props.placeholder.cloned()),
@@ -136,10 +136,10 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
     let set_value = use_callback(move |cursor_opt: Option<SelectCursor<T>>| {
         if let Some(cursor) = cursor_opt {
             set_value_internal.call(Some(cursor.value.clone()));
-            current_display.set(Some(cursor.text_value.clone()));
+            current_text_value.set(Some(cursor.text_value.clone()));
         } else {
             set_value_internal.call(None);
-            current_display.set(None);
+            current_text_value.set(None);
         }
     });
 

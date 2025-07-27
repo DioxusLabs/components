@@ -26,9 +26,9 @@ pub struct SelectGroupProps {
 
 /// # SelectGroup
 ///
-/// The `SelectGroup` component is used to group related options within a [`SelectList`]. It provides a way to organize options into logical sections.
+/// The `SelectGroup` component is used to group related options within a [`SelectList`](super::list::SelectList). It provides a way to organize options into logical sections.
 ///
-/// This must be used inside a [`SelectList`] component.
+/// This must be used inside a [`SelectList`](super::list::SelectList) component.
 #[component]
 pub fn SelectGroup<T: Clone + PartialEq + 'static>(props: SelectGroupProps) -> Element {
     let ctx = use_context::<SelectContext<T>>();
@@ -68,9 +68,9 @@ pub struct SelectGroupLabelProps {
 
 /// # SelectGroupLabel
 ///
-/// The `SelectGroupLabel` component is used to render a label for a group of options within a [`SelectList`].
+/// The `SelectGroupLabel` component is used to render a label for a group of options within a [`SelectList`](super::list::SelectList).
 ///
-/// This must be used inside a [`SelectGroup`] component.
+/// This must be used inside a [`SelectGroup`](SelectGroup) component.
 #[component]
 pub fn SelectGroupLabel(props: SelectGroupLabelProps) -> Element {
     let mut ctx: SelectGroupContext = use_context();

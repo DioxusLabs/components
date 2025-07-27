@@ -178,7 +178,7 @@ impl AdaptiveKeyboard {
         let key_b = self.physical_mappings.iter().find(|(_, &ch)| ch == b)?.0;
 
         let distance = physical_key_distance(key_a, key_b)?;
-        Some((distance / 10.0).min(1.0).max(0.1))
+        Some((distance / 10.0).clamp(0.1, 1.0))
     }
 
     /// Calculate similarity based on Unicode codepoint proximity
@@ -187,7 +187,7 @@ impl AdaptiveKeyboard {
 
         // Characters close in Unicode are often similar
         // Scale: adjacent codepoints get ~0.1 cost, distant ones approach 1.0
-        (diff / 100.0).min(1.0).max(0.1)
+        (diff / 100.0).clamp(0.1, 1.0)
     }
 
     /// Check phonetic similarity using small lookup groups
@@ -387,7 +387,7 @@ impl KeyboardLayout {
         let distance = (dx * dx + dy * dy).sqrt();
 
         // Scale the distance to be between 0.1 and 1.0
-        (distance / 10.0).min(1.0).max(0.1)
+        (distance / 10.0).clamp(0.1, 1.0)
     }
 
     /// Get the position of a character on the keyboard layout

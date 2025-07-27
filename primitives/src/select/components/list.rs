@@ -22,10 +22,10 @@ pub struct SelectListProps {
 
 /// # SelectList
 ///
-/// The dropdown list container for the [`Select`] component that contains the
-/// [`SelectOption`]s. The list will only be rendered when the select is open.
+/// The dropdown list container for the [`Select`](super::select::Select) component that contains the
+/// [`SelectOption`](super::option::SelectOption)s. The list will only be rendered when the select is open.
 ///
-/// This must be used inside a [`Select`] component.
+/// This must be used inside a [`Select`](super::select::Select) component.
 #[component]
 pub fn SelectList<T: Clone + PartialEq + 'static>(props: SelectListProps) -> Element {
     let mut ctx = use_context::<SelectContext<T>>();

@@ -118,7 +118,7 @@
 
 // Internal modules
 mod context;
-mod text_search;
+pub(crate) mod text_search;
 
 // Public components module
 pub mod components;

@@ -44,17 +44,15 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 
 /// # SelectOption
 ///
-/// An individual selectable option within a [`SelectList`] component. Each option represents
+/// An individual selectable option within a [`SelectList`](super::list::SelectList) component. Each option represents
 /// a value that can be selected.
 ///
-/// ## Value vs Display
+/// ## Value vs Text Value
 ///
 /// - **`value`**: The programmatic value (e.g., `"apple"`, `"user_123"`) used internally
-/// - **`display`**: The user-facing text (e.g., `"Apple"`, `"John Doe"`) shown in the UI
+/// - **`text_value`**: The user-facing text (e.g., `"Apple"`, `"John Doe"`) shown in the UI
 ///
-/// If `display` is not provided, the `value` will be formatted and used as the display text.
-///
-/// This must be used inside a [`SelectList`] component.
+/// This must be used inside a [`SelectList`](super::list::SelectList) component.
 #[component]
 pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>) -> Element {
     // Generate a unique ID for this option for accessibility
@@ -136,10 +134,10 @@ pub struct SelectItemIndicatorProps {
 
 /// # SelectItemIndicator
 ///
-/// The `SelectItemIndicator` component is used to render an indicator for a selected item within a [`SelectList`]. The
+/// The `SelectItemIndicator` component is used to render an indicator for a selected item within a [`SelectList`](super::list::SelectList). The
 /// children will only be rendered if the option is selected.
 ///
-/// This must be used inside a [`SelectOption`] component.
+/// This must be used inside a [`SelectOption`](SelectOption) component.
 #[component]
 pub fn SelectItemIndicator(props: SelectItemIndicatorProps) -> Element {
     let ctx: SelectOptionContext = use_context();

@@ -17,9 +17,9 @@ pub struct SelectTriggerProps {
 
 /// # SelectTrigger
 ///
-/// The trigger button for the [`Select`] component which controls if the [`SelectList`] is rendered.
+/// The trigger button for the [`Select`](super::select::Select) component which controls if the [`SelectList`](super::list::SelectList) is rendered.
 ///
-/// This must be used inside a [`Select`] component.
+/// This must be used inside a [`Select`](super::select::Select) component.
 #[component]
 pub fn SelectTrigger<T: Clone + PartialEq + 'static>(props: SelectTriggerProps) -> Element {
     let mut ctx = use_context::<SelectContext<T>>();
