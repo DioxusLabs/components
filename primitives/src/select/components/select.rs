@@ -42,6 +42,10 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
     pub roving_loop: ReadOnlySignal<bool>,
 
+    /// Timeout in milliseconds before clearing typeahead buffer
+    #[props(default = ReadOnlySignal::new(Signal::new(1000)))]
+    pub typeahead_timeout: ReadOnlySignal<u64>,
+
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 
@@ -65,6 +69,7 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
 ///     rsx! {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
+///             typeahead_timeout: 1500u64, // Buffer clears after 1.5 seconds of inactivity
 ///             SelectTrigger::<String> {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
@@ -164,6 +169,7 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
         disabled: props.disabled,
         placeholder: props.placeholder,
         typeahead_clear_task,
+        typeahead_timeout: props.typeahead_timeout,
     });
 
     rsx! {

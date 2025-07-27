@@ -26,23 +26,23 @@
 //! When users type characters while the dropdown is open:
 //! 1. Each character is added to a typeahead buffer
 //! 2. The buffer is used to find and focus the best matching option
-//! 3. The buffer automatically clears after 1 second of inactivity
+//! 3. The buffer automatically clears after a configurable timeout (default: 1 second)
 //!
 //! ### Race Condition Prevention
 //!
 //! The component uses task cancellation to prevent a common race condition:
 //! - **Problem**: Without cancellation, rapid typing (e.g., "apple") would spawn multiple clear timers,
-//!   causing the first timer to clear the entire buffer after 1 second, losing later keystrokes.
+//!   causing the first timer to clear the entire buffer after the timeout period, losing later keystrokes.
 //! - **Solution**: Each new keystroke cancels any existing clear timer before starting a new one.
 //!   This ensures only the most recent timer remains active.
 //!
 //! ### Example Scenario
 //!
 //! ```text
-//! User types "app" quickly:
-//! - 0ms: Types 'a' → starts 1-second timer
-//! - 100ms: Types 'p' → cancels first timer, starts new 1-second timer
-//! - 200ms: Types 'p' → cancels second timer, starts new 1-second timer
+//! User types "app" quickly (with default 1000ms timeout):
+//! - 0ms: Types 'a' → starts timer
+//! - 100ms: Types 'p' → cancels first timer, starts new timer
+//! - 200ms: Types 'p' → cancels second timer, starts new timer
 //! - 1200ms: Buffer clears (only the final timer executes)
 //! ```
 //!
@@ -63,6 +63,7 @@
 //!     rsx! {
 //!         Select::<String> {
 //!             placeholder: "Select a fruit...",
+//!             typeahead_timeout: 1500u64, // Optional: customize timeout (ms)
 //!             SelectTrigger::<String> {
 //!                 aria_label: "Select Trigger",
 //!                 width: "12rem",
