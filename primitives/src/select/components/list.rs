@@ -102,7 +102,7 @@ pub fn SelectList<T: Clone + PartialEq + 'static>(props: SelectListProps) -> Ele
                 event.prevent_default();
                 event.stop_propagation();
             }
-            Key::Escape => {
+            Key::Escape | Key::Tab => {
                 open.set(false);
                 event.prevent_default();
                 event.stop_propagation();
