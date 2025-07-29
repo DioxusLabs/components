@@ -78,7 +78,7 @@
 //! use dioxus::prelude::*;
 //! use dioxus_primitives::select::{
 //!     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator,
-//!     SelectList, SelectOption, SelectTrigger,
+//!     SelectList, SelectOption, SelectTrigger, SelectValue,
 //! };
 //!
 //! #[component]
@@ -97,15 +97,13 @@
 //!                     SelectGroupLabel { "Fruits" }
 //!                     SelectOption::<String> {
 //!                         index: 0usize,
-//!                         value: "apple".to_string(),
-//!                         text_value: "Apple".to_string(),
+//!                         value: SelectValue::new("apple".to_string(), "Apple"),
 //!                         "Apple"
 //!                         SelectItemIndicator { "✔️" }
 //!                     }
 //!                     SelectOption::<String> {
 //!                         index: 1usize,
-//!                         value: "banana".to_string(),
-//!                         text_value: "Banana".to_string(),
+//!                         value: SelectValue::new("banana".to_string(), "Banana"),
 //!                         "Banana"
 //!                         SelectItemIndicator { "✔️" }
 //!                     }
@@ -118,6 +116,7 @@
 
 // Internal modules
 mod context;
+pub use context::SelectValue;
 pub(crate) mod text_search;
 
 // Public components module

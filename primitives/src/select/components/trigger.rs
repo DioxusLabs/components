@@ -61,8 +61,8 @@ pub fn SelectTrigger<T: Clone + PartialEq + 'static>(props: SelectTriggerProps) 
 
             // Add placeholder option if needed
             span {
-                "data-placeholder": ctx.cursor.read().text_value == ctx.placeholder.cloned(),
-                {ctx.cursor.read().text_value.clone()}
+                "data-placeholder": ctx.cursor.read().is_none(),
+                {ctx.cursor.read().as_ref().map(|c| c.text_value.clone()).unwrap_or(ctx.placeholder.read().clone())}
             }
 
             // Render children (options)

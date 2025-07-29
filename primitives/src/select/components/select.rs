@@ -4,7 +4,7 @@ use crate::{use_controlled, use_effect};
 use dioxus::prelude::*;
 use dioxus_core::Task;
 
-use super::super::context::{SelectContext, SelectCursor};
+use super::super::context::{SelectContext, SelectValue};
 use crate::focus::use_focus_provider;
 
 /// Props for the main Select component
@@ -12,15 +12,15 @@ use crate::focus::use_focus_provider;
 pub struct SelectProps<T: Clone + PartialEq + 'static> {
     /// The controlled value of the select
     #[props(default)]
-    pub value: ReadOnlySignal<Option<Option<T>>>,
+    pub value: ReadOnlySignal<Option<Option<SelectValue<T>>>>,
 
     /// The default value of the select
     #[props(default)]
-    pub default_value: Option<T>,
+    pub default_value: Option<SelectValue<T>>,
 
     /// Callback when the value changes
     #[props(default)]
-    pub on_value_change: Callback<Option<T>>,
+    pub on_value_change: Callback<Option<SelectValue<T>>>,
 
     /// Whether the select is disabled
     #[props(default)]
@@ -62,7 +62,7 @@ pub struct SelectProps<T: Clone + PartialEq + 'static> {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::select::{
 ///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
-///     SelectTrigger,
+///     SelectTrigger, SelectValue,
 /// };
 /// #[component]
 /// fn Demo() -> Element {
@@ -80,15 +80,13 @@ pub struct SelectProps<T: Clone + PartialEq + 'static> {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
-///                         value: "apple".to_string(),
-///                         text_value: "Apple".to_string(), // Capitalized display text
+///                         value: SelectValue::new("apple".to_string(), "Apple"),
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
 ///                         index: 1usize,
-///                         value: "banana".to_string(),
-///                         text_value: "Banana".to_string(), // Capitalized display text
+///                         value: SelectValue::new("banana".to_string(), "Banana"),
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
@@ -113,33 +111,16 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
     let options = use_signal(Vec::default);
     let adaptive_keyboard = use_signal(super::super::text_search::AdaptiveKeyboard::new);
     let list_id = use_signal(|| None);
-    let mut current_text_value = use_signal(|| None);
     let mut typeahead_clear_task: Signal<Option<Task>> = use_signal(|| None);
 
-    let cursor = use_memo(move || {
-        if let Some(val) = value() {
-            SelectCursor {
-                value: Some(val.clone()),
-                text_value: current_text_value
-                    .read()
-                    .clone()
-                    .unwrap_or_else(|| props.placeholder.cloned()),
-            }
-        } else {
-            SelectCursor {
-                value: None,
-                text_value: props.placeholder.cloned(),
-            }
-        }
-    });
+    #[allow(clippy::redundant_closure)]
+    let cursor = use_memo(move || value());
 
-    let set_value = use_callback(move |cursor_opt: Option<SelectCursor<T>>| {
+    let set_value = use_callback(move |cursor_opt: Option<SelectValue<T>>| {
         if let Some(cursor) = cursor_opt {
-            set_value_internal.call(cursor.value.clone());
-            current_text_value.set(Some(cursor.text_value.clone()));
+            set_value_internal.call(Some(cursor.clone()));
         } else {
             set_value_internal.call(None);
-            current_text_value.set(None);
         }
     });
 

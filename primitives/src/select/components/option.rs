@@ -6,16 +6,13 @@ use crate::{
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 
-use super::super::context::{OptionState, SelectContext, SelectCursor, SelectOptionContext};
+use super::super::context::{OptionState, SelectContext, SelectOptionContext, SelectValue};
 
 /// The props for the [`SelectOption`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
     /// The value of the option
-    pub value: ReadOnlySignal<T>,
-
-    /// Optional human-readable text, typehead
-    pub text_value: String,
+    pub value: ReadOnlySignal<SelectValue<T>>,
 
     /// Whether the option is disabled
     #[props(default)]
@@ -63,7 +60,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
     let index = props.index;
     let value = props.value;
-    let text_value = use_memo(move || props.text_value.clone());
+    let text_value = use_memo(move || (props.value)().text_value);
 
     // Push this option to the context
     let mut ctx: SelectContext<T> = use_context();
@@ -86,7 +83,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
     let onmounted = use_focus_controlled_item(props.index);
     let focused = move || ctx.focus_state.is_focused(index());
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
-    let selected = use_memo(move || ctx.cursor.read().value == Some(props.value.read().clone()));
+    let selected = use_memo(move || ctx.cursor.read().clone() == Some(props.value.read().clone()));
 
     use_context_provider(|| SelectOptionContext {
         selected: selected.into(),
@@ -107,10 +104,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
             onpointerdown: move |event| {
                 if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
-                    ctx.set_value.call(Some(SelectCursor {
-                        value: Some(props.value.read().clone()),
-                        text_value: text_value.read().to_string(),
-                    }));
+                    ctx.set_value.call(Some(props.value.read().clone()));
                     ctx.open.set(false);
                 }
             },

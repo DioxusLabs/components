@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_primitives::select::{
     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
-    SelectTrigger,
+    SelectTrigger, SelectValue,
 };
 use strum::{EnumCount, IntoEnumIterator};
 
@@ -33,8 +33,7 @@ pub fn Demo() -> Element {
             SelectOption::<Option<Fruit>> {
                 index: i,
                 class: "select-option",
-                value: Some(f),
-                text_value: f.to_string(),
+                value: SelectValue::new(Some(f), f.to_string()),
                 {format!("{} {f}", f.emoji())}
                 SelectItemIndicator {
                     svg {
@@ -87,8 +86,7 @@ pub fn Demo() -> Element {
                     SelectOption::<Option<Fruit>> {
                         index: Fruit::COUNT,
                         class: "select-option",
-                        value: None,
-                        text_value: "Other".to_string(),
+                        value: SelectValue::new(None::<Fruit>, "Other"),
                         "Other"
                         SelectItemIndicator {
                             svg {
