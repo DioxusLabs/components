@@ -9,7 +9,7 @@ use crate::focus::use_focus_provider;
 
 /// Props for the main Select component
 #[derive(Props, Clone, PartialEq)]
-pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
+pub struct SelectProps<T: Clone + PartialEq + 'static> {
     /// The controlled value of the select
     #[props(default)]
     pub value: ReadOnlySignal<Option<Option<T>>>,
@@ -104,7 +104,7 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
 /// The [`Select`] component defines the following data attributes you can use to control styling:
 /// - `data-state`: Indicates the current state of the select. Values are `open` or `closed`.
 #[component]
-pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -> Element {
+pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element {
     let (value, set_value_internal) =
         use_controlled(props.value, props.default_value, props.on_value_change);
 
@@ -119,7 +119,7 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
     let cursor = use_memo(move || {
         if let Some(val) = value() {
             SelectCursor {
-                value: val.clone(),
+                value: Some(val.clone()),
                 text_value: current_text_value
                     .read()
                     .clone()
@@ -127,7 +127,7 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
             }
         } else {
             SelectCursor {
-                value: T::default(),
+                value: None,
                 text_value: props.placeholder.cloned(),
             }
         }
@@ -135,7 +135,7 @@ pub fn Select<T: Clone + PartialEq + Default + 'static>(props: SelectProps<T>) -
 
     let set_value = use_callback(move |cursor_opt: Option<SelectCursor<T>>| {
         if let Some(cursor) = cursor_opt {
-            set_value_internal.call(Some(cursor.value.clone()));
+            set_value_internal.call(cursor.value.clone());
             current_text_value.set(Some(cursor.text_value.clone()));
         } else {
             set_value_internal.call(None);

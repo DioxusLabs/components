@@ -86,7 +86,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
     let onmounted = use_focus_controlled_item(props.index);
     let focused = move || ctx.focus_state.is_focused(index());
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
-    let selected = use_memo(move || ctx.cursor.read().value == *props.value.read());
+    let selected = use_memo(move || ctx.cursor.read().value == Some(props.value.read().clone()));
 
     use_context_provider(|| SelectOptionContext {
         selected: selected.into(),
@@ -108,7 +108,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
             onpointerdown: move |event| {
                 if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
                     ctx.set_value.call(Some(SelectCursor {
-                        value: props.value.read().clone(),
+                        value: Some(props.value.read().clone()),
                         text_value: text_value.read().to_string(),
                     }));
                     ctx.open.set(false);

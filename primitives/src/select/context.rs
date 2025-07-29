@@ -13,7 +13,7 @@ use super::text_search::{AdaptiveKeyboard, KeyboardLayout};
 #[derive(Clone, PartialEq)]
 pub(super) struct SelectCursor<V> {
     /// Typed value of the select
-    pub value: V,
+    pub value: Option<V>,
     /// Human-readable display of the select value
     pub text_value: String,
 }
@@ -56,7 +56,7 @@ impl<T: Clone + PartialEq + 'static> SelectContext<T> {
                 let options = self.options.read();
                 if let Some(option) = options.iter().find(|opt| opt.tab_index == focused_index) {
                     self.set_value.call(Some(SelectCursor {
-                        value: option.value.clone(),
+                        value: Some(option.value.clone()),
                         text_value: option.text_value.clone(),
                     }));
                 }
