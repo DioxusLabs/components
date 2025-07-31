@@ -52,12 +52,12 @@ pub(super) fn recency_bias(char_index: usize, total_length: usize) -> f32 {
     ((char_index as f32 + 1.5).ln() / (total_length as f32 + 1.5).ln()).powi(4)
 }
 
-/// Weighted Levenshtein distance to account for the recency of characters
-/// More recent characters have a higher weight, while older characters have a lower weight
-/// The first few characters in the value are weighted more heavily
-///
-/// When substitution is required, the substitution is cheaper for characters that are closer together on the keyboard
-pub(super) fn levenshtein_distance(
+// We use a weighted Levenshtein distance to account for the recency of characters
+// More recent characters have a higher weight, while older characters have a lower weight
+// The first few characters in the value are weighted more heavily
+//
+// When substitution is required, the substitution is cheaper for characters that are closer together on the keyboard
+fn levenshtein_distance(
     typeahead: &[char],
     value: &[char],
     substitution_cost: impl Fn(char, char) -> f32,
@@ -66,28 +66,44 @@ pub(super) fn levenshtein_distance(
 
     let mut prev = 0.0;
     for j in 0..=value.len() {
-        let weight = recency_bias(j, value.len());
-        dp[0][j] = prev + weight;
-        prev = dp[0][j];
+        let new = prev + (1.0 - recency_bias(j, value.len())) * 0.5;
+        prev = new;
+        dp[0][j] = new;
+    }
+    let mut prev = 0.0;
+    for (i, row) in dp.iter_mut().enumerate().take(typeahead.len() + 1) {
+        let new = prev + recency_bias(i, typeahead.len()) * 0.5;
+        prev = new;
+        row[0] = new;
     }
 
     for i in 1..=typeahead.len() {
-        dp[i][0] = dp[i - 1][0] + 1.0;
         for j in 1..=value.len() {
-            let weight = recency_bias(j - 1, value.len());
             let cost = if typeahead[i - 1] == value[j - 1] {
                 0.0
             } else {
-                substitution_cost(typeahead[i - 1], value[j - 1]) * weight
+                substitution_cost(typeahead[i - 1], value[j - 1])
             };
 
-            dp[i][j] = (dp[i - 1][j] + weight)
-                .min(dp[i][j - 1] + weight)
-                .min(dp[i - 1][j - 1] + cost);
+            dp[i][j] = f32::min(
+                f32::min(
+                    // Insertion is cheaper for old characters in the typeahead
+                    dp[i - 1][j] + recency_bias(i, typeahead.len()),
+                    // Deletion is cheaper for untyped characters in the value
+                    dp[i][j - 1] + (1.0 - recency_bias(j, value.len())),
+                ),
+                // Substitution
+                dp[i - 1][j - 1] + cost * 2.0 * recency_bias(i, typeahead.len()),
+            );
         }
     }
 
-    dp[typeahead.len()][value.len()]
+    let result = dp[typeahead.len()][value.len()];
+
+    let max_possible = dp[typeahead.len()][0].max(dp[0][value.len()]);
+
+    // Normalize the result to a range of 0.0 to 1.0
+    result / max_possible
 }
 
 /// Adaptive keyboard learning system for multi-language support
@@ -131,12 +147,12 @@ impl AdaptiveKeyboard {
         let b_lowercase = b.to_lowercase().next().unwrap_or(b);
 
         // Try physical key distance if we have mappings
-        let physical_cost = self
-            .layout
-            .distance_cost(a_lowercase, b_lowercase)
-            .map_or(f32::INFINITY, |cost| {
-                cost * 0.3 // Physical proximity is a strong signal
-            });
+        let physical_cost =
+            self.layout
+                .distance_cost(a_lowercase, b_lowercase)
+                .map_or(f32::INFINITY, |cost| {
+                    cost * 0.3 // Physical proximity is a strong signal
+                });
 
         // Use Unicode codepoint similarity
         let unicode_cost = self.unicode_similarity_cost(a, b);
