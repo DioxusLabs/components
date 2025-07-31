@@ -46,7 +46,7 @@ pub struct SelectGroupProps {
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue::<String> {}
+///                 SelectValue {}
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",
@@ -129,7 +129,7 @@ pub struct SelectGroupLabelProps {
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue::<String> {}
+///                 SelectValue {}
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",

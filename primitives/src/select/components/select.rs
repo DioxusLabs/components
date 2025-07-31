@@ -70,7 +70,7 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue::<String> {}
+///                 SelectValue {}
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",

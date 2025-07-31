@@ -72,7 +72,7 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue::<String> {}
+///                 SelectValue {}
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",
@@ -215,7 +215,7 @@ pub struct SelectItemIndicatorProps {
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue::<String> {}
+///                 SelectValue {}
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",

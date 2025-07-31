@@ -86,14 +86,14 @@
 //!     rsx! {
 //!         Select::<String> {
 //!             placeholder: "Select a fruit...",
-//!             SelectTrigger::<String> {
+//!             SelectTrigger{
 //!                 aria_label: "Select Trigger",
 //!                 width: "12rem",
-//!                 SelectValue::<String> {}
+//!                 SelectValue {}
 //!             }
-//!             SelectList::<String> {
+//!             SelectList {
 //!                 aria_label: "Select Demo",
-//!                 SelectGroup::<String> {
+//!                 SelectGroup {
 //!                     SelectGroupLabel { "Fruits" }
 //!                     SelectOption::<String> {
 //!                         index: 0usize,
