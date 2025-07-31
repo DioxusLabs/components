@@ -1,6 +1,8 @@
 //! Main Select component implementation.
 
-use crate::{use_controlled, use_effect};
+use core::panic;
+
+use crate::{select::context::RcPartialEqValue, use_controlled, use_effect};
 use dioxus::prelude::*;
 use dioxus_core::Task;
 
@@ -9,7 +11,7 @@ use crate::focus::use_focus_provider;
 
 /// Props for the main Select component
 #[derive(Props, Clone, PartialEq)]
-pub struct SelectProps<T: Clone + PartialEq + 'static> {
+pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
     /// The controlled value of the select
     #[props(default)]
     pub value: ReadOnlySignal<Option<Option<T>>>,
@@ -65,14 +67,14 @@ pub struct SelectProps<T: Clone + PartialEq + 'static> {
 ///     rsx! {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
-///             SelectTrigger::<String> {
+///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
 ///                 SelectValue::<String> {}
 ///             }
-///             SelectList::<String> {
+///             SelectList {
 ///                 aria_label: "Select Demo",
-///                 SelectGroup::<String> {
+///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
@@ -109,9 +111,17 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
     let list_id = use_signal(|| None);
     let mut typeahead_clear_task: Signal<Option<Task>> = use_signal(|| None);
 
-    let set_value = use_callback(move |cursor_opt: Option<T>| {
+    let value = use_memo(move || value().map(RcPartialEqValue::new));
+    let set_value = use_callback(move |cursor_opt: Option<RcPartialEqValue>| {
         if let Some(value) = cursor_opt {
-            set_value_internal.call(Some(value.clone()));
+            set_value_internal.call(Some(
+                value
+                    .as_ref::<T>()
+                    .unwrap_or_else(|| {
+                        panic!("The values of select and all options must match types")
+                    })
+                    .clone(),
+            ));
         } else {
             set_value_internal.call(None);
         }

@@ -43,14 +43,14 @@ pub struct SelectGroupProps {
 ///     rsx! {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
-///             SelectTrigger::<String> {
+///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
 ///                 SelectValue::<String> {}
 ///             }
-///             SelectList::<String> {
+///             SelectList {
 ///                 aria_label: "Select Demo",
-///                 SelectGroup::<String> {
+///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
@@ -71,8 +71,8 @@ pub struct SelectGroupProps {
 /// }
 /// ```
 #[component]
-pub fn SelectGroup<T: Clone + PartialEq + 'static>(props: SelectGroupProps) -> Element {
-    let ctx = use_context::<SelectContext<T>>();
+pub fn SelectGroup(props: SelectGroupProps) -> Element {
+    let ctx = use_context::<SelectContext>();
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
 
     let labeled_by = use_signal(|| None);
@@ -126,14 +126,14 @@ pub struct SelectGroupLabelProps {
 ///     rsx! {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
-///             SelectTrigger::<String> {
+///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
 ///                 SelectValue::<String> {}
 ///             }
-///             SelectList::<String> {
+///             SelectList {
 ///                 aria_label: "Select Demo",
-///                 SelectGroup::<String> {
+///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,

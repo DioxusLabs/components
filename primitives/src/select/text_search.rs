@@ -5,10 +5,10 @@ use core::f32;
 use std::collections::HashMap;
 
 /// Find the best matching option based on typeahead input
-pub(super) fn best_match<T: Clone + PartialEq + 'static>(
+pub(super) fn best_match(
     keyboard: &AdaptiveKeyboard,
     typeahead: &str,
-    options: &[OptionState<T>],
+    options: &[OptionState],
 ) -> Option<usize> {
     if typeahead.is_empty() {
         return None;
@@ -417,7 +417,7 @@ static QWERTZ_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::select::context::OptionState;
+    use crate::select::context::{OptionState, RcPartialEqValue};
     use std::collections::HashMap;
 
     #[test]
@@ -536,19 +536,19 @@ mod tests {
         let options = vec![
             OptionState {
                 tab_index: 0,
-                value: "apple",
+                value: RcPartialEqValue::new("apple"),
                 text_value: "Apple".to_string(),
                 id: "apple".to_string(),
             },
             OptionState {
                 tab_index: 1,
-                value: "banana",
+                value: RcPartialEqValue::new("banana"),
                 text_value: "Banana".to_string(),
                 id: "banana".to_string(),
             },
             OptionState {
                 tab_index: 2,
-                value: "cherry",
+                value: RcPartialEqValue::new("cherry"),
                 text_value: "Cherry".to_string(),
                 id: "cherry".to_string(),
             },
@@ -602,13 +602,13 @@ mod tests {
         let options = vec![
             OptionState {
                 tab_index: 0,
-                value: "ф",
+                value: RcPartialEqValue::new("ф"),
                 text_value: "ф".to_string(),
                 id: "ф".to_string(),
             },
             OptionState {
                 tab_index: 1,
-                value: "banana",
+                value: RcPartialEqValue::new("banana"),
                 text_value: "Banana".to_string(),
                 id: "banana".to_string(),
             },

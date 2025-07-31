@@ -55,11 +55,11 @@ pub fn Demo() -> Element {
         Select::<Option<Fruit>> {
             class: "select",
             placeholder: "Select a fruit...",
-            SelectTrigger::<Option<Fruit>> {
+            SelectTrigger {
                 class: "select-trigger",
                 aria_label: "Select Trigger",
                 width: "12rem",
-                SelectValue::<Option<Fruit>> {}
+                SelectValue {}
                 svg {
                     class: "select-expand-icon",
                     view_box: "0 0 24 24",
@@ -67,10 +67,10 @@ pub fn Demo() -> Element {
                     polyline { points: "6 9 12 15 18 9" }
                 }
             }
-            SelectList::<Option<Fruit>> {
+            SelectList {
                 class: "select-list",
                 aria_label: "Select Demo",
-                SelectGroup::<Option<Fruit>> {
+                SelectGroup {
                     class: "select-group",
                     SelectGroupLabel {
                         class: "select-group-label",
@@ -78,7 +78,7 @@ pub fn Demo() -> Element {
                     }
                     {fruits}
                 }
-                SelectGroup::<Option<Fruit>> {
+                SelectGroup {
                     class: "select-group",
                     SelectGroupLabel {
                         class: "select-group-label",
@@ -87,7 +87,7 @@ pub fn Demo() -> Element {
                     SelectOption::<Option<Fruit>> {
                         index: Fruit::COUNT,
                         class: "select-option",
-                        value: None::<Fruit>,
+                        value: None,
                         text_value: "Other",
                         "Other"
                         SelectItemIndicator {

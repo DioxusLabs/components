@@ -32,14 +32,14 @@ pub struct SelectTriggerProps {
 ///     rsx! {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
-///             SelectTrigger::<String> {
+///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
 ///                 SelectValue::<String> {}
 ///             }
-///             SelectList::<String> {
+///             SelectList {
 ///                 aria_label: "Select Demo",
-///                 SelectGroup::<String> {
+///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
@@ -65,8 +65,8 @@ pub struct SelectTriggerProps {
 ///
 /// The [`SelectTrigger`] component defines a span with a `data-placeholder` attribute if a placeholder is set.
 #[component]
-pub fn SelectTrigger<T: Clone + PartialEq + 'static>(props: SelectTriggerProps) -> Element {
-    let mut ctx = use_context::<SelectContext<T>>();
+pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
+    let mut ctx = use_context::<SelectContext>();
     let mut open = ctx.open;
 
     rsx! {

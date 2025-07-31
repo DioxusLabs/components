@@ -40,14 +40,14 @@ pub struct SelectListProps {
 ///     rsx! {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
-///             SelectTrigger::<String> {
+///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
 ///                 SelectValue::<String> {}
 ///             }
-///             SelectList::<String> {
+///             SelectList {
 ///                 aria_label: "Select Demo",
-///                 SelectGroup::<String> {
+///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
@@ -68,8 +68,8 @@ pub struct SelectListProps {
 /// }
 /// ```
 #[component]
-pub fn SelectList<T: Clone + PartialEq + 'static>(props: SelectListProps) -> Element {
-    let mut ctx = use_context::<SelectContext<T>>();
+pub fn SelectList(props: SelectListProps) -> Element {
+    let mut ctx = use_context::<SelectContext>();
 
     let id = use_unique_id();
     let id = use_id_or(id, props.id);

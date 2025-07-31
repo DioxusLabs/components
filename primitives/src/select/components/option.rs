@@ -1,7 +1,8 @@
 //! SelectOption and SelectItemIndicator component implementations.
 
 use crate::{
-    focus::use_focus_controlled_item, use_effect, use_effect_cleanup, use_id_or, use_unique_id,
+    focus::use_focus_controlled_item, select::context::RcPartialEqValue, use_effect, use_effect_cleanup,
+    use_id_or, use_unique_id,
 };
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
@@ -68,14 +69,14 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 ///     rsx! {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
-///             SelectTrigger::<String> {
+///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
 ///                 SelectValue::<String> {}
 ///             }
-///             SelectList::<String> {
+///             SelectList {
 ///                 aria_label: "Select Demo",
-///                 SelectGroup::<String> {
+///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
@@ -124,11 +125,11 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
     });
 
     // Push this option to the context
-    let mut ctx: SelectContext<T> = use_context();
+    let mut ctx: SelectContext = use_context();
     use_effect(move || {
         let option_state = OptionState {
             tab_index: index(),
-            value: value.cloned(),
+            value: RcPartialEqValue::new(value.cloned()),
             text_value: text_value.cloned(),
             id: id(),
         };
@@ -144,7 +145,9 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
     let onmounted = use_focus_controlled_item(props.index);
     let focused = move || ctx.focus_state.is_focused(index());
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
-    let selected = use_memo(move || ctx.value.read().clone() == Some(props.value.cloned()));
+    let selected = use_memo(move || {
+        ctx.value.read().as_ref().and_then(|v| v.as_ref::<T>()) == Some(&props.value.read())
+    });
 
     use_context_provider(|| SelectOptionContext {
         selected: selected.into(),
@@ -165,7 +168,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
             onpointerdown: move |event| {
                 if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
-                    ctx.set_value.call(Some(props.value.cloned()));
+                    ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
                     ctx.open.set(false);
                 }
             },
@@ -209,14 +212,14 @@ pub struct SelectItemIndicatorProps {
 ///     rsx! {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
-///             SelectTrigger::<String> {
+///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
 ///                 SelectValue::<String> {}
 ///             }
-///             SelectList::<String> {
+///             SelectList {
 ///                 aria_label: "Select Demo",
-///                 SelectGroup::<String> {
+///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,

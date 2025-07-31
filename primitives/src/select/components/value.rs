@@ -29,14 +29,14 @@ pub struct SelectValueProps {
 ///     rsx! {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
-///             SelectTrigger::<String> {
+///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
 ///                 SelectValue::<String> {}
 ///             }
-///             SelectList::<String> {
+///             SelectList {
 ///                 aria_label: "Select Demo",
-///                 SelectGroup::<String> {
+///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
@@ -62,8 +62,8 @@ pub struct SelectValueProps {
 ///
 /// The [`SelectValue`] component defines a span with a `data-placeholder` attribute if a placeholder is set.
 #[component]
-pub fn SelectValue<T: Clone + PartialEq + 'static>(props: SelectValueProps) -> Element {
-    let ctx = use_context::<SelectContext<T>>();
+pub fn SelectValue(props: SelectValueProps) -> Element {
+    let ctx = use_context::<SelectContext>();
 
     let selected_text_value = use_memo(move || {
         let value = ctx.value.read();
@@ -71,7 +71,7 @@ pub fn SelectValue<T: Clone + PartialEq + 'static>(props: SelectValueProps) -> E
             ctx.options
                 .peek()
                 .iter()
-                .find(|opt| &opt.value == v)
+                .find(|opt| opt.value == *v)
                 .map(|opt| opt.text_value.clone())
         })
     });
