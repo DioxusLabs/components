@@ -8,6 +8,7 @@
 //! - [`SelectItemIndicator`] - Visual indicator for selected items
 //! - [`SelectGroup`] - Groups related options together
 //! - [`SelectGroupLabel`] - Labels for option groups
+//! - [`SelectValue`] - Displays the currently selected value
 //!
 //! ## Features
 //!

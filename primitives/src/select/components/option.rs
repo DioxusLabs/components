@@ -52,7 +52,7 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 /// ## Value vs Text Value
 ///
 /// - **`value`**: The programmatic value (e.g., `"apple"`, `"user_123"`) used internally
-/// - **`text_value`**: The text value (e.g., `"Apple"`, `"John Doe"`) used for typeahead search
+/// - **`text_value`**: The text value (e.g., `"Apple"`, `"John Doe"`) used for typeahead search and displayed in the [`SelectValue`](super::value::SelectValue)
 ///
 /// This must be used inside a [`SelectList`](super::list::SelectList) component.
 ///
