@@ -47,7 +47,7 @@ jobs:
       with:
         node-version: lts/*
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@1.86.0
+      uses: dtolnay/rust-toolchain@1.88.0
       with:
         targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
     - uses: Swatinem/rust-cache@v2
