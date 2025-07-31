@@ -1,8 +1,8 @@
 //! SelectOption and SelectItemIndicator component implementations.
 
 use crate::{
-    focus::use_focus_controlled_item, select::context::RcPartialEqValue, use_effect, use_effect_cleanup,
-    use_id_or, use_unique_id,
+    focus::use_focus_controlled_item, select::context::RcPartialEqValue, use_effect,
+    use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;

@@ -15,7 +15,7 @@ trait DynPartialEq: Any {
 
 impl<T: PartialEq + 'static> DynPartialEq for T {
     fn eq(&self, other: &dyn Any) -> bool {
-        other.downcast_ref::<T>().map_or(false, |o| self == o)
+        other.downcast_ref::<T>() == Some(self)
     }
 }
 
