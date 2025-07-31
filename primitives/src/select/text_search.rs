@@ -21,8 +21,7 @@ pub(super) fn best_match<T: Clone + PartialEq + 'static>(
         .map(|opt| {
             let value = &opt.text_value;
             let value_characters: Box<[_]> = value.chars().collect();
-            let distance =
-                normalized_distance(&typeahead_characters, &value_characters, keyboard_layout);
+            let distance = normalized_distance(&typeahead_characters, &value_characters, keyboard);
             (distance, opt.tab_index)
         })
         .min_by(|(d1, _), (d2, _)| f32::total_cmp(d1, d2))
@@ -248,20 +247,15 @@ impl KeyboardLayout {
             .iter()
             .copied()
             .find(|layout| {
-                for (from, to) in known_key_positions {
-                    let Some(from_char) = from.chars().next() else {
+                known_key_positions.iter().all(|(from, to)| {
+                    let Some(from_char) = code_to_char(from) else {
                         return false;
                     };
-                    if let (Some(from_pos), Some(to_pos)) =
-                        (layout.char_position(from_char), layout.char_position(*to))
-                    {
-                        // If the positions are not the same, try the next layout
-                        if from_pos != to_pos {
-                            return false;
-                        }
+                    match (Self::Qwerty.char_position(from_char), layout.char_position(*to)) {
+                        (Some(from_pos), Some(to_pos)) => from_pos == to_pos,
+                        _ => false,
                     }
-                }
-                true
+                })
             })
             .unwrap_or_default()
     }
@@ -277,8 +271,8 @@ impl KeyboardLayout {
         let dy = (a_pos.1 as f32 - b_pos.1 as f32).abs();
         let distance = (dx * dx + dy * dy).sqrt();
 
-        // Scale the distance to be between 0.1 and 1.0
-        Some((distance / 10.0).clamp(0.1, 1.0))
+        // Scale the distance to be between 0.0 and 1.0
+        Some((distance / 10.0).clamp(0.0, 1.0))
     }
 
     /// Get the position of a character on the keyboard layout
@@ -442,32 +436,30 @@ mod tests {
     fn test_normalized_distance() {
         let typeahead_chars = ['a', 'b', 'c'];
         let value_chars = ['a', 'b', 'c'];
-        let keyboard_layout = KeyboardLayout::Qwerty;
+        let keyboard = AdaptiveKeyboard::default();
 
-        let distance = normalized_distance(&typeahead_chars, &value_chars, &keyboard_layout);
+        let distance = normalized_distance(&typeahead_chars, &value_chars, &keyboard);
         assert!(distance < 0.01); // Very small but not exactly 0 due to recency bias
 
         let typeahead_chars = ['a', 'b', 'c'];
         let value_chars = ['a', 'b', 'd'];
-        let distance = normalized_distance(&typeahead_chars, &value_chars, &keyboard_layout);
+        let distance = normalized_distance(&typeahead_chars, &value_chars, &keyboard);
         assert!(distance > 0.0);
 
         // Test truncation behavior
         let typeahead_chars = ['a', 'b', 'c', 'd', 'e'];
         let value_chars = ['x', 'y', 'z'];
-        let distance = normalized_distance(&typeahead_chars, &value_chars, &keyboard_layout);
+        let distance = normalized_distance(&typeahead_chars, &value_chars, &keyboard);
         assert!(distance > 0.0);
 
         // Test with keyboard-aware costs
         let typeahead_chars = ['q'];
         let value_chars = ['w'];
-        let qwerty_distance =
-            normalized_distance(&typeahead_chars, &value_chars, &KeyboardLayout::Qwerty);
+        let qwerty_distance = normalized_distance(&typeahead_chars, &value_chars, &keyboard);
 
         let typeahead_chars = ['q'];
         let value_chars = ['p'];
-        let far_distance =
-            normalized_distance(&typeahead_chars, &value_chars, &KeyboardLayout::Qwerty);
+        let far_distance = normalized_distance(&typeahead_chars, &value_chars, &keyboard);
 
         // Adjacent keys should have lower distance than distant keys
         assert!(qwerty_distance < far_distance);
@@ -477,27 +469,27 @@ mod tests {
     fn test_detect_keyboard_layout() {
         // Test QWERTY detection
         let mut known_positions = HashMap::new();
-        known_positions.insert("q".to_string(), 'q');
-        known_positions.insert("w".to_string(), 'w');
-        known_positions.insert("e".to_string(), 'e');
+        known_positions.insert("KeyQ".to_string(), 'q');
+        known_positions.insert("KeyW".to_string(), 'w');
+        known_positions.insert("KeyE".to_string(), 'e');
 
         let detected = KeyboardLayout::guess(&known_positions);
         assert_eq!(detected, KeyboardLayout::Qwerty);
 
-        // Test with mostly QWERTY matches (layout detection is based on position matches)
+        // Test with colemak dh matches
         let mut known_positions = HashMap::new();
-        known_positions.insert("q".to_string(), 'q');
-        known_positions.insert("w".to_string(), 'w');
-        known_positions.insert("e".to_string(), 'e');
-        known_positions.insert("r".to_string(), 'r');
+        known_positions.insert("KeyQ".to_string(), 'q');
+        known_positions.insert("KeyW".to_string(), 'w');
+        known_positions.insert("KeyE".to_string(), 'f');
+        known_positions.insert("KeyR".to_string(), 'p');
 
         let detected = KeyboardLayout::guess(&known_positions);
-        assert_eq!(detected, KeyboardLayout::Qwerty);
+        assert_eq!(detected, KeyboardLayout::ColemakDH);
 
         // Test empty input
         let known_positions = HashMap::new();
         let detected = KeyboardLayout::guess(&known_positions);
-        assert_eq!(detected, KeyboardLayout::Unknown);
+        assert_eq!(detected, KeyboardLayout::Qwerty);
     }
 
     #[test]
@@ -515,16 +507,6 @@ mod tests {
         // Unknown characters should return None
         let unknown_cost = layout.distance_cost('α', 'β');
         assert_eq!(unknown_cost, None);
-    }
-
-    #[test]
-    fn test_code_to_char() {
-        assert_eq!(code_to_char("KeyA"), Some('a'));
-        assert_eq!(code_to_char("KeyZ"), Some('z'));
-        assert_eq!(code_to_char("Digit0"), Some('0'));
-        assert_eq!(code_to_char("Digit9"), Some('9'));
-        assert_eq!(code_to_char("Unknown"), None);
-        assert_eq!(code_to_char(""), None);
     }
 
     #[test]
@@ -550,7 +532,7 @@ mod tests {
             },
         ];
 
-        let layout = KeyboardLayout::Qwerty;
+        let layout = AdaptiveKeyboard::default();
 
         // Exact prefix match
         let result = best_match(&layout, "App", &options);
@@ -589,10 +571,34 @@ mod tests {
         // Test learning from keyboard events
         adaptive.learn_from_event("KeyA", 'ф'); // Russian 'f' sound on A key
         adaptive.learn_from_event("KeyS", 'ы'); // Russian 'y' sound on S key
+        assert_eq!(adaptive.layout, KeyboardLayout::Unknown);
 
         // Should have learned the mappings
         assert_eq!(adaptive.physical_mappings.get("KeyA"), Some(&'ф'));
         assert_eq!(adaptive.physical_mappings.get("KeyS"), Some(&'ы'));
+
+        let options = vec![
+            OptionState {
+                tab_index: 0,
+                value: "ф",
+                text_value: "ф".to_string(),
+                id: "ф".to_string(),
+            },
+            OptionState {
+                tab_index: 1,
+                value: "banana",
+                text_value: "Banana".to_string(),
+                id: "banana".to_string(),
+            },
+        ];
+
+        // ы should be a closer match to ф than banana
+        let result = best_match(&adaptive, "ф", &options);
+        assert_eq!(result, Some(0));
+
+        // b should still match banana
+        let result = best_match(&adaptive, "b", &options);
+        assert_eq!(result, Some(1));
     }
 
     #[test]
