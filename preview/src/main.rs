@@ -245,7 +245,7 @@ fn CopyButton(#[props(extends=GlobalAttributes)] attributes: Vec<Attribute>) -> 
             class: "copy-button",
             aria_label: "Copy code",
             "data-copied": copied,
-            "onclick": "navigator.clipboard.writeText(this.parentNode.firstChild.innerText);",
+            "onclick": "navigator.clipboard.writeText(this.parentNode.firstChild.innerText || this.parentNode.innerText);",
             onclick: move |_| copied.set(true),
             ..attributes,
             if copied() {
