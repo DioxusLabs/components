@@ -71,8 +71,8 @@ pub(super) struct SelectContext {
     pub placeholder: ReadOnlySignal<String>,
     /// Task handle for clearing typeahead buffer
     pub typeahead_clear_task: Signal<Option<Task>>,
-    /// Timeout in milliseconds before clearing typeahead buffer
-    pub typeahead_timeout: ReadOnlySignal<u64>,
+    /// Timeout before clearing typeahead buffer
+    pub typeahead_timeout: ReadOnlySignal<Duration>,
 }
 
 impl SelectContext {
@@ -116,9 +116,9 @@ impl SelectContext {
         let mut typeahead_clear_task_signal = self.typeahead_clear_task;
 
         // Spawn a new task to clear the buffer after the configured timeout
-        let timeout_ms = self.typeahead_timeout.cloned();
+        let timeout = self.typeahead_timeout.cloned();
         let new_task = spawn(async move {
-            sleep(Duration::from_millis(timeout_ms)).await;
+            sleep(timeout).await;
 
             // Clear the buffer
             typeahead_buffer_signal.write().clear();

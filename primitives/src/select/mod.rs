@@ -20,58 +20,9 @@
 //!
 //! ## Typeahead Buffer Behavior
 //!
-//! The Select component implements an intelligent typeahead search system with race condition prevention:
-//!
-//! ### How it Works
-//!
-//! When users type characters while the dropdown is open:
-//! 1. Each character is added to a typeahead buffer
-//! 2. The buffer is used to find and focus the best matching option
-//! 3. The buffer automatically clears after a configurable timeout (default: 1 second)
-//!
-//! ### Race Condition Prevention
-//!
-//! The component uses task cancellation to prevent a common race condition:
-//! - **Problem**: Without cancellation, rapid typing (e.g., "apple") would spawn multiple clear timers,
-//!   causing the first timer to clear the entire buffer after the timeout period, losing later keystrokes.
-//! - **Solution**: Each new keystroke cancels any existing clear timer before starting a new one.
-//!   This ensures only the most recent timer remains active.
-//!
-//! ### Example Scenario
-//!
-//! ```text
-//! User types "app" quickly (with default 1000ms timeout):
-//! - 0ms: Types 'a' → starts timer
-//! - 100ms: Types 'p' → cancels first timer, starts new timer
-//! - 200ms: Types 'p' → cancels second timer, starts new timer
-//! - 1200ms: Buffer clears (only the final timer executes)
-//! ```
-//!
-//! This behavior ensures the typeahead buffer remains intact during rapid typing while still
-//! clearing after a period of inactivity, providing a smooth and predictable user experience.
-//!
-//! ## Focus and Blur Handling
-//!
-//! The Select component uses a specific blur handling strategy to ensure smooth keyboard navigation
-//!
-//! ### Design Decision
-//!
-//! - **Blur handlers are only on the list container**, not on individual options
-//! - This prevents the dropdown from closing when navigating between options with keyboard
-//! - The list container's blur handler closes the dropdown when focus leaves the select entirely
-//!
-//! ### Why This Matters
-//!
-//! Without this design, keyboard navigation would be broken:
-//! ```text
-//! 1. User presses arrow key to move to next option
-//! 2. Current option loses focus (blur event)
-//! 3. Dropdown closes immediately (BUG!)
-//! 4. User can't navigate to next option
-//! ```
-//!
-//! By handling blur only at the container level, we ensure the dropdown stays open during
-//! option navigation and only closes when focus truly leaves the select component.
+//! The Select component implements an typeahead search buffer that lets you type while the dropdown is open to focus a matching
+//! option. The buffer will be cleared after some amount of time has passed with no new input. The timeout is 1 second by default,
+//! but can be configured by setting the [`SelectProps::typeahead_timeout`].
 //!
 //! ## Example
 //!

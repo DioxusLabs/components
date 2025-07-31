@@ -1,6 +1,7 @@
 //! Main Select component implementation.
 
 use core::panic;
+use std::time::Duration;
 
 use crate::{select::context::RcPartialEqValue, use_controlled, use_effect};
 use dioxus::prelude::*;
@@ -41,8 +42,8 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
     pub roving_loop: ReadOnlySignal<bool>,
 
     /// Timeout in milliseconds before clearing typeahead buffer
-    #[props(default = ReadOnlySignal::new(Signal::new(1000)))]
-    pub typeahead_timeout: ReadOnlySignal<u64>,
+    #[props(default = ReadOnlySignal::new(Signal::new(Duration::from_millis(1000))))]
+    pub typeahead_timeout: ReadOnlySignal<Duration>,
 
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
