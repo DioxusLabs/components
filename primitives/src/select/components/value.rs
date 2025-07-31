@@ -1,26 +1,25 @@
-//! SelectTrigger component implementation.
+//! SelectValue component implementation.
 
 use dioxus::prelude::*;
 
 use super::super::context::SelectContext;
 
-/// The props for the [`SelectTrigger`] component
+
+
+/// The props for the [`SelectValue`] component
 #[derive(Props, Clone, PartialEq)]
-pub struct SelectTriggerProps {
-    /// Additional attributes for the trigger button
+pub struct SelectValueProps {
+    /// Additional attributes for the value element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
-
-    /// The children to render inside the trigger
-    children: Element,
 }
 
-/// # SelectTrigger
+/// # SelectValue
 ///
 /// The trigger button for the [`Select`](super::select::Select) component which controls if the [`SelectList`](super::list::SelectList) is rendered.
 ///
 /// This must be used inside a [`Select`](super::select::Select) component.
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::select::{
@@ -59,52 +58,32 @@ pub struct SelectTriggerProps {
 ///     }
 /// }
 /// ```
-/// 
-/// 
+///
+///
 /// ## Styling
-/// 
-/// The [`SelectTrigger`] component defines a span with a `data-placeholder` attribute if a placeholder is set.
+///
+/// The [`SelectValue`] component defines a span with a `data-placeholder` attribute if a placeholder is set.
 #[component]
-pub fn SelectTrigger<T: Clone + PartialEq + 'static>(props: SelectTriggerProps) -> Element {
-    let mut ctx = use_context::<SelectContext<T>>();
-    let mut open = ctx.open;
+pub fn SelectValue<T: Clone + PartialEq + 'static>(props: SelectValueProps) -> Element {
+    let ctx = use_context::<SelectContext<T>>();
+    let value = ctx.value.read();
+
+    let selected_text_value = value.as_ref().and_then(|v| {
+        ctx.options
+            .read()
+            .iter()
+            .find(|opt| &opt.value == v)
+            .map(|opt| opt.text_value.clone())
+    });
+
+    let display_value = selected_text_value.unwrap_or_else(|| ctx.placeholder.cloned());
 
     rsx! {
-        button {
-            // Standard HTML attributes
-            disabled: (ctx.disabled)(),
-
-            onclick: move |_| {
-                open.toggle();
-            },
-            onkeydown: move |event| {
-                match event.key() {
-                    Key::ArrowUp => {
-                        open.set(true);
-                        ctx.focus_state.focus_last();
-                        event.prevent_default();
-                        event.stop_propagation();
-                    }
-                    Key::ArrowDown => {
-                        open.set(true);
-                        ctx.focus_state.focus_first();
-                        event.prevent_default();
-                        event.stop_propagation();
-                    }
-                    _ => {}
-                }
-            },
-
-            // ARIA attributes
-            aria_haspopup: "listbox",
-            aria_expanded: open(),
-            aria_controls: ctx.list_id,
-
-            // Pass through other attributes
+        // Add placeholder option if needed
+        span {
+            "data-placeholder": ctx.value.read().is_none(),
             ..props.attributes,
-
-            // Render children (options)
-            {props.children}
+            {display_value}
         }
     }
 }

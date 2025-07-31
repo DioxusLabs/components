@@ -4,7 +4,7 @@ use crate::{use_controlled, use_effect};
 use dioxus::prelude::*;
 use dioxus_core::Task;
 
-use super::super::context::{SelectContext, SelectValue};
+use super::super::context::SelectContext;
 use crate::focus::use_focus_provider;
 
 /// Props for the main Select component
@@ -12,23 +12,19 @@ use crate::focus::use_focus_provider;
 pub struct SelectProps<T: Clone + PartialEq + 'static> {
     /// The controlled value of the select
     #[props(default)]
-    pub value: ReadOnlySignal<Option<Option<SelectValue<T>>>>,
+    pub value: ReadOnlySignal<Option<Option<T>>>,
 
     /// The default value of the select
     #[props(default)]
-    pub default_value: Option<SelectValue<T>>,
+    pub default_value: Option<T>,
 
     /// Callback when the value changes
     #[props(default)]
-    pub on_value_change: Callback<Option<SelectValue<T>>>,
+    pub on_value_change: Callback<Option<T>>,
 
     /// Whether the select is disabled
     #[props(default)]
     pub disabled: ReadOnlySignal<bool>,
-
-    /// Whether the select is required
-    #[props(default)]
-    pub required: ReadOnlySignal<bool>,
 
     /// Name of the select for form submission
     #[props(default)]
@@ -69,10 +65,10 @@ pub struct SelectProps<T: Clone + PartialEq + 'static> {
 ///     rsx! {
 ///         Select::<String> {
 ///             placeholder: "Select a fruit...",
-///             typeahead_timeout: 1500u64, // Buffer clears after 1.5 seconds of inactivity
 ///             SelectTrigger::<String> {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
+///                 SelectValue::<String> {}
 ///             }
 ///             SelectList::<String> {
 ///                 aria_label: "Select Demo",
@@ -113,12 +109,10 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
     let list_id = use_signal(|| None);
     let mut typeahead_clear_task: Signal<Option<Task>> = use_signal(|| None);
 
-    #[allow(clippy::redundant_closure)]
-    let cursor = use_memo(move || value());
 
-    let set_value = use_callback(move |cursor_opt: Option<SelectValue<T>>| {
-        if let Some(cursor) = cursor_opt {
-            set_value_internal.call(Some(cursor.clone()));
+    let set_value = use_callback(move |cursor_opt: Option<T>| {
+        if let Some(value) = cursor_opt {
+            set_value_internal.call(Some(value.clone()));
         } else {
             set_value_internal.call(None);
         }
@@ -141,7 +135,7 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
     use_context_provider(|| SelectContext {
         typeahead_buffer,
         open,
-        cursor,
+        value,
         set_value,
         options,
         adaptive_keyboard,

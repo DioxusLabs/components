@@ -86,10 +86,10 @@
 //!     rsx! {
 //!         Select::<String> {
 //!             placeholder: "Select a fruit...",
-//!             typeahead_timeout: 1500u64, // Optional: customize timeout (ms)
 //!             SelectTrigger::<String> {
 //!                 aria_label: "Select Trigger",
 //!                 width: "12rem",
+//!                 SelectValue::<String> {}
 //!             }
 //!             SelectList::<String> {
 //!                 aria_label: "Select Demo",
@@ -116,15 +116,12 @@
 
 // Internal modules
 mod context;
-pub use context::SelectValue;
 pub(crate) mod text_search;
-
-// Public components module
-pub mod components;
+mod components;
 
 // Re-export all public components and types
 pub use components::{
     Select, SelectGroup, SelectGroupLabel, SelectGroupLabelProps, SelectGroupProps,
     SelectItemIndicator, SelectItemIndicatorProps, SelectList, SelectListProps, SelectOption,
-    SelectOptionProps, SelectProps, SelectTrigger, SelectTriggerProps,
+    SelectOptionProps, SelectProps, SelectTrigger, SelectTriggerProps, SelectValue, SelectValueProps
 };

@@ -29,6 +29,47 @@ pub struct SelectGroupProps {
 /// The `SelectGroup` component is used to group related options within a [`SelectList`](super::list::SelectList). It provides a way to organize options into logical sections.
 ///
 /// This must be used inside a [`SelectList`](super::list::SelectList) component.
+/// 
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger, SelectValue,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select::<String> {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger::<String> {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///                 SelectValue::<String> {}
+///             }
+///             SelectList::<String> {
+///                 aria_label: "Select Demo",
+///                 SelectGroup::<String> {
+///                     SelectGroupLabel { "Fruits" }
+///                     SelectOption::<String> {
+///                         index: 0usize,
+///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption::<String> {
+///                         index: 1usize,
+///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn SelectGroup<T: Clone + PartialEq + 'static>(props: SelectGroupProps) -> Element {
     let ctx = use_context::<SelectContext<T>>();
@@ -71,6 +112,47 @@ pub struct SelectGroupLabelProps {
 /// The `SelectGroupLabel` component is used to render a label for a group of options within a [`SelectList`](super::list::SelectList).
 ///
 /// This must be used inside a [`SelectGroup`](SelectGroup) component.
+/// 
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger, SelectValue,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select::<String> {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger::<String> {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///                 SelectValue::<String> {}
+///             }
+///             SelectList::<String> {
+///                 aria_label: "Select Demo",
+///                 SelectGroup::<String> {
+///                     SelectGroupLabel { "Fruits" }
+///                     SelectOption::<String> {
+///                         index: 0usize,
+///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption::<String> {
+///                         index: 1usize,
+///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn SelectGroupLabel(props: SelectGroupLabelProps) -> Element {
     let mut ctx: SelectGroupContext = use_context();

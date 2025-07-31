@@ -26,6 +26,47 @@ pub struct SelectListProps {
 /// [`SelectOption`](super::option::SelectOption)s. The list will only be rendered when the select is open.
 ///
 /// This must be used inside a [`Select`](super::select::Select) component.
+/// 
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger, SelectValue,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select::<String> {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger::<String> {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///                 SelectValue::<String> {}
+///             }
+///             SelectList::<String> {
+///                 aria_label: "Select Demo",
+///                 SelectGroup::<String> {
+///                     SelectGroupLabel { "Fruits" }
+///                     SelectOption::<String> {
+///                         index: 0usize,
+///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption::<String> {
+///                         index: 1usize,
+///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn SelectList<T: Clone + PartialEq + 'static>(props: SelectListProps) -> Element {
     let mut ctx = use_context::<SelectContext<T>>();
@@ -102,7 +143,7 @@ pub fn SelectList<T: Clone + PartialEq + 'static>(props: SelectListProps) -> Ele
                 event.prevent_default();
                 event.stop_propagation();
             }
-            Key::Escape | Key::Tab => {
+            Key::Escape => {
                 open.set(false);
                 event.prevent_default();
                 event.stop_propagation();
@@ -125,10 +166,6 @@ pub fn SelectList<T: Clone + PartialEq + 'static>(props: SelectListProps) -> Ele
 
                 onmounted: move |evt| listbox_ref.set(Some(evt.data())),
                 onkeydown,
-                // Handle blur events at the list level to close the dropdown when focus leaves
-                // the select entirely. This works in conjunction with NOT having blur handlers
-                // on individual options, which would incorrectly close the dropdown during
-                // keyboard navigation between options.
                 onblur: move |_| {
                     if focused() {
                         open.set(false);

@@ -6,13 +6,17 @@ use crate::{
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 
-use super::super::context::{OptionState, SelectContext, SelectOptionContext, SelectValue};
+use super::super::context::{OptionState, SelectContext, SelectOptionContext};
 
 /// The props for the [`SelectOption`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
     /// The value of the option
-    pub value: ReadOnlySignal<SelectValue<T>>,
+    pub value: ReadOnlySignal<T>,
+
+    /// The text value of the option used for typeahead search
+    #[props(default)]
+    pub text_value: ReadOnlySignal<Option<String>>,
 
     /// Whether the option is disabled
     #[props(default)]
@@ -47,9 +51,50 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 /// ## Value vs Text Value
 ///
 /// - **`value`**: The programmatic value (e.g., `"apple"`, `"user_123"`) used internally
-/// - **`text_value`**: The user-facing text (e.g., `"Apple"`, `"John Doe"`) shown in the UI
+/// - **`text_value`**: The text value (e.g., `"Apple"`, `"John Doe"`) used for typeahead search
 ///
 /// This must be used inside a [`SelectList`](super::list::SelectList) component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger, SelectValue,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select::<String> {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger::<String> {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///                 SelectValue::<String> {}
+///             }
+///             SelectList::<String> {
+///                 aria_label: "Select Demo",
+///                 SelectGroup::<String> {
+///                     SelectGroupLabel { "Fruits" }
+///                     SelectOption::<String> {
+///                         index: 0usize,
+///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption::<String> {
+///                         index: 1usize,
+///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>) -> Element {
     // Generate a unique ID for this option for accessibility
@@ -60,7 +105,21 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
     let index = props.index;
     let value = props.value;
-    let text_value = use_memo(move || (props.value)().text_value);
+    let text_value = use_memo(move || match (props.text_value)() {
+        Some(text) => text,
+        None => {
+            let value = value.read();
+            let as_any: &dyn std::any::Any = &*value;
+            as_any
+                .downcast_ref::<String>()
+                .cloned()
+                .or_else(|| as_any.downcast_ref::<&str>().map(|s| s.to_string()))
+                .unwrap_or_else(|| {
+                    tracing::warn!("SelectOption with non-string types requires text_value to be set");
+                    String::new()
+                })
+        }
+    });
 
     // Push this option to the context
     let mut ctx: SelectContext<T> = use_context();
@@ -68,7 +127,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
         let option_state = OptionState {
             tab_index: index(),
             value: value.cloned(),
-            text_value: text_value.read().to_string(),
+            text_value: text_value.cloned(),
             id: id(),
         };
 
@@ -83,7 +142,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
     let onmounted = use_focus_controlled_item(props.index);
     let focused = move || ctx.focus_state.is_focused(index());
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
-    let selected = use_memo(move || ctx.cursor.read().clone() == Some(props.value.read().clone()));
+    let selected = use_memo(move || ctx.value.read().clone() == Some(props.value.cloned()));
 
     use_context_provider(|| SelectOptionContext {
         selected: selected.into(),
@@ -104,14 +163,16 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
             onpointerdown: move |event| {
                 if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
-                    ctx.set_value.call(Some(props.value.read().clone()));
+                    ctx.set_value.call(Some(props.value.cloned()));
                     ctx.open.set(false);
                 }
             },
-            // Note: We intentionally don't handle blur events on individual options.
-            // The blur handler on the list container (SelectList) manages closing the dropdown.
-            // Having blur handlers on options causes issues with keyboard navigation where
-            // moving between options would incorrectly close the dropdown.
+            onblur: move |_| {
+                if focused() {
+                    ctx.focus_state.blur();
+                    ctx.open.set(false);
+                }
+            },
 
             ..props.attributes,
             {props.children}
@@ -132,6 +193,47 @@ pub struct SelectItemIndicatorProps {
 /// children will only be rendered if the option is selected.
 ///
 /// This must be used inside a [`SelectOption`](SelectOption) component.
+///
+/// ## Example
+///
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::select::{
+///     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+///     SelectTrigger, SelectValue,
+/// };
+/// #[component]
+/// fn Demo() -> Element {
+///     rsx! {
+///         Select::<String> {
+///             placeholder: "Select a fruit...",
+///             SelectTrigger::<String> {
+///                 aria_label: "Select Trigger",
+///                 width: "12rem",
+///                 SelectValue::<String> {}
+///             }
+///             SelectList::<String> {
+///                 aria_label: "Select Demo",
+///                 SelectGroup::<String> {
+///                     SelectGroupLabel { "Fruits" }
+///                     SelectOption::<String> {
+///                         index: 0usize,
+///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         "Apple"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                     SelectOption::<String> {
+///                         index: 1usize,
+///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         "Banana"
+///                         SelectItemIndicator { "✔️" }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[component]
 pub fn SelectItemIndicator(props: SelectItemIndicatorProps) -> Element {
     let ctx: SelectOptionContext = use_context();
