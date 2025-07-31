@@ -251,7 +251,10 @@ impl KeyboardLayout {
                     let Some(from_char) = code_to_char(from) else {
                         return false;
                     };
-                    match (Self::Qwerty.char_position(from_char), layout.char_position(*to)) {
+                    match (
+                        Self::Qwerty.char_position(from_char),
+                        layout.char_position(*to),
+                    ) {
                         (Some(from_pos), Some(to_pos)) => from_pos == to_pos,
                         _ => false,
                     }

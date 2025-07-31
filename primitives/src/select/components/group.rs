@@ -29,7 +29,7 @@ pub struct SelectGroupProps {
 /// The `SelectGroup` component is used to group related options within a [`SelectList`](super::list::SelectList). It provides a way to organize options into logical sections.
 ///
 /// This must be used inside a [`SelectList`](super::list::SelectList) component.
-/// 
+///
 /// ## Example
 ///
 /// ```rust
@@ -54,13 +54,13 @@ pub struct SelectGroupProps {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
-///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
 ///                         index: 1usize,
-///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
@@ -112,7 +112,7 @@ pub struct SelectGroupLabelProps {
 /// The `SelectGroupLabel` component is used to render a label for a group of options within a [`SelectList`](super::list::SelectList).
 ///
 /// This must be used inside a [`SelectGroup`](SelectGroup) component.
-/// 
+///
 /// ## Example
 ///
 /// ```rust
@@ -137,13 +137,13 @@ pub struct SelectGroupLabelProps {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
-///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
 ///                         index: 1usize,
-///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }

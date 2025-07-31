@@ -97,13 +97,13 @@
 //!                     SelectGroupLabel { "Fruits" }
 //!                     SelectOption::<String> {
 //!                         index: 0usize,
-//!                         value: SelectValue::new("apple".to_string(), "Apple"),
+//!                         value: "apple",
 //!                         "Apple"
 //!                         SelectItemIndicator { "✔️" }
 //!                     }
 //!                     SelectOption::<String> {
 //!                         index: 1usize,
-//!                         value: SelectValue::new("banana".to_string(), "Banana"),
+//!                         value: "banana",
 //!                         "Banana"
 //!                         SelectItemIndicator { "✔️" }
 //!                     }
@@ -115,13 +115,14 @@
 //! ```
 
 // Internal modules
+mod components;
 mod context;
 pub(crate) mod text_search;
-mod components;
 
 // Re-export all public components and types
 pub use components::{
     Select, SelectGroup, SelectGroupLabel, SelectGroupLabelProps, SelectGroupProps,
     SelectItemIndicator, SelectItemIndicatorProps, SelectList, SelectListProps, SelectOption,
-    SelectOptionProps, SelectProps, SelectTrigger, SelectTriggerProps, SelectValue, SelectValueProps
+    SelectOptionProps, SelectProps, SelectTrigger, SelectTriggerProps, SelectValue,
+    SelectValueProps,
 };

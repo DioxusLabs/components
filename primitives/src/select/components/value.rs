@@ -4,8 +4,6 @@ use dioxus::prelude::*;
 
 use super::super::context::SelectContext;
 
-
-
 /// The props for the [`SelectValue`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectValueProps {
@@ -42,13 +40,13 @@ pub struct SelectValueProps {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
-///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
 ///                         index: 1usize,
-///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }

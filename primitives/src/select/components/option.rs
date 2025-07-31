@@ -79,13 +79,13 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
-///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
 ///                         index: 1usize,
-///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
@@ -115,7 +115,9 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 .cloned()
                 .or_else(|| as_any.downcast_ref::<&str>().map(|s| s.to_string()))
                 .unwrap_or_else(|| {
-                    tracing::warn!("SelectOption with non-string types requires text_value to be set");
+                    tracing::warn!(
+                        "SelectOption with non-string types requires text_value to be set"
+                    );
                     String::new()
                 })
         }
@@ -218,13 +220,13 @@ pub struct SelectItemIndicatorProps {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
-///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
 ///                         index: 1usize,
-///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }

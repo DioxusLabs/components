@@ -76,13 +76,13 @@ pub struct SelectProps<T: Clone + PartialEq + 'static> {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
-///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
 ///                         index: 1usize,
-///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
@@ -108,7 +108,6 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
     let adaptive_keyboard = use_signal(super::super::text_search::AdaptiveKeyboard::new);
     let list_id = use_signal(|| None);
     let mut typeahead_clear_task: Signal<Option<Task>> = use_signal(|| None);
-
 
     let set_value = use_callback(move |cursor_opt: Option<T>| {
         if let Some(value) = cursor_opt {

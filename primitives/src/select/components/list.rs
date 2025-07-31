@@ -26,7 +26,7 @@ pub struct SelectListProps {
 /// [`SelectOption`](super::option::SelectOption)s. The list will only be rendered when the select is open.
 ///
 /// This must be used inside a [`Select`](super::select::Select) component.
-/// 
+///
 /// ## Example
 ///
 /// ```rust
@@ -51,13 +51,13 @@ pub struct SelectListProps {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
-///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
 ///                         index: 1usize,
-///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }

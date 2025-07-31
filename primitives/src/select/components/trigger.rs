@@ -20,7 +20,7 @@ pub struct SelectTriggerProps {
 /// The trigger button for the [`Select`](super::select::Select) component which controls if the [`SelectList`](super::list::SelectList) is rendered.
 ///
 /// This must be used inside a [`Select`](super::select::Select) component.
-/// 
+///
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::select::{
@@ -43,13 +43,13 @@ pub struct SelectTriggerProps {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
 ///                         index: 0usize,
-///                         value: SelectValue::new("apple".to_string(), "Apple"),
+///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
 ///                         index: 1usize,
-///                         value: SelectValue::new("banana".to_string(), "Banana"),
+///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
@@ -59,10 +59,10 @@ pub struct SelectTriggerProps {
 ///     }
 /// }
 /// ```
-/// 
-/// 
+///
+///
 /// ## Styling
-/// 
+///
 /// The [`SelectTrigger`] component defines a span with a `data-placeholder` attribute if a placeholder is set.
 #[component]
 pub fn SelectTrigger<T: Clone + PartialEq + 'static>(props: SelectTriggerProps) -> Element {
