@@ -64,17 +64,19 @@ pub struct SelectValueProps {
 #[component]
 pub fn SelectValue<T: Clone + PartialEq + 'static>(props: SelectValueProps) -> Element {
     let ctx = use_context::<SelectContext<T>>();
-    let value = ctx.value.read();
 
-    let selected_text_value = value.as_ref().and_then(|v| {
-        ctx.options
-            .read()
-            .iter()
-            .find(|opt| &opt.value == v)
-            .map(|opt| opt.text_value.clone())
+    let selected_text_value = use_memo(move || {
+        let value = ctx.value.read();
+        value.as_ref().and_then(|v| {
+            ctx.options
+                .peek()
+                .iter()
+                .find(|opt| &opt.value == v)
+                .map(|opt| opt.text_value.clone())
+        })
     });
 
-    let display_value = selected_text_value.unwrap_or_else(|| ctx.placeholder.cloned());
+    let display_value = selected_text_value().unwrap_or_else(|| ctx.placeholder.cloned());
 
     rsx! {
         // Add placeholder option if needed

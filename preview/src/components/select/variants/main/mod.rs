@@ -88,7 +88,7 @@ pub fn Demo() -> Element {
                         index: Fruit::COUNT,
                         class: "select-option",
                         value: None::<Fruit>,
-                        text_value: "other",
+                        text_value: "Other",
                         "Other"
                         SelectItemIndicator {
                             svg {
