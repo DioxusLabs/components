@@ -7,7 +7,7 @@ use dioxus_time::sleep;
 
 use std::time::Duration;
 
-use super::text_search::{AdaptiveKeyboard, KeyboardLayout};
+use super::text_search::AdaptiveKeyboard;
 
 /// Main context for the select component containing all shared state
 #[derive(Clone, Copy)]
@@ -94,11 +94,10 @@ impl<T: Clone + PartialEq + 'static> SelectContext<T> {
 
         // Focus the best match using adaptive keyboard
         let options = self.options.read();
-        let adaptive = self.adaptive_keyboard.read();
-        let keyboard_layout = KeyboardLayout::Adaptive(adaptive.clone());
+        let keyboard = self.adaptive_keyboard.read();
 
         if let Some(best_match_index) =
-            super::text_search::best_match(&keyboard_layout, &typeahead, &options)
+            super::text_search::best_match(&keyboard, &typeahead, &options)
         {
             self.focus_state.set_focus(Some(best_match_index));
         }

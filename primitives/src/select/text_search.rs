@@ -1,11 +1,12 @@
 //! Text search and matching algorithms for the select component.
 
 use crate::select::context::OptionState;
+use core::f32;
 use std::collections::HashMap;
 
 /// Find the best matching option based on typeahead input
 pub(super) fn best_match<T: Clone + PartialEq + 'static>(
-    keyboard_layout: &KeyboardLayout,
+    keyboard: &AdaptiveKeyboard,
     typeahead: &str,
     options: &[OptionState<T>],
 ) -> Option<usize> {
@@ -32,7 +33,7 @@ pub(super) fn best_match<T: Clone + PartialEq + 'static>(
 pub(super) fn normalized_distance(
     typeahead_characters: &[char],
     value_characters: &[char],
-    keyboard_layout: &KeyboardLayout,
+    keyboard: &AdaptiveKeyboard,
 ) -> f32 {
     // Only use the the start of the value characters
     let value_characters =
@@ -43,7 +44,7 @@ pub(super) fn normalized_distance(
         .saturating_sub(value_characters.len())..];
 
     levenshtein_distance(typeahead_characters, value_characters, |a, b| {
-        keyboard_layout.substitution_cost(a, b)
+        keyboard.substitution_cost(a, b)
     })
 }
 
@@ -93,10 +94,10 @@ pub(super) fn levenshtein_distance(
 /// Adaptive keyboard learning system for multi-language support
 #[derive(Debug, Clone)]
 pub struct AdaptiveKeyboard {
-    /// Learned substitution costs between characters
-    confusion_matrix: HashMap<(char, char), f32>,
     /// Physical key position mappings learned from events
     physical_mappings: HashMap<String, char>,
+    /// Our current best guess of the keyboard layout based on learned mappings
+    layout: KeyboardLayout,
 }
 
 impl Default for AdaptiveKeyboard {
@@ -109,8 +110,8 @@ impl AdaptiveKeyboard {
     /// Create a new adaptive keyboard system
     pub fn new() -> Self {
         Self {
-            confusion_matrix: HashMap::new(),
             physical_mappings: HashMap::new(),
+            layout: KeyboardLayout::Qwerty,
         }
     }
 
@@ -118,31 +119,7 @@ impl AdaptiveKeyboard {
     pub fn learn_from_event(&mut self, physical_code: &str, logical_char: char) {
         self.physical_mappings
             .insert(physical_code.to_string(), logical_char);
-    }
-
-    /// Record a user correction to improve future matching
-    #[allow(dead_code)]
-    pub fn record_correction(&mut self, typed: char, intended: char) {
-        if typed == intended {
-            return;
-        }
-
-        let current = self
-            .confusion_matrix
-            .get(&(typed, intended))
-            .copied()
-            .unwrap_or(1.0);
-        // Gradually reduce substitution cost for this pair
-        self.confusion_matrix
-            .insert((typed, intended), (current * 0.9).max(0.1));
-    }
-
-    /// Get learned substitution cost between two characters
-    pub fn get_learned_cost(&self, a: char, b: char) -> Option<f32> {
-        self.confusion_matrix
-            .get(&(a, b))
-            .or_else(|| self.confusion_matrix.get(&(b, a)))
-            .copied()
+        self.layout = KeyboardLayout::guess(&self.physical_mappings);
     }
 
     /// Calculate hybrid substitution cost using multiple strategies
@@ -151,34 +128,25 @@ impl AdaptiveKeyboard {
             return 0.0;
         }
 
-        // 1. Check learned patterns first (highest priority)
-        if let Some(cost) = self.get_learned_cost(a, b) {
-            return cost;
-        }
+        // Try physical key distance if we have mappings
+        let physical_cost = self
+            .layout
+            .distance_cost(a, b)
+            .map_or(f32::INFINITY, |cost| {
+                cost * 0.3 // Physical proximity is a strong signal
+            });
 
-        // 2. Try physical key distance if we have mappings
-        if let Some(cost) = self.physical_key_cost(a, b) {
-            return cost * 0.3; // Physical proximity is a strong signal
-        }
-
-        // 3. Use Unicode codepoint similarity
+        // Use Unicode codepoint similarity
         let unicode_cost = self.unicode_similarity_cost(a, b);
 
-        // 4. Check phonetic similarity
+        // Check phonetic similarity
         let phonetic_cost = self.phonetic_similarity_cost(a, b);
 
-        // Return the minimum of unicode and phonetic costs
-        unicode_cost.min(phonetic_cost)
-    }
-
-    /// Calculate cost based on physical key positions
-    fn physical_key_cost(&self, a: char, b: char) -> Option<f32> {
-        // Find physical keys that produce these characters
-        let key_a = self.physical_mappings.iter().find(|(_, &ch)| ch == a)?.0;
-        let key_b = self.physical_mappings.iter().find(|(_, &ch)| ch == b)?.0;
-
-        let distance = physical_key_distance(key_a, key_b)?;
-        Some((distance / 10.0).clamp(0.1, 1.0))
+        // Return the minimum of all costs
+        [physical_cost, unicode_cost, phonetic_cost]
+            .iter()
+            .cloned()
+            .fold(f32::INFINITY, f32::min)
     }
 
     /// Calculate similarity based on Unicode codepoint proximity
@@ -248,70 +216,9 @@ impl AdaptiveKeyboard {
     }
 }
 
-/// Calculate distance between physical keys based on QWERTY layout
-fn physical_key_distance(code1: &str, code2: &str) -> Option<f32> {
-    let pos1 = physical_key_position(code1)?;
-    let pos2 = physical_key_position(code2)?;
-
-    let dx = pos1.0 - pos2.0;
-    let dy = pos1.1 - pos2.1;
-    Some((dx * dx + dy * dy).sqrt())
-}
-
-/// Get universal physical position of a key (layout-independent)
-fn physical_key_position(code: &str) -> Option<(f32, f32)> {
-    match code {
-        // Top row
-        "KeyQ" => Some((0.0, 0.0)),
-        "KeyW" => Some((1.0, 0.0)),
-        "KeyE" => Some((2.0, 0.0)),
-        "KeyR" => Some((3.0, 0.0)),
-        "KeyT" => Some((4.0, 0.0)),
-        "KeyY" => Some((5.0, 0.0)),
-        "KeyU" => Some((6.0, 0.0)),
-        "KeyI" => Some((7.0, 0.0)),
-        "KeyO" => Some((8.0, 0.0)),
-        "KeyP" => Some((9.0, 0.0)),
-
-        // Home row
-        "KeyA" => Some((0.5, 1.0)),
-        "KeyS" => Some((1.5, 1.0)),
-        "KeyD" => Some((2.5, 1.0)),
-        "KeyF" => Some((3.5, 1.0)),
-        "KeyG" => Some((4.5, 1.0)),
-        "KeyH" => Some((5.5, 1.0)),
-        "KeyJ" => Some((6.5, 1.0)),
-        "KeyK" => Some((7.5, 1.0)),
-        "KeyL" => Some((8.5, 1.0)),
-
-        // Bottom row
-        "KeyZ" => Some((1.0, 2.0)),
-        "KeyX" => Some((2.0, 2.0)),
-        "KeyC" => Some((3.0, 2.0)),
-        "KeyV" => Some((4.0, 2.0)),
-        "KeyB" => Some((5.0, 2.0)),
-        "KeyN" => Some((6.0, 2.0)),
-        "KeyM" => Some((7.0, 2.0)),
-
-        // Number row
-        "Digit1" => Some((0.0, -1.0)),
-        "Digit2" => Some((1.0, -1.0)),
-        "Digit3" => Some((2.0, -1.0)),
-        "Digit4" => Some((3.0, -1.0)),
-        "Digit5" => Some((4.0, -1.0)),
-        "Digit6" => Some((5.0, -1.0)),
-        "Digit7" => Some((6.0, -1.0)),
-        "Digit8" => Some((7.0, -1.0)),
-        "Digit9" => Some((8.0, -1.0)),
-        "Digit0" => Some((9.0, -1.0)),
-
-        _ => None,
-    }
-}
-
 /// Supported keyboard layouts for optimized text matching
-#[derive(Debug, Clone, PartialEq)]
-#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+
 pub enum KeyboardLayout {
     Qwerty,
     ColemakDH,
@@ -320,12 +227,11 @@ pub enum KeyboardLayout {
     Workman,
     Azerty,
     Qwertz,
-    Adaptive(AdaptiveKeyboard), // New adaptive option
+    #[default]
     Unknown,
 }
 
 impl KeyboardLayout {
-    #[allow(dead_code)]
     const KNOWN_KEYBOARD_LAYOUTS: &'static [KeyboardLayout] = &[
         KeyboardLayout::Qwerty,
         KeyboardLayout::ColemakDH,
@@ -337,49 +243,34 @@ impl KeyboardLayout {
     ];
 
     /// Guess the keyboard layout based on observed key positions
-    #[allow(dead_code)]
-    pub fn guess(known_key_positions: &HashMap<char, char>) -> KeyboardLayout {
-        let mut best_layout = KeyboardLayout::Unknown;
-        let mut best_score = 0;
-
-        for layout in Self::KNOWN_KEYBOARD_LAYOUTS {
-            let mut score = 0;
-            for (from, to) in known_key_positions {
-                if let (Some(from_pos), Some(to_pos)) =
-                    (layout.char_position(*from), layout.char_position(*to))
-                {
-                    // If the positions are the same, it's a match
-                    if from_pos == to_pos {
-                        score += 1;
+    pub fn guess(known_key_positions: &HashMap<String, char>) -> KeyboardLayout {
+        Self::KNOWN_KEYBOARD_LAYOUTS
+            .iter()
+            .copied()
+            .find(|layout| {
+                for (from, to) in known_key_positions {
+                    let Some(from_char) = from.chars().next() else {
+                        return false;
+                    };
+                    if let (Some(from_pos), Some(to_pos)) =
+                        (layout.char_position(from_char), layout.char_position(*to))
+                    {
+                        // If the positions are not the same, try the next layout
+                        if from_pos != to_pos {
+                            return false;
+                        }
                     }
                 }
-            }
-            if score > best_score {
-                best_score = score;
-                best_layout = layout.clone();
-            }
-        }
-
-        best_layout
+                true
+            })
+            .unwrap_or_default()
     }
 
     /// Calculate substitution cost between two characters based on keyboard distance
-    pub fn substitution_cost(&self, a: char, b: char) -> f32 {
-        match self {
-            KeyboardLayout::Adaptive(adaptive) => adaptive.substitution_cost(a, b),
-            _ => self.legacy_substitution_cost(a, b),
-        }
-    }
-
-    /// Legacy substitution cost for hardcoded layouts
-    fn legacy_substitution_cost(&self, a: char, b: char) -> f32 {
-        if a == b {
-            return 0.0;
-        }
-
+    pub fn distance_cost(&self, a: char, b: char) -> Option<f32> {
         let (a_pos, b_pos) = match (self.char_position(a), self.char_position(b)) {
             (Some(a_pos), Some(b_pos)) => (a_pos, b_pos),
-            _ => return 1.0,
+            _ => return None,
         };
 
         let dx = (a_pos.0 as f32 - b_pos.0 as f32).abs();
@@ -387,7 +278,7 @@ impl KeyboardLayout {
         let distance = (dx * dx + dy * dy).sqrt();
 
         // Scale the distance to be between 0.1 and 1.0
-        (distance / 10.0).clamp(0.1, 1.0)
+        Some((distance / 10.0).clamp(0.1, 1.0))
     }
 
     /// Get the position of a character on the keyboard layout
@@ -400,7 +291,6 @@ impl KeyboardLayout {
             KeyboardLayout::Workman => &WORKMAN_KEYBOARD_LAYOUT,
             KeyboardLayout::Azerty => &AZERTY_KEYBOARD_LAYOUT,
             KeyboardLayout::Qwertz => &QWERTZ_KEYBOARD_LAYOUT,
-            KeyboardLayout::Adaptive(_) => return None, // Use hybrid approach instead
             KeyboardLayout::Unknown => return None,
         };
 
@@ -416,7 +306,6 @@ impl KeyboardLayout {
 }
 
 /// Convert a key code to a character
-#[allow(dead_code)]
 pub(super) fn code_to_char(code: &str) -> Option<char> {
     match code {
         "KeyA" => Some('a'),
@@ -459,61 +348,54 @@ pub(super) fn code_to_char(code: &str) -> Option<char> {
     }
 }
 
-impl PartialEq for AdaptiveKeyboard {
-    fn eq(&self, other: &Self) -> bool {
-        self.confusion_matrix == other.confusion_matrix
-            && self.physical_mappings == other.physical_mappings
-    }
-}
-
 // Keyboard layout definitions
 static QWERTY_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
     ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';'],
     ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'],
-    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
 ];
 
 static COLEMACK_DH_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['q', 'w', 'f', 'p', 'b', 'j', 'l', 'u', 'y', ';'],
     ['a', 'r', 's', 't', 'g', 'm', 'n', 'e', 'i', 'o'],
     ['x', 'c', 'd', 'v', 'z', 'k', 'h', ',', '.', '/'],
-    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
 ];
 
 static COLEMAK_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['q', 'w', 'f', 'p', 'g', 'j', 'l', 'u', 'y', ';'],
     ['a', 'r', 's', 't', 'd', 'h', 'n', 'e', 'i', 'o'],
     ['z', 'x', 'c', 'v', 'b', 'k', 'm', ',', '.', '/'],
-    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
 ];
 
 static DVORAK_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['\'', ',', '.', 'p', 'y', 'f', 'g', 'c', 'r', 'l'],
     ['a', 'o', 'e', 'u', 'i', 'd', 'h', 't', 'n', 's'],
     [';', 'q', 'j', 'k', 'x', 'b', 'm', 'w', 'v', 'z'],
-    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
 ];
 
 static WORKMAN_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['q', 'd', 'r', 'w', 'b', 'j', 'f', 'u', 'p', ';'],
     ['a', 's', 'h', 't', 'g', 'y', 'n', 'e', 'o', 'i'],
     ['z', 'x', 'm', 'c', 'v', 'k', 'l', ',', '.', '/'],
-    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
 ];
 
 static AZERTY_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['a', 'z', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
     ['q', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm'],
     ['w', 'x', 'c', 'v', 'b', 'n', ',', ';', ':', '!'],
-    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
 ];
 
 static QWERTZ_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'],
     ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ö'],
     ['y', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '-'],
-    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
 ];
 
 #[cfg(test)]
@@ -548,7 +430,7 @@ mod tests {
         let typeahead = ['q', 'w'];
         let value = ['q', 'e'];
         let qwerty_distance = levenshtein_distance(&typeahead, &value, |a, b| {
-            KeyboardLayout::Qwerty.substitution_cost(a, b)
+            KeyboardLayout::Qwerty.distance_cost(a, b).unwrap()
         });
         let uniform_distance = levenshtein_distance(&typeahead, &value, |_, _| 1.0);
 
@@ -595,19 +477,19 @@ mod tests {
     fn test_detect_keyboard_layout() {
         // Test QWERTY detection
         let mut known_positions = HashMap::new();
-        known_positions.insert('q', 'q');
-        known_positions.insert('w', 'w');
-        known_positions.insert('e', 'e');
+        known_positions.insert("q".to_string(), 'q');
+        known_positions.insert("w".to_string(), 'w');
+        known_positions.insert("e".to_string(), 'e');
 
         let detected = KeyboardLayout::guess(&known_positions);
         assert_eq!(detected, KeyboardLayout::Qwerty);
 
         // Test with mostly QWERTY matches (layout detection is based on position matches)
         let mut known_positions = HashMap::new();
-        known_positions.insert('q', 'q');
-        known_positions.insert('w', 'w');
-        known_positions.insert('e', 'e');
-        known_positions.insert('r', 'r');
+        known_positions.insert("q".to_string(), 'q');
+        known_positions.insert("w".to_string(), 'w');
+        known_positions.insert("e".to_string(), 'e');
+        known_positions.insert("r".to_string(), 'r');
 
         let detected = KeyboardLayout::guess(&known_positions);
         assert_eq!(detected, KeyboardLayout::Qwerty);
@@ -623,16 +505,16 @@ mod tests {
         let layout = KeyboardLayout::Qwerty;
 
         // Same character should have zero cost
-        assert_eq!(layout.substitution_cost('a', 'a'), 0.0);
+        assert_eq!(layout.distance_cost('a', 'a'), Some(0.0));
 
         // Adjacent characters should have lower cost than distant ones
-        let adjacent_cost = layout.substitution_cost('q', 'w');
-        let distant_cost = layout.substitution_cost('q', 'p');
+        let adjacent_cost = layout.distance_cost('q', 'w');
+        let distant_cost = layout.distance_cost('q', 'p');
         assert!(adjacent_cost < distant_cost);
 
-        // Unknown characters should have cost of 1.0
-        let unknown_cost = layout.substitution_cost('α', 'β');
-        assert_eq!(unknown_cost, 1.0);
+        // Unknown characters should return None
+        let unknown_cost = layout.distance_cost('α', 'β');
+        assert_eq!(unknown_cost, None);
     }
 
     #[test]
@@ -714,25 +596,6 @@ mod tests {
     }
 
     #[test]
-    fn test_adaptive_keyboard_corrections() {
-        let mut adaptive = AdaptiveKeyboard::new();
-
-        // Initially, substitution cost should be high
-        let initial_cost = adaptive.substitution_cost('a', 'ф');
-        assert!(initial_cost > 0.5);
-
-        // Record multiple corrections
-        adaptive.record_correction('a', 'ф');
-        adaptive.record_correction('a', 'ф');
-        adaptive.record_correction('a', 'ф');
-
-        // Cost should be reduced
-        let learned_cost = adaptive.substitution_cost('a', 'ф');
-        assert!(learned_cost < initial_cost);
-        assert!(learned_cost >= 0.1); // But not below minimum
-    }
-
-    #[test]
     fn test_unicode_similarity() {
         let adaptive = AdaptiveKeyboard::new();
 
@@ -766,49 +629,12 @@ mod tests {
     }
 
     #[test]
-    fn test_physical_key_distance() {
-        // Test adjacent keys
-        let adjacent_distance = physical_key_distance("KeyA", "KeyS");
-        assert!(adjacent_distance.is_some());
-        assert!(adjacent_distance.unwrap() < 2.0);
-
-        // Test distant keys
-        let distant_distance = physical_key_distance("KeyA", "KeyP");
-        assert!(distant_distance.is_some());
-        assert!(distant_distance.unwrap() > adjacent_distance.unwrap());
-
-        // Test same key
-        let same_distance = physical_key_distance("KeyA", "KeyA");
-        assert_eq!(same_distance, Some(0.0));
-
-        // Test unknown key
-        let unknown_distance = physical_key_distance("KeyA", "UnknownKey");
-        assert!(unknown_distance.is_none());
-    }
-
-    #[test]
-    fn test_physical_key_positions() {
-        // Test some known positions
-        assert_eq!(physical_key_position("KeyQ"), Some((0.0, 0.0)));
-        assert_eq!(physical_key_position("KeyA"), Some((0.5, 1.0)));
-        assert_eq!(physical_key_position("Digit1"), Some((0.0, -1.0)));
-
-        // Test unknown key
-        assert_eq!(physical_key_position("UnknownKey"), None);
-    }
-
-    #[test]
     fn test_hybrid_substitution_cost() {
         let mut adaptive = AdaptiveKeyboard::new();
 
         // Set up some learned mappings and corrections
         adaptive.learn_from_event("KeyA", 'ф');
         adaptive.learn_from_event("KeyS", 'ы');
-        adaptive.record_correction('a', 'ф');
-
-        // Test learned cost takes priority
-        let learned_cost = adaptive.substitution_cost('a', 'ф');
-        assert!(learned_cost < 1.0);
 
         // Test physical key cost for mapped characters
         let physical_cost = adaptive.substitution_cost('ф', 'ы');
@@ -847,48 +673,5 @@ mod tests {
         // Mixed script matching - test f/ф which are phonetically similar
         let mixed_cost = adaptive.substitution_cost('f', 'ф');
         assert!(mixed_cost < 1.0); // Should work through phonetic similarity
-    }
-
-    #[test]
-    fn test_adaptive_keyboard_layout_enum() {
-        let mut adaptive = AdaptiveKeyboard::new();
-        adaptive.record_correction('q', 'й'); // Russian
-
-        let layout = KeyboardLayout::Adaptive(adaptive);
-
-        // Test that adaptive layout uses hybrid approach
-        let cost = layout.substitution_cost('q', 'й');
-        assert!(cost < 1.0);
-        assert!(cost >= 0.1);
-    }
-
-    #[test]
-    fn test_best_match_with_adaptive() {
-        let mut adaptive = AdaptiveKeyboard::new();
-
-        // Learn some Cyrillic mappings
-        adaptive.record_correction('a', 'а');
-        adaptive.record_correction('p', 'р');
-
-        let layout = KeyboardLayout::Adaptive(adaptive);
-
-        let options = vec![
-            OptionState {
-                tab_index: 0,
-                value: "apple",
-                text_value: "Apple".to_string(),
-                id: "apple".to_string(),
-            },
-            OptionState {
-                tab_index: 1,
-                value: "арple", // Mixed Cyrillic/Latin
-                text_value: "Арple".to_string(),
-                id: "arple".to_string(),
-            },
-        ];
-
-        // Typing with mixed scripts should still find matches
-        let result = best_match(&layout, "аp", &options);
-        assert!(result.is_some());
     }
 }
