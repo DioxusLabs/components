@@ -127,10 +127,13 @@ impl AdaptiveKeyboard {
             return 0.0;
         }
 
+        let a_lowercase = a.to_lowercase().next().unwrap_or(a);
+        let b_lowercase = b.to_lowercase().next().unwrap_or(b);
+
         // Try physical key distance if we have mappings
         let physical_cost = self
             .layout
-            .distance_cost(a, b)
+            .distance_cost(a_lowercase, b_lowercase)
             .map_or(f32::INFINITY, |cost| {
                 cost * 0.3 // Physical proximity is a strong signal
             });
@@ -139,7 +142,7 @@ impl AdaptiveKeyboard {
         let unicode_cost = self.unicode_similarity_cost(a, b);
 
         // Check phonetic similarity
-        let phonetic_cost = self.phonetic_similarity_cost(a, b);
+        let phonetic_cost = self.phonetic_similarity_cost(a_lowercase, b_lowercase);
 
         // Return the minimum of all costs
         [physical_cost, unicode_cost, phonetic_cost]

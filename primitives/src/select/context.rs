@@ -56,6 +56,7 @@ impl<T: Clone + PartialEq + 'static> SelectContext<T> {
     /// Learn from a keyboard event mapping physical key to logical character
     pub fn learn_from_keyboard_event(&mut self, physical_code: &str, logical_char: char) {
         let mut adaptive = self.adaptive_keyboard.write();
+        let logical_char = logical_char.to_lowercase().next().unwrap_or(logical_char);
         adaptive.learn_from_event(physical_code, logical_char);
     }
 
