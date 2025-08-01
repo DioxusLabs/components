@@ -68,7 +68,7 @@ pub struct DropdownMenuProps {
 ///         DropdownMenu { default_open: false,
 ///             DropdownMenuTrigger { "Open Menu" }
 ///             DropdownMenuContent {
-///                 DropdownMenuItem {
+///                 DropdownMenuItem::<String> {
 ///                     value: "edit".to_string(),
 ///                     index: 0usize,
 ///                     on_select: move |value| {
@@ -76,7 +76,7 @@ pub struct DropdownMenuProps {
 ///                     },
 ///                     "Edit"
 ///                 }
-///                 DropdownMenuItem {
+///                 DropdownMenuItem::<String> {
 ///                     value: "undo".to_string(),
 ///                     index: 1usize,
 ///                     disabled: true,
@@ -183,7 +183,7 @@ pub struct DropdownMenuTriggerProps {
 ///         DropdownMenu { default_open: false,
 ///             DropdownMenuTrigger { "Open Menu" }
 ///             DropdownMenuContent {
-///                 DropdownMenuItem {
+///                 DropdownMenuItem::<String> {
 ///                     value: "edit".to_string(),
 ///                     index: 0usize,
 ///                     on_select: move |value| {
@@ -191,7 +191,7 @@ pub struct DropdownMenuTriggerProps {
 ///                     },
 ///                     "Edit"
 ///                 }
-///                 DropdownMenuItem {
+///                 DropdownMenuItem::<String> {
 ///                     value: "undo".to_string(),
 ///                     index: 1usize,
 ///                     disabled: true,
@@ -281,7 +281,7 @@ pub struct DropdownMenuContentProps {
 ///         DropdownMenu { default_open: false,
 ///             DropdownMenuTrigger { "Open Menu" }
 ///             DropdownMenuContent {
-///                 DropdownMenuItem {
+///                 DropdownMenuItem::<String> {
 ///                     value: "edit".to_string(),
 ///                     index: 0usize,
 ///                     on_select: move |value| {
@@ -289,7 +289,7 @@ pub struct DropdownMenuContentProps {
 ///                     },
 ///                     "Edit"
 ///                 }
-///                 DropdownMenuItem {
+///                 DropdownMenuItem::<String> {
 ///                     value: "undo".to_string(),
 ///                     index: 1usize,
 ///                     disabled: true,
@@ -332,9 +332,9 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
 
 /// The props for the [`DropdownMenuItem`] component
 #[derive(Props, Clone, PartialEq)]
-pub struct DropdownMenuItemProps {
+pub struct DropdownMenuItemProps<T: Clone + PartialEq + 'static> {
     /// The value of the item, which will be passed to the `on_select` callback when clicked.
-    pub value: ReadOnlySignal<String>,
+    pub value: ReadOnlySignal<T>,
     /// The index of the item within the [`DropdownMenuContent`]. This is used to order the items for keyboard navigation.
     pub index: ReadOnlySignal<usize>,
 
@@ -345,7 +345,7 @@ pub struct DropdownMenuItemProps {
 
     /// The callback function that will be called when the item is selected. The value of the item will be passed as an argument.
     #[props(default)]
-    pub on_select: Callback<String>,
+    pub on_select: Callback<T>,
 
     /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]
@@ -372,7 +372,7 @@ pub struct DropdownMenuItemProps {
 ///         DropdownMenu { default_open: false,
 ///             DropdownMenuTrigger { "Open Menu" }
 ///             DropdownMenuContent {
-///                 DropdownMenuItem {
+///                 DropdownMenuItem::<String> {
 ///                     value: "edit".to_string(),
 ///                     index: 0usize,
 ///                     on_select: move |value| {
@@ -380,7 +380,7 @@ pub struct DropdownMenuItemProps {
 ///                     },
 ///                     "Edit"
 ///                 }
-///                 DropdownMenuItem {
+///                 DropdownMenuItem::<String> {
 ///                     value: "undo".to_string(),
 ///                     index: 1usize,
 ///                     disabled: true,
@@ -400,7 +400,9 @@ pub struct DropdownMenuItemProps {
 /// The [`DropdownMenuItem`] component defines the following data attributes you can use to control styling:
 /// - `data-disabled`: Indicates whether the item is disabled. Values are `true` or `false`.
 #[component]
-pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
+pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
+    props: DropdownMenuItemProps<T>,
+) -> Element {
     let mut ctx: DropdownMenuContext = use_context();
 
     let disabled = move || (ctx.disabled)() || (props.disabled)();
