@@ -154,22 +154,45 @@
   stroke-width: 2;
 }
 
+.calendar-month-select-container, .calendar-year-select-container {
+  position: relative;
+}
+
+.calendar-month-select-container:has(:focus-visible), .calendar-year-select-container:has(:focus-visible) {
+  outline: 2px solid var(--focused-border-color);
+  border-radius: 0.5rem;
+}
+
+
 .calendar-month-select, .calendar-year-select {
-  /* border: 1px solid var(--primary-color-6); */
+  opacity: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  position: absolute;
+  padding: .25rem;
+}
+
+.calendar-month-select-value, .calendar-year-select-value {
   border: none;
   background-color: transparent;
   color: var(--secondary-color-4);
-  padding: .25rem;
-  border-radius: 0.5rem;
   cursor: pointer;
   font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .25rem;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.calendar-month-select:hover, .calendar-year-select:hover {
-  background-color: var(--primary-color-4);
-}
-
-.calendar-month-select:focus-visible, .calendar-year-select:focus-visible {
-  box-shadow: 0 0 0 2px var(--focused-border-color);
+.select-expand-icon {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--secondary-color-4);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
