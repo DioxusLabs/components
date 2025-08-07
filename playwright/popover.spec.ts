@@ -17,6 +17,8 @@ test('test', async ({ page }) => {
   await expect(confirm).toBeFocused();
   // pressing enter should close the popover
   await page.keyboard.press('Enter');
+  // the item should show deleted under component-preview-frame
+  await expect(page.locator('.component-preview-frame')).toContainText('Item deleted!');
 
   // Open the popover again
   await popoverButton.click();

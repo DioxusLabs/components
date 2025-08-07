@@ -47,7 +47,6 @@ pub fn Demo() -> Element {
                     "data-style": "outline",
                     onclick: move |_| {
                         open.set(false);
-                        confirmed.set(true);
                     },
                     "Cancel"
                 }

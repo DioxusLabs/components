@@ -1937,6 +1937,7 @@ dependencies = [
 name = "dioxus-primitives"
 version = "0.0.1"
 dependencies = [
+ "chrono",
  "dioxus",
  "dioxus-time",
  "lazy-js-bundle 0.6.2",
@@ -5191,6 +5192,7 @@ checksum = "e8cf8e6a8aa66ce33f63993ffc4ea4271eb5b0530a9002db8455ea6050c77bfa"
 name = "preview"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "dioxus",
  "dioxus-primitives",
  "pulldown-cmark",

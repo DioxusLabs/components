@@ -5,6 +5,7 @@ edition = "2021"
 rust-version = "1.80.0"
 
 [dependencies]
+chrono = "0.4.41"
 dioxus = { workspace = true, features = ["router"] }
 dioxus-primitives.workspace = true
 strum = { version = "0.27.2", features = ["derive"] }
