@@ -14,6 +14,8 @@ enum Operation {
 
 #[component]
 pub fn Demo() -> Element {
+    let mut selected_operation = use_signal(|| None);
+
     let operations = Operation::iter().enumerate().map(|(i, o)| {
         rsx! {
             DropdownMenuItem::<Operation> {
@@ -22,7 +24,7 @@ pub fn Demo() -> Element {
                 index: i,
                 disabled: matches!(o, Operation::Undo),
                 on_select: move |value| {
-                    tracing::info!("Selected: {value}");
+                    selected_operation.set(Some(value));
                 },
                 {o.to_string()}
             }
@@ -39,6 +41,9 @@ pub fn Demo() -> Element {
             DropdownMenuContent { class: "dropdown-menu-content",
                 {operations}
             }
+        }
+        if let Some(op) = selected_operation() {
+            "Selected: {op}"
         }
     }
 }

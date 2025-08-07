@@ -4,6 +4,8 @@ use dioxus_primitives::context_menu::{
 };
 #[component]
 pub fn Demo() -> Element {
+    let mut selected_item = use_signal(|| None);
+
     rsx! {
         document::Link {
             rel: "stylesheet",
@@ -26,7 +28,7 @@ pub fn Demo() -> Element {
                     value: "edit".to_string(),
                     index: 0usize,
                     on_select: move |value| {
-                        tracing::info!("Selected item: {}", value);
+                        selected_item.set(Some(value));
                     },
                     "Edit"
                 }
@@ -36,7 +38,7 @@ pub fn Demo() -> Element {
                     index: 1usize,
                     disabled: true,
                     on_select: move |value| {
-                        tracing::info!("Selected item: {}", value);
+                        selected_item.set(Some(value));
                     },
                     "Undo"
                 }
@@ -45,7 +47,7 @@ pub fn Demo() -> Element {
                     value: "duplicate".to_string(),
                     index: 2usize,
                     on_select: move |value| {
-                        tracing::info!("Selected item: {}", value);
+                        selected_item.set(Some(value));
                     },
                     "Duplicate"
                 }
@@ -54,11 +56,15 @@ pub fn Demo() -> Element {
                     value: "delete".to_string(),
                     index: 3usize,
                     on_select: move |value| {
-                        tracing::info!("Selected item: {}", value);
+                        selected_item.set(Some(value));
                     },
                     "Delete"
                 }
             }
+        }
+
+        if let Some(item) = selected_item() {
+            "Selected: {item}"
         }
     }
 }

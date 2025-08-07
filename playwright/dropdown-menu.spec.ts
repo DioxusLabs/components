@@ -18,6 +18,8 @@ test('test', async ({ page }) => {
   // The menu should close after selecting an item
   await page.keyboard.press('Enter');
   await expect(menuElement).toHaveAttribute('data-state', 'closed');
+  // The selected item should be displayed
+  await expect(page.getByText('Selected: Duplicate')).toBeVisible();
 
   // Reopen the menu
   await menuElement.click();
@@ -40,7 +42,7 @@ test('test', async ({ page }) => {
   await page.click('body');
   await expect(menuElement).toHaveAttribute('data-state', 'closed');
 
-   // Reopen the menu
+  // Reopen the menu
   await menuElement.click();
   await expect(menuElement).toHaveAttribute('data-state', 'open');
   // Clicking an item should close the menu
