@@ -45,4 +45,6 @@ test('keyboard navigation', async ({ page }) => {
   await page.keyboard.press('Enter');
   // Assert the context menu is closed after selection
   await expect(contextMenu).toHaveCount(0);
+  // Assert the selected item is displayed
+  await expect(page.getByText('Selected: Duplicate')).toBeVisible();
 });
