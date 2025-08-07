@@ -323,6 +323,14 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
                 role: "listbox",
                 aria_labelledby: "{ctx.trigger_id}",
                 "data-state": if (ctx.open)() { "open" } else { "closed" },
+                onmousedown: move |event: Event<MouseData>| {
+                    // The user is starting a click inside the dropdown menu.
+                    // Prevent the blur event from occuring during mousedown
+                    // to keep the dropdown menu open until mouseup happens,
+                    // thus enabling onclick/onselect events to fire.
+                    event.prevent_default();
+                    event.stop_propagation();
+                },
                 ..props.attributes,
                 {props.children}
             }
