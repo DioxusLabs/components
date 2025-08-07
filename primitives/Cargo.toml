@@ -12,6 +12,7 @@ homepage = "https://dioxuslabs.com"
 repository = "https://github.com/DioxusLabs/components"
 
 [dependencies]
+chrono = "0.4.41"
 dioxus.workspace = true
 dioxus-time = "=0.7.0-alpha.3"
 tracing.workspace = true
