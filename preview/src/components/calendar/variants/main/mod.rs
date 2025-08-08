@@ -1,15 +1,15 @@
 use dioxus::prelude::*;
 use dioxus_primitives::calendar::{
     Calendar, CalendarContext, CalendarGrid, CalendarHeader, CalendarNavigation,
-    CalendarNextMonthButton, CalendarPreviousMonthButton, MONTH_ABBREVIATIONS,
+    CalendarNextMonthButton, CalendarPreviousMonthButton,
 };
 
-use chrono::{Datelike, Month, NaiveDate};
+use chrono::{Datelike, Month, NaiveDate, Utc};
 
 #[component]
 pub fn Demo() -> Element {
     let mut selected_date = use_signal(|| None::<NaiveDate>);
-    let mut view_date = use_signal(|| NaiveDate::from_ymd_opt(2025, 6, 5).unwrap());
+    let mut view_date = use_signal(|| Utc::now().date_naive());
     rsx! {
         document::Link {
             rel: "stylesheet",
@@ -62,6 +62,7 @@ fn MonthTitle() -> Element {
     let view_date = calendar.view_date();
     let month = &Month::try_from(view_date.month() as u8).unwrap().name()[0..3];
     let year = view_date.year();
+    let months = (1..12).map(|month_i| Month::try_from(month_i).unwrap());
 
     rsx! {
         span {
@@ -75,11 +76,11 @@ fn MonthTitle() -> Element {
                     view_date = view_date.with_month0(cur_month).unwrap_or(view_date);
                     calendar.set_view_date(view_date);
                 },
-                for (i, month) in MONTH_ABBREVIATIONS.iter().enumerate() {
+                for (i, month) in months.enumerate() {
                     option {
                         value: i,
                         selected: calendar.view_date().month0() == i as u32,
-                        "{month}"
+                        "{month.name()}"
                     }
                 }
             }
