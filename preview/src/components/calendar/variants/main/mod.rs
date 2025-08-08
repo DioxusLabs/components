@@ -4,12 +4,12 @@ use dioxus_primitives::calendar::{
     CalendarNextMonthButton, CalendarPreviousMonthButton, MONTH_ABBREVIATIONS,
 };
 
-use chrono::{Datelike, Month, NaiveDate};
+use chrono::{Datelike, Month, NaiveDate, Utc};
 
 #[component]
 pub fn Demo() -> Element {
     let mut selected_date = use_signal(|| None::<NaiveDate>);
-    let mut view_date = use_signal(|| NaiveDate::from_ymd_opt(2025, 6, 5).unwrap());
+    let mut view_date = use_signal(|| Utc::now().date_naive());
     rsx! {
         document::Link {
             rel: "stylesheet",

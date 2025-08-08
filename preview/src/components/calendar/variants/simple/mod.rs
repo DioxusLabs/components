@@ -1,14 +1,15 @@
 use dioxus::prelude::*;
 use dioxus_primitives::calendar::{
-    Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+    Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation,
+    CalendarNextMonthButton, CalendarPreviousMonthButton,
 };
 
-use chrono::{Datelike, NaiveDate};
+use chrono::{Datelike, NaiveDate, Utc};
 
 #[component]
 pub fn Demo() -> Element {
     let mut selected_date = use_signal(|| None::<NaiveDate>);
-    let mut view_date = use_signal(|| NaiveDate::from_ymd_opt(2025, 6, 5).unwrap());
+    let mut view_date = use_signal(|| Utc::now().date_naive());
     rsx! {
         document::Link {
             rel: "stylesheet",
