@@ -6,7 +6,7 @@ use std::{
     rc::Rc,
 };
 
-use chrono::{Datelike, Days, Local, Month, Months, NaiveDate, Weekday};
+use chrono::{Datelike, Days, Local, Month, Months, NaiveDate, Weekday, WeekdaySet};
 
 /// Abbreviated month names
 pub const MONTH_ABBREVIATIONS: [&str; 12] = [
@@ -26,6 +26,7 @@ pub struct CalendarContext {
     // Configuration
     disabled: ReadOnlySignal<bool>,
     today: NaiveDate,
+    first_day_of_week: Weekday,
 }
 
 impl CalendarContext {
@@ -91,9 +92,9 @@ pub struct CalendarProps {
     #[props(default)]
     pub disabled: ReadOnlySignal<bool>,
 
-    /// First day of the week (1 = Monday, 7 = Sunday)
-    #[props(default = 1)]
-    pub first_day_of_week: u32,
+    /// First day of the week
+    #[props(default = Weekday::Sun)]
+    pub first_day_of_week: Weekday,
 
     /// Additional attributes to extend the calendar element
     #[props(extends = GlobalAttributes)]
@@ -162,6 +163,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
         set_view_date: props.on_view_change,
         disabled: props.disabled,
         today: props.today,
+        first_day_of_week: props.first_day_of_week,
     });
 
     rsx! {
@@ -612,10 +614,6 @@ pub struct CalendarGridProps {
     #[props(default)]
     pub show_week_numbers: bool,
 
-    /// Weekday order (Sun, Mon, etc.)
-    #[props(default = vec![Weekday::Sun, Weekday::Mon, Weekday::Tue, Weekday::Wed, Weekday::Thu, Weekday::Fri, Weekday::Sat])]
-    pub weekdays: Vec<Weekday>,
-
     /// The callback that will be used to render each day in the grid
     #[props(default = Callback::new(|date: NaiveDate| {
         rsx! { CalendarDay { date } }
@@ -684,7 +682,6 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
     let ctx: CalendarContext = use_context();
 
     // We'll use the view_date from context in the memo below
-    let start_weekday = *props.weekdays.first().unwrap_or(&Weekday::Mon);
 
     // Generate a grid of days with proper layout
     // Use the view_date as a dependency to ensure the grid updates when the view changes
@@ -694,7 +691,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         let num_days_in_month = view_date.num_days_in_month();
 
         let weekday = view_date.with_day(1).unwrap().weekday();
-        let first_day_offset = weekday.days_since(start_weekday);
+        let first_day_offset = weekday.days_since(ctx.first_day_of_week);
 
         // Create a grid with empty cells for padding and actual days
         let mut grid = Vec::new();
@@ -740,7 +737,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                 tr {
                     class: "calendar-grid-header",
                     // Day name headers
-                    for weekday in &props.weekdays {
+                    for weekday in WeekdaySet::ALL.iter(ctx.first_day_of_week) {
                         th {
                             class: "calendar-grid-day-header",
                             {format!("{weekday}")}
