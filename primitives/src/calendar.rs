@@ -6,7 +6,7 @@ use std::{
     rc::Rc,
 };
 
-use chrono::{Datelike, Days, Local, Month, Months, NaiveDate};
+use chrono::{Datelike, Days, Local, Month, Months, NaiveDate, Weekday};
 
 /// Abbreviated month names
 pub const MONTH_ABBREVIATIONS: [&str; 12] = [
@@ -173,41 +173,47 @@ pub fn Calendar(props: CalendarProps) -> Element {
                 let Some(focused_date) = (ctx.focused_date)() else {
                     return;
                 };
-                let mut set_focused_date = |new_date: NaiveDate| {
+                let mut set_focused_date = |new_date: Option<NaiveDate>| {
                     // Make sure the view date month is the same as the focused date
                     let mut view_date = (ctx.view_date)();
-                    if new_date.month() != view_date.month() {
-                        view_date = new_date.with_day(view_date.day()).unwrap();
-                        (ctx.set_view_date)(view_date);
+                    if let Some(date) = new_date {
+                        if date.month() != view_date.month() {
+                            view_date = date.with_day(view_date.day()).unwrap();
+                            (ctx.set_view_date)(view_date);
+                        }
                     }
-                    ctx.focused_date.set(Some(new_date));
+                    ctx.focused_date.set(new_date);
                 };
                 match e.key() {
                     Key::ArrowLeft => {
                         e.prevent_default();
-                        set_focused_date(focused_date - Days::new(1));
+                        set_focused_date(focused_date.pred_opt());
                     }
                     Key::ArrowRight => {
                         e.prevent_default();
-                        set_focused_date(focused_date + Days::new(1));
+                        set_focused_date(focused_date.succ_opt());
                     }
                     Key::ArrowUp => {
                         e.prevent_default();
                         if e.modifiers().shift() {
-                            let prev_month = focused_date - Months::new(1);
-                            set_focused_date(prev_month.with_day(1).unwrap());
+                            match focused_date.checked_sub_months(Months::new(1)) {
+                                Some(prev_month) => set_focused_date(prev_month.with_day(1)),
+                                None => set_focused_date(None)
+                            }
                         } else {
                             // Otherwise, move to the previous week
-                            set_focused_date(focused_date - Days::new(7));
+                            set_focused_date(focused_date.checked_sub_days(Days::new(7)));
                         }
                     }
                     Key::ArrowDown => {
                         e.prevent_default();
                         if e.modifiers().shift() {
-                            let next_month = focused_date + Months::new(1);
-                            set_focused_date(next_month.with_day(1).unwrap());
+                            match focused_date.checked_add_months(Months::new(1)) {
+                                Some(next_month) => set_focused_date(next_month.with_day(1)),
+                                None => set_focused_date(None)
+                            }
                         } else {
-                            set_focused_date(focused_date + Days::new(7));
+                            set_focused_date(focused_date.checked_add_days(Days::new(7)));
                         }
                     }
                     _ => {}
@@ -420,7 +426,9 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
     let handle_prev_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        ctx.set_view_date.call(current_view - Months::new(1));
+        if let Some(prev_month) = current_view.checked_sub_months(Months::new(1)) {
+            ctx.set_view_date.call(prev_month);
+        }
     };
 
     rsx! {
@@ -500,7 +508,9 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     let handle_next_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        ctx.set_view_date.call(current_view + Months::new(1));
+        if let Some(next_month) = current_view.checked_add_months(Months::new(1)) {
+            ctx.set_view_date.call(next_month);
+        }
     };
 
     rsx! {
@@ -602,9 +612,9 @@ pub struct CalendarGridProps {
     #[props(default)]
     pub show_week_numbers: bool,
 
-    /// Day labels (Sun, Mon, etc.)
-    #[props(default = vec!["Su".to_string(), "Mo".to_string(), "Tu".to_string(), "We".to_string(), "Th".to_string(), "Fr".to_string(), "Sa".to_string()])]
-    pub day_labels: Vec<String>,
+    /// Weekday order (Sun, Mon, etc.)
+    #[props(default = vec![Weekday::Sun, Weekday::Mon, Weekday::Tue, Weekday::Wed, Weekday::Thu, Weekday::Fri, Weekday::Sat])]
+    pub weekdays: Vec<Weekday>,
 
     /// The callback that will be used to render each day in the grid
     #[props(default = Callback::new(|date: NaiveDate| {
@@ -674,6 +684,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
     let ctx: CalendarContext = use_context();
 
     // We'll use the view_date from context in the memo below
+    let start_weekday = *props.weekdays.first().unwrap_or(&Weekday::Mon);
 
     // Generate a grid of days with proper layout
     // Use the view_date as a dependency to ensure the grid updates when the view changes
@@ -682,20 +693,18 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         let view_date = (ctx.view_date)();
         let num_days_in_month = view_date.num_days_in_month();
 
-        let first_day_offset = view_date
-            .with_day(1)
-            .unwrap()
-            .weekday()
-            .num_days_from_monday();
+        let weekday = view_date.with_day(1).unwrap().weekday();
+        let first_day_offset = weekday.days_since(start_weekday);
 
         // Create a grid with empty cells for padding and actual days
         let mut grid = Vec::new();
 
         // Add empty cells for days before the first day of the month
-        let previous_month = view_date - Months::new(1);
-        for i in 0..first_day_offset {
-            let day = previous_month.num_days_in_month() as u32 + i + 1 - first_day_offset;
-            grid.push(previous_month.with_day(day));
+        if let Some(previous_month) = view_date.checked_sub_months(Months::new(1)) {
+            for index in 1..=first_day_offset {
+                let day = previous_month.num_days_in_month() as u32 + index - first_day_offset;
+                grid.push(previous_month.with_day(day));
+            }
         }
 
         // Add days of the month
@@ -704,11 +713,12 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         }
 
         // Add empty cells to complete the grid (for a clean layout)
-        let remainder = grid.len() % 7;
-        let next_month = view_date + Months::new(1);
-        if remainder > 0 {
-            for day in 1..=(7 - remainder) {
-                grid.push(next_month.with_day(day as u32));
+        if let Some(next_month) = view_date.checked_add_months(Months::new(1)) {
+            let remainder = grid.len() % 7;
+            if remainder > 0 {
+                for day in 1..=(7 - remainder) {
+                    grid.push(next_month.with_day(day as u32));
+                }
             }
         }
 
@@ -730,10 +740,10 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                 tr {
                     class: "calendar-grid-header",
                     // Day name headers
-                    for day_label in &props.day_labels {
+                    for weekday in &props.weekdays {
                         th {
                             class: "calendar-grid-day-header",
-                            {day_label.clone()}
+                            {format!("{weekday}")}
                         }
                     }
                 }
@@ -780,7 +790,7 @@ fn month_name(date: &NaiveDate) -> &str {
     let result = Month::try_from(date.month() as u8);
     match result {
         Ok(month) => month.name(),
-        Err(..) => ""
+        Err(..) => "",
     }
 }
 
