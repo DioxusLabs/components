@@ -8,11 +8,6 @@ use std::{
 
 use chrono::{Datelike, Days, Local, Month, Months, NaiveDate, Weekday, WeekdaySet};
 
-/// Abbreviated month names
-pub const MONTH_ABBREVIATIONS: [&str; 12] = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-
 /// The context provided by the [`Calendar`] component to its children.
 #[derive(Copy, Clone)]
 pub struct CalendarContext {
@@ -589,7 +584,7 @@ pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
     // Format the current month and year
     let month_year = use_memo(move || {
         let view_date = (ctx.view_date)();
-        let month_name = &month_name(&view_date)[0..3];
+        let month_name = month_name(&view_date);
         format!("{} {}", month_name, view_date.year())
     });
 
