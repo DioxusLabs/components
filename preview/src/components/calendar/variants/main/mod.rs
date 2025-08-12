@@ -180,7 +180,7 @@ fn LanguageSelect() -> Element {
                         }
                         let id = current_lang.read().id();
                         tracing::info!("Current lang: {id}");
-                        //i18n().set_language(id);
+                        i18n().set_language(id);
                     },
                     for lang in Language::iter() {
                         option {
