@@ -17,6 +17,7 @@ pub struct CalendarContext {
     focused_date: Signal<Option<NaiveDate>>,
     view_date: ReadOnlySignal<NaiveDate>,
     set_view_date: Callback<NaiveDate>,
+    format_weekday: Callback<Weekday, String>,
 
     // Configuration
     disabled: ReadOnlySignal<bool>,
@@ -72,6 +73,10 @@ pub struct CalendarProps {
     #[props(default)]
     pub on_date_change: Callback<Option<NaiveDate>>,
 
+    /// callback when localizing day of the week
+    #[props(default = Callback::new(|weekday| format!("{weekday}")))]
+    pub on_format_weekday: Callback<Weekday, String>,
+
     /// The month being viewed
     pub view_date: ReadOnlySignal<NaiveDate>,
 
@@ -107,7 +112,7 @@ pub struct CalendarProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -156,6 +161,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
         focused_date: Signal::new(props.selected_date.cloned()),
         view_date: props.view_date,
         set_view_date: props.on_view_change,
+        format_weekday: props.on_format_weekday,
         disabled: props.disabled,
         today: props.today,
         first_day_of_week: props.first_day_of_week,
@@ -246,7 +252,7 @@ pub struct CalendarHeaderProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -316,7 +322,7 @@ pub struct CalendarNavigationProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -381,7 +387,7 @@ pub struct CalendarPreviousMonthButtonProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -419,12 +425,15 @@ pub struct CalendarPreviousMonthButtonProps {
 #[component]
 pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> Element {
     let ctx: CalendarContext = use_context();
+    // disable previous button when we reach the limit
+    let mut button_disabled = use_signal(|| false);
     // Handle navigation to previous month
     let handle_prev_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        if let Some(prev_month) = current_view.checked_sub_months(Months::new(1)) {
-            ctx.set_view_date.call(prev_month);
+        match current_view.checked_sub_months(Months::new(1)) {
+            Some(prev_month) => ctx.set_view_date.call(prev_month),
+            None => button_disabled.set(true),
         }
     };
 
@@ -434,7 +443,7 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
             aria_label: "Previous month",
             r#type: "button",
             onclick: handle_prev_month,
-            disabled: (ctx.disabled)(),
+            disabled: (ctx.disabled)() || button_disabled(),
             ..props.attributes,
 
             {props.children}
@@ -463,7 +472,7 @@ pub struct CalendarNextMonthButtonProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -501,12 +510,15 @@ pub struct CalendarNextMonthButtonProps {
 #[component]
 pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     let ctx: CalendarContext = use_context();
+    // disable next button when we reach the limit
+    let mut button_disabled = use_signal(|| false);
     // Handle navigation to next month
     let handle_next_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        if let Some(next_month) = current_view.checked_add_months(Months::new(1)) {
-            ctx.set_view_date.call(next_month);
+        match current_view.checked_add_months(Months::new(1)) {
+            Some(next_month) => ctx.set_view_date.call(next_month),
+            None => button_disabled.set(true),
         }
     };
 
@@ -516,7 +528,7 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
             aria_label: "Next month",
             r#type: "button",
             onclick: handle_next_month,
-            disabled: (ctx.disabled)(),
+            disabled: (ctx.disabled)() || button_disabled(),
             ..props.attributes,
 
             {props.children}
@@ -543,7 +555,7 @@ pub struct CalendarMonthTitleProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -630,7 +642,7 @@ pub struct CalendarGridProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -695,13 +707,21 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         if let Some(previous_month) = view_date.checked_sub_months(Months::new(1)) {
             for index in 1..=first_day_offset {
                 let day = previous_month.num_days_in_month() as u32 + index - first_day_offset;
-                grid.push(previous_month.with_day(day));
+                grid.push(
+                    previous_month
+                        .with_day(day)
+                        .expect("invalid or out-of-range date"),
+                );
             }
         }
 
         // Add days of the month
         for day in 1..=num_days_in_month {
-            grid.push(view_date.with_day(day as u32));
+            grid.push(
+                view_date
+                    .with_day(day as u32)
+                    .expect("invalid or out-of-range date"),
+            );
         }
 
         // Add empty cells to complete the grid (for a clean layout)
@@ -709,7 +729,11 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             let remainder = grid.len() % 7;
             if remainder > 0 {
                 for day in 1..=(7 - remainder) {
-                    grid.push(next_month.with_day(day as u32));
+                    grid.push(
+                        next_month
+                            .with_day(day as u32)
+                            .expect("invalid or out-of-range date"),
+                    );
                 }
             }
         }
@@ -735,7 +759,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                     for weekday in WeekdaySet::ALL.iter(ctx.first_day_of_week) {
                         th {
                             class: "calendar-grid-day-header",
-                            {format!("{weekday}")}
+                            {ctx.format_weekday.call(weekday)}
                         }
                     }
                 }
@@ -750,7 +774,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                         class: "calendar-grid-week",
                         for date in row.iter().copied() {
                             td {
-                                {props.render_day.call(date.unwrap())}
+                                {props.render_day.call(date)}
                             }
                         }
                     }
@@ -779,11 +803,8 @@ impl Display for RelativeMonth {
 
 /// Get a human-readable Month for input date
 fn month_name(date: &NaiveDate) -> &str {
-    let result = Month::try_from(date.month() as u8);
-    match result {
-        Ok(month) => month.name(),
-        Err(..) => "",
-    }
+    let month = Month::try_from(date.month() as u8).expect("Month out of range");
+    month.name()
 }
 
 /// Get a human-readable ARIA label for input date

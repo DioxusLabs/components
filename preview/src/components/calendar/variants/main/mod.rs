@@ -1,10 +1,11 @@
 use dioxus::prelude::*;
+use dioxus_i18n::tid;
 use dioxus_primitives::calendar::{
     Calendar, CalendarContext, CalendarGrid, CalendarHeader, CalendarNavigation,
     CalendarNextMonthButton, CalendarPreviousMonthButton,
 };
 
-use chrono::{Datelike, Month, NaiveDate, Utc};
+use chrono::{Datelike, Month, NaiveDate, Utc, Weekday};
 
 #[component]
 pub fn Demo() -> Element {
@@ -28,6 +29,7 @@ pub fn Demo() -> Element {
                         tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
                         view_date.set(new_view);
                     },
+                    on_format_weekday: Callback::new(|weekday: Weekday| tid!(&weekday.to_string())),
                     CalendarHeader {
                         CalendarNavigation {
                             CalendarPreviousMonthButton {
@@ -60,13 +62,12 @@ pub fn Demo() -> Element {
 fn MonthTitle() -> Element {
     let calendar: CalendarContext = use_context();
     let view_date = calendar.view_date();
-    let month = &Month::try_from(view_date.month() as u8).unwrap().name()[0..3];
+    let month_name = Month::try_from(view_date.month() as u8).unwrap().name();
     let year = view_date.year();
-    let months = (1..12).map(|month_i| Month::try_from(month_i).unwrap());
+    let months = (1..=12).map(|month_i| Month::try_from(month_i).unwrap());
 
     rsx! {
-        span {
-            class: "calendar-month-select-container",
+        span { class: "calendar-month-select-container",
             select {
                 class: "calendar-month-select",
                 aria_label: "Month",
@@ -76,17 +77,16 @@ fn MonthTitle() -> Element {
                     view_date = view_date.with_month0(cur_month).unwrap_or(view_date);
                     calendar.set_view_date(view_date);
                 },
-                for (i, month) in months.enumerate() {
+                for (i , month) in months.enumerate() {
                     option {
                         value: i,
                         selected: calendar.view_date().month0() == i as u32,
-                        "{month.name()}"
+                        {tid!(month.name())}
                     }
                 }
             }
-            span {
-                class: "calendar-month-select-value",
-                "{month}"
+            span { class: "calendar-month-select-value",
+                {tid!(month_name)}
                 svg {
                     class: "select-expand-icon",
                     view_box: "0 0 24 24",
@@ -96,8 +96,7 @@ fn MonthTitle() -> Element {
             }
         }
 
-        span {
-            class: "calendar-year-select-container",
+        span { class: "calendar-year-select-container",
             select {
                 class: "calendar-year-select",
                 aria_label: "Year",
@@ -115,8 +114,7 @@ fn MonthTitle() -> Element {
                     }
                 }
             }
-            span {
-                class: "calendar-year-select-value",
+            span { class: "calendar-year-select-value",
                 "{year}"
                 svg {
                     class: "select-expand-icon",

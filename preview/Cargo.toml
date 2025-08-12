@@ -8,6 +8,8 @@ rust-version = "1.80.0"
 chrono = "0.4.41"
 dioxus = { workspace = true, features = ["router"] }
 dioxus-primitives.workspace = true
+dioxus-i18n = { git = "https://github.com/dioxus-community/dioxus-i18n.git", branch = "main" }
+unic-langid = { version = "0.9", features = ["macros"] }
 strum = { version = "0.27.2", features = ["derive"] }
 tracing.workspace = true
 
