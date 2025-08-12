@@ -6,11 +6,12 @@ use dioxus_primitives::calendar::{
 };
 
 use chrono::{Datelike, Month, NaiveDate, Utc};
-use strum::{Display, EnumCount, EnumIter, IntoEnumIterator};
+use strum::{Display, EnumCount, EnumIter, EnumString, IntoEnumIterator};
 
 use unic_langid::{langid, LanguageIdentifier};
+use std::str::FromStr;
 
-#[derive(PartialEq, EnumCount, EnumIter, Display)]
+#[derive(PartialEq, EnumCount, EnumIter, Display, EnumString)]
 enum Language {
     English,
     French,
@@ -102,8 +103,7 @@ fn MonthTitle() -> Element {
     let months = (1..12).map(|month_i| Month::try_from(month_i).unwrap());
 
     rsx! {
-        span {
-            class: "calendar-month-select-container",
+        span { class: "calendar-month-select-container",
             select {
                 class: "calendar-month-select",
                 aria_label: "Month",
@@ -113,7 +113,7 @@ fn MonthTitle() -> Element {
                     view_date = view_date.with_month0(cur_month).unwrap_or(view_date);
                     calendar.set_view_date(view_date);
                 },
-                for (i, month) in months.enumerate() {
+                for (i , month) in months.enumerate() {
                     option {
                         value: i,
                         selected: calendar.view_date().month0() == i as u32,
@@ -121,8 +121,7 @@ fn MonthTitle() -> Element {
                     }
                 }
             }
-            span {
-                class: "calendar-month-select-value",
+            span { class: "calendar-month-select-value",
                 "{month}"
                 svg {
                     class: "select-expand-icon",
@@ -133,8 +132,7 @@ fn MonthTitle() -> Element {
             }
         }
 
-        span {
-            class: "calendar-year-select-container",
+        span { class: "calendar-year-select-container",
             select {
                 class: "calendar-year-select",
                 aria_label: "Year",
@@ -152,8 +150,7 @@ fn MonthTitle() -> Element {
                     }
                 }
             }
-            span {
-                class: "calendar-year-select-value",
+            span { class: "calendar-year-select-value",
                 "{year}"
                 svg {
                     class: "select-expand-icon",
@@ -168,23 +165,41 @@ fn MonthTitle() -> Element {
 
 #[component]
 fn LanguageSelect() -> Element {
-    let default_lang = Language::English;
+    let mut current_lang = use_signal(|| Language::English);
 
     rsx! {
-            select {
-                aria_label: "Language",
-                onchange: move |e| {
-                    let id = e.value().parse().unwrap_or(default_lang.id());
-                    tracing::info!("Current lang: {id}");
-                    i18n().set_language(id);
-                },
-                for lang in Language::iter() {
-                    option {
-                        value: lang.id().to_string(),
-                        selected: lang == default_lang,
-                        "{lang}"
+        div { class: "language-container",
+            span { class: "language-select-container",
+                select {
+                    class: "language-select",
+                    aria_label: "Language",
+                    onchange: move |e| {
+                        let name = e.value().parse().unwrap_or(current_lang.to_string());
+                        if let Ok(lang) = Language::from_str(&name) {
+                            current_lang.set(lang);
+                        }
+                        let id = current_lang.read().id();
+                        tracing::info!("Current lang: {id}");
+                        //i18n().set_language(id);
+                    },
+                    for lang in Language::iter() {
+                        option {
+                            value: lang.to_string(),
+                            selected: lang == *current_lang.read(),
+                            "{lang}"
+                        }
+                    }
+                }
+                span { class: "language-select-value",
+                    "{current_lang}"
+                    svg {
+                        class: "select-expand-icon",
+                        view_box: "0 0 24 24",
+                        xmlns: "http://www.w3.org/2000/svg",
+                        polyline { points: "6 9 12 15 18 9" }
                     }
                 }
             }
+        }
     }
 }
