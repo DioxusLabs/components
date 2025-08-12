@@ -1,13 +1,49 @@
 use dioxus::prelude::*;
+use dioxus_i18n::{prelude::*, te};
 use dioxus_primitives::calendar::{
     Calendar, CalendarContext, CalendarGrid, CalendarHeader, CalendarNavigation,
     CalendarNextMonthButton, CalendarPreviousMonthButton,
 };
 
 use chrono::{Datelike, Month, NaiveDate, Utc};
+use strum::{Display, EnumCount, EnumIter, IntoEnumIterator};
+
+use unic_langid::{langid, LanguageIdentifier};
+
+#[derive(PartialEq, EnumCount, EnumIter, Display)]
+enum Language {
+    English,
+    French,
+    Spanish,
+    German,
+}
+
+impl Language {
+    const fn id(&self) -> LanguageIdentifier {
+        match self {
+            Language::English => langid!("en-US"),
+            Language::French => langid!("fr-FR"),
+            Language::Spanish => langid!("es-ES"),
+            Language::German => langid!("de-DE"),
+        }
+    }
+}
+
+fn month_label(month: Month) -> String {
+    let name = month.name();
+    te!(name).unwrap_or(name.to_string())
+}
 
 #[component]
 pub fn Demo() -> Element {
+    use_init_i18n(|| {
+        I18nConfig::new(langid!("en-US"))
+            .with_locale((langid!("en-US"), include_str!("./i18n/en-US.ftl")))
+            .with_locale((langid!("fr-FR"), include_str!("./i18n/fr-FR.ftl")))
+            .with_locale((langid!("es-ES"), include_str!("./i18n/es-ES.ftl")))
+            .with_locale((langid!("de-DE"), include_str!("./i18n/de-DE.ftl")))
+    });
+
     let mut selected_date = use_signal(|| None::<NaiveDate>);
     let mut view_date = use_signal(|| Utc::now().date_naive());
     rsx! {
@@ -28,6 +64,7 @@ pub fn Demo() -> Element {
                         tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
                         view_date.set(new_view);
                     },
+                    LanguageSelect {}
                     CalendarHeader {
                         CalendarNavigation {
                             CalendarPreviousMonthButton {
@@ -80,7 +117,7 @@ fn MonthTitle() -> Element {
                     option {
                         value: i,
                         selected: calendar.view_date().month0() == i as u32,
-                        "{month.name()}"
+                        {month_label(month)}
                     }
                 }
             }
@@ -126,5 +163,28 @@ fn MonthTitle() -> Element {
                 }
             }
         }
+    }
+}
+
+#[component]
+fn LanguageSelect() -> Element {
+    let default_lang = Language::English;
+
+    rsx! {
+            select {
+                aria_label: "Language",
+                onchange: move |e| {
+                    let id = e.value().parse().unwrap_or(default_lang.id());
+                    tracing::info!("Current lang: {id}");
+                    i18n().set_language(id);
+                },
+                for lang in Language::iter() {
+                    option {
+                        value: lang.id().to_string(),
+                        selected: lang == default_lang,
+                        "{lang}"
+                    }
+                }
+            }
     }
 }
