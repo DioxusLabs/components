@@ -112,7 +112,7 @@ pub struct CalendarProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -252,7 +252,7 @@ pub struct CalendarHeaderProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -322,7 +322,7 @@ pub struct CalendarNavigationProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -387,7 +387,7 @@ pub struct CalendarPreviousMonthButtonProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -469,7 +469,7 @@ pub struct CalendarNextMonthButtonProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -549,7 +549,7 @@ pub struct CalendarMonthTitleProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
@@ -636,7 +636,7 @@ pub struct CalendarGridProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, NaiveDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
 /// use chrono::{Datelike, NaiveDate, Utc};
 /// #[component]
