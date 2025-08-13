@@ -1,34 +1,11 @@
 use dioxus::prelude::*;
-use dioxus_i18n::{prelude::*, te};
+use dioxus_i18n::te;
 use dioxus_primitives::calendar::{
     Calendar, CalendarContext, CalendarGrid, CalendarHeader, CalendarNavigation,
     CalendarNextMonthButton, CalendarPreviousMonthButton,
 };
 
 use chrono::{Datelike, Month, NaiveDate, Utc};
-use strum::{Display, EnumCount, EnumIter, EnumString, IntoEnumIterator};
-
-use unic_langid::{langid, LanguageIdentifier};
-use std::str::FromStr;
-
-#[derive(PartialEq, EnumCount, EnumIter, Display, EnumString)]
-enum Language {
-    English,
-    French,
-    Spanish,
-    German,
-}
-
-impl Language {
-    const fn id(&self) -> LanguageIdentifier {
-        match self {
-            Language::English => langid!("en-US"),
-            Language::French => langid!("fr-FR"),
-            Language::Spanish => langid!("es-ES"),
-            Language::German => langid!("de-DE"),
-        }
-    }
-}
 
 fn month_label(month: Month) -> String {
     let name = month.name();
@@ -37,14 +14,6 @@ fn month_label(month: Month) -> String {
 
 #[component]
 pub fn Demo() -> Element {
-    use_init_i18n(|| {
-        I18nConfig::new(langid!("en-US"))
-            .with_locale((langid!("en-US"), include_str!("./i18n/en-US.ftl")))
-            .with_locale((langid!("fr-FR"), include_str!("./i18n/fr-FR.ftl")))
-            .with_locale((langid!("es-ES"), include_str!("./i18n/es-ES.ftl")))
-            .with_locale((langid!("de-DE"), include_str!("./i18n/de-DE.ftl")))
-    });
-
     let mut selected_date = use_signal(|| None::<NaiveDate>);
     let mut view_date = use_signal(|| Utc::now().date_naive());
     rsx! {
@@ -65,7 +34,6 @@ pub fn Demo() -> Element {
                         tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
                         view_date.set(new_view);
                     },
-                    LanguageSelect {}
                     CalendarHeader {
                         CalendarNavigation {
                             CalendarPreviousMonthButton {
@@ -100,7 +68,7 @@ fn MonthTitle() -> Element {
     let view_date = calendar.view_date();
     let month = &Month::try_from(view_date.month() as u8).unwrap().name()[0..3];
     let year = view_date.year();
-    let months = (1..12).map(|month_i| Month::try_from(month_i).unwrap());
+    let months = (1..=12).map(|month_i| Month::try_from(month_i).unwrap());
 
     rsx! {
         span { class: "calendar-month-select-container",
@@ -157,47 +125,6 @@ fn MonthTitle() -> Element {
                     view_box: "0 0 24 24",
                     xmlns: "http://www.w3.org/2000/svg",
                     polyline { points: "6 9 12 15 18 9" }
-                }
-            }
-        }
-    }
-}
-
-#[component]
-fn LanguageSelect() -> Element {
-    let mut current_lang = use_signal(|| Language::English);
-
-    rsx! {
-        div { class: "language-container",
-            span { class: "language-select-container",
-                select {
-                    class: "language-select",
-                    aria_label: "Language",
-                    onchange: move |e| {
-                        let name = e.value().parse().unwrap_or(current_lang.to_string());
-                        if let Ok(lang) = Language::from_str(&name) {
-                            current_lang.set(lang);
-                        }
-                        let id = current_lang.read().id();
-                        tracing::info!("Current lang: {id}");
-                        i18n().set_language(id);
-                    },
-                    for lang in Language::iter() {
-                        option {
-                            value: lang.to_string(),
-                            selected: lang == *current_lang.read(),
-                            "{lang}"
-                        }
-                    }
-                }
-                span { class: "language-select-value",
-                    "{current_lang}"
-                    svg {
-                        class: "select-expand-icon",
-                        view_box: "0 0 24 24",
-                        xmlns: "http://www.w3.org/2000/svg",
-                        polyline { points: "6 9 12 15 18 9" }
-                    }
                 }
             }
         }

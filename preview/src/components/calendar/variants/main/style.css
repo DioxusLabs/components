@@ -154,18 +154,17 @@
   stroke-width: 2;
 }
 
-.calendar-month-select-container, .calendar-year-select-container, .language-select-container {
+.calendar-month-select-container, .calendar-year-select-container {
   position: relative;
 }
 
-.calendar-month-select-container:has(:focus-visible), .calendar-year-select-container:has(:focus-visible), 
-.language-select-container:has(:focus-visible) {
+.calendar-month-select-container:has(:focus-visible), .calendar-year-select-container:has(:focus-visible) {
   outline: 2px solid var(--focused-border-color);
   border-radius: 0.5rem;
 }
 
 
-.calendar-month-select, .calendar-year-select, .language-select {
+.calendar-month-select, .calendar-year-select {
   opacity: 0;
   inset: 0;
   width: 100%;
@@ -175,7 +174,7 @@
   padding: .25rem;
 }
 
-.calendar-month-select-value, .calendar-year-select-value, .language-select-value {
+.calendar-month-select-value, .calendar-year-select-value {
   border: none;
   background-color: transparent;
   color: var(--secondary-color-4);
@@ -196,12 +195,4 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2;
-}
-
-/* Calendar Language */
-.language-container {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 0.75rem 0.25rem;
-  justify-content: flex-end;
 }
