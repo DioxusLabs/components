@@ -400,7 +400,16 @@ impl Language {
     }
 
     fn display_name(&self) -> String {
-        format!("{} {self}", self.flag())
+        format!("{} {}", self.flag(), self.localize_name())
+    }
+
+    const fn localize_name(&self) -> &'static str {
+        match self {
+            Language::English => "English",
+            Language::French => "Français",
+            Language::Spanish => "Español",
+            Language::German => "Deutsch",
+        }
     }
 }
 
