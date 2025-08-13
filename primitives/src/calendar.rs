@@ -17,6 +17,7 @@ pub struct CalendarContext {
     focused_date: Signal<Option<NaiveDate>>,
     view_date: ReadOnlySignal<NaiveDate>,
     set_view_date: Callback<NaiveDate>,
+    localize_weekday: Callback<Weekday, String>,
 
     // Configuration
     disabled: ReadOnlySignal<bool>,
@@ -71,6 +72,10 @@ pub struct CalendarProps {
     /// Callback when selected date changes
     #[props(default)]
     pub on_date_change: Callback<Option<NaiveDate>>,
+
+    /// callback when localizing day of the week
+    #[props(default = Callback::new(|weekday| format!("{weekday}")))]
+    pub on_localize_weekday: Callback<Weekday, String>,
 
     /// The month being viewed
     pub view_date: ReadOnlySignal<NaiveDate>,
@@ -156,6 +161,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
         focused_date: Signal::new(props.selected_date.cloned()),
         view_date: props.view_date,
         set_view_date: props.on_view_change,
+        localize_weekday: props.on_localize_weekday,
         disabled: props.disabled,
         today: props.today,
         first_day_of_week: props.first_day_of_week,
@@ -735,7 +741,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                     for weekday in WeekdaySet::ALL.iter(ctx.first_day_of_week) {
                         th {
                             class: "calendar-grid-day-header",
-                            {format!("{weekday}")}
+                            {ctx.localize_weekday.call(weekday)}
                         }
                     }
                 }

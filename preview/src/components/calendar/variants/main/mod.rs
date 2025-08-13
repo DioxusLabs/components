@@ -1,16 +1,11 @@
 use dioxus::prelude::*;
-use dioxus_i18n::te;
+use dioxus_i18n::tid;
 use dioxus_primitives::calendar::{
     Calendar, CalendarContext, CalendarGrid, CalendarHeader, CalendarNavigation,
     CalendarNextMonthButton, CalendarPreviousMonthButton,
 };
 
 use chrono::{Datelike, Month, NaiveDate, Utc};
-
-fn month_label(month: Month) -> String {
-    let name = month.name();
-    te!(name).unwrap_or(name.to_string())
-}
 
 #[component]
 pub fn Demo() -> Element {
@@ -34,6 +29,7 @@ pub fn Demo() -> Element {
                         tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
                         view_date.set(new_view);
                     },
+                    on_localize_weekday: Callback::new(|weekday| tid!(&format!("{weekday}"))),
                     CalendarHeader {
                         CalendarNavigation {
                             CalendarPreviousMonthButton {
@@ -66,7 +62,7 @@ pub fn Demo() -> Element {
 fn MonthTitle() -> Element {
     let calendar: CalendarContext = use_context();
     let view_date = calendar.view_date();
-    let month = &Month::try_from(view_date.month() as u8).unwrap().name()[0..3];
+    let month_name = Month::try_from(view_date.month() as u8).unwrap().name();
     let year = view_date.year();
     let months = (1..=12).map(|month_i| Month::try_from(month_i).unwrap());
 
@@ -85,12 +81,12 @@ fn MonthTitle() -> Element {
                     option {
                         value: i,
                         selected: calendar.view_date().month0() == i as u32,
-                        {month_label(month)}
+                        {tid!(month.name())}
                     }
                 }
             }
             span { class: "calendar-month-select-value",
-                "{month}"
+                {tid!(month_name)}
                 svg {
                     class: "select-expand-icon",
                     view_box: "0 0 24 24",

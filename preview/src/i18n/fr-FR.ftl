@@ -1,3 +1,4 @@
+## Months
 January = Janvier
 February = Février
 March = Mars
@@ -10,3 +11,12 @@ September = Septembre
 October = Octobre
 November = Novembre
 December = Décembre
+
+## Weekdays
+Mon = Lu
+Tue = Ma
+Wed = Me
+Thu = Je
+Fri = Ve
+Sat = Sa
+Sun = Di

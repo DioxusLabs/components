@@ -1,3 +1,4 @@
+## Months
 January = January
 February = February
 March = March
@@ -10,3 +11,12 @@ September = September
 October = October
 November = November
 December = December
+
+## Weekdays
+Mon = Mo
+Tue = Tu
+Wed = We
+Thu = Th
+Fri = Fr
+Sat = Sa
+Sun = Su
