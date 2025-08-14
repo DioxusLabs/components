@@ -5,7 +5,7 @@ use dioxus_primitives::calendar::{
     CalendarNextMonthButton, CalendarPreviousMonthButton,
 };
 
-use chrono::{Datelike, Month, NaiveDate, Utc};
+use chrono::{Datelike, Month, NaiveDate, Utc, Weekday};
 
 #[component]
 pub fn Demo() -> Element {
@@ -29,7 +29,7 @@ pub fn Demo() -> Element {
                         tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
                         view_date.set(new_view);
                     },
-                    on_localize_weekday: Callback::new(|weekday| tid!(&format!("{weekday}"))),
+                    on_format_weekday: Callback::new(|weekday: Weekday| tid!(&weekday.to_string())),
                     CalendarHeader {
                         CalendarNavigation {
                             CalendarPreviousMonthButton {
