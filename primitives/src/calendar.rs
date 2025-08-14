@@ -208,34 +208,67 @@ pub fn Calendar(props: CalendarProps) -> Element {
                 match e.key() {
                     Key::ArrowLeft => {
                         e.prevent_default();
-                        set_focused_date(focused_date.pred_opt());
+                        match focused_date.pred_opt() {
+                            Some(date) => {
+                                if ctx.min_date <= date {
+                                    set_focused_date(Some(date));
+                                }
+                            },
+                            None => set_focused_date(None)
+                        }
                     }
                     Key::ArrowRight => {
                         e.prevent_default();
-                        set_focused_date(focused_date.succ_opt());
+                        match focused_date.succ_opt() {
+                            Some(date) => {
+                                if ctx.max_date >= date {
+                                    set_focused_date(Some(date));
+                                }
+                            },
+                            None => set_focused_date(None)
+                        }
                     }
                     Key::ArrowUp => {
                         e.prevent_default();
+                        let mut new_date = None;
                         if e.modifiers().shift() {
-                            match focused_date.checked_sub_months(Months::new(1)) {
-                                Some(prev_month) => set_focused_date(prev_month.with_day(1)),
-                                None => set_focused_date(None)
+                            if let Some(prev_month) = focused_date.checked_sub_months(Months::new(1)) {
+                                new_date = prev_month.with_day(1);
                             }
                         } else {
                             // Otherwise, move to the previous week
-                            set_focused_date(focused_date.checked_sub_days(Days::new(7)));
+                            new_date = focused_date.checked_sub_days(Days::new(7));
                         }
+
+                            match new_date {
+                                Some(date) => {
+                                    if ctx.min_date <= date {
+                                        set_focused_date(Some(date));
+                                    }
+                                },
+                                None => set_focused_date(None)
+                            }
                     }
                     Key::ArrowDown => {
                         e.prevent_default();
+                        let mut new_date = None;
                         if e.modifiers().shift() {
-                            match focused_date.checked_add_months(Months::new(1)) {
-                                Some(next_month) => set_focused_date(next_month.with_day(1)),
-                                None => set_focused_date(None)
+                            if let Some(next_month) = focused_date.checked_add_months(Months::new(1)) {
+                                new_date = next_month.with_day(1);
                             }
                         } else {
-                            set_focused_date(focused_date.checked_add_days(Days::new(7)));
+                            // Otherwise, move to the next week
+                            new_date = focused_date.checked_add_days(Days::new(7));
                         }
+
+                        match new_date {
+                                Some(date) => {
+                                    if ctx.max_date >= date {
+                                        set_focused_date(Some(date));
+                                    }
+                                },
+                                None => set_focused_date(None)
+                            }
                     }
                     _ => {}
                 }
@@ -444,17 +477,21 @@ pub struct CalendarPreviousMonthButtonProps {
 pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> Element {
     let ctx: CalendarContext = use_context();
     // disable previous button when we reach the limit
-    let mut button_disabled = use_signal(|| false);
+    let button_disabled = use_memo(move || {
+        // Get the current view date from context
+        let view_date = (ctx.view_date)();
+        match view_date.checked_sub_months(Months::new(1)) {
+            Some(prev_month) => ctx.min_date.with_day(1).unwrap() > prev_month,
+            None => true,
+        }
+    });
+
     // Handle navigation to previous month
     let handle_prev_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        match current_view.checked_sub_months(Months::new(1)) {
-            Some(prev_month) => {
-                ctx.set_view_date.call(prev_month);
-                button_disabled.set(false);
-            }
-            None => button_disabled.set(true),
+        if let Some(prev_month) = current_view.checked_sub_months(Months::new(1)) {
+            ctx.set_view_date.call(prev_month);
         }
     };
 
@@ -532,14 +569,24 @@ pub struct CalendarNextMonthButtonProps {
 pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     let ctx: CalendarContext = use_context();
     // disable next button when we reach the limit
-    let mut button_disabled = use_signal(|| false);
+    let button_disabled = use_memo(move || {
+        // Get the current view date from context
+        let view_date = (ctx.view_date)();
+        match view_date.checked_add_months(Months::new(1)) {
+            Some(next_month) => {
+                let day = ctx.max_date.num_days_in_month().into();
+                ctx.max_date.with_day(day).unwrap() < next_month
+            }
+            None => true,
+        }
+    });
+
     // Handle navigation to next month
     let handle_next_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        match current_view.checked_add_months(Months::new(1)) {
-            Some(next_month) => ctx.set_view_date.call(next_month),
-            None => button_disabled.set(true),
+        if let Some(next_month) = current_view.checked_add_months(Months::new(1)) {
+            ctx.set_view_date.call(next_month)
         }
     };
 

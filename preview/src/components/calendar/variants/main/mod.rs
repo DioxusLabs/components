@@ -31,7 +31,7 @@ pub fn Demo() -> Element {
                     },
                     on_format_weekday: Callback::new(|weekday: Weekday| tid!(&weekday.to_string())),
                     on_format_month: Callback::new(|month: Month| tid!(month.name())),
-                    min_date: NaiveDate::from_ymd_opt(2025, 7, 21).unwrap(),
+                    min_date: NaiveDate::from_ymd_opt(1995, 7, 21).unwrap(),
                     max_date: NaiveDate::from_ymd_opt(2035, 9, 11).unwrap(),
                     CalendarHeader {
                         CalendarNavigation {
