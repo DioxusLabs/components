@@ -707,13 +707,21 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         if let Some(previous_month) = view_date.checked_sub_months(Months::new(1)) {
             for index in 1..=first_day_offset {
                 let day = previous_month.num_days_in_month() as u32 + index - first_day_offset;
-                grid.push(previous_month.with_day(day).expect("invalid or out-of-range date"));
+                grid.push(
+                    previous_month
+                        .with_day(day)
+                        .expect("invalid or out-of-range date"),
+                );
             }
         }
 
         // Add days of the month
         for day in 1..=num_days_in_month {
-            grid.push(view_date.with_day(day as u32).expect("invalid or out-of-range date"));
+            grid.push(
+                view_date
+                    .with_day(day as u32)
+                    .expect("invalid or out-of-range date"),
+            );
         }
 
         // Add empty cells to complete the grid (for a clean layout)
@@ -721,7 +729,11 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             let remainder = grid.len() % 7;
             if remainder > 0 {
                 for day in 1..=(7 - remainder) {
-                    grid.push(next_month.with_day(day as u32).expect("invalid or out-of-range date"));
+                    grid.push(
+                        next_month
+                            .with_day(day as u32)
+                            .expect("invalid or out-of-range date"),
+                    );
                 }
             }
         }
