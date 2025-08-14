@@ -63,7 +63,7 @@ pub fn PortalOut(portal: PortalId) -> Element {
     if let Some(ctx) = try_use_context::<PortalCtx>() {
         if let Some(children) = ctx.portals.peek().get(&portal.0) {
             return rsx! {
-                {children}
+                {*children}
             };
         }
     }
