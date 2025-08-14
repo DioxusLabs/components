@@ -2,8 +2,9 @@
 
 use dioxus::prelude::*;
 use std::{
-    fmt::{self, Display},
-    rc::Rc,
+    fmt::{self, Display}, 
+    ops::RangeInclusive, 
+    rc::Rc
 };
 
 use chrono::{Datelike, Days, Local, Month, Months, NaiveDate, Weekday, WeekdaySet};
@@ -18,6 +19,7 @@ pub struct CalendarContext {
     view_date: ReadOnlySignal<NaiveDate>,
     set_view_date: Callback<NaiveDate>,
     format_weekday: Callback<Weekday, String>,
+    format_month: Callback<Month, String>,
 
     // Configuration
     disabled: ReadOnlySignal<bool>,
@@ -73,9 +75,13 @@ pub struct CalendarProps {
     #[props(default)]
     pub on_date_change: Callback<Option<NaiveDate>>,
 
-    /// callback when localizing day of the week
-    #[props(default = Callback::new(|weekday| format!("{weekday}")))]
+    /// callback when display weekday
+    #[props(default = Callback::new(|weekday: Weekday| weekday.to_string()))]
     pub on_format_weekday: Callback<Weekday, String>,
+
+    /// callback when display month
+    #[props(default = Callback::new(|month: Month| month.name().to_string()))]
+    pub on_format_month: Callback<Month, String>,
 
     /// The month being viewed
     pub view_date: ReadOnlySignal<NaiveDate>,
@@ -162,6 +168,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
         view_date: props.view_date,
         set_view_date: props.on_view_change,
         format_weekday: props.on_format_weekday,
+        format_month: props.on_format_month,
         disabled: props.disabled,
         today: props.today,
         first_day_of_week: props.first_day_of_week,
@@ -778,6 +785,196 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+/// The props for the [`CalendarSelectMonth`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarSelectMonthProps {
+    /// Additional attributes to extend the select month element
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+}
+
+/// # CalendarSelectMonth
+///
+/// The [`CalendarSelectMonth`] component provides a drop-down list for selecting the current month.
+///
+/// This must be used inside a [`Calendar`] component.
+///
+/// ## Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::calendar::{
+///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton, CalendarSelectMonth
+/// };
+/// use chrono::{Datelike, NaiveDate, Utc};
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut selected_date = use_signal(|| None::<NaiveDate>);
+///     let mut view_date = use_signal(|| Utc::now().date_naive());
+///     rsx! {
+///         Calendar {
+///             selected_date: selected_date(),
+///             on_date_change: move |date| {
+///                 tracing::info!("Selected date: {:?}", date);
+///                 selected_date.set(date);
+///             },
+///             view_date: view_date(),
+///             on_view_change: move |new_view: NaiveDate| {
+///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
+///                 view_date.set(new_view);
+///             },
+///             CalendarHeader {
+///                 CalendarNavigation {
+///                     CalendarPreviousMonthButton {
+///                         "<"
+///                     }
+///                     CalendarSelectMonth {}
+///                     CalendarNextMonthButton {
+///                         ">"
+///                     }
+///                 }
+///             }
+///             CalendarGrid {}
+///         }
+///     }
+/// }
+/// ```
+#[component]
+pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
+    let calendar: CalendarContext = use_context();
+    let view_date = calendar.view_date();
+    let month = Month::try_from(view_date.month() as u8).unwrap();
+
+    let months = (1..=12).map(|month_i| Month::try_from(month_i).unwrap());
+
+    rsx! {
+        span { class: "calendar-month-select-container",
+            select {
+                class: "calendar-month-select",
+                aria_label: "Month",
+                onchange: move |e| {
+                    let mut view_date = calendar.view_date();
+                    let cur_month = e.value().parse().unwrap_or(view_date.month0());
+                    view_date = view_date.with_month0(cur_month).unwrap_or(view_date);
+                    calendar.set_view_date(view_date);
+                },
+                ..props.attributes,
+                for (i , month) in months.enumerate() {
+                    option {
+                        value: i,
+                        selected: calendar.view_date().month0() == i as u32,
+                        {calendar.format_month.call(month)}
+                    }
+                }
+            }
+            span { class: "calendar-month-select-value",
+                {calendar.format_month.call(month)}
+                svg {
+                    class: "select-expand-icon",
+                    view_box: "0 0 24 24",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    polyline { points: "6 9 12 15 18 9" }
+                }
+            }
+        }
+    }
+}
+
+/// The props for the [`CalendarSelectYear`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarSelectYearProps {
+    /// displayed range of years values
+    #[props(default = 1925..=2050)]
+    range: RangeInclusive<i32>,
+
+    /// Additional attributes to extend the select year element
+    #[props(extends = GlobalAttributes)]
+    attributes: Vec<Attribute>,
+}
+
+/// # CalendarSelectYear
+///
+/// The [`CalendarSelectYear`] component provides a drop-down list for selecting the current year.
+///
+/// This must be used inside a [`Calendar`] component.
+///
+/// ## Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::calendar::{
+///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton, CalendarSelectYear
+/// };
+/// use chrono::{Datelike, NaiveDate, Utc};
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut selected_date = use_signal(|| None::<NaiveDate>);
+///     let mut view_date = use_signal(|| Utc::now().date_naive());
+///     rsx! {
+///         Calendar {
+///             selected_date: selected_date(),
+///             on_date_change: move |date| {
+///                 tracing::info!("Selected date: {:?}", date);
+///                 selected_date.set(date);
+///             },
+///             view_date: view_date(),
+///             on_view_change: move |new_view: NaiveDate| {
+///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
+///                 view_date.set(new_view);
+///             },
+///             CalendarHeader {
+///                 CalendarNavigation {
+///                     CalendarPreviousMonthButton {
+///                         "<"
+///                     }
+///                     CalendarSelectYear {}
+///                     CalendarNextMonthButton {
+///                         ">"
+///                     }
+///                 }
+///             }
+///             CalendarGrid {}
+///         }
+///     }
+/// }
+/// ```
+#[component]
+pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
+    let calendar: CalendarContext = use_context();
+    let view_date = calendar.view_date();
+    let year = view_date.year();
+
+    rsx! {
+        span { class: "calendar-year-select-container",
+            select {
+                class: "calendar-year-select",
+                aria_label: "Year",
+                onchange: move |e| {
+                    let mut view_date = calendar.view_date();
+                    let year = e.value().parse().unwrap_or(view_date.year());
+                    view_date = view_date.with_year(year).unwrap_or(view_date);
+                    calendar.set_view_date(view_date);
+                },
+                ..props.attributes,
+                for year in props.range {
+                    option {
+                        value: year,
+                        selected: calendar.view_date().year() == year,
+                        "{year}"
+                    }
+                }
+            }
+            span { class: "calendar-year-select-value",
+                "{year}"
+                svg {
+                    class: "select-expand-icon",
+                    view_box: "0 0 24 24",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    polyline { points: "6 9 12 15 18 9" }
                 }
             }
         }
