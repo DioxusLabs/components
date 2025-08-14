@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 use dioxus_i18n::tid;
 use dioxus_primitives::calendar::{
-    Calendar, CalendarContext, CalendarGrid, CalendarHeader, CalendarNavigation,
-    CalendarNextMonthButton, CalendarPreviousMonthButton,
+    Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton,
+    CalendarPreviousMonthButton, CalendarSelectMonth, CalendarSelectYear,
 };
 
 use chrono::{Datelike, Month, NaiveDate, Utc, Weekday};
@@ -30,6 +30,9 @@ pub fn Demo() -> Element {
                         view_date.set(new_view);
                     },
                     on_format_weekday: Callback::new(|weekday: Weekday| tid!(&weekday.to_string())),
+                    on_format_month: Callback::new(|month: Month| tid!(month.name())),
+                    min_date: NaiveDate::from_ymd_opt(1995, 7, 21).unwrap(),
+                    max_date: NaiveDate::from_ymd_opt(2035, 9, 11).unwrap(),
                     CalendarHeader {
                         CalendarNavigation {
                             CalendarPreviousMonthButton {
@@ -40,7 +43,8 @@ pub fn Demo() -> Element {
                                     polyline { points: "15 6 9 12 15 18" }
                                 }
                             }
-                            MonthTitle {}
+                            CalendarSelectMonth {}
+                            CalendarSelectYear {}
                             CalendarNextMonthButton {
                                 svg {
                                     class: "calendar-next-month-icon",
@@ -52,75 +56,6 @@ pub fn Demo() -> Element {
                         }
                     }
                     CalendarGrid {}
-                }
-            }
-        }
-    }
-}
-
-#[component]
-fn MonthTitle() -> Element {
-    let calendar: CalendarContext = use_context();
-    let view_date = calendar.view_date();
-    let month_name = Month::try_from(view_date.month() as u8).unwrap().name();
-    let year = view_date.year();
-    let months = (1..=12).map(|month_i| Month::try_from(month_i).unwrap());
-
-    rsx! {
-        span { class: "calendar-month-select-container",
-            select {
-                class: "calendar-month-select",
-                aria_label: "Month",
-                onchange: move |e| {
-                    let mut view_date = calendar.view_date();
-                    let cur_month = e.value().parse().unwrap_or(view_date.month0());
-                    view_date = view_date.with_month0(cur_month).unwrap_or(view_date);
-                    calendar.set_view_date(view_date);
-                },
-                for (i , month) in months.enumerate() {
-                    option {
-                        value: i,
-                        selected: calendar.view_date().month0() == i as u32,
-                        {tid!(month.name())}
-                    }
-                }
-            }
-            span { class: "calendar-month-select-value",
-                {tid!(month_name)}
-                svg {
-                    class: "select-expand-icon",
-                    view_box: "0 0 24 24",
-                    xmlns: "http://www.w3.org/2000/svg",
-                    polyline { points: "6 9 12 15 18 9" }
-                }
-            }
-        }
-
-        span { class: "calendar-year-select-container",
-            select {
-                class: "calendar-year-select",
-                aria_label: "Year",
-                onchange: move |e| {
-                    let mut view_date = calendar.view_date();
-                    let year = e.value().parse().unwrap_or(view_date.year());
-                    view_date = view_date.with_year(year).unwrap_or(view_date);
-                    calendar.set_view_date(view_date);
-                },
-                for year in 1925..=2050 {
-                    option {
-                        value: year,
-                        selected: calendar.view_date().year() == year,
-                        "{year}"
-                    }
-                }
-            }
-            span { class: "calendar-year-select-value",
-                "{year}"
-                svg {
-                    class: "select-expand-icon",
-                    view_box: "0 0 24 24",
-                    xmlns: "http://www.w3.org/2000/svg",
-                    polyline { points: "6 9 12 15 18 9" }
                 }
             }
         }
