@@ -911,7 +911,20 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     let view_date = calendar.view_date();
     let month = Month::try_from(view_date.month() as u8).unwrap();
 
-    let months = (1..=12).map(|month_i| Month::try_from(month_i).unwrap());
+    let months = use_memo(move || {
+        // Get the current view date from context
+        let view_date = (calendar.view_date)();
+        let mut min_month = 1;
+        if view_date.with_month(1).unwrap() < calendar.min_date {
+            min_month = calendar.min_date.month();
+        }
+        let mut max_month = 12;
+        if view_date.with_month(12).unwrap() > calendar.max_date {
+            max_month = calendar.max_date.month();
+        }
+
+        min_month..=max_month
+    });
 
     rsx! {
         span { class: "calendar-month-select-container",
@@ -920,16 +933,16 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
                 aria_label: "Month",
                 onchange: move |e| {
                     let mut view_date = calendar.view_date();
-                    let cur_month = e.value().parse().unwrap_or(view_date.month0());
-                    view_date = view_date.with_month0(cur_month).unwrap_or(view_date);
+                    let cur_month = e.value().parse().unwrap_or(view_date.month());
+                    view_date = view_date.with_month(cur_month).unwrap_or(view_date);
                     calendar.set_view_date(view_date);
                 },
                 ..props.attributes,
-                for (i , month) in months.enumerate() {
+                for month in months() {
                     option {
-                        value: i,
-                        selected: calendar.view_date().month0() == i as u32,
-                        {calendar.format_month.call(month)}
+                        value: month,
+                        selected: calendar.view_date().month() == month,
+                        {calendar.format_month.call(Month::try_from(month as u8).unwrap())}
                     }
                 }
             }
@@ -1005,6 +1018,22 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
     let view_date = calendar.view_date();
     let year = view_date.year();
 
+    let years = use_memo(move || {
+        // Get the current view date from context
+        let view_date = (calendar.view_date)();
+        let month = view_date.month();
+        let mut min_year = calendar.min_date.year();
+        if calendar.min_date.with_month(month).unwrap() < calendar.min_date {
+            min_year += 1;
+        }
+        let mut max_year = calendar.max_date.year();
+        if calendar.max_date.with_month(month).unwrap() > calendar.max_date {
+            max_year -= 1;
+        }
+
+        min_year..=max_year
+    });
+
     rsx! {
         span { class: "calendar-year-select-container",
             select {
@@ -1017,7 +1046,7 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
                     calendar.set_view_date(view_date);
                 },
                 ..props.attributes,
-                for year in calendar.min_date.year()..=calendar.max_date.year() {
+                for year in years() {
                     option {
                         value: year,
                         selected: calendar.view_date().year() == year,
