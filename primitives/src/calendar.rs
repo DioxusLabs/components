@@ -2,9 +2,8 @@
 
 use dioxus::prelude::*;
 use std::{
-    fmt::{self, Display}, 
-    ops::RangeInclusive, 
-    rc::Rc
+    fmt::{self, Display},
+    rc::Rc,
 };
 
 use chrono::{Datelike, Days, Local, Month, Months, NaiveDate, Weekday, WeekdaySet};
@@ -25,6 +24,8 @@ pub struct CalendarContext {
     disabled: ReadOnlySignal<bool>,
     today: NaiveDate,
     first_day_of_week: Weekday,
+    min_date: NaiveDate,
+    max_date: NaiveDate,
 }
 
 impl CalendarContext {
@@ -55,7 +56,7 @@ impl CalendarContext {
 
     /// Set the view date
     pub fn set_view_date(&self, date: NaiveDate) {
-        (self.set_view_date)(date);
+        (self.set_view_date)(date.clamp(self.min_date, self.max_date));
     }
 
     /// Check if the calendar is disabled
@@ -75,11 +76,11 @@ pub struct CalendarProps {
     #[props(default)]
     pub on_date_change: Callback<Option<NaiveDate>>,
 
-    /// callback when display weekday
+    /// Callback when display weekday
     #[props(default = Callback::new(|weekday: Weekday| weekday.to_string()))]
     pub on_format_weekday: Callback<Weekday, String>,
 
-    /// callback when display month
+    /// Callback when display month
     #[props(default = Callback::new(|month: Month| month.name().to_string()))]
     pub on_format_month: Callback<Month, String>,
 
@@ -101,6 +102,14 @@ pub struct CalendarProps {
     /// First day of the week
     #[props(default = Weekday::Sun)]
     pub first_day_of_week: Weekday,
+
+    /// Lower limit of the range of available dates
+    #[props(default = NaiveDate::from_ymd_opt(1925, 1, 1).unwrap())]
+    pub min_date: NaiveDate,
+
+    /// Upper limit of the range of available dates
+    #[props(default = NaiveDate::from_ymd_opt(2050, 12, 31).unwrap())]
+    pub max_date: NaiveDate,
 
     /// Additional attributes to extend the calendar element
     #[props(extends = GlobalAttributes)]
@@ -172,6 +181,8 @@ pub fn Calendar(props: CalendarProps) -> Element {
         disabled: props.disabled,
         today: props.today,
         first_day_of_week: props.first_day_of_week,
+        min_date: props.min_date,
+        max_date: props.max_date,
     });
 
     rsx! {
@@ -439,7 +450,10 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
         e.prevent_default();
         let current_view = (ctx.view_date)();
         match current_view.checked_sub_months(Months::new(1)) {
-            Some(prev_month) => ctx.set_view_date.call(prev_month),
+            Some(prev_month) => {
+                ctx.set_view_date.call(prev_month);
+                button_disabled.set(false);
+            }
             None => button_disabled.set(true),
         }
     };
@@ -888,10 +902,6 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
 /// The props for the [`CalendarSelectYear`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarSelectYearProps {
-    /// displayed range of years values
-    #[props(default = 1925..=2050)]
-    range: RangeInclusive<i32>,
-
     /// Additional attributes to extend the select year element
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -960,7 +970,7 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
                     calendar.set_view_date(view_date);
                 },
                 ..props.attributes,
-                for year in props.range {
+                for year in calendar.min_date.year()..=calendar.max_date.year() {
                     option {
                         value: year,
                         selected: calendar.view_date().year() == year,
@@ -1030,10 +1040,18 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
     let mut ctx: CalendarContext = use_context();
     let view_date = (ctx.view_date)();
     let day = date.day();
-    let month = match date.month().cmp(&view_date.month()) {
-        std::cmp::Ordering::Less => RelativeMonth::Last,
-        std::cmp::Ordering::Equal => RelativeMonth::Current,
-        std::cmp::Ordering::Greater => RelativeMonth::Next,
+    let month = {
+        if date < ctx.min_date {
+            RelativeMonth::Last
+        } else if date > ctx.max_date {
+            RelativeMonth::Next
+        } else {
+            match date.month().cmp(&view_date.month()) {
+                std::cmp::Ordering::Less => RelativeMonth::Last,
+                std::cmp::Ordering::Equal => RelativeMonth::Current,
+                std::cmp::Ordering::Greater => RelativeMonth::Next,
+            }
+        }
     };
     let in_current_month = month == RelativeMonth::Current;
     let is_selected = move || (ctx.selected_date)().is_some_and(|d| d == date);
