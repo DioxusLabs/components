@@ -1,12 +1,16 @@
 use dioxus::prelude::*;
 use dioxus_primitives::calendar::{
-    Calendar, CalendarDate, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
+    Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation,
+    CalendarNextMonthButton, CalendarPreviousMonthButton,
 };
+
+use time::Date;
+use time_macros::date;
 
 #[component]
 pub fn Demo() -> Element {
-    let mut selected_date = use_signal(|| None::<CalendarDate>);
-    let mut view_date = use_signal(|| CalendarDate::new(2025, 6, 5));
+    let mut selected_date = use_signal(|| None::<Date>);
+    let mut view_date = use_signal(|| date!(2025 - 08 - 16));
     rsx! {
         document::Link {
             rel: "stylesheet",
@@ -21,8 +25,8 @@ pub fn Demo() -> Element {
                         selected_date.set(date);
                     },
                     view_date: view_date(),
-                    on_view_change: move |new_view: CalendarDate| {
-                        tracing::info!("View changed to: {}-{}", new_view.year, new_view.month);
+                    on_view_change: move |new_view: Date| {
+                        tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
                         view_date.set(new_view);
                     },
                     CalendarHeader {

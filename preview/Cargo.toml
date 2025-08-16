@@ -7,8 +7,12 @@ rust-version = "1.80.0"
 [dependencies]
 dioxus = { workspace = true, features = ["router"] }
 dioxus-primitives.workspace = true
+dioxus-i18n = { git = "https://github.com/dioxus-community/dioxus-i18n.git", branch = "main" }
+unic-langid = { version = "0.9", features = ["macros"] }
 strum = { version = "0.27.2", features = ["derive"] }
 tracing.workspace = true
+time = "0.3.41"
+time-macros = "0.2.22"
 
 [build-dependencies]
 syntect = "5.2"
