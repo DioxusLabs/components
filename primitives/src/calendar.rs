@@ -84,25 +84,6 @@ impl WeekdaySet {
     }
 }
 
-fn days_since(weekday: Weekday, other: Weekday) -> u8 {
-    let lhs = weekday as u8;
-    let rhs = other as u8;
-    if lhs < rhs {
-        7 + lhs - rhs
-    } else {
-        lhs - rhs
-    }
-}
-
-fn next_month(date: Date) -> Option<Date> {
-    let last_date = date.month().length(date.year());
-    date.replace_day(last_date).unwrap().next_day()
-}
-
-fn previous_month(date: Date) -> Option<Date> {
-    date.replace_day(1).unwrap().previous_day()
-}
-
 struct WeekdaySetIter {
     days: WeekdaySet,
     start: Weekday,
@@ -123,6 +104,25 @@ impl Iterator for WeekdaySetIter {
         self.days.remove(next);
         Some(next)
     }
+}
+
+fn days_since(weekday: Weekday, other: Weekday) -> u8 {
+    let lhs = weekday as u8;
+    let rhs = other as u8;
+    if lhs < rhs {
+        7 + lhs - rhs
+    } else {
+        lhs - rhs
+    }
+}
+
+fn next_month(date: Date) -> Option<Date> {
+    let last_day = date.month().length(date.year());
+    date.replace_day(last_day).unwrap().next_day()
+}
+
+fn previous_month(date: Date) -> Option<Date> {
+    date.replace_day(1).unwrap().previous_day()
 }
 
 /// The context provided by the [`Calendar`] component to its children.
@@ -246,7 +246,8 @@ pub struct CalendarProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, Weekday};
+/// use time::{Date, Month};
+/// use time_macros::date;
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
@@ -320,71 +321,45 @@ pub fn Calendar(props: CalendarProps) -> Element {
                             (ctx.set_view_date)(view_date);
                         }
                     }
-                    ctx.focused_date.set(new_date);
+
+                    match new_date {
+                        Some(date) => {
+                            if ctx.min_date <= date && date <= ctx.max_date {
+                                ctx.focused_date.set(new_date);
+                            }
+                        },
+                        None => ctx.focused_date.set(None)
+                    }
                 };
                 match e.key() {
                     Key::ArrowLeft => {
                         e.prevent_default();
-                        match focused_date.previous_day() {
-                            Some(date) => {
-                                if ctx.min_date <= date {
-                                    set_focused_date(Some(date));
-                                }
-                            },
-                            None => set_focused_date(None)
-                        }
+                        set_focused_date(focused_date.previous_day());
                     }
                     Key::ArrowRight => {
                         e.prevent_default();
-                        match focused_date.next_day() {
-                            Some(date) => {
-                                if ctx.max_date >= date {
-                                    set_focused_date(Some(date));
-                                }
-                            },
-                            None => set_focused_date(None)
-                        }
+                        set_focused_date(focused_date.next_day());
                     }
                     Key::ArrowUp => {
                         e.prevent_default();
-                        let mut new_date = None;
                         if e.modifiers().shift() {
                             if let Some(date) = previous_month(focused_date) {
-                                new_date = Some(date.replace_day(1).unwrap());
+                                set_focused_date(date.replace_day(1).ok());
                             }
                         } else {
                             // Otherwise, move to the previous week
-                            new_date = Some(focused_date.saturating_sub(Duration::days(7)));
-                        }
-
-                        match new_date {
-                            Some(date) => {
-                                if ctx.min_date <= date {
-                                     set_focused_date(Some(date));
-                                }
-                            },
-                            None => set_focused_date(None)
+                            set_focused_date(Some(focused_date.saturating_sub(Duration::days(7))));
                         }
                     }
                     Key::ArrowDown => {
                         e.prevent_default();
-                        let mut new_date = None;
                         if e.modifiers().shift() {
                             if let Some(date) = next_month(focused_date) {
-                                new_date = Some(date.replace_day(1).unwrap());
+                                set_focused_date(date.replace_day(1).ok());
                             }
                         } else {
                             // Otherwise, move to the next week
-                            new_date = Some(focused_date.saturating_add(Duration::days(7)));
-                        }
-
-                        match new_date {
-                            Some(date) => {
-                                if ctx.max_date >= date {
-                                    set_focused_date(Some(date));
-                                }
-                            },
-                            None => set_focused_date(None)
+                            set_focused_date(Some(focused_date.saturating_add(Duration::days(7))));
                         }
                     }
                     _ => {}
@@ -422,7 +397,8 @@ pub struct CalendarHeaderProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, Weekday};
+/// use time::{Date, Month};
+/// use time_macros::date;
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
@@ -492,7 +468,8 @@ pub struct CalendarNavigationProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, Weekday};
+/// use time::{Date, Month};
+/// use time_macros::date;
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
@@ -557,7 +534,8 @@ pub struct CalendarPreviousMonthButtonProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, Weekday};
+/// use time::{Date, Month};
+/// use time_macros::date;
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
@@ -649,7 +627,8 @@ pub struct CalendarNextMonthButtonProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, Weekday};
+/// use time::{Date, Month};
+/// use time_macros::date;
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
@@ -691,8 +670,8 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
         let view_date = (ctx.view_date)();
         match next_month(view_date) {
             Some(date) => {
-                let day = ctx.max_date.month().length(ctx.max_date.year());
-                ctx.max_date.replace_day(day).unwrap() < date
+                let last_day = ctx.max_date.month().length(ctx.max_date.year());
+                ctx.max_date.replace_day(last_day).unwrap() < date
             }
             None => true,
         }
@@ -742,7 +721,8 @@ pub struct CalendarMonthTitleProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, Weekday};
+/// use time::{Date, Month};
+/// use time_macros::date;
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
@@ -828,7 +808,8 @@ pub struct CalendarGridProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, Weekday};
+/// use time::{Date, Month};
+/// use time_macros::date;
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
@@ -984,7 +965,8 @@ pub struct CalendarSelectMonthProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton, CalendarSelectMonth
 /// };
-/// use time::{Date, Month, Weekday};
+/// use time::{Date, Month};
+/// use time_macros::date;
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
@@ -1101,7 +1083,8 @@ pub struct CalendarSelectYearProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton, CalendarSelectYear
 /// };
-/// use time::{Date, Month, Weekday};
+/// use time::{Date, Month};
+/// use time_macros::date;
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);

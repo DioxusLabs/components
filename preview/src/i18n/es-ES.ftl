@@ -18,5 +18,5 @@ Tuesday = Ma
 Wednesday = Mi
 Thursday = Ju
 Friday = Vi
-SaturdaySat = Sa
+Saturday = Sa
 Sunday = Do
