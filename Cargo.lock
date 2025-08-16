@@ -1819,7 +1819,7 @@ source = "git+https://github.com/dioxus-community/dioxus-i18n.git?branch=main#31
 dependencies = [
  "dioxus-lib",
  "fluent",
- "thiserror 2.0.12",
+ "thiserror 2.0.14",
  "unic-langid",
  "walkdir",
 ]
@@ -1857,6 +1857,20 @@ dependencies = [
  "thiserror 2.0.14",
  "tracing",
  "walkdir",
+]
+
+[[package]]
+name = "dioxus-lib"
+version = "0.7.0-alpha.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3340a7eeebc207010d27dcf2b347c748dfd6a8605dc3624019f0c7a06e0d5d8b"
+dependencies = [
+ "dioxus-config-macro",
+ "dioxus-core",
+ "dioxus-core-macro",
+ "dioxus-hooks",
+ "dioxus-rsx",
+ "dioxus-signals",
 ]
 
 [[package]]
@@ -2479,7 +2493,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "54f0d287c53ffd184d04d8677f590f4ac5379785529e5e08b1c8083acdd5c198"
 dependencies = [
  "memchr",
- "thiserror 2.0.12",
+ "thiserror 2.0.14",
 ]
 
 [[package]]
@@ -7550,7 +7564,7 @@ checksum = "a1249a628de3ad34b821ecb1001355bca3940bcb2f88558f1a8bd82e977f75b5"
 dependencies = [
  "proc-macro-hack",
  "quote",
- "syn 2.0.104",
+ "syn 2.0.105",
  "unic-langid-impl",
 ]
 
