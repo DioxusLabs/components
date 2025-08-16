@@ -5,12 +5,13 @@ use dioxus_primitives::calendar::{
     CalendarPreviousMonthButton, CalendarSelectMonth, CalendarSelectYear,
 };
 
-use chrono::{Datelike, Month, NaiveDate, Utc, Weekday};
+use time::{Date, Month, Weekday};
+use time_macros::date;
 
 #[component]
 pub fn Demo() -> Element {
-    let mut selected_date = use_signal(|| None::<NaiveDate>);
-    let mut view_date = use_signal(|| Utc::now().date_naive());
+    let mut selected_date = use_signal(|| None::<Date>);
+    let mut view_date = use_signal(|| date!(2025 - 08 - 16));
     rsx! {
         document::Link {
             rel: "stylesheet",
@@ -25,14 +26,14 @@ pub fn Demo() -> Element {
                         selected_date.set(date);
                     },
                     view_date: view_date(),
-                    on_view_change: move |new_view: NaiveDate| {
+                    on_view_change: move |new_view: Date| {
                         tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
                         view_date.set(new_view);
                     },
                     on_format_weekday: Callback::new(|weekday: Weekday| tid!(&weekday.to_string())),
-                    on_format_month: Callback::new(|month: Month| tid!(month.name())),
-                    min_date: NaiveDate::from_ymd_opt(1995, 7, 21).unwrap(),
-                    max_date: NaiveDate::from_ymd_opt(2035, 9, 11).unwrap(),
+                    on_format_month: Callback::new(|month: Month| tid!(&month.to_string())),
+                    min_date: date!(1995-07-21),
+                    max_date: date!(2035-09-11),
                     CalendarHeader {
                         CalendarNavigation {
                             CalendarPreviousMonthButton {
