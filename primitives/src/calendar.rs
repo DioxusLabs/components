@@ -106,9 +106,9 @@ impl Iterator for WeekdaySetIter {
     }
 }
 
-fn days_since(weekday: Weekday, other: Weekday) -> u8 {
-    let lhs = weekday as u8;
-    let rhs = other as u8;
+fn days_since(date: Date, weekday: Weekday) -> u8 {
+    let lhs = date.replace_day(1).unwrap().weekday() as u8;
+    let rhs = weekday as u8;
     if lhs < rhs {
         7 + lhs - rhs
     } else {
@@ -862,8 +862,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         let view_date = (ctx.view_date)();
         let num_days_in_month = view_date.month().length(view_date.year());
 
-        let weekday = view_date.replace_day(1).unwrap().weekday();
-        let first_day_offset = days_since(weekday, ctx.first_day_of_week);
+        let first_day_offset = days_since(view_date, ctx.first_day_of_week);
 
         // Create a grid with empty cells for padding and actual days
         let mut grid = Vec::new();
@@ -873,7 +872,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         for index in 1..=first_day_offset {
             let day = previous_month.length(view_date.year()) + index - first_day_offset;
             grid.push(
-                Date::from_calendar_date(view_date.year(), previous_month, day as u8)
+                Date::from_calendar_date(view_date.year(), previous_month, day)
                     .expect("invalid or out-of-range date"),
             );
         }
@@ -1191,10 +1190,9 @@ impl Display for RelativeMonth {
 
 /// Get a human-readable ARIA label for input date
 fn aria_label(date: &Date) -> String {
-    let day_name = date.weekday();
     format!(
         "{}, {} {}, {}",
-        day_name,
+        date.weekday(),
         date.month(),
         date.day(),
         date.year()
