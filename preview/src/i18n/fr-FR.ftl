@@ -13,10 +13,10 @@ November = Novembre
 December = Décembre
 
 ## Weekdays
-Mon = Lu
-Tue = Ma
-Wed = Me
-Thu = Je
-Fri = Ve
-Sat = Sa
-Sun = Di
+Monday = Lu
+Tuesday = Ma
+Wednesday = Me
+Thursday = Je
+Friday = Ve
+Saturday = Sa
+Sunday = Di

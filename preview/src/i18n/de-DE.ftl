@@ -13,10 +13,10 @@ November = November
 December = Dezember
 
 ## Weekdays
-Mon = Mo
-Tue = Di
-Wed = Mi
-Thu = Do
-Fri = Fr
-Sat = Sa
-Sun = So
+Monday = Mo
+Tuesday = Di
+Wednesday = Mi
+Thursday = Do
+Friday = Fr
+Saturday = Sa
+Sunday = So

@@ -6,56 +6,174 @@ use std::{
     rc::Rc,
 };
 
-use chrono::{Datelike, Days, Local, Month, Months, NaiveDate, Weekday, WeekdaySet};
+use time::{ext::NumericalDuration, macros::date, Date, Month, UtcDateTime, Weekday};
+
+// A collection of [`Weekday`]s stored as a single byte
+#[derive(Clone, Copy)]
+struct WeekdaySet(u8);
+
+impl WeekdaySet {
+    pub const fn first(self) -> Option<Weekday> {
+        if self.is_empty() {
+            return None;
+        }
+
+        // Find the first non-zero bit
+        let bit = 1 << self.0.trailing_zeros();
+
+        Self(bit).single_day()
+    }
+
+    pub const fn single(weekday: Weekday) -> Self {
+        match weekday {
+            Weekday::Monday => Self(0b000_0001),
+            Weekday::Tuesday => Self(0b000_0010),
+            Weekday::Wednesday => Self(0b000_0100),
+            Weekday::Thursday => Self(0b000_1000),
+            Weekday::Friday => Self(0b001_0000),
+            Weekday::Saturday => Self(0b010_0000),
+            Weekday::Sunday => Self(0b100_0000),
+        }
+    }
+
+    pub const fn single_day(self) -> Option<Weekday> {
+        match self {
+            Self(0b000_0001) => Some(Weekday::Monday),
+            Self(0b000_0010) => Some(Weekday::Tuesday),
+            Self(0b000_0100) => Some(Weekday::Wednesday),
+            Self(0b000_1000) => Some(Weekday::Thursday),
+            Self(0b001_0000) => Some(Weekday::Friday),
+            Self(0b010_0000) => Some(Weekday::Saturday),
+            Self(0b100_0000) => Some(Weekday::Sunday),
+            _ => None,
+        }
+    }
+
+    // Iterate over the [`Weekday`]s in the collection starting from a given day
+    pub const fn iter(self, start: Weekday) -> WeekdaySetIter {
+        WeekdaySetIter { days: self, start }
+    }
+
+    pub const fn len(self) -> u8 {
+        self.0.count_ones() as u8
+    }
+
+    pub const fn is_empty(self) -> bool {
+        self.len() == 0
+    }
+
+    // Split the collection in two at the given day
+    const fn split_at(self, weekday: Weekday) -> (Self, Self) {
+        let days_after = 0b1000_0000 - Self::single(weekday).0;
+        let days_before = days_after ^ 0b0111_1111;
+        (Self(self.0 & days_before), Self(self.0 & days_after))
+    }
+
+    pub const fn contains(self, day: Weekday) -> bool {
+        self.0 & Self::single(day).0 != 0
+    }
+
+    pub fn remove(&mut self, day: Weekday) -> bool {
+        if self.contains(day) {
+            self.0 &= !Self::single(day).0;
+            return true;
+        }
+
+        false
+    }
+}
+
+// An iterator over a collection of weekdays, starting from a given day
+struct WeekdaySetIter {
+    days: WeekdaySet,
+    start: Weekday,
+}
+
+impl Iterator for WeekdaySetIter {
+    type Item = Weekday;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.days.is_empty() {
+            return None;
+        }
+
+        let (before, after) = self.days.split_at(self.start);
+        let days = if after.is_empty() { before } else { after };
+
+        let next = days.first().expect("the collection is not empty");
+        self.days.remove(next);
+        Some(next)
+    }
+}
+
+// The number of days since the first weekday of date
+fn days_since(date: Date, weekday: Weekday) -> i64 {
+    let lhs = date.replace_day(1).unwrap().weekday() as i64;
+    let rhs = weekday as i64;
+    if lhs < rhs {
+        7 + lhs - rhs
+    } else {
+        lhs - rhs
+    }
+}
+
+fn next_month(date: Date) -> Option<Date> {
+    let last_day = date.month().length(date.year());
+    date.replace_day(last_day).unwrap().next_day()
+}
+
+fn previous_month(date: Date) -> Option<Date> {
+    date.replace_day(1).unwrap().previous_day()
+}
 
 /// The context provided by the [`Calendar`] component to its children.
 #[derive(Copy, Clone)]
 pub struct CalendarContext {
     // State
-    selected_date: ReadOnlySignal<Option<NaiveDate>>,
-    set_selected_date: Callback<Option<NaiveDate>>,
-    focused_date: Signal<Option<NaiveDate>>,
-    view_date: ReadOnlySignal<NaiveDate>,
-    set_view_date: Callback<NaiveDate>,
+    selected_date: ReadOnlySignal<Option<Date>>,
+    set_selected_date: Callback<Option<Date>>,
+    focused_date: Signal<Option<Date>>,
+    view_date: ReadOnlySignal<Date>,
+    set_view_date: Callback<Date>,
     format_weekday: Callback<Weekday, String>,
     format_month: Callback<Month, String>,
 
     // Configuration
     disabled: ReadOnlySignal<bool>,
-    today: NaiveDate,
+    today: Date,
     first_day_of_week: Weekday,
-    min_date: NaiveDate,
-    max_date: NaiveDate,
+    min_date: Date,
+    max_date: Date,
 }
 
 impl CalendarContext {
     /// Get the currently selected date
-    pub fn selected_date(&self) -> Option<NaiveDate> {
+    pub fn selected_date(&self) -> Option<Date> {
         self.selected_date.cloned()
     }
 
     /// Set the selected date
-    pub fn set_selected_date(&self, date: Option<NaiveDate>) {
+    pub fn set_selected_date(&self, date: Option<Date>) {
         (self.set_selected_date)(date);
     }
 
     /// Get the currently focused date
-    pub fn focused_date(&self) -> Option<NaiveDate> {
+    pub fn focused_date(&self) -> Option<Date> {
         self.focused_date.cloned()
     }
 
     /// Set the focused date
-    pub fn set_focused_date(&mut self, date: Option<NaiveDate>) {
+    pub fn set_focused_date(&mut self, date: Option<Date>) {
         self.focused_date.set(date);
     }
 
     /// Get the current view date
-    pub fn view_date(&self) -> NaiveDate {
+    pub fn view_date(&self) -> Date {
         self.view_date.cloned()
     }
 
     /// Set the view date
-    pub fn set_view_date(&self, date: NaiveDate) {
+    pub fn set_view_date(&self, date: Date) {
         (self.set_view_date)(date.clamp(self.min_date, self.max_date));
     }
 
@@ -70,46 +188,46 @@ impl CalendarContext {
 pub struct CalendarProps {
     /// The selected date
     #[props(default)]
-    pub selected_date: ReadOnlySignal<Option<NaiveDate>>,
+    pub selected_date: ReadOnlySignal<Option<Date>>,
 
     /// Callback when selected date changes
     #[props(default)]
-    pub on_date_change: Callback<Option<NaiveDate>>,
+    pub on_date_change: Callback<Option<Date>>,
 
     /// Callback when display weekday
     #[props(default = Callback::new(|weekday: Weekday| weekday.to_string()))]
     pub on_format_weekday: Callback<Weekday, String>,
 
     /// Callback when display month
-    #[props(default = Callback::new(|month: Month| month.name().to_string()))]
+    #[props(default = Callback::new(|month: Month| month.to_string()))]
     pub on_format_month: Callback<Month, String>,
 
     /// The month being viewed
-    pub view_date: ReadOnlySignal<NaiveDate>,
+    pub view_date: ReadOnlySignal<Date>,
 
     /// The current date (used for highlighting today)
-    #[props(default = Local::now().date_naive())]
-    pub today: NaiveDate,
+    #[props(default = UtcDateTime::now().date())]
+    pub today: Date,
 
     /// Callback when view date changes
     #[props(default)]
-    pub on_view_change: Callback<NaiveDate>,
+    pub on_view_change: Callback<Date>,
 
     /// Whether the calendar is disabled
     #[props(default)]
     pub disabled: ReadOnlySignal<bool>,
 
     /// First day of the week
-    #[props(default = Weekday::Sun)]
+    #[props(default = Weekday::Sunday)]
     pub first_day_of_week: Weekday,
 
     /// Lower limit of the range of available dates
-    #[props(default = NaiveDate::from_ymd_opt(1925, 1, 1).unwrap())]
-    pub min_date: NaiveDate,
+    #[props(default = date!(1925-01-01))]
+    pub min_date: Date,
 
     /// Upper limit of the range of available dates
-    #[props(default = NaiveDate::from_ymd_opt(2050, 12, 31).unwrap())]
-    pub max_date: NaiveDate,
+    #[props(default = date!(2050-12-31))]
+    pub max_date: Date,
 
     /// Additional attributes to extend the calendar element
     #[props(extends = GlobalAttributes)]
@@ -129,11 +247,11 @@ pub struct CalendarProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use chrono::{Datelike, NaiveDate, Utc};
+/// use time::{Date, Month, UtcDateTime};
 /// #[component]
 /// fn Demo() -> Element {
-///     let mut selected_date = use_signal(|| None::<NaiveDate>);
-///     let mut view_date = use_signal(|| Utc::now().date_naive());
+///     let mut selected_date = use_signal(|| None::<Date>);
+///     let mut view_date = use_signal(|| UtcDateTime::now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -142,7 +260,7 @@ pub struct CalendarProps {
 ///                 selected_date.set(date);
 ///             },
 ///             view_date: view_date(),
-///             on_view_change: move |new_view: NaiveDate| {
+///             on_view_change: move |new_view: Date| {
 ///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
 ///                 view_date.set(new_view);
 ///             },
@@ -194,81 +312,55 @@ pub fn Calendar(props: CalendarProps) -> Element {
                 let Some(focused_date) = (ctx.focused_date)() else {
                     return;
                 };
-                let mut set_focused_date = |new_date: Option<NaiveDate>| {
+                let mut set_focused_date = |new_date: Option<Date>| {
                     // Make sure the view date month is the same as the focused date
                     let mut view_date = (ctx.view_date)();
                     if let Some(date) = new_date {
                         if date.month() != view_date.month() {
-                            view_date = date.with_day(view_date.day()).unwrap();
+                            view_date = date.replace_day(1).unwrap();
                             (ctx.set_view_date)(view_date);
                         }
                     }
-                    ctx.focused_date.set(new_date);
+
+                    match new_date {
+                        Some(date) => {
+                            if ctx.min_date <= date && date <= ctx.max_date {
+                                ctx.focused_date.set(new_date);
+                            }
+                        },
+                        None => ctx.focused_date.set(None)
+                    }
                 };
                 match e.key() {
                     Key::ArrowLeft => {
                         e.prevent_default();
-                        match focused_date.pred_opt() {
-                            Some(date) => {
-                                if ctx.min_date <= date {
-                                    set_focused_date(Some(date));
-                                }
-                            },
-                            None => set_focused_date(None)
-                        }
+                        set_focused_date(focused_date.previous_day());
                     }
                     Key::ArrowRight => {
                         e.prevent_default();
-                        match focused_date.succ_opt() {
-                            Some(date) => {
-                                if ctx.max_date >= date {
-                                    set_focused_date(Some(date));
-                                }
-                            },
-                            None => set_focused_date(None)
-                        }
+                        set_focused_date(focused_date.next_day());
                     }
                     Key::ArrowUp => {
                         e.prevent_default();
-                        let mut new_date = None;
                         if e.modifiers().shift() {
-                            if let Some(prev_month) = focused_date.checked_sub_months(Months::new(1)) {
-                                new_date = prev_month.with_day(1);
+                            if let Some(date) = previous_month(focused_date) {
+                                set_focused_date(date.replace_day(1).ok());
                             }
                         } else {
                             // Otherwise, move to the previous week
-                            new_date = focused_date.checked_sub_days(Days::new(7));
+                            set_focused_date(Some(focused_date.saturating_sub(7.days())));
                         }
-
-                            match new_date {
-                                Some(date) => {
-                                    if ctx.min_date <= date {
-                                        set_focused_date(Some(date));
-                                    }
-                                },
-                                None => set_focused_date(None)
-                            }
                     }
                     Key::ArrowDown => {
                         e.prevent_default();
-                        let mut new_date = None;
                         if e.modifiers().shift() {
-                            if let Some(next_month) = focused_date.checked_add_months(Months::new(1)) {
-                                new_date = next_month.with_day(1);
+                            if let Some(date) = next_month(focused_date) {
+                                set_focused_date(date.replace_day(1).ok());
                             }
                         } else {
                             // Otherwise, move to the next week
-                            new_date = focused_date.checked_add_days(Days::new(7));
+                            set_focused_date(Some(focused_date.saturating_add(7.days())));
                         }
-
-                        match new_date {
-                                Some(date) => {
-                                    if ctx.max_date >= date {
-                                        set_focused_date(Some(date));
-                                    }
-                                },
-                                None => set_focused_date(None)
-                            }
                     }
                     _ => {}
                 }
@@ -305,11 +397,11 @@ pub struct CalendarHeaderProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use chrono::{Datelike, NaiveDate, Utc};
+/// use time::{Date, Month, UtcDateTime};
 /// #[component]
 /// fn Demo() -> Element {
-///     let mut selected_date = use_signal(|| None::<NaiveDate>);
-///     let mut view_date = use_signal(|| Utc::now().date_naive());
+///     let mut selected_date = use_signal(|| None::<Date>);
+///     let mut view_date = use_signal(|| UtcDateTime::now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -318,7 +410,7 @@ pub struct CalendarHeaderProps {
 ///                 selected_date.set(date);
 ///             },
 ///             view_date: view_date(),
-///             on_view_change: move |new_view: NaiveDate| {
+///             on_view_change: move |new_view: Date| {
 ///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
 ///                 view_date.set(new_view);
 ///             },
@@ -375,11 +467,11 @@ pub struct CalendarNavigationProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use chrono::{Datelike, NaiveDate, Utc};
+/// use time::{Date, Month, UtcDateTime};
 /// #[component]
 /// fn Demo() -> Element {
-///     let mut selected_date = use_signal(|| None::<NaiveDate>);
-///     let mut view_date = use_signal(|| Utc::now().date_naive());
+///     let mut selected_date = use_signal(|| None::<Date>);
+///     let mut view_date = use_signal(|| UtcDateTime::now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -388,7 +480,7 @@ pub struct CalendarNavigationProps {
 ///                 selected_date.set(date);
 ///             },
 ///             view_date: view_date(),
-///             on_view_change: move |new_view: NaiveDate| {
+///             on_view_change: move |new_view: Date| {
 ///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
 ///                 view_date.set(new_view);
 ///             },
@@ -440,11 +532,11 @@ pub struct CalendarPreviousMonthButtonProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use chrono::{Datelike, NaiveDate, Utc};
+/// use time::{Date, Month, UtcDateTime};
 /// #[component]
 /// fn Demo() -> Element {
-///     let mut selected_date = use_signal(|| None::<NaiveDate>);
-///     let mut view_date = use_signal(|| Utc::now().date_naive());
+///     let mut selected_date = use_signal(|| None::<Date>);
+///     let mut view_date = use_signal(|| UtcDateTime::now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -453,7 +545,7 @@ pub struct CalendarPreviousMonthButtonProps {
 ///                 selected_date.set(date);
 ///             },
 ///             view_date: view_date(),
-///             on_view_change: move |new_view: NaiveDate| {
+///             on_view_change: move |new_view: Date| {
 ///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
 ///                 view_date.set(new_view);
 ///             },
@@ -480,8 +572,8 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
     let button_disabled = use_memo(move || {
         // Get the current view date from context
         let view_date = (ctx.view_date)();
-        match view_date.checked_sub_months(Months::new(1)) {
-            Some(prev_month) => ctx.min_date.with_day(1).unwrap() > prev_month,
+        match previous_month(view_date) {
+            Some(date) => ctx.min_date.replace_day(1).unwrap() > date,
             None => true,
         }
     });
@@ -490,8 +582,8 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
     let handle_prev_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        if let Some(prev_month) = current_view.checked_sub_months(Months::new(1)) {
-            ctx.set_view_date.call(prev_month);
+        if let Some(date) = previous_month(current_view) {
+            ctx.set_view_date.call(date)
         }
     };
 
@@ -532,11 +624,11 @@ pub struct CalendarNextMonthButtonProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use chrono::{Datelike, NaiveDate, Utc};
+/// use time::{Date, Month, UtcDateTime};
 /// #[component]
 /// fn Demo() -> Element {
-///     let mut selected_date = use_signal(|| None::<NaiveDate>);
-///     let mut view_date = use_signal(|| Utc::now().date_naive());
+///     let mut selected_date = use_signal(|| None::<Date>);
+///     let mut view_date = use_signal(|| UtcDateTime::now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -545,7 +637,7 @@ pub struct CalendarNextMonthButtonProps {
 ///                 selected_date.set(date);
 ///             },
 ///             view_date: view_date(),
-///             on_view_change: move |new_view: NaiveDate| {
+///             on_view_change: move |new_view: Date| {
 ///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
 ///                 view_date.set(new_view);
 ///             },
@@ -572,10 +664,10 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     let button_disabled = use_memo(move || {
         // Get the current view date from context
         let view_date = (ctx.view_date)();
-        match view_date.checked_add_months(Months::new(1)) {
-            Some(next_month) => {
-                let day = ctx.max_date.num_days_in_month().into();
-                ctx.max_date.with_day(day).unwrap() < next_month
+        match next_month(view_date) {
+            Some(date) => {
+                let last_day = ctx.max_date.month().length(ctx.max_date.year());
+                ctx.max_date.replace_day(last_day).unwrap() < date
             }
             None => true,
         }
@@ -585,8 +677,8 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     let handle_next_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        if let Some(next_month) = current_view.checked_add_months(Months::new(1)) {
-            ctx.set_view_date.call(next_month)
+        if let Some(date) = next_month(current_view) {
+            ctx.set_view_date.call(date)
         }
     };
 
@@ -625,11 +717,11 @@ pub struct CalendarMonthTitleProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use chrono::{Datelike, NaiveDate, Utc};
+/// use time::{Date, Month, UtcDateTime};
 /// #[component]
 /// fn Demo() -> Element {
-///     let mut selected_date = use_signal(|| None::<NaiveDate>);
-///     let mut view_date = use_signal(|| Utc::now().date_naive());
+///     let mut selected_date = use_signal(|| None::<Date>);
+///     let mut view_date = use_signal(|| UtcDateTime::now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -638,7 +730,7 @@ pub struct CalendarMonthTitleProps {
 ///                 selected_date.set(date);
 ///             },
 ///             view_date: view_date(),
-///             on_view_change: move |new_view: NaiveDate| {
+///             on_view_change: move |new_view: Date| {
 ///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
 ///                 view_date.set(new_view);
 ///             },
@@ -664,8 +756,7 @@ pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
     // Format the current month and year
     let month_year = use_memo(move || {
         let view_date = (ctx.view_date)();
-        let month_name = month_name(&view_date);
-        format!("{} {}", month_name, view_date.year())
+        format!("{} {}", view_date.month(), view_date.year())
     });
 
     rsx! {
@@ -690,10 +781,10 @@ pub struct CalendarGridProps {
     pub show_week_numbers: bool,
 
     /// The callback that will be used to render each day in the grid
-    #[props(default = Callback::new(|date: NaiveDate| {
+    #[props(default = Callback::new(|date: Date| {
         rsx! { CalendarDay { date } }
     }))]
-    pub render_day: Callback<NaiveDate, Element>,
+    pub render_day: Callback<Date, Element>,
 
     /// Additional attributes to apply to the grid element
     #[props(extends = GlobalAttributes)]
@@ -712,11 +803,11 @@ pub struct CalendarGridProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use chrono::{Datelike, NaiveDate, Utc};
+/// use time::{Date, Month, UtcDateTime};
 /// #[component]
 /// fn Demo() -> Element {
-///     let mut selected_date = use_signal(|| None::<NaiveDate>);
-///     let mut view_date = use_signal(|| Utc::now().date_naive());
+///     let mut selected_date = use_signal(|| None::<Date>);
+///     let mut view_date = use_signal(|| UtcDateTime::now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -725,7 +816,7 @@ pub struct CalendarGridProps {
 ///                 selected_date.set(date);
 ///             },
 ///             view_date: view_date(),
-///             on_view_change: move |new_view: NaiveDate| {
+///             on_view_change: move |new_view: Date| {
 ///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
 ///                 view_date.set(new_view);
 ///             },
@@ -763,45 +854,38 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
     let days_grid = use_memo(move || {
         // Get the current view date from context
         let view_date = (ctx.view_date)();
-        let num_days_in_month = view_date.num_days_in_month();
-
-        let weekday = view_date.with_day(1).unwrap().weekday();
-        let first_day_offset = weekday.days_since(ctx.first_day_of_week);
 
         // Create a grid with empty cells for padding and actual days
         let mut grid = Vec::new();
 
         // Add empty cells for days before the first day of the month
-        if let Some(previous_month) = view_date.checked_sub_months(Months::new(1)) {
-            for index in 1..=first_day_offset {
-                let day = previous_month.num_days_in_month() as u32 + index - first_day_offset;
-                grid.push(
-                    previous_month
-                        .with_day(day)
-                        .expect("invalid or out-of-range date"),
-                );
-            }
+        let previous_month = view_date
+            .replace_day(1)
+            .expect("invalid or out-of-range date");
+        let num_days = days_since(view_date, ctx.first_day_of_week);
+        let mut date = previous_month.saturating_sub(num_days.days());
+        for _ in 1..=num_days {
+            grid.push(date);
+            date = date.next_day().expect("invalid or out-of-range date");
         }
 
         // Add days of the month
+        let num_days_in_month = view_date.month().length(view_date.year());
         for day in 1..=num_days_in_month {
             grid.push(
                 view_date
-                    .with_day(day as u32)
+                    .replace_day(day)
                     .expect("invalid or out-of-range date"),
             );
         }
 
         // Add empty cells to complete the grid (for a clean layout)
-        if let Some(next_month) = view_date.checked_add_months(Months::new(1)) {
-            let remainder = grid.len() % 7;
-            if remainder > 0 {
-                for day in 1..=(7 - remainder) {
-                    grid.push(
-                        next_month
-                            .with_day(day as u32)
-                            .expect("invalid or out-of-range date"),
-                    );
+        let remainder = grid.len() % 7;
+        if remainder > 0 {
+            if let Some(mut date) = next_month(view_date) {
+                for _ in 1..=(7 - remainder) {
+                    grid.push(date);
+                    date = date.next_day().expect("invalid or out-of-range date");
                 }
             }
         }
@@ -824,7 +908,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                 tr {
                     class: "calendar-grid-header",
                     // Day name headers
-                    for weekday in WeekdaySet::ALL.iter(ctx.first_day_of_week) {
+                    for weekday in WeekdaySet(0b111_1111).iter(ctx.first_day_of_week) {
                         th {
                             class: "calendar-grid-day-header",
                             {ctx.format_weekday.call(weekday)}
@@ -872,11 +956,11 @@ pub struct CalendarSelectMonthProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton, CalendarSelectMonth
 /// };
-/// use chrono::{Datelike, NaiveDate, Utc};
+/// use time::{Date, Month, UtcDateTime};
 /// #[component]
 /// fn Demo() -> Element {
-///     let mut selected_date = use_signal(|| None::<NaiveDate>);
-///     let mut view_date = use_signal(|| Utc::now().date_naive());
+///     let mut selected_date = use_signal(|| None::<Date>);
+///     let mut view_date = use_signal(|| UtcDateTime::now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -885,7 +969,7 @@ pub struct CalendarSelectMonthProps {
 ///                 selected_date.set(date);
 ///             },
 ///             view_date: view_date(),
-///             on_view_change: move |new_view: NaiveDate| {
+///             on_view_change: move |new_view: Date| {
 ///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
 ///                 view_date.set(new_view);
 ///             },
@@ -909,21 +993,30 @@ pub struct CalendarSelectMonthProps {
 pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     let calendar: CalendarContext = use_context();
     let view_date = calendar.view_date();
-    let month = Month::try_from(view_date.month() as u8).unwrap();
+    let month = view_date.month();
 
     let months = use_memo(move || {
         // Get the current view date from context
         let view_date = (calendar.view_date)();
-        let mut min_month = 1;
-        if view_date.with_month(1).unwrap() < calendar.min_date {
+        let mut min_month = Month::January;
+        if view_date.replace_month(min_month).unwrap() < calendar.min_date {
             min_month = calendar.min_date.month();
         }
-        let mut max_month = 12;
-        if view_date.with_month(12).unwrap() > calendar.max_date {
+        let mut max_month = Month::December;
+        if view_date.replace_month(max_month).unwrap() > calendar.max_date {
             max_month = calendar.max_date.month();
         }
 
-        min_month..=max_month
+        let mut month = min_month;
+        let mut months = Vec::new();
+        loop {
+            months.push(month);
+
+            if month == max_month {
+                return months;
+            }
+            month = month.next();
+        }
     });
 
     rsx! {
@@ -933,16 +1026,17 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
                 aria_label: "Month",
                 onchange: move |e| {
                     let mut view_date = calendar.view_date();
-                    let cur_month = e.value().parse().unwrap_or(view_date.month());
-                    view_date = view_date.with_month(cur_month).unwrap_or(view_date);
+                    let number = e.value().parse().unwrap_or(view_date.month() as u8);
+                    let cur_month = Month::try_from(number).expect("Month out-of-range");
+                    view_date = view_date.replace_month(cur_month).unwrap_or(view_date);
                     calendar.set_view_date(view_date);
                 },
                 ..props.attributes,
                 for month in months() {
                     option {
-                        value: month,
+                        value: month as u8,
                         selected: calendar.view_date().month() == month,
-                        {calendar.format_month.call(Month::try_from(month as u8).unwrap())}
+                        {calendar.format_month.call(month)}
                     }
                 }
             }
@@ -979,11 +1073,11 @@ pub struct CalendarSelectYearProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton, CalendarSelectYear
 /// };
-/// use chrono::{Datelike, NaiveDate, Utc};
+/// use time::{Date, Month, UtcDateTime};
 /// #[component]
 /// fn Demo() -> Element {
-///     let mut selected_date = use_signal(|| None::<NaiveDate>);
-///     let mut view_date = use_signal(|| Utc::now().date_naive());
+///     let mut selected_date = use_signal(|| None::<Date>);
+///     let mut view_date = use_signal(|| UtcDateTime::now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -992,7 +1086,7 @@ pub struct CalendarSelectYearProps {
 ///                 selected_date.set(date);
 ///             },
 ///             view_date: view_date(),
-///             on_view_change: move |new_view: NaiveDate| {
+///             on_view_change: move |new_view: Date| {
 ///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
 ///                 view_date.set(new_view);
 ///             },
@@ -1023,11 +1117,11 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
         let view_date = (calendar.view_date)();
         let month = view_date.month();
         let mut min_year = calendar.min_date.year();
-        if calendar.min_date.with_month(month).unwrap() < calendar.min_date {
+        if calendar.min_date.replace_month(month).unwrap() < calendar.min_date {
             min_year += 1;
         }
         let mut max_year = calendar.max_date.year();
-        if calendar.max_date.with_month(month).unwrap() > calendar.max_date {
+        if calendar.max_date.replace_month(month).unwrap() > calendar.max_date {
             max_year -= 1;
         }
 
@@ -1042,7 +1136,7 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
                 onchange: move |e| {
                     let mut view_date = calendar.view_date();
                     let year = e.value().parse().unwrap_or(view_date.year());
-                    view_date = view_date.with_year(year).unwrap_or(view_date);
+                    view_date = view_date.replace_year(year).unwrap_or(view_date);
                     calendar.set_view_date(view_date);
                 },
                 ..props.attributes,
@@ -1084,20 +1178,12 @@ impl Display for RelativeMonth {
     }
 }
 
-/// Get a human-readable Month for input date
-fn month_name(date: &NaiveDate) -> &str {
-    let month = Month::try_from(date.month() as u8).expect("Month out of range");
-    month.name()
-}
-
 /// Get a human-readable ARIA label for input date
-fn aria_label(date: &NaiveDate) -> String {
-    let month_name = month_name(date);
-    let day_name = date.weekday();
+fn aria_label(date: &Date) -> String {
     format!(
         "{}, {} {}, {}",
-        day_name,
-        month_name,
+        date.weekday(),
+        date.month(),
         date.day(),
         date.year()
     )
@@ -1105,7 +1191,7 @@ fn aria_label(date: &NaiveDate) -> String {
 
 #[derive(Props, Clone, Debug, PartialEq)]
 struct CalendarDayProps {
-    date: NaiveDate,
+    date: Date,
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
 }
@@ -1122,7 +1208,9 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
         } else if date > ctx.max_date {
             RelativeMonth::Next
         } else {
-            match date.month().cmp(&view_date.month()) {
+            let lhs = date.month() as u8;
+            let rhs = view_date.month() as u8;
+            match lhs.cmp(&rhs) {
                 std::cmp::Ordering::Less => RelativeMonth::Last,
                 std::cmp::Ordering::Equal => RelativeMonth::Current,
                 std::cmp::Ordering::Greater => RelativeMonth::Next,
@@ -1135,10 +1223,10 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
     let is_today = date == ctx.today;
 
     // Handle day selection
-    let mut handle_day_select = move |day: u32| {
+    let mut handle_day_select = move |day: u8| {
         if !(ctx.disabled)() {
             let view_date = (ctx.view_date)();
-            let date = view_date.with_day(day).unwrap();
+            let date = view_date.replace_day(day).unwrap();
             ctx.set_selected_date.call((!is_selected()).then_some(date));
             ctx.focused_date.set(Some(date));
         }
@@ -1157,11 +1245,11 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
 
     let view_date = (ctx.view_date)();
     let focusable_date = (ctx.focused_date)()
-        .filter(|d| d.month0() == view_date.month0())
+        .filter(|d| d.month() == view_date.month())
         .or_else(|| {
             ctx.selected_date
                 .cloned()
-                .filter(|d| d.month0() == view_date.month0())
+                .filter(|d| d.month() == view_date.month())
         })
         .unwrap_or(view_date);
 

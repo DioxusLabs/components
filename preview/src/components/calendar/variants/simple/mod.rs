@@ -4,12 +4,12 @@ use dioxus_primitives::calendar::{
     CalendarNextMonthButton, CalendarPreviousMonthButton,
 };
 
-use chrono::{Datelike, NaiveDate, Utc};
+use time::{Date, UtcDateTime};
 
 #[component]
 pub fn Demo() -> Element {
-    let mut selected_date = use_signal(|| None::<NaiveDate>);
-    let mut view_date = use_signal(|| Utc::now().date_naive());
+    let mut selected_date = use_signal(|| None::<Date>);
+    let mut view_date = use_signal(|| UtcDateTime::now().date());
     rsx! {
         document::Link {
             rel: "stylesheet",
@@ -24,7 +24,7 @@ pub fn Demo() -> Element {
                         selected_date.set(date);
                     },
                     view_date: view_date(),
-                    on_view_change: move |new_view: NaiveDate| {
+                    on_view_change: move |new_view: Date| {
                         tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
                         view_date.set(new_view);
                     },
