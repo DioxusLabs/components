@@ -1301,3 +1301,189 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use time::macros::date;
+
+    #[test]
+    fn test_weekday_set() {
+        let mut weekdays = WeekdaySet::single(Weekday::Monday);
+        // Test contains
+        assert!(weekdays.contains(Weekday::Monday));
+        assert!(!weekdays.contains(Weekday::Tuesday));
+
+        // Test remove
+        assert!(weekdays.remove(Weekday::Monday));
+        assert!(!weekdays.contains(Weekday::Monday));
+        assert!(!weekdays.remove(Weekday::Monday)); // Already removed
+
+        let all_days = WeekdaySet(0b111_1111); // All days
+        let empty_set = WeekdaySet(0b000_0000); // Empty
+        let single_set = WeekdaySet::single(Weekday::Friday); // Single day
+        let part_size_set = WeekdaySet(0b010_1010); // Tu, Th, Sa
+
+        // Test iterator
+        let days: Vec<_> = all_days.iter(Weekday::Sunday).collect();
+        assert_eq!(days.len(), 7);
+        assert_eq!(days[0], Weekday::Sunday);
+
+        let mut iter = all_days.iter(Weekday::Wednesday);
+        assert_eq!(iter.next(), Some(Weekday::Wednesday));
+        assert_eq!(iter.next(), Some(Weekday::Thursday));
+
+        // Test single_day
+        assert_eq!(empty_set.single_day(), None);
+        assert_eq!(single_set.single_day(), Some(Weekday::Friday));
+        assert_eq!(part_size_set.single_day(), None);
+        assert_eq!(all_days.single_day(), None);
+
+        // Test first
+        assert_eq!(empty_set.first(), None);
+        assert_eq!(single_set.first(), Some(Weekday::Friday));
+        assert_eq!(part_size_set.first(), Some(Weekday::Tuesday));
+        assert_eq!(all_days.first(), Some(Weekday::Monday));
+
+        // Test is_empty
+        assert!(empty_set.is_empty());
+        assert!(!part_size_set.is_empty());
+        assert!(!single_set.is_empty());
+        assert!(!all_days.is_empty());
+
+        // Test len
+        assert_eq!(empty_set.len(), 0);
+        assert_eq!(single_set.len(), 1);
+        assert_eq!(part_size_set.len(), 3);
+        assert_eq!(all_days.len(), 7);
+    }
+
+    #[test]
+    fn test_days_since() {
+        // Test days since calculation
+        let date = date!(2024 - 01 - 01); // Monday
+        assert_eq!(days_since(date, Weekday::Monday), 0);
+        assert_eq!(days_since(date, Weekday::Sunday), 1);
+        assert_eq!(days_since(date, Weekday::Tuesday), 6);
+    }
+
+    #[test]
+    fn test_month_navigation() {
+        let date = date!(2024 - 01 - 15);
+
+        // Test next month
+        let next = next_month(date);
+        assert!(next.is_some());
+        assert_eq!(next.unwrap().month(), Month::February);
+
+        // Test previous month
+        let prev = previous_month(date);
+        assert!(prev.is_some());
+        assert_eq!(prev.unwrap().month(), Month::December);
+        assert_eq!(prev.unwrap().year(), 2023);
+    }
+
+    #[test]
+    fn test_calendar_grid_weeks() {
+        // Helper function to generate grid (mimics what CalendarGrid does)
+        fn generate_test_grid(view_date: Date, first_day_of_week: Weekday) -> Vec<Vec<Date>> {
+            let mut grid = Vec::new();
+
+            let first_of_month = view_date.replace_day(1).unwrap();
+            let start_offset = days_since(view_date, first_day_of_week) as usize;
+
+            // Add previous month's trailing days
+            if start_offset > 0 {
+                if let Some(mut date) = first_of_month.previous_day() {
+                    for _ in 1..start_offset {
+                        date = date.previous_day().unwrap_or(date);
+                    }
+                    for _ in 0..start_offset {
+                        grid.push(date);
+                        date = date.next_day().unwrap_or(date);
+                    }
+                }
+            }
+
+            // Add current month's days
+            let days_in_month = view_date.month().length(view_date.year());
+            for day in 1..=days_in_month {
+                if let Ok(date) = view_date.replace_day(day) {
+                    grid.push(date);
+                }
+            }
+
+            // Add next month's days to complete the week
+            let remainder = grid.len() % 7;
+            if remainder > 0 {
+                if let Ok(last_day) = view_date.replace_day(days_in_month) {
+                    if let Some(mut date) = last_day.next_day() {
+                        for _ in 0..(7 - remainder) {
+                            grid.push(date);
+                            date = date.next_day().unwrap_or(date);
+                        }
+                    }
+                }
+            }
+
+            grid.chunks(7).map(|week| week.to_vec()).collect()
+        }
+
+        // Test February 2021: starts on Monday, 28 days
+        // When first day of week is Monday, should fit in exactly 4 weeks
+        let feb_2021 = date!(2021 - 02 - 15);
+        let feb_grid = generate_test_grid(feb_2021, Weekday::Monday);
+        assert_eq!(
+            feb_grid.len(),
+            4,
+            "February 2021 should have exactly 4 weeks"
+        );
+
+        // Count days from February in the grid
+        let feb_days: Vec<_> = feb_grid
+            .iter()
+            .flatten()
+            .filter(|d| d.month() == Month::February && d.year() == 2021)
+            .collect();
+        assert_eq!(
+            feb_days.len(),
+            28,
+            "Should have all 28 days of February 2021"
+        );
+
+        // Test May 2024: starts on Wednesday, 31 days
+        // When first day of week is Sunday, should need 5 weeks
+        let may_2024 = date!(2024 - 05 - 15);
+        let may_grid = generate_test_grid(may_2024, Weekday::Sunday);
+        assert_eq!(
+            may_grid.len(),
+            5,
+            "May 2024 should have exactly 5 weeks when starting from Sunday"
+        );
+
+        // Count days from May in the grid
+        let may_days: Vec<_> = may_grid
+            .iter()
+            .flatten()
+            .filter(|d| d.month() == Month::May && d.year() == 2024)
+            .collect();
+        assert_eq!(may_days.len(), 31, "Should have all 31 days of May 2024");
+
+        // Test that we don't generate empty trailing weeks
+        // December 2018: starts on Saturday, 31 days (when week starts on Sunday)
+        // Should need exactly 6 weeks (30 days in November + 31 in December + 5 in January = 66/7 = 6)
+        let dec_2018 = date!(2018 - 12 - 15);
+        let dec_grid = generate_test_grid(dec_2018, Weekday::Sunday);
+        assert_eq!(
+            dec_grid.len(),
+            6,
+            "December 2018 should have exactly 6 weeks"
+        );
+
+        // Verify no week is completely empty
+        for week in &dec_grid {
+            assert!(!week.is_empty(), "No week should be empty");
+            assert_eq!(week.len(), 7, "Each week should have exactly 7 days");
+        }
+    }
+}
