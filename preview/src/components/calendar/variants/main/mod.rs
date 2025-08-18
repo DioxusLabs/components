@@ -43,8 +43,8 @@ pub fn Demo() -> Element {
                                     polyline { points: "15 6 9 12 15 18" }
                                 }
                             }
-                            CalendarSelectMonth {}
-                            CalendarSelectYear {}
+                            CalendarSelectMonth { class: "calendar-month-select" }
+                            CalendarSelectYear { class: "calendar-year-select" }
                             CalendarNextMonthButton {
                                 svg {
                                     class: "calendar-next-month-icon",

@@ -908,6 +908,13 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             .collect::<Vec<_>>()
     });
 
+    let weekday_headers = use_memo(move || {
+        WeekdaySet(0b111_1111) // `WeekdaySet` containing all seven `Weekday`s
+            .iter(ctx.first_day_of_week)
+            .map(|weekday| (weekday, ctx.format_weekday.call(weekday)))
+            .collect::<Vec<_>>()
+    });
+
     rsx! {
         table {
             role: "grid",
@@ -919,11 +926,12 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             thead { aria_hidden: "true",
                 tr {
                     class: "calendar-grid-header",
-                    // Day name headers (`WeekdaySet` containing all seven `Weekday`s)
-                    for weekday in WeekdaySet(0b111_1111).iter(ctx.first_day_of_week) {
+                    // Day name headers
+                    for (weekday, label) in weekday_headers() {
                         th {
+                            key: "{weekday:?}",  // Add key for efficient diffing
                             class: "calendar-grid-day-header",
-                            {ctx.format_weekday.call(weekday)}
+                            {label}
                         }
                     }
                 }
@@ -1034,7 +1042,6 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     rsx! {
         span { class: "calendar-month-select-container",
             select {
-                class: "calendar-month-select",
                 aria_label: "Month",
                 onchange: move |e| {
                     let mut view_date = calendar.view_date();
@@ -1143,7 +1150,6 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
     rsx! {
         span { class: "calendar-year-select-container",
             select {
-                class: "calendar-year-select",
                 aria_label: "Year",
                 onchange: move |e| {
                     let mut view_date = calendar.view_date();
