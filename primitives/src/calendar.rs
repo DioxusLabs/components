@@ -9,22 +9,25 @@ use std::{
 use time::{ext::NumericalDuration, macros::date, Date, Month, UtcDateTime, Weekday};
 
 // A collection of [`Weekday`]s stored as a single byte
+// Implemented as a bitmask where bits 1-7 correspond to Monday-Sunday
 #[derive(Clone, Copy)]
-struct WeekdaySet(u8);
+struct WeekdaySet(u8); // the 8-th bit is always 0
 
 impl WeekdaySet {
-    pub const fn first(self) -> Option<Weekday> {
+    // Get the first day in the collection, starting from Monday
+    // Returns `None` if the collection is empty
+    const fn first(self) -> Option<Weekday> {
         if self.is_empty() {
             return None;
         }
 
         // Find the first non-zero bit
         let bit = 1 << self.0.trailing_zeros();
-
         Self(bit).single_day()
     }
 
-    pub const fn single(weekday: Weekday) -> Self {
+    // Create a `WeekdaySet` from a single [`Weekday`]
+    const fn single(weekday: Weekday) -> Self {
         match weekday {
             Weekday::Monday => Self(0b000_0001),
             Weekday::Tuesday => Self(0b000_0010),
@@ -36,7 +39,8 @@ impl WeekdaySet {
         }
     }
 
-    pub const fn single_day(self) -> Option<Weekday> {
+    // Returns `Some(day)` if this collection contains exactly one day, otherwise - `None`
+    const fn single_day(self) -> Option<Weekday> {
         match self {
             Self(0b000_0001) => Some(Weekday::Monday),
             Self(0b000_0010) => Some(Weekday::Tuesday),
@@ -50,30 +54,38 @@ impl WeekdaySet {
     }
 
     // Iterate over the [`Weekday`]s in the collection starting from a given day
-    pub const fn iter(self, start: Weekday) -> WeekdaySetIter {
+    // Wraps around from Sunday to Monday if necessary
+    const fn iter(self, start: Weekday) -> WeekdaySetIter {
         WeekdaySetIter { days: self, start }
     }
 
-    pub const fn len(self) -> u8 {
+    // Returns the number of days in the collection
+    const fn len(self) -> u8 {
         self.0.count_ones() as u8
     }
 
-    pub const fn is_empty(self) -> bool {
+    // Returns `true` if the collection is empty
+    const fn is_empty(self) -> bool {
         self.len() == 0
     }
 
-    // Split the collection in two at the given day
+    // Split the collection in two at the given day. Returns a tuple `(before, after)`
+    // `before` contains all days starting from Monday up to but NOT including `weekday`
+    // `after` contains all days starting from `weekday` up to and including Sunday
     const fn split_at(self, weekday: Weekday) -> (Self, Self) {
         let days_after = 0b1000_0000 - Self::single(weekday).0;
         let days_before = days_after ^ 0b0111_1111;
         (Self(self.0 & days_before), Self(self.0 & days_after))
     }
 
-    pub const fn contains(self, day: Weekday) -> bool {
+    // Returns `true` if the collection contains the given day
+    const fn contains(self, day: Weekday) -> bool {
         self.0 & Self::single(day).0 != 0
     }
 
-    pub fn remove(&mut self, day: Weekday) -> bool {
+    // Removes a day from the collection
+    // Returns `true` if the collection did contain the day
+    fn remove(&mut self, day: Weekday) -> bool {
         if self.contains(day) {
             self.0 &= !Self::single(day).0;
             return true;
@@ -106,7 +118,7 @@ impl Iterator for WeekdaySetIter {
     }
 }
 
-// The number of days since the first weekday of date
+// The number of days since the first weekday of current date
 fn days_since(date: Date, weekday: Weekday) -> i64 {
     let lhs = date.replace_day(1).unwrap().weekday() as i64;
     let rhs = weekday as i64;
@@ -907,7 +919,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             thead { aria_hidden: "true",
                 tr {
                     class: "calendar-grid-header",
-                    // Day name headers
+                    // Day name headers (`WeekdaySet` containing all seven `Weekday`s)
                     for weekday in WeekdaySet(0b111_1111).iter(ctx.first_day_of_week) {
                         th {
                             class: "calendar-grid-day-header",
