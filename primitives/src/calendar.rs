@@ -102,12 +102,36 @@ fn days_since(date: Date, weekday: Weekday) -> i64 {
 }
 
 fn next_month(date: Date) -> Option<Date> {
-    let last_day = date.month().length(date.year());
-    date.replace_day(last_day).unwrap().next_day()
+    let next_month = date.month().next();
+    let last_day = next_month.length(date.year());
+    // Clamp the day to the length of the next month
+    let current_day = date.day();
+    let new_day = current_day.min(last_day);
+    Date::from_calendar_date(
+        date.year() + if next_month == Month::January { 1 } else { 0 },
+        next_month,
+        new_day,
+    )
+    .ok()
 }
 
 fn previous_month(date: Date) -> Option<Date> {
-    date.replace_day(1).unwrap().previous_day()
+    let previous_month = date.month().previous();
+    let last_day = previous_month.length(date.year());
+    // Clamp the day to the length of the previous month
+    let current_day = date.day();
+    let new_day = current_day.min(last_day);
+    Date::from_calendar_date(
+        date.year()
+            + if previous_month == Month::December {
+                -1
+            } else {
+                0
+            },
+        previous_month,
+        new_day,
+    )
+    .ok()
 }
 
 /// The context provided by the [`Calendar`] component to its children.
@@ -328,7 +352,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
                         e.prevent_default();
                         if e.modifiers().shift() {
                             if let Some(date) = previous_month(focused_date) {
-                                set_focused_date(date.replace_day(1).ok());
+                                set_focused_date(Some(date));
                             }
                         } else {
                             // Otherwise, move to the previous week
@@ -339,7 +363,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
                         e.prevent_default();
                         if e.modifiers().shift() {
                             if let Some(date) = next_month(focused_date) {
-                                set_focused_date(date.replace_day(1).ok());
+                                set_focused_date(Some(date));
                             }
                         } else {
                             // Otherwise, move to the next week
@@ -1335,12 +1359,15 @@ mod tests {
         let next = next_month(date);
         assert!(next.is_some());
         assert_eq!(next.unwrap().month(), Month::February);
+        assert_eq!(next.unwrap().year(), 2024);
+        assert_eq!(next.unwrap().day(), 15);
 
         // Test previous month
         let prev = previous_month(date);
         assert!(prev.is_some());
         assert_eq!(prev.unwrap().month(), Month::December);
         assert_eq!(prev.unwrap().year(), 2023);
+        assert_eq!(prev.unwrap().day(), 15);
     }
 
     #[test]
