@@ -20,6 +20,7 @@ macro_rules! examples {
                     docs: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/docs.html")),
                     variants: &[
                         ComponentVariantDemoData {
+                            name: "main",
                             rs_highlighted: HighlightedCode {
                                 light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.light.html")),
                                 dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.dark.html")),
@@ -33,6 +34,7 @@ macro_rules! examples {
                         $(
                             $(
                                 ComponentVariantDemoData {
+                                    name: stringify!($variant),
                                     rs_highlighted: HighlightedCode {
                                         light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.light.html")),
                                         dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.dark.html")),
@@ -57,7 +59,7 @@ examples!(
     aspect_ratio,
     avatar,
     button,
-    calendar[simple],
+    calendar[simple, internationalized],
     checkbox,
     collapsible,
     context_menu,

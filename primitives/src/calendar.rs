@@ -191,6 +191,18 @@ impl CalendarContext {
     }
 }
 
+fn weekday_abbreviation(weekday: Weekday) -> &'static str {
+    match weekday {
+        Weekday::Monday => "Mo",
+        Weekday::Tuesday => "Tu",
+        Weekday::Wednesday => "We",
+        Weekday::Thursday => "Th",
+        Weekday::Friday => "Fr",
+        Weekday::Saturday => "Sa",
+        Weekday::Sunday => "Su",
+    }
+}
+
 /// The props for the [`Calendar`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarProps {
@@ -203,7 +215,7 @@ pub struct CalendarProps {
     pub on_date_change: Callback<Option<Date>>,
 
     /// Callback when display weekday
-    #[props(default = Callback::new(|weekday: Weekday| weekday.to_string()))]
+    #[props(default = Callback::new(|weekday: Weekday| weekday_abbreviation(weekday).to_string()))]
     pub on_format_weekday: Callback<Weekday, String>,
 
     /// Callback when display month

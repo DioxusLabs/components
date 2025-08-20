@@ -20,6 +20,7 @@ struct ComponentDemoData {
 
 #[derive(Clone, PartialEq)]
 struct ComponentVariantDemoData {
+    name: &'static str,
     rs_highlighted: HighlightedCode,
     css_highlighted: HighlightedCode,
     component: fn() -> Element,
@@ -418,7 +419,7 @@ fn LanguageSelect() -> Element {
     let mut current_lang = use_signal(|| Language::English);
 
     rsx! {
-        document::Stylesheet { href: asset!("/src/style.css") }
+        document::Stylesheet { href: asset!("/assets/language-select.css") }
         div { class: "language-container",
             span { class: "language-select-container",
                 select {
@@ -599,14 +600,14 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     rsx! {
         main { class: "component-demo",
             h1 { class: "component-title", {name} }
-            ComponentVariantHighlight { variant: main.clone(), include_installation: true }
+            ComponentVariantHighlight { variant: main.clone(), main_variant: true }
             div { class: "component-description",
                 div { dangerous_inner_html: docs }
             }
             if !variants.is_empty() {
                 h2 { class: "component-variants-title", "Variants" }
                 for variant in variants {
-                    ComponentVariantHighlight { variant: variant.clone(), include_installation: false }
+                    ComponentVariantHighlight { variant: variant.clone(), main_variant: false }
                 }
             }
         }
@@ -614,11 +615,9 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
 }
 
 #[component]
-fn ComponentVariantHighlight(
-    variant: ComponentVariantDemoData,
-    include_installation: bool,
-) -> Element {
+fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bool) -> Element {
     let ComponentVariantDemoData {
+        name,
         rs_highlighted,
         css_highlighted,
         component: Comp,
@@ -626,8 +625,13 @@ fn ComponentVariantHighlight(
     rsx! {
         div { class: "component-preview",
             div { class: "component-preview-contents",
+                if !main_variant {
+                    h3 {
+                        "{name}"
+                    }
+                }
                 div { class: "component-preview-frame", Comp {} }
-                if include_installation {
+                if main_variant {
                     div { class: "component-installation",
                         h2 { "Installation" }
                         ol { class: "component-installation-list",

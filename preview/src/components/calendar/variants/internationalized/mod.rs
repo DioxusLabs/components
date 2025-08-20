@@ -1,10 +1,11 @@
 use dioxus::prelude::*;
+use dioxus_i18n::tid;
 use dioxus_primitives::calendar::{
     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton,
     CalendarPreviousMonthButton, CalendarSelectMonth, CalendarSelectYear,
 };
 
-use time::{macros::date, Date, UtcDateTime};
+use time::{macros::date, Date, Month, UtcDateTime, Weekday};
 
 #[component]
 pub fn Demo() -> Element {
@@ -28,6 +29,8 @@ pub fn Demo() -> Element {
                         tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
                         view_date.set(new_view);
                     },
+                    on_format_weekday: Callback::new(|weekday: Weekday| tid!(&weekday.to_string())),
+                    on_format_month: Callback::new(|month: Month| tid!(&month.to_string())),
                     min_date: date!(1995-07-21),
                     max_date: date!(2035-09-11),
                     CalendarHeader {
