@@ -22,35 +22,12 @@ impl WeekdaySet {
         }
 
         // Find the first non-zero bit
-        let bit = 1 << self.0.trailing_zeros();
-        Self(bit).single_day()
+        Some(Weekday::Monday.nth_next(self.0.trailing_zeros() as u8))
     }
 
     // Create a `WeekdaySet` from a single [`Weekday`]
     const fn single(weekday: Weekday) -> Self {
-        match weekday {
-            Weekday::Monday => Self(0b000_0001),
-            Weekday::Tuesday => Self(0b000_0010),
-            Weekday::Wednesday => Self(0b000_0100),
-            Weekday::Thursday => Self(0b000_1000),
-            Weekday::Friday => Self(0b001_0000),
-            Weekday::Saturday => Self(0b010_0000),
-            Weekday::Sunday => Self(0b100_0000),
-        }
-    }
-
-    // Returns `Some(day)` if this collection contains exactly one day, otherwise - `None`
-    const fn single_day(self) -> Option<Weekday> {
-        match self {
-            Self(0b000_0001) => Some(Weekday::Monday),
-            Self(0b000_0010) => Some(Weekday::Tuesday),
-            Self(0b000_0100) => Some(Weekday::Wednesday),
-            Self(0b000_1000) => Some(Weekday::Thursday),
-            Self(0b001_0000) => Some(Weekday::Friday),
-            Self(0b010_0000) => Some(Weekday::Saturday),
-            Self(0b100_0000) => Some(Weekday::Sunday),
-            _ => None,
-        }
+        Self(1 << weekday.number_days_from_monday())
     }
 
     // Iterate over the [`Weekday`]s in the collection starting from a given day
@@ -59,14 +36,9 @@ impl WeekdaySet {
         WeekdaySetIter { days: self, start }
     }
 
-    // Returns the number of days in the collection
-    const fn len(self) -> u8 {
-        self.0.count_ones() as u8
-    }
-
     // Returns `true` if the collection is empty
     const fn is_empty(self) -> bool {
-        self.len() == 0
+        self.0 == 0
     }
 
     // Split the collection in two at the given day. Returns a tuple `(before, after)`
@@ -1333,12 +1305,6 @@ mod tests {
         assert_eq!(iter.next(), Some(Weekday::Wednesday));
         assert_eq!(iter.next(), Some(Weekday::Thursday));
 
-        // Test single_day
-        assert_eq!(empty_set.single_day(), None);
-        assert_eq!(single_set.single_day(), Some(Weekday::Friday));
-        assert_eq!(part_size_set.single_day(), None);
-        assert_eq!(all_days.single_day(), None);
-
         // Test first
         assert_eq!(empty_set.first(), None);
         assert_eq!(single_set.first(), Some(Weekday::Friday));
@@ -1350,12 +1316,6 @@ mod tests {
         assert!(!part_size_set.is_empty());
         assert!(!single_set.is_empty());
         assert!(!all_days.is_empty());
-
-        // Test len
-        assert_eq!(empty_set.len(), 0);
-        assert_eq!(single_set.len(), 1);
-        assert_eq!(part_size_set.len(), 3);
-        assert_eq!(all_days.len(), 7);
     }
 
     #[test]
