@@ -1,10 +1,11 @@
 use dioxus::prelude::*;
+use dioxus_i18n::tid;
 use dioxus_primitives::calendar::{
-    Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation,
-    CalendarNextMonthButton, CalendarPreviousMonthButton,
+    Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton,
+    CalendarPreviousMonthButton, CalendarSelectMonth, CalendarSelectYear,
 };
 
-use time::{Date, UtcDateTime};
+use time::{macros::date, Date, Month, UtcDateTime, Weekday};
 
 #[component]
 pub fn Demo() -> Element {
@@ -13,7 +14,7 @@ pub fn Demo() -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/calendar/variants/simple/style.css"),
+            href: asset!("/src/components/calendar/variants/main/style.css"),
         }
         div { class: "calendar-example", style: "padding: 20px;",
             div { class: "calendar",
@@ -28,6 +29,10 @@ pub fn Demo() -> Element {
                         tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
                         view_date.set(new_view);
                     },
+                    on_format_weekday: Callback::new(|weekday: Weekday| tid!(&weekday.to_string())),
+                    on_format_month: Callback::new(|month: Month| tid!(&month.to_string())),
+                    min_date: date!(1995-07-21),
+                    max_date: date!(2035-09-11),
                     CalendarHeader {
                         CalendarNavigation {
                             CalendarPreviousMonthButton {
@@ -38,7 +43,8 @@ pub fn Demo() -> Element {
                                     polyline { points: "15 6 9 12 15 18" }
                                 }
                             }
-                            CalendarMonthTitle {}
+                            CalendarSelectMonth { class: "calendar-month-select" }
+                            CalendarSelectYear { class: "calendar-year-select" }
                             CalendarNextMonthButton {
                                 svg {
                                     class: "calendar-next-month-icon",

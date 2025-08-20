@@ -7,15 +7,18 @@ rust-version = "1.80.0"
 [dependencies]
 dioxus = { workspace = true, features = ["router"] }
 dioxus-primitives.workspace = true
+dioxus-i18n = { git = "https://github.com/dioxus-community/dioxus-i18n.git", branch = "main" }
+unic-langid = { version = "0.9", features = ["macros"] }
 strum = { version = "0.27.2", features = ["derive"] }
 tracing.workspace = true
+time = { version = "0.3.41", features = ["std", "macros"] }
 
 [build-dependencies]
 syntect = "5.2"
 pulldown-cmark = "0.13.0"
 
 [features]
-web = ["dioxus/web"]
+web = ["dioxus/web", "dioxus-primitives/web"]
 desktop = ["dioxus/desktop"]
 fullstack = ["dioxus/fullstack"]
 server = ["dioxus/server"]

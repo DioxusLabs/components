@@ -2,7 +2,12 @@ use core::panic;
 
 use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
+use dioxus_i18n::prelude::*;
 use dioxus_primitives::tabs::{TabContent, TabList, TabTrigger, Tabs};
+
+use std::str::FromStr;
+use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
+use unic_langid::{langid, LanguageIdentifier};
 
 mod components;
 
@@ -15,6 +20,7 @@ struct ComponentDemoData {
 
 #[derive(Clone, PartialEq)]
 struct ComponentVariantDemoData {
+    name: &'static str,
     rs_highlighted: HighlightedCode,
     css_highlighted: HighlightedCode,
     component: fn() -> Element,
@@ -26,6 +32,14 @@ fn main() {
 
 #[component]
 fn App() -> Element {
+    use_init_i18n(|| {
+        I18nConfig::new(langid!("en-US"))
+            .with_locale((langid!("en-US"), include_str!("i18n/en-US.ftl")))
+            .with_locale((langid!("fr-FR"), include_str!("i18n/fr-FR.ftl")))
+            .with_locale((langid!("es-ES"), include_str!("i18n/es-ES.ftl")))
+            .with_locale((langid!("de-DE"), include_str!("i18n/de-DE.ftl")))
+    });
+
     rsx! {
         Router::<Route> {}
     }
@@ -147,9 +161,7 @@ fn Navbar() -> Element {
                             stroke_linecap: "round",
                             stroke_linejoin: "round",
                             stroke_width: 2,
-                            path {
-                                d: "M15 18 L9 12 L15 6",
-                            }
+                            path { d: "M15 18 L9 12 L15 6" }
                         }
                     }
                 }
@@ -202,6 +214,7 @@ fn Navbar() -> Element {
                     }
                 }
                 DarkModeToggle {}
+                LanguageSelect {}
             }
         }
     }
@@ -360,6 +373,89 @@ fn LightModeIcon() -> Element {
     }
 }
 
+#[derive(PartialEq, Display, EnumIter, EnumString)]
+enum Language {
+    English,
+    French,
+    Spanish,
+    German,
+}
+
+impl Language {
+    const fn id(&self) -> LanguageIdentifier {
+        match self {
+            Language::English => langid!("en-US"),
+            Language::French => langid!("fr-FR"),
+            Language::Spanish => langid!("es-ES"),
+            Language::German => langid!("de-DE"),
+        }
+    }
+
+    const fn flag(&self) -> &'static str {
+        match self {
+            Language::English => "🇬🇧",
+            Language::French => "🇫🇷",
+            Language::Spanish => "🇪🇸",
+            Language::German => "🇩🇪",
+        }
+    }
+
+    fn display_name(&self) -> String {
+        format!("{} {}", self.flag(), self.localize_name())
+    }
+
+    const fn localize_name(&self) -> &'static str {
+        match self {
+            Language::English => "English",
+            Language::French => "Français",
+            Language::Spanish => "Español",
+            Language::German => "Deutsch",
+        }
+    }
+}
+
+#[component]
+fn LanguageSelect() -> Element {
+    let mut current_lang = use_signal(|| Language::English);
+
+    rsx! {
+        document::Stylesheet { href: asset!("/assets/language-select.css") }
+        div { class: "language-container",
+            span { class: "language-select-container",
+                select {
+                    class: "language-select",
+                    aria_label: "Language",
+                    onchange: move |e| {
+                        let name = e.value().parse().unwrap_or(current_lang.to_string());
+                        if let Ok(lang) = Language::from_str(&name) {
+                            current_lang.set(lang);
+                        }
+                        let id = current_lang.read().id();
+                        tracing::info!("Current lang: {id}");
+                        i18n().set_language(id);
+                    },
+                    for lang in Language::iter() {
+                        option {
+                            value: lang.to_string(),
+                            selected: lang == *current_lang.read(),
+                            {lang.display_name()}
+                        }
+                    }
+                }
+                span { class: "language-select-value",
+                    {current_lang.read().flag()}
+                    svg {
+                        class: "select-expand-icon",
+                        view_box: "0 0 24 24",
+                        xmlns: "http://www.w3.org/2000/svg",
+                        polyline { points: "6 9 12 15 18 9" }
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[component]
 fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCode) -> Element {
     let mut collapsed = use_signal(|| true);
@@ -504,14 +600,14 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     rsx! {
         main { class: "component-demo",
             h1 { class: "component-title", {name} }
-            ComponentVariantHighlight { variant: main.clone(), include_installation: true }
+            ComponentVariantHighlight { variant: main.clone(), main_variant: true }
             div { class: "component-description",
                 div { dangerous_inner_html: docs }
             }
             if !variants.is_empty() {
                 h2 { class: "component-variants-title", "Variants" }
                 for variant in variants {
-                    ComponentVariantHighlight { variant: variant.clone(), include_installation: false }
+                    ComponentVariantHighlight { variant: variant.clone(), main_variant: false }
                 }
             }
         }
@@ -519,11 +615,9 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
 }
 
 #[component]
-fn ComponentVariantHighlight(
-    variant: ComponentVariantDemoData,
-    include_installation: bool,
-) -> Element {
+fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bool) -> Element {
     let ComponentVariantDemoData {
+        name,
         rs_highlighted,
         css_highlighted,
         component: Comp,
@@ -531,8 +625,13 @@ fn ComponentVariantHighlight(
     rsx! {
         div { class: "component-preview",
             div { class: "component-preview-contents",
+                if !main_variant {
+                    h3 {
+                        "{name}"
+                    }
+                }
                 div { class: "component-preview-frame", Comp {} }
-                if include_installation {
+                if main_variant {
                     div { class: "component-installation",
                         h2 { "Installation" }
                         ol { class: "component-installation-list",

@@ -14,6 +14,7 @@ repository = "https://github.com/DioxusLabs/components"
 [dependencies]
 dioxus.workspace = true
 dioxus-time = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
+time = { version = "0.3.41", features = ["std", "macros"] }
 tracing.workspace = true
 
 [build-dependencies]
@@ -22,3 +23,4 @@ lazy-js-bundle = "0.6.2"
 [features]
 default = ["router"]
 router = ["dioxus/router"]
+web = ["time/wasm-bindgen"]
