@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 test("test", async ({ page }) => {
-  await page.goto("http://127.0.0.1:8080/component/?name=calendar&", { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
+  await page.goto("http://127.0.0.1:8080/component/?name=calendar&", {
+    timeout: 20 * 60 * 1000,
+  }); // Increase timeout to 20 minutes
   // Find the calendar element
   const calendar = page.locator(".calendar").nth(0);
   // Find the calendar-nav-prev button
@@ -29,7 +31,7 @@ test("test", async ({ page }) => {
   // Move focus to the calendar with tab
   await page.keyboard.press("Tab");
   const focusedDay = calendar.locator(
-    '.calendar-grid-cell[data-month="current"]:focus'
+    '.calendar-grid-cell[data-month="current"]:focus',
   );
   // Assert a day is focused
   const firstDay = focusedDay.first();
@@ -51,9 +53,20 @@ test("test", async ({ page }) => {
   // Assert the next week day is focused
   const nextWeekDayNumber = parseInt(
     (await nextWeekDay.textContent()) || "",
-    10
+    10,
   );
-  expect(nextWeekDayNumber).toBe(dayNumber + 7);
+  let current_date = new Date();
+  let daysInMonth = new Date(
+    current_date.getFullYear(),
+    current_date.getMonth() + 1,
+    0,
+  ).getDate();
+  if (dayNumber + 7 > daysInMonth) {
+    // If the next week day is in the next month, it should wrap around
+    expect(nextWeekDayNumber).toBe(dayNumber + 7 - daysInMonth);
+  } else {
+    expect(nextWeekDayNumber).toBe(dayNumber + 7);
+  }
   // Pressing up arrow should move focus back to the first day of the month
   await page.keyboard.press("ArrowUp");
   await expect(firstDay).toContainText(day || "failure");
