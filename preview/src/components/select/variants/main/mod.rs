@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_primitives::select::{
-    SelectValue, Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption, SelectTrigger
+    Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+    SelectTrigger, SelectValue,
 };
 use strum::{EnumCount, IntoEnumIterator};
 
@@ -27,6 +28,8 @@ impl Fruit {
 
 #[component]
 pub fn Demo() -> Element {
+    let mut value = use_signal(|| None);
+
     let fruits = Fruit::iter().enumerate().map(|(i, f)| {
         rsx! {
             SelectOption::<Option<Fruit>> {
@@ -53,6 +56,10 @@ pub fn Demo() -> Element {
             href: asset!("/src/components/select/variants/main/style.css"),
         }
         Select::<Option<Fruit>> {
+            on_value_change: move |v: Option<Option<Fruit>>| {
+                value.set(v.flatten())
+            },
+            value: Some(value()),
             class: "select",
             placeholder: "Select a fruit...",
             SelectTrigger {

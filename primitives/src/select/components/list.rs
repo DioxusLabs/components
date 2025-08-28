@@ -1,6 +1,8 @@
 //! SelectList component implementation.
 
-use crate::{use_animated_open, use_effect, use_id_or, use_unique_id};
+use crate::{
+    select::context::SelectListContext, use_animated_open, use_effect, use_id_or, use_unique_id,
+};
 use dioxus::prelude::*;
 
 use super::super::context::SelectContext;
@@ -153,6 +155,11 @@ pub fn SelectList(props: SelectListProps) -> Element {
     };
 
     let render = use_animated_open(id, open);
+    let render = use_memo(render);
+
+    use_context_provider(|| SelectListContext {
+        render: render.into(),
+    });
 
     rsx! {
         if render() {
@@ -175,6 +182,9 @@ pub fn SelectList(props: SelectListProps) -> Element {
                 ..props.attributes,
                 {props.children}
             }
+        } else {
+            // If not rendering, return children directly so we can populate the selected list, but they should choose to not render themselves
+            {props.children}
         }
     }
 }

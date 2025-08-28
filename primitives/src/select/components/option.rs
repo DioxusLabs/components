@@ -1,8 +1,9 @@
 //! SelectOption and SelectItemIndicator component implementations.
 
 use crate::{
-    focus::use_focus_controlled_item, select::context::RcPartialEqValue, use_effect,
-    use_effect_cleanup, use_id_or, use_unique_id,
+    focus::use_focus_controlled_item,
+    select::context::{RcPartialEqValue, SelectListContext},
+    use_effect, use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
@@ -153,34 +154,38 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
         selected: selected.into(),
     });
 
+    let render = use_context::<SelectListContext>().render;
+
     rsx! {
-        div {
-            role: "option",
-            id,
-            tabindex: if focused() { "0" } else { "-1" },
-            onmounted,
+        if render() {
+            div {
+                role: "option",
+                id,
+                tabindex: if focused() { "0" } else { "-1" },
+                onmounted,
 
-            // ARIA attributes
-            aria_selected: selected(),
-            aria_disabled: disabled,
-            aria_label: props.aria_label.clone(),
-            aria_roledescription: props.aria_roledescription.clone(),
+                // ARIA attributes
+                aria_selected: selected(),
+                aria_disabled: disabled,
+                aria_label: props.aria_label.clone(),
+                aria_roledescription: props.aria_roledescription.clone(),
 
-            onpointerdown: move |event| {
-                if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
-                    ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
-                    ctx.open.set(false);
-                }
-            },
-            onblur: move |_| {
-                if focused() {
-                    ctx.focus_state.blur();
-                    ctx.open.set(false);
-                }
-            },
+                onpointerdown: move |event| {
+                    if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
+                        ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
+                        ctx.open.set(false);
+                    }
+                },
+                onblur: move |_| {
+                    if focused() {
+                        ctx.focus_state.blur();
+                        ctx.open.set(false);
+                    }
+                },
 
-            ..props.attributes,
-            {props.children}
+                ..props.attributes,
+                {props.children}
+            }
         }
     }
 }
