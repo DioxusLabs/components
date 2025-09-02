@@ -69,7 +69,7 @@ pub fn SelectValue(props: SelectValueProps) -> Element {
         let value = ctx.value.read();
         value.as_ref().and_then(|v| {
             ctx.options
-                .peek()
+                .read()
                 .iter()
                 .find(|opt| opt.value == *v)
                 .map(|opt| opt.text_value.clone())
