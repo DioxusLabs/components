@@ -8,7 +8,7 @@ pub fn Demo() -> Element {
             href: asset!("/src/components/toggle_group/variants/main/style.css"),
         }
         ToggleGroup { class: "toggle-group", horizontal: true, allow_multiple_pressed: true,
-            ToggleItem { class: "toggle-item", index: 0usize, em { "B" } }
+            ToggleItem { class: "toggle-item", index: 0usize, b { "B" } }
             ToggleItem { class: "toggle-item", index: 1usize, i { "I" } }
             ToggleItem { class: "toggle-item", index: 2usize, u { "U" } }
         }
