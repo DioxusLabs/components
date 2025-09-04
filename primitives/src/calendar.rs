@@ -611,7 +611,7 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
         button {
             class: "calendar-nav-prev",
             aria_label: "Previous month",
-            r#type: "button",
+            type: "button",
             onclick: handle_prev_month,
             disabled: (ctx.disabled)() || button_disabled(),
             ..props.attributes,
@@ -706,7 +706,7 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
         button {
             class: "calendar-nav-next",
             aria_label: "Next month",
-            r#type: "button",
+            type: "button",
             onclick: handle_next_month,
             disabled: (ctx.disabled)() || button_disabled(),
             ..props.attributes,
@@ -1282,7 +1282,7 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
     rsx! {
         button {
             class: "calendar-grid-cell",
-            r#type: "button",
+            type: "button",
             tabindex: if date == focusable_date {
                 "0"
             } else {

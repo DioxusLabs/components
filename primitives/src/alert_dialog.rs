@@ -463,6 +463,7 @@ pub fn AlertDialogAction(props: AlertDialogActionProps) -> Element {
     rsx! {
         button {
             tabindex: if open() { "0" } else { "-1" },
+            type: "button",
             onclick: on_click,
             ..props.attributes,
             {props.children}
@@ -538,6 +539,7 @@ pub fn AlertDialogCancel(props: AlertDialogCancelProps) -> Element {
     rsx! {
         button {
             tabindex: if open() { "0" } else { "-1" },
+            type: "button",
             onclick: on_click,
             ..props.attributes,
             {props.children}

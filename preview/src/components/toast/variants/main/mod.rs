@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_primitives::toast::{ToastOptions, ToastProvider, use_toast};
+use dioxus_primitives::toast::{use_toast, ToastOptions, ToastProvider};
 use std::time::Duration;
 
 #[component]
@@ -25,6 +25,7 @@ fn ToastButton() -> Element {
         }
         button {
             class: "button",
+            type: "button",
             "data-style": "outline",
             onclick: move |_| {
                 toast_api

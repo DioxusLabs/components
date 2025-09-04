@@ -16,6 +16,7 @@ pub fn Demo() -> Element {
         }
         button {
             class: "button",
+            type: "button",
             "data-style": "outline",
             style: "margin-bottom: 1.5rem;",
             onclick: move |_| open.set(true),
@@ -29,6 +30,7 @@ pub fn Demo() -> Element {
                 class: "dialog",
                 button {
                     class: "dialog-close",
+                    type: "button",
                     aria_label: "Close",
                     tabindex: if open() { "0" } else { "-1" },
                     onclick: move |_| open.set(false),

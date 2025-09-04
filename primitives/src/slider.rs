@@ -567,7 +567,7 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
 
     rsx! {
         button {
-            r#type: "button",
+            type: "button",
             role: "slider",
             aria_valuemin: ctx.min,
             aria_valuemax: ctx.max,

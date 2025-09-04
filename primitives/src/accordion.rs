@@ -525,6 +525,7 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
             id: props.id,
             disabled: is_disabled,
             tabindex: "0",
+            type: "button",
 
             aria_controls: item.aria_id(),
             aria_expanded: ctx.is_open(item.id),

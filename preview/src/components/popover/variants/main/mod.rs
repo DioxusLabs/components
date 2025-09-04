@@ -35,6 +35,7 @@ pub fn Demo() -> Element {
                 }
                 button {
                     class: "button",
+                    type: "button",
                     "data-style": "outline",
                     onclick: move |_| {
                         open.set(false);
@@ -44,6 +45,7 @@ pub fn Demo() -> Element {
                 }
                 button {
                     class: "button",
+                    type: "button",
                     "data-style": "outline",
                     onclick: move |_| {
                         open.set(false);

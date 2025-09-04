@@ -415,6 +415,7 @@ pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
                 }
             },
             role: "menuitem",
+            type: "button",
             tabindex: if is_focused() { "0" } else { "-1" },
             ..props.attributes,
             {props.children}
