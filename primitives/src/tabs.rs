@@ -307,6 +307,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
             id: props.id,
             class: props.class,
             tabindex: tab_index,
+            type: "button",
 
             aria_selected: selected,
             aria_controls: (ctx.tab_content_ids)().get((props.index)()).cloned(),

@@ -256,6 +256,7 @@ fn CopyButton(#[props(extends=GlobalAttributes)] attributes: Vec<Attribute>) -> 
     rsx! {
         button {
             class: "copy-button",
+            type: "button",
             aria_label: "Copy code",
             "data-copied": copied,
             "onclick": "navigator.clipboard.writeText(this.parentNode.firstChild.innerText || this.parentNode.innerText);",
@@ -317,6 +318,7 @@ fn DarkModeToggle() -> Element {
             onclick: move |_| {
                 set_theme(false);
             },
+            type: "button",
             aria_label: "Enable light mode",
             DarkModeIcon {}
         }
@@ -325,6 +327,7 @@ fn DarkModeToggle() -> Element {
             onclick: move |_| {
                 set_theme(true);
             },
+            type: "button",
             aria_label: "Enable dark mode",
             LightModeIcon {}
         }
@@ -470,6 +473,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
             border_radius: "0 0 0.5rem 0.5rem",
             border: "none",
             text_align: "center",
+            type: "button",
             onclick: move |_| {
                 collapsed.toggle();
             },
@@ -669,7 +673,7 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                 div { id: "hero-search-container",
                     input {
                         id: "hero-search-input",
-                        r#type: "search",
+                        type: "search",
                         placeholder: "Search components...",
                         value: search,
                         oninput: move |e| {

@@ -78,7 +78,7 @@ pub fn Switch(props: SwitchProps) -> Element {
 
     rsx! {
         button {
-            r#type: "button",
+            type: "button",
             role: "switch",
             value: props.value,
             aria_checked: checked,
@@ -106,7 +106,7 @@ pub fn Switch(props: SwitchProps) -> Element {
 
         // Hidden input for form submission
         input {
-            r#type: "checkbox",
+            type: "checkbox",
             aria_hidden: true,
             tabindex: -1,
             name: props.name,

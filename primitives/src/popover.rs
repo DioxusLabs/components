@@ -353,6 +353,7 @@ pub fn PopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
         button {
             id,
+            type: "button",
             onclick: move |e| {
                 // Prevent the click event from propagating to the overlay.
                 e.stop_propagation();

@@ -6,7 +6,11 @@ The AlertDialog primitive provides an accessible, composable modal dialog for cr
 // Usage example:
 let open = use_signal(|| false);
 rsx! {
-    button { onclick: move |_| open.set(true), "Show Alert Dialog" }
+    button {
+        onclick: move |_| open.set(true),
+        type: "button",
+        "Show Alert Dialog"
+    }
     AlertDialogRoot { open: Some(open), on_open_change: move |v| open.set(v),
         AlertDialogContent {
             // You may pass class/style for custom appearance

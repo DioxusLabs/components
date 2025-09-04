@@ -436,6 +436,7 @@ pub fn Toast(props: ToastProps) -> Element {
             button {
                 class: "toast-close",
                 aria_label: "close",
+                type: "button",
                 onclick: move |e| {
                     // Focus the region again after closing
                     ctx.focus_region.call(());

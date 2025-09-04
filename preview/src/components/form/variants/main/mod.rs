@@ -14,7 +14,7 @@ pub fn Demo() -> Element {
             }
             label { r#for: "tos-check", "I agree to the terms presented." }
             br {}
-            button { r#type: "submit", "Submit" }
+            button { type: "submit", "Submit" }
         }
     }
 }
