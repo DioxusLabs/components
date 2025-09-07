@@ -14,7 +14,7 @@ repository = "https://github.com/DioxusLabs/components"
 [dependencies]
 dioxus.workspace = true
 dioxus-time = { git = "https://github.com/ealmloff/dioxus-std", branch = "0.7" }
-time = { version = "0.3.41", features = ["std", "macros"] }
+time = { version = "0.3.41", features = ["std", "macros", "parsing"] }
 tracing.workspace = true
 
 [build-dependencies]
