@@ -1,5 +1,6 @@
 //! Defines the [`AlertDialogRoot`] component and its sub-components.
 
+use crate::use_global_escape_listener;
 use crate::{use_animated_open, use_id_or, use_unique_id, FOCUS_TRAP_JS};
 use dioxus::document;
 use dioxus::prelude::*;
@@ -95,21 +96,7 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
     // Add a escape key listener to the document when the dialog is open. We can't
     // just add this to the dialog itself because it might not be focused if the user
     // is highlighting text or interacting with another element.
-    use_effect(move || {
-        let mut escape = document::eval(
-            "document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape') {
-                    event.preventDefault();
-                    dioxus.send(true);
-                }
-            });",
-        );
-        spawn(async move {
-            while let Ok(true) = escape.recv().await {
-                set_open.call(false);
-            }
-        });
-    });
+    use_global_escape_listener(move || set_open.call(false));
 
     let id = use_unique_id();
     let id = use_id_or(id, props.id);
