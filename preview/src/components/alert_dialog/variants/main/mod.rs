@@ -1,5 +1,5 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::alert_dialog::*;
 
 #[component]
 pub fn Demo() -> Element {
@@ -7,10 +7,6 @@ pub fn Demo() -> Element {
     let mut confirmed = use_signal(|| false);
 
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/alert_dialog/variants/main/style.css"),
-        }
         document::Link {
             rel: "stylesheet",
             href: asset!("/src/components/button/variants/main/style.css"),
@@ -26,15 +22,12 @@ pub fn Demo() -> Element {
         AlertDialogRoot {
             open: open(),
             on_open_change: move |v| open.set(v),
-            class: "alert-dialog-backdrop",
-            AlertDialogContent { class: "alert-dialog",
+            AlertDialogContent {
                 AlertDialogTitle { "Delete item" }
                 AlertDialogDescription { "Are you sure you want to delete this item? This action cannot be undone." }
                 AlertDialogActions {
-                    class: "alert-dialog-actions",
-                    AlertDialogCancel { class: "alert-dialog-cancel", "Cancel" }
+                    AlertDialogCancel { "Cancel" }
                     AlertDialogAction {
-                        class: "alert-dialog-action",
                         on_click: move |_| confirmed.set(true),
                         "Delete"
                     }
