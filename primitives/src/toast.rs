@@ -63,12 +63,12 @@ struct ToastCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct ToastProviderProps {
     /// The default duration for non-permanent toasts. Defaults to 5 seconds
-    #[props(default = ReadOnlySignal::new(Signal::new(Some(Duration::from_secs(5)))))]
-    pub default_duration: ReadOnlySignal<Option<Duration>>,
+    #[props(default = ReadSignal::new(Signal::new(Some(Duration::from_secs(5)))))]
+    pub default_duration: ReadSignal<Option<Duration>>,
 
     /// The maximum number of toasts to display at once. Defaults to 10.
-    #[props(default = ReadOnlySignal::new(Signal::new(10)))]
-    pub max_toasts: ReadOnlySignal<usize>,
+    #[props(default = ReadSignal::new(Signal::new(10)))]
+    pub max_toasts: ReadSignal<usize>,
 
     /// The callback to render a toast. Defaults to rendering the [`Toast`] component.
     #[props(default = Callback::new(|props: ToastPropsWithOwner| rsx! { {DynamicNode::Component(props.into_vcomponent(Toast))} }))]

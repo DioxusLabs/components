@@ -11,7 +11,7 @@ struct ContextMenuCtx {
     // State
     open: Memo<bool>,
     set_open: Callback<bool>,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 
     // Position of the context menu
     position: Signal<(i32, i32)>,
@@ -24,11 +24,11 @@ struct ContextMenuCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuProps {
     /// Whether the context menu is disabled
-    #[props(default = ReadOnlySignal::new(Signal::new(false)))]
-    pub disabled: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(false)))]
+    pub disabled: ReadSignal<bool>,
 
     /// Whether the context menu is open
-    pub open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadSignal<Option<bool>>,
 
     /// Default open state
     #[props(default)]
@@ -39,8 +39,8 @@ pub struct ContextMenuProps {
     pub on_open_change: Callback<bool>,
 
     /// Whether focus should loop around when reaching the end.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub roving_loop: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub roving_loop: ReadSignal<bool>,
 
     /// Additional attributes for the context menu element.
     #[props(extends = GlobalAttributes)]
@@ -245,7 +245,7 @@ pub fn ContextMenuTrigger(props: ContextMenuTriggerProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuContentProps {
     /// The ID of the context menu content element.
-    id: ReadOnlySignal<Option<String>>,
+    id: ReadSignal<Option<String>>,
 
     /// Additional attributes for the context menu content element.
     #[props(extends = GlobalAttributes)]
@@ -380,14 +380,14 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuItemProps {
     /// Whether the item is disabled
-    #[props(default = ReadOnlySignal::new(Signal::new(false)))]
-    pub disabled: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(false)))]
+    pub disabled: ReadSignal<bool>,
 
     /// The value of the menu item
-    pub value: ReadOnlySignal<String>,
+    pub value: ReadSignal<String>,
 
     /// The index of the item in the menu
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// Callback when the item is selected
     #[props(default)]
