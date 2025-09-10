@@ -60,7 +60,7 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
 #[component]
 pub fn AccordionContent(props: AccordionContentProps) -> Element {
     rsx! {
-        AccordionContent { class: "accordion-content",
+        accordion::AccordionContent { class: "accordion-content",
             style: "--collapsible-content-width: 140px",
             id: props.id,
             attributes: props.attributes,
