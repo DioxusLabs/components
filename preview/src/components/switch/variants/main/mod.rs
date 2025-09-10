@@ -1,5 +1,6 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::switch::{Switch, SwitchThumb};
+
 #[component]
 pub fn Demo() -> Element {
     let mut checked = use_signal(|| false);

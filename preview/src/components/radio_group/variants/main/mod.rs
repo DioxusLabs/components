@@ -1,5 +1,5 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::radio_group::{RadioGroup, RadioItem};
 
 #[component]
 pub fn Demo() -> Element {
