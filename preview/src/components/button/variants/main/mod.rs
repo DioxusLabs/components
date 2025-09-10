@@ -1,3 +1,5 @@
+// demo.rs
+use super::super::component::*;
 use dioxus::prelude::*;
 
 #[component]
@@ -12,33 +14,27 @@ pub fn Demo() -> Element {
             display: "flex",
             flex_direction: "column",
             gap: "0.5rem",
-            button {
-                class: "button",
-                "data-style": "primary",
+            Button {
                 "Primary"
             }
 
-            button {
-                class: "button",
-                "data-style": "secondary",
+            Button {
+                variant: ButtonVariant::Secondary,
                 "Secondary"
             }
 
-            button {
-                class: "button",
-                "data-style": "destructive",
+            Button {
+                variant: ButtonVariant::Destructive,
                 "Destructive"
             }
 
-            button {
-                class: "button",
-                "data-style": "outline",
+            Button {
+                variant: ButtonVariant::Outline,
                 "Outline"
             }
 
-            button {
-                class: "button",
-                "data-style": "ghost",
+            Button {
+                variant: ButtonVariant::Ghost,
                 "Ghost"
             }
         }
