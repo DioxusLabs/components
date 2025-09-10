@@ -34,9 +34,9 @@ pub struct MenubarProps {
 
     /// Additional attributes to apply to the menubar element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the menubar component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Menubar
@@ -172,9 +172,9 @@ pub struct MenubarMenuProps {
 
     /// Additional attributes to apply to the menu element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the menu component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # MenubarMenu
@@ -313,9 +313,9 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
 pub struct MenubarTriggerProps {
     /// Additional attributes to apply to the trigger element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the trigger component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # MenubarTrigger
@@ -430,9 +430,9 @@ pub struct MenubarContentProps {
     pub id: ReadOnlySignal<Option<String>>,
     /// Additional attributes to apply to the content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the content component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # MenubarContent
@@ -544,10 +544,10 @@ pub struct MenubarItemProps {
 
     /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the item component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # MenubarItem

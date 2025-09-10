@@ -1,15 +1,11 @@
+use super::super::component::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
 use dioxus::prelude::*;
-use dioxus_primitives::dialog::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
 
 #[component]
 pub fn Demo() -> Element {
     let mut open = use_signal(|| false);
 
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/dialog/variants/main/style.css"),
-        }
         document::Link {
             rel: "stylesheet",
             href: asset!("/src/components/button/variants/main/style.css"),
@@ -23,11 +19,9 @@ pub fn Demo() -> Element {
             "Show Dialog"
         }
         DialogRoot {
-            class: "dialog-backdrop",
             open: open(),
             on_open_change: move |v| open.set(v),
             DialogContent {
-                class: "dialog",
                 button {
                     class: "dialog-close",
                     type: "button",
@@ -37,11 +31,9 @@ pub fn Demo() -> Element {
                     "×"
                 }
                 DialogTitle {
-                    class: "dialog-title",
                     "Item information"
                 }
                 DialogDescription {
-                    class: "dialog-description",
                     "Here is some additional information about the item."
                 }
             }

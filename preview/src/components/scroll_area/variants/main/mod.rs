@@ -1,5 +1,7 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::scroll_area::{ScrollArea, ScrollDirection};
+use dioxus_primitives::scroll_area::ScrollDirection;
+
 #[component]
 pub fn Demo() -> Element {
     rsx! {

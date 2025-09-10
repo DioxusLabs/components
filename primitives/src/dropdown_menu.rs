@@ -46,10 +46,10 @@ pub struct DropdownMenuProps {
 
     /// Additional attributes to apply to the dropdown menu element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the dropdown menu, which should include a [`DropdownMenuTrigger`] and a [`DropdownMenuContent`].
-    children: Element,
+    pub children: Element,
 }
 
 /// # DropdownMenu
@@ -160,9 +160,9 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 pub struct DropdownMenuTriggerProps {
     /// Additional attributes to apply to the trigger button element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the trigger button
-    children: Element,
+    pub children: Element,
 }
 
 /// # DropdownMenuTrigger
@@ -258,9 +258,9 @@ pub struct DropdownMenuContentProps {
     pub id: ReadOnlySignal<Option<String>>,
     /// Additional attributes to apply to the dropdown menu content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the dropdown menu content, which should include one or more [`DropdownMenuItem`] components.
-    children: Element,
+    pub children: Element,
 }
 
 /// # DropdownMenuTrigger
@@ -357,9 +357,9 @@ pub struct DropdownMenuItemProps<T: Clone + PartialEq + 'static> {
 
     /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the item, which will be rendered inside the item element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # DropdownMenuTrigger

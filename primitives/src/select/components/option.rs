@@ -39,10 +39,12 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
     #[props(default)]
     pub aria_roledescription: Option<String>,
 
+    /// Additional attributes for the option element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
-    children: Element,
+    /// The children to render inside the option
+    pub children: Element,
 }
 
 /// # SelectOption
@@ -194,7 +196,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectItemIndicatorProps {
     /// The children to render inside the indicator
-    children: Element,
+    pub children: Element,
 }
 
 /// # SelectItemIndicator

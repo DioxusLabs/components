@@ -1,5 +1,6 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::toolbar::{Toolbar, ToolbarButton, ToolbarSeparator};
+
 #[component]
 pub fn Demo() -> Element {
     let mut text_style = use_signal(Vec::new);
@@ -27,47 +28,37 @@ pub fn Demo() -> Element {
     let text_align_style =
         use_memo(move || format!("text-align: {}; {}", text_align(), text_styles()));
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/toolbar/variants/main/style.css"),
-        }
-        Toolbar { class: "toolbar", aria_label: "Text formatting",
-            div { class: "toolbar-group",
+        Toolbar { aria_label: "Text formatting",
+            ToolbarGroup {
                 ToolbarButton {
-                    class: "toolbar-button",
                     index: 0usize,
                     on_click: move |_| toggle_style("bold"),
                     "Bold"
                 }
                 ToolbarButton {
-                    class: "toolbar-button",
                     index: 1usize,
                     on_click: move |_| toggle_style("italic"),
                     "Italic"
                 }
                 ToolbarButton {
-                    class: "toolbar-button",
                     index: 2usize,
                     on_click: move |_| toggle_style("underline"),
                     "Underline"
                 }
             }
-            ToolbarSeparator { class: "toolbar-separator" }
-            div { class: "toolbar-group",
+            ToolbarSeparator {}
+            ToolbarGroup {
                 ToolbarButton {
-                    class: "toolbar-button",
                     index: 3usize,
                     on_click: move |_| set_align("left"),
                     "Align Left"
                 }
                 ToolbarButton {
-                    class: "toolbar-button",
                     index: 4usize,
                     on_click: move |_| set_align("center"),
                     "Align Center"
                 }
                 ToolbarButton {
-                    class: "toolbar-button",
                     index: 5usize,
                     on_click: move |_| set_align("right"),
                     "Align Right"

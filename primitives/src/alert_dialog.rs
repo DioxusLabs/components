@@ -232,9 +232,9 @@ pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
 pub struct AlertDialogTitleProps {
     /// Additional attributes to extend the title element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the title element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # AlertDialogTitle
@@ -289,9 +289,9 @@ pub fn AlertDialogTitle(props: AlertDialogTitleProps) -> Element {
 pub struct AlertDialogDescriptionProps {
     /// Additional attributes to extend the description element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the description element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # AlertDialogDescription

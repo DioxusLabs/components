@@ -10,14 +10,12 @@ pub fn Demo() -> Element {
         }
         div { class: "switch-example",
             Switch {
-                class: "switch",
                 checked: checked(),
                 aria_label: "Switch Demo",
                 on_checked_change: move |new_checked| {
                     checked.set(new_checked);
-                    tracing::info!("Switch toggled: {new_checked}");
                 },
-                SwitchThumb { class: "switch-thumb" }
+                SwitchThumb {}
             }
         }
     }

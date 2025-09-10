@@ -1,23 +1,17 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::{
-    hover_card::{HoverCard, HoverCardContent, HoverCardTrigger},
-    ContentSide,
-};
+use dioxus_primitives::ContentSide;
 
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/hover_card/variants/main/style.css"),
-        }
         div {
             style: "padding: 50px; display: flex; flex-direction: row; flex-wrap: wrap; gap: 40px; justify-content: center; align-items: center;",
-            HoverCard { class: "hover-card",
-                HoverCardTrigger { class: "hover-card-trigger",
+            HoverCard {
+                HoverCardTrigger {
                     i { "Dioxus" }
                 }
-                HoverCardContent { class: "hover-card-content", side: ContentSide::Bottom,
+                HoverCardContent { side: ContentSide::Bottom,
                     div {
                         padding: "1rem",
                         "Dioxus is"

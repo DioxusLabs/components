@@ -1,5 +1,6 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::toggle_group::{ToggleGroup, ToggleItem};
+
 #[component]
 pub fn Demo() -> Element {
     rsx! {
@@ -7,10 +8,10 @@ pub fn Demo() -> Element {
             rel: "stylesheet",
             href: asset!("/src/components/toggle_group/variants/main/style.css"),
         }
-        ToggleGroup { class: "toggle-group", horizontal: true, allow_multiple_pressed: true,
-            ToggleItem { class: "toggle-item", index: 0usize, b { "B" } }
-            ToggleItem { class: "toggle-item", index: 1usize, i { "I" } }
-            ToggleItem { class: "toggle-item", index: 2usize, u { "U" } }
+        ToggleGroup { horizontal: true, allow_multiple_pressed: true,
+            ToggleItem { index: 0usize, b { "B" } }
+            ToggleItem { index: 1usize, i { "I" } }
+            ToggleItem { index: 2usize, u { "U" } }
         }
     }
 }

@@ -41,10 +41,10 @@ pub struct PopoverRootProps {
 
     /// Additional attributes to apply to the popover root element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the popover root component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # PopoverRoot
@@ -139,7 +139,7 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
 
 /// The props for the [`PopoverContent`] component.
 #[derive(Props, Clone, PartialEq)]
-pub struct PopoverProps {
+pub struct PopoverContentProps {
     /// The id of the popover content element.
     pub id: ReadOnlySignal<Option<String>>,
 
@@ -157,10 +157,10 @@ pub struct PopoverProps {
 
     /// Additional attributes to apply to the content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the popover content component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # PopoverContent
@@ -216,7 +216,7 @@ pub struct PopoverProps {
 /// - `data-side`: Indicates the side where the popover is positioned relative to the trigger. Possible values are `top`, `right`, `bottom`, and `left`.
 /// - `data-align`: Indicates the alignment of the popover relative to the trigger. Possible values are `start`, `center`, and `end`.
 #[component]
-pub fn PopoverContent(props: PopoverProps) -> Element {
+pub fn PopoverContent(props: PopoverContentProps) -> Element {
     let ctx: PopoverCtx = use_context();
     let open = ctx.open;
     let is_open = open();
@@ -279,10 +279,10 @@ pub fn PopoverContent(props: PopoverProps) -> Element {
 pub struct PopoverTriggerProps {
     /// Additional attributes to apply to the trigger element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the trigger component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # PopoverTrigger

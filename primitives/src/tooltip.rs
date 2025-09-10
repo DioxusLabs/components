@@ -36,10 +36,10 @@ pub struct TooltipProps {
 
     /// Additional attributes for the tooltip
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the tooltip component, which should include a [`TooltipTrigger`] and a [`TooltipContent`].
-    children: Element,
+    pub children: Element,
 }
 
 /// # Tooltip
@@ -108,10 +108,10 @@ pub struct TooltipTriggerProps {
 
     /// Additional attributes for the trigger element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the trigger element
-    children: Element,
+    pub children: Element,
 }
 
 /// # TooltipTrigger
@@ -218,10 +218,10 @@ pub struct TooltipContentProps {
 
     /// Additional attributes for the tooltip content element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the tooltip content
-    children: Element,
+    pub children: Element,
 }
 
 /// # TooltipContent

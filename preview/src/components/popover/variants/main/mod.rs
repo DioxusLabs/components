@@ -1,5 +1,5 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::popover::*;
 
 #[component]
 pub fn Demo() -> Element {
@@ -9,21 +9,15 @@ pub fn Demo() -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/popover/variants/main/style.css"),
-        }
-        document::Link {
-            rel: "stylesheet",
             href: asset!("/src/components/button/variants/main/style.css"),
         }
         PopoverRoot {
             open: open(),
             on_open_change: move |v| open.set(v),
-            class: "popover",
             PopoverTrigger {
-                class: "popover-trigger",
                 "Show Popover"
             }
-            PopoverContent { class: "popover-content",
+            PopoverContent {
                 gap: "0.25rem",
                 h3 {
                     padding_top: "0.25rem",
