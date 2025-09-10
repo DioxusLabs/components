@@ -1,5 +1,6 @@
+use super::super::component::AspectRatio;
 use dioxus::prelude::*;
-use dioxus_primitives::aspect_ratio::AspectRatio;
+
 #[component]
 pub fn Demo() -> Element {
     rsx! {
