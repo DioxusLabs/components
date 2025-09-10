@@ -3,7 +3,6 @@
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use dioxus::core::{queue_effect, use_drop};
 use dioxus::prelude::*;
 use dioxus::prelude::{asset, manganis, Asset};
 

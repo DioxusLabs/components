@@ -3,7 +3,6 @@
 use dioxus::document;
 use dioxus::prelude::*;
 
-use crate::use_effect_with_cleanup;
 use crate::use_global_escape_listener;
 use crate::{use_animated_open, use_controlled, use_id_or, use_unique_id, FOCUS_TRAP_JS};
 
