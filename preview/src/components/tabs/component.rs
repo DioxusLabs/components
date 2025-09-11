@@ -1,5 +1,67 @@
 use dioxus::prelude::*;
-use dioxus_primitives::tabs::{self, TabContentProps, TabListProps, TabTriggerProps, TabsProps};
+use dioxus_primitives::tabs::{self, TabContentProps, TabListProps, TabTriggerProps};
+
+/// The props for the [`Tabs`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct TabsProps {
+    /// The class of the tabs component.
+    #[props(default)]
+    pub class: String,
+
+    /// The controlled value of the active tab.
+    pub value: ReadOnlySignal<Option<String>>,
+
+    /// The default active tab value when uncontrolled.
+    #[props(default)]
+    pub default_value: String,
+
+    /// Callback fired when the active tab changes.
+    #[props(default)]
+    pub on_value_change: Callback<String>,
+
+    /// Whether the tabs are disabled.
+    #[props(default)]
+    pub disabled: ReadOnlySignal<bool>,
+
+    /// Whether the tabs are horizontal.
+    #[props(default)]
+    pub horizontal: ReadOnlySignal<bool>,
+
+    /// Whether focus should loop around when reaching the end.
+    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
+    pub roving_loop: ReadOnlySignal<bool>,
+
+    /// The variant of the tabs component.
+    #[props(default)]
+    pub variant: TabsVariant,
+
+    /// Additional attributes to apply to the tabs element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the tabs component.
+    pub children: Element,
+}
+
+/// The variant of the tabs component.
+#[derive(Clone, Copy, PartialEq, Default)]
+pub enum TabsVariant {
+    /// The default variant.
+    #[default]
+    Default,
+    /// The ghost variant.
+    Ghost,
+}
+
+impl TabsVariant {
+    /// Returns the string representation of the variant.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            TabsVariant::Default => "default",
+            TabsVariant::Ghost => "ghost",
+        }
+    }
+}
 
 #[component]
 pub fn Tabs(props: TabsProps) -> Element {
@@ -9,7 +71,8 @@ pub fn Tabs(props: TabsProps) -> Element {
             href: asset!("/src/components/tabs/style.css"),
         }
         tabs::Tabs {
-            class: "tabs",
+            class: props.class + " tabs",
+            "data-variant": props.variant.as_str(),
             value: props.value,
             default_value: props.default_value,
             on_value_change: props.on_value_change,
@@ -52,7 +115,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
 pub fn TabContent(props: TabContentProps) -> Element {
     rsx! {
         tabs::TabContent {
-            class: "tabs-content tabs-content-themed",
+            class: props.class.unwrap_or_default() + " tabs-content tabs-content-themed",
             value: props.value,
             id: props.id,
             index: props.index,

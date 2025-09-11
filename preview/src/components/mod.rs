@@ -2,7 +2,7 @@ use super::{ComponentDemoData, ComponentVariantDemoData, HighlightedCode};
 macro_rules! examples {
     ($($name:ident $([$($variant:ident),*])?),*) => {
         $(
-            mod $name {
+            pub(crate) mod $name {
                 pub(crate) mod component;
                 pub(crate) mod variants {
                     pub(crate) mod main;

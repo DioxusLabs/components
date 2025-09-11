@@ -1,9 +1,9 @@
 use core::panic;
 
+use crate::components::tabs::component::*;
 use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
 use dioxus_i18n::prelude::*;
-use dioxus_primitives::tabs::{TabContent, TabList, TabTrigger, Tabs};
 
 use std::str::FromStr;
 use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
@@ -510,22 +510,19 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
 
     rsx! {
         Tabs {
-            class: "tabs",
             default_value: "main.rs",
             border_bottom_left_radius: "0.5rem",
             border_bottom_right_radius: "0.5rem",
             horizontal: true,
             width: "100%",
-            TabList { class: "tabs-list",
-                TabTrigger { class: "tabs-trigger", value: "main.rs", index: 0usize, "main.rs" }
+            TabList {
+                TabTrigger { value: "main.rs", index: 0usize, "main.rs" }
                 TabTrigger {
-                    class: "tabs-trigger",
                     value: "style.css",
                     index: 1usize,
                     "style.css"
                 }
                 TabTrigger {
-                    class: "tabs-trigger",
                     value: "theme.css",
                     index: 2usize,
                     "theme.css"
@@ -540,7 +537,6 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 align_items: "center",
                 TabContent {
                     index: 0usize,
-                    class: "tabs-content tabs-content-themed",
                     value: "main.rs",
                     width: "100%",
                     position: "relative",
@@ -549,7 +545,6 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 }
                 TabContent {
                     index: 1usize,
-                    class: "tabs-content tabs-content-themed",
                     value: "style.css",
                     width: "100%",
                     position: "relative",
@@ -558,7 +553,6 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 }
                 TabContent {
                     index: 2usize,
-                    class: "tabs-content tabs-content-themed",
                     value: "theme.css",
                     width: "100%",
                     position: "relative",
@@ -715,24 +709,22 @@ fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bo
             }
         }
         Tabs {
-            class: "tabs",
-            default_value: "demo",
+            default_value: "Demo",
             border_bottom_left_radius: "0.5rem",
             border_bottom_right_radius: "0.5rem",
             horizontal: true,
             width: "100%",
-            TabList { class: "tabs-list",
+            variant: TabsVariant::Ghost,
+            TabList {
                 TabTrigger {
-                    class: "tabs-trigger",
-                    value: "demo",
+                    value: "Demo",
                     index: 0usize,
-                    "demo"
+                    "DEMO"
                 }
                 TabTrigger {
-                    class: "tabs-trigger",
-                    value: "code",
+                    value: "Code",
                     index: 1usize,
-                    "code"
+                    "CODE"
                 }
             }
             div {
@@ -744,16 +736,16 @@ fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bo
                 align_items: "center",
                 TabContent {
                     index: 0usize,
-                    class: "tabs-content component-preview-frame",
-                    value: "demo",
+                    class: "component-preview-frame",
+                    value: "Demo",
                     width: "100%",
                     position: "relative",
                     Comp {}
                 }
                 TabContent {
                     index: 1usize,
-                    class: "tabs-content component-preview-frame",
-                    value: "code",
+                    class: "component-preview-frame",
+                    value: "Code",
                     width: "100%",
                     position: "relative",
                     ColapsibleCodeBlock { highlighted }
