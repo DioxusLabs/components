@@ -737,6 +737,7 @@ fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bo
                 TabContent {
                     index: 0usize,
                     class: "component-preview-frame",
+                    id: "component-preview-frame",
                     value: "Demo",
                     width: "100%",
                     position: "relative",
