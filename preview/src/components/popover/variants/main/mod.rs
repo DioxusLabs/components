@@ -1,3 +1,5 @@
+use crate::components::button::component::Button;
+
 use super::super::component::*;
 use dioxus::prelude::*;
 
@@ -7,10 +9,6 @@ pub fn Demo() -> Element {
     let mut confirmed = use_signal(|| false);
 
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/button/style.css"),
-        }
         PopoverRoot {
             open: open(),
             on_open_change: move |v| open.set(v),
@@ -27,8 +25,7 @@ pub fn Demo() -> Element {
                     margin: 0,
                     "Delete Item?"
                 }
-                button {
-                    class: "button",
+                Button {
                     type: "button",
                     "data-style": "outline",
                     onclick: move |_| {
@@ -37,8 +34,7 @@ pub fn Demo() -> Element {
                     },
                     "Confirm"
                 }
-                button {
-                    class: "button",
+                Button {
                     type: "button",
                     "data-style": "outline",
                     onclick: move |_| {

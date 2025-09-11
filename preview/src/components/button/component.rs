@@ -26,7 +26,12 @@ impl ButtonVariant {
 #[component]
 pub fn Button(
     #[props(default)] variant: ButtonVariant,
-    #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
+    #[props(extends=GlobalAttributes)]
+    #[props(extends=button)]
+    attributes: Vec<Attribute>,
+    onclick: Option<EventHandler<MouseEvent>>,
+    onmousedown: Option<EventHandler<MouseEvent>>,
+    onmouseup: Option<EventHandler<MouseEvent>>,
     children: Element,
 ) -> Element {
     rsx! {
@@ -38,6 +43,21 @@ pub fn Button(
         button {
             class: "button",
             "data-style": variant.class(),
+            onclick: move |event| {
+                if let Some(f) = &onclick {
+                    f.call(event);
+                }
+            },
+            onmousedown: move |event| {
+                if let Some(f) = &onmousedown {
+                    f.call(event);
+                }
+            },
+            onmouseup: move |event| {
+                if let Some(f) = &onmouseup {
+                    f.call(event);
+                }
+            },
             ..attributes,
             {children}
         }

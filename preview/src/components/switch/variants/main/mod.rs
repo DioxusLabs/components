@@ -5,10 +5,7 @@ use dioxus::prelude::*;
 pub fn Demo() -> Element {
     let mut checked = use_signal(|| false);
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/switch/style.css"),
-        }
+
         div { class: "switch-example",
             Switch {
                 checked: checked(),

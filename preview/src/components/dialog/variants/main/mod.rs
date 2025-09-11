@@ -1,3 +1,5 @@
+use crate::components::button::component::Button;
+
 use super::super::component::{DialogContent, DialogDescription, DialogRoot, DialogTitle};
 use dioxus::prelude::*;
 
@@ -6,12 +8,7 @@ pub fn Demo() -> Element {
     let mut open = use_signal(|| false);
 
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/button/style.css"),
-        }
-        button {
-            class: "button",
+        Button {
             type: "button",
             "data-style": "outline",
             style: "margin-bottom: 1.5rem;",

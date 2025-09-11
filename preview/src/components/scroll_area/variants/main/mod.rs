@@ -5,10 +5,7 @@ use dioxus_primitives::scroll_area::ScrollDirection;
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/scroll_area/style.css"),
-        }
+
         ScrollArea {
             width: "10em",
             height: "10em",

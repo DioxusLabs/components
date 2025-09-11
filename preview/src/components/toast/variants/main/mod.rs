@@ -1,3 +1,5 @@
+use crate::components::button::component::Button;
+
 use super::super::component::*;
 use dioxus::prelude::*;
 use dioxus_primitives::toast::{use_toast, ToastOptions};
@@ -15,13 +17,7 @@ fn ToastButton() -> Element {
     let toast_api = use_toast();
 
     rsx! {
-        // Additional styles just for the trigger button
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/button/style.css"),
-        }
-        button {
-            class: "button",
+        Button {
             type: "button",
             "data-style": "outline",
             onclick: move |_| {

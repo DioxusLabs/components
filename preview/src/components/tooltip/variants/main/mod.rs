@@ -5,10 +5,7 @@ use dioxus_primitives::ContentSide;
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/tooltip/style.css"),
-        }
+
         Tooltip {
             TooltipTrigger {
                 "Rich content"
