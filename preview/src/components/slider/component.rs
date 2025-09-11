@@ -8,7 +8,7 @@ pub fn Slider(props: SliderProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/slider/variants/main/style.css"),
+            href: asset!("/src/components/slider/style.css"),
         }
         slider::Slider {
             class: "slider",

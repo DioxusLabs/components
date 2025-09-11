@@ -6,7 +6,7 @@ pub fn Toolbar(props: ToolbarProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/toolbar/variants/main/style.css"),
+            href: asset!("/src/components/toolbar/style.css"),
         }
         toolbar::Toolbar {
             class: "toolbar",

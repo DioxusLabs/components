@@ -30,6 +30,11 @@ pub fn Button(
     children: Element,
 ) -> Element {
     rsx! {
+        document::Link {
+            rel: "stylesheet",
+            href: asset!("/src/components/button/style.css"),
+        }
+
         button {
             class: "button",
             "data-style": variant.class(),

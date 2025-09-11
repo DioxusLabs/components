@@ -8,7 +8,7 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/context_menu/variants/main/style.css"),
+            href: asset!("/src/components/context_menu/style.css"),
         }
         context_menu::ContextMenu {
             disabled: props.disabled,

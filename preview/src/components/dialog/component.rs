@@ -8,7 +8,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/dialog/variants/main/style.css"),
+            href: asset!("/src/components/dialog/style.css"),
         }
         dialog::DialogRoot {
             class: "dialog-backdrop",

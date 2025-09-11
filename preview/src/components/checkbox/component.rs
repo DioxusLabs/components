@@ -6,7 +6,7 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/checkbox/variants/main/style.css"),
+            href: asset!("/src/components/checkbox/style.css"),
         }
         checkbox::Checkbox {
             class: "checkbox",

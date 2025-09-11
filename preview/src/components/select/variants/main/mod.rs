@@ -40,7 +40,7 @@ pub fn Demo() -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/select/variants/main/style.css"),
+            href: asset!("/src/components/select/style.css"),
         }
         Select::<Option<Fruit>> {
             placeholder: "Select a fruit...",

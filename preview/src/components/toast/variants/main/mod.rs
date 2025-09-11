@@ -18,7 +18,7 @@ fn ToastButton() -> Element {
         // Additional styles just for the trigger button
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/button/variants/main/style.css"),
+            href: asset!("/src/components/button/style.css"),
         }
         button {
             class: "button",

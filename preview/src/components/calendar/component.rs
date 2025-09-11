@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_primitives::calendar::{
-    self, CalendarGridProps, CalendarHeaderProps, CalendarNavigationProps, CalendarProps,
-    CalendarSelectMonthProps, CalendarSelectYearProps,
+    self, CalendarGridProps, CalendarHeaderProps, CalendarMonthTitleProps, CalendarNavigationProps,
+    CalendarProps, CalendarSelectMonthProps, CalendarSelectYearProps,
 };
 
 #[component]
@@ -9,7 +9,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/calendar/variants/main/style.css"),
+            href: asset!("/src/components/calendar/style.css"),
         }
         div { class: "calendar",
             calendar::Calendar {
@@ -116,4 +116,9 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             attributes: props.attributes,
         }
     }
+}
+
+#[component]
+pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
+    calendar::CalendarMonthTitle(props)
 }

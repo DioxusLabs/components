@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/src/components/tabs/variants/main/style.css") }
+        document::Link { rel: "stylesheet", href: asset!("/src/components/tabs/style.css") }
         Tabs {
             default_value: "tab1".to_string(),
             horizontal: true,

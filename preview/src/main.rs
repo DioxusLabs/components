@@ -15,6 +15,8 @@ mod components;
 struct ComponentDemoData {
     name: &'static str,
     docs: &'static str,
+    component: HighlightedCode,
+    style: HighlightedCode,
     variants: &'static [ComponentVariantDemoData],
 }
 
@@ -22,7 +24,6 @@ struct ComponentDemoData {
 struct ComponentVariantDemoData {
     name: &'static str,
     rs_highlighted: HighlightedCode,
-    css_highlighted: HighlightedCode,
     component: fn() -> Element,
 }
 
@@ -131,7 +132,7 @@ fn NavigationLayout() -> Element {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/theme.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
-        document::Link { rel: "stylesheet", href: asset!("/src/components/tabs/variants/main/style.css") }
+        document::Link { rel: "stylesheet", href: asset!("/src/components/tabs/style.css") }
         Navbar {}
         Outlet::<Route> {}
     }
@@ -539,7 +540,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 align_items: "center",
                 TabContent {
                     index: 0usize,
-                    class: "tabs-content",
+                    class: "tabs-content tabs-content-themed",
                     value: "main.rs",
                     width: "100%",
                     position: "relative",
@@ -548,7 +549,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 }
                 TabContent {
                     index: 1usize,
-                    class: "tabs-content",
+                    class: "tabs-content tabs-content-themed",
                     value: "style.css",
                     width: "100%",
                     position: "relative",
@@ -557,7 +558,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 }
                 TabContent {
                     index: 2usize,
-                    class: "tabs-content",
+                    class: "tabs-content tabs-content-themed",
                     value: "theme.css",
                     width: "100%",
                     position: "relative",
@@ -565,6 +566,71 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     {expand.clone()}
                 }
             }
+        }
+    }
+}
+
+#[component]
+fn ColapsibleCodeBlock(highlighted: HighlightedCode) -> Element {
+    let mut collapsed = use_signal(|| true);
+
+    let expand = rsx! {
+        button {
+            aria_label: if collapsed() { "Expand code" } else { "Collapse code" },
+            width: "100%",
+            height: "2rem",
+            color: "var(--secondary-color-4)",
+            background_color: "rgba(0, 0, 0, 0)",
+            border_radius: "0 0 0.5rem 0.5rem",
+            border: "none",
+            text_align: "center",
+            type: "button",
+            onclick: move |_| {
+                collapsed.toggle();
+            },
+            if collapsed() {
+                svg {
+                    fill: "none",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    stroke: "var(--secondary-color-4)",
+                    stroke_linecap: "round",
+                    stroke_linejoin: "round",
+                    stroke_width: "2",
+                    width: "20px",
+                    height: "20px",
+                    view_box: "0 0 24 24",
+                    polyline { points: "6 9 12 15 18 9" }
+                }
+            } else {
+                svg {
+                    fill: "none",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    stroke: "var(--secondary-color-4)",
+                    stroke_linecap: "round",
+                    stroke_linejoin: "round",
+                    stroke_width: "2",
+                    width: "20px",
+                    height: "20px",
+                    view_box: "0 0 24 24",
+                    polyline { points: "6 15 12 9 18 15" }
+                }
+            }
+        }
+    };
+
+    rsx! {
+        div {
+            class: "tabs-content",
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            flex_direction: "column",
+            justify_content: "center",
+            align_items: "center",
+            border_bottom_left_radius: "0.5rem",
+            border_bottom_right_radius: "0.5rem",
+            CodeBlock { source: highlighted, collapsed: collapsed() }
+            {expand.clone()}
         }
     }
 }
@@ -596,22 +662,39 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
         name,
         docs,
         variants,
+        component,
+        style,
     } = demo;
     let name = name.replace("_", " ");
     let [main, variants @ ..] = variants else {
         unreachable!("Expected at least one variant for component: {}", name);
     };
+
     rsx! {
         main { class: "component-demo",
             h1 { class: "component-title", {name} }
-            ComponentVariantHighlight { variant: main.clone(), main_variant: true }
-            div { class: "component-description",
-                div { dangerous_inner_html: docs }
-            }
-            if !variants.is_empty() {
-                h2 { class: "component-variants-title", "Variants" }
-                for variant in variants {
-                    ComponentVariantHighlight { variant: variant.clone(), main_variant: false }
+            div { class: "component-preview",
+                div { class: "component-preview-contents",
+                    ComponentVariantHighlight { variant: main.clone(), main_variant: true }
+                    div { class: "component-installation",
+                        h2 { "Installation" }
+                        ol { class: "component-installation-list",
+                            li { "If you haven't already, add the theme.css file to your project and import it in the root of your app." }
+                            li { "Add the style.css file to your project." }
+                            li { "Create a component based on the main.rs below." }
+                            li { "Modify your components and styles as needed." }
+                        }
+                    }
+                    ComponentCode { rs_highlighted: component, css_highlighted: style }
+                    div { class: "component-description",
+                        div { dangerous_inner_html: docs }
+                    }
+                    if !variants.is_empty() {
+                        h2 { class: "component-variants-title", "Variants" }
+                        for variant in variants {
+                            ComponentVariantHighlight { variant: variant.clone(), main_variant: false }
+                        }
+                    }
                 }
             }
         }
@@ -622,32 +705,58 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
 fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bool) -> Element {
     let ComponentVariantDemoData {
         name,
-        rs_highlighted,
-        css_highlighted,
+        rs_highlighted: highlighted,
         component: Comp,
     } = variant;
     rsx! {
-        div { class: "component-preview",
-            div { class: "component-preview-contents",
-                if !main_variant {
-                    h3 {
-                        "{name}"
-                    }
+        if !main_variant {
+            h3 {
+                "{name}"
+            }
+        }
+        Tabs {
+            class: "tabs",
+            default_value: "demo",
+            border_bottom_left_radius: "0.5rem",
+            border_bottom_right_radius: "0.5rem",
+            horizontal: true,
+            width: "100%",
+            TabList { class: "tabs-list",
+                TabTrigger {
+                    class: "tabs-trigger",
+                    value: "demo",
+                    index: 0usize,
+                    "demo"
                 }
-                div { class: "component-preview-frame", Comp {} }
-                if main_variant {
-                    div { class: "component-installation",
-                        h2 { "Installation" }
-                        ol { class: "component-installation-list",
-                            li { "If you haven't already, add the theme.css file to your project and import it in the root of your app." }
-                            li { "Add the style.css file to your project." }
-                            li { "Create a component based on the main.rs below." }
-                            li { "Modify your components and styles as needed." }
-                        }
-                    }
+                TabTrigger {
+                    class: "tabs-trigger",
+                    value: "code",
+                    index: 1usize,
+                    "code"
                 }
-                div { class: "component-code",
-                    ComponentCode { rs_highlighted, css_highlighted }
+            }
+            div {
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                flex_direction: "column",
+                justify_content: "center",
+                align_items: "center",
+                TabContent {
+                    index: 0usize,
+                    class: "tabs-content component-preview-frame",
+                    value: "demo",
+                    width: "100%",
+                    position: "relative",
+                    Comp {}
+                }
+                TabContent {
+                    index: 1usize,
+                    class: "tabs-content component-preview-frame",
+                    value: "code",
+                    width: "100%",
+                    position: "relative",
+                    ColapsibleCodeBlock { highlighted }
                 }
             }
         }

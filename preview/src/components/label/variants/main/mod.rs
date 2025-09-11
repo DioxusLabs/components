@@ -6,7 +6,7 @@ pub fn Demo() -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/input/variants/main/style.css"),
+            href: asset!("/src/components/input/style.css"),
         }
 
         div {

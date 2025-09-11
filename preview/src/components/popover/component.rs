@@ -8,7 +8,7 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/popover/variants/main/style.css"),
+            href: asset!("/src/components/popover/style.css"),
         }
         popover::PopoverRoot {
             class: "popover",

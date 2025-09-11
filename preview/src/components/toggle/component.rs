@@ -6,7 +6,7 @@ pub fn Toggle(props: ToggleProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/toggle/variants/main/style.css"),
+            href: asset!("/src/components/toggle/style.css"),
         }
         toggle::Toggle {
             class: "toggle",

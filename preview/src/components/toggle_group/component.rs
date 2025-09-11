@@ -6,7 +6,7 @@ pub fn ToggleGroup(props: ToggleGroupProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/toggle_group/variants/main/style.css"),
+            href: asset!("/src/components/toggle_group/style.css"),
         }
         toggle_group::ToggleGroup {
             class: "toggle-group",

@@ -8,7 +8,7 @@ pub fn Demo() -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/button/variants/main/style.css"),
+            href: asset!("/src/components/button/style.css"),
         }
         button {
             class: "button",

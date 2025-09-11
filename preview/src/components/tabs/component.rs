@@ -6,7 +6,7 @@ pub fn Tabs(props: TabsProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/tabs/variants/main/style.css"),
+            href: asset!("/src/components/tabs/style.css"),
         }
         tabs::Tabs {
             class: "tabs",
@@ -52,7 +52,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
 pub fn TabContent(props: TabContentProps) -> Element {
     rsx! {
         tabs::TabContent {
-            class: "tabs-content",
+            class: "tabs-content tabs-content-themed",
             value: props.value,
             id: props.id,
             index: props.index,

@@ -8,7 +8,7 @@ pub fn Navbar(props: NavbarProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/navbar/variants/main/style.css"),
+            href: asset!("/src/components/navbar/style.css"),
         }
         navbar::Navbar {
             class: "navbar",

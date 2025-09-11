@@ -1,9 +1,5 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::calendar::{
-    Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation,
-    CalendarNextMonthButton, CalendarPreviousMonthButton,
-};
-
 use time::{Date, UtcDateTime};
 
 #[component]
@@ -11,10 +7,6 @@ pub fn Demo() -> Element {
     let mut selected_date = use_signal(|| None::<Date>);
     let mut view_date = use_signal(|| UtcDateTime::now().date());
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/calendar/variants/simple/style.css"),
-        }
         div { class: "calendar-example", style: "padding: 20px;",
             Calendar {
                 selected_date: selected_date(),
