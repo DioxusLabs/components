@@ -54,8 +54,8 @@ pub enum TabsVariant {
 }
 
 impl TabsVariant {
-    /// Returns the string representation of the variant.
-    pub fn as_str(&self) -> &'static str {
+    /// Convert the variant to a string for use in class names
+    fn to_class(self) -> &'static str {
         match self {
             TabsVariant::Default => "default",
             TabsVariant::Ghost => "ghost",
@@ -72,7 +72,7 @@ pub fn Tabs(props: TabsProps) -> Element {
         }
         tabs::Tabs {
             class: props.class + " tabs",
-            "data-variant": props.variant.as_str(),
+            "data-variant": props.variant.to_class(),
             value: props.value,
             default_value: props.default_value,
             on_value_change: props.on_value_change,
