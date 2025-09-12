@@ -6,7 +6,7 @@ pub fn Progress(props: ProgressProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/progress/style.css"),
+            href: asset!("./style.css"),
         }
         progress::Progress {
             class: "progress",

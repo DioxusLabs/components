@@ -132,7 +132,6 @@ fn NavigationLayout() -> Element {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/theme.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
-        document::Link { rel: "stylesheet", href: asset!("/src/components/tabs/style.css") }
         Navbar {}
         Outlet::<Route> {}
     }

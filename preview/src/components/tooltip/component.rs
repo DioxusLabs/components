@@ -6,7 +6,7 @@ pub fn Tooltip(props: TooltipProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/tooltip/style.css"),
+            href: asset!("./style.css"),
         }
         tooltip::Tooltip {
             class: "tooltip",

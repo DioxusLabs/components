@@ -3,7 +3,7 @@ use dioxus_primitives::checkbox::{Checkbox, CheckboxIndicator};
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/src/components/form/style.css") }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         form {
             class: "form-example",
             onsubmit: move |e| {

@@ -9,7 +9,7 @@ pub fn Menubar(props: MenubarProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/menubar/style.css"),
+            href: asset!("./style.css"),
         }
         menubar::Menubar {
             class: "menubar",

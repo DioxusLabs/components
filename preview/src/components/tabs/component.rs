@@ -68,7 +68,7 @@ pub fn Tabs(props: TabsProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/tabs/style.css"),
+            href: asset!("./style.css"),
         }
         tabs::Tabs {
             class: props.class + " tabs",

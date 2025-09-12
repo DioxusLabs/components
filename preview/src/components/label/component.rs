@@ -6,7 +6,7 @@ pub fn Label(props: LabelProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/label/style.css"),
+            href: asset!("./style.css"),
         }
         label::Label {
             class: "label",

@@ -8,7 +8,7 @@ pub fn HoverCard(props: HoverCardProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/hover_card/style.css"),
+            href: asset!("./style.css"),
         }
         hover_card::HoverCard {
             class: "hover-card",

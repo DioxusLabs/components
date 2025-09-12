@@ -8,7 +8,7 @@ pub fn Accordion(props: AccordionProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/accordion/style.css"),
+            href: asset!("./style.css"),
         }
         accordion::Accordion {
             class: "accordion",

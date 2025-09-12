@@ -9,7 +9,7 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/dropdown_menu/style.css"),
+            href: asset!("./style.css"),
         }
         dropdown_menu::DropdownMenu {
             class: "dropdown-menu",

@@ -10,7 +10,7 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/alert_dialog/style.css"),
+            href: asset!("./style.css"),
         }
         alert_dialog::AlertDialogRoot {
             class: "alert-dialog-backdrop",

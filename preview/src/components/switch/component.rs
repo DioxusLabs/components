@@ -6,7 +6,7 @@ pub fn Switch(props: SwitchProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/switch/style.css"),
+            href: asset!("./style.css"),
         }
         switch::Switch {
             class: "switch",

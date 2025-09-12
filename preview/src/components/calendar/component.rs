@@ -9,7 +9,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/calendar/style.css"),
+            href: asset!("./style.css"),
         }
         div { class: "calendar",
             calendar::Calendar {

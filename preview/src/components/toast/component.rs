@@ -6,7 +6,7 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/toast/style.css"),
+            href: asset!("./style.css"),
         }
         toast::ToastProvider {
             default_duration: props.default_duration,

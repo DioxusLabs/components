@@ -9,7 +9,7 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/select/style.css"),
+            href: asset!("./style.css"),
         }
         select::Select {
             class: "select",

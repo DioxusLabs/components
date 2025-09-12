@@ -50,7 +50,7 @@ pub fn Avatar(props: AvatarProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/avatar/style.css"),
+            href: asset!("./style.css"),
         }
 
         avatar::Avatar {

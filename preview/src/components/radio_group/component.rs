@@ -6,7 +6,7 @@ pub fn RadioGroup(props: RadioGroupProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/radio_group/style.css"),
+            href: asset!("./style.css"),
         }
         radio_group::RadioGroup {
             class: "radio-group",

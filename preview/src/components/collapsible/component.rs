@@ -8,7 +8,7 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/collapsible/style.css"),
+            href: asset!("./style.css"),
         }
         collapsible::Collapsible {
             keep_mounted: props.keep_mounted,

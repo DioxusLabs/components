@@ -6,7 +6,7 @@ pub fn Separator(props: SeparatorProps) -> Element {
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/separator/style.css"),
+            href: asset!("./style.css"),
         }
         separator::Separator {
             class: "separator",

@@ -10,7 +10,7 @@ pub fn Input(
     rsx! {
         document::Link {
             rel: "stylesheet",
-            href: asset!("/src/components/input/style.css"),
+            href: asset!("./style.css"),
         }
         input {
             class: "input",
