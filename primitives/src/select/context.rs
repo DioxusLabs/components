@@ -66,13 +66,13 @@ pub(super) struct SelectContext {
     /// The focus state for the select
     pub focus_state: FocusState,
     /// Whether the select is disabled
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
     /// The placeholder text
-    pub placeholder: ReadOnlySignal<String>,
+    pub placeholder: ReadSignal<String>,
     /// Task handle for clearing typeahead buffer
     pub typeahead_clear_task: Signal<Option<Task>>,
     /// Timeout before clearing typeahead buffer
-    pub typeahead_timeout: ReadOnlySignal<Duration>,
+    pub typeahead_timeout: ReadSignal<Duration>,
 }
 
 impl SelectContext {
@@ -158,14 +158,14 @@ pub(super) struct OptionState {
 #[derive(Clone, Copy)]
 pub(super) struct SelectOptionContext {
     /// Whether this option is currently selected
-    pub selected: ReadOnlySignal<bool>,
+    pub selected: ReadSignal<bool>,
 }
 
 /// Context for children of select list components to know if they should render
 #[derive(Clone, Copy)]
 pub(super) struct SelectListContext {
     /// Whether to render in the dom (or just run logic)
-    pub render: ReadOnlySignal<bool>,
+    pub render: ReadSignal<bool>,
 }
 
 /// Context for select group components

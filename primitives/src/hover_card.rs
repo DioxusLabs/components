@@ -10,7 +10,7 @@ struct HoverCardCtx {
     // State
     open: Memo<bool>,
     set_open: Callback<bool>,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 
     // ARIA attributes
     content_id: Signal<String>,
@@ -20,7 +20,7 @@ struct HoverCardCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct HoverCardProps {
     /// Whether the hover card is open
-    pub open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadSignal<Option<bool>>,
 
     /// Default open state
     #[props(default)]
@@ -32,7 +32,7 @@ pub struct HoverCardProps {
 
     /// Whether the hover card is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Additional attributes for the hover card
     #[props(extends = GlobalAttributes)]
@@ -113,7 +113,7 @@ pub fn HoverCard(props: HoverCardProps) -> Element {
 pub struct HoverCardTriggerProps {
     /// Optional ID for the trigger element
     #[props(default)]
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// Additional attributes for the hover card trigger
     #[props(extends = GlobalAttributes)]
@@ -211,7 +211,7 @@ pub fn HoverCardTrigger(props: HoverCardTriggerProps) -> Element {
 pub struct HoverCardContentProps {
     /// Optional ID for the hover card content
     #[props(default)]
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// Side of the trigger to place the hover card
     #[props(default = ContentSide::Top)]

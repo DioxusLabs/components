@@ -3,6 +3,7 @@
 use dioxus::document;
 use dioxus::prelude::*;
 
+use crate::use_global_escape_listener;
 use crate::{
     use_animated_open, use_controlled, use_id_or, use_unique_id, ContentAlign, ContentSide,
     FOCUS_TRAP_JS,
@@ -17,7 +18,7 @@ struct PopoverCtx {
 
     // Whether the dialog is a modal and should capture focus.
     #[allow(unused)]
-    is_modal: ReadOnlySignal<bool>,
+    is_modal: ReadSignal<bool>,
     labelledby: Signal<String>,
 }
 
@@ -25,11 +26,11 @@ struct PopoverCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverRootProps {
     /// Whether the popover is a modal and should capture focus.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub is_modal: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub is_modal: ReadSignal<bool>,
 
     /// The controlled open state of the popover.
-    pub open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadSignal<Option<bool>>,
 
     /// The default open state when uncontrolled.
     #[props(default)]
@@ -112,21 +113,7 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
     // Add a escape key listener to the document when the dialog is open. We can't
     // just add this to the dialog itself because it might not be focused if the user
     // is highlighting text or interacting with another element.
-    use_effect(move || {
-        let mut escape = document::eval(
-            "document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape') {
-                    event.preventDefault();
-                    dioxus.send(true);
-                }
-            });",
-        );
-        spawn(async move {
-            while let Ok(true) = escape.recv().await {
-                set_open.call(false);
-            }
-        });
-    });
+    use_global_escape_listener(move || set_open.call(false));
 
     rsx! {
         div {
@@ -141,7 +128,7 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverProps {
     /// The id of the popover content element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// CSS class for the popover content.
     #[props(default)]

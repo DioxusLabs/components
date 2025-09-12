@@ -3,6 +3,7 @@
 use dioxus::document;
 use dioxus::prelude::*;
 
+use crate::use_global_escape_listener;
 use crate::{use_animated_open, use_controlled, use_id_or, use_unique_id, FOCUS_TRAP_JS};
 
 #[derive(Clone, Copy)]
@@ -14,7 +15,7 @@ struct DialogCtx {
 
     // Whether the dialog is a modal and should capture focus.
     #[allow(unused)]
-    is_modal: ReadOnlySignal<bool>,
+    is_modal: ReadSignal<bool>,
     dialog_labelledby: Signal<String>,
     dialog_describedby: Signal<String>,
 }
@@ -23,14 +24,14 @@ struct DialogCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogRootProps {
     /// The ID of the dialog root element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// Whether the dialog is modal. If true, it will trap focus within the dialog when open.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub is_modal: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub is_modal: ReadSignal<bool>,
 
     /// The controlled `open` state of the dialog.
-    pub open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadSignal<Option<bool>>,
 
     /// The default `open` state of the dialog if it is not controlled.
     #[props(default)]
@@ -112,21 +113,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
     // Add a escape key listener to the document when the dialog is open. We can't
     // just add this to the dialog itself because it might not be focused if the user
     // is highlighting text or interacting with another element.
-    use_effect(move || {
-        let mut escape = document::eval(
-            "document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape') {
-                    event.preventDefault();
-                    dioxus.send(true);
-                }
-            });",
-        );
-        spawn(async move {
-            while let Ok(true) = escape.recv().await {
-                set_open.call(false);
-            }
-        });
-    });
+    use_global_escape_listener(move || set_open.call(false));
 
     let unique_id = use_unique_id();
     let id = use_id_or(unique_id, props.id);
@@ -158,7 +145,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogProps {
     /// The ID of the dialog content element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// The class to apply to the dialog content element.
     #[props(default)]
@@ -270,7 +257,7 @@ pub fn DialogContent(props: DialogProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogTitleProps {
     /// The ID of the dialog title element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
     /// Additional attributes for the dialog title element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,
@@ -338,7 +325,7 @@ pub fn DialogTitle(props: DialogTitleProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogDescriptionProps {
     /// The ID of the dialog description element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
     /// Additional attributes for the dialog description element.
     #[props(extends = GlobalAttributes)]
     attributes: Vec<Attribute>,

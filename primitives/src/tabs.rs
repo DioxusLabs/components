@@ -9,16 +9,16 @@ use dioxus::prelude::*;
 #[derive(Clone, Copy)]
 struct TabsContext {
     // State
-    value: ReadOnlySignal<String>,
+    value: ReadSignal<String>,
     set_value: Callback<String>,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 
     // Focus state
     focus: FocusState,
 
     // Orientation
-    horizontal: ReadOnlySignal<bool>,
-    roving_loop: ReadOnlySignal<bool>,
+    horizontal: ReadSignal<bool>,
+    roving_loop: ReadSignal<bool>,
 
     // ARIA attributes
     tab_content_ids: Signal<Vec<String>>,
@@ -28,7 +28,7 @@ struct TabsContext {
 #[derive(Props, Clone, PartialEq)]
 pub struct TabsProps {
     /// The controlled value of the active tab.
-    pub value: ReadOnlySignal<Option<String>>,
+    pub value: ReadSignal<Option<String>>,
 
     /// The default active tab value when uncontrolled.
     #[props(default)]
@@ -40,15 +40,15 @@ pub struct TabsProps {
 
     /// Whether the tabs are disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Whether the tabs are horizontal.
     #[props(default)]
-    pub horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadSignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub roving_loop: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub roving_loop: ReadSignal<bool>,
 
     /// Additional attributes to apply to the tabs element.
     #[props(extends = GlobalAttributes)]
@@ -210,11 +210,11 @@ pub struct TabTriggerProps {
     /// must match the `value` prop of the corresponding [`TabContent`].
     pub value: String,
     /// The index of the tab trigger. This is used to define the focus order for keyboard navigation.
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// Whether the tab trigger is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// The ID of the tab trigger element.
     pub id: Option<String>,
@@ -357,12 +357,12 @@ pub struct TabContentProps {
     pub value: String,
 
     /// The ID of the tab content element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
     /// The class of the tab content element.
     pub class: Option<String>,
 
     /// The index of the tab content. This is used to define the focus order for keyboard navigation.
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// Additional attributes to apply to the tab content element.
     #[props(extends = GlobalAttributes)]

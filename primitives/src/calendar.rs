@@ -138,16 +138,16 @@ fn previous_month(date: Date) -> Option<Date> {
 #[derive(Copy, Clone)]
 pub struct CalendarContext {
     // State
-    selected_date: ReadOnlySignal<Option<Date>>,
+    selected_date: ReadSignal<Option<Date>>,
     set_selected_date: Callback<Option<Date>>,
     focused_date: Signal<Option<Date>>,
-    view_date: ReadOnlySignal<Date>,
+    view_date: ReadSignal<Date>,
     set_view_date: Callback<Date>,
     format_weekday: Callback<Weekday, String>,
     format_month: Callback<Month, String>,
 
     // Configuration
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
     today: Date,
     first_day_of_week: Weekday,
     min_date: Date,
@@ -208,7 +208,7 @@ fn weekday_abbreviation(weekday: Weekday) -> &'static str {
 pub struct CalendarProps {
     /// The selected date
     #[props(default)]
-    pub selected_date: ReadOnlySignal<Option<Date>>,
+    pub selected_date: ReadSignal<Option<Date>>,
 
     /// Callback when selected date changes
     #[props(default)]
@@ -223,7 +223,7 @@ pub struct CalendarProps {
     pub on_format_month: Callback<Month, String>,
 
     /// The month being viewed
-    pub view_date: ReadOnlySignal<Date>,
+    pub view_date: ReadSignal<Date>,
 
     /// The current date (used for highlighting today)
     #[props(default = UtcDateTime::now().date())]
@@ -235,7 +235,7 @@ pub struct CalendarProps {
 
     /// Whether the calendar is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// First day of the week
     #[props(default = Weekday::Sunday)]

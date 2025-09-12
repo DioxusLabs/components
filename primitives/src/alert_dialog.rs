@@ -1,5 +1,6 @@
 //! Defines the [`AlertDialogRoot`] component and its sub-components.
 
+use crate::use_global_escape_listener;
 use crate::{use_animated_open, use_id_or, use_unique_id, FOCUS_TRAP_JS};
 use dioxus::document;
 use dioxus::prelude::*;
@@ -16,13 +17,13 @@ struct AlertDialogCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogRootProps {
     /// The id of the alert dialog root element. If not provided, a unique id will be generated.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
     /// Whether the alert dialog should be open by default. This is only used if the `open` signal is not provided.
     #[props(default)]
     pub default_open: bool,
     /// The open state of the alert dialog. If this is provided, it will be used to control the open state of the dialog.
     #[props(default)]
-    pub open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadSignal<Option<bool>>,
     /// Callback to handle changes in the open state of the dialog.
     #[props(default)]
     pub on_open_change: Callback<bool>,
@@ -95,21 +96,7 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
     // Add a escape key listener to the document when the dialog is open. We can't
     // just add this to the dialog itself because it might not be focused if the user
     // is highlighting text or interacting with another element.
-    use_effect(move || {
-        let mut escape = document::eval(
-            "document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape') {
-                    event.preventDefault();
-                    dioxus.send(true);
-                }
-            });",
-        );
-        spawn(async move {
-            while let Ok(true) = escape.recv().await {
-                set_open.call(false);
-            }
-        });
-    });
+    use_global_escape_listener(move || set_open.call(false));
 
     let id = use_unique_id();
     let id = use_id_or(id, props.id);
@@ -136,7 +123,7 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogContentProps {
     /// The id of the alert dialog content element. If not provided, a unique id will be generated.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// The class to apply to the alert dialog content element.
     #[props(default)]

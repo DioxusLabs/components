@@ -6,13 +6,13 @@ use std::rc::Rc;
 #[derive(Clone, Copy)]
 struct ToolbarCtx {
     // State
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 
     // Focus management
     focused_index: Signal<Option<usize>>,
 
     // Orientation
-    horizontal: ReadOnlySignal<bool>,
+    horizontal: ReadSignal<bool>,
 }
 
 impl ToolbarCtx {
@@ -38,11 +38,11 @@ impl ToolbarCtx {
 pub struct ToolbarProps {
     /// Whether the toolbar is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Whether the toolbar is horizontal (true) or vertical (false)
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub horizontal: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub horizontal: ReadSignal<bool>,
 
     /// ARIA label for the toolbar
     #[props(default)]
@@ -117,11 +117,11 @@ pub fn Toolbar(props: ToolbarProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ToolbarButtonProps {
     /// Index of the button in the toolbar. This is used to define the focus order for keyboard navigation.
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// Whether the button is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Callback when the button is clicked
     #[props(default)]

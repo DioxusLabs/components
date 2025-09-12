@@ -98,7 +98,7 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderProps {
     /// The controlled value of the slider
-    pub value: ReadOnlySignal<Option<SliderValue>>,
+    pub value: ReadSignal<Option<SliderValue>>,
 
     /// The default value when uncontrolled
     #[props(default = SliderValue::Single(0.0))]
@@ -118,7 +118,7 @@ pub struct SliderProps {
 
     /// Whether the slider is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Orientation of the slider
     #[props(default = true)]
@@ -133,7 +133,7 @@ pub struct SliderProps {
     pub on_value_change: Callback<SliderValue>,
 
     /// The label for the slider (for accessibility)
-    pub label: ReadOnlySignal<Option<String>>,
+    pub label: ReadSignal<Option<String>>,
 
     /// Additional attributes for the slider
     #[props(extends = GlobalAttributes)]
@@ -635,11 +635,11 @@ struct SliderContext {
     min: f64,
     max: f64,
     step: f64,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
     horizontal: bool,
     inverted: bool,
-    dragging: ReadOnlySignal<bool>,
-    label: ReadOnlySignal<Option<String>>,
+    dragging: ReadSignal<bool>,
+    label: ReadSignal<Option<String>>,
 }
 
 impl SliderContext {

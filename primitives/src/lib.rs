@@ -63,7 +63,7 @@ fn use_unique_id() -> Signal<String> {
 // Elements can only have one id so if the user provides their own, we must use it as the aria id.
 fn use_id_or<T: Clone + PartialEq + 'static>(
     mut gen_id: Signal<T>,
-    user_id: ReadOnlySignal<Option<T>>,
+    user_id: ReadSignal<Option<T>>,
 ) -> Memo<T> {
     // First, check if we have a user-provided ID
     let has_user_id = use_memo(move || user_id().is_some());
@@ -87,7 +87,7 @@ fn use_id_or<T: Clone + PartialEq + 'static>(
 
 /// Allows some state to be either controlled or uncontrolled.
 fn use_controlled<T: Clone + PartialEq + 'static>(
-    prop: ReadOnlySignal<Option<T>>,
+    prop: ReadSignal<Option<T>>,
     default: T,
     on_change: Callback<T>,
 ) -> (Memo<T>, Callback<T>) {
@@ -105,6 +105,44 @@ fn use_controlled<T: Clone + PartialEq + 'static>(
 /// Run some cleanup code when the component is unmounted if the effect was run.
 fn use_effect_cleanup<F: FnOnce() + 'static>(#[allow(unused)] cleanup: F) {
     client!(crate::dioxus_core::use_drop(cleanup))
+}
+
+/// Run some cleanup code when the component is unmounted if the effect was run.
+fn use_effect_with_cleanup<F: FnMut() -> C + 'static, C: FnOnce() + 'static>(mut effect: F) {
+    let mut cleanup = use_hook(|| CopyValue::new(None as Option<C>));
+    use_effect(move || {
+        if let Some(cleanup) = cleanup.take() {
+            cleanup();
+        }
+        cleanup.set(Some(effect()));
+    });
+    client!(crate::dioxus_core::use_drop(move || {
+        if let Some(cleanup) = cleanup.take() {
+            cleanup();
+        }
+    }))
+}
+
+fn use_global_escape_listener(mut on_escape: impl FnMut() + Copy + 'static) {
+    use_effect_with_cleanup(move || {
+        let mut escape = document::eval(
+            "let listener = (event) => {
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    dioxus.send(true);
+                }
+            };
+            document.addEventListener('keydown', listener);
+            await dioxus.recv();
+            document.removeEventListener('keydown', listener);",
+        );
+        spawn(async move {
+            while let Ok(true) = escape.recv().await {
+                on_escape();
+            }
+        });
+        move || _ = escape.send(true)
+    });
 }
 
 fn use_animated_open(

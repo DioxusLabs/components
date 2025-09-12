@@ -10,7 +10,7 @@ struct TooltipCtx {
     // State
     open: Memo<bool>,
     set_open: Callback<bool>,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 
     // ARIA attributes
     tooltip_id: Signal<String>,
@@ -20,7 +20,7 @@ struct TooltipCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct TooltipProps {
     /// Whether the tooltip is open
-    pub open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadSignal<Option<bool>>,
 
     /// Default open state when uncontrolled
     #[props(default)]
@@ -32,7 +32,7 @@ pub struct TooltipProps {
 
     /// Whether the tooltip is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Additional attributes for the tooltip
     #[props(extends = GlobalAttributes)]
@@ -206,7 +206,7 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
 pub struct TooltipContentProps {
     /// Optional ID for the tooltip content
     #[props(default)]
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// Side of the trigger to place the tooltip
     #[props(default = ContentSide::Top)]

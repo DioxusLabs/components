@@ -12,7 +12,7 @@ use super::super::context::SelectContext;
 pub struct SelectListProps {
     /// The ID of the list for ARIA attributes
     #[props(default)]
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// Additional attributes for the list
     #[props(extends = GlobalAttributes)]

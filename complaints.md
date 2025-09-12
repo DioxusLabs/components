@@ -6,22 +6,22 @@ https://github.com/DioxusLabs/dioxus/issues/3919
 ### Setting default of signal prop is verbose.
 https://github.com/DioxusLabs/dioxus/issues/3920
 
-It's verbose to set a `Signal` or `ReadOnlySignal`'s default value through props.
+It's verbose to set a `Signal` or `ReadSignal`'s default value through props.
 ```rust
 #[derive(Props, Clone, PartialEq)]
 pub struct SomeProps {
 
     // This sets bool to be false
     #[props(default)] 
-    value: ReadOnlySignal<bool>,
+    value: ReadSignal<bool>,
 
-    // This is what I'd like, except it wants a ReadOnlySignal
+    // This is what I'd like, except it wants a ReadSignal
     #[props(default = true)] 
-    value: ReadOnlySignal<bool>,
+    value: ReadSignal<bool>,
 
     // Instead you have to do this:
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    value: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    value: ReadSignal<bool>,
 
     // Same for a regular signal:
     #[props(default = Signal::new(true))]
@@ -73,16 +73,16 @@ pub fn App() -> Element {
 
 ```
 
-### `From<Signal<T>>` Is Not Implemented For `Option<ReadOnlySignal<T>>`
+### `From<Signal<T>>` Is Not Implemented For `Option<ReadSignal<T>>`
 
-### `From<T>` Is Not Implemented For `Option<ReadOnlySignal<T>>`
+### `From<T>` Is Not Implemented For `Option<ReadSignal<T>>`
 `T` can already be converted to `Option<Signal<T>>` when provided thru props.
-This however doesn't work for `Option<ReadOnlySignal<T>>`.
+This however doesn't work for `Option<ReadSignal<T>>`.
 
 ### Number Props Don't Type Infer
 Normally Rust would automatically determine that a number should be of type thru inference but for props it doesn't work when the prop is a signal.
 
-`index: ReadOnlySignal<usize>,` fails
+`index: ReadSignal<usize>,` fails
 `index: usize,` works
 
 ```rust
