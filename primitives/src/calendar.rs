@@ -134,6 +134,13 @@ fn previous_month(date: Date) -> Option<Date> {
     .ok()
 }
 
+fn replace_month(date: Date, month: Month) -> Date {
+    let year = date.year();
+    let num_days = month.length(year);
+    Date::from_calendar_date(year, month, std::cmp::min(date.day(), num_days))
+        .expect("invalid or out-of-range date")
+}
+
 /// The context provided by the [`Calendar`] component to its children.
 #[derive(Copy, Clone)]
 pub struct CalendarContext {
@@ -1027,11 +1034,11 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
         // Get the current view date from context
         let view_date = (calendar.view_date)();
         let mut min_month = Month::January;
-        if view_date.replace_month(min_month).unwrap() < calendar.min_date {
+        if replace_month(view_date, min_month) < calendar.min_date {
             min_month = calendar.min_date.month();
         }
         let mut max_month = Month::December;
-        if view_date.replace_month(max_month).unwrap() > calendar.max_date {
+        if replace_month(view_date, max_month) > calendar.max_date {
             max_month = calendar.max_date.month();
         }
 
@@ -1144,11 +1151,11 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
         let view_date = (calendar.view_date)();
         let month = view_date.month();
         let mut min_year = calendar.min_date.year();
-        if calendar.min_date.replace_month(month).unwrap() < calendar.min_date {
+        if replace_month(calendar.min_date, month) < calendar.min_date {
             min_year += 1;
         }
         let mut max_year = calendar.max_date.year();
-        if calendar.max_date.replace_month(month).unwrap() > calendar.max_date {
+        if replace_month(calendar.max_date, month) > calendar.max_date {
             max_year -= 1;
         }
 
