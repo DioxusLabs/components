@@ -14,10 +14,10 @@ pub struct ProgressProps {
 
     /// Additional attributes to apply to the progress element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the progress component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Progress
@@ -87,9 +87,9 @@ pub fn Progress(props: ProgressProps) -> Element {
 pub struct ProgressIndicatorProps {
     /// Additional attributes to apply to the indicator element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the indicator component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # ProgressIndicator

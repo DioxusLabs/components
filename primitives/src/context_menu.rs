@@ -44,9 +44,10 @@ pub struct ContextMenuProps {
 
     /// Additional attributes for the context menu element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
+
     /// The children of the context menu component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # ContextMenu
@@ -166,9 +167,10 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
 pub struct ContextMenuTriggerProps {
     /// Additional attributes for the context menu trigger element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
+
     /// The children of the context menu trigger.
-    children: Element,
+    pub children: Element,
 }
 
 /// # ContextMenuTrigger
@@ -245,13 +247,14 @@ pub fn ContextMenuTrigger(props: ContextMenuTriggerProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ContextMenuContentProps {
     /// The ID of the context menu content element.
-    id: ReadOnlySignal<Option<String>>,
+    pub id: ReadOnlySignal<Option<String>>,
 
     /// Additional attributes for the context menu content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
+
     /// The children of the context menu content.
-    children: Element,
+    pub children: Element,
 }
 
 /// # ContextMenuContent
@@ -395,9 +398,10 @@ pub struct ContextMenuItemProps {
 
     /// Additional attributes for the context menu item element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
+
     /// The children of the context menu item
-    children: Element,
+    pub children: Element,
 }
 
 /// # ContextMenuItem

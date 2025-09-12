@@ -10,10 +10,10 @@ pub struct LabelProps {
 
     /// Additional attributes to apply to the label element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the label element
-    children: Element,
+    pub children: Element,
 }
 
 /// # Label

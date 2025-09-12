@@ -16,10 +16,10 @@ pub struct SeparatorProps {
 
     /// Additional attributes to apply to the separator element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the separator component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Separator
