@@ -8,6 +8,12 @@ dioxus-primitives = { path = "primitives" }
 dioxus = "^0.7.0-rc.0"
 tracing = { version = "0.1", features = ["std"] }
 
+[patch.crates-io]
+dioxus-core = { git = "https://github.com/ealmloff/dioxus", branch = "all-hydration-fixes" }
+dioxus-signals = { git = "https://github.com/ealmloff/dioxus", branch = "all-hydration-fixes" }
+generational-box = { git = "https://github.com/ealmloff/dioxus", branch = "all-hydration-fixes" }
+dioxus = { git = "https://github.com/ealmloff/dioxus", branch = "all-hydration-fixes" }
+
 [profile]
 
 [profile.wasm-dev]

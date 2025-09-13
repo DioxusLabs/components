@@ -33,7 +33,7 @@ jobs:
       - name: Install CLI
         run: cargo binstall dioxus-cli -y --force --version 0.7.0-rc.0
       - name: Build
-        run: cd preview && dx build --platform web --release --base-path "components"
+        run: cd preview && dx build --platform web --features fullstack --fullstack --ssg --release --base-path "components"
       - name: Copy output
         run: cp -r target/dx/preview/release/web/public docs
       - name: Add gh pages 404
