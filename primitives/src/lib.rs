@@ -123,19 +123,23 @@ fn use_effect_with_cleanup<F: FnMut() -> C + 'static, C: FnOnce() + 'static>(mut
     }))
 }
 
-fn use_global_escape_listener(mut on_escape: impl FnMut() + Copy + 'static) {
+fn use_global_escape_listener(on_escape: impl FnMut() + Copy + 'static) {
+    use_global_keydown_listener("Escape", on_escape);
+}
+
+fn use_global_keydown_listener(key: &'static str, mut on_escape: impl FnMut() + Copy + 'static) {
     use_effect_with_cleanup(move || {
-        let mut escape = document::eval(
-            "let listener = (event) => {
-                if (event.key === 'Escape') {
+        let mut escape = document::eval(&format!(
+            "function listener(event) => {{
+                if (event.key === '{key}') {{
                     event.preventDefault();
                     dioxus.send(true);
-                }
-            };
+                }}
+            }}
             document.addEventListener('keydown', listener);
             await dioxus.recv();
-            document.removeEventListener('keydown', listener);",
-        );
+            document.removeEventListener('keydown', listener);"
+        ));
         spawn(async move {
             while let Ok(true) = escape.recv().await {
                 on_escape();
