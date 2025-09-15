@@ -1,7 +1,5 @@
 {
   "name": "tooltip",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A tooltip component for additional information on hover or focus.",
+  "authors": ["Evan Almloff"]
 }

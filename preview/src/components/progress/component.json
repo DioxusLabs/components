@@ -1,7 +1,5 @@
 {
   "name": "progress",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "An accessable progress bar indicator.",
+  "authors": ["Evan Almloff"]
 }

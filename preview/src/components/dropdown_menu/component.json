@@ -1,7 +1,5 @@
 {
   "name": "dropdown_menu",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A dropdown menu component for selecting options from a list.",
+  "authors": ["Evan Almloff"]
 }

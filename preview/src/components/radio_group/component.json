@@ -1,7 +1,5 @@
 {
   "name": "radio_group",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A group of radio buttons for selecting one option from a set.",
+  "authors": ["Evan Almloff"]
 }

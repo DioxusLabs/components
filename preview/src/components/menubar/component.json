@@ -1,7 +1,5 @@
 {
   "name": "menubar",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A menubar component for a collection of menu items.",
+  "authors": ["Evan Almloff"]
 }

@@ -1,7 +1,5 @@
 {
   "name": "toggle",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A simple toggle button component.",
+  "authors": ["Evan Almloff"]
 }

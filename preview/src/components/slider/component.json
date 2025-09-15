@@ -1,7 +1,5 @@
 {
   "name": "slider",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "An accessable slider component.",
+  "authors": ["Evan Almloff"]
 }

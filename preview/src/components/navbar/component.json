@@ -1,7 +1,5 @@
 {
   "name": "navbar",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A navbar component for navigation between pages.",
+  "authors": ["Evan Almloff"]
 }

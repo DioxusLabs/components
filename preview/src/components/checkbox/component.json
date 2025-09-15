@@ -1,7 +1,5 @@
 {
   "name": "checkbox",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A togglable checkbox component.",
+  "authors": ["Evan Almloff"]
 }

@@ -1,7 +1,5 @@
 {
   "name": "calendar",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A calendar grid component for selecting dates.",
+  "authors": ["Evan Almloff"]
 }

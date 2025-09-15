@@ -1,7 +1,5 @@
 {
   "name": "accordion",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "An accordion component for displaying collapsible content sections.",
+  "authors": ["Evan Almloff"]
 }

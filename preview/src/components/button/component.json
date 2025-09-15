@@ -1,7 +1,5 @@
 {
   "name": "button",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A button component for triggering actions or events when clicked.",
+  "authors": ["Evan Almloff"]
 }

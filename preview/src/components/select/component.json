@@ -1,7 +1,5 @@
 {
   "name": "select",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A select dropdown component with typeahead support.",
+  "authors": ["Evan Almloff"]
 }

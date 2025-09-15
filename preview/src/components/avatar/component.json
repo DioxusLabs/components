@@ -1,7 +1,5 @@
 {
   "name": "avatar",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "An avatar component for displaying user profile images or initials.",
+  "authors": ["Evan Almloff"]
 }

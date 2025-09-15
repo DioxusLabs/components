@@ -1,7 +1,5 @@
 {
   "name": "toast",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A toast notification component.",
+  "authors": ["Evan Almloff"]
 }

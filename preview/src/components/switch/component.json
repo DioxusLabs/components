@@ -1,7 +1,5 @@
 {
   "name": "switch",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A togglable switch component.",
+  "authors": ["Evan Almloff"]
 }

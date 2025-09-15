@@ -1,7 +1,5 @@
 {
   "name": "tabs",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A tabbed interface component.",
+  "authors": ["Evan Almloff"]
 }

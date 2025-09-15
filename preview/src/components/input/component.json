@@ -1,7 +1,5 @@
 {
   "name": "input",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "An input field component for user text entry.",
+  "authors": ["Evan Almloff"]
 }

@@ -1,7 +1,5 @@
 {
   "name": "collapsible",
-  "description": "",
-  "authors": [
-    "Evan Almloff"
-  ]
+  "description": "A collapsible component for showing and hiding content sections.",
+  "authors": ["Evan Almloff"]
 }
