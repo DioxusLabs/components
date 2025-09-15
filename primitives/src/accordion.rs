@@ -165,10 +165,6 @@ impl AccordionContext {
 pub struct AccordionProps {
     /// The id of the accordion root element.
     pub id: Option<String>,
-    /// The class of the accordion root element.
-    pub class: Option<String>,
-    /// The style of the accordion root element.
-    pub style: Option<String>,
 
     /// Whether multiple accordion items are allowed to be open at once.
     ///
@@ -194,10 +190,10 @@ pub struct AccordionProps {
 
     /// Attributes to extend the root element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the accordion, which should contain [`AccordionItem`] components.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Accordion
@@ -263,8 +259,6 @@ pub fn Accordion(props: AccordionProps) -> Element {
     rsx! {
         div {
             id: props.id,
-            class: props.class,
-            style: props.style,
             "data-disabled": (props.disabled)(),
 
             onfocusout: move |_| {
@@ -306,10 +300,10 @@ pub struct AccordionItemProps {
 
     /// Additional attributes to extend the item element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the accordion item.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Accordion Item
@@ -395,9 +389,9 @@ pub struct AccordionContentProps {
     pub id: ReadSignal<Option<String>>,
     /// Additional attributes to extend the content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the accordion content element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Accordion Content
@@ -466,9 +460,9 @@ pub struct AccordionTriggerProps {
     pub id: Option<String>,
     /// Additional attributes to extend the trigger element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the accordion trigger element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Accordion Trigger

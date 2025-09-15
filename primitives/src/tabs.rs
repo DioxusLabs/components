@@ -52,10 +52,10 @@ pub struct TabsProps {
 
     /// Additional attributes to apply to the tabs element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the tabs component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Tabs
@@ -142,10 +142,10 @@ pub fn Tabs(props: TabsProps) -> Element {
 pub struct TabListProps {
     /// Additional attributes to apply to the tab list element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the tab list component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # TabList
@@ -224,10 +224,10 @@ pub struct TabTriggerProps {
     /// Additional attributes to apply to the tab trigger element.
     #[props(extends = GlobalAttributes)]
     #[props(extends = button)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the tab trigger component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # TabTrigger
@@ -367,10 +367,10 @@ pub struct TabContentProps {
     /// Additional attributes to apply to the tab content element.
     #[props(extends = GlobalAttributes)]
     #[props(extends = div)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the tab content element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # TabContent

@@ -110,10 +110,10 @@ pub struct ToggleGroupProps {
 
     /// Additional attributes to apply to the toggle group element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the toggle group, which should include multiple [`ToggleItem`] components.
-    children: Element,
+    pub children: Element,
 }
 
 /// # ToggleGroup
@@ -179,7 +179,7 @@ pub fn ToggleGroup(props: ToggleGroupProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleItemProps {
     /// The index of the item within the [`ToggleGroup`]. This is used to order the items for keyboard navigation.
-    index: ReadSignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// Whether the toggle item is disabled.
     #[props(default)]
@@ -187,10 +187,10 @@ pub struct ToggleItemProps {
 
     /// Additional attributes to apply to the toggle item element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the toggle item
-    children: Element,
+    pub children: Element,
 }
 
 /// # ToggleItem

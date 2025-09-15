@@ -46,10 +46,10 @@ pub struct CollapsibleProps {
 
     /// Additional attributes for the collapsible element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the collapsible component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Collapsible
@@ -116,9 +116,9 @@ pub struct CollapsibleContentProps {
 
     /// Additional attributes for the collapsible content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the collapsible content.
-    children: Element,
+    pub children: Element,
 }
 
 /// # CollapsibleContent
@@ -182,9 +182,9 @@ pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
 pub struct CollapsibleTriggerProps {
     /// Additional attributes for the collapsible trigger element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the collapsible trigger.
-    children: Element,
+    pub children: Element,
 }
 
 /// # CollapsibleTrigger

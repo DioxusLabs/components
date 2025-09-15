@@ -105,10 +105,10 @@ pub struct RadioGroupProps {
 
     /// Additional attributes to apply to the radio group element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the radio group component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # RadioGroup
@@ -200,9 +200,12 @@ pub struct RadioItemProps {
     /// Optional class for the radio item element.
     pub class: Option<String>,
 
+    /// Additional attributes to apply to the radio item element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
-    children: Element,
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the radio item component.
+    pub children: Element,
 }
 
 /// # RadioItem

@@ -43,10 +43,10 @@ pub struct DialogRootProps {
 
     /// Additional attributes to apply to the dialog root element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the dialog root component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # DialogRoot
@@ -143,7 +143,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
 
 /// The props for the [`DialogRoot`] component
 #[derive(Props, Clone, PartialEq)]
-pub struct DialogProps {
+pub struct DialogContentProps {
     /// The ID of the dialog content element.
     pub id: ReadSignal<Option<String>>,
 
@@ -153,9 +153,9 @@ pub struct DialogProps {
 
     /// Additional attributes to apply to the dialog content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the dialog content.
-    children: Element,
+    pub children: Element,
 }
 
 /// # DialogContent
@@ -207,7 +207,7 @@ pub struct DialogProps {
 /// The [`DialogRoot`] component defines the following data attributes you can use to control styling:
 /// - `data-state`: Indicates if the dialog is open or closed. It can be either "open" or "closed".
 #[component]
-pub fn DialogContent(props: DialogProps) -> Element {
+pub fn DialogContent(props: DialogContentProps) -> Element {
     let ctx: DialogCtx = use_context();
     let open = ctx.open;
     let is_modal = ctx.is_modal;
@@ -260,9 +260,9 @@ pub struct DialogTitleProps {
     pub id: ReadSignal<Option<String>>,
     /// Additional attributes for the dialog title element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the dialog title.
-    children: Element,
+    pub children: Element,
 }
 
 /// # DialogTitle
@@ -328,9 +328,9 @@ pub struct DialogDescriptionProps {
     pub id: ReadSignal<Option<String>>,
     /// Additional attributes for the dialog description element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the dialog description.
-    children: Element,
+    pub children: Element,
 }
 
 /// # DialogDescription

@@ -137,10 +137,10 @@ pub struct SliderProps {
 
     /// Additional attributes for the slider
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the slider
-    children: Element,
+    pub children: Element,
 }
 
 /// # Slider
@@ -339,9 +339,9 @@ pub fn Slider(props: SliderProps) -> Element {
 pub struct SliderTrackProps {
     /// Additional attributes to apply to the track element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the track which should include a [`SliderThumb`]
-    children: Element,
+    pub children: Element,
 }
 
 /// # SliderTrack
@@ -402,9 +402,9 @@ pub fn SliderTrack(props: SliderTrackProps) -> Element {
 pub struct SliderRangeProps {
     /// Additional attributes to apply to the range element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the range element
-    children: Element,
+    pub children: Element,
 }
 
 /// # SliderRange
@@ -485,9 +485,9 @@ pub struct SliderThumbProps {
 
     /// Additional attributes to apply to the thumb element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the thumb element
-    children: Element,
+    pub children: Element,
 }
 
 /// # SliderThumb

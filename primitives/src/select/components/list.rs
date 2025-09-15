@@ -16,10 +16,10 @@ pub struct SelectListProps {
 
     /// Additional attributes for the list
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children to render inside the list
-    children: Element,
+    pub children: Element,
 }
 
 /// # SelectList

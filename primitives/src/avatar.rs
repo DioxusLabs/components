@@ -45,10 +45,10 @@ pub struct AvatarProps {
 
     /// Additional attributes for the avatar element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the Avatar component, which can include AvatarImage and AvatarFallback
-    children: Element,
+    pub children: Element,
 }
 
 /// # Avatar
@@ -138,9 +138,9 @@ pub fn Avatar(props: AvatarProps) -> Element {
 pub struct AvatarFallbackProps {
     /// Additional attributes for the fallback element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the AvatarFallback component, typically text or an icon
-    children: Element,
+    pub children: Element,
 }
 
 /// # AvatarFallback
@@ -203,7 +203,7 @@ pub struct AvatarImageProps {
 
     /// Additional attributes for the image element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 }
 
 /// # AvatarImage

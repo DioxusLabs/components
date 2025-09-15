@@ -18,10 +18,10 @@ pub struct SelectGroupProps {
 
     /// Additional attributes for the group
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children to render inside the group
-    children: Element,
+    pub children: Element,
 }
 
 /// # SelectGroup
@@ -107,10 +107,10 @@ pub struct SelectGroupLabelProps {
 
     /// Additional attributes for the label
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children to render inside the label
-    children: Element,
+    pub children: Element,
 }
 
 /// # SelectGroupLabel

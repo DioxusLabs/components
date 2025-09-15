@@ -50,10 +50,10 @@ pub struct ToolbarProps {
 
     /// Additional attributes for the toolbar
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the toolbar, which should include multiple [`ToolbarButton`] components.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Toolbar
@@ -129,10 +129,10 @@ pub struct ToolbarButtonProps {
 
     /// Additional attributes for the button
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the button
-    children: Element,
+    pub children: Element,
 }
 
 /// # ToolbarButton
@@ -265,7 +265,7 @@ pub struct ToolbarSeparatorProps {
 
     /// Additional attributes for the separator
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 }
 
 /// # ToolbarSeparator

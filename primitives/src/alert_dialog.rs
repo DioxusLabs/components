@@ -29,8 +29,9 @@ pub struct AlertDialogRootProps {
     pub on_open_change: Callback<bool>,
     /// Additional attributes to extend the root element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
-    children: Element,
+    pub attributes: Vec<Attribute>,
+    /// The children of the alert dialog root element.
+    pub children: Element,
 }
 
 /// # AlertDialogRoot
@@ -131,9 +132,9 @@ pub struct AlertDialogContentProps {
 
     /// Additional attributes to extend the content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the alert dialog content element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # AlertDialogContent
@@ -218,9 +219,9 @@ pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
 pub struct AlertDialogTitleProps {
     /// Additional attributes to extend the title element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the title element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # AlertDialogTitle
@@ -275,9 +276,9 @@ pub fn AlertDialogTitle(props: AlertDialogTitleProps) -> Element {
 pub struct AlertDialogDescriptionProps {
     /// Additional attributes to extend the description element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the description element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # AlertDialogDescription
@@ -332,9 +333,9 @@ pub fn AlertDialogDescription(props: AlertDialogDescriptionProps) -> Element {
 pub struct AlertDialogActionsProps {
     /// Additional attributes to extend the actions element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the actions element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # AlertDialogActions
@@ -391,9 +392,9 @@ pub struct AlertDialogActionProps {
     pub on_click: Option<EventHandler<MouseEvent>>,
     /// Additional attributes to extend the action button element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the action button.
-    children: Element,
+    pub children: Element,
 }
 
 /// # AlertDialogAction
@@ -466,9 +467,9 @@ pub struct AlertDialogCancelProps {
     pub on_click: Option<EventHandler<MouseEvent>>,
     /// Additional attributes to extend the cancel button element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the cancel button.
-    children: Element,
+    pub children: Element,
 }
 
 /// # AlertDialogCancel

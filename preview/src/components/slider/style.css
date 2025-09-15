@@ -15,7 +15,7 @@
 
 .slider-track {
     position: relative;
-    height: .5rem;
+    height: 0.5rem;
     box-sizing: border-box;
     flex-grow: 1;
     border-radius: 9999px;
@@ -61,7 +61,8 @@
 .slider-thumb:focus-visible[data-dragging="true"],
 .slider-thumb:focus-visible,
 .slider-thumb:hover {
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary-color-7) 50%,transparent);
+    box-shadow: 0 0 0 4px
+        color-mix(in oklab, var(--primary-color-7) 50%, transparent);
     transition: box-shadow 150ms;
 }
 

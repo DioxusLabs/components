@@ -8,7 +8,7 @@ test("test", async ({ page }) => {
   let alignLeft = page.getByRole("button", { name: "Align Left" });
   let alignCenter = page.getByRole("button", { name: "Align Center" });
   let alignRight = page.getByRole("button", { name: "Align Right" });
-  await page.getByRole("heading", { name: "Toolbar" }).click();
+  await page.locator("#component-preview-frame").focus();
   // Tabbing to the first button should focus it
   await page.keyboard.press("Tab");
   await expect(bold).toBeFocused();

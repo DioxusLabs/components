@@ -45,10 +45,12 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
     #[props(default = ReadSignal::new(Signal::new(Duration::from_millis(1000))))]
     pub typeahead_timeout: ReadSignal<Duration>,
 
+    /// Additional attributes for the select element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
-    children: Element,
+    /// The children of the Select component
+    pub children: Element,
 }
 
 /// # Select

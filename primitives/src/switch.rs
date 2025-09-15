@@ -35,10 +35,10 @@ pub struct SwitchProps {
 
     /// Additional attributes to apply to the switch element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the switch component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Switch
@@ -123,9 +123,9 @@ pub fn Switch(props: SwitchProps) -> Element {
 pub struct SwitchThumbProps {
     /// Additional attributes to apply to the thumb element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the thumb component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # SwitchThumb

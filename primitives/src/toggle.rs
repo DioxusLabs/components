@@ -34,10 +34,10 @@ pub struct ToggleProps {
 
     /// Additional attributes to apply to the toggle element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the toggle component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Toggle

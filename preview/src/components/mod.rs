@@ -2,7 +2,8 @@ use super::{ComponentDemoData, ComponentVariantDemoData, HighlightedCode};
 macro_rules! examples {
     ($($name:ident $([$($variant:ident),*])?),*) => {
         $(
-            mod $name {
+            pub(crate) mod $name {
+                pub(crate) mod component;
                 pub(crate) mod variants {
                     pub(crate) mod main;
                     $(
@@ -18,16 +19,20 @@ macro_rules! examples {
                 ComponentDemoData {
                     name: stringify!($name),
                     docs: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/docs.html")),
+                    component: HighlightedCode {
+                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.light.html")),
+                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.dark.html")),
+                    },
+                    style: HighlightedCode {
+                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.light.html")),
+                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.dark.html")),
+                    },
                     variants: &[
                         ComponentVariantDemoData {
                             name: "main",
                             rs_highlighted: HighlightedCode {
                                 light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.light.html")),
                                 dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.dark.html")),
-                            },
-                            css_highlighted: HighlightedCode {
-                                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/style.css.base16-ocean.light.html")),
-                                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/style.css.base16-ocean.dark.html")),
                             },
                             component: $name::variants::main::Demo,
                         },
@@ -38,10 +43,6 @@ macro_rules! examples {
                                     rs_highlighted: HighlightedCode {
                                         light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.light.html")),
                                         dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.dark.html")),
-                                    },
-                                    css_highlighted: HighlightedCode {
-                                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/style.css.base16-ocean.light.html")),
-                                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/style.css.base16-ocean.dark.html")),
                                     },
                                     component: $name::variants::$variant::Demo,
                                 },
