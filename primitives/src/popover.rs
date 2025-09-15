@@ -110,11 +110,6 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
         labelledby,
     });
 
-    // Add a escape key listener to the document when the dialog is open. We can't
-    // just add this to the dialog itself because it might not be focused if the user
-    // is highlighting text or interacting with another element.
-    use_global_escape_listener(move || set_open.call(false));
-
     rsx! {
         div {
             "data-state": if open() { "open" } else { "closed" },
@@ -206,7 +201,6 @@ pub struct PopoverContentProps {
 pub fn PopoverContent(props: PopoverContentProps) -> Element {
     let ctx: PopoverCtx = use_context();
     let open = ctx.open;
-    let is_open = open();
     let is_modal = ctx.is_modal;
 
     let gen_id = use_unique_id();
@@ -244,19 +238,45 @@ pub fn PopoverContent(props: PopoverContentProps) -> Element {
             defer: true
         }
         if render() {
-            div {
-                id,
-                role: "dialog",
-                aria_modal: "true",
-                aria_labelledby: ctx.labelledby,
-                aria_hidden: (!is_open).then_some("true"),
-                class: props.class.clone().unwrap_or_else(|| "popover-content".to_string()),
-                "data-state": if is_open { "open" } else { "closed" },
-                "data-side": props.side.as_str(),
-                "data-align": props.align.as_str(),
-                ..props.attributes,
-                {props.children}
-            }
+
+        }
+    }
+}
+
+/// The rendered content of the popover. This is separated out so the global event listener
+/// is only added when the popover is actually rendered.
+#[component]
+pub fn PopoverContentRendered(
+    id: String,
+    class: Option<String>,
+    side: ContentSide,
+    align: ContentAlign,
+    attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let ctx: PopoverCtx = use_context();
+    let open = ctx.open;
+    let is_open = open();
+    let set_open = ctx.set_open;
+
+    // Add a escape key listener to the document when the dialog is open. We can't
+    // just add this to the dialog itself because it might not be focused if the user
+    // is highlighting text or interacting with another element.
+    use_global_escape_listener(move || set_open.call(false));
+
+    rsx! {
+        div {
+            id,
+            role: "dialog",
+            aria_modal: "true",
+            aria_labelledby: ctx.labelledby,
+            aria_hidden: (!is_open).then_some("true"),
+            class: class.unwrap_or_else(|| "popover-content".to_string()),
+            "data-state": if is_open { "open" } else { "closed" },
+            "data-side": side.as_str(),
+            "data-align": align.as_str(),
+            ..attributes,
+            {children}
         }
     }
 }

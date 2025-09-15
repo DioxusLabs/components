@@ -110,11 +110,6 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
         dialog_describedby,
     });
 
-    // Add a escape key listener to the document when the dialog is open. We can't
-    // just add this to the dialog itself because it might not be focused if the user
-    // is highlighting text or interacting with another element.
-    use_global_escape_listener(move || set_open.call(false));
-
     let unique_id = use_unique_id();
     let id = use_id_or(unique_id, props.id);
 
@@ -211,6 +206,12 @@ pub fn DialogContent(props: DialogContentProps) -> Element {
     let ctx: DialogCtx = use_context();
     let open = ctx.open;
     let is_modal = ctx.is_modal;
+    let set_open = ctx.set_open;
+
+    // Add a escape key listener to the document when the dialog is open. We can't
+    // just add this to the dialog itself because it might not be focused if the user
+    // is highlighting text or interacting with another element.
+    use_global_escape_listener(move || set_open.call(false));
 
     let gen_id = use_unique_id();
     let id = use_id_or(gen_id, props.id);
