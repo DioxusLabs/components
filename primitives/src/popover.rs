@@ -238,7 +238,14 @@ pub fn PopoverContent(props: PopoverContentProps) -> Element {
             defer: true
         }
         if render() {
-
+            PopoverContentRendered {
+                id,
+                class: props.class,
+                side: props.side,
+                align: props.align,
+                attributes: props.attributes,
+                children: props.children
+            }
         }
     }
 }

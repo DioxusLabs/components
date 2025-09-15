@@ -2,7 +2,7 @@
 
 use crate::{
     portal::{use_portal, PortalIn, PortalOut},
-    use_effect_with_cleanup, use_global_keydown_listener, use_unique_id,
+    use_global_keydown_listener, use_unique_id,
 };
 use dioxus::dioxus_core::DynamicNode;
 use dioxus::prelude::*;
