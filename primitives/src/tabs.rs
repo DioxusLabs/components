@@ -194,12 +194,7 @@ pub struct TabListProps {
 #[component]
 pub fn TabList(props: TabListProps) -> Element {
     rsx! {
-        div {
-            role: "tablist",
-            ..props.attributes,
-
-            {props.children}
-        }
+        div { role: "tablist", ..props.attributes, {props.children} }
     }
 }
 
@@ -307,7 +302,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
             id: props.id,
             class: props.class,
             tabindex: tab_index,
-            type: "button",
+            r#type: "button",
 
             aria_selected: selected,
             aria_controls: (ctx.tab_content_ids)().get((props.index)()).cloned(),

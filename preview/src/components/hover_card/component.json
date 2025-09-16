@@ -1,5 +1,6 @@
 {
   "name": "hover_card",
   "description": "A hover card component for displaying additional information on hover.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

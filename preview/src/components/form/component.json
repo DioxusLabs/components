@@ -1,5 +1,6 @@
 {
   "name": "form",
   "description": "A form component for collecting user input.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

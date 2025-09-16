@@ -1,5 +1,6 @@
 {
   "name": "button",
   "description": "A button component for triggering actions or events when clicked.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

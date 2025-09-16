@@ -1,5 +1,6 @@
 {
   "name": "avatar",
   "description": "An avatar component for displaying user profile images or initials.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

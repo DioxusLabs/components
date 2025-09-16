@@ -1,5 +1,6 @@
 {
   "name": "collapsible",
   "description": "A collapsible component for showing and hiding content sections.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

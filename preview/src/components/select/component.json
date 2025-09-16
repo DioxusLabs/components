@@ -1,5 +1,6 @@
 {
   "name": "select",
   "description": "A select dropdown component with typeahead support.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

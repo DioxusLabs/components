@@ -1,5 +1,6 @@
 {
   "name": "radio_group",
   "description": "A group of radio buttons for selecting one option from a set.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

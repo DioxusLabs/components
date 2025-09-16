@@ -1,5 +1,6 @@
 {
   "name": "scroll_area",
   "description": "A scrollable area component.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

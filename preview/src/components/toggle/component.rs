@@ -4,10 +4,7 @@ use dioxus_primitives::toggle::{self, ToggleProps};
 #[component]
 pub fn Toggle(props: ToggleProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("./style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         toggle::Toggle {
             class: "toggle",
             pressed: props.pressed,

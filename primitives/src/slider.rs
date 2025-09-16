@@ -281,37 +281,35 @@ pub fn Slider(props: SliderProps) -> Element {
                 evt.prevent_default();
                 evt.stop_propagation();
 
-                if current_pointer_id.read().is_some() || evt.trigger_button() != Some(MouseButton::Primary) {
+                if current_pointer_id.read().is_some()
+
+                    // Handle pointer interaction
+
+                    // Update the bounding rect of the slider in case it moved
+
+                    // Get the mouse position relative to the slider
+
+                    || evt.trigger_button() != Some(MouseButton::Primary)
+                {
                     return;
                 }
-
                 current_pointer_id.set(Some(evt.data().pointer_id()));
-                POINTERS.write().push(Pointer {
-                    id: evt.data().pointer_id(),
-                    position: evt.client_coordinates(),
-                    last_position: None,
-                });
-
-                // Handle pointer interaction
+                POINTERS
+                    .write()
+                    .push(Pointer {
+                        id: evt.data().pointer_id(),
+                        position: evt.client_coordinates(),
+                        last_position: None,
+                    });
                 spawn(async move {
                     let Some(div_element) = div_element() else {
                         return;
                     };
-
-                    // Update the bounding rect of the slider in case it moved
                     if let Ok(r) = div_element.get_client_rect().await {
                         rect.set(Some(r));
-
-                        let size = if props.horizontal {
-                            r.width()
-                        } else {
-                            r.height()
-                        };
-
-                        // Get the mouse position relative to the slider
+                        let size = if props.horizontal { r.width() } else { r.height() };
                         let top_left = r.origin;
                         let relative_pos = evt.client_coordinates() - top_left.cast_unit();
-
                         let offset = if ctx.horizontal {
                             relative_pos.x
                         } else {
@@ -322,7 +320,6 @@ pub fn Slider(props: SliderProps) -> Element {
                         let stepped = (new / ctx.step).round() * ctx.step;
                         ctx.set_value.call(SliderValue::Single(stepped));
                     }
-
                     dragging.set(true);
                 });
             },
@@ -567,7 +564,7 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
 
     rsx! {
         button {
-            type: "button",
+            r#type: "button",
             role: "slider",
             aria_valuemin: ctx.min,
             aria_valuemax: ctx.max,
@@ -605,20 +602,16 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
 
                 // Handle keyboard navigation
                 let mut new_value = match key {
-                    Key::ArrowUp | Key::ArrowRight => {
-                        value() + step
-                    }
-                    Key::ArrowDown | Key::ArrowLeft => {
-                        value() - step
-                    }
+
+                    // Clamp the new value to the range
+
+                    // Update the value
+                    Key::ArrowUp | Key::ArrowRight => value() + step,
+                    Key::ArrowDown | Key::ArrowLeft => value() - step,
                     _ => return,
                 };
-
-                // Clamp the new value to the range
                 new_value = new_value.clamp(ctx.min, ctx.max);
                 let stepped_value = (new_value / ctx.step).round() * ctx.step;
-
-                // Update the value
                 ctx.set_value.call(SliderValue::Single(stepped_value));
             },
             ..props.attributes,

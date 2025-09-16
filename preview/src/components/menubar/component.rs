@@ -7,10 +7,7 @@ use dioxus_primitives::menubar::{
 #[component]
 pub fn Menubar(props: MenubarProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("./style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         menubar::Menubar {
             class: "menubar",
             disabled: props.disabled,
@@ -37,11 +34,7 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
 #[component]
 pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
     rsx! {
-        menubar::MenubarTrigger {
-            class: "menubar-trigger",
-            attributes: props.attributes,
-            {props.children}
-        }
+        menubar::MenubarTrigger { class: "menubar-trigger", attributes: props.attributes, {props.children} }
     }
 }
 

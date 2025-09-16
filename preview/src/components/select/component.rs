@@ -7,10 +7,7 @@ use dioxus_primitives::select::{
 #[component]
 pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("./style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         select::Select {
             class: "select",
             value: props.value,
@@ -30,9 +27,7 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
 #[component]
 pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
     rsx! {
-        select::SelectTrigger {
-            class: "select-trigger",
-            attributes: props.attributes,
+        select::SelectTrigger { class: "select-trigger", attributes: props.attributes,
             {props.children}
             svg {
                 class: "select-expand-icon",
@@ -47,9 +42,7 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
 #[component]
 pub fn SelectValue(props: SelectValueProps) -> Element {
     rsx! {
-        select::SelectValue {
-            attributes: props.attributes,
-        }
+        select::SelectValue { attributes: props.attributes }
     }
 }
 

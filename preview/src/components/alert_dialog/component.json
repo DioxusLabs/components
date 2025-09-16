@@ -1,5 +1,6 @@
 {
   "name": "alert_dialog",
   "description": "An alert dialog component for displaying important messages and requiring user confirmation.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

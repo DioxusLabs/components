@@ -6,10 +6,7 @@ use dioxus_primitives::accordion::{
 #[component]
 pub fn Accordion(props: AccordionProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("./style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         accordion::Accordion {
             class: "accordion",
             width: "15rem",
@@ -43,7 +40,8 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
 #[component]
 pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
     rsx! {
-        accordion::AccordionTrigger { class: "accordion-trigger",
+        accordion::AccordionTrigger {
+            class: "accordion-trigger",
             id: props.id,
             attributes: props.attributes,
             {props.children}
@@ -60,7 +58,8 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
 #[component]
 pub fn AccordionContent(props: AccordionContentProps) -> Element {
     rsx! {
-        accordion::AccordionContent { class: "accordion-content",
+        accordion::AccordionContent {
+            class: "accordion-content",
             style: "--collapsible-content-width: 140px",
             id: props.id,
             attributes: props.attributes,

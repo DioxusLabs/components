@@ -73,7 +73,7 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
         button {
             // Standard HTML attributes
             disabled: (ctx.disabled)(),
-            type: "button",
+            r#type: "button",
 
             onclick: move |_| {
                 open.toggle();

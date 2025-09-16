@@ -6,10 +6,7 @@ use dioxus_primitives::collapsible::{
 #[component]
 pub fn Collapsible(props: CollapsibleProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("./style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         collapsible::Collapsible {
             keep_mounted: props.keep_mounted,
             default_open: props.default_open,
@@ -26,8 +23,7 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
 #[component]
 pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
     rsx! {
-        collapsible::CollapsibleTrigger { class: "collapsible-trigger",
-            attributes: props.attributes,
+        collapsible::CollapsibleTrigger { class: "collapsible-trigger", attributes: props.attributes,
             {props.children}
             svg {
                 class: "collapsible-expand-icon",
@@ -45,7 +41,8 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
 #[component]
 pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
     rsx! {
-        collapsible::CollapsibleContent { class: "collapsible-content",
+        collapsible::CollapsibleContent {
+            class: "collapsible-content",
             id: props.id,
             attributes: props.attributes,
             {props.children}

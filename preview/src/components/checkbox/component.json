@@ -1,5 +1,6 @@
 {
   "name": "checkbox",
   "description": "A togglable checkbox component.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

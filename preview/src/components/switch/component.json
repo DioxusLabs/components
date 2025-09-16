@@ -1,5 +1,6 @@
 {
   "name": "switch",
   "description": "A togglable switch component.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

@@ -6,10 +6,7 @@ use dioxus_primitives::context_menu::{
 #[component]
 pub fn ContextMenu(props: ContextMenuProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("./style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         context_menu::ContextMenu {
             disabled: props.disabled,
             open: props.open,
@@ -42,7 +39,8 @@ pub fn ContextMenuTrigger(props: ContextMenuTriggerProps) -> Element {
 #[component]
 pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
     rsx! {
-        context_menu::ContextMenuContent { class: "context-menu-content",
+        context_menu::ContextMenuContent {
+            class: "context-menu-content",
             id: props.id,
             attributes: props.attributes,
             {props.children}

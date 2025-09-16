@@ -124,8 +124,7 @@ pub fn Avatar(props: AvatarProps) -> Element {
 
             // Default fallback if no AvatarFallback is provided and fallback should be shown
             if show_fallback() && !has_fallback_child() && has_image_child() {
-                span {
-                    style: "display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;",
+                span { style: "display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;",
                     "??"
                 }
             }
@@ -183,11 +182,13 @@ pub fn AvatarFallback(props: AvatarFallbackProps) -> Element {
         use_memo(move || matches!((ctx.state)(), AvatarState::Error | AvatarState::Empty));
 
     if !show_fallback() {
-        return rsx!({});
+        return rsx!(
+            {}
+        );
     }
 
     rsx! {
-        span { ..props.attributes, {props.children} }
+        span { ..props.attributes,{props.children} }
     }
 }
 
@@ -263,7 +264,9 @@ pub fn AvatarImage(props: AvatarImageProps) -> Element {
 
     let show_image = (ctx.state)() != AvatarState::Error;
     if !show_image {
-        return rsx!({});
+        return rsx!(
+            {}
+        );
     }
 
     rsx! {

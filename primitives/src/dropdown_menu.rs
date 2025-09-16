@@ -219,7 +219,7 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
     rsx! {
         button {
             id: "{ctx.trigger_id}",
-            type: "button",
+            r#type: "button",
             "data-state": if (ctx.open)() { "open" } else { "closed" },
             "data-disabled": (ctx.disabled)(),
             disabled: (ctx.disabled)(),

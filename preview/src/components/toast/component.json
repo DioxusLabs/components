@@ -1,5 +1,6 @@
 {
   "name": "toast",
   "description": "A toast notification component.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

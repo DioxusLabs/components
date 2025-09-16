@@ -4,8 +4,6 @@ use dioxus::prelude::*;
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        Input {
-            placeholder: "Enter your name",
-        }
+        Input { placeholder: "Enter your name" }
     }
 }

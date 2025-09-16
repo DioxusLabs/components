@@ -17,6 +17,8 @@ pub struct Component {
     pub cargo_dependencies: Vec<CargoDependency>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub members: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub exclude: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize, JsonSchema)]

@@ -4,10 +4,7 @@ use dioxus_primitives::toolbar::{self, ToolbarButtonProps, ToolbarProps, Toolbar
 #[component]
 pub fn Toolbar(props: ToolbarProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("./style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         toolbar::Toolbar {
             class: "toolbar",
             aria_label: props.aria_label,
@@ -53,9 +50,6 @@ pub fn ToolbarGroup(
     children: Element,
 ) -> Element {
     rsx! {
-        div { class: "toolbar-group",
-            ..attributes,
-            {children}
-        }
+        div { class: "toolbar-group", ..attributes, {children} }
     }
 }

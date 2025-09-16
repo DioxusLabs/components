@@ -1,5 +1,6 @@
 {
   "name": "dialog",
   "description": "A dialog component for displaying modal content.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

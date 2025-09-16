@@ -79,7 +79,7 @@ pub fn Toggle(props: ToggleProps) -> Element {
             onfocus: props.onfocus,
             onkeydown: props.onkeydown,
 
-            type: "button",
+            r#type: "button",
             disabled: props.disabled,
             aria_pressed: pressed,
             "data-state": if pressed() { "on" } else { "off" },

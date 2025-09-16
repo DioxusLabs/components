@@ -1,5 +1,6 @@
 {
   "name": "toolbar",
   "description": "A toolbar component for grouping related inputs.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

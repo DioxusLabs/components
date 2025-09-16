@@ -137,7 +137,7 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
 
     rsx! {
         button {
-            type: "button",
+            r#type: "button",
             value: props.value,
             role: "checkbox",
             aria_checked: checked().to_aria_checked(),
@@ -162,7 +162,7 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
             {props.children}
         }
         BubbleInput {
-            checked: checked,
+            checked,
             default_checked: props.default_checked,
 
             required: props.required,
@@ -266,7 +266,7 @@ fn BubbleInput(
     rsx! {
         input {
             id,
-            type: "checkbox",
+            r#type: "checkbox",
             aria_hidden: "true",
             tabindex: "-1",
             position: "absolute",

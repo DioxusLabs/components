@@ -41,14 +41,8 @@ pub fn AspectRatio(props: AspectRatioProps) -> Element {
     let ratio = 100.0 / (props.ratio);
 
     rsx! {
-        div {
-            style: "position: relative; width: 100%; padding-bottom: {ratio}%;",
-            div {
-                style: "position: absolute; inset: 0;",
-                ..props.attributes,
-
-                {props.children}
-            }
+        div { style: "position: relative; width: 100%; padding-bottom: {ratio}%;",
+            div { style: "position: absolute; inset: 0;", ..props.attributes, {props.children} }
         }
     }
 }

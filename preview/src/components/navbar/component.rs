@@ -6,10 +6,7 @@ use dioxus_primitives::navbar::{
 #[component]
 pub fn Navbar(props: NavbarProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("./style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         navbar::Navbar {
             class: "navbar",
             disabled: props.disabled,
@@ -36,9 +33,7 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
 #[component]
 pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
     rsx! {
-        navbar::NavbarTrigger {
-            class: "navbar-trigger",
-            attributes: props.attributes,
+        navbar::NavbarTrigger { class: "navbar-trigger", attributes: props.attributes,
             {props.children}
             svg {
                 class: "navbar-expand-icon",

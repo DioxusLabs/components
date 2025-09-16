@@ -1,5 +1,6 @@
 {
   "name": "popover",
   "description": "A popover component for colapsible content.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

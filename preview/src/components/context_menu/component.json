@@ -1,5 +1,6 @@
 {
   "name": "context_menu",
   "description": "A context menu component for displaying a list of actions or option after right clicking an area.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

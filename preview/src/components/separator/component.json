@@ -1,5 +1,6 @@
 {
   "name": "separator",
   "description": "A visual separator between different sections of the page.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

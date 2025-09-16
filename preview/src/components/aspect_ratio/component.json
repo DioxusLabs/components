@@ -1,5 +1,6 @@
 {
   "name": "aspect_ratio",
   "description": "An aspect ratio component for maintaining a consistent width-to-height ratio of an element.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

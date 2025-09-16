@@ -8,10 +8,7 @@ use dioxus_primitives::alert_dialog::{
 #[component]
 pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("./style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         alert_dialog::AlertDialogRoot {
             class: "alert-dialog-backdrop",
             id: props.id,
@@ -49,11 +46,7 @@ pub fn AlertDialogDescription(props: AlertDialogDescriptionProps) -> Element {
 #[component]
 pub fn AlertDialogActions(props: AlertDialogActionsProps) -> Element {
     rsx! {
-        alert_dialog::AlertDialogActions {
-            class: "alert-dialog-actions",
-            attributes: props.attributes,
-            {props.children}
-        }
+        alert_dialog::AlertDialogActions { class: "alert-dialog-actions", attributes: props.attributes, {props.children} }
     }
 }
 

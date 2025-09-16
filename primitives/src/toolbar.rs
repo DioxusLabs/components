@@ -193,7 +193,7 @@ pub fn ToolbarButton(props: ToolbarButtonProps) -> Element {
 
     rsx! {
         button {
-            type: "button",
+            r#type: "button",
             tabindex: "0",
             disabled: (ctx.disabled)() || (props.disabled)(),
             "data-disabled": (ctx.disabled)() || (props.disabled)(),

@@ -7,10 +7,7 @@ use dioxus_primitives::calendar::{
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("./style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         div { class: "calendar",
             calendar::Calendar {
                 selected_date: props.selected_date,
@@ -34,21 +31,14 @@ pub fn Calendar(props: CalendarProps) -> Element {
 #[component]
 pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
     rsx! {
-        calendar::CalendarHeader {
-            id: props.id,
-            attributes: props.attributes,
-            {props.children}
-        }
+        calendar::CalendarHeader { id: props.id, attributes: props.attributes, {props.children} }
     }
 }
 
 #[component]
 pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
     rsx! {
-        calendar::CalendarNavigation {
-            attributes: props.attributes,
-            {props.children}
-        }
+        calendar::CalendarNavigation { attributes: props.attributes, {props.children} }
     }
 }
 
@@ -57,8 +47,7 @@ pub fn CalendarPreviousMonthButton(
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
     rsx! {
-        calendar::CalendarPreviousMonthButton {
-            attributes,
+        calendar::CalendarPreviousMonthButton { attributes,
             svg {
                 class: "calendar-previous-month-icon",
                 view_box: "0 0 24 24",
@@ -74,8 +63,7 @@ pub fn CalendarNextMonthButton(
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
     rsx! {
-        calendar::CalendarNextMonthButton {
-            attributes,
+        calendar::CalendarNextMonthButton { attributes,
             svg {
                 class: "calendar-next-month-icon",
                 view_box: "0 0 24 24",
@@ -89,20 +77,14 @@ pub fn CalendarNextMonthButton(
 #[component]
 pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     rsx! {
-        calendar::CalendarSelectMonth {
-            class: "calendar-month-select",
-            attributes: props.attributes,
-        }
+        calendar::CalendarSelectMonth { class: "calendar-month-select", attributes: props.attributes }
     }
 }
 
 #[component]
 pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
     rsx! {
-        calendar::CalendarSelectYear {
-            class: "calendar-year-select",
-            attributes: props.attributes,
-        }
+        calendar::CalendarSelectYear { class: "calendar-year-select", attributes: props.attributes }
     }
 }
 

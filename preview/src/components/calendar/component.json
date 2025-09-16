@@ -1,5 +1,6 @@
 {
   "name": "calendar",
   "description": "A calendar grid component for selecting dates.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

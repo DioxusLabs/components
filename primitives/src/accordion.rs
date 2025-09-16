@@ -442,13 +442,7 @@ pub fn AccordionContent(props: AccordionContentProps) -> Element {
 
     rsx! {
         if render_element() {
-            div {
-                id: id,
-                "data-open": open,
-                ..props.attributes,
-
-                {props.children}
-            }
+            div { id, "data-open": open, ..props.attributes, {props.children} }
         }
     }
 }
@@ -519,7 +513,7 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
             id: props.id,
             disabled: is_disabled,
             tabindex: "0",
-            type: "button",
+            r#type: "button",
 
             aria_controls: item.aria_id(),
             aria_expanded: ctx.is_open(item.id),

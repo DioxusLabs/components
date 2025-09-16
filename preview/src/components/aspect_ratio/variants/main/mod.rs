@@ -4,10 +4,7 @@ use dioxus::prelude::*;
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("../../style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("../../style.css") }
         div {
             class: "aspect-ratio-container",
             width: "20rem",

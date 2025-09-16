@@ -134,10 +134,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
     let render = use_animated_open(id, open);
 
     rsx! {
-        document::Script {
-            src: FOCUS_TRAP_JS,
-            defer: true
-        }
+        document::Script { src: FOCUS_TRAP_JS, defer: true }
         if render() {
             div {
                 id,
@@ -326,11 +323,7 @@ pub fn DialogTitle(props: DialogTitleProps) -> Element {
     let id = use_id_or(ctx.dialog_labelledby, props.id);
 
     rsx! {
-        h2 {
-            id: id,
-            ..props.attributes,
-            {props.children}
-        }
+        h2 { id, ..props.attributes, {props.children} }
     }
 }
 
@@ -394,10 +387,6 @@ pub fn DialogDescription(props: DialogDescriptionProps) -> Element {
     let id = use_id_or(ctx.dialog_describedby, props.id);
 
     rsx! {
-        p {
-            id: id,
-            ..props.attributes,
-            {props.children}
-        }
+        p { id, ..props.attributes, {props.children} }
     }
 }

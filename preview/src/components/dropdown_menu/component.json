@@ -1,5 +1,6 @@
 {
   "name": "dropdown_menu",
   "description": "A dropdown menu component for selecting options from a list.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

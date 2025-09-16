@@ -294,7 +294,7 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
             id: props.id,
             class: props.class,
             tabindex: tab_index,
-            type: "button",
+            r#type: "button",
 
             aria_checked: checked,
             "data-state": if checked() { "checked" } else { "unchecked" },

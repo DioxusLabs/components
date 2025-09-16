@@ -149,7 +149,9 @@ fn Navbar() -> Element {
                 padding: "1rem",
                 justify_content: "flex-start",
                 if in_component {
-                    Link { to: Route::home(), class: "navbar-brand",
+                    Link {
+                        to: Route::home(),
+                        class: "navbar-brand",
                         aria_label: "Back",
                         svg {
                             view_box: "0 0 24 24",
@@ -241,11 +243,7 @@ fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.light,
         }
-        CopyButton {
-            position: "absolute",
-            top: "0.5em",
-            right: "0.5em",
-        }
+        CopyButton { position: "absolute", top: "0.5em", right: "0.5em" }
     }
 }
 
@@ -256,7 +254,7 @@ fn CopyButton(#[props(extends=GlobalAttributes)] attributes: Vec<Attribute>) -> 
     rsx! {
         button {
             class: "copy-button",
-            type: "button",
+            r#type: "button",
             aria_label: "Copy code",
             "data-copied": copied,
             "onclick": "navigator.clipboard.writeText(this.parentNode.firstChild.innerText || this.parentNode.innerText);",
@@ -318,7 +316,7 @@ fn DarkModeToggle() -> Element {
             onclick: move |_| {
                 set_theme(false);
             },
-            type: "button",
+            r#type: "button",
             aria_label: "Enable light mode",
             DarkModeIcon {}
         }
@@ -327,7 +325,7 @@ fn DarkModeToggle() -> Element {
             onclick: move |_| {
                 set_theme(true);
             },
-            type: "button",
+            r#type: "button",
             aria_label: "Enable dark mode",
             LightModeIcon {}
         }
@@ -364,14 +362,54 @@ fn LightModeIcon() -> Element {
             stroke_linecap: "round",
             stroke_linejoin: "round",
             circle { cx: "12", cy: "12", r: "4" }
-            line { x1: "12", y1: "1", x2: "12", y2: "3" }
-            line { x1: "12", y1: "21", x2: "12", y2: "23" }
-            line { x1: "4.22", y1: "4.22", x2: "5.64", y2: "5.64" }
-            line { x1: "18.36", y1: "18.36", x2: "19.78", y2: "19.78" }
-            line { x1: "1", y1: "12", x2: "3", y2: "12" }
-            line { x1: "21", y1: "12", x2: "23", y2: "12" }
-            line { x1: "4.22", y1: "19.78", x2: "5.64", y2: "18.36" }
-            line { x1: "18.36", y1: "5.64", x2: "19.78", y2: "4.22" }
+            line {
+                x1: "12",
+                y1: "1",
+                x2: "12",
+                y2: "3",
+            }
+            line {
+                x1: "12",
+                y1: "21",
+                x2: "12",
+                y2: "23",
+            }
+            line {
+                x1: "4.22",
+                y1: "4.22",
+                x2: "5.64",
+                y2: "5.64",
+            }
+            line {
+                x1: "18.36",
+                y1: "18.36",
+                x2: "19.78",
+                y2: "19.78",
+            }
+            line {
+                x1: "1",
+                y1: "12",
+                x2: "3",
+                y2: "12",
+            }
+            line {
+                x1: "21",
+                y1: "12",
+                x2: "23",
+                y2: "12",
+            }
+            line {
+                x1: "4.22",
+                y1: "19.78",
+                x2: "5.64",
+                y2: "18.36",
+            }
+            line {
+                x1: "18.36",
+                y1: "5.64",
+                x2: "19.78",
+                y2: "4.22",
+            }
         }
     }
 }
@@ -473,7 +511,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
             border_radius: "0 0 0.5rem 0.5rem",
             border: "none",
             text_align: "center",
-            type: "button",
+            r#type: "button",
             onclick: move |_| {
                 collapsed.toggle();
             },
@@ -516,16 +554,8 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
             width: "100%",
             TabList {
                 TabTrigger { value: "main.rs", index: 0usize, "main.rs" }
-                TabTrigger {
-                    value: "style.css",
-                    index: 1usize,
-                    "style.css"
-                }
-                TabTrigger {
-                    value: "theme.css",
-                    index: 2usize,
-                    "theme.css"
-                }
+                TabTrigger { value: "style.css", index: 1usize, "style.css" }
+                TabTrigger { value: "theme.css", index: 2usize, "theme.css" }
             }
             div {
                 width: "100%",
@@ -577,7 +607,7 @@ fn ColapsibleCodeBlock(highlighted: HighlightedCode) -> Element {
             border_radius: "0 0 0.5rem 0.5rem",
             border: "none",
             text_align: "center",
-            type: "button",
+            r#type: "button",
             onclick: move |_| {
                 collapsed.toggle();
             },
@@ -672,7 +702,9 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
                     div { class: "component-installation",
                         h2 { "Installation" }
                         ol { class: "component-installation-list",
-                            li { "If you haven't already, add the theme.css file to your project and import it in the root of your app." }
+                            li {
+                                "If you haven't already, add the theme.css file to your project and import it in the root of your app."
+                            }
                             li { "Add the style.css file to your project." }
                             li { "Create a component based on the main.rs below." }
                             li { "Modify your components and styles as needed." }
@@ -703,9 +735,7 @@ fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bo
     } = variant;
     rsx! {
         if !main_variant {
-            h3 {
-                "{name}"
-            }
+            h3 { "{name}" }
         }
         Tabs {
             default_value: "Demo",
@@ -715,16 +745,8 @@ fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bo
             width: "100%",
             variant: TabsVariant::Ghost,
             TabList {
-                TabTrigger {
-                    value: "Demo",
-                    index: 0usize,
-                    "DEMO"
-                }
-                TabTrigger {
-                    value: "Code",
-                    index: 1usize,
-                    "CODE"
-                }
+                TabTrigger { value: "Demo", index: 0usize, "DEMO" }
+                TabTrigger { value: "Code", index: 1usize, "CODE" }
             }
             div {
                 width: "100%",
@@ -760,8 +782,7 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
     let mut search = use_signal(String::new);
 
     rsx! {
-        main {
-            role: "main",
+        main { role: "main",
             div { id: "hero",
                 h1 { "Dioxus Components" }
                 h2 {
@@ -774,7 +795,7 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                 div { id: "hero-search-container",
                     input {
                         id: "hero-search-input",
-                        type: "search",
+                        r#type: "search",
                         placeholder: "Search components...",
                         value: search,
                         oninput: move |e| {
@@ -791,8 +812,7 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
 #[component]
 fn Installation() -> Element {
     rsx! {
-        div {
-            id: "hero-installation",
+        div { id: "hero-installation",
             "cargo add dioxus-primitives --git https://github.com/DioxusLabs/components"
             CopyButton {}
         }

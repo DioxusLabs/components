@@ -1,5 +1,6 @@
 {
   "name": "input",
   "description": "An input field component for user text entry.",
-  "authors": ["Evan Almloff"]
+  "authors": ["Evan Almloff"],
+  "exclude": ["variants", "docs.md", "component.json"]
 }

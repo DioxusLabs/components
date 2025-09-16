@@ -131,10 +131,7 @@ pub fn Navbar(props: NavbarProps) -> Element {
         .find_map(|attr| (attr.name == "aria-label").then(|| attr.value.clone()));
 
     rsx! {
-        div {
-            role: "navigation",
-            display: "content",
-            aria_label,
+        div { role: "navigation", display: "content", aria_label,
             div {
                 role: "menubar",
                 "data-disabled": (props.disabled)(),
@@ -322,12 +319,12 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
                             ctx.set_open_nav.call(Some(props.index.cloned()));
                         }
                         nav_ctx.focus_next();
-                    },
+                    }
                     Key::ArrowUp if !disabled() => {
                         if is_open() {
                             nav_ctx.focus_prev();
                         }
-                    },
+                    }
                     _ => return,
                 }
                 event.prevent_default();
@@ -441,7 +438,7 @@ pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
                 }
             },
             role: "menuitem",
-            type: "button",
+            r#type: "button",
             tabindex: if is_focused() { "0" } else { "-1" },
             ..props.attributes,
             {props.children}
