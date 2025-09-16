@@ -16,8 +16,6 @@ time = { version = "0.3.41", features = ["std", "macros"] }
 [build-dependencies]
 syntect = "5.2"
 pulldown-cmark = "0.13.0"
-dioxus-component-manifest = { version = "0.1.0", path = "../dioxus-component-manifest" }
-serde_json = "1.0"
 
 [features]
 web = ["dioxus/web", "dioxus-primitives/web"]

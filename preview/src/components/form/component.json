@@ -2,5 +2,11 @@
   "name": "form",
   "description": "A form component for collecting user input.",
   "authors": ["Evan Almloff"],
-  "exclude": ["variants", "docs.md", "component.json"]
+  "exclude": ["variants", "docs.md", "component.json"],
+  "cargoDependencies": [
+    {
+      "name": "dioxus-primitives",
+      "git": "https://github.com/DioxusLabs/components"
+    }
+  ]
 }

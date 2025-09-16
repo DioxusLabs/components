@@ -2,5 +2,11 @@
   "name": "switch",
   "description": "A togglable switch component.",
   "authors": ["Evan Almloff"],
-  "exclude": ["variants", "docs.md", "component.json"]
+  "exclude": ["variants", "docs.md", "component.json"],
+  "cargoDependencies": [
+    {
+      "name": "dioxus-primitives",
+      "git": "https://github.com/DioxusLabs/components"
+    }
+  ]
 }

@@ -2,5 +2,11 @@
   "name": "popover",
   "description": "A popover component for colapsible content.",
   "authors": ["Evan Almloff"],
-  "exclude": ["variants", "docs.md", "component.json"]
+  "exclude": ["variants", "docs.md", "component.json"],
+  "cargoDependencies": [
+    {
+      "name": "dioxus-primitives",
+      "git": "https://github.com/DioxusLabs/components"
+    }
+  ]
 }

@@ -2,5 +2,11 @@
   "name": "dialog",
   "description": "A dialog component for displaying modal content.",
   "authors": ["Evan Almloff"],
-  "exclude": ["variants", "docs.md", "component.json"]
+  "exclude": ["variants", "docs.md", "component.json"],
+  "cargoDependencies": [
+    {
+      "name": "dioxus-primitives",
+      "git": "https://github.com/DioxusLabs/components"
+    }
+  ]
 }

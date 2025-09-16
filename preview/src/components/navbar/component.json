@@ -2,5 +2,12 @@
   "name": "navbar",
   "description": "A navbar component for navigation between pages.",
   "authors": ["Evan Almloff"],
-  "exclude": ["variants", "docs.md", "component.json"]
+  "exclude": ["variants", "docs.md", "component.json"],
+  "cargoDependencies": [
+    {
+      "name": "dioxus-primitives",
+      "git": "https://github.com/DioxusLabs/components",
+      "features": ["router"]
+    }
+  ]
 }

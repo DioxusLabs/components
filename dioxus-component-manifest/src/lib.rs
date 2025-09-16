@@ -53,7 +53,7 @@ pub enum CargoDependency {
 }
 
 impl CargoDependency {
-    fn add_command(&self) -> Command {
+    pub fn add_command(&self) -> Command {
         let mut cmd = Command::new("cargo");
         cmd.arg("add");
         match self {
@@ -91,20 +91,17 @@ impl CargoDependency {
         }
         cmd
     }
+
+    pub fn name(&self) -> &str {
+        match self {
+            CargoDependency::Simple(name) => name,
+            CargoDependency::Detailed { name, .. } => name,
+        }
+    }
 }
 
-fn main() {
+#[test]
+fn test_schema() {
     let schema = schema_for!(Component);
     println!("{}", serde_json::to_string_pretty(&schema).unwrap());
-
-    let command = CargoDependency::Detailed {
-        name: "dioxus".to_string(),
-        features: vec!["web".to_string(), "ssr".to_string()],
-        version: Some("0.4".to_string()),
-        default_features: true,
-        git: None,
-        rev: None,
-    }
-    .add_command();
-    println!("{command:?}");
 }
