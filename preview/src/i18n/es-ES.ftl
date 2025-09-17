@@ -20,3 +20,6 @@ Thursday = Ju
 Friday = Vi
 Saturday = Sa
 Sunday = Do
+
+## Date
+YMD = YYYY-MM-DD

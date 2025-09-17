@@ -230,6 +230,7 @@ pub struct CalendarProps {
     pub on_format_month: Callback<Month, String>,
 
     /// The month being viewed
+    #[props(default = ReadOnlySignal::new(Signal::new(UtcDateTime::now().date())))]
     pub view_date: ReadOnlySignal<Date>,
 
     /// The current date (used for highlighting today)
@@ -896,24 +897,22 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             date = date.next_day().expect("invalid or out-of-range date");
         }
 
+        let mut date = view_date;
         // Add days of the month
         let num_days_in_month = view_date.month().length(view_date.year());
         for day in 1..=num_days_in_month {
-            grid.push(
-                view_date
-                    .replace_day(day)
-                    .expect("invalid or out-of-range date"),
-            );
+            date = view_date
+                .replace_day(day)
+                .expect("invalid or out-of-range date");
+            grid.push(date);
         }
 
         // Add empty cells to complete the grid (for a clean layout)
         let remainder = grid.len() % 7;
         if remainder > 0 {
-            if let Some(mut date) = next_month(view_date) {
-                for _ in 1..=(7 - remainder) {
-                    grid.push(date);
-                    date = date.next_day().expect("invalid or out-of-range date");
-                }
+            for _ in 1..=(7 - remainder) {
+                date = date.next_day().expect("invalid or out-of-range date");
+                grid.push(date);
             }
         }
 

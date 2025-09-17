@@ -1,39 +1,40 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::date_picker::{
-    DatePicker, DatePickerCalendar, DatePickerInput, DatePickerTrigger, DatePickerValue,
-};
+
+use dioxus_i18n::tid;
+use dioxus_primitives::date_picker::DatePickerValue;
+
+use time::{Date, Month, Weekday};
 
 #[component]
 pub fn Demo() -> Element {
-    let mut value = use_signal(|| None::<DatePickerValue>);
+    let v = DatePickerValue::new_day(None);
+    let mut value = use_signal(|| v);
+
+    let mut selected_date = use_signal(|| None::<Date>);
 
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/date_picker/variants/main/style.css"),
-        }
         div {
             DatePicker {
-                class: "date-picker",
                 value: value(),
-                on_value_change: move |date| {
-                    tracing::info!("Selected date: {:?}", date);
-                    value.set(date);
+                selected_date: selected_date(),
+                on_value_change: move |v| {
+                    tracing::info!("Selected: {v}");
+                    value.set(v);
+                    selected_date.set(v.date());
                 },
+                on_format_placeholder: || tid!("YMD"),
                 DatePickerInput {
-                    class: "date-picker-input",
                     DatePickerTrigger {
-                    class: "date-picker-trigger",
-                    aria_label: "DatePicker Trigger",
-                    svg {
-                        class: "date-picker-expand-icon",
-                        view_box: "0 0 24 24",
-                        xmlns: "http://www.w3.org/2000/svg",
-                        polyline { points: "6 9 12 15 18 9" }
+                        aria_label: "DatePicker Trigger",
+                        DatePickerCalendar {
+                            selected_date: selected_date(),
+                            on_date_change: move |date| selected_date.set(date),
+                            on_format_weekday: |weekday: Weekday| tid!(&weekday.to_string()),
+                            on_format_month: |month: Month| tid!(&month.to_string()),
+                        }
                     }
                 }
-                }
-                DatePickerCalendar { class: "date-picker-calendar" }
             }
         }
     }

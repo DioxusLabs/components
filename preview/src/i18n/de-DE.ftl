@@ -20,3 +20,6 @@ Thursday = Do
 Friday = Fr
 Saturday = Sa
 Sunday = So
+
+## Date
+YMD = JJJJ-MM-TT

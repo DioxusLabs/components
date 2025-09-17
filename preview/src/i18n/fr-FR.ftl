@@ -20,3 +20,6 @@ Thursday = Je
 Friday = Ve
 Saturday = Sa
 Sunday = Di
+
+## Date
+YMD = AAAA-MM-JJ
