@@ -32,10 +32,6 @@ pub fn Demo() -> Element {
     });
 
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/dropdown_menu/variants/main/style.css"),
-        }
         DropdownMenu { class: "dropdown-menu", default_open: false,
             DropdownMenuTrigger { class: "dropdown-menu-trigger", "Open Menu" }
             DropdownMenuContent { class: "dropdown-menu-content",

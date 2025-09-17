@@ -19,9 +19,9 @@ pub struct ScrollAreaProps {
 
     /// Additional attributes to apply to the scroll area element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the scroll area component.
-    children: Element,
+    pub children: Element,
 }
 
 /// The direction in which scrolling is allowed.

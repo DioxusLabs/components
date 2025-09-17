@@ -33,9 +33,9 @@ pub struct NavbarProps {
 
     /// Additional attributes to apply to the navbar element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the navbar component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Navbar
@@ -193,9 +193,9 @@ pub struct NavbarNavProps {
 
     /// Additional attributes to apply to the nav element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the nav component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # NavbarNav
@@ -344,9 +344,9 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
 pub struct NavbarTriggerProps {
     /// Additional attributes to apply to the trigger element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the trigger component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # NavbarTrigger
@@ -456,9 +456,9 @@ pub struct NavbarContentProps {
     pub id: ReadOnlySignal<Option<String>>,
     /// Additional attributes to apply to the content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the content component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # NavbarContent
@@ -620,10 +620,10 @@ pub struct NavbarItemProps {
 
     /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children to render within the generated HTML anchor tag.
-    children: Element,
+    pub children: Element,
 }
 
 /// # NavbarItem

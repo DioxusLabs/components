@@ -75,7 +75,7 @@ pub struct ToastProviderProps {
     pub render_toast: Callback<ToastPropsWithOwner, Element>,
 
     /// The children of the toast provider component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # ToastProvider
@@ -308,7 +308,7 @@ pub struct ToastProps {
 
     /// Additional attributes to apply to the toast element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 }
 
 /// # Toast

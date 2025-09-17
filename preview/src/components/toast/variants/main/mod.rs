@@ -1,5 +1,8 @@
+use crate::components::button::component::Button;
+
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::toast::{use_toast, ToastOptions, ToastProvider};
+use dioxus_primitives::toast::{use_toast, ToastOptions};
 use std::time::Duration;
 
 #[component]
@@ -14,17 +17,7 @@ fn ToastButton() -> Element {
     let toast_api = use_toast();
 
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/toast/variants/main/style.css"),
-        }
-        // Additional styles just for the trigger button
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/button/variants/main/style.css"),
-        }
-        button {
-            class: "button",
+        Button {
             type: "button",
             "data-style": "outline",
             onclick: move |_| {

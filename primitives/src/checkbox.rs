@@ -88,10 +88,10 @@ pub struct CheckboxProps {
 
     /// Additional attributes to apply to the checkbox element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children to render inside the checkbox.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Checkbox
@@ -251,7 +251,7 @@ fn BubbleInput(
                     input.indeterminate = true;
                     input.checked = true;
                     break;
-                case "unchecked": 
+                case "unchecked":
                     input.checked = false;
                     input.indeterminate = false;
                     break;

@@ -1,29 +1,25 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::tabs::{TabContent, TabTrigger, Tabs, TabList};
+
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/src/components/tabs/variants/main/style.css") }
         Tabs {
-            class: "tabs",
             default_value: "tab1".to_string(),
             horizontal: true,
             max_width: "16rem",
-            TabList { class: "tabs-list",
+            TabList {
                 TabTrigger {
-                    class: "tabs-trigger",
                     value: "tab1".to_string(),
                     index: 0usize,
                     "Tab 1"
                 }
                 TabTrigger {
-                    class: "tabs-trigger",
                     value: "tab2".to_string(),
                     index: 1usize,
                     "Tab 2"
                 }
                 TabTrigger {
-                    class: "tabs-trigger",
                     value: "tab3".to_string(),
                     index: 2usize,
                     "Tab 3"
@@ -31,7 +27,6 @@ pub fn Demo() -> Element {
             }
             TabContent {
                 index: 0usize,
-                class: "tabs-content",
                 value: "tab1".to_string(),
                 div {
                     width: "100%",
@@ -57,7 +52,6 @@ pub fn Demo() -> Element {
             }
             TabContent {
                 index: 2usize,
-                class: "tabs-content",
                 value: "tab3".to_string(),
                 div {
                     width: "100%",

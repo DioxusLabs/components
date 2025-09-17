@@ -9,10 +9,10 @@ use super::super::context::SelectContext;
 pub struct SelectTriggerProps {
     /// Additional attributes for the trigger button
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children to render inside the trigger
-    children: Element,
+    pub children: Element,
 }
 
 /// # SelectTrigger
