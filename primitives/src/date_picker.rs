@@ -1,10 +1,10 @@
 //! Defines the [`DatePicker`] component and its subcomponents, which allowing users to enter or select a date value
 
-use crate::calendar::{
-    Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton,
-    CalendarPreviousMonthButton, CalendarSelectMonth, CalendarSelectYear,
-};
 use crate::{
+    calendar::{
+        Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton,
+        CalendarPreviousMonthButton, CalendarSelectMonth, CalendarSelectYear,
+    },
     focus::{use_focus_provider, FocusState},
     use_animated_open, use_effect, use_id_or, use_unique_id,
 };
@@ -12,31 +12,121 @@ use crate::{
 use dioxus::prelude::*;
 use time::{macros::format_description, Date, UtcDateTime};
 
+/// The value of the [`DatePicker`] component.
+#[derive(Debug, Clone, PartialEq)]
+pub enum DatePickerValue {
+    /// A single value for the date picker
+    Single {
+        /// The selected date
+        date: Date,
+    },
+    /// A dates range value for the date picker
+    Range {
+        /// The first range date
+        start: Date,
+        /// The last range date
+        end: Option<Date>,
+    },
+}
+
+impl DatePickerValue {
+    fn set(&self, date: Date) -> Self {
+        match self {
+            DatePickerValue::Single { .. } => DatePickerValue::Single { date },
+            DatePickerValue::Range { start, end } => match end {
+                Some(_) => DatePickerValue::Range {
+                    start: date,
+                    end: None,
+                },
+                None => {
+                    if date < *start {
+                        DatePickerValue::Range {
+                            start: date,
+                            end: Some(*start),
+                        }
+                    } else {
+                        DatePickerValue::Range {
+                            start: *start,
+                            end: Some(date),
+                        }
+                    }
+                }
+            },
+        }
+    }
+
+    fn date(&self) -> Date {
+        match self {
+            DatePickerValue::Single { date } => *date,
+            DatePickerValue::Range { start, end } => {
+                if let Some(date) = end {
+                    return *date;
+                }
+
+                *start
+            }
+        }
+    }
+}
+
+impl std::fmt::Display for DatePickerValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DatePickerValue::Single { date } => write!(f, "{date}"),
+            DatePickerValue::Range { start, end } => {
+                let end_str = match end {
+                    Some(value) => value.to_string(),
+                    None => String::default(),
+                };
+                write!(f, "{start} - {end_str}")
+            }
+        }
+    }
+}
+
 /// The context provided by the [`DatePicker`] component to its children.
 #[derive(Copy, Clone)]
-pub struct DatePickerContext {
-    /// The selected date
-    pub selected_date: Signal<Option<Date>>,
-
-    /// If the date select is open
-    pub open: Signal<bool>,
-    /// The ID of the calendar for ARIA attributes
-    pub calendar_id: Signal<Option<String>>,
-    /// The focus state for the date picker
+struct DatePickerContext {
+    // State
+    value: ReadOnlySignal<Option<DatePickerValue>>,
+    on_value_change: Callback<Option<DatePickerValue>>,
+    open: Signal<bool>,
     focus_state: FocusState,
 
+    // Configuration
     disabled: ReadOnlySignal<bool>,
+    calendar_id: Signal<Option<String>>,
+}
+
+impl DatePickerContext {
+    fn set_date(&mut self, date: Option<Date>) {
+        match date {
+            Some(date) => match (self.value)() {
+                Some(value) => self.on_value_change.call(Some(value.set(date))),
+                None => {
+                    tracing::error!("create new");
+                    self.on_value_change
+                        .call(Some(DatePickerValue::Single { date }))
+                }
+            },
+            None => self.on_value_change.call(None),
+        }
+    }
 }
 
 /// The props for the [`DatePicker`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct DatePickerProps {
-    /// The selected date
-    pub selected_date: Signal<Option<Date>>,
+    /// The controlled value of the date picker
+    pub value: ReadOnlySignal<Option<DatePickerValue>>,
 
-    /// Callback when selected date changes
+    /// Callback when value changes
     #[props(default)]
-    pub on_date_change: Callback<Option<Date>>,
+    pub on_value_change: Callback<Option<DatePickerValue>>,
+
+    /// The selected date
+    #[props(default)]
+    pub selected_date: Signal<Option<Date>>,
 
     /// Whether focus should loop around when reaching the end
     #[props(default = ReadOnlySignal::new(Signal::new(true)))]
@@ -77,7 +167,8 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
         open,
         calendar_id,
         focus_state,
-        selected_date: props.selected_date,
+        value: props.value,
+        on_value_change: props.on_value_change,
         disabled: props.disabled,
     });
 
@@ -160,8 +251,8 @@ pub struct DatePickerInputProps {
 pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
     let mut ctx = use_context::<DatePickerContext>();
 
-    let display_value = use_memo(move || match (ctx.selected_date)() {
-        Some(date) => date.to_string(),
+    let display_value = use_memo(move || match (ctx.value)() {
+        Some(value) => value.to_string(),
         None => String::default(),
     });
 
@@ -174,7 +265,7 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
 
                 let format = format_description!("[year]-[month]-[day]");
                 if let Ok(date) = Date::parse(&text, &format) {
-                    ctx.selected_date.set(Some(date));
+                    ctx.set_date(Some(date));
                 }
             },
             ..props.attributes,
@@ -244,12 +335,16 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps) -> Element {
     let render = use_animated_open(id, open);
     let render = use_memo(render);
 
+    let mut selected_date = use_signal(|| None::<Date>);
     let mut view_date = use_signal(|| UtcDateTime::now().date());
 
-    use_effect(move || {
-        if let Some(date) = (ctx.selected_date)() {
+    use_effect(move || match (ctx.value)() {
+        Some(value) => {
+            let date = value.date();
             view_date.set(date);
+            selected_date.set(Some(date));
         }
+        None => selected_date.set(None),
     });
 
     rsx! {
@@ -268,9 +363,9 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps) -> Element {
                 ..props.attributes,
 
                 Calendar {
-                    selected_date: (ctx.selected_date)(),
+                    selected_date: selected_date(),
                     on_date_change: move |date| {
-                        ctx.selected_date.set(date);
+                        ctx.set_date(date);
                         open.set(false);
                     },
                     view_date: view_date(),

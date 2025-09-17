@@ -1,13 +1,11 @@
 use dioxus::prelude::*;
 use dioxus_primitives::date_picker::{
-    DatePicker, DatePickerCalendar, DatePickerInput, DatePickerTrigger,
+    DatePicker, DatePickerCalendar, DatePickerInput, DatePickerTrigger, DatePickerValue,
 };
-
-use time::Date;
 
 #[component]
 pub fn Demo() -> Element {
-    let mut selected_date = use_signal(|| None::<Date>);
+    let mut value = use_signal(|| None::<DatePickerValue>);
 
     rsx! {
         document::Link {
@@ -17,10 +15,10 @@ pub fn Demo() -> Element {
         div {
             DatePicker {
                 class: "date-picker",
-                selected_date: selected_date,
-                on_date_change: move |date| {
+                value: value(),
+                on_value_change: move |date| {
                     tracing::info!("Selected date: {:?}", date);
-                    selected_date.set(date);
+                    value.set(date);
                 },
                 DatePickerInput {
                     class: "date-picker-input",
