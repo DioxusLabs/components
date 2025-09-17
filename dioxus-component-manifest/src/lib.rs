@@ -3,7 +3,7 @@ use std::process::Command;
 use schemars::{JsonSchema, schema_for};
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, JsonSchema)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Component {
     pub name: String,
@@ -21,7 +21,7 @@ pub struct Component {
     pub exclude: Vec<String>,
 }
 
-#[derive(Deserialize, Serialize, JsonSchema)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(untagged)]
 pub enum ComponentDependency {
     Builtin(String),
@@ -33,7 +33,7 @@ pub enum ComponentDependency {
     },
 }
 
-#[derive(Deserialize, Serialize, JsonSchema)]
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(untagged)]
 pub enum CargoDependency {
     Simple(String),
