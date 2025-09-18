@@ -17,7 +17,7 @@ struct PopoverCtx {
 
     // Whether the dialog is a modal and should capture focus.
     #[allow(unused)]
-    is_modal: ReadOnlySignal<bool>,
+    is_modal: ReadSignal<bool>,
     labelledby: Signal<String>,
 }
 
@@ -25,11 +25,11 @@ struct PopoverCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverRootProps {
     /// Whether the popover is a modal and should capture focus.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub is_modal: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub is_modal: ReadSignal<bool>,
 
     /// The controlled open state of the popover.
-    pub open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadSignal<Option<bool>>,
 
     /// The default open state when uncontrolled.
     #[props(default)]
@@ -141,7 +141,7 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverContentProps {
     /// The id of the popover content element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// CSS class for the popover content.
     #[props(default)]

@@ -16,13 +16,13 @@ struct AlertDialogCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogRootProps {
     /// The id of the alert dialog root element. If not provided, a unique id will be generated.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
     /// Whether the alert dialog should be open by default. This is only used if the `open` signal is not provided.
     #[props(default)]
     pub default_open: bool,
     /// The open state of the alert dialog. If this is provided, it will be used to control the open state of the dialog.
     #[props(default)]
-    pub open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadSignal<Option<bool>>,
     /// Callback to handle changes in the open state of the dialog.
     #[props(default)]
     pub on_open_change: Callback<bool>,
@@ -137,7 +137,7 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct AlertDialogContentProps {
     /// The id of the alert dialog content element. If not provided, a unique id will be generated.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// The class to apply to the alert dialog content element.
     #[props(default)]

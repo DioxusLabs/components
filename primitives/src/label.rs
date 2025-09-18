@@ -6,7 +6,7 @@ use dioxus::prelude::*;
 #[derive(Props, Clone, PartialEq)]
 pub struct LabelProps {
     /// The id of the element that this label is associated with
-    pub html_for: ReadOnlySignal<String>,
+    pub html_for: ReadSignal<String>,
 
     /// Additional attributes to apply to the label element
     #[props(extends = GlobalAttributes)]

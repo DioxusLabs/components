@@ -13,17 +13,17 @@ use std::collections::HashSet;
 #[derive(Clone, Copy)]
 struct ToggleGroupCtx {
     // State
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
     pressed: Memo<HashSet<usize>>,
     set_pressed: Callback<HashSet<usize>>,
 
-    allow_multiple_pressed: ReadOnlySignal<bool>,
+    allow_multiple_pressed: ReadSignal<bool>,
 
     // Focus state
     focus: FocusState,
 
-    horizontal: ReadOnlySignal<bool>,
-    roving_loop: ReadOnlySignal<bool>,
+    horizontal: ReadSignal<bool>,
+    roving_loop: ReadSignal<bool>,
 }
 
 impl ToggleGroupCtx {
@@ -86,7 +86,7 @@ pub struct ToggleGroupProps {
     pub default_pressed: HashSet<usize>,
 
     /// The currently pressed items. This can be used to drive the component when controlled.
-    pub pressed: ReadOnlySignal<Option<HashSet<usize>>>,
+    pub pressed: ReadSignal<Option<HashSet<usize>>>,
 
     /// Callback to handle changes in pressed state
     #[props(default)]
@@ -94,19 +94,19 @@ pub struct ToggleGroupProps {
 
     /// Whether the toggle group is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// If multiple items can be pressed at the same time. If this is false, only one item can be pressed at a time (radio-style).
     #[props(default)]
-    pub allow_multiple_pressed: ReadOnlySignal<bool>,
+    pub allow_multiple_pressed: ReadSignal<bool>,
 
     /// Whether the toggle group is horizontal or vertical.
     #[props(default)]
-    pub horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadSignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub roving_loop: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub roving_loop: ReadSignal<bool>,
 
     /// Additional attributes to apply to the toggle group element
     #[props(extends = GlobalAttributes)]
@@ -179,11 +179,11 @@ pub fn ToggleGroup(props: ToggleGroupProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleItemProps {
     /// The index of the item within the [`ToggleGroup`]. This is used to order the items for keyboard navigation.
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// Whether the toggle item is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Additional attributes to apply to the toggle item element
     #[props(extends = GlobalAttributes)]

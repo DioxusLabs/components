@@ -1080,6 +1080,7 @@ dependencies = [
 [[package]]
 name = "const-serialize"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "const-serialize-macro",
  "serde",
@@ -1088,6 +1089,7 @@ dependencies = [
 [[package]]
 name = "const-serialize-macro"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1498,19 +1500,20 @@ dependencies = [
 [[package]]
 name = "dioxus"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-asset-resolver",
  "dioxus-cli-config",
- "dioxus-config-macro 0.7.0-rc.0",
+ "dioxus-config-macro 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
  "dioxus-config-macros",
  "dioxus-core",
- "dioxus-core-macro 0.7.0-rc.0",
+ "dioxus-core-macro 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
  "dioxus-desktop",
  "dioxus-devtools",
  "dioxus-document",
  "dioxus-fullstack",
  "dioxus-history",
- "dioxus-hooks 0.7.0-rc.0",
+ "dioxus-hooks 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
  "dioxus-html",
  "dioxus-liveview",
  "dioxus-logger",
@@ -1531,6 +1534,7 @@ dependencies = [
 [[package]]
 name = "dioxus-asset-resolver"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-cli-config",
  "http",
@@ -1551,25 +1555,9 @@ dependencies = [
 [[package]]
 name = "dioxus-cli-config"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "wasm-bindgen",
-]
-
-[[package]]
-name = "dioxus-component-manifest"
-version = "0.1.0"
-dependencies = [
- "schemars",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "dioxus-config-macro"
-version = "0.7.0-rc.0"
-dependencies = [
- "proc-macro2",
- "quote",
 ]
 
 [[package]]
@@ -1583,12 +1571,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "dioxus-config-macro"
+version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "dioxus-config-macros"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 
 [[package]]
 name = "dioxus-core"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "const_format",
  "dioxus-core-types",
@@ -1609,17 +1608,6 @@ dependencies = [
 [[package]]
 name = "dioxus-core-macro"
 version = "0.7.0-rc.0"
-dependencies = [
- "convert_case 0.8.0",
- "dioxus-rsx 0.7.0-rc.0",
- "proc-macro2",
- "quote",
- "syn 2.0.106",
-]
-
-[[package]]
-name = "dioxus-core-macro"
-version = "0.7.0-rc.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9280f81c8d58863b3077f1b7ca097e2f2b28d30a5aa02a656fbf72b0aee1bd9f"
 dependencies = [
@@ -1631,12 +1619,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "dioxus-core-macro"
+version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
+dependencies = [
+ "convert_case 0.8.0",
+ "dioxus-rsx 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
 name = "dioxus-core-types"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 
 [[package]]
 name = "dioxus-desktop"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "async-trait",
  "base64",
@@ -1648,7 +1650,7 @@ dependencies = [
  "dioxus-devtools",
  "dioxus-document",
  "dioxus-history",
- "dioxus-hooks 0.7.0-rc.0",
+ "dioxus-hooks 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
  "dioxus-html",
  "dioxus-interpreter-js",
  "dioxus-signals",
@@ -1689,6 +1691,7 @@ dependencies = [
 [[package]]
 name = "dioxus-devtools"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-cli-config",
  "dioxus-core",
@@ -1706,6 +1709,7 @@ dependencies = [
 [[package]]
 name = "dioxus-devtools-types"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-core",
  "serde",
@@ -1715,9 +1719,10 @@ dependencies = [
 [[package]]
 name = "dioxus-document"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-core",
- "dioxus-core-macro 0.7.0-rc.0",
+ "dioxus-core-macro 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
  "dioxus-core-types",
  "dioxus-html",
  "futures-channel",
@@ -1732,6 +1737,7 @@ dependencies = [
 [[package]]
 name = "dioxus-fullstack"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "base64",
  "bytes",
@@ -1759,12 +1765,13 @@ dependencies = [
 [[package]]
 name = "dioxus-fullstack-hooks"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-core",
  "dioxus-document",
  "dioxus-fullstack-protocol",
  "dioxus-history",
- "dioxus-hooks 0.7.0-rc.0",
+ "dioxus-hooks 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
  "dioxus-signals",
  "futures-channel",
  "serde",
@@ -1773,6 +1780,7 @@ dependencies = [
 [[package]]
 name = "dioxus-fullstack-protocol"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "base64",
  "ciborium",
@@ -1784,24 +1792,10 @@ dependencies = [
 [[package]]
 name = "dioxus-history"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-core",
  "tracing",
-]
-
-[[package]]
-name = "dioxus-hooks"
-version = "0.7.0-rc.0"
-dependencies = [
- "dioxus-core",
- "dioxus-signals",
- "futures-channel",
- "futures-util",
- "generational-box",
- "rustversion",
- "slab",
- "tracing",
- "warnings",
 ]
 
 [[package]]
@@ -1822,14 +1816,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "dioxus-hooks"
+version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
+dependencies = [
+ "dioxus-core",
+ "dioxus-signals",
+ "futures-channel",
+ "futures-util",
+ "generational-box",
+ "rustversion",
+ "slab",
+ "tracing",
+ "warnings",
+]
+
+[[package]]
 name = "dioxus-html"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "async-trait",
  "dioxus-core",
- "dioxus-core-macro 0.7.0-rc.0",
+ "dioxus-core-macro 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
  "dioxus-core-types",
- "dioxus-hooks 0.7.0-rc.0",
+ "dioxus-hooks 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
  "dioxus-html-internal-macro",
  "enumset",
  "euclid",
@@ -1847,6 +1858,7 @@ dependencies = [
 [[package]]
 name = "dioxus-html-internal-macro"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "convert_case 0.8.0",
  "proc-macro2",
@@ -1869,6 +1881,7 @@ dependencies = [
 [[package]]
 name = "dioxus-interpreter-js"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-core",
  "dioxus-core-types",
@@ -1887,6 +1900,7 @@ dependencies = [
 [[package]]
 name = "dioxus-isrg"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "chrono",
  "http",
@@ -1914,6 +1928,7 @@ dependencies = [
 [[package]]
 name = "dioxus-liveview"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "axum",
  "dioxus-cli-config",
@@ -1940,6 +1955,7 @@ dependencies = [
 [[package]]
 name = "dioxus-logger"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-cli-config",
  "tracing",
@@ -1950,6 +1966,7 @@ dependencies = [
 [[package]]
 name = "dioxus-native"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "anyrender",
  "anyrender_vello",
@@ -1978,6 +1995,7 @@ dependencies = [
 [[package]]
 name = "dioxus-native-dom"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "blitz-dom",
  "blitz-traits",
@@ -2003,13 +2021,14 @@ dependencies = [
 [[package]]
 name = "dioxus-router"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-cli-config",
  "dioxus-core",
- "dioxus-core-macro 0.7.0-rc.0",
+ "dioxus-core-macro 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
  "dioxus-fullstack-hooks",
  "dioxus-history",
- "dioxus-hooks 0.7.0-rc.0",
+ "dioxus-hooks 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
  "dioxus-html",
  "dioxus-router-macro",
  "dioxus-signals",
@@ -2022,6 +2041,7 @@ dependencies = [
 [[package]]
 name = "dioxus-router-macro"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "base16",
  "digest",
@@ -2029,16 +2049,6 @@ dependencies = [
  "quote",
  "sha2",
  "slab",
- "syn 2.0.106",
-]
-
-[[package]]
-name = "dioxus-rsx"
-version = "0.7.0-rc.0"
-dependencies = [
- "proc-macro2",
- "proc-macro2-diagnostics",
- "quote",
  "syn 2.0.106",
 ]
 
@@ -2055,8 +2065,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "dioxus-rsx"
+version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
+dependencies = [
+ "proc-macro2",
+ "proc-macro2-diagnostics",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
 name = "dioxus-server"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "async-trait",
  "axum",
@@ -2066,7 +2088,7 @@ dependencies = [
  "dashmap",
  "dioxus-cli-config",
  "dioxus-core",
- "dioxus-core-macro 0.7.0-rc.0",
+ "dioxus-core-macro 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
  "dioxus-devtools",
  "dioxus-document",
  "dioxus-fullstack-hooks",
@@ -2105,6 +2127,7 @@ dependencies = [
 [[package]]
 name = "dioxus-signals"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-core",
  "futures-channel",
@@ -2119,6 +2142,7 @@ dependencies = [
 [[package]]
 name = "dioxus-ssr"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "askama_escape",
  "dioxus-core",
@@ -2129,6 +2153,7 @@ dependencies = [
 [[package]]
 name = "dioxus-stores"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dioxus-core",
  "dioxus-signals",
@@ -2138,6 +2163,7 @@ dependencies = [
 [[package]]
 name = "dioxus-stores-macro"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "convert_case 0.8.0",
  "proc-macro2",
@@ -2159,6 +2185,7 @@ dependencies = [
 [[package]]
 name = "dioxus-web"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "async-trait",
  "dioxus-cli-config",
@@ -2191,6 +2218,7 @@ dependencies = [
 [[package]]
 name = "dioxus_server_macro"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2321,12 +2349,6 @@ name = "dunce"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
-
-[[package]]
-name = "dyn-clone"
-version = "1.0.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
 
 [[package]]
 name = "either"
@@ -2878,6 +2900,7 @@ dependencies = [
 [[package]]
 name = "generational-box"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "parking_lot",
  "tracing",
@@ -3954,6 +3977,7 @@ checksum = "e49596223b9d9d4947a14a25c142a6e7d8ab3f27eb3ade269d238bb8b5c267e2"
 [[package]]
 name = "lazy-js-bundle"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 
 [[package]]
 name = "lazy_static"
@@ -4148,6 +4172,7 @@ dependencies = [
 [[package]]
 name = "manganis"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "const-serialize",
  "manganis-core",
@@ -4157,6 +4182,7 @@ dependencies = [
 [[package]]
 name = "manganis-core"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "const-serialize",
  "dioxus-cli-config",
@@ -4167,6 +4193,7 @@ dependencies = [
 [[package]]
 name = "manganis-macro"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "dunce",
  "macro-string",
@@ -5714,26 +5741,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ref-cast"
-version = "1.0.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a0ae411dbe946a674d89546582cea4ba2bb8defac896622d6496f14c23ba5cf"
-dependencies = [
- "ref-cast-impl",
-]
-
-[[package]]
-name = "ref-cast-impl"
-version = "1.0.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1165225c21bff1f3bbce98f5a1f889949bc902d3575308cc7b0de30b4f6d27c7"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.106",
-]
-
-[[package]]
 name = "regex-automata"
 version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5979,31 +5986,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "schemars"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82d20c4491bc164fa2f6c5d44565947a52ad80b9505d8e36f8d54c27c739fcd0"
-dependencies = [
- "dyn-clone",
- "ref-cast",
- "schemars_derive",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "schemars_derive"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33d020396d1d138dc19f1165df7545479dcd58d93810dc5d646a16e55abefa80"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde_derive_internals",
- "syn 2.0.106",
-]
-
-[[package]]
 name = "scoped-tls"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6136,17 +6118,6 @@ name = "serde_derive"
 version = "1.0.219"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b0276cf7f2c73365f7157c8123c21cd9a50fbbd844757af28ca1f5925fc2a00"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.106",
-]
-
-[[package]]
-name = "serde_derive_internals"
-version = "0.29.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18d26a20a969b9e3fdf2fc2d9f21eda6c40e2de84c9408bb5d3b05d499aae711"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -6796,6 +6767,7 @@ dependencies = [
 [[package]]
 name = "subsecond"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "js-sys",
  "libc",
@@ -6813,6 +6785,7 @@ dependencies = [
 [[package]]
 name = "subsecond-types"
 version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "serde",
 ]
