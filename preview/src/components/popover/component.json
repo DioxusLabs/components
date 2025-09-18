@@ -9,5 +9,5 @@
       "git": "https://github.com/DioxusLabs/components"
     }
   ],
-  "global-assets": ["../../../assets/dx-components-theme.css"]
+  "globalAssets": ["../../../assets/dx-components-theme.css"]
 }
