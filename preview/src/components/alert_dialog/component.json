@@ -8,5 +8,6 @@
       "name": "dioxus-primitives",
       "git": "https://github.com/DioxusLabs/components"
     }
-  ]
+  ],
+  "global-assets": ["../../../assets/dx-components-theme.css"]
 }

@@ -130,7 +130,7 @@ fn NavigationLayout() -> Element {
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
-        document::Link { rel: "stylesheet", href: asset!("/assets/theme.css") }
+        document::Link { rel: "stylesheet", href: asset!("/assets/dx-components-theme.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
         Navbar {}
         Outlet::<Route> {}
@@ -555,7 +555,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
             TabList {
                 TabTrigger { value: "main.rs", index: 0usize, "main.rs" }
                 TabTrigger { value: "style.css", index: 1usize, "style.css" }
-                TabTrigger { value: "theme.css", index: 2usize, "theme.css" }
+                TabTrigger { value: "dx-components-theme.css", index: 2usize, "dx-components-theme.css" }
             }
             div {
                 width: "100%",
@@ -582,7 +582,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 }
                 TabContent {
                     index: 2usize,
-                    value: "theme.css",
+                    value: "dx-components-theme.css",
                     width: "100%",
                     position: "relative",
                     CodeBlock { source: THEME_CSS, collapsed: collapsed() }
@@ -703,7 +703,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
                         h2 { "Installation" }
                         ol { class: "component-installation-list",
                             li {
-                                "If you haven't already, add the theme.css file to your project and import it in the root of your app."
+                                "If you haven't already, add the dx-components-theme.css file to your project and import it in the root of your app."
                             }
                             li { "Add the style.css file to your project." }
                             li { "Create a component based on the main.rs below." }
@@ -874,10 +874,10 @@ fn GotoIcon(mut props: LinkProps) -> Element {
 const THEME_CSS: HighlightedCode = HighlightedCode {
     light: include_str!(concat!(
         env!("OUT_DIR"),
-        "/theme.css.base16-ocean.light.html"
+        "/dx-components-theme.css.base16-ocean.light.html"
     )),
     dark: include_str!(concat!(
         env!("OUT_DIR"),
-        "/theme.css.base16-ocean.dark.html"
+        "/dx-components-theme.css.base16-ocean.dark.html"
     )),
 };
