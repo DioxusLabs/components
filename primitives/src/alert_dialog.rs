@@ -117,7 +117,10 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
     let render_element = use_animated_open(id, open);
 
     rsx! {
-        document::Script { src: FOCUS_TRAP_JS, defer: true }
+        document::Script {
+            src: FOCUS_TRAP_JS,
+            defer: true
+        }
         if render_element() {
             div {
                 id,
@@ -277,12 +280,7 @@ pub struct AlertDialogTitleProps {
 pub fn AlertDialogTitle(props: AlertDialogTitleProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
     rsx! {
-        h2 {
-            id: ctx.labelledby.clone(),
-            class: "alert-dialog-title",
-            ..props.attributes,
-            {props.children}
-        }
+        h2 { id: ctx.labelledby.clone(), class: "alert-dialog-title", ..props.attributes, {props.children} }
     }
 }
 
@@ -339,12 +337,7 @@ pub struct AlertDialogDescriptionProps {
 pub fn AlertDialogDescription(props: AlertDialogDescriptionProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
     rsx! {
-        p {
-            id: ctx.describedby.clone(),
-            class: "alert-dialog-description",
-            ..props.attributes,
-            {props.children}
-        }
+        p { id: ctx.describedby.clone(), class: "alert-dialog-description", ..props.attributes, {props.children} }
     }
 }
 
@@ -400,7 +393,7 @@ pub struct AlertDialogActionsProps {
 #[component]
 pub fn AlertDialogActions(props: AlertDialogActionsProps) -> Element {
     rsx! {
-        div { ..props.attributes,{props.children} }
+        div { ..props.attributes, {props.children} }
     }
 }
 
@@ -471,7 +464,7 @@ pub fn AlertDialogAction(props: AlertDialogActionProps) -> Element {
     rsx! {
         button {
             tabindex: if open() { "0" } else { "-1" },
-            r#type: "button",
+            type: "button",
             onclick: on_click,
             ..props.attributes,
             {props.children}
@@ -547,7 +540,7 @@ pub fn AlertDialogCancel(props: AlertDialogCancelProps) -> Element {
     rsx! {
         button {
             tabindex: if open() { "0" } else { "-1" },
-            r#type: "button",
+            type: "button",
             onclick: on_click,
             ..props.attributes,
             {props.children}

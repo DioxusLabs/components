@@ -43,6 +43,11 @@ pub struct LabelProps {
 pub fn Label(props: LabelProps) -> Element {
     // TODO: (?) the Radix primitive prevents selection on double click (but not intentional highlighting)
     rsx! {
-        label { r#for: props.html_for, ..props.attributes, {props.children} }
+        label {
+            for: props.html_for,
+            ..props.attributes,
+
+            {props.children}
+        }
     }
 }

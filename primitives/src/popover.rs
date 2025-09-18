@@ -129,7 +129,11 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
     });
 
     rsx! {
-        div { "data-state": if open() { "open" } else { "closed" }, ..props.attributes, {props.children} }
+        div {
+            "data-state": if open() { "open" } else { "closed" },
+            ..props.attributes,
+            {props.children}
+        }
     }
 }
 
@@ -248,7 +252,10 @@ pub fn PopoverContent(props: PopoverContentProps) -> Element {
     });
 
     rsx! {
-        document::Script { src: FOCUS_TRAP_JS, defer: true }
+        document::Script {
+            src: FOCUS_TRAP_JS,
+            defer: true
+        }
         if render() {
             div {
                 id,
@@ -346,7 +353,7 @@ pub fn PopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
         button {
             id,
-            r#type: "button",
+            type: "button",
             onclick: move |e| {
                 // Prevent the click event from propagating to the overlay.
                 e.stop_propagation();

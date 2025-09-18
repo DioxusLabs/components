@@ -246,33 +246,32 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
                     region_ref.set(Some(e.data()));
                 },
 
-                ol { class: "toast-list",
+                ol {
+                    class: "toast-list",
                     // Render all toasts
-                    for (index , toast) in toast_list.read().iter().rev().enumerate() {
-                        li { key: "{toast.id}", class: "toast-item",
+                    for (index, toast) in toast_list.read().iter().rev().enumerate() {
+                        li {
+                            key: "{toast.id}",
+                            class: "toast-item",
                             {
-                                props
+                                props.render_toast.call(ToastProps::builder().id(toast.id)
+                                    .index(index)
+                                    .title(toast.title.clone())
+                                    .description(toast.description.clone())
+                                    .toast_type(toast.toast_type)
+                                    .permanent(toast.permanent)
+                                    .on_close({
+                                        let toast_id = toast.id;
+                                        let remove_toast = ctx.remove_toast;
+                                        move |_| {
+                                            remove_toast.call(toast_id);
+                                        }
+                                    })
                                     // Only pass duration to non-permanent toasts
-                                    .render_toast
-                                    .call(
-                                        ToastProps::builder()
-                                            .id(toast.id)
-                                            .index(index)
-                                            .title(toast.title.clone())
-                                            .description(toast.description.clone())
-                                            .toast_type(toast.toast_type)
-                                            .permanent(toast.permanent)
-                                            .on_close({
-                                                let toast_id = toast.id;
-                                                let remove_toast = ctx.remove_toast;
-                                                move |_| {
-                                                    remove_toast.call(toast_id);
-                                                }
-                                            })
-                                            .duration(if toast.permanent { None } else { toast.duration })
-                                            .attributes(vec![])
-                                            .build(),
-                                    )
+                                    .duration(if toast.permanent { None } else { toast.duration })
+                                    .attributes(vec![])
+                                    .build()
+                                )
                             }
                         }
                     }
@@ -415,9 +414,15 @@ pub fn Toast(props: ToastProps) -> Element {
             style: "--toast-index: {props.index}",
             ..props.attributes,
 
-            div { class: "toast-content", role: "alert", aria_atomic: "true",
+            div { class: "toast-content",
+                role: "alert",
+                aria_atomic: "true",
 
-                div { id: label_id, class: "toast-title", {props.title.clone()} }
+                div {
+                    id: label_id,
+                    class: "toast-title",
+                    {props.title.clone()}
+                }
 
                 if let Some(description) = &props.description {
                     div {
@@ -431,7 +436,7 @@ pub fn Toast(props: ToastProps) -> Element {
             button {
                 class: "toast-close",
                 aria_label: "close",
-                r#type: "button",
+                type: "button",
                 onclick: move |e| {
                     // Focus the region again after closing
                     ctx.focus_region.call(());

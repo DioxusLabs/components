@@ -347,8 +347,8 @@ pub fn Calendar(props: CalendarProps) -> Element {
                             if ctx.min_date <= date && date <= ctx.max_date {
                                 ctx.focused_date.set(new_date);
                             }
-                        }
-                        None => ctx.focused_date.set(None),
+                        },
+                        None => ctx.focused_date.set(None)
                     }
                 };
                 match e.key() {
@@ -523,7 +523,9 @@ pub struct CalendarNavigationProps {
 #[component]
 pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
     rsx! {
-        div { class: "calendar-navigation", ..props.attributes, {props.children} }
+        div { class: "calendar-navigation", ..props.attributes,
+            {props.children}
+        }
     }
 }
 
@@ -609,7 +611,7 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
         button {
             class: "calendar-nav-prev",
             aria_label: "Previous month",
-            r#type: "button",
+            type: "button",
             onclick: handle_prev_month,
             disabled: (ctx.disabled)() || button_disabled(),
             ..props.attributes,
@@ -704,7 +706,7 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
         button {
             class: "calendar-nav-next",
             aria_label: "Next month",
-            r#type: "button",
+            type: "button",
             onclick: handle_next_month,
             disabled: (ctx.disabled)() || button_disabled(),
             ..props.attributes,
@@ -778,7 +780,12 @@ pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
     });
 
     rsx! {
-        div { class: "calendar-month-title", ..props.attributes, {month_year} }
+        div {
+            class: "calendar-month-title",
+            ..props.attributes,
+
+            {month_year}
+        }
     }
 }
 
@@ -925,11 +932,12 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
 
             // Day headers
             thead { aria_hidden: "true",
-                tr { class: "calendar-grid-header",
+                tr {
+                    class: "calendar-grid-header",
                     // Day name headers
-                    for (weekday , label) in weekday_headers() {
+                    for (weekday, label) in weekday_headers() {
                         th {
-                            key: "{weekday:?}", // Add key for efficient diffing
+                            key: "{weekday:?}",  // Add key for efficient diffing
                             class: "calendar-grid-day-header",
                             {label}
                         }
@@ -941,9 +949,13 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             tbody { class: "calendar-grid-body",
                 // Display all days in a grid
                 for row in &*days_grid.read() {
-                    tr { role: "row", class: "calendar-grid-week",
+                    tr {
+                        role: "row",
+                        class: "calendar-grid-week",
                         for date in row.iter().copied() {
-                            td { {props.render_day.call(date)} }
+                            td {
+                                {props.render_day.call(date)}
+                            }
                         }
                     }
                 }
@@ -1270,8 +1282,12 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
     rsx! {
         button {
             class: "calendar-grid-cell",
-            r#type: "button",
-            tabindex: if date == focusable_date { "0" } else { "-1" },
+            type: "button",
+            tabindex: if date == focusable_date {
+                "0"
+            } else {
+                "-1"
+            },
             aria_label: aria_label(&props.date),
             "data-today": is_today,
             "data-selected": is_selected(),

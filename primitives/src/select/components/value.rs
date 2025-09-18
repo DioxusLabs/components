@@ -80,6 +80,10 @@ pub fn SelectValue(props: SelectValueProps) -> Element {
 
     rsx! {
         // Add placeholder option if needed
-        span { "data-placeholder": ctx.value.read().is_none(), ..props.attributes, {display_value} }
+        span {
+            "data-placeholder": ctx.value.read().is_none(),
+            ..props.attributes,
+            {display_value}
+        }
     }
 }

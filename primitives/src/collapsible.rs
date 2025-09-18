@@ -165,7 +165,7 @@ pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
 
     rsx! {
         div {
-            id,
+            id: id,
             "data-open": open,
             "data-disabled": ctx.disabled,
             ..props.attributes,
@@ -230,7 +230,7 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
     rsx! {
 
         button {
-            r#type: "button",
+            type: "button",
             "data-open": open,
             "data-disabled": ctx.disabled,
             disabled: ctx.disabled,

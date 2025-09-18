@@ -289,12 +289,12 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
                             ctx.set_open_menu.call(Some(props.index.cloned()));
                         }
                         menu_ctx.focus_next();
-                    }
+                    },
                     Key::ArrowUp if !disabled() => {
                         if is_open() {
                             menu_ctx.focus_prev();
                         }
-                    }
+                    },
                     Key::Home => ctx.focus.focus_first(),
                     Key::End => ctx.focus.focus_last(),
                     _ => return,
@@ -415,7 +415,7 @@ pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
                 }
             },
             role: "menuitem",
-            r#type: "button",
+            type: "button",
             tabindex: if is_focused() { "0" } else { "-1" },
             ..props.attributes,
             {props.children}
@@ -648,9 +648,7 @@ pub fn MenubarItem(props: MenubarItemProps) -> Element {
             onkeydown: {
                 let value = props.value.clone();
                 move |event: Event<KeyboardData>| {
-                    if event.key() == Key::Enter
-                        || event.key() == Key::Character(" ".to_string())
-                    {
+                    if event.key() == Key::Enter || event.key() == Key::Character(" ".to_string()) {
                         if !disabled() {
                             props.on_select.call(value.clone());
                             ctx.set_open_menu.call(None);

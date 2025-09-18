@@ -117,6 +117,6 @@ pub struct ProgressIndicatorProps {
 #[component]
 pub fn ProgressIndicator(props: ProgressIndicatorProps) -> Element {
     rsx! {
-        div { ..props.attributes,{props.children} }
+        div { ..props.attributes, {props.children} }
     }
 }

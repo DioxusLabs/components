@@ -284,9 +284,7 @@ pub fn HoverCardContent(props: HoverCardContentProps) -> Element {
     // Only render if the hover card is open or force_mount is true
     let is_open = (ctx.open)();
     if !is_open && !props.force_mount {
-        return rsx!(
-            {}
-        );
+        return rsx!({});
     }
 
     // Use use_id_or to handle the ID
