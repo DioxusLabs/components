@@ -14,7 +14,7 @@ struct DialogCtx {
 
     // Whether the dialog is a modal and should capture focus.
     #[allow(unused)]
-    is_modal: ReadOnlySignal<bool>,
+    is_modal: ReadSignal<bool>,
     dialog_labelledby: Signal<String>,
     dialog_describedby: Signal<String>,
 }
@@ -23,14 +23,14 @@ struct DialogCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogRootProps {
     /// The ID of the dialog root element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// Whether the dialog is modal. If true, it will trap focus within the dialog when open.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub is_modal: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub is_modal: ReadSignal<bool>,
 
     /// The controlled `open` state of the dialog.
-    pub open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadSignal<Option<bool>>,
 
     /// The default `open` state of the dialog if it is not controlled.
     #[props(default)]
@@ -158,7 +158,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogContentProps {
     /// The ID of the dialog content element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// The class to apply to the dialog content element.
     #[props(default)]
@@ -270,7 +270,7 @@ pub fn DialogContent(props: DialogContentProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogTitleProps {
     /// The ID of the dialog title element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
     /// Additional attributes for the dialog title element.
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -338,7 +338,7 @@ pub fn DialogTitle(props: DialogTitleProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct DialogDescriptionProps {
     /// The ID of the dialog description element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
     /// Additional attributes for the dialog description element.
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,

@@ -30,16 +30,8 @@ pub fn Demo() -> Element {
     rsx! {
         Toolbar { aria_label: "Text formatting",
             ToolbarGroup {
-                ToolbarButton {
-                    index: 0usize,
-                    on_click: move |_| toggle_style("bold"),
-                    "Bold"
-                }
-                ToolbarButton {
-                    index: 1usize,
-                    on_click: move |_| toggle_style("italic"),
-                    "Italic"
-                }
+                ToolbarButton { index: 0usize, on_click: move |_| toggle_style("bold"), "Bold" }
+                ToolbarButton { index: 1usize, on_click: move |_| toggle_style("italic"), "Italic" }
                 ToolbarButton {
                     index: 2usize,
                     on_click: move |_| toggle_style("underline"),
@@ -48,21 +40,9 @@ pub fn Demo() -> Element {
             }
             ToolbarSeparator {}
             ToolbarGroup {
-                ToolbarButton {
-                    index: 3usize,
-                    on_click: move |_| set_align("left"),
-                    "Align Left"
-                }
-                ToolbarButton {
-                    index: 4usize,
-                    on_click: move |_| set_align("center"),
-                    "Align Center"
-                }
-                ToolbarButton {
-                    index: 5usize,
-                    on_click: move |_| set_align("right"),
-                    "Align Right"
-                }
+                ToolbarButton { index: 3usize, on_click: move |_| set_align("left"), "Align Left" }
+                ToolbarButton { index: 4usize, on_click: move |_| set_align("center"), "Align Center" }
+                ToolbarButton { index: 5usize, on_click: move |_| set_align("right"), "Align Right" }
             }
         }
         p { style: text_align_style, max_width: "30rem",

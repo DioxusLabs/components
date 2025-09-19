@@ -9,30 +9,24 @@ pub fn Demo() -> Element {
 
     rsx! {
         Button {
-            type: "button",
+            r#type: "button",
             "data-style": "outline",
             style: "margin-bottom: 1.5rem;",
             onclick: move |_| open.set(true),
             "Show Dialog"
         }
-        DialogRoot {
-            open: open(),
-            on_open_change: move |v| open.set(v),
+        DialogRoot { open: open(), on_open_change: move |v| open.set(v),
             DialogContent {
                 button {
                     class: "dialog-close",
-                    type: "button",
+                    r#type: "button",
                     aria_label: "Close",
                     tabindex: if open() { "0" } else { "-1" },
                     onclick: move |_| open.set(false),
                     "×"
                 }
-                DialogTitle {
-                    "Item information"
-                }
-                DialogDescription {
-                    "Here is some additional information about the item."
-                }
+                DialogTitle { "Item information" }
+                DialogDescription { "Here is some additional information about the item." }
             }
         }
     }

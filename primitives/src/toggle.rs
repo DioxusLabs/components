@@ -7,7 +7,7 @@ use dioxus::prelude::*;
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleProps {
     /// The controlled pressed state of the toggle.
-    pub pressed: ReadOnlySignal<Option<bool>>,
+    pub pressed: ReadSignal<Option<bool>>,
 
     /// The default pressed state when uncontrolled.
     #[props(default)]
@@ -15,7 +15,7 @@ pub struct ToggleProps {
 
     /// Whether the toggle is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Callback fired when the pressed state changes.
     #[props(default)]

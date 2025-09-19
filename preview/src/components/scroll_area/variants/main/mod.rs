@@ -16,9 +16,7 @@ pub fn Demo() -> Element {
             tabindex: "0",
             div { class: "scroll-content",
                 for i in 1..=20 {
-                    p {
-                        "Scrollable content item {i}"
-                    }
+                    p { "Scrollable content item {i}" }
                 }
             }
         }

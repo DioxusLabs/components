@@ -9,7 +9,7 @@ pub struct TabsProps {
     pub class: String,
 
     /// The controlled value of the active tab.
-    pub value: ReadOnlySignal<Option<String>>,
+    pub value: ReadSignal<Option<String>>,
 
     /// The default active tab value when uncontrolled.
     #[props(default)]
@@ -21,15 +21,15 @@ pub struct TabsProps {
 
     /// Whether the tabs are disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Whether the tabs are horizontal.
     #[props(default)]
-    pub horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadSignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub roving_loop: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub roving_loop: ReadSignal<bool>,
 
     /// The variant of the tabs component.
     #[props(default)]
@@ -66,10 +66,7 @@ impl TabsVariant {
 #[component]
 pub fn Tabs(props: TabsProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/tabs/style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         tabs::Tabs {
             class: props.class + " tabs",
             "data-variant": props.variant.to_class(),
@@ -88,11 +85,7 @@ pub fn Tabs(props: TabsProps) -> Element {
 #[component]
 pub fn TabList(props: TabListProps) -> Element {
     rsx! {
-        tabs::TabList {
-            class: "tabs-list",
-            attributes: props.attributes,
-            {props.children}
-        }
+        tabs::TabList { class: "tabs-list", attributes: props.attributes, {props.children} }
     }
 }
 

@@ -4,9 +4,6 @@ use dioxus::prelude::*;
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        Checkbox {
-            name: "tos-check",
-            aria_label: "Demo Checkbox",
-        }
+        Checkbox { name: "tos-check", aria_label: "Demo Checkbox" }
     }
 }

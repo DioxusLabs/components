@@ -7,10 +7,7 @@ use dioxus_primitives::dropdown_menu::{
 #[component]
 pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/dropdown_menu/style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         dropdown_menu::DropdownMenu {
             class: "dropdown-menu",
             open: props.open,
@@ -27,11 +24,7 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 #[component]
 pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
     rsx! {
-        dropdown_menu::DropdownMenuTrigger {
-            class: "dropdown-menu-trigger",
-            attributes: props.attributes,
-            {props.children}
-        }
+        dropdown_menu::DropdownMenuTrigger { class: "dropdown-menu-trigger", attributes: props.attributes, {props.children} }
     }
 }
 
