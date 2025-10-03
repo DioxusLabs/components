@@ -1619,6 +1619,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "dioxus-core-macro"
+version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
+dependencies = [
+ "convert_case 0.8.0",
+ "dioxus-rsx 0.7.0-rc.0 (git+https://github.com/DioxusLabs/dioxus)",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
 name = "dioxus-core-types"
 version = "0.7.0-rc.0"
 source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
@@ -2045,6 +2057,17 @@ name = "dioxus-rsx"
 version = "0.7.0-rc.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee08e1302f384a54d97b762eddb57cf3b7335b08b176e136c1d9631b5c71ff18"
+dependencies = [
+ "proc-macro2",
+ "proc-macro2-diagnostics",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
+name = "dioxus-rsx"
+version = "0.7.0-rc.0"
+source = "git+https://github.com/DioxusLabs/dioxus#eef4db67b1164934eb29b7ac4d4bcd693bba25a5"
 dependencies = [
  "proc-macro2",
  "proc-macro2-diagnostics",
@@ -4216,6 +4239,17 @@ name = "match_token"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "88a9689d8d44bf9964484516275f5cd4c9b59457a6940c1d5d0ecbb94510a36b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
+name = "match_token"
+version = "0.35.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac84fd3f360fcc43dc5f5d186f02a94192761a080e8bc58621ad4d12296a58cf"
 dependencies = [
  "proc-macro2",
  "quote",

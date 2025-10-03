@@ -179,14 +179,14 @@ impl std::fmt::Display for DateValue {
 #[derive(Copy, Clone)]
 struct DatePickerContext {
     // State
-    value: ReadOnlySignal<DatePickerValue>,
+    value: ReadSignal<DatePickerValue>,
     on_value_change: Callback<DatePickerValue>,
-    selected_date: ReadOnlySignal<Option<Date>>,
+    selected_date: ReadSignal<Option<Date>>,
     open: Signal<bool>,
-    read_only: ReadOnlySignal<bool>,
+    read_only: ReadSignal<bool>,
 
     // Configuration
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
     separator: &'static str,
     format_placeholder: Callback<(), String>,
 }
@@ -211,7 +211,7 @@ impl DatePickerContext {
 #[derive(Props, Clone, PartialEq)]
 pub struct DatePickerProps {
     /// The controlled value of the date picker
-    pub value: ReadOnlySignal<DatePickerValue>,
+    pub value: ReadSignal<DatePickerValue>,
 
     /// Callback when value changes
     #[props(default)]
@@ -219,15 +219,15 @@ pub struct DatePickerProps {
 
     /// The selected date
     #[props(default)]
-    pub selected_date: ReadOnlySignal<Option<Date>>,
+    pub selected_date: ReadSignal<Option<Date>>,
 
     /// Whether the date picker is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Whether the date picker is enable user input
-    #[props(default = ReadOnlySignal::new(Signal::new(false)))]
-    pub read_only: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(false)))]
+    pub read_only: ReadSignal<bool>,
 
     /// Separator between range value
     #[props(default = " - ")]

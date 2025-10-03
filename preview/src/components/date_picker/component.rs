@@ -1,4 +1,3 @@
-use crate::components::calendar::component::*;
 use dioxus::prelude::*;
 
 use dioxus_primitives::{
@@ -6,15 +5,13 @@ use dioxus_primitives::{
     date_picker::{self, DatePickerInputProps, DatePickerProps, DatePickerTriggerProps},
 };
 
+use crate::components::calendar::component::*;
 use time::UtcDateTime;
 
 #[component]
 pub fn DatePicker(props: DatePickerProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/date_picker/style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css"), }
         div {
             date_picker::DatePicker {
                 class: "date-picker",

@@ -32,6 +32,7 @@
     "preview/src/components/toggle_group",
     "preview/src/components/context_menu",
     "preview/src/components/aspect_ratio",
-    "preview/src/components/scroll_area"
+    "preview/src/components/scroll_area",
+    "preview/src/components/date_picker"
   ]
 }

@@ -230,8 +230,8 @@ pub struct CalendarProps {
     pub on_format_month: Callback<Month, String>,
 
     /// The month being viewed
-    #[props(default = ReadOnlySignal::new(Signal::new(UtcDateTime::now().date())))]
-    pub view_date: ReadOnlySignal<Date>,
+    #[props(default = ReadSignal::new(Signal::new(UtcDateTime::now().date())))]
+    pub view_date: ReadSignal<Date>,
 
     /// The current date (used for highlighting today)
     #[props(default = UtcDateTime::now().date())]
