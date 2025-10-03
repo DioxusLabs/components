@@ -8,23 +8,8 @@ dioxus-primitives = { path = "primitives" }
 dioxus = "^0.7.0-rc.0"
 tracing = { version = "0.1", features = ["std"] }
 
-[profile]
-
-[profile.wasm-dev]
-inherits = "dev"
-opt-level = 1
-
-[profile.server-dev]
-inherits = "dev"
-
-[profile.android-dev]
-inherits = "dev"
-
-# Same as in the Stable section
-[profile.release]
-opt-level = "z"
-debug = false
-lto = true
-codegen-units = 1
-panic = "abort"
-incremental = false
+[patch.crates-io]
+dioxus = { git = "https://github.com/DioxusLabs/dioxus" }
+dioxus-core = { git = "https://github.com/DioxusLabs/dioxus" }
+dioxus-signals = { git = "https://github.com/DioxusLabs/dioxus" }
+generational-box = { git = "https://github.com/DioxusLabs/dioxus" }

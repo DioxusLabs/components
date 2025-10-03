@@ -13,11 +13,11 @@ fn main() {
         walk_highlight_dir(&folder_path, &out_dir).unwrap();
     }
 
-    // Process the main theme.css file
-    let theme_css_path = std::path::PathBuf::from("assets/theme.css");
+    // Process the main dx-components-theme.css file
+    let theme_css_path = std::path::PathBuf::from("assets/dx-components-theme.css");
     for theme in ["base16-ocean.dark", "base16-ocean.light"] {
         let html = highlight_file_to(&theme_css_path, theme);
-        let out_file_path = out_dir.join(format!("theme.css.{theme}.html"));
+        let out_file_path = out_dir.join(format!("dx-components-theme.css.{theme}.html"));
         std::fs::write(out_file_path, html).unwrap();
     }
 }

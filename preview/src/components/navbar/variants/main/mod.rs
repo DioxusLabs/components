@@ -6,12 +6,9 @@ use dioxus::prelude::*;
 pub fn Demo() -> Element {
     rsx! {
         div { class: "navbar-example",
-            Navbar {
-                aria_label: "Components",
+            Navbar { aria_label: "Components",
                 NavbarNav { index: 0usize,
-                    NavbarTrigger {
-                        "Inputs"
-                    }
+                    NavbarTrigger { "Inputs" }
                     NavbarContent { class: "navbar-content",
                         NavbarItem {
                             index: 0usize,
@@ -40,9 +37,7 @@ pub fn Demo() -> Element {
                     }
                 }
                 NavbarNav { index: 1usize,
-                    NavbarTrigger {
-                        "Information"
-                    }
+                    NavbarTrigger { "Information" }
                     NavbarContent {
                         NavbarItem {
                             index: 0usize,

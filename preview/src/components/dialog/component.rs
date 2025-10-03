@@ -6,10 +6,7 @@ use dioxus_primitives::dialog::{
 #[component]
 pub fn DialogRoot(props: DialogRootProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/dialog/style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         dialog::DialogRoot {
             class: "dialog-backdrop",
             id: props.id,
@@ -26,12 +23,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
 #[component]
 pub fn DialogContent(props: DialogContentProps) -> Element {
     rsx! {
-        dialog::DialogContent {
-            class: "dialog",
-            id: props.id,
-            attributes: props.attributes,
-            {props.children}
-        }
+        dialog::DialogContent { class: "dialog", id: props.id, attributes: props.attributes, {props.children} }
     }
 }
 

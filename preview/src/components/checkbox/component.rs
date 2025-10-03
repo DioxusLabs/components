@@ -4,10 +4,7 @@ use dioxus_primitives::checkbox::{self, CheckboxProps};
 #[component]
 pub fn Checkbox(props: CheckboxProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/checkbox/style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         checkbox::Checkbox {
             class: "checkbox",
             checked: props.checked,
@@ -18,8 +15,7 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
             value: props.value,
             on_checked_change: props.on_checked_change,
             attributes: props.attributes,
-            checkbox::CheckboxIndicator {
-                class: "checkbox-indicator",
+            checkbox::CheckboxIndicator { class: "checkbox-indicator",
                 svg {
                     class: "checkbox-check-icon",
                     view_box: "0 0 24 24",

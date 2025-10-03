@@ -15,7 +15,7 @@ use crate::focus::use_focus_provider;
 pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
     /// The controlled value of the select
     #[props(default)]
-    pub value: ReadOnlySignal<Option<Option<T>>>,
+    pub value: ReadSignal<Option<Option<T>>>,
 
     /// The default value of the select
     #[props(default)]
@@ -27,23 +27,23 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
 
     /// Whether the select is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Name of the select for form submission
     #[props(default)]
-    pub name: ReadOnlySignal<String>,
+    pub name: ReadSignal<String>,
 
     /// Optional placeholder text
-    #[props(default = ReadOnlySignal::new(Signal::new(String::from("Select an option"))))]
-    pub placeholder: ReadOnlySignal<String>,
+    #[props(default = ReadSignal::new(Signal::new(String::from("Select an option"))))]
+    pub placeholder: ReadSignal<String>,
 
     /// Whether focus should loop around when reaching the end.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub roving_loop: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub roving_loop: ReadSignal<bool>,
 
     /// Timeout in milliseconds before clearing typeahead buffer
-    #[props(default = ReadOnlySignal::new(Signal::new(Duration::from_millis(1000))))]
-    pub typeahead_timeout: ReadOnlySignal<Duration>,
+    #[props(default = ReadSignal::new(Signal::new(Duration::from_millis(1000))))]
+    pub typeahead_timeout: ReadSignal<Duration>,
 
     /// Additional attributes for the select element
     #[props(extends = GlobalAttributes)]

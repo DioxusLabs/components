@@ -8,10 +8,7 @@ pub fn Demo() -> Element {
 
     rsx! {
         // Display the current value
-        div {
-            style: "margin-bottom: 15px; font-size: 16px; font-weight: bold;",
-            "{current_value:.0}%"
-        }
+        div { style: "margin-bottom: 15px; font-size: 16px; font-weight: bold;", "{current_value:.0}%" }
 
         Slider {
             label: "Demo Slider",
