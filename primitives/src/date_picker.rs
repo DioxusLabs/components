@@ -1,19 +1,20 @@
 //! Defines the [`DatePicker`] component and its subcomponents, which allowing users to enter or select a date value
 
 use crate::{
-    dioxus_elements::input_data::MouseButton,
-    popover::{PopoverContent, PopoverRoot, PopoverTrigger},
-    ContentAlign,
+    focus::{use_focus_controlled_item, use_focus_provider, FocusState},
+    popover::{PopoverRoot, PopoverRootProps},
+    use_unique_id,
 };
 
 use dioxus::prelude::*;
-use time::{macros::format_description, Date};
+use num_integer::Integer;
+use std::{fmt::Display, str::FromStr};
+use time::{Date, Month, UtcDateTime};
 
 /// The value of the [`DatePicker`] component.
+/// Currently this can only be a single date, but support for ranges is planned.
 #[derive(Copy, Clone)]
 pub struct DatePickerValue {
-    /// A dates range value or single day
-    is_range: bool,
     /// Current date value
     value: DateValue,
 }
@@ -21,88 +22,13 @@ pub struct DatePickerValue {
 impl DatePickerValue {
     /// Create a single day value
     pub fn new_day(date: Option<Date>) -> Self {
-        let is_range = false;
-
         match date {
             Some(date) => Self {
-                is_range,
                 value: DateValue::Single { date },
             },
-            None => Self::new_empty(is_range),
-        }
-    }
-
-    /// Create new date range value
-    pub fn new_range(date: Option<Date>) -> Self {
-        let is_range = true;
-
-        match date {
-            Some(date) => Self {
-                is_range,
-                value: DateValue::Range {
-                    start: date,
-                    end: None,
-                },
+            None => Self {
+                value: DateValue::Empty,
             },
-            None => Self::new_empty(is_range),
-        }
-    }
-
-    /// Create full date range value
-    pub fn range(start: Date, end: Date) -> Self {
-        let value = if end < start {
-            DateValue::Range {
-                start: end,
-                end: Some(start),
-            }
-        } else {
-            DateValue::Range {
-                start,
-                end: Some(end),
-            }
-        };
-        Self {
-            is_range: true,
-            value,
-        }
-    }
-
-    fn new(is_range: bool, date: Option<Date>) -> Self {
-        if is_range {
-            Self::new_range(date)
-        } else {
-            Self::new_day(date)
-        }
-    }
-
-    fn new_empty(is_range: bool) -> Self {
-        Self {
-            is_range,
-            value: DateValue::Empty,
-        }
-    }
-
-    fn part_count(&self) -> usize {
-        if self.is_range {
-            2
-        } else {
-            1
-        }
-    }
-
-    fn set_date(&self, date: Option<Date>) -> Self {
-        match self.value {
-            DateValue::Range { start, end } => {
-                if end.is_some() {
-                    Self::new_range(date)
-                } else {
-                    match date {
-                        Some(end) => Self::range(start, end),
-                        None => *self,
-                    }
-                }
-            }
-            _ => Self::new(self.is_range, date),
         }
     }
 
@@ -110,13 +36,6 @@ impl DatePickerValue {
     pub fn date(&self) -> Option<Date> {
         match self.value {
             DateValue::Single { date } => Some(date),
-            DateValue::Range { start, end } => {
-                if end.is_some() {
-                    return end;
-                }
-
-                Some(start)
-            }
             DateValue::Empty => None,
         }
     }
@@ -124,13 +43,6 @@ impl DatePickerValue {
     // Returns `true` if the given date is selected
     fn is_date_selected(&self, date: Option<Date>) -> bool {
         self.date() == date
-    }
-
-    fn ready_to_close(&self) -> bool {
-        match self.value {
-            DateValue::Range { end, .. } => end.is_some(),
-            _ => true,
-        }
     }
 }
 
@@ -148,13 +60,6 @@ pub enum DateValue {
         /// The selected date
         date: Date,
     },
-    /// A dates range value for the date picker
-    Range {
-        /// The first range date
-        start: Date,
-        /// The last range date
-        end: Option<Date>,
-    },
     /// None value for the date picker
     Empty,
 }
@@ -163,13 +68,6 @@ impl std::fmt::Display for DateValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             DateValue::Single { date } => write!(f, "{date}"),
-            DateValue::Range { start, end } => {
-                let end_str = match end {
-                    Some(date) => date.to_string(),
-                    None => String::default(),
-                };
-                write!(f, "{start} - {end_str}")
-            }
             DateValue::Empty => write!(f, ""),
         }
     }
@@ -187,8 +85,7 @@ struct DatePickerContext {
 
     // Configuration
     disabled: ReadSignal<bool>,
-    separator: &'static str,
-    format_placeholder: Callback<(), String>,
+    focus: FocusState,
 }
 
 impl DatePickerContext {
@@ -198,12 +95,10 @@ impl DatePickerContext {
             return;
         }
 
-        let value = value.set_date(date);
+        let value = DatePickerValue::new_day(date);
         self.on_value_change.call(value);
 
-        if value.ready_to_close() {
-            self.open.set(false);
-        }
+        self.open.set(false);
     }
 }
 
@@ -229,13 +124,9 @@ pub struct DatePickerProps {
     #[props(default = ReadSignal::new(Signal::new(false)))]
     pub read_only: ReadSignal<bool>,
 
-    /// Separator between range value
-    #[props(default = " - ")]
-    pub separator: &'static str,
-
-    /// Callback when display placeholder
-    #[props(default = Callback::new(|_| "YYYY-MM-DD".to_string()))]
-    pub on_format_placeholder: Callback<(), String>,
+    /// Whether focus should loop around when reaching the end.
+    #[props(default = ReadSignal::new(Signal::new(false)))]
+    pub roving_loop: ReadSignal<bool>,
 
     /// Additional attributes to extend the date picker element
     #[props(extends = GlobalAttributes)]
@@ -260,17 +151,17 @@ pub struct DatePickerProps {
 #[component]
 pub fn DatePicker(props: DatePickerProps) -> Element {
     let open = use_signal(|| false);
+    let focus = use_focus_provider(props.roving_loop);
 
     // Create context provider for child components
     use_context_provider(|| DatePickerContext {
-        open,
         value: props.value,
         on_value_change: props.on_value_change,
         selected_date: props.selected_date,
-        disabled: props.disabled,
+        open,
         read_only: props.read_only,
-        separator: props.separator,
-        format_placeholder: props.on_format_placeholder,
+        disabled: props.disabled,
+        focus,
     });
 
     rsx! {
@@ -284,51 +175,212 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
     }
 }
 
-/// The props for the [`SelectDateTrigger`] component
-#[derive(Props, Clone, PartialEq)]
-pub struct DatePickerTriggerProps {
-    /// Additional attributes for the trigger button
-    #[props(extends = GlobalAttributes)]
-    pub attributes: Vec<Attribute>,
-
-    /// The children to render inside the trigger
-    pub children: Element,
-}
-
-/// # DatePickerTrigger
+/// # DatePickerPopover
 ///
-/// The `PopoverTrigger` is a button that toggles the visibility of the [`PopoverContent`].
+/// The `DatePickerPopover` is a button that toggles the visibility of the [`PopoverContent`].
 ///
 /// ```rust
 /// ```
 #[component]
-pub fn DatePickerTrigger(props: DatePickerTriggerProps) -> Element {
-    let mut ctx = use_context::<DatePickerContext>();
+pub fn DatePickerPopover(props: PopoverRootProps) -> Element {
+    let ctx = use_context::<DatePickerContext>();
     let mut open = ctx.open;
-
-    use_effect(move || {
-        let date = (ctx.selected_date)();
-        ctx.set_date(date);
-    });
 
     rsx! {
         PopoverRoot {
-            class: "popover",
             open: open(),
             on_open_change: move |v| open.set(v),
-            PopoverTrigger { attributes: props.attributes,
-                svg {
-                    class: "date-picker-expand-icon",
-                    view_box: "0 0 24 24",
-                    xmlns: "http://www.w3.org/2000/svg",
-                    polyline { points: "6 9 12 15 18 9" }
+            attributes: props.attributes,
+            {props.children}
+        }
+    }
+}
+
+// The props for the [`DateSegment`] component
+#[derive(Props, Clone, PartialEq)]
+struct DateSegmentProps<T: Clone + Integer + 'static> {
+    // The index of the segment
+    pub index: ReadSignal<usize>,
+
+    // The controlled value of the date picker
+    pub value: ReadSignal<Option<T>>,
+
+    // Default value
+    pub default: T,
+
+    // Callback when value changes
+    #[props(default)]
+    pub on_value_change: Callback<Option<T>>,
+
+    // The minimum value
+    pub min: T,
+
+    // The maximum value
+    pub max: T,
+
+    // Max field length
+    pub max_length: usize,
+
+    // Callback when display placeholder
+    pub on_format_placeholder: Callback<(), String>,
+
+    // Additional attributes for the value element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
+#[component]
+fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
+    props: DateSegmentProps<T>,
+) -> Element {
+    let mut text_value = use_signal(|| "".to_string());
+    use_effect(move || {
+        if let Some(value) = (props.value)() {
+            text_value.set(value.to_string());
+        }
+    });
+
+    // The formatted text for the segment
+    let display_value = use_memo(move || {
+        let value = (props.value)();
+        match value {
+            Some(value) => format!("{:0>width$}", value, width = props.max_length),
+            None => props
+                .on_format_placeholder
+                .call(())
+                .repeat(props.max_length),
+        }
+    });
+
+    let mut ctx = use_context::<DatePickerContext>();
+
+    let mut set_value = move |text: String| {
+        if text.is_empty() {
+            props.on_value_change.call(None);
+            ctx.focus.focus_prev();
+            return;
+        }
+
+        let value = text.parse::<T>().ok();
+        if let Some(value) = value {
+            let inRange = value >= props.min && value <= props.max;
+
+            let newValue = (text + "0").parse::<T>().unwrap_or(value);
+            if inRange && newValue > props.max {
+                ctx.focus.focus_next();
+            }
+        };
+
+        props.on_value_change.call(value);
+    };
+
+    let clamp_value = move |value: T| {
+        if value < props.min {
+            props.max
+        } else if value > props.max {
+            props.min
+        } else {
+            value
+        }
+    };
+
+    let handle_keydown = move |event: Event<KeyboardData>| {
+        let key = event.key();
+        match key {
+            Key::Character(actual_char) => {
+                if actual_char.parse::<T>().is_ok() {
+                    let mut text = text_value();
+                    if text.len() == props.max_length {
+                        text = String::default();
+                    };
+                    text.push_str(&actual_char);
+                    set_value(text);
                 }
+
+                event.prevent_default();
+                event.stop_propagation();
             }
-            PopoverContent {
-                gap: "0.25rem",
-                align: ContentAlign::End,
-                {props.children}
+            Key::Backspace => {
+                let mut text = text_value();
+                text.pop();
+                set_value(text);
             }
+            Key::Delete => {
+                let mut text = text_value();
+                text.remove(0);
+                set_value(text);
+            }
+            Key::ArrowLeft => {
+                ctx.focus.focus_prev();
+            }
+            Key::ArrowRight => {
+                ctx.focus.focus_next();
+            }
+            Key::ArrowUp => {
+                let value = match (props.value)() {
+                    Some(mut value) => {
+                        value.inc();
+                        clamp_value(value)
+                    }
+                    None => props.default,
+                };
+                props.on_value_change.call(Some(value));
+            }
+            Key::ArrowDown => {
+                let value = match (props.value)() {
+                    Some(mut value) => {
+                        value.dec();
+                        clamp_value(value)
+                    }
+                    None => props.default,
+                };
+                props.on_value_change.call(Some(value));
+            }
+            _ => (),
+        }
+    };
+
+    let focused = move || ctx.focus.is_focused(props.index.cloned());
+    let onmounted = use_focus_controlled_item(props.index);
+
+    rsx! {
+        span {
+            class: "date-segment",
+            id: use_unique_id(),
+            role: "spinbutton",
+            aria_valuemin: props.min.to_string(),
+            aria_valuemax: props.max.to_string(),
+            aria_valuenow: display_value,
+            inputmode: "numeric",
+            contenteditable: !(ctx.read_only)(),
+            spellcheck: false,
+            tabindex: if focused() { "0" } else { "-1" },
+            enterkeyhint: "next",
+            onkeydown: handle_keydown,
+            onmounted,
+            onfocus: move |_| {
+                ctx.focus.set_focus(Some(props.index.cloned()));
+                if (ctx.open)() {
+                    ctx.open.set(false);
+                }
+            },
+            "no-date": (props.value)().is_none(),
+            "data-disabled": (ctx.disabled)(),
+            {display_value}
+        }
+    }
+}
+
+#[component]
+fn DateSeparator() -> Element {
+    rsx! {
+        span {
+            class: "date-segment",
+            aria_hidden: "true",
+            tabindex: "-1",
+            "is-separator": true,
+            "no-date": true,
+            {"-"}
         }
     }
 }
@@ -336,6 +388,18 @@ pub fn DatePickerTrigger(props: DatePickerTriggerProps) -> Element {
 /// The props for the [`DatePickerInput`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct DatePickerInputProps {
+    /// Callback when display day placeholder
+    #[props(default = Callback::new(|_| "D".to_string()))]
+    pub on_format_day_placeholder: Callback<(), String>,
+
+    /// Callback when display month placeholder
+    #[props(default = Callback::new(|_| "M".to_string()))]
+    pub on_format_month_placeholder: Callback<(), String>,
+
+    /// Callback when display year placeholder
+    #[props(default = Callback::new(|_| "Y".to_string()))]
+    pub on_format_year_placeholder: Callback<(), String>,
+
     /// Additional attributes for the value element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -354,50 +418,88 @@ pub struct DatePickerInputProps {
 pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
     let mut ctx = use_context::<DatePickerContext>();
 
-    let display_value = use_memo(move || ctx.value.to_string());
+    let mut day_value = use_signal(|| None);
+    let mut month_value = use_signal(|| None);
+    let mut year_value = use_signal(|| None);
 
-    let placeholder = {
-        let capacity = (ctx.value)().part_count();
-        let text = ctx.format_placeholder.call(());
-        vec![text; capacity].join(ctx.separator)
-    };
+    use_effect(move || {
+        let date = (ctx.selected_date)();
+        year_value.set(date.map(|d| d.year()));
+        month_value.set(date.map(|d| d.month() as u8));
+        day_value.set(date.map(|d| d.day()));
+    });
 
-    let handle_input = move |e: Event<FormData>| {
-        let text = e.value().parse().unwrap_or(display_value());
+    use_effect(move || {
+        let year = match year_value() {
+            Some(value) => value,
+            None => return,
+        };
 
-        let value = (ctx.value)();
-        let format = format_description!("[year]-[month]-[day]");
+        let month = match month_value() {
+            Some(value) => match Month::try_from(value) {
+                Ok(m) => m,
+                Err(..) => return,
+            },
+            None => return,
+        };
 
-        if value.is_range {
-        } else {
-            if text.is_empty() {
-                ctx.set_date(None);
-                return;
+        let day = match day_value() {
+            Some(value) => {
+                let max = month.length(year);
+                value.clamp(1, max)
             }
+            None => return,
+        };
 
-            let date = Date::parse(&text, &format).ok();
-            if date.is_some_and(|_| !value.is_date_selected(date)) {
-                ctx.set_date(date);
-            }
-        }
-    };
+        let date = Date::from_calendar_date(year, month, day).ok();
+        tracing::info!("Parsed new date {date:?}");
+        ctx.set_date(date);
+    });
+
+    let today = UtcDateTime::now().date();
 
     rsx! {
-        input {
-            style: "min-width: 240px",
-            placeholder,
-            value: display_value,
-            disabled: ctx.disabled,
-            readonly: ctx.read_only,
-            cursor: if (ctx.read_only)() { "pointer" } else { "text" },
-            oninput: handle_input,
-            onpointerdown: move |event| {
-                if (ctx.read_only)() && event.trigger_button() == Some(MouseButton::Primary) {
-                    ctx.open.toggle();
+        div {
+            class: "date-picker-group",
+            div {
+                class: "date-picker-container",
+                DateSegment {
+                    aria_label: "year",
+                    index: 0usize,
+                    value: year_value,
+                    default: today.year(),
+                    on_value_change: move |value: Option<i32>| year_value.set(value),
+                    min: 1,
+                    max: 9999,
+                    max_length: 4,
+                    on_format_placeholder: props.on_format_year_placeholder,
                 }
-            },
-            ..props.attributes,
+                DateSeparator {}
+                DateSegment {
+                    aria_label: "month",
+                    index: 1usize,
+                    value: month_value,
+                    default: today.month() as u8,
+                    on_value_change: move |value: Option<u8>| month_value.set(value),
+                    min: Month::January as u8,
+                    max: Month::December as u8,
+                    max_length: 2,
+                    on_format_placeholder: props.on_format_month_placeholder,
+                }
+                DateSeparator {}
+                DateSegment {
+                    aria_label: "day",
+                    index: 2usize,
+                    value: day_value,
+                    default: today.day(),
+                    on_value_change: move |value: Option<u8>| day_value.set(value),
+                    min: 1,
+                    max: 31,
+                    max_length: 2,
+                    on_format_placeholder: props.on_format_day_placeholder,
+                }
+            }
+            {props.children}
         }
-        {props.children}
     }
 }

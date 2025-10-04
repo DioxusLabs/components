@@ -23,15 +23,19 @@ pub fn Demo() -> Element {
                     value.set(v);
                     selected_date.set(v.date());
                 },
-                on_format_placeholder: || tid!("YMD"),
                 DatePickerInput {
-                    DatePickerTrigger {
-                        aria_label: "DatePicker Trigger",
-                        DatePickerCalendar {
-                            selected_date: selected_date(),
-                            on_date_change: move |date| selected_date.set(date),
-                            on_format_weekday: |weekday: Weekday| tid!(&weekday.to_string()),
-                            on_format_month: |month: Month| tid!(&month.to_string()),
+                    on_format_day_placeholder: || tid!("D_Abbr"),
+                    on_format_month_placeholder: || tid!("M_Abbr"),
+                    on_format_year_placeholder: || tid!("Y_Abbr"),
+                    DatePickerPopover { 
+                        DatePickerPopoverTrigger {}
+                        DatePickerPopoverContent {
+                            DatePickerCalendar {
+                                selected_date: selected_date(),
+                                on_date_change: move |date| selected_date.set(date),
+                                on_format_weekday: |weekday: Weekday| tid!(& weekday.to_string()),
+                                on_format_month: |month: Month| tid!(& month.to_string()),
+                            }
                         }
                     }
                 }

@@ -22,4 +22,6 @@ Saturday = Sa
 Sunday = Su
 
 ## Date
-YMD = YYYY-MM-DD
+D_Abbr = D
+M_Abbr = M
+Y_Abbr = Y
