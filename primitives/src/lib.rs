@@ -131,7 +131,7 @@ fn use_effect_with_cleanup<F: FnMut() -> C + 'static, C: FnOnce() + 'static>(mut
 struct EscapeListenerStack(Rc<RefCell<Vec<ScopeId>>>);
 
 fn use_global_escape_listener(mut on_escape: impl FnMut() + Clone + 'static) {
-    let scope_id = current_scope_id().unwrap();
+    let scope_id = current_scope_id();
     let stack = use_hook(move || {
         // Get or create the escape listener stack
         let stack: EscapeListenerStack = try_consume_context()
