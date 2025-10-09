@@ -2,7 +2,7 @@
 
 use crate::{
     portal::{use_portal, PortalIn, PortalOut},
-    use_unique_id,
+    use_global_keydown_listener, use_unique_id,
 };
 use dioxus::dioxus_core::DynamicNode;
 use dioxus::prelude::*;
@@ -209,18 +209,8 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
         });
     });
 
-    // Mount the first toast when the user presses f6
-    use_effect(move || {
-        let mut eval = dioxus::document::eval(
-            "document.addEventListener('keydown', (event) => { if (event.key === 'F6') { dioxus.send(true) } });",
-        );
-        spawn(async move {
-            while let Ok(true) = eval.recv().await {
-                // Focus the first toast when F6 is pressed
-                focus_region(())
-            }
-        });
-    });
+    // Focus the first toast when the user presses f6
+    use_global_keydown_listener("F6", move || focus_region(()));
 
     // Provide the context
     let ctx = use_context_provider(|| ToastCtx {

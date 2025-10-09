@@ -1,8 +1,11 @@
 #![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
 
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use dioxus::core::{current_scope_id, use_drop};
 use dioxus::prelude::*;
 use dioxus::prelude::{asset, manganis, Asset};
 
@@ -105,6 +108,76 @@ fn use_controlled<T: Clone + PartialEq + 'static>(
 /// Run some cleanup code when the component is unmounted if the effect was run.
 fn use_effect_cleanup<F: FnOnce() + 'static>(#[allow(unused)] cleanup: F) {
     client!(crate::dioxus_core::use_drop(cleanup))
+}
+
+/// Run some cleanup code when the component is unmounted if the effect was run.
+fn use_effect_with_cleanup<F: FnMut() -> C + 'static, C: FnOnce() + 'static>(mut effect: F) {
+    let mut cleanup = use_hook(|| CopyValue::new(None as Option<C>));
+    use_effect(move || {
+        if let Some(cleanup) = cleanup.take() {
+            cleanup();
+        }
+        cleanup.set(Some(effect()));
+    });
+    client!(crate::dioxus_core::use_drop(move || {
+        if let Some(cleanup) = cleanup.take() {
+            cleanup();
+        }
+    }))
+}
+
+/// A stack of escape listeners to allow only the top-most listener to be called.
+#[derive(Clone)]
+struct EscapeListenerStack(Rc<RefCell<Vec<ScopeId>>>);
+
+fn use_global_escape_listener(mut on_escape: impl FnMut() + Clone + 'static) {
+    let scope_id = current_scope_id();
+    let stack = use_hook(move || {
+        // Get or create the escape listener stack
+        let stack: EscapeListenerStack = try_consume_context()
+            .unwrap_or_else(|| provide_context(EscapeListenerStack(Default::default())));
+        // Push the current scope onto the stack
+        stack.0.borrow_mut().push(scope_id);
+        stack
+    });
+    // Remove the current scope id from the stack when we unmount
+    use_drop({
+        let stack = stack.clone();
+        move || {
+            let mut stack = stack.0.borrow_mut();
+            stack.retain(|id| *id != scope_id);
+        }
+    });
+    use_global_keydown_listener("Escape", move || {
+        // Only call the listener if this component is on top of the stack
+        let stack = stack.0.borrow();
+        if stack.last() == Some(&scope_id) {
+            on_escape();
+        }
+    });
+}
+
+fn use_global_keydown_listener(key: &'static str, on_escape: impl FnMut() + Clone + 'static) {
+    use_effect_with_cleanup(move || {
+        let mut escape = document::eval(&format!(
+            "function listener(event) {{
+                if (event.key === '{key}') {{
+                    event.preventDefault();
+                    dioxus.send(true);
+                }}
+            }}
+            document.addEventListener('keydown', listener);
+            await dioxus.recv();
+            document.removeEventListener('keydown', listener);"
+        ));
+        let mut on_escape = on_escape.clone();
+        spawn(async move {
+            while let Ok(true) = escape.recv().await {
+                on_escape();
+            }
+        });
+        move || _ = escape.send(true)
+    });
 }
 
 fn use_animated_open(

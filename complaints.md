@@ -12,11 +12,11 @@ It's verbose to set a `Signal` or `ReadSignal`'s default value through props.
 pub struct SomeProps {
 
     // This sets bool to be false
-    #[props(default)]
+    #[props(default)] 
     value: ReadSignal<bool>,
 
     // This is what I'd like, except it wants a ReadSignal
-    #[props(default = true)]
+    #[props(default = true)] 
     value: ReadSignal<bool>,
 
     // Instead you have to do this:
