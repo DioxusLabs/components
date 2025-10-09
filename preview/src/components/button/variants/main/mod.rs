@@ -1,46 +1,20 @@
+// demo.rs
+use super::super::component::*;
 use dioxus::prelude::*;
 
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/button/variants/main/style.css"),
-        }
+        div { display: "flex", flex_direction: "column", gap: "0.5rem",
+            Button { "Primary" }
 
-        div {
-            display: "flex",
-            flex_direction: "column",
-            gap: "0.5rem",
-            button {
-                class: "button",
-                "data-style": "primary",
-                "Primary"
-            }
+            Button { variant: ButtonVariant::Secondary, "Secondary" }
 
-            button {
-                class: "button",
-                "data-style": "secondary",
-                "Secondary"
-            }
+            Button { variant: ButtonVariant::Destructive, "Destructive" }
 
-            button {
-                class: "button",
-                "data-style": "destructive",
-                "Destructive"
-            }
+            Button { variant: ButtonVariant::Outline, "Outline" }
 
-            button {
-                class: "button",
-                "data-style": "outline",
-                "Outline"
-            }
-
-            button {
-                class: "button",
-                "data-style": "ghost",
-                "Ghost"
-            }
+            Button { variant: ButtonVariant::Ghost, "Ghost" }
         }
     }
 }

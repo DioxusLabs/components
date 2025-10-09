@@ -13,7 +13,7 @@ struct DropdownMenuContext {
     // State
     open: Memo<bool>,
     set_open: Callback<bool>,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 
     // Focus state
     focus: FocusState,
@@ -26,7 +26,7 @@ struct DropdownMenuContext {
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuProps {
     /// Whether the dropdown menu is open. If not provided, the component will be uncontrolled and use `default_open`.
-    pub open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadSignal<Option<bool>>,
 
     /// Default open state if the component is not controlled.
     #[props(default)]
@@ -38,18 +38,18 @@ pub struct DropdownMenuProps {
 
     /// Whether the dropdown menu is disabled. If true, the menu will not open and items will not be selectable.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub roving_loop: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub roving_loop: ReadSignal<bool>,
 
     /// Additional attributes to apply to the dropdown menu element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the dropdown menu, which should include a [`DropdownMenuTrigger`] and a [`DropdownMenuContent`].
-    children: Element,
+    pub children: Element,
 }
 
 /// # DropdownMenu
@@ -160,9 +160,9 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 pub struct DropdownMenuTriggerProps {
     /// Additional attributes to apply to the trigger button element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the trigger button
-    children: Element,
+    pub children: Element,
 }
 
 /// # DropdownMenuTrigger
@@ -255,12 +255,12 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuContentProps {
     /// The ID of the dropdown menu content element. If not provided, a unique ID will be generated.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
     /// Additional attributes to apply to the dropdown menu content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the dropdown menu content, which should include one or more [`DropdownMenuItem`] components.
-    children: Element,
+    pub children: Element,
 }
 
 /// # DropdownMenuTrigger
@@ -342,14 +342,14 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct DropdownMenuItemProps<T: Clone + PartialEq + 'static> {
     /// The value of the item, which will be passed to the `on_select` callback when clicked.
-    pub value: ReadOnlySignal<T>,
+    pub value: ReadSignal<T>,
     /// The index of the item within the [`DropdownMenuContent`]. This is used to order the items for keyboard navigation.
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// Whether the item is disabled. If true, the item will not be clickable and will not respond to keyboard events.
     /// Defaults to false.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// The callback function that will be called when the item is selected. The value of the item will be passed as an argument.
     #[props(default)]
@@ -357,9 +357,9 @@ pub struct DropdownMenuItemProps<T: Clone + PartialEq + 'static> {
 
     /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the item, which will be rendered inside the item element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # DropdownMenuTrigger

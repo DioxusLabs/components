@@ -32,15 +32,9 @@ pub fn Demo() -> Element {
     });
 
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/dropdown_menu/variants/main/style.css"),
-        }
         DropdownMenu { class: "dropdown-menu", default_open: false,
             DropdownMenuTrigger { class: "dropdown-menu-trigger", "Open Menu" }
-            DropdownMenuContent { class: "dropdown-menu-content",
-                {operations}
-            }
+            DropdownMenuContent { class: "dropdown-menu-content", {operations} }
         }
         if let Some(op) = selected_operation() {
             "Selected: {op}"

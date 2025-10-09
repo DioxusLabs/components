@@ -138,16 +138,16 @@ fn previous_month(date: Date) -> Option<Date> {
 #[derive(Copy, Clone)]
 pub struct CalendarContext {
     // State
-    selected_date: ReadOnlySignal<Option<Date>>,
+    selected_date: ReadSignal<Option<Date>>,
     set_selected_date: Callback<Option<Date>>,
     focused_date: Signal<Option<Date>>,
-    view_date: ReadOnlySignal<Date>,
+    view_date: ReadSignal<Date>,
     set_view_date: Callback<Date>,
     format_weekday: Callback<Weekday, String>,
     format_month: Callback<Month, String>,
 
     // Configuration
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
     today: Date,
     first_day_of_week: Weekday,
     min_date: Date,
@@ -208,7 +208,7 @@ fn weekday_abbreviation(weekday: Weekday) -> &'static str {
 pub struct CalendarProps {
     /// The selected date
     #[props(default)]
-    pub selected_date: ReadOnlySignal<Option<Date>>,
+    pub selected_date: ReadSignal<Option<Date>>,
 
     /// Callback when selected date changes
     #[props(default)]
@@ -223,7 +223,7 @@ pub struct CalendarProps {
     pub on_format_month: Callback<Month, String>,
 
     /// The month being viewed
-    pub view_date: ReadOnlySignal<Date>,
+    pub view_date: ReadSignal<Date>,
 
     /// The current date (used for highlighting today)
     #[props(default = UtcDateTime::now().date())]
@@ -235,7 +235,7 @@ pub struct CalendarProps {
 
     /// Whether the calendar is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// First day of the week
     #[props(default = Weekday::Sunday)]
@@ -251,10 +251,10 @@ pub struct CalendarProps {
 
     /// Additional attributes to extend the calendar element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the calendar element
-    children: Element,
+    pub children: Element,
 }
 
 /// # Calendar
@@ -397,14 +397,14 @@ pub fn Calendar(props: CalendarProps) -> Element {
 pub struct CalendarHeaderProps {
     /// Optional ID for the header
     #[props(default)]
-    id: Option<String>,
+    pub id: Option<String>,
 
     /// Additional attributes to extend the header element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the header element
-    children: Element,
+    pub children: Element,
 }
 
 /// # CalendarHeader
@@ -469,11 +469,11 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
 pub struct CalendarNavigationProps {
     /// Optional ID for the navigation
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the navigation element
     #[props(default)]
-    children: Element,
+    pub children: Element,
 }
 
 /// # CalendarNavigation
@@ -534,10 +534,10 @@ pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
 pub struct CalendarPreviousMonthButtonProps {
     /// Additional attributes to apply to the button
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the button element
-    children: Element,
+    pub children: Element,
 }
 
 /// # CalendarPreviousMonthButton
@@ -626,10 +626,10 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
 pub struct CalendarNextMonthButtonProps {
     /// Additional attributes to apply to the button
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the button element
-    children: Element,
+    pub children: Element,
 }
 
 /// # CalendarNextMonthButton
@@ -721,7 +721,7 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
 pub struct CalendarMonthTitleProps {
     /// Additional attributes to apply to the title element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 }
 
 /// # CalendarMonthTitle
@@ -808,7 +808,7 @@ pub struct CalendarGridProps {
 
     /// Additional attributes to apply to the grid element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 }
 
 /// # CalendarGrid
@@ -969,7 +969,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
 pub struct CalendarSelectMonthProps {
     /// Additional attributes to extend the select month element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 }
 
 /// # CalendarSelectMonth
@@ -1085,7 +1085,7 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
 pub struct CalendarSelectYearProps {
     /// Additional attributes to extend the select year element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 }
 
 /// # CalendarSelectYear
@@ -1219,7 +1219,7 @@ fn aria_label(date: &Date) -> String {
 struct CalendarDayProps {
     date: Date,
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 }
 
 #[component]

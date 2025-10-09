@@ -53,14 +53,14 @@ impl Not for CheckboxState {
 #[derive(Clone, Copy)]
 struct CheckboxCtx {
     checked: Memo<CheckboxState>,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 }
 
 /// The props for the [`Checkbox`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CheckboxProps {
     /// The controlled state of the checkbox.
-    pub checked: ReadOnlySignal<Option<CheckboxState>>,
+    pub checked: ReadSignal<Option<CheckboxState>>,
 
     /// The default state of the checkbox when it is not controlled.
     #[props(default = CheckboxState::Unchecked)]
@@ -68,19 +68,19 @@ pub struct CheckboxProps {
 
     /// Whether the checkbox is required in a form.
     #[props(default)]
-    pub required: ReadOnlySignal<bool>,
+    pub required: ReadSignal<bool>,
 
     /// Whether the checkbox is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// The name of the checkbox, used in forms.
     #[props(default)]
-    pub name: ReadOnlySignal<String>,
+    pub name: ReadSignal<String>,
 
     /// The value of the checkbox, which can be used in forms.
-    #[props(default = ReadOnlySignal::new(Signal::new(String::from("on"))))]
-    pub value: ReadOnlySignal<String>,
+    #[props(default = ReadSignal::new(Signal::new(String::from("on"))))]
+    pub value: ReadSignal<String>,
 
     /// Callback that is called when the checked state changes.
     #[props(default)]
@@ -88,10 +88,10 @@ pub struct CheckboxProps {
 
     /// Additional attributes to apply to the checkbox element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children to render inside the checkbox.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Checkbox
@@ -227,7 +227,7 @@ pub fn CheckboxIndicator(
 
 #[component]
 fn BubbleInput(
-    checked: ReadOnlySignal<CheckboxState>,
+    checked: ReadSignal<CheckboxState>,
     default_checked: CheckboxState,
     #[props(extends = input)] attributes: Vec<Attribute>,
 ) -> Element {
@@ -251,7 +251,7 @@ fn BubbleInput(
                     input.indeterminate = true;
                     input.checked = true;
                     break;
-                case "unchecked": 
+                case "unchecked":
                     input.checked = false;
                     input.indeterminate = false;
                     break;

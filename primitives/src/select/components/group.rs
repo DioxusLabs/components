@@ -10,18 +10,18 @@ use super::super::context::{SelectContext, SelectGroupContext};
 pub struct SelectGroupProps {
     /// Whether the group is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Optional ID for the group
     #[props(default)]
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// Additional attributes for the group
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children to render inside the group
-    children: Element,
+    pub children: Element,
 }
 
 /// # SelectGroup
@@ -103,14 +103,14 @@ pub fn SelectGroup(props: SelectGroupProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectGroupLabelProps {
     /// Optional ID for the label
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// Additional attributes for the label
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children to render inside the label
-    children: Element,
+    pub children: Element,
 }
 
 /// # SelectGroupLabel

@@ -1,22 +1,16 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::menubar::{
-    Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger,
-};
+
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/menubar/variants/main/style.css"),
-        }
         div { class: "menubar-example",
-            Menubar { class: "menubar",
-                MenubarMenu { class: "menubar-menu", index: 0usize,
-                    MenubarTrigger { class: "menubar-trigger", "File" }
-                    MenubarContent { class: "menubar-content",
+            Menubar {
+                MenubarMenu { index: 0usize,
+                    MenubarTrigger { "File" }
+                    MenubarContent {
                         MenubarItem {
                             index: 0usize,
-                            class: "menubar-item",
                             value: "new".to_string(),
                             on_select: move |value| {
                                 tracing::info!("Selected value: {}", value);
@@ -25,7 +19,6 @@ pub fn Demo() -> Element {
                         }
                         MenubarItem {
                             index: 1usize,
-                            class: "menubar-item",
                             value: "open".to_string(),
                             on_select: move |value| {
                                 tracing::info!("Selected value: {}", value);
@@ -34,7 +27,6 @@ pub fn Demo() -> Element {
                         }
                         MenubarItem {
                             index: 2usize,
-                            class: "menubar-item",
                             value: "save".to_string(),
                             on_select: move |value| {
                                 tracing::info!("Selected value: {}", value);
@@ -43,12 +35,11 @@ pub fn Demo() -> Element {
                         }
                     }
                 }
-                MenubarMenu { class: "menubar-menu", index: 1usize,
-                    MenubarTrigger { class: "menubar-trigger", "Edit" }
-                    MenubarContent { class: "menubar-content",
+                MenubarMenu { index: 1usize,
+                    MenubarTrigger { "Edit" }
+                    MenubarContent {
                         MenubarItem {
                             index: 0usize,
-                            class: "menubar-item",
                             value: "cut".to_string(),
                             on_select: move |value| {
                                 tracing::info!("Selected value: {}", value);
@@ -57,7 +48,6 @@ pub fn Demo() -> Element {
                         }
                         MenubarItem {
                             index: 1usize,
-                            class: "menubar-item",
                             value: "copy".to_string(),
                             on_select: move |value| {
                                 tracing::info!("Selected value: {}", value);
@@ -66,7 +56,6 @@ pub fn Demo() -> Element {
                         }
                         MenubarItem {
                             index: 2usize,
-                            class: "menubar-item",
                             value: "paste".to_string(),
                             on_select: move |value| {
                                 tracing::info!("Selected value: {}", value);

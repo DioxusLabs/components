@@ -9,8 +9,8 @@ use dioxus::prelude::*;
 struct CollapsibleCtx {
     open: Memo<bool>,
     set_open: Callback<bool>,
-    disabled: ReadOnlySignal<bool>,
-    keep_mounted: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
+    keep_mounted: ReadSignal<bool>,
     aria_controls_id: Signal<String>,
 }
 
@@ -21,7 +21,7 @@ pub struct CollapsibleProps {
     ///
     /// This does not apply any special ARIA or other attributes.
     #[props(default)]
-    pub keep_mounted: ReadOnlySignal<bool>,
+    pub keep_mounted: ReadSignal<bool>,
 
     /// The default `open` state.
     ///
@@ -31,12 +31,12 @@ pub struct CollapsibleProps {
 
     /// The disabled state of the collapsible.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// The controlled `open` state of the collapsible.
     ///
     /// If this is provided, you must use `on_open_change`.
-    pub open: ReadOnlySignal<Option<bool>>,
+    pub open: ReadSignal<Option<bool>>,
 
     /// A callback for when the open state changes.
     ///
@@ -46,10 +46,10 @@ pub struct CollapsibleProps {
 
     /// Additional attributes for the collapsible element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the collapsible component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Collapsible
@@ -112,13 +112,13 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct CollapsibleContentProps {
     /// The ID of the collapsible content element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// Additional attributes for the collapsible content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the collapsible content.
-    children: Element,
+    pub children: Element,
 }
 
 /// # CollapsibleContent
@@ -182,9 +182,9 @@ pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
 pub struct CollapsibleTriggerProps {
     /// Additional attributes for the collapsible trigger element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the collapsible trigger.
-    children: Element,
+    pub children: Element,
 }
 
 /// # CollapsibleTrigger

@@ -43,7 +43,7 @@ impl Pointer {
 }
 
 static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
-    let runtime = Runtime::current().unwrap();
+    let runtime = Runtime::current();
     queue_effect(move || {
         runtime.spawn(ScopeId::ROOT, async move {
             let mut pointer_updates = dioxus::document::eval(
@@ -98,7 +98,7 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderProps {
     /// The controlled value of the slider
-    pub value: ReadOnlySignal<Option<SliderValue>>,
+    pub value: ReadSignal<Option<SliderValue>>,
 
     /// The default value when uncontrolled
     #[props(default = SliderValue::Single(0.0))]
@@ -118,7 +118,7 @@ pub struct SliderProps {
 
     /// Whether the slider is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Orientation of the slider
     #[props(default = true)]
@@ -133,14 +133,14 @@ pub struct SliderProps {
     pub on_value_change: Callback<SliderValue>,
 
     /// The label for the slider (for accessibility)
-    pub label: ReadOnlySignal<Option<String>>,
+    pub label: ReadSignal<Option<String>>,
 
     /// Additional attributes for the slider
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the slider
-    children: Element,
+    pub children: Element,
 }
 
 /// # Slider
@@ -339,9 +339,9 @@ pub fn Slider(props: SliderProps) -> Element {
 pub struct SliderTrackProps {
     /// Additional attributes to apply to the track element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the track which should include a [`SliderThumb`]
-    children: Element,
+    pub children: Element,
 }
 
 /// # SliderTrack
@@ -402,9 +402,9 @@ pub fn SliderTrack(props: SliderTrackProps) -> Element {
 pub struct SliderRangeProps {
     /// Additional attributes to apply to the range element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the range element
-    children: Element,
+    pub children: Element,
 }
 
 /// # SliderRange
@@ -485,9 +485,9 @@ pub struct SliderThumbProps {
 
     /// Additional attributes to apply to the thumb element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the thumb element
-    children: Element,
+    pub children: Element,
 }
 
 /// # SliderThumb
@@ -635,11 +635,11 @@ struct SliderContext {
     min: f64,
     max: f64,
     step: f64,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
     horizontal: bool,
     inverted: bool,
-    dragging: ReadOnlySignal<bool>,
-    label: ReadOnlySignal<Option<String>>,
+    dragging: ReadSignal<bool>,
+    label: ReadSignal<Option<String>>,
 }
 
 impl SliderContext {

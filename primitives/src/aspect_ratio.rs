@@ -11,10 +11,10 @@ pub struct AspectRatioProps {
 
     /// Additional attributes to apply to the aspect ratio container.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children to render inside the aspect ratio container.
-    children: Element,
+    pub children: Element,
 }
 
 /// # AspectRatio

@@ -9,7 +9,7 @@ use super::super::context::SelectContext;
 pub struct SelectValueProps {
     /// Additional attributes for the value element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 }
 
 /// # SelectValue

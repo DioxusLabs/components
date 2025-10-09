@@ -3,7 +3,7 @@ use dioxus_primitives::checkbox::{Checkbox, CheckboxIndicator};
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/src/components/form/variants/main/style.css") }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         form {
             class: "form-example",
             onsubmit: move |e| {
@@ -14,7 +14,7 @@ pub fn Demo() -> Element {
             }
             label { r#for: "tos-check", "I agree to the terms presented." }
             br {}
-            button { type: "submit", "Submit" }
+            button { r#type: "submit", "Submit" }
         }
     }
 }

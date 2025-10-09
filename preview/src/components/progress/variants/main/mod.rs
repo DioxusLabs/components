@@ -1,5 +1,6 @@
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::progress::{Progress, ProgressIndicator};
+
 #[component]
 pub fn Demo() -> Element {
     let mut progress = use_signal(|| 0);
@@ -19,15 +20,6 @@ pub fn Demo() -> Element {
     });
 
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/progress/variants/main/style.css"),
-        }
-        Progress {
-            aria_label: "Progressbar Demo",
-            class: "progress",
-            value: progress() as f64,
-            ProgressIndicator { class: "progress-indicator" }
-        }
+        Progress { aria_label: "Progressbar Demo", value: progress() as f64, ProgressIndicator {} }
     }
 }

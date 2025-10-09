@@ -19,16 +19,16 @@ struct AccordionContext {
     open_items: Signal<Vec<usize>>,
 
     /// Whether multiple items can be open at once.
-    allow_multiple_open: ReadOnlySignal<bool>,
+    allow_multiple_open: ReadSignal<bool>,
 
     /// Whether the entire accordion is disabled.
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 
     /// Whether all accordion items can be collapsed.
-    collapsible: ReadOnlySignal<bool>,
+    collapsible: ReadSignal<bool>,
 
     /// Whether the accordion is horizontal.
-    horizontal: ReadOnlySignal<bool>,
+    horizontal: ReadSignal<bool>,
 
     /// Number of current accordion items.
     num_items: Signal<usize>,
@@ -39,10 +39,10 @@ struct AccordionContext {
 
 impl AccordionContext {
     pub fn new(
-        allow_multiple_open: ReadOnlySignal<bool>,
-        disabled: ReadOnlySignal<bool>,
-        collapsible: ReadOnlySignal<bool>,
-        horizontal: ReadOnlySignal<bool>,
+        allow_multiple_open: ReadSignal<bool>,
+        disabled: ReadSignal<bool>,
+        collapsible: ReadSignal<bool>,
+        horizontal: ReadSignal<bool>,
     ) -> Self {
         Self {
             next_id: Signal::new(0),
@@ -165,39 +165,35 @@ impl AccordionContext {
 pub struct AccordionProps {
     /// The id of the accordion root element.
     pub id: Option<String>,
-    /// The class of the accordion root element.
-    pub class: Option<String>,
-    /// The style of the accordion root element.
-    pub style: Option<String>,
 
     /// Whether multiple accordion items are allowed to be open at once.
     ///
     /// Defaults to false.
     #[props(default)]
-    pub allow_multiple_open: ReadOnlySignal<bool>,
+    pub allow_multiple_open: ReadSignal<bool>,
 
     /// Set whether the accordion is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Whether the accordion can be fully collapsed.
     ///
     /// Setting this to true will allow all accordion items to close. Defaults to true.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub collapsible: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub collapsible: ReadSignal<bool>,
 
     /// Whether the accordion is horizontal.
     ///
     /// Settings this to true will use left/right keybinds for navigation instead of up/down. Defaults to false.
     #[props(default)]
-    pub horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadSignal<bool>,
 
     /// Attributes to extend the root element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the accordion, which should contain [`AccordionItem`] components.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Accordion
@@ -263,8 +259,6 @@ pub fn Accordion(props: AccordionProps) -> Element {
     rsx! {
         div {
             id: props.id,
-            class: props.class,
-            style: props.style,
             "data-disabled": (props.disabled)(),
 
             onfocusout: move |_| {
@@ -283,7 +277,7 @@ pub fn Accordion(props: AccordionProps) -> Element {
 pub struct AccordionItemProps {
     /// Whether the accordion item is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Whether this accordion item should be opened by default.
     #[props(default)]
@@ -306,10 +300,10 @@ pub struct AccordionItemProps {
 
     /// Additional attributes to extend the item element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the accordion item.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Accordion Item
@@ -392,12 +386,12 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct AccordionContentProps {
     /// The id of the accordion content element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
     /// Additional attributes to extend the content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the accordion content element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Accordion Content
@@ -466,9 +460,9 @@ pub struct AccordionTriggerProps {
     pub id: Option<String>,
     /// Additional attributes to extend the trigger element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the accordion trigger element.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Accordion Trigger
@@ -580,7 +574,7 @@ struct Item {
     id: usize,
     index: usize,
     aria_id: Signal<String>,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
     on_trigger_click: Callback,
 }
 

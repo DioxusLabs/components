@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 
 use crate::use_effect_cleanup;
 
-pub(crate) fn use_focus_provider(roving_loop: ReadOnlySignal<bool>) -> FocusState {
+pub(crate) fn use_focus_provider(roving_loop: ReadSignal<bool>) -> FocusState {
     use_context_provider(|| {
         let item_count = Signal::new(0);
         let recent_focus = Signal::new(None);
@@ -93,7 +93,7 @@ pub(crate) fn use_focus_controlled_item_disabled(
 
 #[derive(Clone, Copy)]
 pub(crate) struct FocusState {
-    pub(crate) roving_loop: ReadOnlySignal<bool>,
+    pub(crate) roving_loop: ReadSignal<bool>,
     pub(crate) item_count: Signal<usize>,
     pub(crate) recent_focus: Signal<Option<usize>>,
     pub(crate) current_focus: Signal<Option<usize>>,

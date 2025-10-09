@@ -11,7 +11,7 @@ use dioxus::prelude::*;
 #[derive(Clone, Copy)]
 struct RadioGroupCtx {
     // State
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
     value: Memo<String>,
     set_value: Callback<String>,
 
@@ -20,8 +20,8 @@ struct RadioGroupCtx {
     values: Signal<HashMap<usize, String>>,
     focus: FocusState,
 
-    horizontal: ReadOnlySignal<bool>,
-    roving_loop: ReadOnlySignal<bool>,
+    horizontal: ReadSignal<bool>,
+    roving_loop: ReadSignal<bool>,
 }
 
 impl RadioGroupCtx {
@@ -73,7 +73,7 @@ impl RadioGroupCtx {
 #[derive(Props, Clone, PartialEq)]
 pub struct RadioGroupProps {
     /// The controlled value of the selected radio item.
-    pub value: ReadOnlySignal<Option<String>>,
+    pub value: ReadSignal<Option<String>>,
 
     /// The default selected value when uncontrolled.
     #[props(default)]
@@ -85,30 +85,30 @@ pub struct RadioGroupProps {
 
     /// Whether the radio group is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Whether the radio group is required in a form.
     #[props(default)]
-    pub required: ReadOnlySignal<bool>,
+    pub required: ReadSignal<bool>,
 
     /// The name attribute for form submission.
     #[props(default)]
-    pub name: ReadOnlySignal<String>,
+    pub name: ReadSignal<String>,
 
     /// Whether the radio group is horizontal.
     #[props(default)]
-    pub horizontal: ReadOnlySignal<bool>,
+    pub horizontal: ReadSignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub roving_loop: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub roving_loop: ReadSignal<bool>,
 
     /// Additional attributes to apply to the radio group element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the radio group component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # RadioGroup
@@ -187,22 +187,25 @@ pub fn RadioGroup(props: RadioGroupProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct RadioItemProps {
     /// The value of the radio item. This will be passed to [`RadioGroupProps::on_value_change`] when selected.
-    pub value: ReadOnlySignal<String>,
+    pub value: ReadSignal<String>,
     /// The index of the radio item within the [`RadioGroup`]. This is used to order the items for keyboard navigation.
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// Whether the radio item is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Optional ID for the radio item element.
     pub id: Option<String>,
     /// Optional class for the radio item element.
     pub class: Option<String>,
 
+    /// Additional attributes to apply to the radio item element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
-    children: Element,
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the radio item component.
+    pub children: Element,
 }
 
 /// # RadioItem

@@ -1,12 +1,10 @@
+use super::super::component::AspectRatio;
 use dioxus::prelude::*;
-use dioxus_primitives::aspect_ratio::AspectRatio;
+
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/aspect_ratio/variants/main/style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("../../style.css") }
         div {
             class: "aspect-ratio-container",
             width: "20rem",

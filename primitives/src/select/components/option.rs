@@ -14,22 +14,22 @@ use super::super::context::{OptionState, SelectContext, SelectOptionContext};
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
     /// The value of the option
-    pub value: ReadOnlySignal<T>,
+    pub value: ReadSignal<T>,
 
     /// The text value of the option used for typeahead search
     #[props(default)]
-    pub text_value: ReadOnlySignal<Option<String>>,
+    pub text_value: ReadSignal<Option<String>>,
 
     /// Whether the option is disabled
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Optional ID for the option
     #[props(default)]
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
 
     /// The index of the option in the list. This is used to define the focus order for keyboard navigation.
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// Optional label for the option (for accessibility)
     #[props(default)]
@@ -39,10 +39,12 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
     #[props(default)]
     pub aria_roledescription: Option<String>,
 
+    /// Additional attributes for the option element
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
-    children: Element,
+    /// The children to render inside the option
+    pub children: Element,
 }
 
 /// # SelectOption
@@ -194,7 +196,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectItemIndicatorProps {
     /// The children to render inside the indicator
-    children: Element,
+    pub children: Element,
 }
 
 /// # SelectItemIndicator

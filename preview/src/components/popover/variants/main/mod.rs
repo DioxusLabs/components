@@ -1,5 +1,7 @@
+use crate::components::button::component::Button;
+
+use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::popover::*;
 
 #[component]
 pub fn Demo() -> Element {
@@ -7,24 +9,9 @@ pub fn Demo() -> Element {
     let mut confirmed = use_signal(|| false);
 
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/popover/variants/main/style.css"),
-        }
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/button/variants/main/style.css"),
-        }
-        PopoverRoot {
-            open: open(),
-            on_open_change: move |v| open.set(v),
-            class: "popover",
-            PopoverTrigger {
-                class: "popover-trigger",
-                "Show Popover"
-            }
-            PopoverContent { class: "popover-content",
-                gap: "0.25rem",
+        PopoverRoot { open: open(), on_open_change: move |v| open.set(v),
+            PopoverTrigger { "Show Popover" }
+            PopoverContent { gap: "0.25rem",
                 h3 {
                     padding_top: "0.25rem",
                     padding_bottom: "0.25rem",
@@ -33,9 +20,8 @@ pub fn Demo() -> Element {
                     margin: 0,
                     "Delete Item?"
                 }
-                button {
-                    class: "button",
-                    type: "button",
+                Button {
+                    r#type: "button",
                     "data-style": "outline",
                     onclick: move |_| {
                         open.set(false);
@@ -43,9 +29,8 @@ pub fn Demo() -> Element {
                     },
                     "Confirm"
                 }
-                button {
-                    class: "button",
-                    type: "button",
+                Button {
+                    r#type: "button",
                     "data-style": "outline",
                     onclick: move |_| {
                         open.set(false);

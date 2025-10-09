@@ -15,7 +15,7 @@ struct MenubarContext {
     // Currently open menu index
     open_menu: Signal<Option<usize>>,
     set_open_menu: Callback<Option<usize>>,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 
     // Focus state
     focus: FocusState,
@@ -26,17 +26,17 @@ struct MenubarContext {
 pub struct MenubarProps {
     /// Whether the menubar is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub roving_loop: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub roving_loop: ReadSignal<bool>,
 
     /// Additional attributes to apply to the menubar element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the menubar component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Menubar
@@ -144,10 +144,10 @@ pub fn Menubar(props: MenubarProps) -> Element {
 
 #[derive(Clone, Copy)]
 struct MenubarMenuContext {
-    index: ReadOnlySignal<usize>,
+    index: ReadSignal<usize>,
     focus: FocusState,
     is_open: Memo<bool>,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 }
 
 impl MenubarMenuContext {
@@ -164,17 +164,17 @@ impl MenubarMenuContext {
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarMenuProps {
     /// The index of this menu in the menubar. This is used to define the focus order for keyboard navigation.
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// Whether this menu is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Additional attributes to apply to the menu element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the menu component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # MenubarMenu
@@ -313,9 +313,9 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
 pub struct MenubarTriggerProps {
     /// Additional attributes to apply to the trigger element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the trigger component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # MenubarTrigger
@@ -427,12 +427,12 @@ pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarContentProps {
     /// The id of the content element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
     /// Additional attributes to apply to the content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the content component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # MenubarContent
@@ -529,14 +529,14 @@ pub fn MenubarContent(props: MenubarContentProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct MenubarItemProps {
     /// The index of this item within the [`MenubarContent`]. This is used to define the focus order for keyboard navigation.
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// The value associated with this menu item. This value will be passed to the [`Self::on_select`] callback when the item is selected.
     pub value: String,
 
     /// Whether this menu item is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Callback fired when the item is selected. The [`Self::value`] will be passed as an argument.
     #[props(default)]
@@ -544,10 +544,10 @@ pub struct MenubarItemProps {
 
     /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the item component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # MenubarItem

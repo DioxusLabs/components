@@ -14,7 +14,7 @@ struct NavbarContext {
     // Currently open nav index
     open_nav: Signal<Option<usize>>,
     set_open_nav: Callback<Option<usize>>,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 
     // Focus state
     focus: FocusState,
@@ -25,17 +25,17 @@ struct NavbarContext {
 pub struct NavbarProps {
     /// Whether the navbar is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Whether focus should loop around when reaching the end.
-    #[props(default = ReadOnlySignal::new(Signal::new(true)))]
-    pub roving_loop: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub roving_loop: ReadSignal<bool>,
 
     /// Additional attributes to apply to the navbar element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the navbar component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Navbar
@@ -165,10 +165,10 @@ pub fn Navbar(props: NavbarProps) -> Element {
 
 #[derive(Clone, Copy)]
 struct NavbarNavContext {
-    index: ReadOnlySignal<usize>,
+    index: ReadSignal<usize>,
     focus: FocusState,
     is_open: Memo<bool>,
-    disabled: ReadOnlySignal<bool>,
+    disabled: ReadSignal<bool>,
 }
 
 impl NavbarNavContext {
@@ -185,17 +185,17 @@ impl NavbarNavContext {
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarNavProps {
     /// The index of this nav item in the navbar. This is used to define the focus order for keyboard navigation.
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// Whether this nav item is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Additional attributes to apply to the nav element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the nav component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # NavbarNav
@@ -344,9 +344,9 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
 pub struct NavbarTriggerProps {
     /// Additional attributes to apply to the trigger element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the trigger component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # NavbarTrigger
@@ -453,12 +453,12 @@ pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarContentProps {
     /// The id of the content element.
-    pub id: ReadOnlySignal<Option<String>>,
+    pub id: ReadSignal<Option<String>>,
     /// Additional attributes to apply to the content element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the content component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # NavbarContent
@@ -568,14 +568,14 @@ pub fn NavbarContent(props: NavbarContentProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct NavbarItemProps {
     /// The index of this item within the nav. This is used to define the focus order for keyboard navigation.
-    pub index: ReadOnlySignal<usize>,
+    pub index: ReadSignal<usize>,
 
     /// The value associated with this nav item. This will be passed to the [`Self::on_select`] callback when the item is selected.
     pub value: String,
 
     /// Whether this nav item is disabled.
     #[props(default)]
-    pub disabled: ReadOnlySignal<bool>,
+    pub disabled: ReadSignal<bool>,
 
     /// Callback fired when the item is selected. The [`Self::value`] will be passed to this callback when the item is selected.
     #[props(default)]
@@ -620,10 +620,10 @@ pub struct NavbarItemProps {
 
     /// Additional attributes to apply to the item element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children to render within the generated HTML anchor tag.
-    children: Element,
+    pub children: Element,
 }
 
 /// # NavbarItem

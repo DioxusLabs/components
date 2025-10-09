@@ -7,27 +7,27 @@ use dioxus::prelude::*;
 #[derive(Props, Clone, PartialEq)]
 pub struct SwitchProps {
     /// The controlled checked state of the switch.
-    pub checked: ReadOnlySignal<Option<bool>>,
+    pub checked: ReadSignal<Option<bool>>,
 
     /// The default checked state when uncontrolled.
     #[props(default = false)]
     pub default_checked: bool,
 
     /// Whether the switch is disabled.
-    #[props(default = ReadOnlySignal::new(Signal::new(false)))]
-    pub disabled: ReadOnlySignal<bool>,
+    #[props(default = ReadSignal::new(Signal::new(false)))]
+    pub disabled: ReadSignal<bool>,
 
     /// Whether the switch is required in a form.
     #[props(default)]
-    pub required: ReadOnlySignal<bool>,
+    pub required: ReadSignal<bool>,
 
     /// The name attribute for form submission.
     #[props(default)]
-    pub name: ReadOnlySignal<String>,
+    pub name: ReadSignal<String>,
 
     /// The value attribute for form submission.
-    #[props(default = ReadOnlySignal::new(Signal::new(String::from("on"))))]
-    pub value: ReadOnlySignal<String>,
+    #[props(default = ReadSignal::new(Signal::new(String::from("on"))))]
+    pub value: ReadSignal<String>,
 
     /// Callback fired when the checked state changes.
     #[props(default)]
@@ -35,10 +35,10 @@ pub struct SwitchProps {
 
     /// Additional attributes to apply to the switch element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
 
     /// The children of the switch component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # Switch
@@ -123,9 +123,9 @@ pub fn Switch(props: SwitchProps) -> Element {
 pub struct SwitchThumbProps {
     /// Additional attributes to apply to the thumb element.
     #[props(extends = GlobalAttributes)]
-    attributes: Vec<Attribute>,
+    pub attributes: Vec<Attribute>,
     /// The children of the thumb component.
-    children: Element,
+    pub children: Element,
 }
 
 /// # SwitchThumb

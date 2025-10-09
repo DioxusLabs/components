@@ -4,7 +4,7 @@ test("test", async ({ page }) => {
   await page.goto("http://127.0.0.1:8080/component/?name=hover_card&");
   let tooltip = page.getByRole("tooltip");
   // tabbing to the trigger element should show the tooltip
-  await page.getByRole("heading", { name: "hover card" }).click();
+  await page.locator("#component-preview-frame").focus();
   await page.keyboard.press("Tab");
   await expect(tooltip).toBeVisible();
   // tabbing out of the trigger element should hide the tooltip

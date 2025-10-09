@@ -1,9 +1,9 @@
 use core::panic;
 
+use crate::components::tabs::component::*;
 use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
 use dioxus_i18n::prelude::*;
-use dioxus_primitives::tabs::{TabContent, TabList, TabTrigger, Tabs};
 
 use std::str::FromStr;
 use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
@@ -15,6 +15,8 @@ mod components;
 struct ComponentDemoData {
     name: &'static str,
     docs: &'static str,
+    component: HighlightedCode,
+    style: HighlightedCode,
     variants: &'static [ComponentVariantDemoData],
 }
 
@@ -22,7 +24,6 @@ struct ComponentDemoData {
 struct ComponentVariantDemoData {
     name: &'static str,
     rs_highlighted: HighlightedCode,
-    css_highlighted: HighlightedCode,
     component: fn() -> Element,
 }
 
@@ -160,9 +161,8 @@ fn NavigationLayout() -> Element {
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
-        document::Link { rel: "stylesheet", href: asset!("/assets/theme.css") }
+        document::Link { rel: "stylesheet", href: asset!("/assets/dx-components-theme.css") }
         document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
-        document::Link { rel: "stylesheet", href: asset!("/src/components/tabs/variants/main/style.css") }
         Navbar {}
         Outlet::<Route> {}
     }
@@ -180,7 +180,9 @@ fn Navbar() -> Element {
                 padding: "1rem",
                 justify_content: "flex-start",
                 if in_component {
-                    Link { to: Route::home(), class: "navbar-brand",
+                    Link {
+                        to: Route::home(),
+                        class: "navbar-brand",
                         aria_label: "Back",
                         svg {
                             view_box: "0 0 24 24",
@@ -272,11 +274,7 @@ fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.light,
         }
-        CopyButton {
-            position: "absolute",
-            top: "0.5em",
-            right: "0.5em",
-        }
+        CopyButton { position: "absolute", top: "0.5em", right: "0.5em" }
     }
 }
 
@@ -287,7 +285,7 @@ fn CopyButton(#[props(extends=GlobalAttributes)] attributes: Vec<Attribute>) -> 
     rsx! {
         button {
             class: "copy-button",
-            type: "button",
+            r#type: "button",
             aria_label: "Copy code",
             "data-copied": copied,
             "onclick": "navigator.clipboard.writeText(this.parentNode.firstChild.innerText || this.parentNode.innerText);",
@@ -349,7 +347,7 @@ fn DarkModeToggle() -> Element {
             onclick: move |_| {
                 set_theme(false);
             },
-            type: "button",
+            r#type: "button",
             aria_label: "Enable light mode",
             DarkModeIcon {}
         }
@@ -358,7 +356,7 @@ fn DarkModeToggle() -> Element {
             onclick: move |_| {
                 set_theme(true);
             },
-            type: "button",
+            r#type: "button",
             aria_label: "Enable dark mode",
             LightModeIcon {}
         }
@@ -395,14 +393,54 @@ fn LightModeIcon() -> Element {
             stroke_linecap: "round",
             stroke_linejoin: "round",
             circle { cx: "12", cy: "12", r: "4" }
-            line { x1: "12", y1: "1", x2: "12", y2: "3" }
-            line { x1: "12", y1: "21", x2: "12", y2: "23" }
-            line { x1: "4.22", y1: "4.22", x2: "5.64", y2: "5.64" }
-            line { x1: "18.36", y1: "18.36", x2: "19.78", y2: "19.78" }
-            line { x1: "1", y1: "12", x2: "3", y2: "12" }
-            line { x1: "21", y1: "12", x2: "23", y2: "12" }
-            line { x1: "4.22", y1: "19.78", x2: "5.64", y2: "18.36" }
-            line { x1: "18.36", y1: "5.64", x2: "19.78", y2: "4.22" }
+            line {
+                x1: "12",
+                y1: "1",
+                x2: "12",
+                y2: "3",
+            }
+            line {
+                x1: "12",
+                y1: "21",
+                x2: "12",
+                y2: "23",
+            }
+            line {
+                x1: "4.22",
+                y1: "4.22",
+                x2: "5.64",
+                y2: "5.64",
+            }
+            line {
+                x1: "18.36",
+                y1: "18.36",
+                x2: "19.78",
+                y2: "19.78",
+            }
+            line {
+                x1: "1",
+                y1: "12",
+                x2: "3",
+                y2: "12",
+            }
+            line {
+                x1: "21",
+                y1: "12",
+                x2: "23",
+                y2: "12",
+            }
+            line {
+                x1: "4.22",
+                y1: "19.78",
+                x2: "5.64",
+                y2: "18.36",
+            }
+            line {
+                x1: "18.36",
+                y1: "5.64",
+                x2: "19.78",
+                y2: "4.22",
+            }
         }
     }
 }
@@ -504,7 +542,7 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
             border_radius: "0 0 0.5rem 0.5rem",
             border: "none",
             text_align: "center",
-            type: "button",
+            r#type: "button",
             onclick: move |_| {
                 collapsed.toggle();
             },
@@ -540,26 +578,15 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
 
     rsx! {
         Tabs {
-            class: "tabs",
             default_value: "main.rs",
             border_bottom_left_radius: "0.5rem",
             border_bottom_right_radius: "0.5rem",
             horizontal: true,
             width: "100%",
-            TabList { class: "tabs-list",
-                TabTrigger { class: "tabs-trigger", value: "main.rs", index: 0usize, "main.rs" }
-                TabTrigger {
-                    class: "tabs-trigger",
-                    value: "style.css",
-                    index: 1usize,
-                    "style.css"
-                }
-                TabTrigger {
-                    class: "tabs-trigger",
-                    value: "theme.css",
-                    index: 2usize,
-                    "theme.css"
-                }
+            TabList {
+                TabTrigger { value: "main.rs", index: 0usize, "main.rs" }
+                TabTrigger { value: "style.css", index: 1usize, "style.css" }
+                TabTrigger { value: "dx-components-theme.css", index: 2usize, "dx-components-theme.css" }
             }
             div {
                 width: "100%",
@@ -570,7 +597,6 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 align_items: "center",
                 TabContent {
                     index: 0usize,
-                    class: "tabs-content",
                     value: "main.rs",
                     width: "100%",
                     position: "relative",
@@ -579,7 +605,6 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 }
                 TabContent {
                     index: 1usize,
-                    class: "tabs-content",
                     value: "style.css",
                     width: "100%",
                     position: "relative",
@@ -588,14 +613,78 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                 }
                 TabContent {
                     index: 2usize,
-                    class: "tabs-content",
-                    value: "theme.css",
+                    value: "dx-components-theme.css",
                     width: "100%",
                     position: "relative",
                     CodeBlock { source: THEME_CSS, collapsed: collapsed() }
                     {expand.clone()}
                 }
             }
+        }
+    }
+}
+
+#[component]
+fn ColapsibleCodeBlock(highlighted: HighlightedCode) -> Element {
+    let mut collapsed = use_signal(|| true);
+
+    let expand = rsx! {
+        button {
+            aria_label: if collapsed() { "Expand code" } else { "Collapse code" },
+            width: "100%",
+            height: "2rem",
+            color: "var(--secondary-color-4)",
+            background_color: "rgba(0, 0, 0, 0)",
+            border_radius: "0 0 0.5rem 0.5rem",
+            border: "none",
+            text_align: "center",
+            r#type: "button",
+            onclick: move |_| {
+                collapsed.toggle();
+            },
+            if collapsed() {
+                svg {
+                    fill: "none",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    stroke: "var(--secondary-color-4)",
+                    stroke_linecap: "round",
+                    stroke_linejoin: "round",
+                    stroke_width: "2",
+                    width: "20px",
+                    height: "20px",
+                    view_box: "0 0 24 24",
+                    polyline { points: "6 9 12 15 18 9" }
+                }
+            } else {
+                svg {
+                    fill: "none",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    stroke: "var(--secondary-color-4)",
+                    stroke_linecap: "round",
+                    stroke_linejoin: "round",
+                    stroke_width: "2",
+                    width: "20px",
+                    height: "20px",
+                    view_box: "0 0 24 24",
+                    polyline { points: "6 15 12 9 18 15" }
+                }
+            }
+        }
+    };
+
+    rsx! {
+        div {
+            class: "tabs-content",
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            flex_direction: "column",
+            justify_content: "center",
+            align_items: "center",
+            border_bottom_left_radius: "0.5rem",
+            border_bottom_right_radius: "0.5rem",
+            CodeBlock { source: highlighted, collapsed: collapsed() }
+            {expand.clone()}
         }
     }
 }
@@ -629,22 +718,41 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
         name,
         docs,
         variants,
+        component,
+        style,
     } = demo;
     let name = name.replace("_", " ");
     let [main, variants @ ..] = variants else {
         unreachable!("Expected at least one variant for component: {}", name);
     };
+
     rsx! {
         main { class: "component-demo",
             h1 { class: "component-title", {name} }
-            ComponentVariantHighlight { variant: main.clone(), main_variant: true }
-            div { class: "component-description",
-                div { dangerous_inner_html: docs }
-            }
-            if !variants.is_empty() {
-                h2 { class: "component-variants-title", "Variants" }
-                for variant in variants {
-                    ComponentVariantHighlight { variant: variant.clone(), main_variant: false }
+            div { class: "component-preview",
+                div { class: "component-preview-contents",
+                    ComponentVariantHighlight { variant: main.clone(), main_variant: true }
+                    div { class: "component-installation",
+                        h2 { "Installation" }
+                        ol { class: "component-installation-list",
+                            li {
+                                "If you haven't already, add the dx-components-theme.css file to your project and import it in the root of your app."
+                            }
+                            li { "Add the style.css file to your project." }
+                            li { "Create a component based on the main.rs below." }
+                            li { "Modify your components and styles as needed." }
+                        }
+                    }
+                    ComponentCode { rs_highlighted: component, css_highlighted: style }
+                    div { class: "component-description",
+                        div { dangerous_inner_html: docs }
+                    }
+                    if !variants.is_empty() {
+                        h2 { class: "component-variants-title", "Variants" }
+                        for variant in variants {
+                            ComponentVariantHighlight { variant: variant.clone(), main_variant: false }
+                        }
+                    }
                 }
             }
         }
@@ -655,32 +763,47 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
 fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bool) -> Element {
     let ComponentVariantDemoData {
         name,
-        rs_highlighted,
-        css_highlighted,
+        rs_highlighted: highlighted,
         component: Comp,
     } = variant;
     rsx! {
-        div { class: "component-preview",
-            div { class: "component-preview-contents",
-                if !main_variant {
-                    h3 {
-                        "{name}"
-                    }
+        if !main_variant {
+            h3 { "{name}" }
+        }
+        Tabs {
+            default_value: "Demo",
+            border_bottom_left_radius: "0.5rem",
+            border_bottom_right_radius: "0.5rem",
+            horizontal: true,
+            width: "100%",
+            variant: TabsVariant::Ghost,
+            TabList {
+                TabTrigger { value: "Demo", index: 0usize, "DEMO" }
+                TabTrigger { value: "Code", index: 1usize, "CODE" }
+            }
+            div {
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                flex_direction: "column",
+                justify_content: "center",
+                align_items: "center",
+                TabContent {
+                    index: 0usize,
+                    class: "component-preview-frame",
+                    id: "component-preview-frame",
+                    value: "Demo",
+                    width: "100%",
+                    position: "relative",
+                    Comp {}
                 }
-                div { class: "component-preview-frame", Comp {} }
-                if main_variant {
-                    div { class: "component-installation",
-                        h2 { "Installation" }
-                        ol { class: "component-installation-list",
-                            li { "If you haven't already, add the theme.css file to your project and import it in the root of your app." }
-                            li { "Add the style.css file to your project." }
-                            li { "Create a component based on the main.rs below." }
-                            li { "Modify your components and styles as needed." }
-                        }
-                    }
-                }
-                div { class: "component-code",
-                    ComponentCode { rs_highlighted, css_highlighted }
+                TabContent {
+                    index: 1usize,
+                    class: "component-preview-frame",
+                    value: "Code",
+                    width: "100%",
+                    position: "relative",
+                    ColapsibleCodeBlock { highlighted }
                 }
             }
         }
@@ -692,8 +815,7 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
     let mut search = use_signal(String::new);
 
     rsx! {
-        main {
-            role: "main",
+        main { role: "main",
             div { id: "hero",
                 h1 { "Dioxus Components" }
                 h2 {
@@ -706,7 +828,7 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                 div { id: "hero-search-container",
                     input {
                         id: "hero-search-input",
-                        type: "search",
+                        r#type: "search",
                         placeholder: "Search components...",
                         value: search,
                         oninput: move |e| {
@@ -723,8 +845,7 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
 #[component]
 fn Installation() -> Element {
     rsx! {
-        div {
-            id: "hero-installation",
+        div { id: "hero-installation",
             "cargo add dioxus-primitives --git https://github.com/DioxusLabs/components"
             CopyButton {}
         }
@@ -786,10 +907,10 @@ fn GotoIcon(mut props: LinkProps) -> Element {
 const THEME_CSS: HighlightedCode = HighlightedCode {
     light: include_str!(concat!(
         env!("OUT_DIR"),
-        "/theme.css.base16-ocean.light.html"
+        "/dx-components-theme.css.base16-ocean.light.html"
     )),
     dark: include_str!(concat!(
         env!("OUT_DIR"),
-        "/theme.css.base16-ocean.dark.html"
+        "/dx-components-theme.css.base16-ocean.dark.html"
     )),
 };
