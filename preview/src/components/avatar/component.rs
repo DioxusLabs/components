@@ -48,10 +48,7 @@ pub struct AvatarProps {
 #[component]
 pub fn Avatar(props: AvatarProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/avatar/style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
 
         avatar::Avatar {
             class: "avatar {props.size.to_class()}",
@@ -79,10 +76,6 @@ pub fn AvatarImage(props: AvatarImageProps) -> Element {
 #[component]
 pub fn AvatarFallback(props: AvatarFallbackProps) -> Element {
     rsx! {
-        avatar::AvatarFallback {
-            class: "avatar-fallback",
-            attributes: props.attributes,
-            {props.children}
-        }
+        avatar::AvatarFallback { class: "avatar-fallback", attributes: props.attributes, {props.children} }
     }
 }

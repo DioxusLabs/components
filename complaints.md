@@ -31,13 +31,13 @@ pub struct SomeProps {
 
 ### No way to know a component or element's parent, siblings, or children.
 
-Some stuff relies on knowing their surrounding elements for proper behavior. 
+Some stuff relies on knowing their surrounding elements for proper behavior.
 
 Take [radix-primitives' switch](https://github.com/radix-ui/primitives/blob/6e75e117977c9e6ffa939e6951a707f16ba0f95e/packages/react/switch/src/switch.tsx#L51) as an example. It detects when the switch is in a form and creates an input so that the switch's value bubbles with the form submit event.
 
 This is also an issue with keybind navigation - we can give components ids to internally track them through a parent context, but how do we know which order they are in for navigation?
 
-At a minimum, I need the ordering index. This could be a special prop similar to `children`. 
+At a minimum, I need the ordering index. This could be a special prop similar to `children`.
 
 ### Need Portals
 Components should behave as if they are still a child of the parent of the "portaled" item. Same scope basically - context is still consumable as if it was a child.

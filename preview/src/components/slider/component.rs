@@ -6,10 +6,7 @@ use dioxus_primitives::slider::{
 #[component]
 pub fn Slider(props: SliderProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/slider/style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         slider::Slider {
             class: "slider",
             value: props.value,
@@ -31,22 +28,14 @@ pub fn Slider(props: SliderProps) -> Element {
 #[component]
 pub fn SliderTrack(props: SliderTrackProps) -> Element {
     rsx! {
-        slider::SliderTrack {
-            class: "slider-track",
-            attributes: props.attributes,
-            {props.children}
-        }
+        slider::SliderTrack { class: "slider-track", attributes: props.attributes, {props.children} }
     }
 }
 
 #[component]
 pub fn SliderRange(props: SliderRangeProps) -> Element {
     rsx! {
-        slider::SliderRange {
-            class: "slider-range",
-            attributes: props.attributes,
-            {props.children}
-        }
+        slider::SliderRange { class: "slider-range", attributes: props.attributes, {props.children} }
     }
 }
 

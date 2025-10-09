@@ -5,7 +5,12 @@ use dioxus::prelude::*;
 pub fn Demo() -> Element {
     let mut avatar_state = use_signal(|| "No state yet".to_string());
     rsx! {
-        div { display: "flex", flex_direction: "row", align_items: "center", justify_content: "between", gap: "1rem",
+        div {
+            display: "flex",
+            flex_direction: "row",
+            align_items: "center",
+            justify_content: "between",
+            gap: "1rem",
             div { class: "avatar-item",
                 p { class: "avatar-label", "Basic Usage" }
                 Avatar {

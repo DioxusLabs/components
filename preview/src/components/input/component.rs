@@ -8,14 +8,7 @@ pub fn Input(
     children: Element,
 ) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/input/style.css"),
-        }
-        input {
-            class: "input",
-            ..attributes,
-            {children}
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
+        input { class: "input", ..attributes, {children} }
     }
 }

@@ -66,10 +66,7 @@ impl TabsVariant {
 #[component]
 pub fn Tabs(props: TabsProps) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/src/components/tabs/style.css"),
-        }
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         tabs::Tabs {
             class: props.class + " tabs",
             "data-variant": props.variant.to_class(),
@@ -88,11 +85,7 @@ pub fn Tabs(props: TabsProps) -> Element {
 #[component]
 pub fn TabList(props: TabListProps) -> Element {
     rsx! {
-        tabs::TabList {
-            class: "tabs-list",
-            attributes: props.attributes,
-            {props.children}
-        }
+        tabs::TabList { class: "tabs-list", attributes: props.attributes, {props.children} }
     }
 }
 

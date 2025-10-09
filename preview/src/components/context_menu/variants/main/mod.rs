@@ -6,9 +6,7 @@ pub fn Demo() -> Element {
 
     rsx! {
         ContextMenu {
-            ContextMenuTrigger {
-                "right click here"
-            }
+            ContextMenuTrigger { "right click here" }
             ContextMenuContent {
                 ContextMenuItem {
                     value: "edit".to_string(),

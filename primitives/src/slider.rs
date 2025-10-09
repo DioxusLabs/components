@@ -43,7 +43,7 @@ impl Pointer {
 }
 
 static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
-    let runtime = Runtime::current().unwrap();
+    let runtime = Runtime::current();
     queue_effect(move || {
         runtime.spawn(ScopeId::ROOT, async move {
             let mut pointer_updates = dioxus::document::eval(

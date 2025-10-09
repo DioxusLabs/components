@@ -18,7 +18,7 @@ fn ToastButton() -> Element {
 
     rsx! {
         Button {
-            type: "button",
+            r#type: "button",
             "data-style": "outline",
             onclick: move |_| {
                 toast_api

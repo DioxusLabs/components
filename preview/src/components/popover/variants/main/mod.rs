@@ -9,14 +9,9 @@ pub fn Demo() -> Element {
     let mut confirmed = use_signal(|| false);
 
     rsx! {
-        PopoverRoot {
-            open: open(),
-            on_open_change: move |v| open.set(v),
-            PopoverTrigger {
-                "Show Popover"
-            }
-            PopoverContent {
-                gap: "0.25rem",
+        PopoverRoot { open: open(), on_open_change: move |v| open.set(v),
+            PopoverTrigger { "Show Popover" }
+            PopoverContent { gap: "0.25rem",
                 h3 {
                     padding_top: "0.25rem",
                     padding_bottom: "0.25rem",
@@ -26,7 +21,7 @@ pub fn Demo() -> Element {
                     "Delete Item?"
                 }
                 Button {
-                    type: "button",
+                    r#type: "button",
                     "data-style": "outline",
                     onclick: move |_| {
                         open.set(false);
@@ -35,7 +30,7 @@ pub fn Demo() -> Element {
                     "Confirm"
                 }
                 Button {
-                    type: "button",
+                    r#type: "button",
                     "data-style": "outline",
                     onclick: move |_| {
                         open.set(false);
