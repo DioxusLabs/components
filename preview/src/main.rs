@@ -34,7 +34,7 @@ fn main() {
             ServeConfig::builder()
                 // Enable incremental rendering
                 .incremental(
-                    dioxus::fullstack::IncrementalRendererConfig::new()
+                    dioxus::server::IncrementalRendererConfig::new()
                         // Store static files in the public directory where other static assets like wasm are stored
                         .static_dir(
                             std::env::current_exe()
