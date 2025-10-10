@@ -4,7 +4,7 @@ use dioxus_primitives::slider::SliderValue;
 
 #[component]
 pub fn Demo() -> Element {
-    let mut current_value = use_signal(|| 0.5);
+    let mut current_value = use_signal(|| 50.0);
 
     rsx! {
         // Display the current value
