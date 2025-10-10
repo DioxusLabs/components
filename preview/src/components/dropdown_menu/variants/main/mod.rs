@@ -1,7 +1,7 @@
-use dioxus::prelude::*;
-use dioxus_primitives::dropdown_menu::{
+use super::super::component::{
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 };
+use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
 #[derive(Clone, Copy, strum::Display, strum::EnumIter, PartialEq)]
