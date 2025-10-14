@@ -3,14 +3,10 @@ use dioxus::prelude::*;
 use dioxus_primitives::{
     calendar::CalendarProps,
     date_picker::{self, DatePickerInputProps, DatePickerProps},
-    popover::{
-        PopoverContent, PopoverContentProps, PopoverRootProps, PopoverTrigger, PopoverTriggerProps,
-    },
-    ContentAlign,
+    popover::{PopoverContentProps, PopoverRootProps, PopoverTriggerProps},
 };
 
 use crate::components::calendar::component::*;
-use time::UtcDateTime;
 
 #[component]
 pub fn DatePicker(props: DatePickerProps) -> Element {
@@ -61,7 +57,7 @@ pub fn DatePickerPopover(props: PopoverRootProps) -> Element {
 #[component]
 pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
-        PopoverTrigger {
+        date_picker::DatePickerPopoverTrigger {
             class: "date-picker-trigger",
             attributes: props.attributes,
             svg {
@@ -77,11 +73,11 @@ pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
 #[component]
 pub fn DatePickerPopoverContent(props: PopoverContentProps) -> Element {
     rsx! {
-        PopoverContent {
+        date_picker::DatePickerPopoverContent {
             class: "popover-content",
             id: props.id,
             side: props.side,
-            align: ContentAlign::End,
+            align: props.align,
             attributes: props.attributes,
             {props.children}
         }
@@ -90,23 +86,16 @@ pub fn DatePickerPopoverContent(props: PopoverContentProps) -> Element {
 
 #[component]
 pub fn DatePickerCalendar(props: CalendarProps) -> Element {
-    let mut view_date = use_signal(|| UtcDateTime::now().date());
-
-    use_effect(move || {
-        if let Some(date) = (props.selected_date)() {
-            view_date.set(date);
-        }
-    });
-
     rsx! {
-        Calendar {
+        date_picker::DatePickerCalendar {
+            class: "calendar",
             selected_date: props.selected_date,
             on_date_change: props.on_date_change,
             on_format_weekday: props.on_format_weekday,
             on_format_month: props.on_format_month,
-            view_date: view_date(),
+            view_date: props.view_date,
             today: props.today,
-            on_view_change: move |date| view_date.set(date),
+            on_view_change: props.on_view_change,
             disabled: props.disabled,
             first_day_of_week: props.first_day_of_week,
             min_date: props.min_date,

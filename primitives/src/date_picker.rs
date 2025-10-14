@@ -1,15 +1,16 @@
 //! Defines the [`DatePicker`] component and its subcomponents, which allowing users to enter or select a date value
 
 use crate::{
+    calendar::{Calendar, CalendarProps},
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
-    popover::{PopoverRoot, PopoverRootProps},
+    popover::*,
     use_unique_id,
 };
 
 use dioxus::prelude::*;
 use num_integer::Integer;
 use std::{fmt::Display, str::FromStr};
-use time::{Date, Month, UtcDateTime};
+use time::{macros::date, Date, Month, UtcDateTime};
 
 /// The value of the [`DatePicker`] component.
 /// Currently this can only be a single date, but support for ranges is planned.
@@ -86,6 +87,8 @@ struct DatePickerContext {
     // Configuration
     disabled: ReadSignal<bool>,
     focus: FocusState,
+    min_date: Date,
+    max_date: Date,
 }
 
 impl DatePickerContext {
@@ -124,6 +127,14 @@ pub struct DatePickerProps {
     #[props(default = ReadSignal::new(Signal::new(false)))]
     pub read_only: ReadSignal<bool>,
 
+    /// Lower limit of the range of available dates
+    #[props(default = date!(1925-01-01))]
+    pub min_date: Date,
+
+    /// Upper limit of the range of available dates
+    #[props(default = date!(2050-12-31))]
+    pub max_date: Date,
+
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadSignal::new(Signal::new(false)))]
     pub roving_loop: ReadSignal<bool>,
@@ -142,6 +153,40 @@ pub struct DatePickerProps {
 ///
 /// ## Example
 /// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{date_picker::*, ContentAlign};
+/// use time::Date;
+/// #[component]
+/// pub fn Demo() -> Element {
+///    let v = DatePickerValue::new_day(None);
+///    let mut value = use_signal(|| v);
+///    let mut selected_date = use_signal(|| None::<Date>);
+///    rsx! {
+///        div {
+///            DatePicker {
+///                value: value(),
+///                selected_date: selected_date(),
+///                on_value_change: move |v| {
+///                    tracing::info!("Date changed to: {v}");
+///                    value.set(v);
+///                    selected_date.set(v.date());
+///               },
+///                DatePickerInput {
+///                    DatePickerPopover {
+///                        DatePickerPopoverTrigger {}
+///                        DatePickerPopoverContent {
+///                            align: ContentAlign::End,
+///                            DatePickerCalendar {
+///                                selected_date: selected_date(),
+///                                on_date_change: move |date| selected_date.set(date),
+///                            }
+///                        }
+///                    }
+///                }
+///            }
+///        }
+///    }
+///}
 /// ```
 ///
 /// # Styling
@@ -162,6 +207,8 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
         read_only: props.read_only,
         disabled: props.disabled,
         focus,
+        min_date: props.min_date,
+        max_date: props.max_date,
     });
 
     rsx! {
@@ -177,9 +224,44 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
 
 /// # DatePickerPopover
 ///
-/// The `DatePickerPopover` is a button that toggles the visibility of the [`PopoverContent`].
+/// The `DatePickerPopover` component wraps all the popover components and manages the state.
 ///
+/// ## Example
 /// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{date_picker::*, ContentAlign};
+/// use time::Date;
+/// #[component]
+/// pub fn Demo() -> Element {
+///    let v = DatePickerValue::new_day(None);
+///    let mut value = use_signal(|| v);
+///    let mut selected_date = use_signal(|| None::<Date>);
+///    rsx! {
+///        div {
+///            DatePicker {
+///                value: value(),
+///                selected_date: selected_date(),
+///                on_value_change: move |v| {
+///                    tracing::info!("Date changed to: {v}");
+///                    value.set(v);
+///                    selected_date.set(v.date());
+///               },
+///                DatePickerInput {
+///                    DatePickerPopover {
+///                        DatePickerPopoverTrigger {}
+///                        DatePickerPopoverContent {
+///                            align: ContentAlign::End,
+///                            DatePickerCalendar {
+///                                selected_date: selected_date(),
+///                                on_date_change: move |date| selected_date.set(date),
+///                            }
+///                        }
+///                    }
+///                }
+///            }
+///        }
+///    }
+///}
 /// ```
 #[component]
 pub fn DatePickerPopover(props: PopoverRootProps) -> Element {
@@ -192,6 +274,189 @@ pub fn DatePickerPopover(props: PopoverRootProps) -> Element {
             on_open_change: move |v| open.set(v),
             attributes: props.attributes,
             {props.children}
+        }
+    }
+}
+
+/// # DatePickerPopoverTrigger
+///
+/// The `DatePickerPopoverTrigger` is a button that toggles the visibility of the [`DatePickerPopoverContent`].
+///
+/// This must be used inside a [`DatePickerPopover`] component.
+///
+/// ## Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{date_picker::*, ContentAlign};
+/// use time::Date;
+/// #[component]
+/// pub fn Demo() -> Element {
+///    let v = DatePickerValue::new_day(None);
+///    let mut value = use_signal(|| v);
+///    let mut selected_date = use_signal(|| None::<Date>);
+///    rsx! {
+///        div {
+///            DatePicker {
+///                value: value(),
+///                selected_date: selected_date(),
+///                on_value_change: move |v| {
+///                    tracing::info!("Date changed to: {v}");
+///                    value.set(v);
+///                    selected_date.set(v.date());
+///               },
+///                DatePickerInput {
+///                    DatePickerPopover {
+///                        DatePickerPopoverTrigger {}
+///                        DatePickerPopoverContent {
+///                            align: ContentAlign::End,
+///                            DatePickerCalendar {
+///                                selected_date: selected_date(),
+///                                on_date_change: move |date| selected_date.set(date),
+///                            }
+///                        }
+///                    }
+///                }
+///            }
+///        }
+///    }
+///}
+/// ```
+#[component]
+pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
+    rsx! {
+        PopoverTrigger {
+            aria_label: "Show Calendar",
+            attributes: props.attributes,
+            {props.children}
+        }
+    }
+}
+
+/// # DatePickerPopoverContent
+///
+/// The `DatePickerPopoverContent` component defines the content of the popover. This component will
+/// only be rendered if the popover is open.
+///
+/// This must be used inside a [`DatePickerPopover`] component.
+///
+/// ## Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{date_picker::*, ContentAlign};
+/// use time::Date;
+/// #[component]
+/// pub fn Demo() -> Element {
+///    let v = DatePickerValue::new_day(None);
+///    let mut value = use_signal(|| v);
+///    let mut selected_date = use_signal(|| None::<Date>);
+///    rsx! {
+///        div {
+///            DatePicker {
+///                value: value(),
+///                selected_date: selected_date(),
+///                on_value_change: move |v| {
+///                    tracing::info!("Date changed to: {v}");
+///                    value.set(v);
+///                    selected_date.set(v.date());
+///               },
+///                DatePickerInput {
+///                    DatePickerPopover {
+///                        DatePickerPopoverTrigger {}
+///                        DatePickerPopoverContent {
+///                            align: ContentAlign::End,
+///                            DatePickerCalendar {
+///                                selected_date: selected_date(),
+///                                on_date_change: move |date| selected_date.set(date),
+///                            }
+///                        }
+///                    }
+///                }
+///            }
+///        }
+///    }
+///}
+/// ```
+#[component]
+pub fn DatePickerPopoverContent(props: PopoverContentProps) -> Element {
+    rsx! {
+        PopoverContent {
+            id: props.id,
+            side: props.side,
+            align: props.align,
+            attributes: props.attributes,
+            {props.children}
+        }
+    }
+}
+
+/// # DatePickerCalendar
+///
+/// The [`DatePickerCalendar`] component provides an accessible calendar interface with arrow key navigation, month switching, and date selection.
+/// Used as date picker popover component
+///
+/// ## Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{date_picker::*, ContentAlign};
+/// use time::Date;
+/// #[component]
+/// pub fn Demo() -> Element {
+///    let v = DatePickerValue::new_day(None);
+///    let mut value = use_signal(|| v);
+///    let mut selected_date = use_signal(|| None::<Date>);
+///    rsx! {
+///        div {
+///            DatePicker {
+///                value: value(),
+///                selected_date: selected_date(),
+///                on_value_change: move |v| {
+///                    tracing::info!("Date changed to: {v}");
+///                    value.set(v);
+///                    selected_date.set(v.date());
+///               },
+///                DatePickerInput {
+///                    DatePickerPopover {
+///                        DatePickerPopoverTrigger {}
+///                        DatePickerPopoverContent {
+///                            align: ContentAlign::End,
+///                            DatePickerCalendar {
+///                                selected_date: selected_date(),
+///                                on_date_change: move |date| selected_date.set(date),
+///                            }
+///                        }
+///                    }
+///                }
+///            }
+///        }
+///    }
+///}
+/// ```
+#[component]
+pub fn DatePickerCalendar(props: CalendarProps) -> Element {
+    let ctx = use_context::<DatePickerContext>();
+    let mut view_date = use_signal(|| UtcDateTime::now().date());
+
+    use_effect(move || {
+        if let Some(date) = (props.selected_date)() {
+            view_date.set(date);
+        }
+    });
+
+    rsx! {
+        Calendar {
+                selected_date: props.selected_date,
+                on_date_change: props.on_date_change,
+                on_format_weekday: props.on_format_weekday,
+                on_format_month: props.on_format_month,
+                view_date: view_date(),
+                today: props.today,
+                on_view_change: move |date| view_date.set(date),
+                disabled: props.disabled,
+                first_day_of_week: props.first_day_of_week,
+                min_date: ctx.min_date,
+                max_date: ctx.max_date,
+                attributes: props.attributes,
+                {props.children}
         }
     }
 }
@@ -235,9 +500,11 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
 ) -> Element {
     let mut text_value = use_signal(|| "".to_string());
     use_effect(move || {
-        if let Some(value) = (props.value)() {
-            text_value.set(value.to_string());
-        }
+        let text = match (props.value)() {
+            Some(value) => value.to_string(),
+            None => String::default(),
+        };
+        text_value.set(text);
     });
 
     // The formatted text for the segment
@@ -251,6 +518,8 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
                 .repeat(props.max_length),
         }
     });
+
+    let now_value = use_memo(move || (props.value)().unwrap_or(props.default));
 
     let mut ctx = use_context::<DatePickerContext>();
 
@@ -343,14 +612,19 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
     let focused = move || ctx.focus.is_focused(props.index.cloned());
     let onmounted = use_focus_controlled_item(props.index);
 
+    let span_id = use_unique_id();
+    let id = use_memo(move || format!("span-{span_id}"));
+    let label_id = format!("{id}-label");
+
     rsx! {
         span {
             class: "date-segment",
-            id: use_unique_id(),
+            id,
             role: "spinbutton",
             aria_valuemin: props.min.to_string(),
             aria_valuemax: props.max.to_string(),
-            aria_valuenow: display_value,
+            aria_valuenow: now_value.to_string(),
+            aria_labelledby: "{label_id}",
             inputmode: "numeric",
             contenteditable: !(ctx.read_only)(),
             spellcheck: false,
@@ -366,6 +640,7 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
             },
             "no-date": (props.value)().is_none(),
             "data-disabled": (ctx.disabled)(),
+            ..props.attributes,
             {display_value}
         }
     }
@@ -410,9 +685,44 @@ pub struct DatePickerInputProps {
 
 /// # DatePickerInput
 ///
-/// The input element for the [`DatePicker`](super::date_picker::DatePicker) component which allow users to enter a date value.
+/// The input element for the [`DatePicker`] component which allow users to enter a date value.
 ///
+/// ## Example
 /// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::{date_picker::*, ContentAlign};
+/// use time::Date;
+/// #[component]
+/// pub fn Demo() -> Element {
+///    let v = DatePickerValue::new_day(None);
+///    let mut value = use_signal(|| v);
+///    let mut selected_date = use_signal(|| None::<Date>);
+///    rsx! {
+///        div {
+///            DatePicker {
+///                value: value(),
+///                selected_date: selected_date(),
+///                on_value_change: move |v| {
+///                    tracing::info!("Date changed to: {v}");
+///                    value.set(v);
+///                    selected_date.set(v.date());
+///               },
+///                DatePickerInput {
+///                    DatePickerPopover {
+///                        DatePickerPopoverTrigger {}
+///                        DatePickerPopoverContent {
+///                            align: ContentAlign::End,
+///                            DatePickerCalendar {
+///                                selected_date: selected_date(),
+///                                on_date_change: move |date| selected_date.set(date),
+///                            }
+///                        }
+///                    }
+///                }
+///            }
+///        }
+///    }
+///}
 /// ```
 #[component]
 pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
@@ -430,30 +740,25 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
     });
 
     use_effect(move || {
-        let year = match year_value() {
-            Some(value) => value,
-            None => return,
-        };
+        if let Some(year) = year_value() {
+            let value = month_value().unwrap_or(0);
+            if let Ok(month) = Month::try_from(value) {
+                if let Some(value) = day_value() {
+                    let max = month.length(year);
+                    let day = value.clamp(1, max);
 
-        let month = match month_value() {
-            Some(value) => match Month::try_from(value) {
-                Ok(m) => m,
-                Err(..) => return,
-            },
-            None => return,
-        };
+                    let date = Date::from_calendar_date(year, month, day)
+                        .ok()
+                        .map(|date| date.clamp(ctx.min_date, ctx.max_date));
 
-        let day = match day_value() {
-            Some(value) => {
-                let max = month.length(year);
-                value.clamp(1, max)
+                    tracing::info!("Parsed date: {date:?}");
+                    ctx.set_date(date);
+                    return;
+                }
             }
-            None => return,
-        };
+        }
 
-        let date = Date::from_calendar_date(year, month, day).ok();
-        tracing::info!("Parsed new date {date:?}");
-        ctx.set_date(date);
+        ctx.set_date(None);
     });
 
     let today = UtcDateTime::now().date();

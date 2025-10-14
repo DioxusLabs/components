@@ -2,7 +2,7 @@ use super::super::component::*;
 use dioxus::prelude::*;
 
 use dioxus_i18n::tid;
-use dioxus_primitives::date_picker::DatePickerValue;
+use dioxus_primitives::{date_picker::DatePickerValue, ContentAlign};
 
 use time::{Date, Month, Weekday};
 
@@ -19,7 +19,7 @@ pub fn Demo() -> Element {
                 value: value(),
                 selected_date: selected_date(),
                 on_value_change: move |v| {
-                    tracing::info!("Selected: {v}");
+                    tracing::info!("Date changed to: {v}");
                     value.set(v);
                     selected_date.set(v.date());
                 },
@@ -27,9 +27,10 @@ pub fn Demo() -> Element {
                     on_format_day_placeholder: || tid!("D_Abbr"),
                     on_format_month_placeholder: || tid!("M_Abbr"),
                     on_format_year_placeholder: || tid!("Y_Abbr"),
-                    DatePickerPopover { 
+                    DatePickerPopover {
                         DatePickerPopoverTrigger {}
                         DatePickerPopoverContent {
+                            align: ContentAlign::End,
                             DatePickerCalendar {
                                 selected_date: selected_date(),
                                 on_date_change: move |date| selected_date.set(date),
