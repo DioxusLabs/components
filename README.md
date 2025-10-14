@@ -76,8 +76,8 @@ cargo run -p preview --features desktop
 or for the web build
 
 ```
-cargo binstall dioxus-cli -y --force --version 0.7.0-rc.0
-dx run -p preview --platform web
+cargo binstall dioxus-cli -y --force --version 0.7.0-rc.1
+dx run -p preview --web
 ```
 
 ## License

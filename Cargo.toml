@@ -5,11 +5,5 @@ members = ["primitives", "preview"]
 [workspace.dependencies]
 dioxus-primitives = { path = "primitives" }
 
-dioxus = "^0.7.0-rc.0"
+dioxus = "0.7.0-rc.1"
 tracing = { version = "0.1", features = ["std"] }
-
-[patch.crates-io]
-dioxus = { git = "https://github.com/DioxusLabs/dioxus" }
-dioxus-core = { git = "https://github.com/DioxusLabs/dioxus" }
-dioxus-signals = { git = "https://github.com/DioxusLabs/dioxus" }
-generational-box = { git = "https://github.com/DioxusLabs/dioxus" }

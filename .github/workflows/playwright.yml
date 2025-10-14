@@ -41,32 +41,32 @@ jobs:
         shardIndex: [1, 2, 3, 4]
         shardTotal: [4]
     steps:
-    # Do our best to cache the toolchain and node install steps
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@1.88.0
-      with:
-        targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
-    - uses: Swatinem/rust-cache@v2
-      with:
-        cache-all-crates: "true"
-        cache-on-failure: "true"
-    - uses: cargo-bins/cargo-binstall@main
-    - name: Install CLI
-      run: cargo binstall dioxus-cli -y --force --version 0.7.0-rc.0
-    - name: Install dependencies
-      run: cd ./playwright && npm ci
-    - name: Install Playwright Browsers
-      run: cd ./playwright && npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: cd ./playwright && npx playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
-    - name: Upload blob report to GitHub Actions Artifacts
-      if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: blob-report-${{ matrix.shardIndex }}
-        path: blob-report
-        retention-days: 1
+      # Do our best to cache the toolchain and node install steps
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: "true"
+          cache-on-failure: "true"
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Install CLI
+        run: cargo binstall dioxus-cli -y --force --version 0.7.0-rc.1
+      - name: Install dependencies
+        run: cd ./playwright && npm ci
+      - name: Install Playwright Browsers
+        run: cd ./playwright && npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: cd ./playwright && npx playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+      - name: Upload blob report to GitHub Actions Artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shardIndex }}
+          path: blob-report
+          retention-days: 1

@@ -39,7 +39,7 @@ test('test', async ({ page }) => {
   await menuElement.click();
   await expect(menuElement).toHaveAttribute('data-state', 'open');
   // Clicking outside the menu should close it
-  await page.click('body');
+  await page.locator('body').click({ position: { x: 0, y: 0 } });
   await expect(menuElement).toHaveAttribute('data-state', 'closed');
 
   // Reopen the menu
