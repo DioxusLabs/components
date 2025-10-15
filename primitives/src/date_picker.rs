@@ -507,6 +507,8 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
         text_value.set(text);
     });
 
+    let mut reset_value = use_signal(|| false);
+
     // The formatted text for the segment
     let display_value = use_memo(move || {
         let value = (props.value)();
@@ -530,13 +532,14 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
             return;
         }
 
-        let value = text.parse::<T>().ok();
+        let value = text.parse::<T>().map(|v| v.min(props.max)).ok();
         if let Some(value) = value {
             let inRange = value >= props.min && value <= props.max;
 
             let newValue = (text + "0").parse::<T>().unwrap_or(value);
             if inRange && newValue > props.max {
                 ctx.focus.focus_next();
+                reset_value.set(true);
             }
         };
 
@@ -559,8 +562,9 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
             Key::Character(actual_char) => {
                 if actual_char.parse::<T>().is_ok() {
                     let mut text = text_value();
-                    if text.len() == props.max_length {
+                    if text.len() == props.max_length || reset_value() {
                         text = String::default();
+                        reset_value.set(false);
                     };
                     text.push_str(&actual_char);
                     set_value(text);
