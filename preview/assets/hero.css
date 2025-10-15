@@ -1,72 +1,85 @@
 #hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 50px;
-  margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+    margin: 0;
 }
 
-#hero>h1, #hero>h2 {
-  margin: 10px 0;
-  color: var(--secondary-color-4);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1.5rem;
-  font-weight: 500;
+#hero > h1,
+#hero > h2 {
+    margin: 10px 0;
+    color: var(--secondary-color-4);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 500;
 }
 
-#hero>h1{
-  font-size: 2rem;
-  font-weight: 600;
+#hero > h1 {
+    font-size: 2rem;
+    font-weight: 600;
 }
 
 #hero #title {
-  font-size: 2rem;
-  font-weight: 500;
+    font-size: 2rem;
+    font-weight: 500;
 }
 
 #hero-separator {
-  height: 2px;
-  margin-bottom: 50px;
+    height: 2px;
+    margin-bottom: 50px;
 }
 
 #hero-search-container {
-  display: flex;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: auto;
+    display: flex;
+    width: 100%;
+    max-width: 800px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
 }
 
 #hero-search-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 10px 20px;
-  border: 1px solid var(--primary-color-6);
-  border-radius: .5rem;
-  margin: 2em auto;
-  background-color: var(--primary-color-1);
-  color: var(--secondary-color-4);
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 20px;
+    border: 1px solid var(--primary-color-6);
+    border-radius: 0.5rem;
+    margin: 2em auto;
+    background-color: var(--primary-color-1);
+    color: var(--secondary-color-4);
 }
 
 #hero-search-input:focus-visible {
-  box-shadow: 0 0 0 2px var(--focused-border-color);
+    box-shadow: 0 0 0 2px var(--focused-border-color);
 }
 
 #hero-installation {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 1em;
-  border: 1px solid var(--primary-color-6);
-  border-radius: .5rem;
-  padding: .5em 1em;
-  margin: 1em auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+    border: 1px solid var(--primary-color-6);
+    border-radius: 0.5rem;
+    padding: 0.5em 1em;
+    margin: 1em auto;
 }
 
 #hero-installation:hover {
-  background-color: var(--primary-color-3);
+    background-color: var(--primary-color-3);
+}
+
+#version-compatibility-notice {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+    background: var(--primary-warning-color);
+    border-radius: 0.5rem;
+    padding: 0.5em 1em;
+    margin: 1em auto;
 }
