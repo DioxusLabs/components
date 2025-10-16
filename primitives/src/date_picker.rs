@@ -444,19 +444,19 @@ pub fn DatePickerCalendar(props: CalendarProps) -> Element {
 
     rsx! {
         Calendar {
-                selected_date: props.selected_date,
-                on_date_change: props.on_date_change,
-                on_format_weekday: props.on_format_weekday,
-                on_format_month: props.on_format_month,
-                view_date: view_date(),
-                today: props.today,
-                on_view_change: move |date| view_date.set(date),
-                disabled: props.disabled,
-                first_day_of_week: props.first_day_of_week,
-                min_date: ctx.min_date,
-                max_date: ctx.max_date,
-                attributes: props.attributes,
-                {props.children}
+            selected_date: props.selected_date,
+            on_date_change: props.on_date_change,
+            on_format_weekday: props.on_format_weekday,
+            on_format_month: props.on_format_month,
+            view_date: view_date(),
+            today: props.today,
+            on_view_change: move |date| view_date.set(date),
+            disabled: props.disabled,
+            first_day_of_week: props.first_day_of_week,
+            min_date: ctx.min_date,
+            max_date: ctx.max_date,
+            attributes: props.attributes,
+            {props.children}
         }
     }
 }
@@ -624,7 +624,6 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
         }
     };
 
-    let focused = move || ctx.focus.is_focused(props.index.cloned());
     let onmounted = use_focus_controlled_item(props.index);
 
     let span_id = use_unique_id();

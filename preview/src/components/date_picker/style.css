@@ -76,6 +76,11 @@
   display: flex;
 }
 
+.date-picker-group .popover-content {
+  padding: 0;
+  max-width: unset;
+}
+
 .date-picker-container {
   display: inline;
   box-sizing: border-box;
