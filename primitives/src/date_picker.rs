@@ -559,6 +559,10 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
         let key = event.key();
         match key {
             Key::Character(actual_char) => {
+                // Don't block keyboard shortcuts
+                if !event.modifiers().is_empty() {
+                    return;
+                }
                 if actual_char.parse::<T>().is_ok() {
                     let mut text = text_value();
                     if text.len() == props.max_length || reset_value() {
@@ -568,7 +572,6 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
                     text.push_str(&actual_char);
                     set_value(text);
                 }
-
                 event.prevent_default();
                 event.stop_propagation();
             }
