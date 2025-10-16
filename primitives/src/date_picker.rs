@@ -213,8 +213,8 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
 
     rsx! {
         div {
-            role: "application",
-            "aria-label": "DatePicker",
+            role: "group",
+            "aria-label": "Date",
             "data-disabled": (props.disabled)(),
             ..props.attributes,
             {props.children}
@@ -539,7 +539,6 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
             let newValue = (text + "0").parse::<T>().unwrap_or(value);
             if inRange && newValue > props.max {
                 ctx.focus.focus_next();
-                reset_value.set(true);
             }
         };
 
@@ -575,7 +574,11 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
             }
             Key::Backspace => {
                 let mut text = text_value();
-                text.pop();
+                if event.modifiers().ctrl() || event.modifiers().meta() {
+                    text.clear();
+                } else {
+                    text.pop();
+                }
                 set_value(text);
             }
             Key::Delete => {
@@ -588,6 +591,11 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
             }
             Key::ArrowRight => {
                 ctx.focus.focus_next();
+            }
+            Key::Enter => {
+                ctx.focus.focus_next();
+                event.prevent_default();
+                event.stop_propagation();
             }
             Key::ArrowUp => {
                 let value = match (props.value)() {
@@ -632,11 +640,12 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
             inputmode: "numeric",
             contenteditable: !(ctx.read_only)(),
             spellcheck: false,
-            tabindex: if focused() { "0" } else { "-1" },
+            tabindex: "0",
             enterkeyhint: "next",
             onkeydown: handle_keydown,
             onmounted,
             onfocus: move |_| {
+                reset_value.set(true);
                 ctx.focus.set_focus(Some(props.index.cloned()));
                 if (ctx.open)() {
                     ctx.open.set(false);
