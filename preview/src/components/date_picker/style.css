@@ -8,6 +8,10 @@
     border: none;
     background-color: transparent;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
 
 .date-picker-expand-icon {
@@ -43,9 +47,6 @@
     color: var(--secondary-color-4);
     gap: 0.25rem;
     transition: background-color 100ms ease-out;
-    width: calc(
-        10em + 14px
-    ); /*4 year + 1 seperator + 2 month + 1 seperator + 2 day*/
     min-width: 150px;
 }
 
@@ -55,7 +56,6 @@
 }
 
 .date-segment {
-    padding: 0 2px;
     caret-color: transparent;
 }
 
