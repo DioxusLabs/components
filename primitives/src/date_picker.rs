@@ -478,10 +478,10 @@ struct DateSegmentProps<T: Clone + Integer + 'static> {
     pub on_value_change: Callback<Option<T>>,
 
     // The minimum value
-    pub min: T,
+    pub min: ReadSignal<T>,
 
     // The maximum value
-    pub max: T,
+    pub max: ReadSignal<T>,
 
     // Max field length
     pub max_length: usize,
@@ -531,26 +531,41 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
             ctx.focus.focus_prev();
             return;
         }
+        let min = props.min.cloned();
+        let max = props.max.cloned();
 
-        let value = text.parse::<T>().map(|v| v.min(props.max)).ok();
+        let value = text.parse::<T>().map(|v| v.min(max)).ok();
         if let Some(value) = value {
-            let inRange = value >= props.min && value <= props.max;
+            let inRange = value >= min && value <= max;
 
             // If adding a new digit would exceed max, move to next segment
             let newValue = (text + "0").parse::<T>().unwrap_or(value);
-            if inRange && newValue > props.max {
+            if inRange && newValue > max {
                 ctx.focus.focus_next();
             }
         };
 
         props.on_value_change.call(value);
     };
+    use_effect(move || {
+        // If this item is not focused, always keep the value clamped
+        if !ctx.focus.is_focused(props.index.cloned()) {
+            if let Some(value) = (props.value)() {
+                let clamped_value = value.clamp(props.min.cloned(), props.max.cloned());
+                if clamped_value != value {
+                    props.on_value_change.call(Some(clamped_value));
+                }
+            }
+        }
+    });
 
     let roll_value = move |value: T| {
-        if value < props.min {
-            props.max
-        } else if value > props.max {
-            props.min
+        let min = props.min.cloned();
+        let max = props.max.cloned();
+        if value < min {
+            max
+        } else if value > max {
+            min
         } else {
             value
         }
@@ -653,13 +668,6 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
                 if (ctx.open)() {
                     ctx.open.set(false);
                 }
-            },
-            // Apply the clamp on blur
-            onblur: move |_| {
-                if let Some(value) = (props.value)() {
-                    let clamped_value = value.clamp(props.min, props.max);
-                    props.on_value_change.call(Some(clamped_value));
-                };
             },
             "no-date": (props.value)().is_none(),
             "data-disabled": (ctx.disabled)(),
