@@ -536,6 +536,7 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
         if let Some(value) = value {
             let inRange = value >= props.min && value <= props.max;
 
+            // If adding a new digit would exceed max, move to next segment
             let newValue = (text + "0").parse::<T>().unwrap_or(value);
             if inRange && newValue > props.max {
                 ctx.focus.focus_next();
@@ -545,7 +546,7 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
         props.on_value_change.call(value);
     };
 
-    let clamp_value = move |value: T| {
+    let roll_value = move |value: T| {
         if value < props.min {
             props.max
         } else if value > props.max {
@@ -604,7 +605,7 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
                 let value = match (props.value)() {
                     Some(mut value) => {
                         value.inc();
-                        clamp_value(value)
+                        roll_value(value)
                     }
                     None => props.default,
                 };
@@ -614,7 +615,7 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
                 let value = match (props.value)() {
                     Some(mut value) => {
                         value.dec();
-                        clamp_value(value)
+                        roll_value(value)
                     }
                     None => props.default,
                 };
@@ -652,6 +653,13 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
                 if (ctx.open)() {
                     ctx.open.set(false);
                 }
+            },
+            // Apply the clamp on blur
+            onblur: move |_| {
+                if let Some(value) = (props.value)() {
+                    let clamped_value = value.clamp(props.min, props.max);
+                    props.on_value_change.call(Some(clamped_value));
+                };
             },
             "no-date": (props.value)().is_none(),
             "data-disabled": (ctx.disabled)(),
@@ -772,11 +780,39 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
                 }
             }
         }
-
-        ctx.set_date(None);
     });
 
     let today = UtcDateTime::now().date();
+
+    let min_year = ctx.min_date.year();
+    let max_year = ctx.max_date.year();
+    let min_month = match year_value() {
+        Some(year) if year == min_year => ctx.min_date.month(),
+        _ => Month::January,
+    };
+    let max_month = match year_value() {
+        Some(year) if year == max_year => ctx.max_date.month(),
+        _ => Month::December,
+    };
+    let min_day = match (year_value(), month_value()) {
+        (Some(year), Some(month)) if year == min_year && month == ctx.min_date.month() as u8 => {
+            ctx.min_date.day()
+        }
+        _ => 1,
+    };
+    let max_day = match (year_value(), month_value()) {
+        (Some(year), Some(month)) if year == max_year && month == ctx.max_date.month() as u8 => {
+            ctx.max_date.day()
+        }
+        (Some(year), Some(month)) => {
+            if let Ok(month) = Month::try_from(month) {
+                month.length(year)
+            } else {
+                31
+            }
+        }
+        _ => 31,
+    };
 
     rsx! {
         div {
@@ -789,8 +825,8 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
                     value: year_value,
                     default: today.year(),
                     on_value_change: move |value: Option<i32>| year_value.set(value),
-                    min: 1,
-                    max: 9999,
+                    min: min_year,
+                    max: max_year,
                     max_length: 4,
                     on_format_placeholder: props.on_format_year_placeholder,
                 }
@@ -801,8 +837,8 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
                     value: month_value,
                     default: today.month() as u8,
                     on_value_change: move |value: Option<u8>| month_value.set(value),
-                    min: Month::January as u8,
-                    max: Month::December as u8,
+                    min: min_month as u8,
+                    max: max_month as u8,
                     max_length: 2,
                     on_format_placeholder: props.on_format_month_placeholder,
                 }
@@ -813,8 +849,8 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
                     value: day_value,
                     default: today.day(),
                     on_value_change: move |value: Option<u8>| day_value.set(value),
-                    min: 1,
-                    max: 31,
+                    min: min_day,
+                    max: max_day,
                     max_length: 2,
                     on_format_placeholder: props.on_format_day_placeholder,
                 }
