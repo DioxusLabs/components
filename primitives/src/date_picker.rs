@@ -576,7 +576,7 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
         match key {
             Key::Character(actual_char) => {
                 // Don't block keyboard shortcuts
-                if !event.modifiers().is_empty() {
+                if event.modifiers().ctrl() || event.modifiers().meta() || event.modifiers().alt() {
                     return;
                 }
                 if actual_char.parse::<T>().is_ok() {

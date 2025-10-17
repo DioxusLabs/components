@@ -100,7 +100,9 @@
     color: var(--secondary-color-4);
     gap: 0.25rem;
     transition: background-color 100ms ease-out;
-    width: fit-content;
+    width: calc(
+        10em + 14px
+    ); /*4 year + 1 seperator + 2 month + 1 seperator + 2 day*/
     min-width: 150px;
 }
 
