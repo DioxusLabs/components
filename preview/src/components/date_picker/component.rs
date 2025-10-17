@@ -31,7 +31,6 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
 pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
     rsx! {
         date_picker::DatePickerInput {
-            class: "date-picker-input",
             on_format_day_placeholder: props.on_format_day_placeholder,
             on_format_month_placeholder: props.on_format_month_placeholder,
             on_format_year_placeholder: props.on_format_year_placeholder,

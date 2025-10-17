@@ -821,43 +821,41 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
     rsx! {
         div {
             class: "date-picker-group",
-            div {
-                class: "date-picker-container",
-                DateSegment {
-                    aria_label: "year",
-                    index: 0usize,
-                    value: year_value,
-                    default: today.year(),
-                    on_value_change: move |value: Option<i32>| year_value.set(value),
-                    min: min_year,
-                    max: max_year,
-                    max_length: 4,
-                    on_format_placeholder: props.on_format_year_placeholder,
-                }
-                DateSeparator {}
-                DateSegment {
-                    aria_label: "month",
-                    index: 1usize,
-                    value: month_value,
-                    default: today.month() as u8,
-                    on_value_change: move |value: Option<u8>| month_value.set(value),
-                    min: min_month as u8,
-                    max: max_month as u8,
-                    max_length: 2,
-                    on_format_placeholder: props.on_format_month_placeholder,
-                }
-                DateSeparator {}
-                DateSegment {
-                    aria_label: "day",
-                    index: 2usize,
-                    value: day_value,
-                    default: today.day(),
-                    on_value_change: move |value: Option<u8>| day_value.set(value),
-                    min: min_day,
-                    max: max_day,
-                    max_length: 2,
-                    on_format_placeholder: props.on_format_day_placeholder,
-                }
+            ..props.attributes,
+            DateSegment {
+                aria_label: "year",
+                index: 0usize,
+                value: year_value,
+                default: today.year(),
+                on_value_change: move |value: Option<i32>| year_value.set(value),
+                min: min_year,
+                max: max_year,
+                max_length: 4,
+                on_format_placeholder: props.on_format_year_placeholder,
+            }
+            DateSeparator {}
+            DateSegment {
+                aria_label: "month",
+                index: 1usize,
+                value: month_value,
+                default: today.month() as u8,
+                on_value_change: move |value: Option<u8>| month_value.set(value),
+                min: min_month as u8,
+                max: max_month as u8,
+                max_length: 2,
+                on_format_placeholder: props.on_format_month_placeholder,
+            }
+            DateSeparator {}
+            DateSegment {
+                aria_label: "day",
+                index: 2usize,
+                value: day_value,
+                default: today.day(),
+                on_value_change: move |value: Option<u8>| day_value.set(value),
+                min: min_day,
+                max: max_day,
+                max_length: 2,
+                on_format_placeholder: props.on_format_day_placeholder,
             }
             {props.children}
         }

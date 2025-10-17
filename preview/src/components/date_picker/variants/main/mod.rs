@@ -23,14 +23,14 @@ pub fn Demo() -> Element {
                     value.set(v);
                     selected_date.set(v.date());
                 },
-                DatePickerInput {
-                    on_format_day_placeholder: || tid!("D_Abbr"),
-                    on_format_month_placeholder: || tid!("M_Abbr"),
-                    on_format_year_placeholder: || tid!("Y_Abbr"),
-                    DatePickerPopover {
+                DatePickerPopover {
+                    DatePickerInput {
+                        on_format_day_placeholder: || tid!("D_Abbr"),
+                        on_format_month_placeholder: || tid!("M_Abbr"),
+                        on_format_year_placeholder: || tid!("Y_Abbr"),
                         DatePickerPopoverTrigger {}
                         DatePickerPopoverContent {
-                            align: ContentAlign::End,
+                            align: ContentAlign::Center,
                             DatePickerCalendar {
                                 selected_date: selected_date(),
                                 on_date_change: move |date| selected_date.set(date),
