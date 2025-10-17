@@ -763,21 +763,17 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
     });
 
     use_effect(move || {
-        if let Some(year) = year_value() {
-            let value = month_value().unwrap_or(0);
-            if let Ok(month) = Month::try_from(value) {
-                if let Some(value) = day_value() {
-                    let max = month.length(year);
-                    let day = value.clamp(1, max);
-
-                    let date = Date::from_calendar_date(year, month, day)
-                        .ok()
-                        .map(|date| date.clamp(ctx.min_date, ctx.max_date));
-
-                    tracing::info!("Parsed date: {date:?}");
-                    ctx.set_date(date);
-                    return;
-                }
+        if let (Some(year), Some(month), Some(day)) = (
+            year_value(),
+            month_value().and_then(|m| Month::try_from(m).ok()),
+            day_value(),
+        ) {
+            if let Some(date) = Date::from_calendar_date(year, month, day)
+                .ok()
+                .filter(|date| ctx.min_date <= *date && *date <= ctx.max_date)
+            {
+                tracing::info!("Parsed date: {date:?}");
+                ctx.set_date(Some(date));
             }
         }
     });
