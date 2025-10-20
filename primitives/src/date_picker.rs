@@ -98,8 +98,8 @@ pub struct DatePickerProps {
 ///                    tracing::info!("Date changed to: {date:?}");
 ///                    selected_date.set(date);
 ///               },
-///                DatePickerInput {
-///                    DatePickerPopover {
+///                DatePickerPopover {
+///                    DatePickerInput {
 ///                        PopoverTrigger {
 ///                            "Select date"
 ///                        }
@@ -201,8 +201,8 @@ pub struct DatePickerPopoverProps {
 ///                    tracing::info!("Date changed to: {date:?}");
 ///                    selected_date.set(date);
 ///               },
-///                DatePickerInput {
-///                    DatePickerPopover {
+///                DatePickerPopover {
+///                    DatePickerInput {
 ///                        PopoverTrigger {
 ///                            "Select date"
 ///                        }
@@ -318,8 +318,8 @@ pub struct DatePickerCalendarProps {
 ///                    tracing::info!("Date changed to: {date:?}");
 ///                    selected_date.set(date);
 ///               },
-///                DatePickerInput {
-///                    DatePickerPopover {
+///                DatePickerPopover {
+///                    DatePickerInput {
 ///                        PopoverTrigger {
 ///                            "Select date"
 ///                        }
@@ -644,8 +644,8 @@ pub struct DatePickerInputProps {
 ///                    tracing::info!("Date changed to: {date:?}");
 ///                    selected_date.set(date);
 ///               },
-///                DatePickerInput {
-///                    DatePickerPopover {
+///                DatePickerPopover {
+///                    DatePickerInput {
 ///                        PopoverTrigger {
 ///                            "Select date"
 ///                        }
