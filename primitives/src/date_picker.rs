@@ -348,6 +348,12 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps) -> Element {
     let mut ctx = use_context::<DatePickerContext>();
     #[allow(non_snake_case)]
     let Calendar = props.calendar;
+    let mut view_date = use_signal(|| UtcDateTime::now().date());
+    use_effect(move || {
+        if let Some(date) = (props.selected_date)() {
+            view_date.set(date);
+        }
+    });
 
     rsx! {
         Calendar {
@@ -358,8 +364,8 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps) -> Element {
             },
             on_format_weekday: props.on_format_weekday,
             on_format_month: props.on_format_month,
-            view_date: props.view_date,
-            on_view_change: props.on_view_change,
+            view_date: view_date(),
+            on_view_change: move |date| view_date.set(date),
             today: props.today,
             disabled: props.disabled,
             first_day_of_week: props.first_day_of_week,
