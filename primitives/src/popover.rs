@@ -25,7 +25,6 @@ struct PopoverCtx {
 /// The props for the [`PopoverRoot`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct PopoverRootProps {
-    
     /// Whether the popover is a modal and should capture focus.
     #[props(default = ReadSignal::new(Signal::new(true)))]
     pub is_modal: ReadSignal<bool>,
