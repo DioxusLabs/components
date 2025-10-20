@@ -48,8 +48,8 @@
 }
 
 .dropdown-menu-content[data-state="closed"] {
-  pointer-events: none;
   animation: dropdown-menu-content-animate-out 150ms ease-in forwards;
+  pointer-events: none;
 }
 
 @keyframes dropdown-menu-content-animate-out {
@@ -57,6 +57,7 @@
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+
   100% {
     opacity: 0;
     transform: scale(0.95) translateY(-2px);
@@ -72,6 +73,7 @@
     opacity: 0;
     transform: scale(0.95) translateY(-2px);
   }
+
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);

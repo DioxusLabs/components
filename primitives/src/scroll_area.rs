@@ -25,37 +25,27 @@ pub struct ScrollAreaProps {
 }
 
 /// The direction in which scrolling is allowed.
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Default)]
 pub enum ScrollDirection {
     /// Allow vertical scrolling only.
     Vertical,
     /// Allow horizontal scrolling only.
     Horizontal,
     /// Allow scrolling in both directions.
+    #[default]
     Both,
 }
 
-impl Default for ScrollDirection {
-    fn default() -> Self {
-        Self::Both
-    }
-}
-
 /// The type of scrolling behavior.
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Default)]
 pub enum ScrollType {
     /// Browser default scrolling.
+    #[default]
     Auto,
     /// Always show scrollbars.
     Always,
     /// Hide scrollbars but enable scrolling.
     Hidden,
-}
-
-impl Default for ScrollType {
-    fn default() -> Self {
-        Self::Auto
-    }
 }
 
 /// # ScrollArea

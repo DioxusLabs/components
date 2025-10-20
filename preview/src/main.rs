@@ -20,6 +20,7 @@ struct ComponentDemoData {
     variants: &'static [ComponentVariantDemoData],
 }
 
+#[allow(unpredictable_function_pointer_comparisons)]
 #[derive(Clone, PartialEq)]
 struct ComponentVariantDemoData {
     name: &'static str,

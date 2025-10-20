@@ -64,6 +64,7 @@ examples!(
     checkbox,
     collapsible,
     context_menu,
+    date_picker,
     dialog,
     dropdown_menu,
     hover_card,

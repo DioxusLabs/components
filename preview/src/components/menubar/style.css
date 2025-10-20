@@ -55,9 +55,9 @@
     var(--dark, var(--primary-color-5));
   box-shadow: inset 0 0 0 1px var(--light, var(--primary-color-6))
     var(--dark, var(--primary-color-7));
-  transform-origin: top;
   opacity: 0;
   pointer-events: none;
+  transform-origin: top;
   will-change: transform, opacity;
 }
 
@@ -66,8 +66,8 @@
 }
 
 .menubar-content[data-state="closed"] {
-  pointer-events: none;
   animation: menubar-content-animate-out 150ms ease-in forwards;
+  pointer-events: none;
 }
 
 @keyframes menubar-content-animate-out {
@@ -75,6 +75,7 @@
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+
   100% {
     opacity: 0;
     transform: scale(0.95) translateY(-2px);
@@ -91,6 +92,7 @@
     opacity: 0;
     transform: scale(0.95) translateY(-2px);
   }
+
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);

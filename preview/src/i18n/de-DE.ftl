@@ -20,3 +20,8 @@ Thursday = Do
 Friday = Fr
 Saturday = Sa
 Sunday = So
+
+## Date
+D_Abbr = T
+M_Abbr = M
+Y_Abbr = J

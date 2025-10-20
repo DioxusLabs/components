@@ -10,29 +10,29 @@
 }
 
 .language-select-container:has(:focus-visible) {
-  outline: 2px solid var(--focused-border-color);
   border-radius: 0.5rem;
+  outline: 2px solid var(--focused-border-color);
 }
 
 .language-select {
-  opacity: 0;
-  inset: 0;
+  position: absolute;
   width: 100%;
   height: 100%;
-  margin: 0;
-  position: absolute;
   padding: .25rem;
+  margin: 0;
+  inset: 0;
+  opacity: 0;
 }
 
 .language-select-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .25rem;
   border: none;
   background-color: transparent;
   color: var(--secondary-color-4);
   cursor: pointer;
   font-size: 1.5rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: .25rem;
   transition: background-color 0.2s ease, color 0.2s ease;
 }

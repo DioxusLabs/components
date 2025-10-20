@@ -33,7 +33,7 @@ Building styled and more featured component libraries on top of Dioxus Primitive
 
 We're still in the early days - Many components are still being created and stabilized.
 
-28/28
+28/29
 
 - [x] Accordion
 - [x] Alert Dialog
@@ -43,6 +43,7 @@ We're still in the early days - Many components are still being created and stab
 - [x] Checkbox
 - [x] Collapsible
 - [x] Context Menu
+- [ ] Date Picker
 - [x] Dialog
 - [x] Dropdown Menu
 - [x] Hover Card

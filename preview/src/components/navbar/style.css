@@ -67,9 +67,9 @@
     var(--dark, var(--primary-color-5));
   box-shadow: inset 0 0 0 1px var(--light, var(--primary-color-6))
     var(--dark, var(--primary-color-7));
-  transform-origin: top;
   opacity: 0;
   pointer-events: none;
+  transform-origin: top;
   will-change: transform, opacity;
 }
 
