@@ -61,11 +61,11 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 1em;
+    padding: 0.5em 1em;
     border: 1px solid var(--primary-color-6);
     border-radius: 0.5rem;
-    padding: 0.5em 1em;
     margin: 1em auto;
+    gap: 1em;
 }
 
 #hero-installation:hover {
@@ -77,9 +77,9 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 1em;
-    background: var(--primary-warning-color);
-    border-radius: 0.5rem;
     padding: 0.5em 1em;
+    border-radius: 0.5rem;
     margin: 1em auto;
+    background: var(--primary-warning-color);
+    gap: 1em;
 }
