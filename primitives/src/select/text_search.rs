@@ -65,10 +65,10 @@ fn levenshtein_distance(
     let mut dp = vec![vec![0.0; value.len() + 1]; typeahead.len() + 1];
 
     let mut prev = 0.0;
-    for j in 0..=value.len() {
+    for (j, item) in dp[0].iter_mut().enumerate().take(value.len() + 1) {
         let new = prev + (1.0 - recency_bias(j, value.len())) * 0.5;
         prev = new;
-        dp[0][j] = new;
+        *item = new;
     }
     let mut prev = 0.0;
     for (i, row) in dp.iter_mut().enumerate().take(typeahead.len() + 1) {
