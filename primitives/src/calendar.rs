@@ -198,7 +198,7 @@ impl CalendarContext {
     }
 }
 
-fn weekday_abbreviation(weekday: Weekday) -> &'static str {
+pub(crate) fn weekday_abbreviation(weekday: Weekday) -> &'static str {
     match weekday {
         Weekday::Monday => "Mo",
         Weekday::Tuesday => "Tu",

@@ -1,7 +1,7 @@
 //! Defines the [`DatePicker`] component and its subcomponents, which allowing users to enter or select a date value
 
 use crate::{
-    calendar::{Calendar, CalendarProps},
+    calendar::{weekday_abbreviation, Calendar, CalendarProps},
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
     popover::*,
     use_unique_id,
@@ -10,76 +10,13 @@ use crate::{
 use dioxus::prelude::*;
 use num_integer::Integer;
 use std::{fmt::Display, str::FromStr};
-use time::{macros::date, Date, Month, UtcDateTime};
-
-/// The value of the [`DatePicker`] component.
-/// Currently this can only be a single date, but support for ranges is planned.
-#[derive(Copy, Clone)]
-pub struct DatePickerValue {
-    /// Current date value
-    value: DateValue,
-}
-
-impl DatePickerValue {
-    /// Create a single day value
-    pub fn new_day(date: Option<Date>) -> Self {
-        match date {
-            Some(date) => Self {
-                value: DateValue::Single { date },
-            },
-            None => Self {
-                value: DateValue::Empty,
-            },
-        }
-    }
-
-    /// Return current selected date
-    pub fn date(&self) -> Option<Date> {
-        match self.value {
-            DateValue::Single { date } => Some(date),
-            DateValue::Empty => None,
-        }
-    }
-
-    // Returns `true` if the given date is selected
-    fn is_date_selected(&self, date: Option<Date>) -> bool {
-        self.date() == date
-    }
-}
-
-impl std::fmt::Display for DatePickerValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.value)
-    }
-}
-
-/// The value type of the [`DatePicker`] component.
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum DateValue {
-    /// A single value for the date picker
-    Single {
-        /// The selected date
-        date: Date,
-    },
-    /// None value for the date picker
-    Empty,
-}
-
-impl std::fmt::Display for DateValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            DateValue::Single { date } => write!(f, "{date}"),
-            DateValue::Empty => write!(f, ""),
-        }
-    }
-}
+use time::{macros::date, Date, Month, UtcDateTime, Weekday};
 
 /// The context provided by the [`DatePicker`] component to its children.
 #[derive(Copy, Clone)]
 struct DatePickerContext {
     // State
-    value: ReadSignal<DatePickerValue>,
-    on_value_change: Callback<DatePickerValue>,
+    on_value_change: Callback<Option<Date>>,
     selected_date: ReadSignal<Option<Date>>,
     open: Signal<bool>,
     read_only: ReadSignal<bool>,
@@ -93,13 +30,10 @@ struct DatePickerContext {
 
 impl DatePickerContext {
     fn set_date(&mut self, date: Option<Date>) {
-        let value = (self.value)();
-        if value.is_date_selected(date) {
-            return;
+        let value = { self.selected_date.peek().cloned() };
+        if value != date {
+            self.on_value_change.call(date);
         }
-
-        let value = DatePickerValue::new_day(date);
-        self.on_value_change.call(value);
 
         self.open.set(false);
     }
@@ -108,12 +42,9 @@ impl DatePickerContext {
 /// The props for the [`DatePicker`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct DatePickerProps {
-    /// The controlled value of the date picker
-    pub value: ReadSignal<DatePickerValue>,
-
     /// Callback when value changes
     #[props(default)]
-    pub on_value_change: Callback<DatePickerValue>,
+    pub on_value_change: Callback<Option<Date>>,
 
     /// The selected date
     #[props(default)]
@@ -200,7 +131,6 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
 
     // Create context provider for child components
     use_context_provider(|| DatePickerContext {
-        value: props.value,
         on_value_change: props.on_value_change,
         selected_date: props.selected_date,
         open,
@@ -220,6 +150,37 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
             {props.children}
         }
     }
+}
+
+/// The props for the [`DatePickerPopover`] component.
+#[allow(unpredictable_function_pointer_comparisons)]
+#[derive(Props, Clone, PartialEq)]
+pub struct DatePickerPopoverProps {
+    /// Whether the popover is a modal and should capture focus.
+    #[props(default = ReadSignal::new(Signal::new(true)))]
+    pub is_modal: ReadSignal<bool>,
+
+    /// The controlled open state of the popover.
+    pub open: ReadSignal<Option<bool>>,
+
+    /// The default open state when uncontrolled.
+    #[props(default)]
+    pub default_open: bool,
+
+    /// Callback fired when the open state changes.
+    #[props(default)]
+    pub on_open_change: Callback<bool>,
+
+    /// Additional attributes to apply to the popover root element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the popover root component.
+    pub children: Element,
+
+    /// The popover root component to use.
+    #[props(default = PopoverRoot)]
+    pub popover_root: fn(PopoverRootProps) -> Element,
 }
 
 /// # DatePickerPopover
@@ -264,9 +225,11 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
 ///}
 /// ```
 #[component]
-pub fn DatePickerPopover(props: PopoverRootProps) -> Element {
+pub fn DatePickerPopover(props: DatePickerPopoverProps) -> Element {
     let ctx = use_context::<DatePickerContext>();
     let mut open = ctx.open;
+
+    let PopoverRoot = props.popover_root;
 
     rsx! {
         PopoverRoot {
@@ -278,115 +241,64 @@ pub fn DatePickerPopover(props: PopoverRootProps) -> Element {
     }
 }
 
-/// # DatePickerPopoverTrigger
-///
-/// The `DatePickerPopoverTrigger` is a button that toggles the visibility of the [`DatePickerPopoverContent`].
-///
-/// This must be used inside a [`DatePickerPopover`] component.
-///
-/// ## Example
-/// ```rust
-/// use dioxus::prelude::*;
-/// use dioxus_primitives::{date_picker::*, ContentAlign};
-/// use time::Date;
-/// #[component]
-/// pub fn Demo() -> Element {
-///    let v = DatePickerValue::new_day(None);
-///    let mut value = use_signal(|| v);
-///    let mut selected_date = use_signal(|| None::<Date>);
-///    rsx! {
-///        div {
-///            DatePicker {
-///                value: value(),
-///                selected_date: selected_date(),
-///                on_value_change: move |v| {
-///                    tracing::info!("Date changed to: {v}");
-///                    value.set(v);
-///                    selected_date.set(v.date());
-///               },
-///                DatePickerInput {
-///                    DatePickerPopover {
-///                        DatePickerPopoverTrigger {}
-///                        DatePickerPopoverContent {
-///                            align: ContentAlign::End,
-///                            DatePickerCalendar {
-///                                selected_date: selected_date(),
-///                                on_date_change: move |date| selected_date.set(date),
-///                            }
-///                        }
-///                    }
-///                }
-///            }
-///        }
-///    }
-///}
-/// ```
-#[component]
-pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
-    rsx! {
-        PopoverTrigger {
-            aria_label: "Show Calendar",
-            attributes: props.attributes,
-            {props.children}
-        }
-    }
-}
+/// The props for the [`Calendar`] component.
+#[allow(unpredictable_function_pointer_comparisons)]
+#[derive(Props, Clone, PartialEq)]
+pub struct DatePickerCalendarProps {
+    /// The selected date
+    #[props(default)]
+    pub selected_date: ReadSignal<Option<Date>>,
 
-/// # DatePickerPopoverContent
-///
-/// The `DatePickerPopoverContent` component defines the content of the popover. This component will
-/// only be rendered if the popover is open.
-///
-/// This must be used inside a [`DatePickerPopover`] component.
-///
-/// ## Example
-/// ```rust
-/// use dioxus::prelude::*;
-/// use dioxus_primitives::{date_picker::*, ContentAlign};
-/// use time::Date;
-/// #[component]
-/// pub fn Demo() -> Element {
-///    let v = DatePickerValue::new_day(None);
-///    let mut value = use_signal(|| v);
-///    let mut selected_date = use_signal(|| None::<Date>);
-///    rsx! {
-///        div {
-///            DatePicker {
-///                value: value(),
-///                selected_date: selected_date(),
-///                on_value_change: move |v| {
-///                    tracing::info!("Date changed to: {v}");
-///                    value.set(v);
-///                    selected_date.set(v.date());
-///               },
-///                DatePickerInput {
-///                    DatePickerPopover {
-///                        DatePickerPopoverTrigger {}
-///                        DatePickerPopoverContent {
-///                            align: ContentAlign::End,
-///                            DatePickerCalendar {
-///                                selected_date: selected_date(),
-///                                on_date_change: move |date| selected_date.set(date),
-///                            }
-///                        }
-///                    }
-///                }
-///            }
-///        }
-///    }
-///}
-/// ```
-#[component]
-pub fn DatePickerPopoverContent(props: PopoverContentProps) -> Element {
-    rsx! {
-        PopoverContent {
-            id: props.id,
-            side: props.side,
-            align: props.align,
-            attributes: props.attributes,
-            {props.children}
-        }
-    }
+    /// Callback when selected date changes
+    #[props(default)]
+    pub on_date_change: Callback<Option<Date>>,
+
+    /// Callback when display weekday
+    #[props(default = Callback::new(|weekday: Weekday| weekday_abbreviation(weekday).to_string()))]
+    pub on_format_weekday: Callback<Weekday, String>,
+
+    /// Callback when display month
+    #[props(default = Callback::new(|month: Month| month.to_string()))]
+    pub on_format_month: Callback<Month, String>,
+
+    /// The month being viewed
+    #[props(default = ReadSignal::new(Signal::new(UtcDateTime::now().date())))]
+    pub view_date: ReadSignal<Date>,
+
+    /// The current date (used for highlighting today)
+    #[props(default = UtcDateTime::now().date())]
+    pub today: Date,
+
+    /// Callback when view date changes
+    #[props(default)]
+    pub on_view_change: Callback<Date>,
+
+    /// Whether the calendar is disabled
+    #[props(default)]
+    pub disabled: ReadSignal<bool>,
+
+    /// First day of the week
+    #[props(default = Weekday::Sunday)]
+    pub first_day_of_week: Weekday,
+
+    /// Lower limit of the range of available dates
+    #[props(default = date!(1925-01-01))]
+    pub min_date: Date,
+
+    /// Upper limit of the range of available dates
+    #[props(default = date!(2050-12-31))]
+    pub max_date: Date,
+
+    /// Additional attributes to extend the calendar element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the calendar element
+    pub children: Element,
+
+    /// The calendar to render with
+    #[props(default = Calendar)]
+    pub calendar: fn(CalendarProps) -> Element,
 }
 
 /// # DatePickerCalendar
@@ -432,25 +344,23 @@ pub fn DatePickerPopoverContent(props: PopoverContentProps) -> Element {
 ///}
 /// ```
 #[component]
-pub fn DatePickerCalendar(props: CalendarProps) -> Element {
-    let ctx = use_context::<DatePickerContext>();
-    let mut view_date = use_signal(|| UtcDateTime::now().date());
-
-    use_effect(move || {
-        if let Some(date) = (props.selected_date)() {
-            view_date.set(date);
-        }
-    });
+pub fn DatePickerCalendar(props: DatePickerCalendarProps) -> Element {
+    let mut ctx = use_context::<DatePickerContext>();
+    #[allow(non_snake_case)]
+    let Calendar = props.calendar;
 
     rsx! {
         Calendar {
-            selected_date: props.selected_date,
-            on_date_change: props.on_date_change,
+            selected_date: ctx.selected_date,
+            on_date_change: move |date| {
+                tracing::info!("calendar selected date {date:?}");
+                ctx.set_date(date)
+            },
             on_format_weekday: props.on_format_weekday,
             on_format_month: props.on_format_month,
-            view_date: view_date(),
+            view_date: props.view_date,
+            on_view_change: props.on_view_change,
             today: props.today,
-            on_view_change: move |date| view_date.set(date),
             disabled: props.disabled,
             first_day_of_week: props.first_day_of_week,
             min_date: ctx.min_date,

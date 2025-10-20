@@ -1,12 +1,13 @@
 use dioxus::prelude::*;
 
 use dioxus_primitives::{
-    calendar::CalendarProps,
     date_picker::{self, DatePickerInputProps, DatePickerProps},
-    popover::{PopoverContentProps, PopoverRootProps, PopoverTriggerProps},
+    popover::{PopoverContentProps, PopoverTriggerProps},
+    ContentAlign,
 };
 
-use crate::components::calendar::component::*;
+use super::super::calendar::component::*;
+use super::super::popover::component::*;
 
 #[component]
 pub fn DatePicker(props: DatePickerProps) -> Element {
@@ -15,13 +16,15 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
         div {
             date_picker::DatePicker {
                 class: "date-picker",
-                value: props.value,
                 on_value_change: props.on_value_change,
                 selected_date: props.selected_date,
                 disabled: props.disabled,
                 read_only: props.read_only,
                 attributes: props.attributes,
-                {props.children}
+                date_picker::DatePickerPopover {
+                    popover_root: PopoverRoot,
+                    {props.children}
+                }
             }
         }
     }
@@ -36,19 +39,22 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
             on_format_year_placeholder: props.on_format_year_placeholder,
             attributes: props.attributes,
             {props.children}
-        }
-    }
-}
-
-#[component]
-pub fn DatePickerPopover(props: PopoverRootProps) -> Element {
-    rsx! {
-        date_picker::DatePickerPopover {
-            class: "popover",
-            is_modal: props.is_modal,
-            default_open: props.default_open,
-            attributes: props.attributes,
-            {props.children}
+            DatePickerPopoverTrigger {}
+            DatePickerPopoverContent {
+                align: ContentAlign::Center,
+                date_picker::DatePickerCalendar {
+                    calendar: Calendar,
+                    CalendarHeader {
+                        CalendarNavigation {
+                            CalendarPreviousMonthButton {}
+                            CalendarSelectMonth {}
+                            CalendarSelectYear {}
+                            CalendarNextMonthButton {}
+                        }
+                    }
+                    CalendarGrid {}
+                }
+            }
         }
     }
 }
@@ -56,8 +62,7 @@ pub fn DatePickerPopover(props: PopoverRootProps) -> Element {
 #[component]
 pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
-        date_picker::DatePickerPopoverTrigger {
-            class: "date-picker-trigger",
+        PopoverTrigger {
             attributes: props.attributes,
             svg {
                 class: "date-picker-expand-icon",
@@ -72,43 +77,13 @@ pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
 #[component]
 pub fn DatePickerPopoverContent(props: PopoverContentProps) -> Element {
     rsx! {
-        date_picker::DatePickerPopoverContent {
+        PopoverContent {
             class: "popover-content",
             id: props.id,
             side: props.side,
             align: props.align,
             attributes: props.attributes,
             {props.children}
-        }
-    }
-}
-
-#[component]
-pub fn DatePickerCalendar(props: CalendarProps) -> Element {
-    rsx! {
-        date_picker::DatePickerCalendar {
-            class: "calendar",
-            selected_date: props.selected_date,
-            on_date_change: props.on_date_change,
-            on_format_weekday: props.on_format_weekday,
-            on_format_month: props.on_format_month,
-            view_date: props.view_date,
-            today: props.today,
-            on_view_change: props.on_view_change,
-            disabled: props.disabled,
-            first_day_of_week: props.first_day_of_week,
-            min_date: props.min_date,
-            max_date: props.max_date,
-            attributes: props.attributes,
-            CalendarHeader {
-                CalendarNavigation {
-                    CalendarPreviousMonthButton {}
-                    CalendarSelectMonth {}
-                    CalendarSelectYear {}
-                    CalendarNextMonthButton {}
-                }
-            }
-            CalendarGrid {}
         }
     }
 }

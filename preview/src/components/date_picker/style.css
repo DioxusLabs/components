@@ -4,7 +4,7 @@
     align-items: center;
 }
 
-.date-picker-trigger {
+.date-picker-group .popover-trigger {
     border: none;
     background-color: transparent;
     cursor: pointer;
