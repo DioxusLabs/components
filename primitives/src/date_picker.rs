@@ -85,27 +85,25 @@ pub struct DatePickerProps {
 /// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
-/// use dioxus_primitives::{date_picker::*, ContentAlign};
+/// use dioxus_primitives::{date_picker::*, popover::*, ContentAlign};
 /// use time::Date;
 /// #[component]
 /// pub fn Demo() -> Element {
-///    let v = DatePickerValue::new_day(None);
-///    let mut value = use_signal(|| v);
 ///    let mut selected_date = use_signal(|| None::<Date>);
 ///    rsx! {
 ///        div {
 ///            DatePicker {
-///                value: value(),
 ///                selected_date: selected_date(),
-///                on_value_change: move |v| {
-///                    tracing::info!("Date changed to: {v}");
-///                    value.set(v);
-///                    selected_date.set(v.date());
+///                on_value_change: move |date| {
+///                    tracing::info!("Date changed to: {date:?}");
+///                    selected_date.set(date);
 ///               },
 ///                DatePickerInput {
 ///                    DatePickerPopover {
-///                        DatePickerPopoverTrigger {}
-///                        DatePickerPopoverContent {
+///                        PopoverTrigger {
+///                            "Select date"
+///                        }
+///                        PopoverContent {
 ///                            align: ContentAlign::End,
 ///                            DatePickerCalendar {
 ///                                selected_date: selected_date(),
@@ -190,27 +188,25 @@ pub struct DatePickerPopoverProps {
 /// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
-/// use dioxus_primitives::{date_picker::*, ContentAlign};
+/// use dioxus_primitives::{date_picker::*, popover::*, ContentAlign};
 /// use time::Date;
 /// #[component]
 /// pub fn Demo() -> Element {
-///    let v = DatePickerValue::new_day(None);
-///    let mut value = use_signal(|| v);
 ///    let mut selected_date = use_signal(|| None::<Date>);
 ///    rsx! {
 ///        div {
 ///            DatePicker {
-///                value: value(),
 ///                selected_date: selected_date(),
-///                on_value_change: move |v| {
-///                    tracing::info!("Date changed to: {v}");
-///                    value.set(v);
-///                    selected_date.set(v.date());
+///                on_value_change: move |date| {
+///                    tracing::info!("Date changed to: {date:?}");
+///                    selected_date.set(date);
 ///               },
 ///                DatePickerInput {
 ///                    DatePickerPopover {
-///                        DatePickerPopoverTrigger {}
-///                        DatePickerPopoverContent {
+///                        PopoverTrigger {
+///                            "Select date"
+///                        }
+///                        PopoverContent {
 ///                            align: ContentAlign::End,
 ///                            DatePickerCalendar {
 ///                                selected_date: selected_date(),
@@ -309,27 +305,25 @@ pub struct DatePickerCalendarProps {
 /// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
-/// use dioxus_primitives::{date_picker::*, ContentAlign};
+/// use dioxus_primitives::{date_picker::*, popover::*, ContentAlign};
 /// use time::Date;
 /// #[component]
 /// pub fn Demo() -> Element {
-///    let v = DatePickerValue::new_day(None);
-///    let mut value = use_signal(|| v);
 ///    let mut selected_date = use_signal(|| None::<Date>);
 ///    rsx! {
 ///        div {
 ///            DatePicker {
-///                value: value(),
 ///                selected_date: selected_date(),
-///                on_value_change: move |v| {
-///                    tracing::info!("Date changed to: {v}");
-///                    value.set(v);
-///                    selected_date.set(v.date());
+///                on_value_change: move |date| {
+///                    tracing::info!("Date changed to: {date:?}");
+///                    selected_date.set(date);
 ///               },
 ///                DatePickerInput {
 ///                    DatePickerPopover {
-///                        DatePickerPopoverTrigger {}
-///                        DatePickerPopoverContent {
+///                        PopoverTrigger {
+///                            "Select date"
+///                        }
+///                        PopoverContent {
 ///                            align: ContentAlign::End,
 ///                            DatePickerCalendar {
 ///                                selected_date: selected_date(),
@@ -637,27 +631,25 @@ pub struct DatePickerInputProps {
 /// ## Example
 /// ```rust
 /// use dioxus::prelude::*;
-/// use dioxus_primitives::{date_picker::*, ContentAlign};
+/// use dioxus_primitives::{date_picker::*, popover::*, ContentAlign};
 /// use time::Date;
 /// #[component]
 /// pub fn Demo() -> Element {
-///    let v = DatePickerValue::new_day(None);
-///    let mut value = use_signal(|| v);
 ///    let mut selected_date = use_signal(|| None::<Date>);
 ///    rsx! {
 ///        div {
 ///            DatePicker {
-///                value: value(),
 ///                selected_date: selected_date(),
-///                on_value_change: move |v| {
-///                    tracing::info!("Date changed to: {v}");
-///                    value.set(v);
-///                    selected_date.set(v.date());
+///                on_value_change: move |date| {
+///                    tracing::info!("Date changed to: {date:?}");
+///                    selected_date.set(date);
 ///               },
 ///                DatePickerInput {
 ///                    DatePickerPopover {
-///                        DatePickerPopoverTrigger {}
-///                        DatePickerPopoverContent {
+///                        PopoverTrigger {
+///                            "Select date"
+///                        }
+///                        PopoverContent {
 ///                            align: ContentAlign::End,
 ///                            DatePickerCalendar {
 ///                                selected_date: selected_date(),
