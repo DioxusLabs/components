@@ -334,7 +334,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
     rsx! {
         div {
             role: "application",
-            "aria-label": "Calendar",
+            aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
             onkeydown: move |e| {
                 let Some(focused_date) = (ctx.focused_date)() else {

@@ -63,6 +63,7 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
 pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
         PopoverTrigger {
+            aria_label: "Show Calendar",
             attributes: props.attributes,
             svg {
                 class: "date-picker-expand-icon",

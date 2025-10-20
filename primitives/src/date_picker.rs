@@ -144,7 +144,7 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
     rsx! {
         div {
             role: "group",
-            "aria-label": "Date",
+            aria_label: "Date",
             "data-disabled": (props.disabled)(),
             ..props.attributes,
             {props.children}
