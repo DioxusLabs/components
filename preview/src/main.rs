@@ -765,7 +765,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
                                     value: "Manual",
                                     width: "100%",
                                     position: "relative",
-                                    ManualComponentInstallation { component: component.clone(), style: style.clone() }
+                                    ManualComponentInstallation { component, style }
                                 }
                             }
                         }
