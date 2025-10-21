@@ -716,35 +716,60 @@ fn ComponentDemo(iframe: Option<bool>, dark_mode: Option<bool>, name: String) ->
 #[component]
 fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     let ComponentDemoData {
-        name,
+        name: raw_name,
         docs,
         variants,
         component,
         style,
     } = demo;
-    let name = name.replace("_", " ");
+    let name = raw_name.replace("_", " ");
     let [main, variants @ ..] = variants else {
         unreachable!("Expected at least one variant for component: {}", name);
     };
 
     rsx! {
         main { class: "component-demo",
-            h1 { class: "component-title", {name} }
+            h1 { class: "component-title", "{name}" }
             div { class: "component-preview",
                 div { class: "component-preview-contents",
                     ComponentVariantHighlight { variant: main.clone(), main_variant: true }
                     div { class: "component-installation",
                         h2 { "Installation" }
-                        ol { class: "component-installation-list",
-                            li {
-                                "If you haven't already, add the dx-components-theme.css file to your project and import it in the root of your app."
+                        Tabs {
+                            default_value: "Automatic",
+                            border_bottom_left_radius: "0.5rem",
+                            border_bottom_right_radius: "0.5rem",
+                            horizontal: true,
+                            width: "100%",
+                            variant: TabsVariant::Ghost,
+                            TabList {
+                                TabTrigger { value: "Automatic", index: 0usize, "Automatic" }
+                                TabTrigger { value: "Manual", index: 1usize, "Manual" }
                             }
-                            li { "Add the style.css file to your project." }
-                            li { "Create a component based on the main.rs below." }
-                            li { "Modify your components and styles as needed." }
+                            div {
+                                width: "100%",
+                                height: "100%",
+                                display: "flex",
+                                flex_direction: "column",
+                                justify_content: "center",
+                                align_items: "center",
+                                TabContent {
+                                    index: 0usize,
+                                    value: "Automatic",
+                                    width: "100%",
+                                    position: "relative",
+                                    CliComponentInstallation { name: raw_name }
+                                }
+                                TabContent {
+                                    index: 1usize,
+                                    value: "Manual",
+                                    width: "100%",
+                                    position: "relative",
+                                    ManualComponentInstallation { component: component.clone(), style: style.clone() }
+                                }
+                            }
                         }
                     }
-                    ComponentCode { rs_highlighted: component, css_highlighted: style }
                     div { class: "component-description",
                         div { dangerous_inner_html: docs }
                     }
@@ -753,6 +778,59 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
                         for variant in variants {
                             ComponentVariantHighlight { variant: variant.clone(), main_variant: false }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn ManualComponentInstallation(component: HighlightedCode, style: HighlightedCode) -> Element {
+    rsx! {
+        ol { class: "component-installation-list",
+            li {
+                "If you haven't already, add the dx-components-theme.css file to your project and import it in the root of your app."
+            }
+            li { "Add the style.css file to your project." }
+            li { "Create a component based on the main.rs below." }
+            li { "Modify your components and styles as needed." }
+        }
+        ComponentCode { rs_highlighted: component, css_highlighted: style }
+    }
+}
+
+#[component]
+fn CliComponentInstallation(name: String) -> Element {
+    rsx! {
+        ol { class: "component-installation-list",
+            li {
+                "Install the 0.7.0-rc.3 version of the CLI manually (without binstall)"
+                div { id: "hero-installation",
+                    "> "
+                    div {
+                        width: "100%",
+                        display: "flex",
+                        flex_direction: "row",
+                        justify_content: "space-between",
+                        align_items: "center",
+                        "cargo install dioxus-cli@0.7.0-rc.3"
+                        CopyButton {}
+                    }
+                }
+            }
+            li {
+                "Add the component to your project using the dx components add command:"
+                div { id: "hero-installation",
+                    "> "
+                    div {
+                        width: "100%",
+                        display: "flex",
+                        flex_direction: "row",
+                        justify_content: "space-between",
+                        align_items: "center",
+                        "dx components add {name}"
+                        CopyButton {}
                     }
                 }
             }
