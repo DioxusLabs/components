@@ -5,5 +5,5 @@ members = ["primitives", "preview"]
 [workspace.dependencies]
 dioxus-primitives = { path = "primitives" }
 
-dioxus = "0.7.0-rc.2"
+dioxus = "0.7.0-rc.3"
 tracing = { version = "0.1", features = ["std"] }
