@@ -11,7 +11,10 @@ pub fn Demo() -> Element {
             value: name,
         }
         if !name.read().is_empty() {
-            p { "Hello, {name}!" }
+            p {
+                id: "input-greeting",
+                "Hello, {name}!"
+            }
         }
     }
 }
