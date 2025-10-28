@@ -4,6 +4,8 @@ macro_rules! examples {
         $(
             pub(crate) mod $name {
                 pub(crate) mod component;
+                #[allow(unused)]
+                pub use component::*;
                 pub(crate) mod variants {
                     pub(crate) mod main;
                     $(
