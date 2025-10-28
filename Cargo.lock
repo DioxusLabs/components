@@ -2152,6 +2152,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "dioxus-primitives"
+version = "0.0.1"
+source = "git+https://github.com/DioxusLabs/components#0067c31415c26b6215909f573d6c03d3624990d5"
+dependencies = [
+ "dioxus",
+ "dioxus-time",
+ "lazy-js-bundle 0.6.2",
+ "num-integer",
+ "time",
+ "tracing",
+]
+
+[[package]]
 name = "dioxus-router"
 version = "0.7.0-rc.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5621,7 +5634,7 @@ version = "0.1.0"
 dependencies = [
  "dioxus",
  "dioxus-i18n",
- "dioxus-primitives",
+ "dioxus-primitives 0.0.1",
  "pulldown-cmark",
  "strum",
  "syntect",
@@ -7261,6 +7274,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06794f8f6c5c898b3275aebefa6b8a1cb24cd2c6c79397ab15774837a0bc5755"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "test-harness"
+version = "0.1.0"
+dependencies = [
+ "dioxus",
+ "dioxus-primitives 0.0.1 (git+https://github.com/DioxusLabs/components)",
 ]
 
 [[package]]
