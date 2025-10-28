@@ -1,4 +1,4 @@
-name: Deploy PR previews
+name: Add All Components
 
 on:
   pull_request_target:
@@ -18,7 +18,7 @@ permissions:
 jobs:
   deploy-preview:
     if: github.event.pull_request.draft == false
-    name: Deploy PR Preview
+    name: Add All Components
     runs-on: ubuntu-latest
     env:
       CARGO_INCREMENTAL: 1
@@ -44,24 +44,5 @@ jobs:
       - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
         run: cargo binstall dioxus-cli -y --force --version 0.7.0-rc.3
-      - name: Build
-        run: cd preview && dx build --web --release --base-path "components/pr-preview/pr-${{ github.event.pull_request.number }}/"
-      - name: Copy output
-        run: cp -r target/dx/preview/release/web/public docs
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.2.3
-        with:
-          token: ${{ github.token }}
-          branch: gh-pages # The branch the action should deploy to.
-          folder: docs # The folder the action should deploy.
-          target-folder: "pr-preview/pr-${{ github.event.pull_request.number }}/"
-          clean: false
-          single-commit: true
-      - name: Comment PR
-        # Only run if the pr just opened
-        if: github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'ready_for_review'
-        uses: thollander/actions-comment-pull-request@v3
-        with:
-          message: |
-            Preview available at https://dioxuslabs.github.io/components/pr-preview/pr-${{ github.event.pull_request.number }}/
-          comment-tag: "pr-preview"
+      - name: Add components and check
+        run: cd test-harness && dx components add --all --path .. --force && cargo check --all-features

@@ -6,8 +6,8 @@ use dioxus_primitives::{
     ContentAlign,
 };
 
-use super::super::calendar::component::*;
-use super::super::popover::component::*;
+use super::super::calendar::*;
+use super::super::popover::*;
 
 #[component]
 pub fn DatePicker(props: DatePickerProps) -> Element {
