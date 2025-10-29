@@ -56,7 +56,14 @@ jobs:
       - name: Install CLI
         run: cargo install dioxus-cli --git https://github.com/DioxusLabs/dioxus
       - name: Add components and check
-        run: cd test-harness && dx components add --all --path .. --force && cargo check --all-features
+        run: |
+          cd test-harness
+          # Add dependencies manually; TODO: remove this once dx components supports local dependencies
+          dx components add calendar,popover --path ..
+          # Add all components
+          dx components add --all --path .. --force
+          # Make sure it still builds
+          cargo check --all-features
   add-each-component:
     if: github.event.pull_request.draft == false
     name: Add Each Components
