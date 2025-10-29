@@ -90,7 +90,6 @@ jobs:
       - name: Add each component and check
         run: |
           cd preview/src/components/
-          files = *
           for file in *; do
             # Go to test harness
             cd ../../../test-harness
@@ -99,5 +98,6 @@ jobs:
             # Make sure it still builds
             cargo check --all-features
             # Undo changes
-            git clean -fd .
+            dx components remove "$file" --path ..
+            cd ../preview/src/components/
           done
