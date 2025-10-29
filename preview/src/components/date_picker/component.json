@@ -9,5 +9,6 @@
       "git": "https://github.com/DioxusLabs/components"
     }
   ],
+  "componentDependencies": ["calendar", "popover"],
   "globalAssets": ["../../../assets/dx-components-theme.css"]
 }

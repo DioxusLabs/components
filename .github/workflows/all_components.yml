@@ -91,13 +91,22 @@ jobs:
         run: |
           cd preview/src/components/
           for file in *; do
+            if [ -d "$file" ]; then
+              echo "Testing component: $file"
+            else
+              continue
+            fi
             # Go to test harness
             cd ../../../test-harness
+            # Add dependencies manually; TODO: remove this once dx components supports local dependencies
+            if [ "$file" = "date_picker" ]; then
+              dx components add calendar,popover --path ..
+            fi
             # Add the component
             dx components add "$file" --path ..
             # Make sure it still builds
             cargo check --all-features
             # Undo changes
-            dx components remove "$file" --path ..
+            dx components remove --all --path ..
             cd ../preview/src/components/
           done
