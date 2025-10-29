@@ -1,4 +1,4 @@
-name: Add All Components
+name: Add Components
 
 on:
   push:
@@ -62,7 +62,7 @@ jobs:
         run: cd test-harness && dx components add --all --path .. --force && cargo check --all-features
   add-each-component:
     if: github.event.pull_request.draft == false
-    name: Add All Components
+    name: Add Each Components
     runs-on: ubuntu-latest
     env:
       CARGO_INCREMENTAL: 1
