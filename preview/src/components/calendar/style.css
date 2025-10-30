@@ -109,6 +109,20 @@
   color: var(--primary-color);
 }
 
+.calendar-grid-cell[data-month="current"][date-selection-start="true"] {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.calendar-grid-cell[data-month="current"][date-selection-center="true"] {
+  border-radius: 0;
+}
+
+.calendar-grid-cell[data-month="current"][date-selection-end="true"] {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
 .calendar-grid-cell[data-month="current"][data-selected="true"]:hover {
   background-color: var(--light, var(--secondary-color-2))
     var(--dark, var(--primary-color-5));
