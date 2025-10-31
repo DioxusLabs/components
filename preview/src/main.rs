@@ -903,8 +903,6 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                     i { "unstyled" }
                     " foundational components for Dioxus."
                 }
-                VersionCompatibilityNotice {}
-                Installation {}
                 div { id: "hero-search-container",
                     input {
                         id: "hero-search-input",
@@ -918,25 +916,6 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                 }
             }
             ComponentGallery { search }
-        }
-    }
-}
-
-#[component]
-fn Installation() -> Element {
-    rsx! {
-        div { id: "hero-installation",
-            "cargo add dioxus-primitives --git https://github.com/DioxusLabs/components"
-            CopyButton {}
-        }
-    }
-}
-
-#[component]
-fn VersionCompatibilityNotice() -> Element {
-    rsx! {
-        div { id: "version-compatibility-notice",
-            "Dioxus Components is only compatible with Dioxus v0.7.0-rc.1 or later."
         }
     }
 }
