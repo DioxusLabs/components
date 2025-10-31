@@ -53,8 +53,9 @@ jobs:
         with:
           cache-all-crates: "true"
           cache-on-failure: "false"
+      - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
-        run: cargo install dioxus-cli --git https://github.com/DioxusLabs/dioxus
+        run: cargo binstall dioxus-cli
       - name: Add components and check
         run: |
           cd test-harness
@@ -62,6 +63,8 @@ jobs:
           dx components add calendar,popover --path ..
           # Add all components
           dx components add --all --path .. --force
+          # Switch to the local version of dioxus-primitives
+          cargo add dioxus-primitives --path ../primitives
           # Make sure it still builds
           cargo check --all-features
   add-each-component:
@@ -86,8 +89,9 @@ jobs:
         with:
           cache-all-crates: "true"
           cache-on-failure: "false"
+      - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
-        run: cargo install dioxus-cli --git https://github.com/DioxusLabs/dioxus
+        run: cargo binstall dioxus-cli
       - name: Add each component and check
         run: |
           cd preview/src/components/
@@ -105,6 +109,8 @@ jobs:
             fi
             # Add the component
             dx components add "$file" --path ..
+            # Switch to the local version of dioxus-primitives
+            cargo add dioxus-primitives --path ../primitives
             # Make sure it still builds
             cargo check --all-features
             # Undo changes
