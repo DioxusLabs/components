@@ -55,7 +55,7 @@ jobs:
           cache-on-failure: "false"
       - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
-        run: cargo binstall dioxus-cli
+        run: cargo binstall dioxus-cli -y --force --version 0.7.0
       - name: Add components and check
         run: |
           cd test-harness
@@ -91,7 +91,7 @@ jobs:
           cache-on-failure: "false"
       - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
-        run: cargo binstall dioxus-cli
+        run: cargo binstall dioxus-cli -y --force --version 0.7.0
       - name: Add each component and check
         run: |
           cd preview/src/components/

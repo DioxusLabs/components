@@ -805,7 +805,7 @@ fn CliComponentInstallation(name: String) -> Element {
     rsx! {
         ol { class: "component-installation-list",
             li {
-                "Install the 0.7.0-rc.3 version of the CLI manually (without binstall)"
+                "Install the 0.7.0 version of the CLI"
                 div { id: "hero-installation",
                     "> "
                     div {
@@ -814,7 +814,7 @@ fn CliComponentInstallation(name: String) -> Element {
                         flex_direction: "row",
                         justify_content: "space-between",
                         align_items: "center",
-                        "cargo install dioxus-cli@0.7.0-rc.3"
+                        "cargo install dioxus-cli@0.7.0"
                         CopyButton {}
                     }
                 }
