@@ -104,21 +104,26 @@
   cursor: not-allowed;
 }
 
+.calendar-grid-cell[data-month="last"][data-selected="true"],
+.calendar-grid-cell[data-month="next"][data-selected="true"] {
+  background-color: var(--secondary-color-6);
+}
+
 .calendar-grid-cell[data-month="current"][data-selected="true"] {
   background-color: var(--secondary-color-2);
   color: var(--primary-color);
 }
 
-.calendar-grid-cell[data-month="current"][date-selection-start="true"] {
+.calendar-grid-cell[date-selection-start="true"] {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.calendar-grid-cell[data-month="current"][date-selection-center="true"] {
+.calendar-grid-cell[date-selection-between="true"] {
   border-radius: 0;
 }
 
-.calendar-grid-cell[data-month="current"][date-selection-end="true"] {
+.calendar-grid-cell[date-selection-end="true"] {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }

@@ -487,7 +487,7 @@ impl RangeCalendarContext {
     }
 }
 
-/// The props for the [`Calendar`] component.
+/// The props for the [`RangeCalendar`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct RangeCalendarProps {
     /// The selected range
@@ -578,7 +578,11 @@ pub struct RangeCalendarProps {
 ///                     }
 ///                 }
 ///             }
-///             CalendarGrid {}
+///             CalendarGrid {
+///                 render_day: Callback::new(|date: Date| {
+///                     rsx! { RangeCalendarDay { date } }
+///                 })
+///             }
 ///         }
 ///     }
 /// }
@@ -624,9 +628,19 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
             aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
             onkeydown: move |e| {
-                let Some(focused_date) = (base_ctx.focused_date)() else {
+                let Some(mut focused_date) = (base_ctx.focused_date)() else {
                     return;
                 };
+
+                // force hover day as focus
+                if let (Some(range), Some(date)) = ((ctx.highlighted_range)(), (ctx.anchor_date)()) {
+                      if date != range.start {
+                            focused_date = range.start
+                        } else {
+                            focused_date = range.end
+                        }
+                };
+
                 let mut set_focused_date = |new_date: Option<Date>| {
                     // Make sure the view date month is the same as the focused date
                     let mut view_date = (base_ctx.view_date)();
@@ -1607,6 +1621,63 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
     }
 }
 
+/// # RangeCalendarDay
+///
+/// The [`RangeCalendarDay`] component provides an accessible calendar interface for date
+///
+/// This must be used inside a [`CalendarGrid`] component.
+///
+/// ## Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::calendar::*;
+/// use time::{Date, Month, UtcDateTime};
+/// #[component]
+/// fn Demo() -> Element {
+///     let mut selected_range = use_signal(|| None::<DateRange>);
+///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     rsx! {
+///         RangeCalendar {
+///             selected_range: selected_range(),
+///             on_range_change: move |range| {
+///                 tracing::info!("Selected range: {:?}", range);
+///                 selected_range.set(range);
+///             },
+///             view_date: view_date(),
+///             on_view_change: move |new_view: Date| {
+///                 tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
+///                 view_date.set(new_view);
+///             },
+///             CalendarHeader {
+///                 CalendarNavigation {
+///                     CalendarPreviousMonthButton {
+///                         "<"
+///                     }
+///                     CalendarMonthTitle {}
+///                     CalendarNextMonthButton {
+///                         ">"
+///                     }
+///                 }
+///             }
+///             CalendarGrid {
+///                 render_day: Callback::new(|date: Date| {
+///                     rsx! { RangeCalendarDay { date } }
+///                 })
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// # Styling
+///
+/// The [`RangeCalendarDay`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the calendar is disabled. Possible values are `true` or `false`.
+/// - `data-today`: Indicates if the cell is today. Possible values are `true` or `false`.
+/// - `data-selected`: Indicates if the cell is selected. Possible values are `true` or `false`.
+/// - `date-selection-start`: Indicates if cell is the first date in a range selection. Possible values are `true` or `false`.
+/// - `date-selection-between`: Indicates if a date interval contains a cell. Possible values are `true` or `false`.
+/// - `date-selection-end`: Indicates if cell is the last date in a range selection. Possible values are `true` or `false`.
 #[component]
 pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
     let CalendarDayProps { date, attributes } = props;
@@ -1631,7 +1702,7 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
     };
     let in_current_month = month == RelativeMonth::Current;
     let is_selected = move || (ctx.highlighted_range)().is_some_and(|r| r.contains(date));
-    let is_center =
+    let is_between =
         move || (ctx.highlighted_range)().is_some_and(|r| r.contained_in_interval(date));
     let is_start =
         move || (ctx.highlighted_range)().is_some_and(|d| d.start == date && date != d.end);
@@ -1685,7 +1756,7 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             "data-today": is_today,
             "data-selected": is_selected(),
             "date-selection-start": if is_start() { true },
-            "date-selection-center": if is_center() { true },
+            "date-selection-between": if is_between() { true },
             "date-selection-end": if is_end() { true },
             "data-month": "{month}",
             onclick: move |e| {
@@ -1699,7 +1770,11 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
                     base_ctx.focused_date.set(Some(date));
                 }
             },
-            onmouseover: move |_| ctx.set_hovered_date(date),
+            onmouseover: move |_| {
+                if in_current_month {
+                    ctx.set_hovered_date(date)
+                }
+            },
             onmounted: move |e| day_ref.set(Some(e.data())),
             ..attributes,
             {day.to_string()}
