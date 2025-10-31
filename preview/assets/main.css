@@ -187,7 +187,8 @@ body {
 }
 
 .component-description {
-    margin: 5vw;
+    margin-left: 5vw;
+    margin-right: 5vw;
     font-size: 1em;
     overflow-x: scroll;
 }
