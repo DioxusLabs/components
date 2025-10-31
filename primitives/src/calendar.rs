@@ -485,6 +485,12 @@ impl RangeCalendarContext {
             self.highlighted_range.set(Some(range));
         }
     }
+
+    /// Set previous selected range
+    pub fn reset_selection(&mut self, range: Option<DateRange>) {
+        self.anchor_date.set(None);
+        self.highlighted_range.set(range);
+    }
 }
 
 /// The props for the [`RangeCalendar`] component.
@@ -692,6 +698,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
                             set_focused_date(Some(focused_date.saturating_add(7.days())));
                         }
                     }
+                    Key::Escape => ctx.reset_selection((props.selected_range)()),
                     _ => {}
                 }
             },
