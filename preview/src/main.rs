@@ -805,7 +805,7 @@ fn CliComponentInstallation(name: String) -> Element {
     rsx! {
         ol { class: "component-installation-list",
             li {
-                "Install the 0.7.0-rc.3 version of the CLI manually (without binstall)"
+                "Install the 0.7.0 version of the CLI"
                 div { id: "hero-installation",
                     "> "
                     div {
@@ -814,7 +814,7 @@ fn CliComponentInstallation(name: String) -> Element {
                         flex_direction: "row",
                         justify_content: "space-between",
                         align_items: "center",
-                        "cargo install dioxus-cli@0.7.0-rc.3"
+                        "cargo install dioxus-cli@0.7.0"
                         CopyButton {}
                     }
                 }
@@ -903,8 +903,6 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                     i { "unstyled" }
                     " foundational components for Dioxus."
                 }
-                VersionCompatibilityNotice {}
-                Installation {}
                 div { id: "hero-search-container",
                     input {
                         id: "hero-search-input",
@@ -918,25 +916,6 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                 }
             }
             ComponentGallery { search }
-        }
-    }
-}
-
-#[component]
-fn Installation() -> Element {
-    rsx! {
-        div { id: "hero-installation",
-            "cargo add dioxus-primitives --git https://github.com/DioxusLabs/components"
-            CopyButton {}
-        }
-    }
-}
-
-#[component]
-fn VersionCompatibilityNotice() -> Element {
-    rsx! {
-        div { id: "version-compatibility-notice",
-            "Dioxus Components is only compatible with Dioxus v0.7.0-rc.1 or later."
         }
     }
 }
