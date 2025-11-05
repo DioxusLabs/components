@@ -114,6 +114,12 @@
   color: var(--primary-color);
 }
 
+.calendar-grid-cell[data-month="current"][date-unavailable="true"] {
+  color: var(--secondary-color-6);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
 .calendar-grid-cell[date-selection-start="true"] {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;

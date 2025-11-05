@@ -153,6 +153,47 @@ fn replace_month(date: Date, month: Month) -> Date {
         .expect("invalid or out-of-range date")
 }
 
+/// Calendar date range
+#[derive(Copy, Clone, Debug)]
+pub struct DateRange {
+    /// The start date of the range
+    pub start: Date,
+    /// The end date of the range
+    pub end: Date,
+}
+
+impl DateRange {
+    /// Create a new date range
+    pub fn new(start: Date, end: Date) -> Self {
+        if start <= end {
+            Self { start, end }
+        } else {
+            Self {
+                start: end,
+                end: start,
+            }
+        }
+    }
+
+    fn contains(&self, date: Date) -> bool {
+        self.start <= date && date <= self.end
+    }
+
+    fn contained_in_interval(&self, date: Date) -> bool {
+        self.start < date && date < self.end
+    }
+
+    fn clamp(&self, date: Date) -> Date {
+        date.clamp(self.start, self.end)
+    }
+}
+
+impl Display for DateRange {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} - {}", self.start, self.end)
+    }
+}
+
 /// The base context provided by the [`Calendar`] and the [`RangeCalendar`] component to its children.
 #[derive(Copy, Clone)]
 pub struct BaseCalendarContext {
@@ -169,6 +210,7 @@ pub struct BaseCalendarContext {
     first_day_of_week: Weekday,
     min_date: Date,
     max_date: Date,
+    disabled_ranges: ReadSignal<Vec<DateRange>>,
 }
 
 impl BaseCalendarContext {
@@ -195,6 +237,40 @@ impl BaseCalendarContext {
     /// Check if the calendar is disabled
     pub fn is_disabled(&self) -> bool {
         self.disabled.cloned()
+    }
+
+    /// Check if the selected date is unavailable
+    pub fn is_unavailable(&self, date: Date) -> bool {
+        for range in (self.disabled_ranges)() {
+            if range.contains(date) {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Return available date range by given date
+    pub fn available_range(&self, anchor_date: Option<Date>) -> Option<DateRange> {
+        let date = anchor_date?;
+
+        let ranges = (self.disabled_ranges)();
+
+        for (index, range) in ranges.iter().enumerate() {
+            if range.end < date {
+                continue;
+            }
+
+            let start = if index == 0 {
+                self.min_date
+            } else {
+                ranges[index - 1].end.next_day().unwrap()
+            };
+            let end = range.start.previous_day().unwrap();
+
+            return Some(DateRange::new(start, end));
+        }
+
+        None
     }
 }
 
@@ -263,6 +339,10 @@ pub struct CalendarProps {
     /// Upper limit of the range of available dates
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
+
+    /// Unavailable dates
+    #[props(default)]
+    pub disabled_ranges: ReadSignal<Vec<DateRange>>,
 
     /// Additional attributes to extend the calendar element
     #[props(extends = GlobalAttributes)]
@@ -334,6 +414,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
         first_day_of_week: props.first_day_of_week,
         min_date: props.min_date,
         max_date: props.max_date,
+        disabled_ranges: props.disabled_ranges,
     });
     // Create Calendar context provider for child components
     use_context_provider(|| CalendarContext {
@@ -410,42 +491,6 @@ pub fn Calendar(props: CalendarProps) -> Element {
     }
 }
 
-/// Calendar date range
-#[derive(Copy, Clone, Debug)]
-pub struct DateRange {
-    /// The start date of the range
-    pub start: Date,
-    /// The end date of the range
-    pub end: Date,
-}
-
-impl DateRange {
-    fn new(start: Date, end: Date) -> Self {
-        if start <= end {
-            Self { start, end }
-        } else {
-            Self {
-                start: end,
-                end: start,
-            }
-        }
-    }
-
-    fn contains(&self, date: Date) -> bool {
-        self.start <= date && date <= self.end
-    }
-
-    fn contained_in_interval(&self, date: Date) -> bool {
-        self.start < date && date < self.end
-    }
-}
-
-impl Display for DateRange {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} - {}", self.start, self.end)
-    }
-}
-
 /// The context provided by the [`RangeCalendar`] component to its children.
 #[derive(Copy, Clone)]
 pub struct RangeCalendarContext {
@@ -453,6 +498,8 @@ pub struct RangeCalendarContext {
     anchor_date: Signal<Option<Date>>,
     // Currently highlighted date range
     highlighted_range: Signal<Option<DateRange>>,
+    // Currently available date range
+    available_range: Signal<Option<DateRange>>,
     set_selected_range: Callback<Option<DateRange>>,
 }
 
@@ -481,7 +528,11 @@ impl RangeCalendarContext {
     /// Set the selected date range by hovered date
     pub fn set_hovered_date(&mut self, date: Date) {
         if let Some(anchor) = (self.anchor_date)() {
-            let range = DateRange::new(anchor, date);
+            let end = match (self.available_range)() {
+                Some(range) => range.clamp(date),
+                None => date,
+            };
+            let range = DateRange::new(anchor, end);
             self.highlighted_range.set(Some(range));
         }
     }
@@ -489,6 +540,7 @@ impl RangeCalendarContext {
     /// Set previous selected range
     pub fn reset_selection(&mut self, range: Option<DateRange>) {
         self.anchor_date.set(None);
+        self.available_range.set(None);
         self.highlighted_range.set(range);
     }
 }
@@ -539,6 +591,10 @@ pub struct RangeCalendarProps {
     /// Upper limit of the range of available dates
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
+
+    /// Unavailable dates
+    #[props(default)]
+    pub disabled_ranges: ReadSignal<Vec<DateRange>>,
 
     /// Additional attributes to extend the calendar element
     #[props(extends = GlobalAttributes)]
@@ -606,6 +662,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
     });
     let anchor_date = use_signal(|| None::<Date>);
     let highlighted_range = use_signal(|| (props.selected_range)());
+    let available_range = use_signal(|| None::<DateRange>);
 
     // Create base context provider for child components
     let mut base_ctx = use_context_provider(|| BaseCalendarContext {
@@ -619,12 +676,14 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
         first_day_of_week: props.first_day_of_week,
         min_date: props.min_date,
         max_date: props.max_date,
+        disabled_ranges: props.disabled_ranges,
     });
 
     // Create RangeCalendar context provider for child components
     let mut ctx = use_context_provider(|| RangeCalendarContext {
         anchor_date,
         highlighted_range,
+        available_range,
         set_selected_range: props.on_range_change,
     });
 
@@ -1565,15 +1624,17 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
     let is_selected = move || (ctx.selected_date)().is_some_and(|d| d == date);
     let is_focused = move || (base_ctx.focused_date)().is_some_and(|d| d == date);
     let is_today = date == base_ctx.today;
+    let is_unavailable = base_ctx.is_unavailable(date);
 
     // Handle day selection
     let mut handle_day_select = move |day: u8| {
-        if !(base_ctx.disabled)() {
-            let view_date = (base_ctx.view_date)();
-            let date = view_date.replace_day(day).unwrap();
-            ctx.set_selected_date.call((!is_selected()).then_some(date));
-            base_ctx.focused_date.set(Some(date));
+        if (base_ctx.disabled)() || is_unavailable {
+            return;
         }
+        let view_date = (base_ctx.view_date)();
+        let date = view_date.replace_day(day).unwrap();
+        ctx.set_selected_date.call((!is_selected()).then_some(date));
+        base_ctx.focused_date.set(Some(date));
     };
 
     let mut day_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
@@ -1609,6 +1670,7 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
             aria_label: aria_label(&props.date),
             "data-today": is_today,
             "data-selected": is_selected(),
+            "date-unavailable": if is_unavailable { true },
             "data-month": "{month}",
             onclick: move |e| {
                 e.prevent_default();
@@ -1712,21 +1774,36 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
     let is_between =
         move || (ctx.highlighted_range)().is_some_and(|r| r.contained_in_interval(date));
     let is_start =
-        move || (ctx.highlighted_range)().is_some_and(|d| d.start == date && date != d.end);
+        move || (ctx.highlighted_range)().is_some_and(|r| r.start == date && date != r.end);
     let is_end =
-        move || (ctx.highlighted_range)().is_some_and(|d| d.end == date && date != d.start);
+        move || (ctx.highlighted_range)().is_some_and(|r| r.end == date && date != r.start);
 
     let is_focused = move || (base_ctx.focused_date)().is_some_and(|d| d == date);
     let is_today = date == base_ctx.today;
+    let is_unavailable = base_ctx.is_unavailable(date);
+
+    let is_disabled = move || {
+        if (base_ctx.disabled)() {
+            return true;
+        }
+
+        (ctx.available_range)().is_some_and(|r| !r.contains(date))
+    };
 
     // Handle day selection
     let mut handle_day_select = move |day: u8| {
-        if !(base_ctx.disabled)() {
-            let view_date = (base_ctx.view_date)();
-            let date = view_date.replace_day(day).ok();
-            ctx.set_selected_date(date);
-            base_ctx.focused_date.set(date);
+        if is_disabled() || is_unavailable {
+            return;
         }
+
+        let view_date = (base_ctx.view_date)();
+        let date = view_date.replace_day(day).ok();
+        ctx.set_selected_date(date);
+        base_ctx.focused_date.set(date);
+
+        let anchor_date = (ctx.anchor_date)();
+        ctx.available_range
+            .set(base_ctx.available_range(anchor_date));
     };
 
     let mut day_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
@@ -1760,8 +1837,10 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
                 "-1"
             },
             aria_label: aria_label(&props.date),
-            "data-today": is_today,
+            "data-disabled": is_disabled(),
+            "data-today": if is_today { true },
             "data-selected": is_selected(),
+            "date-unavailable": if is_unavailable { true },
             "date-selection-start": if is_start() { true },
             "date-selection-between": if is_between() { true },
             "date-selection-end": if is_end() { true },

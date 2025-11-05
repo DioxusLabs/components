@@ -1,0 +1,54 @@
+use super::super::component::*;
+use dioxus::prelude::*;
+use time::{ext::NumericalDuration, macros::date, Date, UtcDateTime};
+
+use dioxus_primitives::calendar::DateRange;
+
+#[component]
+pub fn Demo() -> Element {
+    let mut selected_range = use_signal(|| None::<DateRange>);
+
+    let now = UtcDateTime::now().date();
+    let mut view_date = use_signal(|| now);
+
+    let disabled_ranges = use_signal(|| {
+        vec![
+            DateRange::new(now, now.saturating_add(3.days())),
+            DateRange::new(now.saturating_add(15.days()), now.saturating_add(18.days())),
+            DateRange::new(now.saturating_add(22.days()), now.saturating_add(23.days())),
+        ]
+    });
+
+    rsx! {
+        div { class: "calendar-example", style: "padding: 20px;",
+            RangeCalendar {
+                selected_range: selected_range(),
+                on_range_change: move |range| {
+                    tracing::info!("Selected range: {:?}", range);
+                    selected_range.set(range);
+                },
+                view_date: view_date(),
+                on_view_change: move |new_view: Date| {
+                    tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
+                    view_date.set(new_view);
+                },
+                min_date: date!(1995 - 07 - 21),
+                max_date: date!(2035 - 09 - 11),
+                disabled_ranges: disabled_ranges(),
+                CalendarHeader {
+                    CalendarNavigation {
+                        CalendarPreviousMonthButton {}
+                        CalendarSelectMonth {}
+                        CalendarSelectYear {}
+                        CalendarNextMonthButton {}
+                    }
+                }
+                CalendarGrid {
+                    render_day: Callback::new(|date: Date| {
+                        rsx! { RangeCalendarDay { date } }
+                    })
+                }
+            }
+        }
+    }
+}

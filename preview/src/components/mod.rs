@@ -62,7 +62,7 @@ examples!(
     aspect_ratio,
     avatar,
     button,
-    calendar[simple, internationalized, range],
+    calendar[simple, internationalized, range, unavailable_dates],
     checkbox,
     collapsible,
     context_menu,
