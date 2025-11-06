@@ -200,6 +200,7 @@ pub struct BaseCalendarContext {
     // State
     focused_date: Signal<Option<Date>>,
     view_date: ReadSignal<Date>,
+    available_range: Signal<Option<DateRange>>,
     set_view_date: Callback<Date>,
     format_weekday: Callback<Weekday, String>,
     format_month: Callback<Month, String>,
@@ -263,14 +264,17 @@ impl BaseCalendarContext {
             let start = if index == 0 {
                 self.min_date
             } else {
-                ranges[index - 1].end.next_day().unwrap()
+                let date = ranges[index - 1].end;
+                date.next_day().unwrap_or(date)
             };
-            let end = range.start.previous_day().unwrap();
+            let end = range.start.previous_day().unwrap_or(range.start);
 
             return Some(DateRange::new(start, end));
         }
 
-        None
+        ranges
+            .last()
+            .map(|r| DateRange::new(r.end.next_day().unwrap_or(r.end), self.max_date))
     }
 }
 
@@ -407,6 +411,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
         focused_date: Signal::new(props.selected_date.cloned()),
         view_date: props.view_date,
         set_view_date: props.on_view_change,
+        available_range: Signal::new(None::<DateRange>),
         format_weekday: props.on_format_weekday,
         format_month: props.on_format_month,
         disabled: props.disabled,
@@ -498,8 +503,6 @@ pub struct RangeCalendarContext {
     anchor_date: Signal<Option<Date>>,
     // Currently highlighted date range
     highlighted_range: Signal<Option<DateRange>>,
-    // Currently available date range
-    available_range: Signal<Option<DateRange>>,
     set_selected_range: Callback<Option<DateRange>>,
 }
 
@@ -528,11 +531,7 @@ impl RangeCalendarContext {
     /// Set the selected date range by hovered date
     pub fn set_hovered_date(&mut self, date: Date) {
         if let Some(anchor) = (self.anchor_date)() {
-            let end = match (self.available_range)() {
-                Some(range) => range.clamp(date),
-                None => date,
-            };
-            let range = DateRange::new(anchor, end);
+            let range = DateRange::new(anchor, date);
             self.highlighted_range.set(Some(range));
         }
     }
@@ -540,7 +539,6 @@ impl RangeCalendarContext {
     /// Set previous selected range
     pub fn reset_selection(&mut self, range: Option<DateRange>) {
         self.anchor_date.set(None);
-        self.available_range.set(None);
         self.highlighted_range.set(range);
     }
 }
@@ -669,6 +667,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
         focused_date,
         view_date: props.view_date,
         set_view_date: props.on_view_change,
+        available_range,
         format_weekday: props.on_format_weekday,
         format_month: props.on_format_month,
         disabled: props.disabled,
@@ -683,7 +682,6 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
     let mut ctx = use_context_provider(|| RangeCalendarContext {
         anchor_date,
         highlighted_range,
-        available_range,
         set_selected_range: props.on_range_change,
     });
 
@@ -720,6 +718,10 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
                         Some(date) => {
                             if base_ctx.min_date <= date && date <= base_ctx.max_date {
                                 base_ctx.focused_date.set(new_date);
+                                let date = match (base_ctx.available_range)() {
+                                    Some(range) => range.clamp(date),
+                                    None => date,
+                                };
                                 ctx.set_hovered_date(date);
                             }
                         },
@@ -757,7 +759,10 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
                             set_focused_date(Some(focused_date.saturating_add(7.days())));
                         }
                     }
-                    Key::Escape => ctx.reset_selection((props.selected_range)()),
+                    Key::Escape => {
+                        ctx.reset_selection((props.selected_range)());
+                        base_ctx.available_range.set(None);
+                    }
                     _ => {}
                 }
             },
@@ -973,6 +978,12 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
             None => true,
         }
     });
+    // disable previous button when the current selection range does not include the previous month
+    let navigate_disabled = use_memo(move || {
+        // Get the current view date from context
+        let view_date = (ctx.view_date)();
+        (ctx.available_range)().is_some_and(|range| range.start.month() == view_date.month())
+    });
 
     // Handle navigation to previous month
     let handle_prev_month = move |e: Event<MouseData>| {
@@ -989,7 +1000,7 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
             aria_label: "Previous month",
             type: "button",
             onclick: handle_prev_month,
-            disabled: (ctx.disabled)() || button_disabled(),
+            disabled: (ctx.disabled)() || button_disabled() || navigate_disabled(),
             ..props.attributes,
 
             {props.children}
@@ -1068,6 +1079,12 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
             None => true,
         }
     });
+    // disable next button when the current selection range does not include the next month
+    let navigate_disabled = use_memo(move || {
+        // Get the current view date from context
+        let view_date = (ctx.view_date)();
+        (ctx.available_range)().is_some_and(|range| range.end.month() == view_date.month())
+    });
 
     // Handle navigation to next month
     let handle_next_month = move |e: Event<MouseData>| {
@@ -1084,7 +1101,7 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
             aria_label: "Next month",
             type: "button",
             onclick: handle_next_month,
-            disabled: (ctx.disabled)() || button_disabled(),
+            disabled: (ctx.disabled)() || button_disabled() || navigate_disabled(),
             ..props.attributes,
 
             {props.children}
@@ -1787,7 +1804,7 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             return true;
         }
 
-        (ctx.available_range)().is_some_and(|r| !r.contains(date))
+        (base_ctx.available_range)().is_some_and(|r| !r.contains(date))
     };
 
     // Handle day selection
@@ -1802,7 +1819,8 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
         base_ctx.focused_date.set(date);
 
         let anchor_date = (ctx.anchor_date)();
-        ctx.available_range
+        base_ctx
+            .available_range
             .set(base_ctx.available_range(anchor_date));
     };
 
@@ -1858,7 +1876,8 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             },
             onmouseover: move |_| {
                 if in_current_month {
-                    ctx.set_hovered_date(date)
+                    let date = (base_ctx.available_range)().map_or(date, |range| range.clamp(date));
+                    ctx.set_hovered_date(date);
                 }
             },
             onmounted: move |e| day_ref.set(Some(e.data())),
