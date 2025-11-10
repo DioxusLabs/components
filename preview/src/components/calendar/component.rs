@@ -133,6 +133,6 @@ pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
 }
 
 #[component]
-pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
-    calendar::RangeCalendarDay(props)
+pub fn CalendarDay(props: CalendarDayProps) -> Element {
+    calendar::CalendarDay(props)
 }

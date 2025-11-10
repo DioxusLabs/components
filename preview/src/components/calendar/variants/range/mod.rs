@@ -31,11 +31,7 @@ pub fn Demo() -> Element {
                         CalendarNextMonthButton {}
                     }
                 }
-                CalendarGrid {
-                    render_day: Callback::new(|date: Date| {
-                        rsx! { RangeCalendarDay { date } }
-                    })
-                }
+                CalendarGrid {}
             }
         }
     }

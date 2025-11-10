@@ -250,6 +250,11 @@ impl BaseCalendarContext {
         false
     }
 
+    /// Check if a date is focused
+    pub fn is_focused(&self, date: Date) -> bool {
+        self.focused_date().is_some_and(|d| d == date)
+    }
+
     /// Return available date range by given date
     pub fn available_range(&self, anchor_date: Option<Date>) -> Option<DateRange> {
         let date = anchor_date?;
@@ -1585,6 +1590,12 @@ enum RelativeMonth {
     Next,
 }
 
+impl RelativeMonth {
+    fn current_month(&self) -> bool {
+        *self == RelativeMonth::Current
+    }
+}
+
 impl Display for RelativeMonth {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -1615,101 +1626,9 @@ pub struct CalendarDayProps {
     pub attributes: Vec<Attribute>,
 }
 
-#[component]
-fn CalendarDay(props: CalendarDayProps) -> Element {
-    let CalendarDayProps { date, attributes } = props;
-    let mut base_ctx: BaseCalendarContext = use_context();
-    let ctx: CalendarContext = use_context();
-    let view_date = (base_ctx.view_date)();
-    let day = date.day();
-    let month = {
-        if date < base_ctx.min_date {
-            RelativeMonth::Last
-        } else if date > base_ctx.max_date {
-            RelativeMonth::Next
-        } else {
-            let lhs = date.month() as u8;
-            let rhs = view_date.month() as u8;
-            match lhs.cmp(&rhs) {
-                std::cmp::Ordering::Less => RelativeMonth::Last,
-                std::cmp::Ordering::Equal => RelativeMonth::Current,
-                std::cmp::Ordering::Greater => RelativeMonth::Next,
-            }
-        }
-    };
-    let in_current_month = month == RelativeMonth::Current;
-    let is_selected = move || (ctx.selected_date)().is_some_and(|d| d == date);
-    let is_focused = move || (base_ctx.focused_date)().is_some_and(|d| d == date);
-    let is_today = date == base_ctx.today;
-    let is_unavailable = base_ctx.is_unavailable(date);
-
-    // Handle day selection
-    let mut handle_day_select = move |day: u8| {
-        if (base_ctx.disabled)() || is_unavailable {
-            return;
-        }
-        let view_date = (base_ctx.view_date)();
-        let date = view_date.replace_day(day).unwrap();
-        ctx.set_selected_date.call((!is_selected()).then_some(date));
-        base_ctx.focused_date.set(Some(date));
-    };
-
-    let mut day_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
-    use_effect(move || {
-        if let Some(day) = day_ref() {
-            if is_focused() {
-                spawn(async move {
-                    _ = day.set_focus(true).await;
-                });
-            }
-        }
-    });
-
-    let view_date = (base_ctx.view_date)();
-    let focusable_date = (base_ctx.focused_date)()
-        .filter(|d| d.month() == view_date.month())
-        .or_else(|| {
-            ctx.selected_date
-                .cloned()
-                .filter(|d| d.month() == view_date.month())
-        })
-        .unwrap_or(view_date);
-
-    rsx! {
-        button {
-            class: "calendar-grid-cell",
-            type: "button",
-            tabindex: if date == focusable_date {
-                "0"
-            } else {
-                "-1"
-            },
-            aria_label: aria_label(&props.date),
-            "data-today": is_today,
-            "data-selected": is_selected(),
-            "date-unavailable": if is_unavailable { true },
-            "data-month": "{month}",
-            onclick: move |e| {
-                e.prevent_default();
-                if in_current_month {
-                    handle_day_select(day);
-                }
-            },
-            onfocus: move |_| {
-                if in_current_month {
-                    base_ctx.focused_date.set(Some(date));
-                }
-            },
-            onmounted: move |e| day_ref.set(Some(e.data())),
-            ..attributes,
-            {day.to_string()}
-        }
-    }
-}
-
-/// # RangeCalendarDay
+/// # CalendarDay
 ///
-/// The [`RangeCalendarDay`] component provides an accessible calendar interface for date
+/// The [`CalendarDay`] component provides an accessible calendar interface for a date
 ///
 /// This must be used inside a [`CalendarGrid`] component.
 ///
@@ -1747,7 +1666,7 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
 ///             }
 ///             CalendarGrid {
 ///                 render_day: Callback::new(|date: Date| {
-///                     rsx! { RangeCalendarDay { date } }
+///                     rsx! { CalendarDay { date } }
 ///                 })
 ///             }
 ///         }
@@ -1757,45 +1676,87 @@ fn CalendarDay(props: CalendarDayProps) -> Element {
 ///
 /// # Styling
 ///
-/// The [`RangeCalendarDay`] component defines the following data attributes you can use to control styling:
+/// The [`CalendarDay`] component defines the following data attributes you can use to control styling:
 /// - `data-disabled`: Indicates if the calendar is disabled. Possible values are `true` or `false`.
+/// - `data-unavailable`: Indicates if the date is unavailable. Possible values are `true` or `false`.
 /// - `data-today`: Indicates if the cell is today. Possible values are `true` or `false`.
+/// - `data-month`: The relative month of the date. Possible values are `last`,
 /// - `data-selected`: Indicates if the cell is selected. Possible values are `true` or `false`.
-/// - `date-selection-start`: Indicates if cell is the first date in a range selection. Possible values are `true` or `false`.
-/// - `date-selection-between`: Indicates if a date interval contains a cell. Possible values are `true` or `false`.
-/// - `date-selection-end`: Indicates if cell is the last date in a range selection. Possible values are `true` or `false`.
+/// - `data-selection-start`: Indicates if cell is the first date in a range selection. Possible values are `true` or `false`.
+/// - `data-selection-between`: Indicates if a date interval contains a cell. Possible values are `true` or `false`.
+/// - `data-selection-end`: Indicates if cell is the last date in a range selection. Possible values are `true` or `false`.
 #[component]
-pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
-    let CalendarDayProps { date, attributes } = props;
-    let mut base_ctx: BaseCalendarContext = use_context();
-    let mut ctx: RangeCalendarContext = use_context();
-    let view_date = (base_ctx.view_date)();
-    let day = date.day();
-    let month = {
-        if date < base_ctx.min_date {
-            RelativeMonth::Last
-        } else if date > base_ctx.max_date {
-            RelativeMonth::Next
-        } else {
-            let lhs = date.month() as u8;
-            let rhs = view_date.month() as u8;
-            match lhs.cmp(&rhs) {
-                std::cmp::Ordering::Less => RelativeMonth::Last,
-                std::cmp::Ordering::Equal => RelativeMonth::Current,
-                std::cmp::Ordering::Greater => RelativeMonth::Next,
+pub fn CalendarDay(props: CalendarDayProps) -> Element {
+    let single_context = try_use_context::<CalendarContext>().is_some();
+
+    if single_context {
+        rsx! {
+            SingleCalendarDay { date: props.date, attributes: props.attributes.clone() }
+        }
+    } else {
+        rsx! {
+            RangeCalendarDay { date: props.date, attributes: props.attributes.clone() }
+        }
+    }
+}
+
+fn relative_calendar_month(
+    date: Date,
+    base_ctx: &BaseCalendarContext,
+    view_date: Date,
+) -> RelativeMonth {
+    if date < base_ctx.min_date {
+        RelativeMonth::Last
+    } else if date > base_ctx.max_date {
+        RelativeMonth::Next
+    } else {
+        let lhs = date.month() as u8;
+        let rhs = view_date.month() as u8;
+        match lhs.cmp(&rhs) {
+            std::cmp::Ordering::Less => RelativeMonth::Last,
+            std::cmp::Ordering::Equal => RelativeMonth::Current,
+            std::cmp::Ordering::Greater => RelativeMonth::Next,
+        }
+    }
+}
+
+fn is_between(date: Date, range: Option<DateRange>) -> bool {
+    range.is_some_and(|r| r.contained_in_interval(date))
+}
+
+fn is_start(date: Date, range: Option<DateRange>) -> bool {
+    range.is_some_and(|r| r.start == date && date != r.end)
+}
+
+fn is_end(date: Date, range: Option<DateRange>) -> bool {
+    range.is_some_and(|r| r.end == date && date != r.start)
+}
+
+fn use_day_mounted_ref(
+    mut is_focused: impl FnMut() -> bool + 'static,
+) -> impl FnMut(MountedEvent) + 'static {
+    let mut day_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    use_effect(move || {
+        if let Some(day) = day_ref() {
+            if is_focused() {
+                spawn(async move {
+                    _ = day.set_focus(true).await;
+                });
             }
         }
-    };
-    let in_current_month = month == RelativeMonth::Current;
-    let is_selected = move || (ctx.highlighted_range)().is_some_and(|r| r.contains(date));
-    let is_between =
-        move || (ctx.highlighted_range)().is_some_and(|r| r.contained_in_interval(date));
-    let is_start =
-        move || (ctx.highlighted_range)().is_some_and(|r| r.start == date && date != r.end);
-    let is_end =
-        move || (ctx.highlighted_range)().is_some_and(|r| r.end == date && date != r.start);
+    });
+    move |e| day_ref.set(Some(e.data()))
+}
 
-    let is_focused = move || (base_ctx.focused_date)().is_some_and(|d| d == date);
+#[component]
+fn SingleCalendarDay(props: CalendarDayProps) -> Element {
+    let CalendarDayProps { date, attributes } = props;
+    let mut base_ctx: BaseCalendarContext = use_context();
+    let day = date.day();
+    let view_date = (base_ctx.view_date)();
+    let month = relative_calendar_month(date, &base_ctx, view_date);
+    let in_current_month = month.current_month();
+    let is_focused = move || base_ctx.is_focused(date);
     let is_today = date == base_ctx.today;
     let is_unavailable = base_ctx.is_unavailable(date);
 
@@ -1804,8 +1765,92 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             return true;
         }
 
-        (base_ctx.available_range)().is_some_and(|r| !r.contains(date))
+        is_unavailable
     };
+    let onmounted = use_day_mounted_ref(is_focused);
+
+    let ctx: CalendarContext = use_context();
+    let is_selected = move || (ctx.selected_date)().is_some_and(|d| d == date);
+
+    // Handle day selection
+    let mut handle_day_select = move |day: u8| {
+        if (base_ctx.disabled)() || is_unavailable {
+            return;
+        }
+        let view_date = (base_ctx.view_date)();
+        let date = view_date.replace_day(day).unwrap();
+        ctx.set_selected_date.call((!is_selected()).then_some(date));
+        base_ctx.focused_date.set(Some(date));
+    };
+
+    let focusable_date = (base_ctx.focused_date)()
+        .filter(|d| d.month() == view_date.month())
+        .or_else(|| {
+            ctx.selected_date
+                .cloned()
+                .filter(|d| d.month() == view_date.month())
+        })
+        .unwrap_or(view_date);
+
+    rsx! {
+        button {
+            class: "calendar-grid-cell",
+            type: "button",
+            tabindex: if date == focusable_date {
+                "0"
+            } else {
+                "-1"
+            },
+            aria_label: aria_label(&props.date),
+            "data-today": is_today,
+            "data-selected": is_selected(),
+            "data-unavailable": if is_unavailable { true },
+            "data-disabled": is_disabled(),
+            "data-month": "{month}",
+            onclick: move |e| {
+                e.prevent_default();
+                if in_current_month {
+                    handle_day_select(day);
+                }
+            },
+            onfocus: move |_| {
+                if in_current_month {
+                    base_ctx.focused_date.set(Some(date));
+                }
+            },
+            onmounted,
+            ..attributes,
+            {day.to_string()}
+        }
+    }
+}
+
+#[component]
+fn RangeCalendarDay(props: CalendarDayProps) -> Element {
+    let CalendarDayProps { date, attributes } = props;
+    let mut base_ctx: BaseCalendarContext = use_context();
+    let day = date.day();
+    let view_date = (base_ctx.view_date)();
+    let month = relative_calendar_month(date, &base_ctx, view_date);
+    let in_current_month = month.current_month();
+    let is_focused = move || base_ctx.is_focused(date);
+    let is_today = date == base_ctx.today;
+    let is_unavailable = base_ctx.is_unavailable(date);
+
+    let is_disabled = move || {
+        if (base_ctx.disabled)() {
+            return true;
+        }
+
+        is_unavailable
+    };
+    let onmounted = use_day_mounted_ref(is_focused);
+
+    let mut ctx: RangeCalendarContext = use_context();
+    let is_selected = move || (ctx.highlighted_range)().is_some_and(|r| r.contains(date));
+    let is_between = move || is_between(date, ctx.highlighted_range.cloned());
+    let is_start = move || is_start(date, ctx.highlighted_range.cloned());
+    let is_end = move || is_end(date, ctx.highlighted_range.cloned());
 
     // Handle day selection
     let mut handle_day_select = move |day: u8| {
@@ -1824,18 +1869,6 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             .set(base_ctx.available_range(anchor_date));
     };
 
-    let mut day_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
-    use_effect(move || {
-        if let Some(day) = day_ref() {
-            if is_focused() {
-                spawn(async move {
-                    _ = day.set_focus(true).await;
-                });
-            }
-        }
-    });
-
-    let view_date = (base_ctx.view_date)();
     let focusable_date = (base_ctx.focused_date)()
         .filter(|d| d.month() == view_date.month())
         .or_else(|| {
@@ -1858,10 +1891,10 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             "data-disabled": is_disabled(),
             "data-today": if is_today { true },
             "data-selected": is_selected(),
-            "date-unavailable": if is_unavailable { true },
-            "date-selection-start": if is_start() { true },
-            "date-selection-between": if is_between() { true },
-            "date-selection-end": if is_end() { true },
+            "data-unavailable": if is_unavailable { true },
+            "data-selection-start": if is_start() { true },
+            "data-selection-between": if is_between() { true },
+            "data-selection-end": if is_end() { true },
             "data-month": "{month}",
             onclick: move |e| {
                 e.prevent_default();
@@ -1880,7 +1913,7 @@ pub fn RangeCalendarDay(props: CalendarDayProps) -> Element {
                     ctx.set_hovered_date(date);
                 }
             },
-            onmounted: move |e| day_ref.set(Some(e.data())),
+            onmounted,
             ..attributes,
             {day.to_string()}
         }
