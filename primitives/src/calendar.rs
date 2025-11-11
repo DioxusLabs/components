@@ -643,11 +643,7 @@ pub struct RangeCalendarProps {
 ///                     }
 ///                 }
 ///             }
-///             CalendarGrid {
-///                 render_day: Callback::new(|date: Date| {
-///                     rsx! { RangeCalendarDay { date } }
-///                 })
-///             }
+///             CalendarGrid {}
 ///         }
 ///     }
 /// }
@@ -1617,7 +1613,7 @@ fn aria_label(date: &Date) -> String {
     )
 }
 
-/// The props for the [`RangeCalendarDay`] component.
+/// The props for the [`CalendarDay`] component.
 #[derive(Props, Clone, Debug, PartialEq)]
 pub struct CalendarDayProps {
     date: Date,
@@ -1664,11 +1660,7 @@ pub struct CalendarDayProps {
 ///                     }
 ///                 }
 ///             }
-///             CalendarGrid {
-///                 render_day: Callback::new(|date: Date| {
-///                     rsx! { CalendarDay { date } }
-///                 })
-///             }
+///             CalendarGrid {}
 ///         }
 ///     }
 /// }
