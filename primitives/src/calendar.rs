@@ -204,7 +204,7 @@ struct AvailibleRanges {
 impl AvailibleRanges {
     fn new(disabled_ranges: &[DateRange]) -> Self {
         let mut sorted_range: Vec<_> = disabled_ranges
-            .into_iter()
+            .iter()
             .enumerate()
             .flat_map(|(index, date)| [(index, date.start), (index, date.end)])
             .collect();
@@ -456,7 +456,7 @@ pub struct CalendarProps {
 /// - `data-disabled`: Indicates if the calendar is disabled. Possible values are `true` or `false`.
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
-    let available_ranges = use_memo(move || AvailibleRanges::new(&*props.disabled_ranges.read()));
+    let available_ranges = use_memo(move || AvailibleRanges::new(&props.disabled_ranges.read()));
 
     // Create base context provider for child components
     let mut base_ctx = use_context_provider(|| BaseCalendarContext {
@@ -707,7 +707,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
     });
     let anchor_date = use_signal(|| None::<Date>);
     let highlighted_range = use_signal(|| (props.selected_range)());
-    let available_ranges = use_memo(move || AvailibleRanges::new(&*props.disabled_ranges.read()));
+    let available_ranges = use_memo(move || AvailibleRanges::new(&props.disabled_ranges.read()));
 
     // Create base context provider for child components
     let mut base_ctx = use_context_provider(|| BaseCalendarContext {
