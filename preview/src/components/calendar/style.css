@@ -51,6 +51,14 @@
     box-shadow: 0 0 0 2px var(--focused-border-color);
 }
 
+.calendar-nav-prev:disabled,
+.calendar-nav-next:disabled {
+    border-color: var(--primary-color-5);
+    background-color: var(--primary-color-2);
+    color: var(--secondary-color-3);
+    cursor: not-allowed;
+}
+
 /* Calendar Grid */
 .calendar-grid {
     width: 100%;
@@ -134,6 +142,13 @@
 .calendar-grid-week td:last-child .calendar-grid-cell {
     border-top-right-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
+}
+
+.calendar-grid-cell[data-month="last"][data-selection-between="true"],
+.calendar-grid-cell[data-month="next"][data-selection-between="true"] {
+    background-color: var(--primary-color-5);
+    color: var(--secondary-color-5);
+    border-radius: 0;
 }
 
 .calendar-grid-cell[data-month="current"][data-selection-between="true"] {

@@ -2,6 +2,7 @@
 
 use dioxus::prelude::*;
 use std::{
+    collections::HashSet,
     fmt::{self, Display},
     rc::Rc,
 };
@@ -157,9 +158,9 @@ fn replace_month(date: Date, month: Month) -> Date {
 #[derive(Copy, Clone, Debug)]
 pub struct DateRange {
     /// The start date of the range
-    pub start: Date,
+    start: Date,
     /// The end date of the range
-    pub end: Date,
+    end: Date,
 }
 
 impl DateRange {
@@ -194,13 +195,79 @@ impl Display for DateRange {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+struct AvailibleRanges {
+    /// A sorted list of dates. Values after an odd number of elements are disabled.
+    changes: Vec<Date>,
+}
+
+impl AvailibleRanges {
+    fn new(disabled_ranges: &[DateRange]) -> Self {
+        let mut sorted_range: Vec<_> = disabled_ranges
+            .into_iter()
+            .enumerate()
+            .flat_map(|(index, date)| [(index, date.start), (index, date.end)])
+            .collect();
+
+        sorted_range.sort_by_key(|(_, date)| *date);
+
+        // Merge any overlapping ranges
+        let mut open_ranges = HashSet::new();
+        let mut deduped_ranges = Vec::with_capacity(sorted_range.len());
+
+        for (index, date) in sorted_range {
+            let end_of_range = open_ranges.remove(&index);
+            if open_ranges.is_empty() {
+                deduped_ranges.push(date);
+            }
+            if !end_of_range {
+                open_ranges.insert(index);
+            }
+        }
+
+        Self {
+            changes: deduped_ranges,
+        }
+    }
+
+    fn valid_interval(&self, date: Date) -> bool {
+        match self.changes.binary_search(&date) {
+            Ok(_) => false,
+            Err(index) => index % 2 == 0,
+        }
+    }
+
+    fn available_range(&self, date: Date, min_date: Date, max_date: Date) -> Option<DateRange> {
+        let date_index = self.changes.binary_search(&date).err()?;
+
+        let valid = date_index % 2 == 0;
+        if !valid {
+            return None;
+        }
+
+        let start = date_index
+            .checked_sub(1)
+            .and_then(|index| self.changes.get(index).copied())
+            .map(|start| start.next_day().unwrap_or(start))
+            .unwrap_or(min_date);
+        let end = self
+            .changes
+            .get(date_index)
+            .copied()
+            .map(|end| end.previous_day().unwrap_or(end))
+            .unwrap_or(max_date);
+
+        Some(DateRange::new(start, end))
+    }
+}
+
 /// The base context provided by the [`Calendar`] and the [`RangeCalendar`] component to its children.
 #[derive(Copy, Clone)]
 pub struct BaseCalendarContext {
     // State
     focused_date: Signal<Option<Date>>,
     view_date: ReadSignal<Date>,
-    available_range: Signal<Option<DateRange>>,
+    available_ranges: Memo<AvailibleRanges>,
     set_view_date: Callback<Date>,
     format_weekday: Callback<Weekday, String>,
     format_month: Callback<Month, String>,
@@ -211,7 +278,6 @@ pub struct BaseCalendarContext {
     first_day_of_week: Weekday,
     min_date: Date,
     max_date: Date,
-    disabled_ranges: ReadSignal<Vec<DateRange>>,
 }
 
 impl BaseCalendarContext {
@@ -242,12 +308,7 @@ impl BaseCalendarContext {
 
     /// Check if the selected date is unavailable
     pub fn is_unavailable(&self, date: Date) -> bool {
-        for range in (self.disabled_ranges)() {
-            if range.contains(date) {
-                return true;
-            }
-        }
-        false
+        !self.available_ranges.read().valid_interval(date)
     }
 
     /// Check if a date is focused
@@ -256,30 +317,14 @@ impl BaseCalendarContext {
     }
 
     /// Return available date range by given date
-    pub fn available_range(&self, anchor_date: Option<Date>) -> Option<DateRange> {
-        let date = anchor_date?;
-
-        let ranges = (self.disabled_ranges)();
-
-        for (index, range) in ranges.iter().enumerate() {
-            if range.end < date {
-                continue;
-            }
-
-            let start = if index == 0 {
-                self.min_date
-            } else {
-                let date = ranges[index - 1].end;
-                date.next_day().unwrap_or(date)
-            };
-            let end = range.start.previous_day().unwrap_or(range.start);
-
-            return Some(DateRange::new(start, end));
-        }
-
-        ranges
-            .last()
-            .map(|r| DateRange::new(r.end.next_day().unwrap_or(r.end), self.max_date))
+    pub fn available_range(&self) -> Option<DateRange> {
+        try_consume_context::<RangeCalendarContext>().and_then(|ctx| {
+            ctx.anchor_date.cloned().and_then(|date| {
+                self.available_ranges
+                    .read()
+                    .available_range(date, self.min_date, self.max_date)
+            })
+        })
     }
 }
 
@@ -411,12 +456,14 @@ pub struct CalendarProps {
 /// - `data-disabled`: Indicates if the calendar is disabled. Possible values are `true` or `false`.
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
+    let available_ranges = use_memo(move || AvailibleRanges::new(&*props.disabled_ranges.read()));
+
     // Create base context provider for child components
     let mut base_ctx = use_context_provider(|| BaseCalendarContext {
         focused_date: Signal::new(props.selected_date.cloned()),
         view_date: props.view_date,
         set_view_date: props.on_view_change,
-        available_range: Signal::new(None::<DateRange>),
+        available_ranges,
         format_weekday: props.on_format_weekday,
         format_month: props.on_format_month,
         disabled: props.disabled,
@@ -424,7 +471,6 @@ pub fn Calendar(props: CalendarProps) -> Element {
         first_day_of_week: props.first_day_of_week,
         min_date: props.min_date,
         max_date: props.max_date,
-        disabled_ranges: props.disabled_ranges,
     });
     // Create Calendar context provider for child components
     use_context_provider(|| CalendarContext {
@@ -661,14 +707,14 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
     });
     let anchor_date = use_signal(|| None::<Date>);
     let highlighted_range = use_signal(|| (props.selected_range)());
-    let available_range = use_signal(|| None::<DateRange>);
+    let available_ranges = use_memo(move || AvailibleRanges::new(&*props.disabled_ranges.read()));
 
     // Create base context provider for child components
     let mut base_ctx = use_context_provider(|| BaseCalendarContext {
         focused_date,
         view_date: props.view_date,
         set_view_date: props.on_view_change,
-        available_range,
+        available_ranges,
         format_weekday: props.on_format_weekday,
         format_month: props.on_format_month,
         disabled: props.disabled,
@@ -676,7 +722,6 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
         first_day_of_week: props.first_day_of_week,
         min_date: props.min_date,
         max_date: props.max_date,
-        disabled_ranges: props.disabled_ranges,
     });
 
     // Create RangeCalendar context provider for child components
@@ -719,7 +764,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
                         Some(date) => {
                             if base_ctx.min_date <= date && date <= base_ctx.max_date {
                                 base_ctx.focused_date.set(new_date);
-                                let date = match (base_ctx.available_range)() {
+                                let date = match base_ctx.available_range() {
                                     Some(range) => range.clamp(date),
                                     None => date,
                                 };
@@ -762,7 +807,6 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
                     }
                     Key::Escape => {
                         ctx.reset_selection((props.selected_range)());
-                        base_ctx.available_range.set(None);
                     }
                     _ => {}
                 }
@@ -983,7 +1027,8 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
     let navigate_disabled = use_memo(move || {
         // Get the current view date from context
         let view_date = (ctx.view_date)();
-        (ctx.available_range)().is_some_and(|range| range.start.month() == view_date.month())
+        ctx.available_range()
+            .is_some_and(|range| range.start.month() == view_date.month())
     });
 
     // Handle navigation to previous month
@@ -1084,7 +1129,8 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     let navigate_disabled = use_memo(move || {
         // Get the current view date from context
         let view_date = (ctx.view_date)();
-        (ctx.available_range)().is_some_and(|range| range.end.month() == view_date.month())
+        ctx.available_range()
+            .is_some_and(|range| range.end.month() == view_date.month())
     });
 
     // Handle navigation to next month
@@ -1844,6 +1890,11 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
     let is_start = move || is_start(date, ctx.highlighted_range.cloned());
     let is_end = move || is_end(date, ctx.highlighted_range.cloned());
 
+    let clamp_date_to_available_range = move |date| {
+        let available_range = base_ctx.available_range();
+        available_range.map_or(date, |range| range.clamp(date))
+    };
+
     // Handle day selection
     let mut handle_day_select = move |day: u8| {
         if is_disabled() || is_unavailable {
@@ -1851,14 +1902,12 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
         }
 
         let view_date = (base_ctx.view_date)();
-        let date = view_date.replace_day(day).ok();
+        let date = view_date
+            .replace_day(day)
+            .ok()
+            .map(clamp_date_to_available_range);
         ctx.set_selected_date(date);
         base_ctx.focused_date.set(date);
-
-        let anchor_date = (ctx.anchor_date)();
-        base_ctx
-            .available_range
-            .set(base_ctx.available_range(anchor_date));
     };
 
     let focusable_date = (base_ctx.focused_date)()
@@ -1901,8 +1950,7 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             },
             onmouseover: move |_| {
                 if in_current_month {
-                    let date = (base_ctx.available_range)().map_or(date, |range| range.clamp(date));
-                    ctx.set_hovered_date(date);
+                    ctx.set_hovered_date(clamp_date_to_available_range(date));
                 }
             },
             onmounted,
