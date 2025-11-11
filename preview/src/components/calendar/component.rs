@@ -1,7 +1,8 @@
 use dioxus::prelude::*;
 use dioxus_primitives::calendar::{
-    self, CalendarGridProps, CalendarHeaderProps, CalendarMonthTitleProps, CalendarNavigationProps,
-    CalendarProps, CalendarSelectMonthProps, CalendarSelectYearProps,
+    self, CalendarDayProps, CalendarGridProps, CalendarHeaderProps, CalendarMonthTitleProps,
+    CalendarNavigationProps, CalendarProps, CalendarSelectMonthProps, CalendarSelectYearProps,
+    RangeCalendarProps,
 };
 
 #[component]
@@ -21,6 +22,32 @@ pub fn Calendar(props: CalendarProps) -> Element {
                 first_day_of_week: props.first_day_of_week,
                 min_date: props.min_date,
                 max_date: props.max_date,
+                disabled_ranges: props.disabled_ranges,
+                attributes: props.attributes,
+                {props.children}
+            }
+        }
+    }
+}
+
+#[component]
+pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
+        div { class: "calendar",
+            calendar::RangeCalendar {
+                selected_range: props.selected_range,
+                on_range_change: props.on_range_change,
+                on_format_weekday: props.on_format_weekday,
+                on_format_month: props.on_format_month,
+                view_date: props.view_date,
+                today: props.today,
+                on_view_change: props.on_view_change,
+                disabled: props.disabled,
+                first_day_of_week: props.first_day_of_week,
+                min_date: props.min_date,
+                max_date: props.max_date,
+                disabled_ranges: props.disabled_ranges,
                 attributes: props.attributes,
                 {props.children}
             }
@@ -103,4 +130,9 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
 #[component]
 pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
     calendar::CalendarMonthTitle(props)
+}
+
+#[component]
+pub fn CalendarDay(props: CalendarDayProps) -> Element {
+    calendar::CalendarDay(props)
 }

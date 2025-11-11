@@ -43,7 +43,7 @@ We're still in the early days - Many components are still being created and stab
 - [x] Checkbox
 - [x] Collapsible
 - [x] Context Menu
-- [ ] Date Picker
+- [x] Date Picker
 - [x] Dialog
 - [x] Dropdown Menu
 - [x] Hover Card
