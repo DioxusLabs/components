@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use dioxus_primitives::{
-    date_picker::{self, DatePickerInputProps, DatePickerProps},
+    date_picker::{self, DatePickerInputProps, DatePickerProps, DateRangePickerProps},
     popover::{PopoverContentProps, PopoverTriggerProps},
     ContentAlign,
 };
@@ -31,6 +31,27 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
 }
 
 #[component]
+pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
+        div {
+            date_picker::DateRangePicker {
+                class: "date-picker",
+                on_range_change: props.on_range_change,
+                selected_range: props.selected_range,
+                disabled: props.disabled,
+                read_only: props.read_only,
+                attributes: props.attributes,
+                date_picker::DatePickerPopover {
+                    popover_root: PopoverRoot,
+                    {props.children}
+                }
+            }
+        }
+    }
+}
+
+#[component]
 pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
     rsx! {
         date_picker::DatePickerInput {
@@ -44,6 +65,35 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
                 align: ContentAlign::Center,
                 date_picker::DatePickerCalendar {
                     calendar: Calendar,
+                    CalendarHeader {
+                        CalendarNavigation {
+                            CalendarPreviousMonthButton {}
+                            CalendarSelectMonth {}
+                            CalendarSelectYear {}
+                            CalendarNextMonthButton {}
+                        }
+                    }
+                    CalendarGrid {}
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
+    rsx! {
+        date_picker::DateRangePickerInput {
+            on_format_day_placeholder: props.on_format_day_placeholder,
+            on_format_month_placeholder: props.on_format_month_placeholder,
+            on_format_year_placeholder: props.on_format_year_placeholder,
+            attributes: props.attributes,
+            {props.children}
+            DatePickerPopoverTrigger {}
+            DatePickerPopoverContent {
+                align: ContentAlign::Center,
+                date_picker::DateRangePickerCalendar {
+                    calendar: RangeCalendar,
                     CalendarHeader {
                         CalendarNavigation {
                             CalendarPreviousMonthButton {}
