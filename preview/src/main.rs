@@ -1,6 +1,6 @@
 use core::panic;
 
-use crate::components::tabs::component::*;
+use crate::components::{separator::Separator, tabs::component::*};
 use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
 use dioxus_i18n::prelude::*;
@@ -162,7 +162,10 @@ fn NavigationLayout() -> Element {
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
-        document::Link { rel: "stylesheet", href: asset!("/assets/dx-components-theme.css") }
+        document::Link {
+            rel: "stylesheet",
+            href: asset!("/assets/dx-components-theme.css"),
+        }
         document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
         Navbar {}
         Outlet::<Route> {}
@@ -441,6 +444,71 @@ fn LightModeIcon() -> Element {
                 y1: "5.64",
                 x2: "19.78",
                 y2: "4.22",
+            }
+        }
+    }
+}
+
+/// lucide plus icon
+#[component]
+fn PlusIcon() -> Element {
+    rsx! {
+        svg {
+            height: "2rem",
+            view_box: "0 0 24 24",
+            width: "2rem",
+            xmlns: "http://www.w3.org/2000/svg",
+            path {
+                d: "M5 12h14m-7-7v14",
+                fill: "none",
+                stroke: "currentColor",
+                stroke_linecap: "round",
+                stroke_linejoin: "round",
+                stroke_width: "2",
+            }
+        }
+    }
+}
+
+/// lucide search icon
+#[component]
+fn SearchIcon() -> Element {
+    rsx! {
+        svg {
+            height: "2rem",
+            view_box: "0 0 24 24",
+            width: "2rem",
+            xmlns: "http://www.w3.org/2000/svg",
+            g {
+                fill: "none",
+                stroke: "currentColor",
+                stroke_linecap: "round",
+                stroke_linejoin: "round",
+                stroke_width: "2",
+                path { d: "m21 21l-4.34-4.34" }
+                circle { cx: "11", cy: "11", r: "8" }
+            }
+        }
+    }
+}
+
+/// lucide edit icon
+#[component]
+fn EditIcon() -> Element {
+    rsx! {
+        svg {
+            height: "2rem",
+            view_box: "0 0 24 24",
+            width: "2rem",
+            xmlns: "http://www.w3.org/2000/svg",
+            g {
+                fill: "none",
+                stroke: "currentColor",
+                stroke_linecap: "round",
+                stroke_linejoin: "round",
+                stroke_width: "2",
+                path { d: "M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" }
+                path { d: "M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" }
             }
         }
     }
@@ -814,7 +882,7 @@ fn CliComponentInstallation(name: String) -> Element {
                         flex_direction: "row",
                         justify_content: "space-between",
                         align_items: "center",
-                        "cargo install dioxus-cli@0.7.0"
+                        "cargo install dioxus-cli"
                         CopyButton {}
                     }
                 }
@@ -900,22 +968,59 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                 h2 {
                     b { "Accessible" }
                     ", "
-                    i { "unstyled" }
-                    " foundational components for Dioxus."
+                    i { "customizable" }
+                    " components for Dioxus."
                 }
-                div { id: "hero-search-container",
-                    input {
-                        id: "hero-search-input",
-                        r#type: "search",
-                        placeholder: "Search components...",
-                        value: search,
-                        oninput: move |e| {
-                            search.set(e.value());
-                        },
-                    }
+                Explaination {}
+                svg {
+                    id: "scroll-down-icon",
+                    view_box: "0 0 24 24",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    polyline { points: "6 9 12 15 18 9" }
+                }
+            }
+            Separator {
+                style: "margin: 15px 20vw; width: 60vw;",
+                horizontal: true,
+                decorative: true,
+            }
+            div { id: "hero-search-container",
+                input {
+                    id: "hero-search-input",
+                    r#type: "search",
+                    placeholder: "Search components...",
+                    value: search,
+                    oninput: move |e| {
+                        search.set(e.value());
+                    },
                 }
             }
             ComponentGallery { search }
+        }
+    }
+}
+
+#[component]
+fn Explaination() -> Element {
+    rsx! {
+        div { class: "explaination",
+            p {
+                "Dioxus components is a shadcn-inspired library of components built on top of Dioxus primitives"
+            }
+            div { display: "flex", justify_content: "space-between",
+                div { class: "explaination-box",
+                    h3 { SearchIcon {} }
+                    p { "Find a component" }
+                }
+                div { class: "explaination-box",
+                    h3 { PlusIcon {} }
+                    p { "Add it with dx" }
+                }
+                div { class: "explaination-box",
+                    h3 { EditIcon {} }
+                    p { "Customize it for your project" }
+                }
+            }
         }
     }
 }

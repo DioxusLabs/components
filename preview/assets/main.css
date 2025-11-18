@@ -94,7 +94,7 @@ body {
 }
 
 .code-block[data-collapsed="true"] {
-    height: 10em;
+    height: 20em;
     backdrop-filter: blur(1px);
     mask: linear-gradient(
         to bottom,
@@ -155,7 +155,7 @@ body {
 .component-preview-frame {
     display: flex;
     width: 100%;
-    min-height: 25vh;
+    min-height: 20rem;
     max-height: 100%;
     box-sizing: border-box;
     flex-direction: column;
@@ -191,6 +191,7 @@ body {
     margin-right: 5vw;
     font-size: 1em;
     overflow-x: scroll;
+    max-width: 90vw;
 }
 
 .component-installation {
@@ -211,7 +212,7 @@ body {
 .component-code {
     display: flex;
     width: 100%;
-    min-height: 25vh;
+    min-height: 20rem;
     max-height: 100%;
     box-sizing: border-box;
     flex-direction: column;
