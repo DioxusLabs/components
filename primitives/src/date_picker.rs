@@ -1,7 +1,9 @@
 //! Defines the [`DatePicker`] and [`DateRangePicker`] components and its subcomponents, which allowing users to enter or select a date value
 
 use crate::{
-    calendar::{weekday_abbreviation, CalendarProps, DateRange, RangeCalendarProps},
+    calendar::{
+        weekday_abbreviation, AvailableRanges, CalendarProps, DateRange, RangeCalendarProps,
+    },
     dioxus_core::Properties,
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
     popover::*,
@@ -24,6 +26,7 @@ struct BaseDatePickerContext {
     disabled: ReadSignal<bool>,
     focus: FocusState,
     enabled_date_range: DateRange,
+    available_ranges: Memo<AvailableRanges>,
 }
 
 /// The context provided by the [`DatePicker`] component to its children.
@@ -68,6 +71,10 @@ pub struct DatePickerProps {
     /// Upper limit of the range of available dates
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
+
+    /// Unavailable dates
+    #[props(default)]
+    pub disabled_ranges: ReadSignal<Vec<DateRange>>,
 
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadSignal::new(Signal::new(false)))]
@@ -128,6 +135,7 @@ pub struct DatePickerProps {
 pub fn DatePicker(props: DatePickerProps) -> Element {
     let open = use_signal(|| false);
     let focus = use_focus_provider(props.roving_loop);
+    let available_ranges = use_memo(move || AvailableRanges::new(&props.disabled_ranges.read()));
 
     // Create context provider for child components
     use_context_provider(|| BaseDatePickerContext {
@@ -136,6 +144,7 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
         disabled: props.disabled,
         focus,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
+        available_ranges,
     });
 
     use_context_provider(|| DatePickerContext {
@@ -157,30 +166,17 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
 /// The context provided by the [`RangeCalendar`] component to its children.
 #[derive(Copy, Clone)]
 pub struct DateRangePickerContext {
-    anchor_date: Signal<Option<Date>>,
-    // Currently highlighted date range
-    highlighted_range: Signal<Option<DateRange>>,
+    // Currently selected date range
+    date_range: Signal<Option<DateRange>>,
     set_selected_range: Callback<Option<DateRange>>,
 }
 
 impl DateRangePickerContext {
     /// Set the selected date
-    pub fn set_selected_date(&mut self, date: Option<Date>) {
-        match (self.anchor_date)() {
-            Some(anchor) => {
-                if let Some(date) = date {
-                    self.anchor_date.set(None);
-
-                    let range = DateRange::new(date, anchor);
-                    tracing::info!("new range {range}");
-                    self.set_selected_range.call(Some(range));
-                    self.highlighted_range.set(Some(range));
-                }
-            }
-            None => {
-                self.anchor_date.set(date);
-                tracing::info!("anchor {date:?}");
-            }
+    pub fn set_range(&mut self, range: Option<DateRange>) {
+        if (self.date_range)() != range {
+            self.date_range.set(range);
+            self.set_selected_range.call(range);
         }
     }
 }
@@ -211,6 +207,10 @@ pub struct DateRangePickerProps {
     /// Upper limit of the range of available dates
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
+
+    /// Unavailable dates
+    #[props(default)]
+    pub disabled_ranges: ReadSignal<Vec<DateRange>>,
 
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadSignal::new(Signal::new(false)))]
@@ -271,6 +271,8 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
     let open = use_signal(|| false);
     let focus = use_focus_provider(props.roving_loop);
 
+    let available_ranges = use_memo(move || AvailableRanges::new(&props.disabled_ranges.read()));
+
     // Create context provider for child components
     use_context_provider(|| BaseDatePickerContext {
         open,
@@ -278,13 +280,12 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
         disabled: props.disabled,
         focus,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
+        available_ranges,
     });
 
-    let anchor_date = use_signal(|| None);
-    let highlighted_range = use_signal(|| (props.selected_range)());
+    let date_range = use_signal(|| (props.selected_range)());
     use_context_provider(|| DateRangePickerContext {
-        anchor_date,
-        highlighted_range,
+        date_range,
         set_selected_range: props.on_range_change,
     });
 
@@ -425,6 +426,10 @@ pub struct DatePickerCalendarProps<T: Properties + PartialEq> {
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
 
+    /// Unavailable dates
+    #[props(default)]
+    pub disabled_ranges: ReadSignal<Vec<DateRange>>,
+
     /// Additional attributes to extend the calendar element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -499,6 +504,7 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps<CalendarProps>) -> Elem
                 ctx.set_date(date);
                 base_ctx.open.set(false);
             },
+            disabled_ranges: base_ctx.available_ranges.read().to_disabled_ranges(),
             on_format_weekday: props.on_format_weekday,
             on_format_month: props.on_format_month,
             view_date: view_date(),
@@ -561,7 +567,7 @@ pub fn DateRangePickerCalendar(props: DatePickerCalendarProps<RangeCalendarProps
     let RangeCalendar = props.calendar;
     let mut view_date = use_signal(|| UtcDateTime::now().date());
     use_effect(move || {
-        if let Some(r) = (ctx.highlighted_range)() {
+        if let Some(r) = (ctx.date_range)() {
             view_date.set(r.end);
         }
     });
@@ -570,13 +576,13 @@ pub fn DateRangePickerCalendar(props: DatePickerCalendarProps<RangeCalendarProps
 
     rsx! {
         RangeCalendar {
-            selected_range: ctx.highlighted_range,
+            selected_range: ctx.date_range,
             on_range_change: move |range| {
-                tracing::info!("calendar selected date {range:?}");
-                ctx.highlighted_range.set(range);
+                tracing::info!("calendar selected range {range:?}");
+                ctx.set_range(range);
                 base_ctx.open.set(false);
             },
-            on_anchor_change: move |date| ctx.set_selected_date(date),
+            disabled_ranges: base_ctx.available_ranges.read().to_disabled_ranges(),
             on_format_weekday: props.on_format_weekday,
             on_format_month: props.on_format_month,
             view_date: view_date(),
@@ -850,7 +856,7 @@ struct DateElementProps {
 
 #[component]
 fn DateElement(props: DateElementProps) -> Element {
-    let mut ctx = use_context::<BaseDatePickerContext>();
+    let ctx = use_context::<BaseDatePickerContext>();
 
     let mut day_value = use_signal(|| None);
     let mut month_value = use_signal(|| None);
@@ -874,8 +880,9 @@ fn DateElement(props: DateElementProps) -> Element {
                 .filter(|date| ctx.enabled_date_range.contains(*date))
             {
                 tracing::info!("Parsed date: {date:?}");
-                props.on_date_change.call(Some(date));
-                ctx.open.set(false);
+                if ctx.available_ranges.read().valid_interval(date) {
+                    props.on_date_change.call(Some(date));
+                };
             }
         }
     });
@@ -1015,13 +1022,17 @@ pub struct DatePickerInputProps {
 /// ```
 #[component]
 pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
+    let mut base_ctx = use_context::<BaseDatePickerContext>();
     let mut ctx = use_context::<DatePickerContext>();
 
     rsx! {
         div { class: "date-picker-group", ..props.attributes,
             DateElement {
                 selected_date: ctx.selected_date,
-                on_date_change: move |date| ctx.set_date(date),
+                on_date_change: move |date| {
+                    ctx.set_date(date);
+                    base_ctx.open.set(false);
+                },
                 on_format_day_placeholder: props.on_format_day_placeholder,
                 on_format_month_placeholder: props.on_format_month_placeholder,
                 on_format_year_placeholder: props.on_format_year_placeholder,
@@ -1071,15 +1082,31 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
 #[component]
 pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
     let mut ctx = use_context::<DateRangePickerContext>();
-    let start_date =
-        use_signal(|| (ctx.anchor_date)().or((ctx.highlighted_range)().map(|r| r.start)));
-    let end_date = use_signal(|| (ctx.highlighted_range)().map(|r| r.end));
+    let mut start_date = use_signal(|| None);
+    let mut end_date = use_signal(|| None);
+
+    use_effect(move || {
+        start_date.set((ctx.date_range)().map(|r| r.start));
+        end_date.set((ctx.date_range)().map(|r| r.end));
+    });
+
+    use_effect(move || {
+        if let (Some(start), Some(end)) = (start_date(), end_date()) {
+            // force auto validation for input range
+            if end < start {
+                return;
+            }
+
+            let range = Some(DateRange::new(start, end));
+            ctx.set_range(range);
+        };
+    });
 
     rsx! {
         div { class: "date-picker-group", ..props.attributes,
             DateElement {
                 selected_date: start_date(),
-                on_date_change: move |date| ctx.set_selected_date(date),
+                on_date_change: move |date| start_date.set(date),
                 on_format_day_placeholder: props.on_format_day_placeholder,
                 on_format_month_placeholder: props.on_format_month_placeholder,
                 on_format_year_placeholder: props.on_format_year_placeholder,
@@ -1088,7 +1115,7 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
             DateElement {
                 start_index: 3,
                 selected_date: end_date(),
-                on_date_change: move |date| ctx.set_selected_date(date),
+                on_date_change: move |date| end_date.set(date),
                 on_format_day_placeholder: props.on_format_day_placeholder,
                 on_format_month_placeholder: props.on_format_month_placeholder,
                 on_format_year_placeholder: props.on_format_year_placeholder,

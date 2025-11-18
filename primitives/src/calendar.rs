@@ -201,14 +201,16 @@ impl Display for DateRange {
     }
 }
 
+/// Calendar available dates
 #[derive(Debug, Clone, PartialEq)]
-struct AvailableRanges {
+pub struct AvailableRanges {
     /// A sorted list of dates. Values after an odd number of elements are disabled.
     changes: Vec<Date>,
 }
 
 impl AvailableRanges {
-    fn new(disabled_ranges: &[DateRange]) -> Self {
+    /// Create a new available dates
+    pub fn new(disabled_ranges: &[DateRange]) -> Self {
         let mut sorted_range: Vec<_> = disabled_ranges
             .iter()
             .enumerate()
@@ -236,7 +238,8 @@ impl AvailableRanges {
         }
     }
 
-    fn valid_interval(&self, date: Date) -> bool {
+    /// Check the availability of given date
+    pub fn valid_interval(&self, date: Date) -> bool {
         match self.changes.binary_search(&date) {
             Ok(_) => false,
             Err(index) => index % 2 == 0,
@@ -265,6 +268,14 @@ impl AvailableRanges {
             .unwrap_or(max_date);
 
         Some(DateRange::new(start, end))
+    }
+
+    /// Get disabled ranges
+    pub fn to_disabled_ranges(&self) -> Vec<DateRange> {
+        self.changes
+            .chunks(2)
+            .map(|d| DateRange::new(d[0], d[1]))
+            .collect()
     }
 }
 
@@ -557,7 +568,6 @@ pub fn Calendar(props: CalendarProps) -> Element {
 pub struct RangeCalendarContext {
     // The date that the user clicked on to begin range selection
     anchor_date: Signal<Option<Date>>,
-    set_anchor_date: Callback<Option<Date>>,
     // Currently highlighted date range
     highlighted_range: Signal<Option<DateRange>>,
     set_selected_range: Callback<Option<DateRange>>,
@@ -570,7 +580,6 @@ impl RangeCalendarContext {
             Some(anchor) => {
                 if let Some(date) = date {
                     self.anchor_date.set(None);
-                    self.set_anchor_date.call(None);
 
                     let range = DateRange::new(date, anchor);
                     self.set_selected_range.call(Some(range));
@@ -579,7 +588,6 @@ impl RangeCalendarContext {
             }
             None => {
                 self.anchor_date.set(date);
-                self.set_anchor_date.call(date);
 
                 let range = date.map(|d| DateRange::new(d, d));
                 self.highlighted_range.set(range);
@@ -598,7 +606,6 @@ impl RangeCalendarContext {
     /// Set previous selected range
     pub fn reset_selection(&mut self, range: Option<DateRange>) {
         self.anchor_date.set(None);
-        self.set_anchor_date.call(None);
         self.highlighted_range.set(range);
     }
 }
@@ -613,10 +620,6 @@ pub struct RangeCalendarProps {
     /// Callback when selected date range changes
     #[props(default)]
     pub on_range_change: Callback<Option<DateRange>>,
-
-    /// Callback when anchor date changes
-    #[props(default)]
-    pub(crate) on_anchor_change: Callback<Option<Date>>,
 
     /// Callback when display weekday
     #[props(default = Callback::new(|weekday: Weekday| weekday_abbreviation(weekday).to_string()))]
@@ -739,7 +742,6 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
     // Create RangeCalendar context provider for child components
     let mut ctx = use_context_provider(|| RangeCalendarContext {
         anchor_date,
-        set_anchor_date: props.on_anchor_change,
         highlighted_range,
         set_selected_range: props.on_range_change,
     });

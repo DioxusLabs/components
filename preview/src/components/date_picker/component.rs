@@ -20,6 +20,10 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
                 selected_date: props.selected_date,
                 disabled: props.disabled,
                 read_only: props.read_only,
+                min_date: props.min_date,
+                max_date: props.max_date,
+                disabled_ranges: props.disabled_ranges,
+                roving_loop: props.roving_loop,
                 attributes: props.attributes,
                 date_picker::DatePickerPopover {
                     popover_root: PopoverRoot,
@@ -41,6 +45,10 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
                 selected_range: props.selected_range,
                 disabled: props.disabled,
                 read_only: props.read_only,
+                min_date: props.min_date,
+                max_date: props.max_date,
+                disabled_ranges: props.disabled_ranges,
+                roving_loop: props.roving_loop,
                 attributes: props.attributes,
                 date_picker::DatePickerPopover {
                     popover_root: PopoverRoot,
