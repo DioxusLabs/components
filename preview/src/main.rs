@@ -458,6 +458,7 @@ fn PlusIcon() -> Element {
             view_box: "0 0 24 24",
             width: "2rem",
             xmlns: "http://www.w3.org/2000/svg",
+            "aria-label": "Add",
             path {
                 d: "M5 12h14m-7-7v14",
                 fill: "none",
@@ -479,6 +480,7 @@ fn SearchIcon() -> Element {
             view_box: "0 0 24 24",
             width: "2rem",
             xmlns: "http://www.w3.org/2000/svg",
+            "aria-label": "Search",
             g {
                 fill: "none",
                 stroke: "currentColor",
@@ -501,6 +503,7 @@ fn EditIcon() -> Element {
             view_box: "0 0 24 24",
             width: "2rem",
             xmlns: "http://www.w3.org/2000/svg",
+            "aria-label": "Edit",
             g {
                 fill: "none",
                 stroke: "currentColor",
