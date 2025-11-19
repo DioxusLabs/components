@@ -4,7 +4,7 @@
     align-items: center;
     justify-content: center;
     margin: 0;
-    height: calc(100vh - 4rem);
+    height: 40rem;
 }
 
 #hero > h1,
@@ -34,7 +34,7 @@
 
 #scroll-down-icon {
     position: absolute;
-    top: 95%;
+    top: 38rem;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 20px;
