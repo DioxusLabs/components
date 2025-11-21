@@ -50,10 +50,7 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
                 disabled_ranges: props.disabled_ranges,
                 roving_loop: props.roving_loop,
                 attributes: props.attributes,
-                date_picker::DatePickerPopover {
-                    popover_root: PopoverRoot,
-                    {props.children}
-                }
+                date_picker::DatePickerPopover { popover_root: PopoverRoot, {props.children} }
             }
         }
     }
@@ -69,10 +66,8 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
             attributes: props.attributes,
             {props.children}
             DatePickerPopoverTrigger {}
-            DatePickerPopoverContent {
-                align: ContentAlign::Center,
-                date_picker::DatePickerCalendar {
-                    calendar: Calendar,
+            DatePickerPopoverContent { align: ContentAlign::Center,
+                date_picker::DatePickerCalendar { calendar: Calendar,
                     CalendarHeader {
                         CalendarNavigation {
                             CalendarPreviousMonthButton {}
@@ -120,9 +115,7 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
 #[component]
 pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
-        PopoverTrigger {
-            aria_label: "Show Calendar",
-            attributes: props.attributes,
+        PopoverTrigger { aria_label: "Show Calendar", attributes: props.attributes,
             svg {
                 class: "date-picker-expand-icon",
                 view_box: "0 0 24 24",
