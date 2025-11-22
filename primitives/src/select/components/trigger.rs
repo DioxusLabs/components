@@ -88,7 +88,7 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
                     }
                     Key::ArrowDown => {
                         open.set(true);
-                        ctx.initial_focus.set((ctx.focus_state.item_count() > 0).then(|| 0));
+                        ctx.initial_focus.set((ctx.focus_state.item_count() > 0).then_some(0));
                         event.prevent_default();
                         event.stop_propagation();
                     }
