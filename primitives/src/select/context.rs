@@ -73,6 +73,8 @@ pub(super) struct SelectContext {
     pub typeahead_clear_task: Signal<Option<Task>>,
     /// Timeout before clearing typeahead buffer
     pub typeahead_timeout: ReadSignal<Duration>,
+    /// The initial element to focus once the list is rendered
+    pub initial_focus: Signal<Option<usize>>,
 }
 
 impl SelectContext {

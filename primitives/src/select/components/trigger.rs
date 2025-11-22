@@ -82,13 +82,13 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
                 match event.key() {
                     Key::ArrowUp => {
                         open.set(true);
-                        ctx.focus_state.focus_last();
+                        ctx.initial_focus.set(ctx.focus_state.item_count().checked_sub(1));
                         event.prevent_default();
                         event.stop_propagation();
                     }
                     Key::ArrowDown => {
                         open.set(true);
-                        ctx.focus_state.focus_first();
+                        ctx.initial_focus.set((ctx.focus_state.item_count() > 1).then(|| 0));
                         event.prevent_default();
                         event.stop_propagation();
                     }
