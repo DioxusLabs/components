@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting</title>
+</head>
+<body>
+    <script>
+        // Find the subroute root from the current URL. Just the pattern components/pr-preview/pr-<PR_NUMBER>
+        const parts = window.location.pathname.split('/');
+        let realUrl;
+        if (parts[2] === 'pr-preview') {
+            realUrl = '/' + parts.slice(1, 4).join('/') + '/';
+        } else {
+            // If not a PR preview, redirect to the main page
+            realUrl = '/' + parts.slice(1, 2).join('/');
+        }
+        // Manually fetch the index.html file from the correct subroute
+        fetch(realUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(html => {
+                // Set the current document's HTML to the fetched content
+                document.documentElement.innerHTML = html;
+                // After setting , run scripts manually
+                document.documentElement.querySelectorAll('script').forEach(oldScript => {
+                  const newScript = document.createElement('script');
+                  // copy over all attributes (e.g. src, type, async, etc.)
+                  for (const { name, value } of oldScript.attributes) {
+                    newScript.setAttribute(name, value);
+                  }
+                  // copy inline code or fallback to src-based loading
+                  newScript.textContent = oldScript.textContent;
+                  // replace the old <script> so the browser will actually execute it
+                  oldScript.replaceWith(newScript);
+                });
+
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    </script>
+</body>
+</html>
