@@ -161,6 +161,14 @@ pub fn SelectList(props: SelectListProps) -> Element {
         render: render.into(),
     });
 
+    use_effect(move || {
+        if render() {
+            ctx.focus_state.set_focus(ctx.initial_focus.cloned());
+        } else {
+            ctx.initial_focus.set(None);
+        }
+    });
+
     rsx! {
         if render() {
             div {

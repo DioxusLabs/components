@@ -126,3 +126,29 @@ test("options selected", async ({ page }) => {
     // Assert the first option is now selected
     await expect(firstOption).toHaveAttribute("aria-selected", "true");
 });
+
+test("down arrow selects first element", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&");
+    // Find Select a fruit...
+    let selectTrigger = page.locator(".select-trigger");
+    const selectMenu = page.locator(".select-list");
+    await selectTrigger.focus();
+
+    // Select the first option
+    await page.keyboard.press("ArrowDown");
+    const firstOption = selectMenu.getByRole("option", { name: "apple" });
+    await expect(firstOption).toBeFocused();
+});
+
+test("up arrow selects last element", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&");
+    // Find Select a fruit...
+    let selectTrigger = page.locator(".select-trigger");
+    const selectMenu = page.locator(".select-list");
+    await selectTrigger.focus();
+
+    // Select the first option
+    await page.keyboard.press("ArrowUp");
+    const firstOption = selectMenu.getByRole("option", { name: "other" });
+    await expect(firstOption).toBeFocused();
+});

@@ -143,6 +143,7 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
             typeahead_buffer.take();
         }
     });
+    let initial_focus = use_signal(|| None);
 
     use_context_provider(|| SelectContext {
         typeahead_buffer,
@@ -157,6 +158,7 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
         placeholder: props.placeholder,
         typeahead_clear_task,
         typeahead_timeout: props.typeahead_timeout,
+        initial_focus,
     });
 
     rsx! {
