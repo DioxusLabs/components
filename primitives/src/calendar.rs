@@ -155,12 +155,12 @@ fn replace_month(date: Date, month: Month) -> Date {
 }
 
 /// Calendar date range
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct DateRange {
     /// The start date of the range
-    start: Date,
+    pub start: Date,
     /// The end date of the range
-    end: Date,
+    pub end: Date,
 }
 
 impl DateRange {
@@ -176,7 +176,8 @@ impl DateRange {
         }
     }
 
-    fn contains(&self, date: Date) -> bool {
+    /// Returns true if date is contained in the range.
+    pub fn contains(&self, date: Date) -> bool {
         self.start <= date && date <= self.end
     }
 
@@ -187,6 +188,11 @@ impl DateRange {
     fn clamp(&self, date: Date) -> Date {
         date.clamp(self.start, self.end)
     }
+
+    /// Get minimum and maximum values
+    pub fn to_min_max(&self) -> (Date, Date) {
+        (self.start, self.end)
+    }
 }
 
 impl Display for DateRange {
@@ -195,14 +201,16 @@ impl Display for DateRange {
     }
 }
 
+/// Calendar available dates
 #[derive(Debug, Clone, PartialEq)]
-struct AvailibleRanges {
+pub struct AvailableRanges {
     /// A sorted list of dates. Values after an odd number of elements are disabled.
     changes: Vec<Date>,
 }
 
-impl AvailibleRanges {
-    fn new(disabled_ranges: &[DateRange]) -> Self {
+impl AvailableRanges {
+    /// Create a new available dates
+    pub fn new(disabled_ranges: &[DateRange]) -> Self {
         let mut sorted_range: Vec<_> = disabled_ranges
             .iter()
             .enumerate()
@@ -230,15 +238,17 @@ impl AvailibleRanges {
         }
     }
 
-    fn valid_interval(&self, date: Date) -> bool {
+    /// Check the availability of given date
+    pub fn valid_interval(&self, date: Date) -> bool {
         match self.changes.binary_search(&date) {
             Ok(_) => false,
             Err(index) => index % 2 == 0,
         }
     }
 
-    fn available_range(&self, date: Date, min_date: Date, max_date: Date) -> Option<DateRange> {
+    fn available_range(&self, date: Date, date_range: DateRange) -> Option<DateRange> {
         let date_index = self.changes.binary_search(&date).err()?;
+        let (min_date, max_date) = date_range.to_min_max();
 
         let valid = date_index % 2 == 0;
         if !valid {
@@ -259,6 +269,14 @@ impl AvailibleRanges {
 
         Some(DateRange::new(start, end))
     }
+
+    /// Get disabled ranges
+    pub fn to_disabled_ranges(&self) -> Vec<DateRange> {
+        self.changes
+            .chunks(2)
+            .map(|d| DateRange::new(d[0], d[1]))
+            .collect()
+    }
 }
 
 /// The base context provided by the [`Calendar`] and the [`RangeCalendar`] component to its children.
@@ -267,7 +285,7 @@ pub struct BaseCalendarContext {
     // State
     focused_date: Signal<Option<Date>>,
     view_date: ReadSignal<Date>,
-    available_ranges: Memo<AvailibleRanges>,
+    available_ranges: Memo<AvailableRanges>,
     set_view_date: Callback<Date>,
     format_weekday: Callback<Weekday, String>,
     format_month: Callback<Month, String>,
@@ -276,8 +294,7 @@ pub struct BaseCalendarContext {
     disabled: ReadSignal<bool>,
     today: Date,
     first_day_of_week: Weekday,
-    min_date: Date,
-    max_date: Date,
+    enabled_date_range: DateRange,
 }
 
 impl BaseCalendarContext {
@@ -298,7 +315,7 @@ impl BaseCalendarContext {
 
     /// Set the view date
     pub fn set_view_date(&self, date: Date) {
-        (self.set_view_date)(date.clamp(self.min_date, self.max_date));
+        (self.set_view_date)(self.enabled_date_range.clamp(date));
     }
 
     /// Check if the calendar is disabled
@@ -322,7 +339,7 @@ impl BaseCalendarContext {
             ctx.anchor_date.cloned().and_then(|date| {
                 self.available_ranges
                     .read()
-                    .available_range(date, self.min_date, self.max_date)
+                    .available_range(date, self.enabled_date_range)
             })
         })
     }
@@ -456,7 +473,7 @@ pub struct CalendarProps {
 /// - `data-disabled`: Indicates if the calendar is disabled. Possible values are `true` or `false`.
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
-    let available_ranges = use_memo(move || AvailibleRanges::new(&props.disabled_ranges.read()));
+    let available_ranges = use_memo(move || AvailableRanges::new(&props.disabled_ranges.read()));
 
     // Create base context provider for child components
     let mut base_ctx = use_context_provider(|| BaseCalendarContext {
@@ -469,8 +486,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
         disabled: props.disabled,
         today: props.today,
         first_day_of_week: props.first_day_of_week,
-        min_date: props.min_date,
-        max_date: props.max_date,
+        enabled_date_range: DateRange::new(props.min_date, props.max_date),
     });
     // Create Calendar context provider for child components
     use_context_provider(|| CalendarContext {
@@ -499,7 +515,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
 
                     match new_date {
                         Some(date) => {
-                            if base_ctx.min_date <= date && date <= base_ctx.max_date {
+                            if base_ctx.enabled_date_range.contains(date) {
                                 base_ctx.focused_date.set(new_date);
                             }
                         },
@@ -707,7 +723,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
     });
     let anchor_date = use_signal(|| None::<Date>);
     let highlighted_range = use_signal(|| (props.selected_range)());
-    let available_ranges = use_memo(move || AvailibleRanges::new(&props.disabled_ranges.read()));
+    let available_ranges = use_memo(move || AvailableRanges::new(&props.disabled_ranges.read()));
 
     // Create base context provider for child components
     let mut base_ctx = use_context_provider(|| BaseCalendarContext {
@@ -720,8 +736,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
         disabled: props.disabled,
         today: props.today,
         first_day_of_week: props.first_day_of_week,
-        min_date: props.min_date,
-        max_date: props.max_date,
+        enabled_date_range: DateRange::new(props.min_date, props.max_date),
     });
 
     // Create RangeCalendar context provider for child components
@@ -762,7 +777,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
 
                     match new_date {
                         Some(date) => {
-                            if base_ctx.min_date <= date && date <= base_ctx.max_date {
+                            if base_ctx.enabled_date_range.contains(date) {
                                 base_ctx.focused_date.set(new_date);
                                 let date = match base_ctx.available_range() {
                                     Some(range) => range.clamp(date),
@@ -1019,7 +1034,7 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
         // Get the current view date from context
         let view_date = (ctx.view_date)();
         match previous_month(view_date) {
-            Some(date) => ctx.min_date.replace_day(1).unwrap() > date,
+            Some(date) => ctx.enabled_date_range.start.replace_day(1).unwrap() > date,
             None => true,
         }
     });
@@ -1119,8 +1134,9 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
         let view_date = (ctx.view_date)();
         match next_month(view_date) {
             Some(date) => {
-                let last_day = ctx.max_date.month().length(ctx.max_date.year());
-                ctx.max_date.replace_day(last_day).unwrap() < date
+                let max = ctx.enabled_date_range.end;
+                let last_day = max.month().length(max.year());
+                max.replace_day(last_day).unwrap() < date
             }
             None => true,
         }
@@ -1464,13 +1480,14 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     let months = use_memo(move || {
         // Get the current view date from context
         let view_date = (calendar.view_date)();
+        let (min_date, max_date) = calendar.enabled_date_range.to_min_max();
         let mut min_month = Month::January;
-        if replace_month(view_date, min_month) < calendar.min_date {
-            min_month = calendar.min_date.month();
+        if replace_month(view_date, min_month) < min_date {
+            min_month = min_date.month();
         }
         let mut max_month = Month::December;
-        if replace_month(view_date, max_month) > calendar.max_date {
-            max_month = calendar.max_date.month();
+        if replace_month(view_date, max_month) > max_date {
+            max_month = max_date.month();
         }
 
         let mut month = min_month;
@@ -1580,13 +1597,14 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
     let years = use_memo(move || {
         // Get the current view date from context
         let view_date = (calendar.view_date)();
+        let (min_date, max_date) = calendar.enabled_date_range.to_min_max();
         let month = view_date.month();
-        let mut min_year = calendar.min_date.year();
-        if replace_month(calendar.min_date, month) < calendar.min_date {
+        let mut min_year = min_date.year();
+        if replace_month(min_date, month) < min_date {
             min_year += 1;
         }
-        let mut max_year = calendar.max_date.year();
-        if replace_month(calendar.max_date, month) > calendar.max_date {
+        let mut max_year = max_date.year();
+        if replace_month(max_date, month) > max_date {
             max_year -= 1;
         }
 
@@ -1743,9 +1761,9 @@ fn relative_calendar_month(
     base_ctx: &BaseCalendarContext,
     view_date: Date,
 ) -> RelativeMonth {
-    if date < base_ctx.min_date {
+    if date < base_ctx.enabled_date_range.start {
         RelativeMonth::Last
-    } else if date > base_ctx.max_date {
+    } else if date > base_ctx.enabled_date_range.end {
         RelativeMonth::Next
     } else {
         let lhs = date.month() as u8;
