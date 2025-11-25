@@ -63,6 +63,7 @@ examples!(
     avatar,
     button,
     calendar[simple, internationalized, range, unavailable_dates],
+    card,
     checkbox,
     collapsible,
     context_menu,
