@@ -246,7 +246,8 @@ impl AvailableRanges {
         }
     }
 
-    fn available_range(&self, date: Date, date_range: DateRange) -> Option<DateRange> {
+    /// Get the available range of given date
+    pub fn available_range(&self, date: Date, date_range: DateRange) -> Option<DateRange> {
         let date_index = self.changes.binary_search(&date).err()?;
         let (min_date, max_date) = date_range.to_min_max();
 
@@ -295,6 +296,7 @@ pub struct BaseCalendarContext {
     today: Date,
     first_day_of_week: Weekday,
     enabled_date_range: DateRange,
+    month_count: u8,
 }
 
 impl BaseCalendarContext {
@@ -411,6 +413,10 @@ pub struct CalendarProps {
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
 
+    /// Specify how many months are visible at once
+    #[props(default = 1)]
+    pub month_count: u8,
+
     /// Unavailable dates
     #[props(default)]
     pub disabled_ranges: ReadSignal<Vec<DateRange>>,
@@ -487,6 +493,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
         today: props.today,
         first_day_of_week: props.first_day_of_week,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
+        month_count: props.month_count,
     });
     // Create Calendar context provider for child components
     use_context_provider(|| CalendarContext {
@@ -657,6 +664,10 @@ pub struct RangeCalendarProps {
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
 
+    /// Specify how many months are visible at once
+    #[props(default = 1)]
+    pub month_count: u8,
+
     /// Unavailable dates
     #[props(default)]
     pub disabled_ranges: ReadSignal<Vec<DateRange>>,
@@ -737,6 +748,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
         today: props.today,
         first_day_of_week: props.first_day_of_week,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
+        month_count: props.month_count,
     });
 
     // Create RangeCalendar context provider for child components
@@ -1252,6 +1264,10 @@ pub struct CalendarGridProps {
     #[props(default)]
     pub id: Option<String>,
 
+    /// An offset from the beginning of the view date that this should display
+    #[props(default = 0)]
+    pub offset: u8,
+
     /// Whether to show week numbers
     #[props(default)]
     pub show_week_numbers: bool,
@@ -1323,6 +1339,33 @@ pub struct CalendarGridProps {
 pub fn CalendarGrid(props: CalendarGridProps) -> Element {
     let ctx: BaseCalendarContext = use_context();
 
+    rsx! {
+        div {
+            class: "calendar-div",
+            for offset in 0..ctx.month_count {
+                CalendarGridView {
+                    offset,
+                    ..props.clone()
+                }
+            }
+        }
+    }
+}
+
+#[derive(Clone, PartialEq)]
+struct GridContext {
+    current_month: ReadSignal<Month>,
+}
+
+#[component]
+fn CalendarGridView(props: CalendarGridProps) -> Element {
+    let ctx: BaseCalendarContext = use_context();
+
+    let mut current_month = use_signal(|| (ctx.view_date)().month());
+    use_context_provider(|| GridContext {
+        current_month: current_month.into(),
+    });
+
     // We'll use the view_date from context in the memo below
 
     // Generate a grid of days with proper layout
@@ -1331,6 +1374,17 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         // Get the current view date from context
         let view_date = (ctx.view_date)();
 
+        let nth_month = view_date.month().nth_next(props.offset);
+        let year = view_date.year()
+            + if (view_date.month() as u8) > (nth_month as u8) {
+                1
+            } else {
+                0
+            };
+        let view_date = Date::from_calendar_date(year, nth_month, 1).unwrap_or(view_date);
+
+        current_month.set(view_date.month());
+        
         // Create a grid with empty cells for padding and actual days
         let mut grid = Vec::new();
 
@@ -1345,7 +1399,7 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             date = date.next_day().expect("invalid or out-of-range date");
         }
 
-        let mut date = view_date;
+        date = view_date;
         // Add days of the month
         let num_days_in_month = view_date.month().length(view_date.year());
         for day in 1..=num_days_in_month {
@@ -1759,7 +1813,7 @@ pub fn CalendarDay(props: CalendarDayProps) -> Element {
 fn relative_calendar_month(
     date: Date,
     base_ctx: &BaseCalendarContext,
-    view_date: Date,
+    current_month: Month,
 ) -> RelativeMonth {
     if date < base_ctx.enabled_date_range.start {
         RelativeMonth::Last
@@ -1767,7 +1821,7 @@ fn relative_calendar_month(
         RelativeMonth::Next
     } else {
         let lhs = date.month() as u8;
-        let rhs = view_date.month() as u8;
+        let rhs = current_month as u8;
         match lhs.cmp(&rhs) {
             std::cmp::Ordering::Less => RelativeMonth::Last,
             std::cmp::Ordering::Equal => RelativeMonth::Current,
@@ -1810,8 +1864,10 @@ fn SingleCalendarDay(props: CalendarDayProps) -> Element {
     let mut base_ctx: BaseCalendarContext = use_context();
     let day = date.day();
     let view_date = (base_ctx.view_date)();
-    let month = relative_calendar_month(date, &base_ctx, view_date);
-    let in_current_month = month.current_month();
+    let grid_ctx: GridContext = use_context();
+    let month =
+        use_memo(move || relative_calendar_month(date, &base_ctx, (grid_ctx.current_month)()));
+    let in_current_month = month.read().current_month();
     let is_focused = move || base_ctx.is_focused(date);
     let is_today = date == base_ctx.today;
     let is_unavailable = base_ctx.is_unavailable(date);
@@ -1887,8 +1943,10 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
     let mut base_ctx: BaseCalendarContext = use_context();
     let day = date.day();
     let view_date = (base_ctx.view_date)();
-    let month = relative_calendar_month(date, &base_ctx, view_date);
-    let in_current_month = month.current_month();
+    let grid_ctx: GridContext = use_context();
+    let month =
+        use_memo(move || relative_calendar_month(date, &base_ctx, (grid_ctx.current_month)()));
+    let in_current_month = month.read().current_month();
     let is_focused = move || base_ctx.is_focused(date);
     let is_today = date == base_ctx.today;
     let is_unavailable = base_ctx.is_unavailable(date);

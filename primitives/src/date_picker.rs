@@ -592,6 +592,7 @@ pub fn DateRangePickerCalendar(props: DatePickerCalendarProps<RangeCalendarProps
             first_day_of_week: props.first_day_of_week,
             min_date,
             max_date,
+            month_count: 2,
             attributes: props.attributes,
             {props.children}
         }
@@ -878,11 +879,10 @@ fn DateElement(props: DateElementProps) -> Element {
             if let Some(date) = Date::from_calendar_date(year, month, day)
                 .ok()
                 .filter(|date| ctx.enabled_date_range.contains(*date))
+                .filter(|date| ctx.available_ranges.read().valid_interval(*date))
             {
                 tracing::info!("Parsed date: {date:?}");
-                if ctx.available_ranges.read().valid_interval(date) {
-                    props.on_date_change.call(Some(date));
-                };
+                props.on_date_change.call(Some(date));
             }
         }
     });
@@ -1081,7 +1081,9 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
 /// ```
 #[component]
 pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
+    let base_ctx = use_context::<BaseDatePickerContext>();
     let mut ctx = use_context::<DateRangePickerContext>();
+
     let mut start_date = use_signal(|| None);
     let mut end_date = use_signal(|| None);
 
@@ -1097,8 +1099,16 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
                 return;
             }
 
-            let range = Some(DateRange::new(start, end));
-            ctx.set_range(range);
+            // checking non-contiguous ranges
+            if base_ctx
+                .available_ranges
+                .read()
+                .available_range(start, base_ctx.enabled_date_range)
+                .is_some_and(|r| r.contains(end))
+            {
+                let range = Some(DateRange::new(start, end));
+                ctx.set_range(range);
+            }
         };
     });
 
