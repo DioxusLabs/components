@@ -296,7 +296,6 @@ pub struct BaseCalendarContext {
     today: Date,
     first_day_of_week: Weekday,
     enabled_date_range: DateRange,
-    month_count: u8,
 }
 
 impl BaseCalendarContext {
@@ -493,7 +492,6 @@ pub fn Calendar(props: CalendarProps) -> Element {
         today: props.today,
         first_day_of_week: props.first_day_of_week,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
-        month_count: props.month_count,
     });
     // Create Calendar context provider for child components
     use_context_provider(|| CalendarContext {
@@ -503,69 +501,71 @@ pub fn Calendar(props: CalendarProps) -> Element {
 
     rsx! {
         div {
+            class: "calendar-div",
             role: "application",
             aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
-            onkeydown: move |e| {
-                let Some(focused_date) = (base_ctx.focused_date)() else {
-                    return;
-                };
-                let mut set_focused_date = |new_date: Option<Date>| {
-                    // Make sure the view date month is the same as the focused date
-                    let mut view_date = (base_ctx.view_date)();
-                    if let Some(date) = new_date {
-                        if date.month() != view_date.month() {
-                            view_date = date.replace_day(1).unwrap();
-                            (base_ctx.set_view_date)(view_date);
-                        }
-                    }
-
-                    match new_date {
-                        Some(date) => {
-                            if base_ctx.enabled_date_range.contains(date) {
-                                base_ctx.focused_date.set(new_date);
+            for offset in 0..props.month_count {
+                CalendarView { offset,
+                    div {
+                        onkeydown: move |e| {
+                            let Some(focused_date) = (base_ctx.focused_date)() else {
+                                return;
+                            };
+                            let mut set_focused_date = |new_date: Option<Date>| {
+                                let mut view_date = (base_ctx.view_date)();
+                                if let Some(date) = new_date {
+                                    if date.month() != view_date.month() {
+                                        view_date = date.replace_day(1).unwrap();
+                                        (base_ctx.set_view_date)(view_date);
+                                    }
+                                }
+                                match new_date {
+                                    Some(date) => {
+                                        if base_ctx.enabled_date_range.contains(date) {
+                                            base_ctx.focused_date.set(new_date);
+                                        }
+                                    }
+                                    None => base_ctx.focused_date.set(None),
+                                }
+                            };
+                            match e.key() {
+                                Key::ArrowLeft => {
+                                    e.prevent_default();
+                                    set_focused_date(focused_date.previous_day());
+                                }
+                                Key::ArrowRight => {
+                                    e.prevent_default();
+                                    set_focused_date(focused_date.next_day());
+                                }
+                                Key::ArrowUp => {
+                                    e.prevent_default();
+                                    if e.modifiers().shift() {
+                                        if let Some(date) = previous_month(focused_date) {
+                                            set_focused_date(Some(date));
+                                        }
+                                    } else {
+                                        set_focused_date(Some(focused_date.saturating_sub(7.days())));
+                                    }
+                                }
+                                Key::ArrowDown => {
+                                    e.prevent_default();
+                                    if e.modifiers().shift() {
+                                        if let Some(date) = next_month(focused_date) {
+                                            set_focused_date(Some(date));
+                                        }
+                                    } else {
+                                        set_focused_date(Some(focused_date.saturating_add(7.days())));
+                                    }
+                                }
+                                _ => {}
                             }
                         },
-                        None => base_ctx.focused_date.set(None)
+                        ..props.attributes.clone(),
+                        {props.children.clone()}
                     }
-                };
-                match e.key() {
-                    Key::ArrowLeft => {
-                        e.prevent_default();
-                        set_focused_date(focused_date.previous_day());
-                    }
-                    Key::ArrowRight => {
-                        e.prevent_default();
-                        set_focused_date(focused_date.next_day());
-                    }
-                    Key::ArrowUp => {
-                        e.prevent_default();
-                        if e.modifiers().shift() {
-                            if let Some(date) = previous_month(focused_date) {
-                                set_focused_date(Some(date));
-                            }
-                        } else {
-                            // Otherwise, move to the previous week
-                            set_focused_date(Some(focused_date.saturating_sub(7.days())));
-                        }
-                    }
-                    Key::ArrowDown => {
-                        e.prevent_default();
-                        if e.modifiers().shift() {
-                            if let Some(date) = next_month(focused_date) {
-                                set_focused_date(Some(date));
-                            }
-                        } else {
-                            // Otherwise, move to the next week
-                            set_focused_date(Some(focused_date.saturating_add(7.days())));
-                        }
-                    }
-                    _ => {}
                 }
-            },
-            ..props.attributes,
-
-            {props.children}
+            }
         }
     }
 }
@@ -748,7 +748,6 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
         today: props.today,
         first_day_of_week: props.first_day_of_week,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
-        month_count: props.month_count,
     });
 
     // Create RangeCalendar context provider for child components
@@ -760,88 +759,187 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
 
     rsx! {
         div {
+            class: "calendar-div",
             role: "application",
             aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
-            onkeydown: move |e| {
-                let Some(mut focused_date) = (base_ctx.focused_date)() else {
-                    return;
-                };
+            for offset in 0..props.month_count {
+                CalendarView { offset,
+                    div {
+                        onkeydown: move |e| {
+                            let Some(mut focused_date) = (base_ctx.focused_date)() else {
+                                return;
+                            };
+                            if let (Some(range), Some(date)) = (
+                                (ctx.highlighted_range)(),
+                                (ctx.anchor_date)(),
+                            ) {
+                                if date != range.start {
+                                    focused_date = range.start
+                                } else {
+                                    focused_date = range.end
+                                }
+                            }
 
-                // force hover day as focus
-                if let (Some(range), Some(date)) = ((ctx.highlighted_range)(), (ctx.anchor_date)()) {
-                      if date != range.start {
-                            focused_date = range.start
-                        } else {
-                            focused_date = range.end
-                        }
-                };
-
-                let mut set_focused_date = |new_date: Option<Date>| {
-                    // Make sure the view date month is the same as the focused date
-                    let mut view_date = (base_ctx.view_date)();
-                    if let Some(date) = new_date {
-                        if date.month() != view_date.month() {
-                            view_date = date.replace_day(1).unwrap();
-                            (base_ctx.set_view_date)(view_date);
-                        }
-                    }
-
-                    match new_date {
-                        Some(date) => {
-                            if base_ctx.enabled_date_range.contains(date) {
-                                base_ctx.focused_date.set(new_date);
-                                let date = match base_ctx.available_range() {
-                                    Some(range) => range.clamp(date),
-                                    None => date,
-                                };
-                                ctx.set_hovered_date(date);
+                            let mut set_focused_date = |new_date: Option<Date>| {
+                                let mut view_date = (base_ctx.view_date)();
+                                if let Some(date) = new_date {
+                                    if date.month() != view_date.month() {
+                                        view_date = date.replace_day(1).unwrap();
+                                        (base_ctx.set_view_date)(view_date);
+                                    }
+                                }
+                                match new_date {
+                                    Some(date) => {
+                                        if base_ctx.enabled_date_range.contains(date) {
+                                            base_ctx.focused_date.set(new_date);
+                                            let date = match base_ctx.available_range() {
+                                                Some(range) => range.clamp(date),
+                                                None => date,
+                                            };
+                                            ctx.set_hovered_date(date);
+                                        }
+                                    }
+                                    None => base_ctx.focused_date.set(None),
+                                }
+                            };
+                            match e.key() {
+                                Key::ArrowLeft => {
+                                    e.prevent_default();
+                                    set_focused_date(focused_date.previous_day());
+                                }
+                                Key::ArrowRight => {
+                                    e.prevent_default();
+                                    set_focused_date(focused_date.next_day());
+                                }
+                                Key::ArrowUp => {
+                                    e.prevent_default();
+                                    if e.modifiers().shift() {
+                                        if let Some(date) = previous_month(focused_date) {
+                                            set_focused_date(Some(date));
+                                        }
+                                    } else {
+                                        set_focused_date(Some(focused_date.saturating_sub(7.days())));
+                                    }
+                                }
+                                Key::ArrowDown => {
+                                    e.prevent_default();
+                                    if e.modifiers().shift() {
+                                        if let Some(date) = next_month(focused_date) {
+                                            set_focused_date(Some(date));
+                                        }
+                                    } else {
+                                        set_focused_date(Some(focused_date.saturating_add(7.days())));
+                                    }
+                                }
+                                Key::Escape => {
+                                    ctx.reset_selection((props.selected_range)());
+                                }
+                                _ => {}
                             }
                         },
-                        None => base_ctx.focused_date.set(None)
-                    }
-                };
-                match e.key() {
-                    Key::ArrowLeft => {
-                        e.prevent_default();
-                        set_focused_date(focused_date.previous_day());
-                    }
-                    Key::ArrowRight => {
-                        e.prevent_default();
-                        set_focused_date(focused_date.next_day());
-                    }
-                    Key::ArrowUp => {
-                        e.prevent_default();
-                        if e.modifiers().shift() {
-                            if let Some(date) = previous_month(focused_date) {
-                                set_focused_date(Some(date));
-                            }
-                        } else {
-                            // Otherwise, move to the previous week
-                            set_focused_date(Some(focused_date.saturating_sub(7.days())));
-                        }
-                    }
-                    Key::ArrowDown => {
-                        e.prevent_default();
-                        if e.modifiers().shift() {
-                            if let Some(date) = next_month(focused_date) {
-                                set_focused_date(Some(date));
-                            }
-                        } else {
-                            // Otherwise, move to the next week
-                            set_focused_date(Some(focused_date.saturating_add(7.days())));
-                        }
-                    }
-                    Key::Escape => {
-                        ctx.reset_selection((props.selected_range)());
-                    }
-                    _ => {}
-                }
-            },
-            ..props.attributes,
+                        ..props.attributes.clone(),
 
-            {props.children}
+                        {props.children.clone()}
+                    }
+                }
+            }
         }
+    }
+}
+
+#[derive(Props, Clone, PartialEq)]
+struct CalendarViewProps {
+    /// An offset from the beginning of the view date that this should display
+    #[props(default = 0)]
+    pub offset: u8,
+
+    /// The children of the calendar element
+    pub children: Element,
+}
+
+#[derive(Clone, PartialEq)]
+struct CalendarViewContext {
+    offset: u8,
+    view_date: Signal<Date>,
+}
+
+impl CalendarViewContext {
+    fn set_view_date(&mut self, view_date: Date) {
+        let new_date = match self.offset {
+            0 => view_date,
+            n => {
+                let month = view_date.month();
+                let nth_month = month.nth_next(n);
+                let year = view_date.year() + if Self::gt(month, nth_month) { 1 } else { 0 };
+                Date::from_calendar_date(year, nth_month, 1).unwrap_or(view_date)
+            }
+        };
+
+        self.view_date.set(new_date);
+    }
+
+    fn nth_month_prev(&self, date: Date) -> Option<Date> {
+        let month = date.month();
+        let nth_month: Month = month.nth_prev(self.offset.max(1));
+        let year = date.year() - if Self::gt(month, nth_month) { 0 } else { 1 };
+        Date::from_calendar_date(year, nth_month, 1).ok()
+    }
+
+    fn nth_month_next(&self, date: Date) -> Option<Date> {
+        let month = date.month();
+        let nth_month = month.nth_next(self.offset.max(1));
+        let year = date.year() + if Self::gt(month, nth_month) { 1 } else { 0 };
+        Date::from_calendar_date(year, nth_month, 1).ok()
+    }
+
+    fn replace_year(&self, date: Date, year: i32) -> Date {
+        let month = date.month();
+        let view_month = (self.view_date)().month();
+        let year = year - if Self::gt(month, view_month) { 1 } else { 0 };
+        date.replace_year(year).unwrap_or(date)
+    }
+
+    fn replace_month(&self, date: Date, month: Month) -> Date {
+        let view_date = (self.view_date)();
+        let new_month = month.nth_prev(self.offset);
+        let year = view_date.year()
+            - if Self::gt(month, view_date.month()) {
+                1
+            } else {
+                0
+            };
+        Date::from_calendar_date(year, new_month, 1).unwrap_or(date)
+    }
+
+    // Get the current view date
+    fn view_date(&self) -> Date {
+        self.view_date.cloned()
+    }
+
+    fn gt(lhs_month: Month, rhs_month: Month) -> bool {
+        let lhs = lhs_month as u8;
+        let rhs = rhs_month as u8;
+        lhs > rhs
+    }
+}
+
+#[component]
+fn CalendarView(props: CalendarViewProps) -> Element {
+    let ctx: BaseCalendarContext = use_context();
+
+    let view_date = use_signal(|| (ctx.view_date)());
+    let mut view_ctx = use_context_provider(|| CalendarViewContext {
+        offset: props.offset,
+        view_date,
+    });
+
+    use_effect(move || {
+        view_ctx.set_view_date((ctx.view_date)());
+    });
+
+    rsx! {
+        {props.children}
     }
 }
 
@@ -1041,10 +1139,12 @@ pub struct CalendarPreviousMonthButtonProps {
 #[component]
 pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> Element {
     let ctx: BaseCalendarContext = use_context();
+    let view_ctx: CalendarViewContext = use_context();
+
     // disable previous button when we reach the limit
     let button_disabled = use_memo(move || {
         // Get the current view date from context
-        let view_date = (ctx.view_date)();
+        let view_date = (view_ctx.view_date)();
         match previous_month(view_date) {
             Some(date) => ctx.enabled_date_range.start.replace_day(1).unwrap() > date,
             None => true,
@@ -1053,7 +1153,7 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
     // disable previous button when the current selection range does not include the previous month
     let navigate_disabled = use_memo(move || {
         // Get the current view date from context
-        let view_date = (ctx.view_date)();
+        let view_date = (view_ctx.view_date)();
         ctx.available_range()
             .is_some_and(|range| range.start.month() == view_date.month())
     });
@@ -1062,7 +1162,7 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
     let handle_prev_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        if let Some(date) = previous_month(current_view) {
+        if let Some(date) = view_ctx.nth_month_prev(current_view) {
             ctx.set_view_date.call(date)
         }
     };
@@ -1071,7 +1171,7 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
         button {
             class: "calendar-nav-prev",
             aria_label: "Previous month",
-            type: "button",
+            r#type: "button",
             onclick: handle_prev_month,
             disabled: (ctx.disabled)() || button_disabled() || navigate_disabled(),
             ..props.attributes,
@@ -1140,10 +1240,12 @@ pub struct CalendarNextMonthButtonProps {
 #[component]
 pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     let ctx: BaseCalendarContext = use_context();
+    let view_ctx: CalendarViewContext = use_context();
+
     // disable next button when we reach the limit
     let button_disabled = use_memo(move || {
         // Get the current view date from context
-        let view_date = (ctx.view_date)();
+        let view_date = (view_ctx.view_date)();
         match next_month(view_date) {
             Some(date) => {
                 let max = ctx.enabled_date_range.end;
@@ -1156,7 +1258,7 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     // disable next button when the current selection range does not include the next month
     let navigate_disabled = use_memo(move || {
         // Get the current view date from context
-        let view_date = (ctx.view_date)();
+        let view_date = (view_ctx.view_date)();
         ctx.available_range()
             .is_some_and(|range| range.end.month() == view_date.month())
     });
@@ -1165,7 +1267,7 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     let handle_next_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        if let Some(date) = next_month(current_view) {
+        if let Some(date) = view_ctx.nth_month_next(current_view) {
             ctx.set_view_date.call(date)
         }
     };
@@ -1174,7 +1276,7 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
         button {
             class: "calendar-nav-next",
             aria_label: "Next month",
-            type: "button",
+            r#type: "button",
             onclick: handle_next_month,
             disabled: (ctx.disabled)() || button_disabled() || navigate_disabled(),
             ..props.attributes,
@@ -1240,7 +1342,7 @@ pub struct CalendarMonthTitleProps {
 /// ```
 #[component]
 pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
-    let ctx: BaseCalendarContext = use_context();
+    let ctx: CalendarViewContext = use_context();
     // Format the current month and year
     let month_year = use_memo(move || {
         let view_date = (ctx.view_date)();
@@ -1263,10 +1365,6 @@ pub struct CalendarGridProps {
     /// Optional ID for the grid
     #[props(default)]
     pub id: Option<String>,
-
-    /// An offset from the beginning of the view date that this should display
-    #[props(default = 0)]
-    pub offset: u8,
 
     /// Whether to show week numbers
     #[props(default)]
@@ -1338,33 +1436,7 @@ pub struct CalendarGridProps {
 #[component]
 pub fn CalendarGrid(props: CalendarGridProps) -> Element {
     let ctx: BaseCalendarContext = use_context();
-
-    rsx! {
-        div {
-            class: "calendar-div",
-            for offset in 0..ctx.month_count {
-                CalendarGridView {
-                    offset,
-                    ..props.clone()
-                }
-            }
-        }
-    }
-}
-
-#[derive(Clone, PartialEq)]
-struct GridContext {
-    current_month: ReadSignal<Month>,
-}
-
-#[component]
-fn CalendarGridView(props: CalendarGridProps) -> Element {
-    let ctx: BaseCalendarContext = use_context();
-
-    let mut current_month = use_signal(|| (ctx.view_date)().month());
-    use_context_provider(|| GridContext {
-        current_month: current_month.into(),
-    });
+    let view_ctx: CalendarViewContext = use_context();
 
     // We'll use the view_date from context in the memo below
 
@@ -1372,19 +1444,7 @@ fn CalendarGridView(props: CalendarGridProps) -> Element {
     // Use the view_date as a dependency to ensure the grid updates when the view changes
     let days_grid = use_memo(move || {
         // Get the current view date from context
-        let view_date = (ctx.view_date)();
-
-        let nth_month = view_date.month().nth_next(props.offset);
-        let year = view_date.year()
-            + if (view_date.month() as u8) > (nth_month as u8) {
-                1
-            } else {
-                0
-            };
-        let view_date = Date::from_calendar_date(year, nth_month, 1).unwrap_or(view_date);
-
-        current_month.set(view_date.month());
-        
+        let view_date = (view_ctx.view_date)();
         // Create a grid with empty cells for padding and actual days
         let mut grid = Vec::new();
 
@@ -1527,14 +1587,16 @@ pub struct CalendarSelectMonthProps {
 /// ```
 #[component]
 pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
-    let calendar: BaseCalendarContext = use_context();
-    let view_date = calendar.view_date();
+    let base_ctx: BaseCalendarContext = use_context();
+    let view_ctx: CalendarViewContext = use_context();
+
+    let view_date = view_ctx.view_date();
     let month = view_date.month();
 
     let months = use_memo(move || {
         // Get the current view date from context
-        let view_date = (calendar.view_date)();
-        let (min_date, max_date) = calendar.enabled_date_range.to_min_max();
+        let view_date = (view_ctx.view_date)();
+        let (min_date, max_date) = base_ctx.enabled_date_range.to_min_max();
         let mut min_month = Month::January;
         if replace_month(view_date, min_month) < min_date {
             min_month = min_date.month();
@@ -1561,23 +1623,23 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
             select {
                 aria_label: "Month",
                 onchange: move |e| {
-                    let mut view_date = calendar.view_date();
+                    let mut view_date = (base_ctx.view_date)();
                     let number = e.value().parse().unwrap_or(view_date.month() as u8);
                     let cur_month = Month::try_from(number).expect("Month out-of-range");
-                    view_date = view_date.replace_month(cur_month).unwrap_or(view_date);
-                    calendar.set_view_date(view_date);
+                    view_date = view_ctx.replace_month(view_date, cur_month);
+                    base_ctx.set_view_date(view_date);
                 },
                 ..props.attributes,
                 for month in months() {
                     option {
                         value: month as u8,
-                        selected: calendar.view_date().month() == month,
-                        {calendar.format_month.call(month)}
+                        selected: view_ctx.view_date().month() == month,
+                        {base_ctx.format_month.call(month)}
                     }
                 }
             }
             span { class: "calendar-month-select-value",
-                {calendar.format_month.call(month)}
+                {base_ctx.format_month.call(month)}
                 svg {
                     class: "select-expand-icon",
                     view_box: "0 0 24 24",
@@ -1644,14 +1706,16 @@ pub struct CalendarSelectYearProps {
 /// ```
 #[component]
 pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
-    let calendar: BaseCalendarContext = use_context();
-    let view_date = calendar.view_date();
+    let base_ctx: BaseCalendarContext = use_context();
+    let view_ctx: CalendarViewContext = use_context();
+
+    let view_date = view_ctx.view_date();
     let year = view_date.year();
 
     let years = use_memo(move || {
         // Get the current view date from context
-        let view_date = (calendar.view_date)();
-        let (min_date, max_date) = calendar.enabled_date_range.to_min_max();
+        let view_date = (view_ctx.view_date)();
+        let (min_date, max_date) = base_ctx.enabled_date_range.to_min_max();
         let month = view_date.month();
         let mut min_year = min_date.year();
         if replace_month(min_date, month) < min_date {
@@ -1670,16 +1734,16 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
             select {
                 aria_label: "Year",
                 onchange: move |e| {
-                    let mut view_date = calendar.view_date();
+                    let mut view_date = (base_ctx.view_date)();
                     let year = e.value().parse().unwrap_or(view_date.year());
-                    view_date = view_date.replace_year(year).unwrap_or(view_date);
-                    calendar.set_view_date(view_date);
+                    view_date = view_ctx.replace_year(view_date, year);
+                    base_ctx.set_view_date(view_date);
                 },
                 ..props.attributes,
                 for year in years() {
                     option {
                         value: year,
-                        selected: calendar.view_date().year() == year,
+                        selected: base_ctx.view_date().year() == year,
                         "{year}"
                     }
                 }
@@ -1862,12 +1926,11 @@ fn use_day_mounted_ref(
 fn SingleCalendarDay(props: CalendarDayProps) -> Element {
     let CalendarDayProps { date, attributes } = props;
     let mut base_ctx: BaseCalendarContext = use_context();
+    let view_ctx: CalendarViewContext = use_context();
     let day = date.day();
-    let view_date = (base_ctx.view_date)();
-    let grid_ctx: GridContext = use_context();
-    let month =
-        use_memo(move || relative_calendar_month(date, &base_ctx, (grid_ctx.current_month)()));
-    let in_current_month = month.read().current_month();
+    let view_date = (view_ctx.view_date)();
+    let month = relative_calendar_month(date, &base_ctx, view_date.month());
+    let in_current_month = month.current_month();
     let is_focused = move || base_ctx.is_focused(date);
     let is_today = date == base_ctx.today;
     let is_unavailable = base_ctx.is_unavailable(date);
@@ -1889,7 +1952,7 @@ fn SingleCalendarDay(props: CalendarDayProps) -> Element {
         if (base_ctx.disabled)() || is_unavailable {
             return;
         }
-        let view_date = (base_ctx.view_date)();
+        let view_date = (view_ctx.view_date)();
         let date = view_date.replace_day(day).unwrap();
         ctx.set_selected_date.call((!is_selected()).then_some(date));
         base_ctx.focused_date.set(Some(date));
@@ -1907,12 +1970,8 @@ fn SingleCalendarDay(props: CalendarDayProps) -> Element {
     rsx! {
         button {
             class: "calendar-grid-cell",
-            type: "button",
-            tabindex: if date == focusable_date {
-                "0"
-            } else {
-                "-1"
-            },
+            r#type: "button",
+            tabindex: if date == focusable_date { "0" } else { "-1" },
             aria_label: aria_label(&props.date),
             "data-today": is_today,
             "data-selected": is_selected(),
@@ -1942,11 +2001,10 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
     let CalendarDayProps { date, attributes } = props;
     let mut base_ctx: BaseCalendarContext = use_context();
     let day = date.day();
-    let view_date = (base_ctx.view_date)();
-    let grid_ctx: GridContext = use_context();
-    let month =
-        use_memo(move || relative_calendar_month(date, &base_ctx, (grid_ctx.current_month)()));
-    let in_current_month = month.read().current_month();
+    let view_ctx: CalendarViewContext = use_context();
+    let view_date = (view_ctx.view_date)();
+    let month = relative_calendar_month(date, &base_ctx, view_date.month());
+    let in_current_month = month.current_month();
     let is_focused = move || base_ctx.is_focused(date);
     let is_today = date == base_ctx.today;
     let is_unavailable = base_ctx.is_unavailable(date);
@@ -1977,7 +2035,7 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             return;
         }
 
-        let view_date = (base_ctx.view_date)();
+        let view_date = (view_ctx.view_date)();
         let date = view_date
             .replace_day(day)
             .ok()
@@ -1998,12 +2056,8 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
     rsx! {
         button {
             class: "calendar-grid-cell",
-            type: "button",
-            tabindex: if date == focusable_date {
-                "0"
-            } else {
-                "-1"
-            },
+            r#type: "button",
+            tabindex: if date == focusable_date { "0" } else { "-1" },
             aria_label: aria_label(&props.date),
             "data-disabled": is_disabled(),
             "data-today": if is_today { true },

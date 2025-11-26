@@ -27,6 +27,7 @@ struct BaseDatePickerContext {
     focus: FocusState,
     enabled_date_range: DateRange,
     available_ranges: Memo<AvailableRanges>,
+    month_count: u8,
 }
 
 /// The context provided by the [`DatePicker`] component to its children.
@@ -71,6 +72,10 @@ pub struct DatePickerProps {
     /// Upper limit of the range of available dates
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
+
+    /// Specify how many months are visible at once
+    #[props(default = 1)]
+    pub month_count: u8,
 
     /// Unavailable dates
     #[props(default)]
@@ -145,6 +150,7 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
         focus,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
         available_ranges,
+        month_count: props.month_count,
     });
 
     use_context_provider(|| DatePickerContext {
@@ -207,6 +213,10 @@ pub struct DateRangePickerProps {
     /// Upper limit of the range of available dates
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
+
+    /// Specify how many months are visible at once
+    #[props(default = 1)]
+    pub month_count: u8,
 
     /// Unavailable dates
     #[props(default)]
@@ -281,6 +291,7 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
         focus,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
         available_ranges,
+        month_count: props.month_count,
     });
 
     let date_range = use_signal(|| (props.selected_range)());
@@ -426,6 +437,10 @@ pub struct DatePickerCalendarProps<T: Properties + PartialEq> {
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
 
+    /// Specify how many months are visible at once
+    #[props(default = 1)]
+    pub month_count: u8,
+
     /// Unavailable dates
     #[props(default)]
     pub disabled_ranges: ReadSignal<Vec<DateRange>>,
@@ -514,6 +529,7 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps<CalendarProps>) -> Elem
             first_day_of_week: props.first_day_of_week,
             min_date,
             max_date,
+            month_count: base_ctx.month_count,
             attributes: props.attributes,
             {props.children}
         }
@@ -568,7 +584,7 @@ pub fn DateRangePickerCalendar(props: DatePickerCalendarProps<RangeCalendarProps
     let mut view_date = use_signal(|| UtcDateTime::now().date());
     use_effect(move || {
         if let Some(r) = (ctx.date_range)() {
-            view_date.set(r.end);
+            view_date.set(r.start);
         }
     });
 
@@ -592,7 +608,7 @@ pub fn DateRangePickerCalendar(props: DatePickerCalendarProps<RangeCalendarProps
             first_day_of_week: props.first_day_of_week,
             min_date,
             max_date,
-            month_count: 2,
+            month_count: base_ctx.month_count,
             attributes: props.attributes,
             {props.children}
         }
