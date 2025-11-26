@@ -173,6 +173,10 @@ impl FocusState {
         self.item_count += 1;
     }
 
+    pub(crate) fn item_count(&self) -> usize {
+        self.item_count.cloned()
+    }
+
     pub(crate) fn remove_item(&mut self, index: usize) {
         self.item_count -= 1;
         if (self.current_focus)() == Some(index) {
