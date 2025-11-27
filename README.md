@@ -33,7 +33,7 @@ Building styled and more featured component libraries on top of Dioxus Primitive
 
 We're still in the early days - Many components are still being created and stabilized.
 
-28/29
+31/31
 
 - [x] Accordion
 - [x] Alert Dialog
@@ -59,6 +59,7 @@ We're still in the early days - Many components are still being created and stab
 - [x] Slider
 - [x] Switch
 - [x] Tabs
+- [x] Textarea
 - [x] Toast
 - [x] Toggle
 - [x] Toggle Group

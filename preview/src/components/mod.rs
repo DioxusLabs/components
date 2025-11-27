@@ -83,6 +83,7 @@ examples!(
     slider,
     switch,
     tabs,
+    textarea,
     toast,
     toggle_group,
     toggle,
