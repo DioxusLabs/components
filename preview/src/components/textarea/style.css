@@ -1,0 +1,120 @@
+/* Base */
+.textarea {
+  width: 100%;
+  min-height: 4rem;
+  padding: 8px 12px;
+  line-height: 1.5;
+  font-family: inherit;
+  color: var(--secondary-color-4);
+  outline: none;
+  resize: vertical;
+  transition: background-color 100ms ease-out, border-color 100ms ease-out, box-shadow 100ms ease-out;
+
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+  border: none;
+  background: none;
+  box-sizing: border-box;
+}
+
+.textarea:disabled {
+  color: var(--secondary-color-5);
+  cursor: not-allowed;
+}
+
+.textarea::placeholder {
+  color: var(--secondary-color-5);
+}
+
+/* Default Variant */
+.textarea[data-style="default"] {
+  border-radius: 0.5rem;
+  background: var(--light, var(--primary-color)) var(--dark, var(--primary-color-3));
+  box-shadow: inset 0 0 0 1px var(--light, var(--primary-color-6)) var(--dark, var(--primary-color-7));
+}
+
+.textarea[data-style="default"]:hover:not(:disabled),
+.textarea[data-style="default"]:focus {
+  background: var(--light, var(--primary-color-4)) var(--dark, var(--primary-color-5));
+  color: var(--secondary-color-1);
+}
+
+/* Fade Variant */
+.textarea[data-style="fade"] {
+  border-radius: 0.5rem;
+  background: var(--light, var(--primary-color)) var(--dark, var(--primary-color-3));
+}
+
+.textarea[data-style="fade"]:hover:not(:disabled),
+.textarea[data-style="fade"]:focus {
+  background: var(--light, var(--primary-color-4)) var(--dark, var(--primary-color-5));
+  color: var(--secondary-color-1);
+}
+
+/* Outline Variant */
+.textarea[data-style="outline"] {
+  padding: 6px 10px;
+  border: 2px solid var(--primary-color-6);
+  border-radius: 0.75rem;
+  background-color: transparent;
+}
+
+.textarea[data-style="outline"]:hover:not(:disabled):not(:focus) {
+  border-color: var(--primary-color-7);
+}
+
+.textarea[data-style="outline"]:focus {
+  border-color: var(--focused-border-color);
+}
+
+.textarea[data-style="outline"]:invalid,
+.textarea[data-style="outline"][aria-invalid="true"] {
+  border-color: var(--primary-error-color);
+}
+
+/* Ghost Variant */
+.textarea[data-style="ghost"] {
+  position: relative;
+  padding-bottom: 6px;
+  border-bottom: 2px solid transparent;
+  background-color: transparent;
+  box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.05);
+}
+
+.textarea[data-style="ghost"]:hover:not(:disabled) {
+  border-bottom-color: var(--primary-color-7);
+}
+
+.textarea[data-style="ghost"]:focus {
+  border-bottom-color: var(--primary-color-6);
+}
+
+.textarea[data-style="ghost"]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background-color: var(--secondary-color-4);
+  transform: scaleX(0);
+  transition: transform 200ms ease-out;
+}
+
+.textarea[data-style="ghost"]:focus::after {
+  transform: scaleX(1);
+}
+
+.textarea[data-style="ghost"]:invalid:hover:not(:disabled),
+.textarea[data-style="ghost"]:invalid:focus,
+.textarea[data-style="ghost"][aria-invalid="true"]:hover:not(:disabled),
+.textarea[data-style="ghost"][aria-invalid="true"]:focus {
+  border-bottom-color: var(--primary-error-color);
+}
+
+.textarea[data-style="ghost"]:invalid::after,
+.textarea[data-style="ghost"][aria-invalid="true"]::after {
+  background-color: var(--primary-error-color);
+}
