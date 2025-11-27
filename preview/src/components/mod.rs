@@ -80,6 +80,7 @@ examples!(
     scroll_area,
     select,
     separator,
+    skeleton,
     slider,
     switch,
     tabs,
