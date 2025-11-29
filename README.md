@@ -33,13 +33,14 @@ Building styled and more featured component libraries on top of Dioxus Primitive
 
 We're still in the early days - Many components are still being created and stabilized.
 
-28/29
+30/30
 
 - [x] Accordion
 - [x] Alert Dialog
 - [x] Aspect Ratio
 - [x] Avatar
 - [x] Calendar
+- [x] Card
 - [x] Checkbox
 - [x] Collapsible
 - [x] Context Menu
