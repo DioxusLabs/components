@@ -83,7 +83,7 @@ examples!(
     slider,
     switch,
     tabs,
-    textarea,
+    textarea[outline, fade, ghost],
     toast,
     toggle_group,
     toggle,

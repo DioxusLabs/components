@@ -19,10 +19,10 @@ pub fn Demo() -> Element {
                 gap: ".5rem",
                 justify_content: "center",
 
-                Label { html_for: "default", "Default" }
+                Label { html_for: "fade", "Fade" }
                 Textarea {
-                    id: "default",
-                    variant: TextareaVariant::Default,
+                    id: "fade",
+                    variant: TextareaVariant::Fade,
                     placeholder: "Enter your description",
                     value: description,
                     oninput: move |e: FormEvent| description.set(e.value()),

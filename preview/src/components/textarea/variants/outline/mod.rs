@@ -18,11 +18,10 @@ pub fn Demo() -> Element {
                 flex_direction: "column",
                 gap: ".5rem",
                 justify_content: "center",
-
-                Label { html_for: "default", "Default" }
+                Label { html_for: "outline", "Outline" }
                 Textarea {
-                    id: "default",
-                    variant: TextareaVariant::Default,
+                    id: "outline",
+                    variant: TextareaVariant::Outline,
                     placeholder: "Enter your description",
                     value: description,
                     oninput: move |e: FormEvent| description.set(e.value()),
