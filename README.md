@@ -40,6 +40,7 @@ We're still in the early days - Many components are still being created and stab
 - [x] Aspect Ratio
 - [x] Avatar
 - [x] Calendar
+- [x] Card
 - [x] Checkbox
 - [x] Collapsible
 - [x] Context Menu
