@@ -154,6 +154,38 @@ fn replace_month(date: Date, month: Month) -> Date {
         .expect("invalid or out-of-range date")
 }
 
+fn gt(lhs_month: Month, rhs_month: Month) -> bool {
+    let lhs = lhs_month as u8;
+    let rhs = rhs_month as u8;
+    lhs > rhs
+}
+
+fn nth_month_prev(date: Date, n: u8) -> Option<Date> {
+    match n {
+        0 => Some(date),
+        n => {
+            let month = date.month();
+            let nth_month: Month = month.nth_prev(n);
+            let year = date.year() - if gt(month, nth_month) { 0 } else { 1 };
+            let max_day = nth_month.length(year);
+            Date::from_calendar_date(year, nth_month, date.day().min(max_day)).ok()
+        }
+    }
+}
+
+fn nth_month_next(date: Date, n: u8) -> Option<Date> {
+    match n {
+        0 => Some(date),
+        n => {
+            let month = date.month();
+            let nth_month = month.nth_next(n);
+            let year = date.year() + if gt(month, nth_month) { 1 } else { 0 };
+            let max_day = nth_month.length(year);
+            Date::from_calendar_date(year, nth_month, date.day().min(max_day)).ok()
+        }
+    }
+}
+
 /// Calendar date range
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct DateRange {
@@ -505,62 +537,63 @@ pub fn Calendar(props: CalendarProps) -> Element {
             role: "application",
             aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
-            for offset in 0..props.month_count {
-                CalendarView { offset,
-                    div {
-                        onkeydown: move |e| {
-                            let Some(focused_date) = (base_ctx.focused_date)() else {
-                                return;
-                            };
-                            let mut set_focused_date = |new_date: Option<Date>| {
-                                let mut view_date = (base_ctx.view_date)();
-                                if let Some(date) = new_date {
-                                    if date.month() != view_date.month() {
-                                        view_date = date.replace_day(1).unwrap();
-                                        (base_ctx.set_view_date)(view_date);
-                                    }
-                                }
-                                match new_date {
-                                    Some(date) => {
-                                        if base_ctx.enabled_date_range.contains(date) {
-                                            base_ctx.focused_date.set(new_date);
-                                        }
-                                    }
-                                    None => base_ctx.focused_date.set(None),
-                                }
-                            };
-                            match e.key() {
-                                Key::ArrowLeft => {
-                                    e.prevent_default();
-                                    set_focused_date(focused_date.previous_day());
-                                }
-                                Key::ArrowRight => {
-                                    e.prevent_default();
-                                    set_focused_date(focused_date.next_day());
-                                }
-                                Key::ArrowUp => {
-                                    e.prevent_default();
-                                    if e.modifiers().shift() {
-                                        if let Some(date) = previous_month(focused_date) {
-                                            set_focused_date(Some(date));
-                                        }
-                                    } else {
-                                        set_focused_date(Some(focused_date.saturating_sub(7.days())));
-                                    }
-                                }
-                                Key::ArrowDown => {
-                                    e.prevent_default();
-                                    if e.modifiers().shift() {
-                                        if let Some(date) = next_month(focused_date) {
-                                            set_focused_date(Some(date));
-                                        }
-                                    } else {
-                                        set_focused_date(Some(focused_date.saturating_add(7.days())));
-                                    }
-                                }
-                                _ => {}
+            onkeydown: move |e| {
+                let Some(focused_date) = (base_ctx.focused_date)() else {
+                    return;
+                };
+                let mut set_focused_date = |new_date: Option<Date>| {
+                    let mut view_date = (base_ctx.view_date)();
+                    if let Some(date) = new_date {
+                        if date.month() != view_date.month() {
+                            view_date = date.replace_day(1).unwrap();
+                            (base_ctx.set_view_date)(view_date);
+                        }
+                    }
+                    match new_date {
+                        Some(date) => {
+                            if base_ctx.enabled_date_range.contains(date) {
+                                base_ctx.focused_date.set(new_date);
                             }
-                        },
+                        }
+                        None => base_ctx.focused_date.set(None),
+                    }
+                };
+                match e.key() {
+                    Key::ArrowLeft => {
+                        e.prevent_default();
+                        set_focused_date(focused_date.previous_day());
+                    }
+                    Key::ArrowRight => {
+                        e.prevent_default();
+                        set_focused_date(focused_date.next_day());
+                    }
+                    Key::ArrowUp => {
+                        e.prevent_default();
+                        if e.modifiers().shift() {
+                            if let Some(date) = previous_month(focused_date) {
+                                set_focused_date(Some(date));
+                            }
+                        } else {
+                            set_focused_date(Some(focused_date.saturating_sub(7.days())));
+                        }
+                    }
+                    Key::ArrowDown => {
+                        e.prevent_default();
+                        if e.modifiers().shift() {
+                            if let Some(date) = next_month(focused_date) {
+                                set_focused_date(Some(date));
+                            }
+                        } else {
+                            set_focused_date(Some(focused_date.saturating_add(7.days())));
+                        }
+                    }
+                    _ => {}
+                }
+            },
+            for offset in 0..props.month_count {
+                CalendarView {
+                    offset,
+                    div {
                         ..props.attributes.clone(),
                         {props.children.clone()}
                     }
@@ -763,83 +796,82 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
             role: "application",
             aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
+            onkeydown: move |e| {
+                let Some(mut focused_date) = (base_ctx.focused_date)() else {
+                    return;
+                };
+                if let (Some(range), Some(date)) = (
+                    (ctx.highlighted_range)(),
+                    (ctx.anchor_date)(),
+                ) {
+                    if date != range.start {
+                        focused_date = range.start
+                    } else {
+                        focused_date = range.end
+                    }
+                }
+                let mut set_focused_date = |new_date: Option<Date>| {
+                    let mut view_date = (base_ctx.view_date)();
+                    if let Some(date) = new_date {
+                        if date.month() != view_date.month() {
+                            view_date = date.replace_day(1).unwrap();
+                            (base_ctx.set_view_date)(view_date);
+                        }
+                    }
+                    match new_date {
+                        Some(date) => {
+                            if base_ctx.enabled_date_range.contains(date) {
+                                base_ctx.focused_date.set(new_date);
+                                let date = match base_ctx.available_range() {
+                                    Some(range) => range.clamp(date),
+                                    None => date,
+                                };
+                                ctx.set_hovered_date(date);
+                            }
+                        }
+                        None => base_ctx.focused_date.set(None),
+                    }
+                };
+                match e.key() {
+                    Key::ArrowLeft => {
+                        e.prevent_default();
+                        set_focused_date(focused_date.previous_day());
+                    }
+                    Key::ArrowRight => {
+                        e.prevent_default();
+                        set_focused_date(focused_date.next_day());
+                    }
+                    Key::ArrowUp => {
+                        e.prevent_default();
+                        if e.modifiers().shift() {
+                            if let Some(date) = previous_month(focused_date) {
+                                set_focused_date(Some(date));
+                            }
+                        } else {
+                            set_focused_date(Some(focused_date.saturating_sub(7.days())));
+                        }
+                    }
+                    Key::ArrowDown => {
+                        e.prevent_default();
+                        if e.modifiers().shift() {
+                            if let Some(date) = next_month(focused_date) {
+                                set_focused_date(Some(date));
+                            }
+                        } else {
+                            set_focused_date(Some(focused_date.saturating_add(7.days())));
+                        }
+                    }
+                    Key::Escape => {
+                        ctx.reset_selection((props.selected_range)());
+                    }
+                    _ => {}
+                }
+            },
             for offset in 0..props.month_count {
-                CalendarView { offset,
+                CalendarView {
+                    offset,
                     div {
-                        onkeydown: move |e| {
-                            let Some(mut focused_date) = (base_ctx.focused_date)() else {
-                                return;
-                            };
-                            if let (Some(range), Some(date)) = (
-                                (ctx.highlighted_range)(),
-                                (ctx.anchor_date)(),
-                            ) {
-                                if date != range.start {
-                                    focused_date = range.start
-                                } else {
-                                    focused_date = range.end
-                                }
-                            }
-
-                            let mut set_focused_date = |new_date: Option<Date>| {
-                                let mut view_date = (base_ctx.view_date)();
-                                if let Some(date) = new_date {
-                                    if date.month() != view_date.month() {
-                                        view_date = date.replace_day(1).unwrap();
-                                        (base_ctx.set_view_date)(view_date);
-                                    }
-                                }
-                                match new_date {
-                                    Some(date) => {
-                                        if base_ctx.enabled_date_range.contains(date) {
-                                            base_ctx.focused_date.set(new_date);
-                                            let date = match base_ctx.available_range() {
-                                                Some(range) => range.clamp(date),
-                                                None => date,
-                                            };
-                                            ctx.set_hovered_date(date);
-                                        }
-                                    }
-                                    None => base_ctx.focused_date.set(None),
-                                }
-                            };
-                            match e.key() {
-                                Key::ArrowLeft => {
-                                    e.prevent_default();
-                                    set_focused_date(focused_date.previous_day());
-                                }
-                                Key::ArrowRight => {
-                                    e.prevent_default();
-                                    set_focused_date(focused_date.next_day());
-                                }
-                                Key::ArrowUp => {
-                                    e.prevent_default();
-                                    if e.modifiers().shift() {
-                                        if let Some(date) = previous_month(focused_date) {
-                                            set_focused_date(Some(date));
-                                        }
-                                    } else {
-                                        set_focused_date(Some(focused_date.saturating_sub(7.days())));
-                                    }
-                                }
-                                Key::ArrowDown => {
-                                    e.prevent_default();
-                                    if e.modifiers().shift() {
-                                        if let Some(date) = next_month(focused_date) {
-                                            set_focused_date(Some(date));
-                                        }
-                                    } else {
-                                        set_focused_date(Some(focused_date.saturating_add(7.days())));
-                                    }
-                                }
-                                Key::Escape => {
-                                    ctx.reset_selection((props.selected_range)());
-                                }
-                                _ => {}
-                            }
-                        },
                         ..props.attributes.clone(),
-
                         {props.children.clone()}
                     }
                 }
@@ -866,61 +898,35 @@ struct CalendarViewContext {
 
 impl CalendarViewContext {
     fn set_view_date(&mut self, view_date: Date) {
-        let new_date = match self.offset {
-            0 => view_date,
-            n => {
-                let month = view_date.month();
-                let nth_month = month.nth_next(n);
-                let year = view_date.year() + if Self::gt(month, nth_month) { 1 } else { 0 };
-                Date::from_calendar_date(year, nth_month, 1).unwrap_or(view_date)
-            }
-        };
-
+        let new_date = nth_month_next(view_date, self.offset).unwrap_or(view_date);
         self.view_date.set(new_date);
     }
 
-    fn nth_month_prev(&self, date: Date) -> Option<Date> {
-        let month = date.month();
-        let nth_month: Month = month.nth_prev(self.offset.max(1));
-        let year = date.year() - if Self::gt(month, nth_month) { 0 } else { 1 };
-        Date::from_calendar_date(year, nth_month, 1).ok()
+    fn sub_months(&self, date: Date) -> Option<Date> {
+        nth_month_prev(date, self.offset.max(1))
     }
 
-    fn nth_month_next(&self, date: Date) -> Option<Date> {
-        let month = date.month();
-        let nth_month = month.nth_next(self.offset.max(1));
-        let year = date.year() + if Self::gt(month, nth_month) { 1 } else { 0 };
-        Date::from_calendar_date(year, nth_month, 1).ok()
+    fn add_months(&self, date: Date) -> Option<Date> {
+        nth_month_next(date, self.offset.max(1))
     }
 
     fn replace_year(&self, date: Date, year: i32) -> Date {
         let month = date.month();
         let view_month = (self.view_date)().month();
-        let year = year - if Self::gt(month, view_month) { 1 } else { 0 };
+        let year = year - if gt(month, view_month) { 1 } else { 0 };
         date.replace_year(year).unwrap_or(date)
     }
 
     fn replace_month(&self, date: Date, month: Month) -> Date {
         let view_date = (self.view_date)();
         let new_month = month.nth_prev(self.offset);
-        let year = view_date.year()
-            - if Self::gt(month, view_date.month()) {
-                1
-            } else {
-                0
-            };
+        let year = view_date.year() - if gt(month, view_date.month()) { 1 } else { 0 };
         Date::from_calendar_date(year, new_month, 1).unwrap_or(date)
     }
 
     // Get the current view date
     fn view_date(&self) -> Date {
         self.view_date.cloned()
-    }
-
-    fn gt(lhs_month: Month, rhs_month: Month) -> bool {
-        let lhs = lhs_month as u8;
-        let rhs = rhs_month as u8;
-        lhs > rhs
     }
 }
 
@@ -1162,7 +1168,7 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
     let handle_prev_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        if let Some(date) = view_ctx.nth_month_prev(current_view) {
+        if let Some(date) = view_ctx.sub_months(current_view) {
             ctx.set_view_date.call(date)
         }
     };
@@ -1267,7 +1273,7 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     let handle_next_month = move |e: Event<MouseData>| {
         e.prevent_default();
         let current_view = (ctx.view_date)();
-        if let Some(date) = view_ctx.nth_month_next(current_view) {
+        if let Some(date) = view_ctx.add_months(current_view) {
             ctx.set_view_date.call(date)
         }
     };
