@@ -58,21 +58,21 @@ test('sheet opens from different sides', async ({ page }) => {
   // Test Top
   await page.getByRole('button', { name: 'Top' }).click();
   await expect(sheet).toHaveAttribute('data-state', 'open');
-  await expect(sheetContent).toHaveClass(/sheet-top/);
+  await expect(sheetContent).toHaveAttribute('data-side', 'top');
   await page.keyboard.press('Escape');
   await expect(sheet).toHaveCount(0);
 
   // Test Bottom
   await page.getByRole('button', { name: 'Bottom' }).click();
   await expect(sheet).toHaveAttribute('data-state', 'open');
-  await expect(sheetContent).toHaveClass(/sheet-bottom/);
+  await expect(sheetContent).toHaveAttribute('data-side', 'bottom');
   await page.keyboard.press('Escape');
   await expect(sheet).toHaveCount(0);
 
   // Test Left
   await page.getByRole('button', { name: 'Left' }).click();
   await expect(sheet).toHaveAttribute('data-state', 'open');
-  await expect(sheetContent).toHaveClass(/sheet-left/);
+  await expect(sheetContent).toHaveAttribute('data-side', 'left');
   await page.keyboard.press('Escape');
   await expect(sheet).toHaveCount(0);
 });
