@@ -57,6 +57,7 @@ We're still in the early days - Many components are still being created and stab
 - [x] Scroll Area
 - [x] Select
 - [x] Separator
+- [x] Sheet
 - [x] Slider
 - [x] Switch
 - [x] Tabs

@@ -82,6 +82,7 @@ examples!(
     select,
     separator,
     skeleton,
+    sheet,
     slider,
     switch,
     tabs,
