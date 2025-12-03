@@ -64,16 +64,16 @@ pub fn SheetContent(
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
     children: Element,
 ) -> Element {
-    let side_class = format!("sheet sheet-{}", side.as_str());
     let class = class
-        .map(|c| format!("{side_class} {c}"))
-        .unwrap_or(side_class);
+        .map(|c| format!("sheet {c}"))
+        .unwrap_or("sheet".to_string());
 
     rsx! {
         dialog::DialogContent {
             class,
             id,
             "data-slot": "sheet-content",
+            "data-side": side.as_str(),
             attributes,
             {children}
             SheetClose { class: "sheet-close",

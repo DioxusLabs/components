@@ -52,73 +52,73 @@
   will-change: transform;
 }
 
-.sheet-right,
-.sheet-left {
+.sheet[data-side="right"],
+.sheet[data-side="left"] {
   top: 0;
   bottom: 0;
   width: 75%;
   max-width: 24rem;
 }
 
-.sheet-right {
+.sheet[data-side="right"] {
   right: 0;
   border-left: 1px solid var(--primary-color-6);
   transform: translateX(100%);
 }
 
-.sheet-left {
+.sheet[data-side="left"] {
   left: 0;
   border-right: 1px solid var(--primary-color-6);
   transform: translateX(-100%);
 }
 
-.sheet-top,
-.sheet-bottom {
+.sheet[data-side="top"],
+.sheet[data-side="bottom"] {
   right: 0;
   left: 0;
 }
 
-.sheet-top {
+.sheet[data-side="top"] {
   top: 0;
   border-bottom: 1px solid var(--primary-color-6);
   transform: translateY(-100%);
 }
 
-.sheet-bottom {
+.sheet[data-side="bottom"] {
   bottom: 0;
   border-top: 1px solid var(--primary-color-6);
   transform: translateY(100%);
 }
 
-.sheet-root[data-state="open"] .sheet-right {
+.sheet-root[data-state="open"] .sheet[data-side="right"] {
   animation: slide-in-right 500ms ease-out forwards;
 }
 
-.sheet-root[data-state="open"] .sheet-left {
+.sheet-root[data-state="open"] .sheet[data-side="left"] {
   animation: slide-in-left 500ms ease-out forwards;
 }
 
-.sheet-root[data-state="open"] .sheet-top {
+.sheet-root[data-state="open"] .sheet[data-side="top"] {
   animation: slide-in-top 500ms ease-out forwards;
 }
 
-.sheet-root[data-state="open"] .sheet-bottom {
+.sheet-root[data-state="open"] .sheet[data-side="bottom"] {
   animation: slide-in-bottom 500ms ease-out forwards;
 }
 
-.sheet-root[data-state="closed"] .sheet-right {
+.sheet-root[data-state="closed"] .sheet[data-side="right"] {
   animation: slide-out-right 300ms ease-in forwards;
 }
 
-.sheet-root[data-state="closed"] .sheet-left {
+.sheet-root[data-state="closed"] .sheet[data-side="left"] {
   animation: slide-out-left 300ms ease-in forwards;
 }
 
-.sheet-root[data-state="closed"] .sheet-top {
+.sheet-root[data-state="closed"] .sheet[data-side="top"] {
   animation: slide-out-top 300ms ease-in forwards;
 }
 
-.sheet-root[data-state="closed"] .sheet-bottom {
+.sheet-root[data-state="closed"] .sheet[data-side="bottom"] {
   animation: slide-out-bottom 300ms ease-in forwards;
 }
 
