@@ -66,7 +66,7 @@ pub fn SheetContent(
 ) -> Element {
     let side_class = format!("sheet sheet-{}", side.as_str());
     let class = class
-        .map(|c| format!("{} {}", side_class, c))
+        .map(|c| format!("{side_class} {c}"))
         .unwrap_or(side_class);
 
     rsx! {

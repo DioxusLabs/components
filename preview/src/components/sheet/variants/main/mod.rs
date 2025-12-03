@@ -61,7 +61,7 @@ pub fn Demo() -> Element {
                     Button { "Save changes" }
                     SheetClose {
                         r#as: |attributes| rsx! {
-                            Button { variant: ButtonVariant::Outline, attributes: attributes, "Cancel" }
+                            Button { variant: ButtonVariant::Outline, attributes, "Cancel" }
                         },
                     }
                 }
