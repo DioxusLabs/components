@@ -13,13 +13,25 @@ pub struct DialogCtx {
     open: Memo<bool>,
     /// Callback to set the open state of the dialog.
     #[allow(unused)]
-    pub set_open: Callback<bool>,
+    set_open: Callback<bool>,
 
     // Whether the dialog is a modal and should capture focus.
     #[allow(unused)]
     is_modal: ReadSignal<bool>,
     dialog_labelledby: Signal<String>,
     dialog_describedby: Signal<String>,
+}
+
+impl DialogCtx {
+    /// Returns whether the dialog is open.
+    pub fn is_open(&self) -> bool {
+        self.open.cloned()
+    }
+
+    /// Sets the open state of the dialog.
+    pub fn set_open(&self, open: bool) {
+        self.set_open.call(open);
+    }
 }
 
 /// The props for the [`DialogRoot`] component

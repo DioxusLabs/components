@@ -144,7 +144,7 @@ pub fn SheetClose(
     let ctx: DialogCtx = use_context();
 
     let mut merged_attributes: Vec<Attribute> = vec![onclick(move |_| {
-        ctx.set_open.call(false);
+        ctx.set_open(false);
     })];
     merged_attributes.extend(attributes);
 
