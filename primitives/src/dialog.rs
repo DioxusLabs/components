@@ -6,12 +6,14 @@ use dioxus::prelude::*;
 use crate::use_global_escape_listener;
 use crate::{use_animated_open, use_controlled, use_id_or, use_unique_id, FOCUS_TRAP_JS};
 
+/// Context for the [`DialogRoot`] component
 #[derive(Clone, Copy)]
-struct DialogCtx {
+pub struct DialogCtx {
     #[allow(unused)]
     open: Memo<bool>,
+    /// Callback to set the open state of the dialog.
     #[allow(unused)]
-    set_open: Callback<bool>,
+    pub set_open: Callback<bool>,
 
     // Whether the dialog is a modal and should capture focus.
     #[allow(unused)]
