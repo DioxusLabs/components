@@ -187,11 +187,11 @@ body {
 }
 
 .component-description {
-    margin-left: 5vw;
+    max-width: 90vw;
     margin-right: 5vw;
+    margin-left: 5vw;
     font-size: 1em;
     overflow-x: scroll;
-    max-width: 90vw;
 }
 
 .component-installation {
