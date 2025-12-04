@@ -1,10 +1,10 @@
 #hero {
     display: flex;
+    height: 40rem;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     margin: 0;
-    height: 40rem;
 }
 
 #hero > h1,
@@ -36,24 +36,26 @@
     position: absolute;
     top: 38rem;
     left: 50%;
-    transform: translate(-50%, -50%);
     width: 20px;
     height: 20px;
+    animation: scroll-down-icon-animation 3000ms ease-in-out infinite;
     fill: none;
     stroke: var(--secondary-color-4);
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 2;
-    animation: scroll-down-icon-animation 3000ms ease-in-out infinite;
+    transform: translate(-50%, -50%);
 }
 
 @keyframes scroll-down-icon-animation {
     0% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(10px);
     }
+
     100% {
         transform: translateY(0);
     }
@@ -62,11 +64,11 @@
 #hero-search-container {
     display: flex;
     width: 80%;
-    padding: 10px;
     max-width: 800px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 10px;
     margin: auto;
 }
 
@@ -102,10 +104,10 @@
 }
 
 .explaination {
-    margin-bottom: 1rem;
-    padding-left: 5vw;
-    padding-right: 5vw;
     min-width: 50vw;
+    padding-right: 5vw;
+    padding-left: 5vw;
+    margin-bottom: 1rem;
     text-align: center;
 }
 
@@ -116,8 +118,8 @@
 
 .explaination-box {
     display: flex;
-    max-width: 30vw;
     width: 10rem;
+    max-width: 30vw;
     min-height: 10rem;
     box-sizing: border-box;
     flex-direction: column;
