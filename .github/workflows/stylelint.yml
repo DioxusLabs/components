@@ -45,6 +45,7 @@ jobs:
         run: cd ./playwright && npm ci
       - name: Stylelint
         uses: reviewdog/action-stylelint@dd2b435cc6a7c82705307a9dee740c9bbaa10411 # v1.30.2
+        workdir: ./preview
         with:
           reporter: github-pr-review # Change reporter.
           stylelint_input: '**/*.css'
