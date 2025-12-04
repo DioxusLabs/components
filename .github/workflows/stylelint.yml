@@ -44,4 +44,4 @@ jobs:
       - name: Install dependencies
         run: cd ./playwright && npm ci
       - name: Stylelint
-        run: cd ./playwright && npx stylelint "**/*.css" --max-warnings=0
+        run: cd ./preview && npx stylelint "**/*.css" --max-warnings=0
