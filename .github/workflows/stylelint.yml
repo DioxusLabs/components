@@ -44,8 +44,4 @@ jobs:
       - name: Install dependencies
         run: cd ./playwright && npm ci
       - name: Stylelint
-        uses: reviewdog/action-stylelint@v1.30.2
-        with:
-          workdir: ./preview
-          reporter: github-pr-review # Change reporter.
-          stylelint_input: '**/*.css'
+        run: cd ./playwright && npx stylelint "**/*.css" --max-warnings=0
