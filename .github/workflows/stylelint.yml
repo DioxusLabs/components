@@ -42,6 +42,6 @@ jobs:
         with:
           node-version: lts/*
       - name: Install dependencies
-        run: cd ./playwright && npm ci
+        run: npm install -g stylelint stylelint-config-standard
       - name: Stylelint
         run: cd ./preview && npx stylelint "**/*.css" --max-warnings=0
