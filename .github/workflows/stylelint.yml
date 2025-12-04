@@ -1,0 +1,45 @@
+name: Stylelint Checks
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - /**
+      - preview/**/*.rs
+      - preview/**/Cargo.toml
+      - primitives/**/*.rs
+      - primitives/**/Cargo.toml
+      - .github/**
+      - Cargo.toml
+
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - main
+    paths:
+      - /**
+      - preview/**/*.rs
+      - preview/**/Cargo.toml
+      - primitives/**/*.rs
+      - primitives/**/Cargo.toml
+      - .github/**
+      - Cargo.toml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stylelint:
+    if: github.event.pull_request.draft == false
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      # Do our best to cache the toolchain and node install steps
+      - uses: actions/checkout@v4
+      - name: Stylelint
+        uses: reviewdog/action-stylelint@dd2b435cc6a7c82705307a9dee740c9bbaa10411 # v1.30.2
+        with:
+          reporter: github-pr-review # Change reporter.
+          stylelint_input: '**/*.css'
