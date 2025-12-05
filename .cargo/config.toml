@@ -1,0 +1,19 @@
+[unstable]
+build-std = ["std", "panic_abort", "core", "alloc"]
+build-std-features = ["panic_immediate_abort"]
+
+[build]
+rustflags = [
+    "-Clto",
+    "-Zvirtual-function-elimination",
+    "-Zlocation-detail=none"
+]
+
+[profile.release]
+opt-level = "z"
+debug = false
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+incremental = false
