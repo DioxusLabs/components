@@ -60,6 +60,11 @@
 }
 
 /* Calendar Grid */
+.calendar-div {
+    display: flex;
+    flex-direction: row;
+}
+
 .calendar-grid {
     width: 100%;
     padding: 0.5rem;

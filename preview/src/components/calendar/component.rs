@@ -22,6 +22,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
                 first_day_of_week: props.first_day_of_week,
                 min_date: props.min_date,
                 max_date: props.max_date,
+                month_count: props.month_count,
                 disabled_ranges: props.disabled_ranges,
                 attributes: props.attributes,
                 {props.children}
@@ -47,6 +48,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
                 first_day_of_week: props.first_day_of_week,
                 min_date: props.min_date,
                 max_date: props.max_date,
+                month_count: props.month_count,
                 disabled_ranges: props.disabled_ranges,
                 attributes: props.attributes,
                 {props.children}
