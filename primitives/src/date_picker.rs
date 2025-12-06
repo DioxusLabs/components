@@ -169,7 +169,7 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
     }
 }
 
-/// The context provided by the [`RangeCalendar`] component to its children.
+/// The context provided by the [`DateRangePicker`] component to its children.
 #[derive(Copy, Clone)]
 pub struct DateRangePickerContext {
     // Currently selected date range
@@ -397,7 +397,7 @@ pub fn DatePickerPopover(props: DatePickerPopoverProps) -> Element {
     }
 }
 
-/// The props for the [`Calendar`] and [`RangeCalendar`] component.
+/// The props for the Calendar component.
 #[allow(unpredictable_function_pointer_comparisons)]
 #[derive(Props, Clone, PartialEq)]
 pub struct DatePickerCalendarProps<T: Properties + PartialEq> {
