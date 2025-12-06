@@ -27,8 +27,7 @@ pub fn Demo() -> Element {
                 CalendarHeader {
                     CalendarNavigation {
                         CalendarPreviousMonthButton {}
-                        CalendarSelectMonth {}
-                        CalendarSelectYear {}
+                        CalendarMonthTitle {}
                         CalendarNextMonthButton {}
                     }
                 }
