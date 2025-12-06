@@ -1,0 +1,49 @@
+name: Stylelint Checks
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - /**
+      - preview/**/*.rs
+      - preview/**/Cargo.toml
+      - primitives/**/*.rs
+      - primitives/**/Cargo.toml
+      - .github/**
+      - Cargo.toml
+
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - main
+    paths:
+      - /**
+      - preview/**/*.rs
+      - preview/**/Cargo.toml
+      - primitives/**/*.rs
+      - primitives/**/Cargo.toml
+      - .github/**
+      - Cargo.toml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stylelint:
+    if: github.event.pull_request.draft == false
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      # Do our best to cache the toolchain and node install steps
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: |
+          npm install --save-dev stylelint-config-idiomatic-order
+          npm install -g stylelint stylelint-config-standard
+      - name: Stylelint
+        run: cd ./preview && npx stylelint "**/*.css" --max-warnings=0

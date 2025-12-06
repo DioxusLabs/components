@@ -94,12 +94,12 @@
 .calendar-grid-cell {
     width: 2rem;
     border: none;
+    border-radius: 0.5rem;
     aspect-ratio: 1;
     background: none;
     color: var(--secondary-color-4);
     cursor: pointer;
     font-size: 14px;
-    border-radius: 0.5rem;
 }
 
 .calendar-grid-cell[data-month="current"]:not([data-disabled="true"]):hover {
@@ -130,54 +130,54 @@
 
 .calendar-grid-cell[data-month="current"][data-unavailable="true"] {
     color: var(--secondary-color-6);
-    text-decoration: line-through;
     cursor: not-allowed;
+    text-decoration: line-through;
 }
 
 .calendar-grid-week td {
-    padding-left: 0;
     padding-right: 0;
+    padding-left: 0;
 }
 
 .calendar-grid-week td:first-child .calendar-grid-cell {
-    border-top-left-radius: 0.5rem;
     border-bottom-left-radius: 0.5rem;
+    border-top-left-radius: 0.5rem;
 }
 
 .calendar-grid-week td:last-child .calendar-grid-cell {
-    border-top-right-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
 }
 
 .calendar-grid-cell[data-month="last"][data-selection-between="true"],
 .calendar-grid-cell[data-month="next"][data-selection-between="true"] {
+    border-radius: 0;
     background-color: var(--primary-color-5);
     color: var(--secondary-color-5);
-    border-radius: 0;
 }
 
 .calendar-grid-cell[data-month="current"][data-selection-between="true"] {
+    border-radius: 0;
     background-color: var(--primary-color-5);
     color: var(--secondary-color-4);
-    border-radius: 0;
 }
 
 td:has(.calendar-grid-cell[data-selection-start="true"]) {
-    background-color: var(--primary-color-5);
-    border-top-left-radius: 0.5rem;
-    border-bottom-left-radius: 0.5rem;
     padding: 0;
-    margin-top: 1;
-    margin-bottom: 1;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    background-color: var(--primary-color-5);
+    border-bottom-left-radius: 0.5rem;
+    border-top-left-radius: 0.5rem;
 }
 
 td:has(.calendar-grid-cell[data-selection-end="true"]) {
-    background-color: var(--primary-color-5);
-    border-top-right-radius: 0.5rem;
-    border-bottom-right-radius: 0.5rem;
     padding: 0;
-    margin-top: 1;
-    margin-bottom: 1;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    background-color: var(--primary-color-5);
+    border-bottom-right-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
 }
 
 .calendar-grid-cell[data-month="current"][data-selected="true"]:hover {
