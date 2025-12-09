@@ -3,7 +3,7 @@
 use crate::focus::FocusState;
 use dioxus::prelude::*;
 use dioxus_core::Task;
-use dioxus_time::sleep;
+use dioxus_sdk_time::sleep;
 
 use std::{any::Any, rc::Rc, time::Duration};
 
