@@ -6,7 +6,7 @@ use crate::{
 };
 use dioxus::dioxus_core::DynamicNode;
 use dioxus::prelude::*;
-use dioxus_time::use_timeout;
+use dioxus_sdk_time::use_timeout;
 use std::collections::VecDeque;
 use std::time::Duration;
 
