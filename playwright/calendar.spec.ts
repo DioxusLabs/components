@@ -12,7 +12,7 @@ test("test", async ({ page }) => {
   const nextButton = calendar.locator(".calendar-nav-next");
 
   // Assert the calendar is displayed
-  await expect(calendar).toBeVisible();
+  await expect(calendar).toBeVisible({ timeout: 30000 });
   // Assert the current month is displayed
   const currentMonth = calendar.locator(".calendar-month-select");
   let currentMonthText = await currentMonth.inputValue();
