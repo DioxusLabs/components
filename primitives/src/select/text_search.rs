@@ -18,6 +18,7 @@ pub(super) fn best_match(
 
     options
         .iter()
+        .filter(|o| !o.disabled)
         .map(|opt| {
             let value = &opt.text_value;
             let value_characters: Box<[_]> = value.chars().collect();
@@ -539,18 +540,21 @@ mod tests {
                 value: RcPartialEqValue::new("apple"),
                 text_value: "Apple".to_string(),
                 id: "apple".to_string(),
+                disabled: false,
             },
             OptionState {
                 tab_index: 1,
                 value: RcPartialEqValue::new("banana"),
                 text_value: "Banana".to_string(),
                 id: "banana".to_string(),
+                disabled: false,
             },
             OptionState {
                 tab_index: 2,
                 value: RcPartialEqValue::new("cherry"),
                 text_value: "Cherry".to_string(),
                 id: "cherry".to_string(),
+                disabled: false,
             },
         ];
 
@@ -605,12 +609,14 @@ mod tests {
                 value: RcPartialEqValue::new("ф"),
                 text_value: "ф".to_string(),
                 id: "ф".to_string(),
+                disabled: false,
             },
             OptionState {
                 tab_index: 1,
                 value: RcPartialEqValue::new("banana"),
                 text_value: "Banana".to_string(),
                 id: "banana".to_string(),
+                disabled: false,
             },
         ];
 

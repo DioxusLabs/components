@@ -73,11 +73,119 @@ pub(super) struct SelectContext {
     pub typeahead_clear_task: Signal<Option<Task>>,
     /// Timeout before clearing typeahead buffer
     pub typeahead_timeout: ReadSignal<Duration>,
-    /// The initial element to focus once the list is rendered
-    pub initial_focus: Signal<Option<usize>>,
+
+    /// The initial element to focus once the list is rendered<br>
+    /// true: last element<br>
+    /// false: first element
+    pub initial_focus_last: Signal<Option<bool>>,
 }
 
 impl SelectContext {
+    /// custom implementation for `FocusState::focus_next`
+    pub(crate) fn focus_next(&mut self) {
+        let current_focus = self.focus_state.recent_focus();
+        let mut new_focus = current_focus.unwrap_or_default();
+        let start_focus = current_focus.unwrap_or_default();
+        let item_count = (self.focus_state.item_count)();
+        let roving_loop = (self.focus_state.roving_loop)();
+        let options = self.options.read();
+
+        loop {
+            new_focus = new_focus.saturating_add(1);
+            if new_focus >= item_count {
+                new_focus = match roving_loop {
+                    true => 0,
+                    false => item_count.saturating_sub(1),
+                }
+            }
+
+            // get value of the option
+            let disabled = options.iter().find(|opt| opt.tab_index == new_focus).map(|e| e.disabled).unwrap_or(false);
+
+            // this fails if the current_focus at the start is None
+            if !disabled || new_focus == start_focus {
+                break;
+            }
+        }
+
+        self.focus_state.set_focus(Some(new_focus));
+    }
+
+    /// custom implementation for `FocusState::focus_prev`
+    pub(crate) fn focus_prev(&mut self) {
+        let current_focus = self.focus_state.recent_focus();
+        let mut new_focus = current_focus.unwrap_or_default();
+        let start_focus = current_focus.unwrap_or_default();
+        let item_count = (self.focus_state.item_count)();
+        let roving_loop = (self.focus_state.roving_loop)();
+        let options = self.options.read();
+
+        loop {
+            let old_focus = new_focus;
+            new_focus = new_focus.saturating_sub(1);
+
+            if old_focus == 0 && roving_loop {
+                new_focus = item_count.saturating_sub(1);
+            }
+
+            // get value of the option
+            let disabled = options.iter().find(|opt| opt.tab_index == new_focus).map(|e| e.disabled).unwrap_or(false);
+
+            if !disabled || new_focus == start_focus {
+                break;
+            }
+        }
+
+        self.focus_state.set_focus(Some(new_focus));
+    }
+
+    /// custom implementation for `FocusState::focus_last`
+    pub(crate) fn focus_last(&mut self) {
+        let item_count = (self.focus_state.item_count)();
+        let options = self.options.read();
+        let mut new_focus = item_count;
+
+        loop {
+            // If at the start, don't focus anything
+            if new_focus == 0 {
+                return;
+            }
+            new_focus = new_focus.saturating_sub(1);
+
+            // get value of the option
+            let disabled = options.iter().find(|opt| opt.tab_index == new_focus).map(|e| e.disabled).unwrap_or(false);
+
+            if !disabled {
+                break;
+            }
+        }
+        self.focus_state.set_focus(Some(new_focus));
+    }
+
+    /// custom implementation for `FocusState::focus_first`
+    pub(crate) fn focus_first(&mut self) {
+        let item_count = (self.focus_state.item_count)();
+        let options = self.options.read();
+        let mut new_focus = 0;
+
+        loop {
+            // get value of the option
+            let disabled = options.iter().find(|opt| opt.tab_index == new_focus).map(|e| e.disabled).unwrap_or(false);
+
+            if !disabled {
+                break;
+            }
+
+            // If at the end, don't focus anything
+            if new_focus >= item_count {
+                return;
+            }
+
+            new_focus = new_focus.saturating_add(1);
+        }
+        self.focus_state.set_focus(Some(new_focus));
+    }
+
     /// Select the currently focused item
     pub fn select_current_item(&mut self) {
         // If the select is open, select the focused item
@@ -154,6 +262,9 @@ pub(super) struct OptionState {
     pub text_value: String,
     /// Unique ID for the option
     pub id: String,
+
+    /// Whether the option is disabled
+    pub disabled: bool,
 }
 
 /// Context for select option components to know if they're selected

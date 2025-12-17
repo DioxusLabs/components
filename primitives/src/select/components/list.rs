@@ -125,19 +125,19 @@ pub fn SelectList(props: SelectListProps) -> Element {
             }
             Key::ArrowUp => {
                 arrow_key_navigation(event);
-                ctx.focus_state.focus_prev();
+                ctx.focus_prev();
             }
             Key::End => {
                 arrow_key_navigation(event);
-                ctx.focus_state.focus_last();
+                ctx.focus_last();
             }
             Key::ArrowDown => {
                 arrow_key_navigation(event);
-                ctx.focus_state.focus_next();
+                ctx.focus_next();
             }
             Key::Home => {
                 arrow_key_navigation(event);
-                ctx.focus_state.focus_first();
+                ctx.focus_first();
             }
             Key::Enter => {
                 ctx.select_current_item();
@@ -163,9 +163,13 @@ pub fn SelectList(props: SelectListProps) -> Element {
 
     use_effect(move || {
         if render() {
-            ctx.focus_state.set_focus(ctx.initial_focus.cloned());
+            if (ctx.initial_focus_last)().unwrap_or_default() {
+                ctx.focus_last();
+            } else {
+                ctx.focus_first();
+            }
         } else {
-            ctx.initial_focus.set(None);
+            ctx.initial_focus_last.set(None);
         }
     });
 

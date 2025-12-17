@@ -129,12 +129,14 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
     // Push this option to the context
     let mut ctx: SelectContext = use_context();
+    let disabled = ctx.disabled.cloned() || props.disabled.cloned();
     use_effect(move || {
         let option_state = OptionState {
             tab_index: index(),
             value: RcPartialEqValue::new(value.cloned()),
             text_value: text_value.cloned(),
             id: id(),
+            disabled
         };
 
         // Add the option to the context's options
@@ -147,7 +149,6 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
     let onmounted = use_focus_controlled_item(props.index);
     let focused = move || ctx.focus_state.is_focused(index());
-    let disabled = ctx.disabled.cloned() || props.disabled.cloned();
     let selected = use_memo(move || {
         ctx.value.read().as_ref().and_then(|v| v.as_ref::<T>()) == Some(&props.value.read())
     });
@@ -171,6 +172,9 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 aria_disabled: disabled,
                 aria_label: props.aria_label.clone(),
                 aria_roledescription: props.aria_roledescription.clone(),
+
+                // data attributes
+                "data-disabled": disabled,
 
                 onpointerdown: move |event| {
                     if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
