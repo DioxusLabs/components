@@ -70,15 +70,17 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
             DatePickerPopoverTrigger {}
             DatePickerPopoverContent { align: ContentAlign::Center,
                 date_picker::DatePickerCalendar { calendar: Calendar,
-                    CalendarHeader {
-                        CalendarNavigation {
-                            CalendarPreviousMonthButton {}
-                            CalendarSelectMonth {}
-                            CalendarSelectYear {}
-                            CalendarNextMonthButton {}
+                    CalendarView {
+                        CalendarHeader {
+                            CalendarNavigation {
+                                CalendarPreviousMonthButton {}
+                                CalendarSelectMonth {}
+                                CalendarSelectYear {}
+                                CalendarNextMonthButton {}
+                            }
                         }
+                        CalendarGrid {}
                     }
-                    CalendarGrid {}
                 }
             }
         }
@@ -99,15 +101,17 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
                 align: ContentAlign::Center,
                 date_picker::DateRangePickerCalendar {
                     calendar: RangeCalendar,
-                    CalendarHeader {
-                        CalendarNavigation {
-                            CalendarPreviousMonthButton {}
-                            CalendarSelectMonth {}
-                            CalendarSelectYear {}
-                            CalendarNextMonthButton {}
+                    CalendarView {
+                        CalendarHeader {
+                            CalendarNavigation {
+                                CalendarPreviousMonthButton {}
+                                CalendarSelectMonth {}
+                                CalendarSelectYear {}
+                                CalendarNextMonthButton {}
+                            }
                         }
+                        CalendarGrid {}
                     }
-                    CalendarGrid {}
                 }
             }
         }

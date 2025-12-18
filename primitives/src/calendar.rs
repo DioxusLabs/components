@@ -545,7 +545,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
 
     rsx! {
         div {
-            class: "calendar-div",
+            class: "calendar",
             role: "application",
             aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
@@ -609,10 +609,9 @@ pub fn Calendar(props: CalendarProps) -> Element {
                     _ => {}
                 }
             },
+            ..props.attributes,
             for offset in 0..props.month_count {
-                CalendarView { offset,
-                    div { ..props.attributes.clone(),{props.children.clone()} }
-                }
+                CalendarView { offset, {props.children.clone()} }
             }
         }
     }
@@ -814,7 +813,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
 
     rsx! {
         div {
-            class: "calendar-div",
+            class: "calendar",
             role: "application",
             aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
@@ -896,10 +895,9 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
                     _ => {}
                 }
             },
+            ..props.attributes,
             for offset in 0..props.month_count {
-                CalendarView { offset,
-                    div { ..props.attributes.clone(),{props.children.clone()} }
-                }
+                CalendarView { offset, {props.children.clone()} }
             }
         }
     }

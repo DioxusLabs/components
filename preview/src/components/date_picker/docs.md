@@ -35,15 +35,18 @@ DatePicker {
 
                 // The DatePickerCalendar component wraps the Calendar with its navigation components
                 DatePickerCalendar {
-                    CalendarHeader {
-                        CalendarNavigation {
-                            CalendarPreviousMonthButton {}
-                            CalendarSelectMonth {}
-                            CalendarSelectYear {}
-                            CalendarNextMonthButton {}
+                    // The calendar view will get rendered once for each month in the multi-month view.
+                    CalendarView {
+                        CalendarHeader {
+                            CalendarNavigation {
+                                CalendarPreviousMonthButton {}
+                                CalendarSelectMonth {}
+                                CalendarSelectYear {}
+                                CalendarNextMonthButton {}
+                            }
                         }
+                        CalendarGrid {}
                     }
-                    CalendarGrid {}
                 }
             }
         }
