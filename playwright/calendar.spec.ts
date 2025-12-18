@@ -31,7 +31,7 @@ test("test", async ({ page }) => {
   // Move focus to the calendar with tab
   await page.keyboard.press("Tab");
   const focusedDay = calendar.locator(
-    '.calendar-grid-cell[data-month="current"]:focus',
+    '.calendar-grid-cell[data-month="current"]:focus'
   );
   // Assert a day is focused
   const firstDay = focusedDay.first();
@@ -53,13 +53,13 @@ test("test", async ({ page }) => {
   // Assert the next week day is focused
   const nextWeekDayNumber = parseInt(
     (await nextWeekDay.textContent()) || "",
-    10,
+    10
   );
   let current_date = new Date();
   let daysInMonth = new Date(
     current_date.getFullYear(),
     current_date.getMonth() + 1,
-    0,
+    0
   ).getDate();
   if (dayNumber + 7 > daysInMonth) {
     // If the next week day is in the next month, it should wrap around
@@ -104,9 +104,9 @@ test("year navigation by moving 52 weeks with arrow keys", async ({ page }) => {
   const weeksToMove = Math.ceil(daysDifference / 7);
 
   // Move focus to the calendar manually
-  const firstDay = calendar.locator(
-    '.calendar-grid-cell[data-month="current"]',
-  ).first();
+  const firstDay = calendar
+    .locator('.calendar-grid-cell[data-month="current"]')
+    .first();
   await firstDay.focus();
 
   // Press ArrowDown the calculated number of times to move forward by one year
@@ -157,9 +157,9 @@ test("shift + arrow keys navigation", async ({ page }) => {
   const initialMonthNumber = parseInt(initialMonth, 10);
 
   // Move focus to the calendar
-  const firstDay = calendar.locator(
-    '.calendar-grid-cell[data-month="current"]',
-  ).first();
+  const firstDay = calendar
+    .locator('.calendar-grid-cell[data-month="current"]')
+    .first();
   await firstDay.focus();
 
   // Test Shift + ArrowDown - should move forward by one month
@@ -168,7 +168,8 @@ test("shift + arrow keys navigation", async ({ page }) => {
   let currentMonth = await monthSelect.inputValue();
   let currentYear = await yearSelect.inputValue();
   let expectedMonth = initialMonthNumber === 12 ? 1 : initialMonthNumber + 1;
-  let expectedYear = initialMonthNumber === 12 ? initialYearNumber + 1 : initialYearNumber;
+  let expectedYear =
+    initialMonthNumber === 12 ? initialYearNumber + 1 : initialYearNumber;
 
   expect(parseInt(currentMonth, 10)).toBe(expectedMonth);
   expect(parseInt(currentYear, 10)).toBe(expectedYear);
@@ -210,14 +211,14 @@ async function testArrowKeyNavigation(
   const daysInMonth = new Date(yearNumber, monthNumber, 0).getDate();
 
   // Move focus to the starting day of the current month
-  const startDay = calendar.locator(
-    '.calendar-grid-cell[data-month="current"]',
-  )[startPosition]();
+  const startDay = calendar
+    .locator('.calendar-grid-cell[data-month="current"]')
+    [startPosition]();
   await startDay.focus();
 
   // Get the focused day selector
   const focusedDay = calendar.locator(
-    '.calendar-grid-cell[data-month="current"]:focus',
+    '.calendar-grid-cell[data-month="current"]:focus'
   );
 
   // Array to track all days visited
@@ -254,15 +255,22 @@ async function testArrowKeyNavigation(
   if (expectedOrder === "ascending") {
     expect(daysVisited).toEqual(expectedDays);
   } else {
-    const expectedReverseDays = Array.from({ length: daysInMonth }, (_, i) => daysInMonth - i);
+    const expectedReverseDays = Array.from(
+      { length: daysInMonth },
+      (_, i) => daysInMonth - i
+    );
     expect(daysVisited).toEqual(expectedReverseDays);
   }
 }
 
-test("right arrow key navigates through all days of the month", async ({ page }) => {
+test("right arrow key navigates through all days of the month", async ({
+  page,
+}) => {
   await testArrowKeyNavigation(page, "ArrowRight", "first", "ascending");
 });
 
-test("left arrow key navigates through all days of the month in reverse", async ({ page }) => {
+test("left arrow key navigates through all days of the month in reverse", async ({
+  page,
+}) => {
   await testArrowKeyNavigation(page, "ArrowLeft", "last", "descending");
 });
