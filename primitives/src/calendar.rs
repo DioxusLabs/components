@@ -922,8 +922,8 @@ impl CalendarViewContext {
     fn offset_view_date(&self) -> Date {
         let base_ctx: BaseCalendarContext = consume_context();
         let view_date = (base_ctx.view_date)();
-        let new_date = nth_month_next(view_date, self.offset).unwrap_or(view_date);
-        new_date
+        
+        nth_month_next(view_date, self.offset).unwrap_or(view_date)
     }
 
     fn set_offset_view_date(&self, date: Date) {
