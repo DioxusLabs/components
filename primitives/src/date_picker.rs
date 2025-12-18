@@ -395,10 +395,17 @@ pub fn DatePickerPopover(props: DatePickerPopoverProps) -> Element {
     }
 }
 
+#[doc(hidden)]
+/// A trait for types that can provide default calendar rendering.
+pub trait DefaultCalendarProps {
+    /// Provide a default calendar rendering function.
+    fn default_calendar(self) -> Element;
+}
+
 /// The props for the Calendar component.
 #[allow(unpredictable_function_pointer_comparisons)]
 #[derive(Props, Clone, PartialEq)]
-pub struct DatePickerCalendarProps<T: Properties + PartialEq> {
+pub struct DatePickerCalendarProps<T: DefaultCalendarProps + Properties + PartialEq> {
     /// Callback when display weekday
     #[props(default = Callback::new(|weekday: Weekday| weekday_abbreviation(weekday).to_string()))]
     pub on_format_weekday: Callback<Weekday, String>,
@@ -451,6 +458,7 @@ pub struct DatePickerCalendarProps<T: Properties + PartialEq> {
     pub children: Element,
 
     /// The calendar to render with
+    #[props(default = T::default_calendar)]
     pub calendar: fn(T) -> Element,
 }
 
@@ -482,9 +490,7 @@ pub struct DatePickerCalendarProps<T: Properties + PartialEq> {
 ///                        }
 ///                        PopoverContent {
 ///                            align: ContentAlign::End,
-///                            DatePickerCalendar {
-///                                calendar: Calendar,
-///                            }
+///                            DatePickerCalendar {}
 ///                        }
 ///                    }
 ///                }
@@ -507,13 +513,13 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps<CalendarProps>) -> Elem
         }
     });
 
-    let (min_date, max_date) = base_ctx.enabled_date_range.to_min_max();
+    let min_date = base_ctx.enabled_date_range.start();
+    let max_date = base_ctx.enabled_date_range.end();
 
     rsx! {
         Calendar {
             selected_date: ctx.selected_date,
             on_date_change: move |date| {
-                tracing::info!("calendar selected date {date:?}");
                 ctx.set_date(date);
                 base_ctx.open.set(false);
             },
@@ -561,9 +567,7 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps<CalendarProps>) -> Elem
 ///                        }
 ///                        PopoverContent {
 ///                            align: ContentAlign::End,
-///                            DateRangePickerCalendar {
-///                                calendar: RangeCalendar,
-///                            }
+///                            DateRangePickerCalendar {}
 ///                        }
 ///                    }
 ///                }
@@ -582,17 +586,17 @@ pub fn DateRangePickerCalendar(props: DatePickerCalendarProps<RangeCalendarProps
     let mut view_date = use_signal(|| UtcDateTime::now().date());
     use_effect(move || {
         if let Some(r) = (ctx.date_range)() {
-            view_date.set(r.start);
+            view_date.set(r.start());
         }
     });
 
-    let (min_date, max_date) = base_ctx.enabled_date_range.to_min_max();
+    let min_date = base_ctx.enabled_date_range.start();
+    let max_date = base_ctx.enabled_date_range.end();
 
     rsx! {
         RangeCalendar {
             selected_range: ctx.date_range,
             on_range_change: move |range| {
-                tracing::info!("calendar selected range {range:?}");
                 ctx.set_range(range);
                 base_ctx.open.set(false);
             },
@@ -895,7 +899,6 @@ fn DateElement(props: DateElementProps) -> Element {
                 .filter(|date| ctx.enabled_date_range.contains(*date))
                 .filter(|date| ctx.available_ranges.read().valid_interval(*date))
             {
-                tracing::info!("Parsed date: {date:?}");
                 props.on_date_change.call(Some(date));
             }
         }
@@ -903,7 +906,8 @@ fn DateElement(props: DateElementProps) -> Element {
 
     let today = UtcDateTime::now().date();
 
-    let (min_date, max_date) = ctx.enabled_date_range.to_min_max();
+    let min_date = ctx.enabled_date_range.start();
+    let max_date = ctx.enabled_date_range.end();
     let min_year = min_date.year();
     let max_year = max_date.year();
     let min_month = match year_value() {
@@ -1102,8 +1106,9 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
     let mut end_date = use_signal(|| None);
 
     use_effect(move || {
-        start_date.set((ctx.date_range)().map(|r| r.start));
-        end_date.set((ctx.date_range)().map(|r| r.end));
+        let date_range = ctx.date_range.cloned();
+        start_date.set(date_range.map(|r| r.start()));
+        end_date.set(date_range.map(|r| r.end()));
     });
 
     use_effect(move || {
