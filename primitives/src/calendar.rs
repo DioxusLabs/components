@@ -1942,7 +1942,11 @@ fn SingleCalendarDay(props: CalendarDayProps) -> Element {
     let view_date = view_ctx.offset_view_date();
     let month = relative_calendar_month(date, &base_ctx, view_date.month());
     let in_current_month = month.current_month();
-    let is_focused = move || in_current_month && base_ctx.is_focused(date);
+    let is_focused = move || {
+        base_ctx
+            .focused_date()
+            .is_some_and(|d| d == date && d.month() == view_date.month())
+    };
     let is_today = date == base_ctx.today;
     let is_unavailable = base_ctx.is_unavailable(date);
 
@@ -1988,7 +1992,7 @@ fn SingleCalendarDay(props: CalendarDayProps) -> Element {
                 "-1"
             },
             aria_label: aria_label(&props.date),
-            "data-today": is_today,
+            "data-today": if is_today { true },
             "data-selected": is_selected(),
             "data-unavailable": if is_unavailable { true },
             "data-disabled": is_disabled(),
@@ -2020,7 +2024,11 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
     let view_date = view_ctx.offset_view_date();
     let month = relative_calendar_month(date, &base_ctx, view_date.month());
     let in_current_month = month.current_month();
-    let is_focused = move || in_current_month && base_ctx.is_focused(date);
+    let is_focused = move || {
+        base_ctx
+            .focused_date()
+            .is_some_and(|d| d == date && d.month() == view_date.month())
+    };
     let is_today = date == base_ctx.today;
     let is_unavailable = base_ctx.is_unavailable(date);
 
