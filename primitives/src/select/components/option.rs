@@ -1,12 +1,12 @@
 //! SelectOption and SelectItemIndicator component implementations.
 
 use crate::{
-    focus::use_focus_controlled_item,
     select::context::{RcPartialEqValue, SelectListContext},
     use_effect, use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
+use std::rc::Rc;
 
 use super::super::context::{OptionState, SelectContext, SelectOptionContext};
 
@@ -28,7 +28,7 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
     #[props(default)]
     pub id: ReadSignal<Option<String>>,
 
-    /// The index of the option in the list. This is used to define the focus order for keyboard navigation.
+    /// The index of the option in the list. This is used to define the focus order for keyboard navigation. Each option must have a unique index.
     pub index: ReadSignal<usize>,
 
     /// Optional label for the option (for accessibility)
@@ -136,19 +136,36 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
             value: RcPartialEqValue::new(value.cloned()),
             text_value: text_value.cloned(),
             id: id(),
-            disabled
+            disabled,
         };
 
         // Add the option to the context's options
-        ctx.options.write().push(option_state);
+        ctx.options
+            .write()
+            .insert(option_state.tab_index, option_state);
     });
 
     use_effect_cleanup(move || {
-        ctx.options.write().retain(|opt| opt.id != *id.read());
+        ctx.options.write().remove(&index());
     });
 
-    let onmounted = use_focus_controlled_item(props.index);
-    let focused = move || ctx.focus_state.is_focused(index());
+    // customized focus handle for this option. Based on `use_focus_controlled_item`.
+    let mut controlled_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    use_effect(move || {
+        if disabled {
+            return;
+        }
+        let is_focused = ctx.is_focused(index.cloned());
+        if is_focused {
+            if let Some(md) = controlled_ref() {
+                spawn(async move {
+                    let _ = md.set_focus(true).await;
+                });
+            }
+        }
+    });
+
+    let focused = move || ctx.is_focused(index());
     let selected = use_memo(move || {
         ctx.value.read().as_ref().and_then(|v| v.as_ref::<T>()) == Some(&props.value.read())
     });
@@ -165,7 +182,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 role: "option",
                 id,
                 tabindex: if focused() { "0" } else { "-1" },
-                onmounted,
+                onmounted: move |data: Event<MountedData>| controlled_ref.set(Some(data.data())),
 
                 // ARIA attributes
                 aria_selected: selected(),
@@ -184,7 +201,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 },
                 onblur: move |_| {
                     if focused() {
-                        ctx.focus_state.blur();
+                        ctx.blur();
                         ctx.open.set(false);
                     }
                 },

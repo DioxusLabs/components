@@ -1,6 +1,7 @@
 //! Main Select component implementation.
 
 use core::panic;
+use std::collections::BTreeMap;
 use std::time::Duration;
 
 use crate::{select::context::RcPartialEqValue, use_controlled, use_effect};
@@ -8,7 +9,6 @@ use dioxus::prelude::*;
 use dioxus_core::Task;
 
 use super::super::context::SelectContext;
-use crate::focus::use_focus_provider;
 
 /// Props for the main Select component
 #[derive(Props, Clone, PartialEq)]
@@ -109,7 +109,7 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
 
     let open = use_signal(|| false);
     let mut typeahead_buffer = use_signal(String::new);
-    let options = use_signal(Vec::default);
+    let options = use_signal(BTreeMap::new);
     let adaptive_keyboard = use_signal(super::super::text_search::AdaptiveKeyboard::new);
     let list_id = use_signal(|| None);
     let mut typeahead_clear_task: Signal<Option<Task>> = use_signal(|| None);
@@ -130,8 +130,6 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
         }
     });
 
-    let focus_state = use_focus_provider(props.roving_loop);
-
     // Clear the typeahead buffer when the select is closed
     use_effect(move || {
         if !open() {
@@ -144,6 +142,7 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
         }
     });
     let initial_focus_last = use_signal(|| None);
+    let current_focus = use_signal(|| None);
 
     use_context_provider(|| SelectContext {
         typeahead_buffer,
@@ -151,14 +150,15 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
         value,
         set_value,
         options,
+        roving_loop: props.roving_loop,
         adaptive_keyboard,
         list_id,
-        focus_state,
         disabled: props.disabled,
         placeholder: props.placeholder,
         typeahead_clear_task,
         typeahead_timeout: props.typeahead_timeout,
         initial_focus_last,
+        current_focus,
     });
 
     rsx! {

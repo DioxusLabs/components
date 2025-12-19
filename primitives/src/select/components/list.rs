@@ -81,7 +81,7 @@ pub fn SelectList(props: SelectListProps) -> Element {
 
     let mut open = ctx.open;
     let mut listbox_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
-    let focused = move || open() && !ctx.focus_state.any_focused();
+    let focused = move || open() && !ctx.any_focused();
 
     use_effect(move || {
         let Some(listbox_ref) = listbox_ref() else {

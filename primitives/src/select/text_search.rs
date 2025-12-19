@@ -5,10 +5,10 @@ use core::f32;
 use std::collections::HashMap;
 
 /// Find the best matching option based on typeahead input
-pub(super) fn best_match(
+pub(super) fn best_match<'a>(
     keyboard: &AdaptiveKeyboard,
     typeahead: &str,
-    options: &[OptionState],
+    options: impl Iterator<Item = &'a OptionState>,
 ) -> Option<usize> {
     if typeahead.is_empty() {
         return None;
@@ -17,7 +17,6 @@ pub(super) fn best_match(
     let typeahead_characters: Box<[_]> = typeahead.chars().collect();
 
     options
-        .iter()
         .filter(|o| !o.disabled)
         .map(|opt| {
             let value = &opt.text_value;
@@ -561,19 +560,19 @@ mod tests {
         let layout = AdaptiveKeyboard::default();
 
         // Exact prefix match
-        let result = best_match(&layout, "App", &options);
+        let result = best_match(&layout, "App", options.iter());
         assert_eq!(result, Some(0));
 
         // Partial match
-        let result = best_match(&layout, "ban", &options);
+        let result = best_match(&layout, "ban", options.iter());
         assert_eq!(result, Some(1));
 
         // Empty typeahead should return None
-        let result = best_match(&layout, "", &options);
+        let result = best_match(&layout, "", options.iter());
         assert_eq!(result, None);
 
         // No match should return closest option
-        let result = best_match(&layout, "xyz", &options);
+        let result = best_match(&layout, "xyz", options.iter());
         assert!(result.is_some());
     }
 
@@ -621,11 +620,11 @@ mod tests {
         ];
 
         // ы should be a closer match to ф than banana
-        let result = best_match(&adaptive, "ф", &options);
+        let result = best_match(&adaptive, "ф", options.iter());
         assert_eq!(result, Some(0));
 
         // b should still match banana
-        let result = best_match(&adaptive, "b", &options);
+        let result = best_match(&adaptive, "b", options.iter());
         assert_eq!(result, Some(1));
     }
 

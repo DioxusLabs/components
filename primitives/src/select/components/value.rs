@@ -70,9 +70,9 @@ pub fn SelectValue(props: SelectValueProps) -> Element {
         value.as_ref().and_then(|v| {
             ctx.options
                 .read()
-                .iter()
-                .find(|opt| opt.value == *v)
-                .map(|opt| opt.text_value.clone())
+                .values()
+                .find(|state| state.value == *v)
+                .map(|state| state.text_value.clone())
         })
     });
 
