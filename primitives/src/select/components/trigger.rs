@@ -69,11 +69,13 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
     let mut ctx = use_context::<SelectContext>();
     let mut open = ctx.open;
 
+    let focus_id = use_memo(move || ctx.current_focus_id());
+
     rsx! {
         button {
             // Standard HTML attributes
             disabled: (ctx.disabled)(),
-            type: "button",
+            r#type: "button",
 
             onclick: move |_| {
                 open.toggle();
@@ -97,9 +99,11 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
             },
 
             // ARIA attributes
+            role: "combobox",
             aria_haspopup: "listbox",
             aria_expanded: open(),
             aria_controls: ctx.list_id,
+            aria_activedescendant: focus_id,
 
             // Pass through other attributes
             ..props.attributes,

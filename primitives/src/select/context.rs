@@ -69,11 +69,11 @@ pub(super) struct SelectContext {
     /// Timeout before clearing typeahead buffer
     pub typeahead_timeout: ReadSignal<Duration>,
     /// A list of options with their states
-    pub options: Signal<BTreeMap<usize, OptionState>>,
+    pub(crate) options: Signal<BTreeMap<usize, OptionState>>,
     /// If focus should loop around
     pub roving_loop: ReadSignal<bool>,
     /// The currently selected option tab_index
-    pub current_focus: Signal<Option<usize>>,
+    pub(crate) current_focus: Signal<Option<usize>>,
     /// The initial element to focus once the list is rendered<br>
     /// true: last element<br>
     /// false: first element
@@ -92,6 +92,11 @@ impl SelectContext {
 
     pub(crate) fn current_focus(&self) -> Option<usize> {
         (self.current_focus)()
+    }
+
+    pub(crate) fn current_focus_id(&self) -> Option<String> {
+        let focus = (self.current_focus)()?;
+        self.options.read().get(&focus).map(|s| s.id.clone())
     }
 
     pub(crate) fn blur(&mut self) {

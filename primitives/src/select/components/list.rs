@@ -163,10 +163,12 @@ pub fn SelectList(props: SelectListProps) -> Element {
 
     use_effect(move || {
         if render() {
-            if (ctx.initial_focus_last)().unwrap_or_default() {
-                ctx.focus_last();
-            } else {
-                ctx.focus_first();
+            if let Some(last) = (ctx.initial_focus_last)() {
+                if last {
+                    ctx.focus_last();
+                } else {
+                    ctx.focus_first();
+                }
             }
         } else {
             ctx.initial_focus_last.set(None);

@@ -194,7 +194,12 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 "data-disabled": disabled,
 
                 onpointerdown: move |event| {
-                    if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
+                    if event.trigger_button() == Some(MouseButton::Primary) {
+                        if disabled {
+                            event.prevent_default();
+                            event.stop_propagation();
+                            return;
+                        }
                         ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
                         ctx.open.set(false);
                     }
