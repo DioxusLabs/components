@@ -2,12 +2,14 @@
 #![warn(missing_docs)]
 
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use dioxus::core::{current_scope_id, use_drop};
 use dioxus::prelude::*;
 use dioxus::prelude::{asset, manganis, Asset};
+use dioxus_core::AttributeValue::Text;
 
 pub mod accordion;
 pub mod alert_dialog;
@@ -259,5 +261,54 @@ impl ContentAlign {
             Self::Center => "center",
             Self::End => "end",
         }
+    }
+}
+
+/// Merge multiple attribute vectors.
+///
+/// Rules:
+/// - Later lists win for the same (name, namespace) pair.
+/// - `class` is concatenated with a single space separator (trimmed); last wins for volatility flag.
+/// - Other attributes are overwritten by the last occurrence.
+/// TODO: event handler attributes are not merged/combined yet.
+pub fn merge_attributes(lists: Vec<Vec<Attribute>>) -> Vec<Attribute> {
+    let mut merged = Vec::new();
+    let mut index = HashMap::new();
+
+    for attr in lists.into_iter().flatten() {
+        let key = (attr.name, attr.namespace);
+        match index.get(&key) {
+            None => {
+                index.insert(key, merged.len());
+                merged.push(attr);
+            }
+            Some(&i) if attr.name != "class" => {
+                merged[i] = attr;
+            }
+            Some(&i) => {
+                let was_volatile = merged[i].volatile;
+                merged[i] = match (&merged[i].value, &attr.value) {
+                    (Text(a), Text(b)) => Attribute {
+                        name: attr.name,
+                        namespace: attr.namespace,
+                        volatile: was_volatile || attr.volatile,
+                        value: Text(join_class(a, b)),
+                    },
+                    _ => attr,
+                };
+            }
+        }
+    }
+
+    merged
+}
+
+fn join_class(a: &str, b: &str) -> String {
+    let (a, b) = (a.trim(), b.trim());
+    match (a.is_empty(), b.is_empty()) {
+        (true, true) => String::new(),
+        (true, false) => b.to_string(),
+        (false, true) => a.to_string(),
+        (false, false) => format!("{a} {b}"),
     }
 }
