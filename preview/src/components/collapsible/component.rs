@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 use dioxus_primitives::collapsible::{
     self, CollapsibleContentProps, CollapsibleProps, CollapsibleTriggerProps,
 };
+use dioxus_primitives::merge_attributes;
 
 #[component]
 pub fn Collapsible(props: CollapsibleProps) -> Element {
@@ -13,6 +14,7 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
             disabled: props.disabled,
             open: props.open,
             on_open_change: props.on_open_change,
+            r#as: props.r#as,
             attributes: props.attributes,
             class: "collapsible",
             {props.children}
@@ -22,17 +24,35 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
 
 #[component]
 pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
-    rsx! {
-        collapsible::CollapsibleTrigger { class: "collapsible-trigger", attributes: props.attributes,
-            {props.children}
-            svg {
-                class: "collapsible-expand-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
-                // shifted up by 6 polyline { points: "6 9 12 15 18 9" }
-                polyline { points: "6 15 12 21 18 15" }
-                // shifted down by 6 polyline { points: "6 15 12 9 18 15" }
-                polyline { points: "6 9 12 3 18 9" }
+    let base = vec![Attribute::new(
+        "class",
+        "collapsible-trigger",
+        None,
+        false,
+    )];
+    let merged = merge_attributes(vec![base, props.attributes]);
+
+    if props.r#as.is_some() {
+        rsx! {
+            collapsible::CollapsibleTrigger {
+                r#as: props.r#as,
+                attributes: merged,
+                {props.children}
+            }
+        }
+    } else {
+        rsx! {
+            collapsible::CollapsibleTrigger { attributes: merged,
+                {props.children}
+                svg {
+                    class: "collapsible-expand-icon",
+                    view_box: "0 0 24 24",
+                    xmlns: "http://www.w3.org/2000/svg",
+                    // shifted up by 6 polyline { points: "6 9 12 15 18 9" }
+                    polyline { points: "6 15 12 21 18 15" }
+                    // shifted down by 6 polyline { points: "6 15 12 9 18 15" }
+                    polyline { points: "6 9 12 3 18 9" }
+                }
             }
         }
     }
