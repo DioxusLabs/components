@@ -83,6 +83,7 @@
 .dropdown-menu-item {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
   padding: 8px 12px;
   border-radius: calc(0.5rem - 0.25rem);
   color: var(--secondary-color-4);
