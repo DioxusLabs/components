@@ -21,7 +21,6 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    border-radius: 3.40282e+38px;
     color: var(--secondary-color-4);
     cursor: pointer;
     font-weight: 500;
@@ -52,13 +51,22 @@
     font-size: 1.75rem;
 }
 
+/* Avatar shape */
+.avatar-circle {
+    border-radius: 50%;
+}
+
+.avatar-rounded {
+    border-radius: 8px;
+}
+
 /* State-specific styles */
 .avatar[data-state="loading"] {
     animation: pulse 1.5s infinite ease-in-out;
 }
 
 .avatar[data-state="empty"] {
-    background: var(--primary-color-2);
+    background: var(--primary-color-7);
 }
 
 @keyframes pulse {

@@ -19,6 +19,22 @@ impl AvatarImageSize {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Default)]
+pub enum AvatarShape {
+    #[default]
+    Circle,
+    Rounded,
+}
+
+impl AvatarShape {
+    fn to_class(self) -> &'static str {
+        match self {
+            AvatarShape::Circle => "avatar-circle",
+            AvatarShape::Rounded => "avatar-rounded",
+        }
+    }
+}
+
 /// The props for the [`Avatar`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct AvatarProps {
@@ -37,6 +53,9 @@ pub struct AvatarProps {
     #[props(default)]
     pub size: AvatarImageSize,
 
+    #[props(default)]
+    pub shape: AvatarShape,
+
     /// Additional attributes for the avatar element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -51,7 +70,7 @@ pub fn Avatar(props: AvatarProps) -> Element {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
 
         avatar::Avatar {
-            class: "avatar {props.size.to_class()}",
+            class: "avatar {props.size.to_class()} {props.shape.to_class()}",
             on_load: props.on_load,
             on_error: props.on_error,
             on_state_change: props.on_state_change,

@@ -13,6 +13,7 @@ pub mod accordion;
 pub mod alert_dialog;
 pub mod aspect_ratio;
 pub mod avatar;
+pub mod badge;
 pub mod calendar;
 pub mod checkbox;
 pub mod collapsible;
