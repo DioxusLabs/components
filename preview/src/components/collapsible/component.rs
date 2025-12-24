@@ -24,12 +24,7 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
 
 #[component]
 pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
-    let base = vec![Attribute::new(
-        "class",
-        "collapsible-trigger",
-        None,
-        false,
-    )];
+    let base = vec![Attribute::new("class", "collapsible-trigger", None, false)];
     let merged = merge_attributes(vec![base, props.attributes]);
 
     if props.r#as.is_some() {

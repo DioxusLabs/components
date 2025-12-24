@@ -270,6 +270,7 @@ impl ContentAlign {
 /// - Later lists win for the same (name, namespace) pair.
 /// - `class` is concatenated with a single space separator (trimmed); last wins for volatility flag.
 /// - Other attributes are overwritten by the last occurrence.
+///
 /// TODO: event handler attributes are not merged/combined yet.
 pub fn merge_attributes(lists: Vec<Vec<Attribute>>) -> Vec<Attribute> {
     let mut merged = Vec::new();
