@@ -1,0 +1,860 @@
+use crate::components::button::{Button, ButtonVariant};
+use crate::components::separator::Separator;
+use crate::components::sheet::{
+    Sheet, SheetContent, SheetDescription, SheetHeader, SheetSide, SheetTitle,
+};
+use crate::components::tooltip::{Tooltip, TooltipContent, TooltipTrigger};
+use dioxus::core::use_drop;
+use dioxus::prelude::*;
+use dioxus_primitives::merge_attributes;
+
+// constants
+const SIDEBAR_WIDTH: &str = "16rem";
+const SIDEBAR_WIDTH_MOBILE: &str = "18rem";
+const SIDEBAR_WIDTH_ICON: &str = "3rem";
+const SIDEBAR_KEYBOARD_SHORTCUT: &str = "b";
+const MOBILE_BREAKPOINT: u32 = 768;
+
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub enum SidebarState {
+    #[default]
+    Expanded,
+    Collapsed,
+}
+
+impl SidebarState {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            SidebarState::Expanded => "expanded",
+            SidebarState::Collapsed => "collapsed",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub enum SidebarSide {
+    #[default]
+    Left,
+    Right,
+}
+
+impl SidebarSide {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            SidebarSide::Left => "left",
+            SidebarSide::Right => "right",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub enum SidebarVariant {
+    #[default]
+    Sidebar,
+    Floating,
+    Inset,
+}
+
+impl SidebarVariant {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            SidebarVariant::Sidebar => "sidebar",
+            SidebarVariant::Floating => "floating",
+            SidebarVariant::Inset => "inset",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub enum SidebarCollapsible {
+    #[default]
+    Offcanvas,
+    Icon,
+    None,
+}
+
+impl SidebarCollapsible {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            SidebarCollapsible::Offcanvas => "offcanvas",
+            SidebarCollapsible::Icon => "icon",
+            SidebarCollapsible::None => "none",
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct SidebarCtx {
+    pub state: Memo<SidebarState>,
+    pub side: Signal<SidebarSide>,
+    pub open: Signal<bool>,
+    pub set_open: Callback<bool>,
+    pub open_mobile: Signal<bool>,
+    pub set_open_mobile: Callback<bool>,
+    pub is_mobile: Signal<bool>,
+    pub toggle_sidebar: Callback<()>,
+}
+
+pub fn use_sidebar() -> SidebarCtx {
+    use_context::<SidebarCtx>()
+}
+
+pub fn use_is_mobile() -> Signal<bool> {
+    let mut is_mobile = use_signal(|| false);
+
+    use_effect(move || {
+        spawn(async move {
+            let js_code = format!(
+                r#"
+                function checkMobile() {{
+                    return window.innerWidth < {};
+                }}
+                function handleResize() {{
+                    dioxus.send(checkMobile());
+                }}
+                window.__sidebarResizeHandler = handleResize;
+                window.addEventListener('resize', window.__sidebarResizeHandler);
+                dioxus.send(checkMobile());
+                "#,
+                MOBILE_BREAKPOINT
+            );
+            let mut eval = document::eval(&js_code);
+
+            while let Ok(result) = eval.recv::<bool>().await {
+                is_mobile.set(result);
+            }
+        });
+    });
+
+    use_drop(|| {
+        _ = document::eval(
+            r#"
+            window.removeEventListener('resize', window.__sidebarResizeHandler);
+            delete window.__sidebarResizeHandler;
+            "#,
+        );
+    });
+
+    is_mobile
+}
+
+#[component]
+pub fn SidebarProvider(
+    #[props(default = true)] default_open: bool,
+    #[props(default)] open: Option<Signal<bool>>,
+    #[props(default)] on_open_change: Option<Callback<bool>>,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let is_mobile = use_is_mobile();
+    let side = use_signal(|| SidebarSide::Left);
+    let mut open_mobile = use_signal(|| false);
+    let mut internal_open = use_signal(move || default_open);
+
+    let open_signal = open.unwrap_or(internal_open);
+
+    let set_open = use_callback(move |value: bool| {
+        if let Some(callback) = on_open_change {
+            callback.call(value);
+        }
+        if open.is_none() {
+            internal_open.set(value);
+        }
+    });
+
+    let set_open_mobile = use_callback(move |value: bool| {
+        open_mobile.set(value);
+    });
+
+    let toggle_sidebar = use_callback(move |_: ()| {
+        if is_mobile() {
+            open_mobile.set(!open_mobile());
+        } else {
+            let new_value = !open_signal();
+            set_open.call(new_value);
+        }
+    });
+
+    let state = use_memo(move || {
+        if open_signal() {
+            SidebarState::Expanded
+        } else {
+            SidebarState::Collapsed
+        }
+    });
+
+    use_effect(move || {
+        spawn(async move {
+            let js_code = format!(
+                r#"
+                function sidebarKeyHandler(event) {{
+                    if (event.key === '{}' && (event.metaKey || event.ctrlKey)) {{
+                        event.preventDefault();
+                        dioxus.send(true);
+                    }}
+                }}
+                window.__sidebarKeyHandler = sidebarKeyHandler;
+                window.addEventListener('keydown', window.__sidebarKeyHandler);
+                "#,
+                SIDEBAR_KEYBOARD_SHORTCUT
+            );
+            let mut eval = document::eval(&js_code);
+
+            loop {
+                if eval.recv::<bool>().await.is_ok() {
+                    toggle_sidebar.call(());
+                }
+            }
+        });
+    });
+
+    use_drop(|| {
+        _ = document::eval(
+            r#"
+            window.removeEventListener('keydown', window.__sidebarKeyHandler);
+            delete window.__sidebarKeyHandler;
+            "#,
+        );
+    });
+
+    let ctx = SidebarCtx {
+        state,
+        side,
+        open: open_signal,
+        set_open,
+        open_mobile,
+        set_open_mobile,
+        is_mobile,
+        toggle_sidebar,
+    };
+
+    use_context_provider(|| ctx);
+
+    let sidebar_style = format!(
+        r#"
+        --sidebar-width: {};
+        --sidebar-width-mobile: {};
+        --sidebar-width-icon: {}
+        "#,
+        SIDEBAR_WIDTH, SIDEBAR_WIDTH_MOBILE, SIDEBAR_WIDTH_ICON
+    );
+
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-wrapper", None, false),
+        Attribute::new("data-slot", "sidebar-wrapper", None, false),
+        Attribute::new("style", sidebar_style, None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
+        div { ..merged, {children} }
+    }
+}
+
+#[component]
+pub fn Sidebar(
+    #[props(default)] side: SidebarSide,
+    #[props(default)] variant: SidebarVariant,
+    #[props(default)] collapsible: SidebarCollapsible,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let ctx = use_sidebar();
+    let mut ctx_side = ctx.side;
+    if *ctx_side.peek() != side {
+        ctx_side.set(side);
+    }
+
+    let is_mobile = ctx.is_mobile;
+    let state = ctx.state;
+    let open_mobile = ctx.open_mobile;
+
+    if collapsible == SidebarCollapsible::None {
+        let base: Vec<Attribute> = vec![
+            Attribute::new("class", "sidebar sidebar-static", None, false),
+            Attribute::new("data-slot", "sidebar", None, false),
+        ];
+        let merged = merge_attributes(vec![base, attributes]);
+
+        return rsx! {
+            div { ..merged, {children} }
+        };
+    }
+
+    if is_mobile() {
+        let sheet_side = match side {
+            SidebarSide::Left => SheetSide::Left,
+            SidebarSide::Right => SheetSide::Right,
+        };
+
+        return rsx! {
+            Sheet {
+                open: open_mobile(),
+                on_open_change: move |v| ctx.set_open_mobile.call(v),
+                SheetContent {
+                    side: sheet_side,
+                    class: "sidebar-sheet",
+                    "data-sidebar": "sidebar",
+                    "data-slot": "sidebar",
+                    "data-mobile": "true",
+                    SheetHeader { class: "sr-only",
+                        SheetTitle { "Sidebar" }
+                        SheetDescription { "Displays the mobile sidebar." }
+                    }
+                    div { class: "sidebar-mobile-inner", {children} }
+                }
+            }
+        };
+    }
+
+    let collapsible_str = if state() == SidebarState::Collapsed {
+        collapsible.as_str()
+    } else {
+        ""
+    };
+
+    let container_base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-container", None, false),
+        Attribute::new("data-slot", "sidebar-container", None, false),
+    ];
+    let container_attrs = merge_attributes(vec![container_base, attributes]);
+
+    rsx! {
+        div {
+            class: "sidebar-desktop",
+            "data-state": state().as_str(),
+            "data-collapsible": collapsible_str,
+            "data-variant": variant.as_str(),
+            "data-side": side.as_str(),
+            "data-slot": "sidebar",
+            div { class: "sidebar-gap", "data-slot": "sidebar-gap" }
+            div {
+                ..container_attrs,
+                div {
+                    class: "sidebar-inner",
+                    "data-sidebar": "sidebar",
+                    "data-slot": "sidebar-inner",
+                    {children}
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn SidebarTrigger(
+    #[props(default)] onclick: Option<EventHandler<MouseEvent>>,
+    #[props(extends = GlobalAttributes)]
+    #[props(extends = button)]
+    attributes: Vec<Attribute>,
+) -> Element {
+    let ctx = use_sidebar();
+
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-trigger", None, false),
+        Attribute::new("data-sidebar", "trigger", None, false),
+        Attribute::new("data-slot", "sidebar-trigger", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        Button {
+            variant: ButtonVariant::Ghost,
+            onclick: move |e| {
+                if let Some(handler) = &onclick {
+                    handler.call(e);
+                }
+                ctx.toggle_sidebar.call(());
+            },
+            attributes: merged,
+            svg {
+                class: "sidebar-trigger-icon",
+                view_box: "0 0 24 24",
+                xmlns: "http://www.w3.org/2000/svg",
+                fill: "none",
+                stroke: "currentColor",
+                stroke_width: "2",
+                stroke_linecap: "round",
+                stroke_linejoin: "round",
+                rect {
+                    x: "3",
+                    y: "3",
+                    width: "18",
+                    height: "18",
+                    rx: "2",
+                }
+                path { d: "M9 3v18" }
+            }
+            span { class: "sr-only", "Toggle Sidebar" }
+        }
+    }
+}
+
+#[component]
+pub fn SidebarRail(#[props(extends = GlobalAttributes)] attributes: Vec<Attribute>) -> Element {
+    let ctx = use_sidebar();
+
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-rail", None, false),
+        Attribute::new("data-sidebar", "rail", None, false),
+        Attribute::new("data-slot", "sidebar-rail", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        button {
+            aria_label: "Toggle Sidebar",
+            tabindex: -1,
+            onclick: move |_| ctx.toggle_sidebar.call(()),
+            title: "Toggle Sidebar",
+            ..merged,
+        }
+    }
+}
+
+#[component]
+pub fn SidebarInset(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-inset", None, false),
+        Attribute::new("data-slot", "sidebar-inset", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        main { ..merged, {children} }
+    }
+}
+
+#[component]
+pub fn SidebarHeader(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-header", None, false),
+        Attribute::new("data-slot", "sidebar-header", None, false),
+        Attribute::new("data-sidebar", "header", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        div { ..merged, {children} }
+    }
+}
+
+#[component]
+pub fn SidebarContent(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-content", None, false),
+        Attribute::new("data-slot", "sidebar-content", None, false),
+        Attribute::new("data-sidebar", "content", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        div { ..merged, {children} }
+    }
+}
+
+#[component]
+pub fn SidebarFooter(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-footer", None, false),
+        Attribute::new("data-slot", "sidebar-footer", None, false),
+        Attribute::new("data-sidebar", "footer", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        div { ..merged, {children} }
+    }
+}
+
+#[component]
+pub fn SidebarSeparator(
+    #[props(default = true)] horizontal: bool,
+    #[props(default = true)] decorative: bool,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-separator", None, false),
+        Attribute::new("data-slot", "sidebar-separator", None, false),
+        Attribute::new("data-sidebar", "separator", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        Separator { horizontal, decorative, attributes: merged }
+    }
+}
+
+#[component]
+pub fn SidebarGroup(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-group", None, false),
+        Attribute::new("data-slot", "sidebar-group", None, false),
+        Attribute::new("data-sidebar", "group", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        div { ..merged, {children} }
+    }
+}
+
+#[component]
+pub fn SidebarGroupLabel(
+    r#as: Option<Callback<Vec<Attribute>, Element>>,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-group-label", None, false),
+        Attribute::new("data-slot", "sidebar-group-label", None, false),
+        Attribute::new("data-sidebar", "group-label", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    if let Some(dynamic) = r#as {
+        dynamic.call(merged)
+    } else {
+        rsx! {
+            div { ..merged,{children} }
+        }
+    }
+}
+
+#[component]
+pub fn SidebarGroupAction(
+    r#as: Option<Callback<Vec<Attribute>, Element>>,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-group-action", None, false),
+        Attribute::new("data-slot", "sidebar-group-action", None, false),
+        Attribute::new("data-sidebar", "group-action", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    if let Some(dynamic) = r#as {
+        dynamic.call(merged)
+    } else {
+        rsx! {
+            button { ..merged,{children} }
+        }
+    }
+}
+
+#[component]
+pub fn SidebarGroupContent(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-group-content", None, false),
+        Attribute::new("data-slot", "sidebar-group-content", None, false),
+        Attribute::new("data-sidebar", "group-content", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        div { ..merged, {children} }
+    }
+}
+
+#[component]
+pub fn SidebarMenu(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-menu", None, false),
+        Attribute::new("data-slot", "sidebar-menu", None, false),
+        Attribute::new("data-sidebar", "menu", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        ul { ..merged, {children} }
+    }
+}
+
+#[component]
+pub fn SidebarMenuItem(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-menu-item", None, false),
+        Attribute::new("data-slot", "sidebar-menu-item", None, false),
+        Attribute::new("data-sidebar", "menu-item", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        li { ..merged, {children} }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub enum SidebarMenuButtonVariant {
+    #[default]
+    Default,
+    Outline,
+}
+
+impl SidebarMenuButtonVariant {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            SidebarMenuButtonVariant::Default => "default",
+            SidebarMenuButtonVariant::Outline => "outline",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub enum SidebarMenuButtonSize {
+    #[default]
+    Default,
+    Sm,
+    Lg,
+}
+
+impl SidebarMenuButtonSize {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            SidebarMenuButtonSize::Default => "default",
+            SidebarMenuButtonSize::Sm => "sm",
+            SidebarMenuButtonSize::Lg => "lg",
+        }
+    }
+}
+
+#[component]
+pub fn SidebarMenuButton(
+    #[props(default = false)] is_active: bool,
+    #[props(default)] variant: SidebarMenuButtonVariant,
+    #[props(default)] size: SidebarMenuButtonSize,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    #[props(default)] tooltip: Option<Element>,
+    r#as: Option<Callback<Vec<Attribute>, Element>>,
+    children: Element,
+) -> Element {
+    let ctx = use_sidebar();
+    let is_mobile = ctx.is_mobile;
+    let state = ctx.state;
+
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-menu-button", None, false),
+        Attribute::new("data-slot", "sidebar-menu-button", None, false),
+        Attribute::new("data-sidebar", "menu-button", None, false),
+        Attribute::new("data-size", size.as_str(), None, false),
+        Attribute::new("data-variant", variant.as_str(), None, false),
+        Attribute::new(
+            "data-active",
+            if is_active { "true" } else { "false" },
+            None,
+            false,
+        ),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    let Some(tooltip_content) = tooltip else {
+        return if let Some(dynamic) = r#as {
+            dynamic.call(merged)
+        } else {
+            rsx! { button { ..merged, {children} } }
+        };
+    };
+
+    let hidden = state() != SidebarState::Collapsed || is_mobile();
+    let sidebar_side = ctx.side;
+
+    rsx! {
+        Tooltip {
+            disabled: hidden,
+            TooltipTrigger {
+                r#as: move |tooltip_attrs: Vec<Attribute>| {
+                    let final_attrs = merge_attributes(vec![tooltip_attrs, merged.clone()]);
+                    let children = children.clone();
+                    if let Some(dynamic) = &r#as {
+                        dynamic.call(final_attrs)
+                    } else {
+                        rsx! { button { ..final_attrs, {children} } }
+                    }
+                },
+            }
+            TooltipContent {
+                side: match sidebar_side() {
+                    SidebarSide::Left => dioxus_primitives::ContentSide::Right,
+                    SidebarSide::Right => dioxus_primitives::ContentSide::Left,
+                },
+                {tooltip_content}
+            }
+        }
+    }
+}
+
+#[component]
+pub fn SidebarMenuAction(
+    #[props(default = false)] show_on_hover: bool,
+    r#as: Option<Callback<Vec<Attribute>, Element>>,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-menu-action", None, false),
+        Attribute::new("data-slot", "sidebar-menu-action", None, false),
+        Attribute::new("data-sidebar", "menu-action", None, false),
+        Attribute::new(
+            "data-show-on-hover",
+            if show_on_hover { "true" } else { "false" },
+            None,
+            false,
+        ),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    if let Some(dynamic) = r#as {
+        dynamic.call(merged)
+    } else {
+        rsx! {
+            button { ..merged,{children} }
+        }
+    }
+}
+
+#[component]
+pub fn SidebarMenuBadge(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-menu-badge", None, false),
+        Attribute::new("data-slot", "sidebar-menu-badge", None, false),
+        Attribute::new("data-sidebar", "menu-badge", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        div { ..merged, {children} }
+    }
+}
+
+#[component]
+pub fn SidebarMenuSkeleton(
+    #[props(default = false)] show_icon: bool,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-menu-skeleton", None, false),
+        Attribute::new("data-slot", "sidebar-menu-skeleton", None, false),
+        Attribute::new("data-sidebar", "menu-skeleton", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        div {
+            ..merged,
+            if show_icon {
+                div { class: "skeleton sidebar-menu-skeleton-icon" }
+            }
+            div { class: "skeleton sidebar-menu-skeleton-text", width: "70%" }
+        }
+    }
+}
+
+#[component]
+pub fn SidebarMenuSub(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-menu-sub", None, false),
+        Attribute::new("data-slot", "sidebar-menu-sub", None, false),
+        Attribute::new("data-sidebar", "menu-sub", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        ul { ..merged, {children} }
+    }
+}
+
+#[component]
+pub fn SidebarMenuSubItem(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-menu-sub-item", None, false),
+        Attribute::new("data-slot", "sidebar-menu-sub-item", None, false),
+        Attribute::new("data-sidebar", "menu-sub-item", None, false),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        li { ..merged, {children} }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub enum SidebarMenuSubButtonSize {
+    Sm,
+    #[default]
+    Md,
+}
+
+impl SidebarMenuSubButtonSize {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            SidebarMenuSubButtonSize::Sm => "sm",
+            SidebarMenuSubButtonSize::Md => "md",
+        }
+    }
+}
+
+#[component]
+pub fn SidebarMenuSubButton(
+    #[props(default = false)] is_active: bool,
+    #[props(default)] size: SidebarMenuSubButtonSize,
+    r#as: Option<Callback<Vec<Attribute>, Element>>,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    let base: Vec<Attribute> = vec![
+        Attribute::new("class", "sidebar-menu-sub-button", None, false),
+        Attribute::new("data-slot", "sidebar-menu-sub-button", None, false),
+        Attribute::new("data-sidebar", "menu-sub-button", None, false),
+        Attribute::new("data-size", size.as_str(), None, false),
+        Attribute::new(
+            "data-active",
+            if is_active { "true" } else { "false" },
+            None,
+            false,
+        ),
+    ];
+    let merged = merge_attributes(vec![base, attributes]);
+
+    if let Some(dynamic) = r#as {
+        dynamic.call(merged)
+    } else {
+        rsx! {
+            a { ..merged, {children} }
+        }
+    }
+}
