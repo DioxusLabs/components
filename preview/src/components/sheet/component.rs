@@ -139,7 +139,7 @@ pub fn SheetDescription(props: DialogDescriptionProps) -> Element {
 pub fn SheetClose(
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
     r#as: Option<Callback<Vec<Attribute>, Element>>,
-    children: Option<Element>,
+    children: Element,
 ) -> Element {
     let ctx: DialogCtx = use_context();
 

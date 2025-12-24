@@ -9,23 +9,23 @@ use dioxus_primitives::calendar::{
 pub fn Calendar(props: CalendarProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
-        div { class: "calendar",
-            calendar::Calendar {
-                selected_date: props.selected_date,
-                on_date_change: props.on_date_change,
-                on_format_weekday: props.on_format_weekday,
-                on_format_month: props.on_format_month,
-                view_date: props.view_date,
-                today: props.today,
-                on_view_change: props.on_view_change,
-                disabled: props.disabled,
-                first_day_of_week: props.first_day_of_week,
-                min_date: props.min_date,
-                max_date: props.max_date,
-                disabled_ranges: props.disabled_ranges,
-                attributes: props.attributes,
-                {props.children}
-            }
+        calendar::Calendar {
+            class: "calendar",
+            selected_date: props.selected_date,
+            on_date_change: props.on_date_change,
+            on_format_weekday: props.on_format_weekday,
+            on_format_month: props.on_format_month,
+            view_date: props.view_date,
+            today: props.today,
+            on_view_change: props.on_view_change,
+            disabled: props.disabled,
+            first_day_of_week: props.first_day_of_week,
+            min_date: props.min_date,
+            max_date: props.max_date,
+            month_count: props.month_count,
+            disabled_ranges: props.disabled_ranges,
+            attributes: props.attributes,
+            {props.children}
         }
     }
 }
@@ -34,23 +34,37 @@ pub fn Calendar(props: CalendarProps) -> Element {
 pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
-        div { class: "calendar",
-            calendar::RangeCalendar {
-                selected_range: props.selected_range,
-                on_range_change: props.on_range_change,
-                on_format_weekday: props.on_format_weekday,
-                on_format_month: props.on_format_month,
-                view_date: props.view_date,
-                today: props.today,
-                on_view_change: props.on_view_change,
-                disabled: props.disabled,
-                first_day_of_week: props.first_day_of_week,
-                min_date: props.min_date,
-                max_date: props.max_date,
-                disabled_ranges: props.disabled_ranges,
-                attributes: props.attributes,
-                {props.children}
-            }
+        calendar::RangeCalendar {
+            class: "calendar",
+            selected_range: props.selected_range,
+            on_range_change: props.on_range_change,
+            on_format_weekday: props.on_format_weekday,
+            on_format_month: props.on_format_month,
+            view_date: props.view_date,
+            today: props.today,
+            on_view_change: props.on_view_change,
+            disabled: props.disabled,
+            first_day_of_week: props.first_day_of_week,
+            min_date: props.min_date,
+            max_date: props.max_date,
+            month_count: props.month_count,
+            disabled_ranges: props.disabled_ranges,
+            attributes: props.attributes,
+            {props.children}
+        }
+    }
+}
+
+#[component]
+pub fn CalendarView(
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
+    rsx! {
+        div {
+            class: "calendar-view",
+            ..attributes,
+            {children}
         }
     }
 }

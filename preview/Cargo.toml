@@ -11,7 +11,7 @@ dioxus-i18n = { git = "https://github.com/ealmloff/dioxus-i18n", branch = "bump-
 unic-langid = { version = "0.9", features = ["macros"] }
 strum = { version = "0.27.2", features = ["derive"] }
 tracing.workspace = true
-time = { version = "0.3.41", features = ["std", "macros"] }
+time = { version = "0.3.44", features = ["std", "macros"] }
 
 [build-dependencies]
 syntect = "5.2"
