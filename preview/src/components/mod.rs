@@ -143,7 +143,7 @@ examples!(
     select,
     separator,
     sheet,
-    sidebar(block),
+    sidebar(block)[floating, inset],
     skeleton,
     slider,
     switch,
