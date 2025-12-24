@@ -143,16 +143,16 @@ pub fn SheetClose(
 ) -> Element {
     let ctx: DialogCtx = use_context();
 
-    let mut merged_attributes: Vec<Attribute> = vec![onclick(move |_| {
+    let mut merged: Vec<Attribute> = vec![onclick(move |_| {
         ctx.set_open(false);
     })];
-    merged_attributes.extend(attributes);
+    merged.extend(attributes);
 
     if let Some(dynamic) = r#as {
-        dynamic.call(merged_attributes)
+        dynamic.call(merged)
     } else {
         rsx! {
-            button { ..merged_attributes, {children} }
+            button { ..merged, {children} }
         }
     }
 }
