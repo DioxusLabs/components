@@ -26,7 +26,7 @@
   min-width: 20px;
   height: 20px;
   font-size: 12px;
-  background: var(--highlight-color-secondary);
+  background-color: var(--badge-color);
   border-radius: 10px;
   box-shadow: 0 0 0 1px var(--primary-color-2);
   transform: translate(-50%, -50%);

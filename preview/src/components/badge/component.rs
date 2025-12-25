@@ -11,6 +11,7 @@ pub fn Badge(props: BadgeProps) -> Element {
             overflow_count: props.overflow_count,
             dot: props.dot,
             show_zero: props.show_zero,
+            color: props.color,
             attributes: props.attributes,
             {props.children}
         }

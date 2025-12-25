@@ -8,10 +8,10 @@ pub fn Demo() -> Element {
     rsx! {
         div {
             class: "badge-example",
-            
-            div { 
+
+            div {
                 class: "badge-item",
-                p { class: "badge-label", "Basic Usage" }
+                p { class: "badge-label", "Basic" }
                 Badge {
                     count: 5,
                     Avatar {
@@ -22,7 +22,7 @@ pub fn Demo() -> Element {
                 }
             }
 
-            div { 
+            div {
                 class: "badge-item",
                 p { class: "badge-label", "Show Zero" }
 
@@ -37,9 +37,9 @@ pub fn Demo() -> Element {
                 }
             }
 
-            div { 
+            div {
                 class: "badge-item",
-                p { class: "badge-label", "Overflow Count" }
+                p { class: "badge-label", "Overflow" }
 
                 Badge {
                     count: 100,
@@ -52,7 +52,22 @@ pub fn Demo() -> Element {
                 }
             }
 
-            div { 
+            div {
+                class: "badge-item",
+                p { class: "badge-label", "Colorful" }
+
+                Badge {
+                    count: 7,
+                    color: String::from("52c41a"),
+                    Avatar {
+                        size: AvatarImageSize::Medium,
+                        shape: AvatarShape::Rounded,
+                        aria_label: "Space item",
+                    }
+                }
+            }
+
+            div {
                 class: "badge-item",
                 p { class: "badge-label", "As Dot" }
 
