@@ -525,7 +525,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
 
     // Create base context provider for child components
     let mut base_ctx = use_context_provider(|| BaseCalendarContext {
-        focused_date: Signal::new(props.selected_date.cloned()),
+        focused_date: Signal::new(None),
         view_date: props.view_date,
         set_view_date: props.on_view_change,
         available_ranges,
