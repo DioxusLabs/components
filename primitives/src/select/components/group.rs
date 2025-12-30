@@ -173,7 +173,7 @@ pub fn SelectGroupLabel(props: SelectGroupLabelProps) -> Element {
     let render = use_context::<SelectListContext>().render;
 
     rsx! {
-        if render () {
+        if render() {
             div {
                 // Set the ID for the label
                 id,

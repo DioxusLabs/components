@@ -78,7 +78,7 @@ examples!(
     progress,
     radio_group,
     scroll_area,
-    select,
+    select[disabled],
     separator,
     skeleton,
     sheet,
