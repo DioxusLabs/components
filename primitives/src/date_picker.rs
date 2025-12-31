@@ -103,7 +103,7 @@ pub struct DatePickerProps {
 /// use dioxus_primitives::{calendar::Calendar, date_picker::*, popover::*, ContentAlign};
 /// use time::Date;
 /// #[component]
-/// pub fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///    let mut selected_date = use_signal(|| None::<Date>);
 ///    rsx! {
 ///        div {
@@ -242,7 +242,7 @@ pub struct DateRangePickerProps {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::{calendar::{DateRange, RangeCalendar}, date_picker::*, popover::*, ContentAlign};
 /// #[component]
-/// pub fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///    let mut selected_range = use_signal(|| None::<DateRange>);
 ///    rsx! {
 ///        div {
@@ -350,7 +350,7 @@ pub struct DatePickerPopoverProps {
 /// use dioxus_primitives::{calendar::Calendar, date_picker::*, popover::*, ContentAlign};
 /// use time::Date;
 /// #[component]
-/// pub fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///    let mut selected_date = use_signal(|| None::<Date>);
 ///    rsx! {
 ///        div {
@@ -473,7 +473,7 @@ pub struct DatePickerCalendarProps<T: DefaultCalendarProps + Properties + Partia
 /// use dioxus_primitives::{calendar::Calendar, date_picker::*, popover::*, ContentAlign};
 /// use time::Date;
 /// #[component]
-/// pub fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///    let mut selected_date = use_signal(|| None::<Date>);
 ///    rsx! {
 ///        div {
@@ -550,7 +550,7 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps<CalendarProps>) -> Elem
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::{calendar::{DateRange, RangeCalendar}, date_picker::*, popover::*, ContentAlign};
 /// #[component]
-/// pub fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///    let mut selected_range = use_signal(|| None::<DateRange>);
 ///    rsx! {
 ///        div {
@@ -1010,7 +1010,7 @@ pub struct DatePickerInputProps {
 /// use dioxus_primitives::{calendar::Calendar, date_picker::*, popover::*, ContentAlign};
 /// use time::Date;
 /// #[component]
-/// pub fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///    let mut selected_date = use_signal(|| None::<Date>);
 ///    rsx! {
 ///        div {
@@ -1069,7 +1069,7 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::{calendar::{DateRange, RangeCalendar}, date_picker::*, popover::*, ContentAlign};
 /// #[component]
-/// pub fn Demo() -> Element {
+/// fn Demo() -> Element {
 ///    let mut selected_range = use_signal(|| None::<DateRange>);
 ///    rsx! {
 ///        div {
