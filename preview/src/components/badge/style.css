@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: between;
   gap: 1rem;
 }
 
@@ -21,14 +20,14 @@
 .badge {
   position: absolute;
   display: inline-flex;
-  justify-content: center;
-  align-items: center;
   min-width: 20px;
   height: 20px;
-  font-size: 12px;
-  background-color: var(--badge-color);
+  align-items: center;
+  justify-content: center;
   border-radius: 10px;
+  background-color: var(--badge-color);
   box-shadow: 0 0 0 1px var(--primary-color-2);
+  font-size: 12px;
   transform: translate(-50%, -50%);
 }
 
