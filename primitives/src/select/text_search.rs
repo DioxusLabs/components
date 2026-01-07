@@ -8,7 +8,7 @@ use std::collections::HashMap;
 pub(super) fn best_match<'a>(
     keyboard: &AdaptiveKeyboard,
     typeahead: &str,
-    options: impl Iterator<Item = &'a OptionState>,
+    options: impl Iterator<Item = (&'a usize, &'a OptionState)>,
 ) -> Option<usize> {
     if typeahead.is_empty() {
         return None;
@@ -17,12 +17,12 @@ pub(super) fn best_match<'a>(
     let typeahead_characters: Box<[_]> = typeahead.chars().collect();
 
     options
-        .filter(|o| !o.disabled)
-        .map(|opt| {
+        .filter(|(_, o)| !o.disabled)
+        .map(|(&key, opt)| {
             let value = &opt.text_value;
             let value_characters: Box<[_]> = value.chars().collect();
             let distance = normalized_distance(&typeahead_characters, &value_characters, keyboard);
-            (distance, opt.tab_index)
+            (distance, key)
         })
         .min_by(|(d1, _), (d2, _)| f32::total_cmp(d1, d2))
         .map(|(_, value)| value)
@@ -533,29 +533,35 @@ mod tests {
 
     #[test]
     fn test_best_match() {
-        let options = vec![
-            OptionState {
-                tab_index: 0,
-                value: RcPartialEqValue::new("apple"),
-                text_value: "Apple".to_string(),
-                id: "apple".to_string(),
-                disabled: false,
-            },
-            OptionState {
-                tab_index: 1,
-                value: RcPartialEqValue::new("banana"),
-                text_value: "Banana".to_string(),
-                id: "banana".to_string(),
-                disabled: false,
-            },
-            OptionState {
-                tab_index: 2,
-                value: RcPartialEqValue::new("cherry"),
-                text_value: "Cherry".to_string(),
-                id: "cherry".to_string(),
-                disabled: false,
-            },
-        ];
+        let options = HashMap::from([
+            (
+                0,
+                OptionState {
+                    value: RcPartialEqValue::new("apple"),
+                    text_value: "Apple".to_string(),
+                    id: "apple".to_string(),
+                    disabled: false,
+                },
+            ),
+            (
+                1,
+                OptionState {
+                    value: RcPartialEqValue::new("banana"),
+                    text_value: "Banana".to_string(),
+                    id: "banana".to_string(),
+                    disabled: false,
+                },
+            ),
+            (
+                2,
+                OptionState {
+                    value: RcPartialEqValue::new("cherry"),
+                    text_value: "Cherry".to_string(),
+                    id: "cherry".to_string(),
+                    disabled: false,
+                },
+            ),
+        ]);
 
         let layout = AdaptiveKeyboard::default();
 
@@ -602,22 +608,26 @@ mod tests {
         assert_eq!(adaptive.physical_mappings.get("KeyA"), Some(&'ф'));
         assert_eq!(adaptive.physical_mappings.get("KeyS"), Some(&'ы'));
 
-        let options = vec![
-            OptionState {
-                tab_index: 0,
-                value: RcPartialEqValue::new("ф"),
-                text_value: "ф".to_string(),
-                id: "ф".to_string(),
-                disabled: false,
-            },
-            OptionState {
-                tab_index: 1,
-                value: RcPartialEqValue::new("banana"),
-                text_value: "Banana".to_string(),
-                id: "banana".to_string(),
-                disabled: false,
-            },
-        ];
+        let options = HashMap::from([
+            (
+                0,
+                OptionState {
+                    value: RcPartialEqValue::new("ф"),
+                    text_value: "ф".to_string(),
+                    id: "ф".to_string(),
+                    disabled: false,
+                },
+            ),
+            (
+                1,
+                OptionState {
+                    value: RcPartialEqValue::new("banana"),
+                    text_value: "Banana".to_string(),
+                    id: "banana".to_string(),
+                    disabled: false,
+                },
+            ),
+        ]);
 
         // ы should be a closer match to ф than banana
         let result = best_match(&adaptive, "ф", options.iter());

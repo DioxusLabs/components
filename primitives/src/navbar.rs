@@ -141,7 +141,7 @@ pub fn Navbar(props: NavbarProps) -> Element {
                 tabindex: (!ctx.focus.any_focused()).then_some("0"),
                 // If the menu receives focus, focus the most recently focused menu item
                 onfocus: move |_| {
-                    ctx.focus.set_focus(Some(ctx.focus.recent_focus_or_default()));
+                    ctx.focus.focus_recent_or_first();
                 },
                 onkeydown: move |event: Event<KeyboardData>| {
                     match event.key() {
@@ -169,6 +169,10 @@ struct NavbarNavContext {
     focus: FocusState,
     is_open: Memo<bool>,
     disabled: ReadSignal<bool>,
+    /// The initial element to focus once the list is opened<br>
+    /// true: last element<br>
+    /// false: first element
+    pub initial_focus_last: Signal<Option<bool>>,
 }
 
 impl NavbarNavContext {
@@ -274,20 +278,28 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
     let mut ctx: NavbarContext = use_context();
     let is_open = use_memo(move || (ctx.open_nav)() == Some(props.index.cloned()));
     let focus = use_focus_provider(ctx.focus.roving_loop);
+    let initial_focus_last = use_signal(|| None);
     let mut nav_ctx = use_context_provider(|| NavbarNavContext {
         index: props.index,
         focus,
         is_open,
         disabled: props.disabled,
+        initial_focus_last,
     });
 
     use_effect(move || {
         if !is_open() {
             nav_ctx.focus.blur();
+        } else if let Some(last) = (nav_ctx.initial_focus_last)() {
+            if last {
+                nav_ctx.focus.focus_last();
+            } else {
+                nav_ctx.focus.focus_first();
+            }
         }
     });
 
-    use_focus_entry(ctx.focus, nav_ctx.index);
+    use_focus_entry(ctx.focus, nav_ctx.index.cloned(), nav_ctx.index);
 
     let disabled = move || (ctx.disabled)() || (props.disabled)();
 
@@ -319,6 +331,7 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
                     }
                     Key::ArrowDown if !disabled() => {
                         if !is_open() {
+                            nav_ctx.initial_focus_last.set(Some(false));
                             ctx.set_open_nav.call(Some(props.index.cloned()));
                         }
                         nav_ctx.focus_next();
@@ -418,7 +431,7 @@ pub struct NavbarTriggerProps {
 pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
     let mut ctx: NavbarContext = use_context();
     let nav_ctx: NavbarNavContext = use_context();
-    let onmounted = use_focus_control(ctx.focus, nav_ctx.index);
+    let onmounted = use_focus_control(ctx.focus, nav_ctx.index.cloned());
     let is_focused = move || {
         ctx.focus.current_focus() == Some(nav_ctx.index.cloned()) && !nav_ctx.focus.any_focused()
     };
@@ -710,7 +723,7 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
         )
     };
 
-    let mut onmounted = use_focus_controlled_item(props.index);
+    let mut onmounted = use_focus_controlled_item(props.index.cloned(), props.index);
 
     props.attributes.push(onkeydown({
         let value = props.value.clone();
@@ -746,7 +759,8 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
     }));
 
     let tabindex = if focused()
-        || (nav_ctx.is_none() && ctx.focus.recent_focus_or_default() == props.index.cloned())
+        || (nav_ctx.is_none()
+            && ctx.focus.recent_focus().unwrap_or_default() == props.index.cloned())
     {
         "0"
     } else {

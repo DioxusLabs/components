@@ -52,13 +52,13 @@ pub struct SelectListProps {
 ///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
-///                         index: 0usize,
+///                         tab_index: 0usize,
 ///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
-///                         index: 1usize,
+///                         tab_index: 1usize,
 ///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
@@ -81,7 +81,7 @@ pub fn SelectList(props: SelectListProps) -> Element {
 
     let mut open = ctx.open;
     let mut listbox_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
-    let focused = move || open() && !ctx.any_focused();
+    let focused = move || open() && !ctx.focus_state.any_focused();
 
     use_effect(move || {
         let Some(listbox_ref) = listbox_ref() else {
@@ -125,19 +125,19 @@ pub fn SelectList(props: SelectListProps) -> Element {
             }
             Key::ArrowUp => {
                 arrow_key_navigation(event);
-                ctx.focus_prev();
+                ctx.focus_state.focus_prev();
             }
             Key::End => {
                 arrow_key_navigation(event);
-                ctx.focus_last();
+                ctx.focus_state.focus_last();
             }
             Key::ArrowDown => {
                 arrow_key_navigation(event);
-                ctx.focus_next();
+                ctx.focus_state.focus_next();
             }
             Key::Home => {
                 arrow_key_navigation(event);
-                ctx.focus_first();
+                ctx.focus_state.focus_first();
             }
             Key::Enter => {
                 ctx.select_current_item();
@@ -165,9 +165,9 @@ pub fn SelectList(props: SelectListProps) -> Element {
         if render() {
             if let Some(last) = (ctx.initial_focus_last)() {
                 if last {
-                    ctx.focus_last();
+                    ctx.focus_state.focus_last();
                 } else {
-                    ctx.focus_first();
+                    ctx.focus_state.focus_first();
                 }
             }
         } else {

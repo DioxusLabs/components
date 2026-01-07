@@ -416,7 +416,7 @@ pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
     let disabled = move || (ctx.disabled)() || (props.disabled)();
     let focused = move || ctx.focus.is_focused((props.index)());
 
-    let onmounted = use_focus_controlled_item(props.index);
+    let onmounted = use_focus_controlled_item(props.index.cloned(), props.index);
 
     rsx! {
         div {

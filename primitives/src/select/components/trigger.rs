@@ -42,13 +42,13 @@ pub struct SelectTriggerProps {
 ///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
-///                         index: 0usize,
+///                         tab_index: 0usize,
 ///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
-///                         index: 1usize,
+///                         tab_index: 1usize,
 ///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
@@ -69,7 +69,7 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
     let mut ctx = use_context::<SelectContext>();
     let mut open = ctx.open;
 
-    let focus_id = use_memo(move || ctx.current_focus_id());
+    let focus_id = use_memo(move || ctx.current_item_id());
 
     rsx! {
         button {
