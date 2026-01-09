@@ -61,15 +61,15 @@
 }
 
 .sidebar-sheet .sidebar-header .dropdown-menu-content {
-  inset: 100% auto auto 0;
   margin-top: 4px;
   margin-bottom: 0;
+  inset: 100% auto auto 0;
 }
 
 .sidebar-sheet .sidebar-footer .dropdown-menu-content {
-  inset: auto auto 100% 0;
   margin-top: 0;
   margin-bottom: 4px;
+  inset: auto auto 100% 0;
 }
 
 .sidebar-menu-button[data-sidebar="menu-button"].collapsible-trigger:hover {
@@ -102,8 +102,8 @@
   }
 
   .sidebar-desktop[data-side="right"] .sidebar-footer .dropdown-menu-content {
-    inset: auto 100% 0 auto;
     margin-right: 0.5rem;
     margin-bottom: 0;
+    inset: auto 100% 0 auto;
   }
 }

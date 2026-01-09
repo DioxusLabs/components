@@ -28,7 +28,7 @@
   min-height: 100svh;
 }
 
-@media (width >= 768px) {
+@media (width >=768px) {
   .sidebar-wrapper:has(.sidebar-desktop[data-side="right"]) {
     flex-direction: row-reverse;
   }
@@ -43,7 +43,7 @@
   color: var(--sidebar-foreground);
 }
 
-@media (width >= 768px) {
+@media (width >=768px) {
   .sidebar-desktop {
     display: block;
   }
@@ -86,7 +86,7 @@
   transition: left 200ms ease-out, right 200ms ease-out, width 200ms ease-out;
 }
 
-@media (width >= 768px) {
+@media (width >=768px) {
   .sidebar-container {
     display: flex;
   }
@@ -160,7 +160,7 @@
   background: var(--sidebar-background);
 }
 
-.sidebar-sheet > .sheet-close {
+.sidebar-sheet>.sheet-close {
   display: none;
 }
 
@@ -201,7 +201,7 @@
   transition: all 200ms ease-out;
 }
 
-@media (width >= 640px) {
+@media (width >=640px) {
   .sidebar-rail {
     display: flex;
   }
@@ -222,17 +222,11 @@
 
 [data-side="left"] .sidebar-rail {
   right: -1rem;
-}
-
-[data-side="left"] .sidebar-rail {
   cursor: w-resize;
 }
 
 [data-side="right"] .sidebar-rail {
   left: 0;
-}
-
-[data-side="right"] .sidebar-rail {
   cursor: e-resize;
 }
 
@@ -302,11 +296,11 @@
 
 .sidebar-content {
   display: flex;
+  overflow: hidden auto;
   min-height: 0;
   flex: 1 1 0%;
   flex-direction: column;
   gap: 0.5rem;
-  overflow: hidden auto;
 }
 
 [data-collapsible="icon"] .sidebar-content {
@@ -396,7 +390,7 @@
   inset: -0.5rem;
 }
 
-@media (width >= 768px) {
+@media (width >=768px) {
   .sidebar-group-action::after {
     display: none;
   }
@@ -575,7 +569,7 @@
   inset: -0.5rem;
 }
 
-@media (width >= 768px) {
+@media (width >=768px) {
   .sidebar-menu-action[data-sidebar="menu-action"]::after {
     display: none;
   }
@@ -601,7 +595,7 @@
   opacity: 0;
 }
 
-@media (width >= 768px) {
+@media (width >=768px) {
   .sidebar-menu-item:hover .sidebar-menu-action[data-sidebar="menu-action"][data-show-on-hover="true"],
   .sidebar-menu-item:focus-within .sidebar-menu-action[data-sidebar="menu-action"][data-show-on-hover="true"],
   .sidebar-menu-action[data-sidebar="menu-action"][data-show-on-hover="true"][data-state="open"] {
