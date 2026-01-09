@@ -301,6 +301,7 @@ pub fn merge_attributes(lists: Vec<Vec<Attribute>>) -> Vec<Attribute> {
         }
     }
 
+    merged.sort_by_key(|attr| attr.name);
     merged
 }
 
