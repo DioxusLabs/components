@@ -3,6 +3,7 @@
 use dioxus::document;
 use dioxus::prelude::*;
 
+use crate::focus_trap::{self, FocusTrap};
 use crate::use_global_escape_listener;
 use crate::{use_animated_open, use_controlled, use_id_or, use_unique_id, FOCUS_TRAP_JS};
 
@@ -229,6 +230,8 @@ pub fn DialogContent(props: DialogContentProps) -> Element {
 
     let gen_id = use_unique_id();
     let id = use_id_or(gen_id, props.id);
+
+    let mut trap: Signal<Option<FocusTrap>> = use_signal(|| None);
     use_effect(move || {
         let is_modal = is_modal();
         if !is_modal {
@@ -236,18 +239,10 @@ pub fn DialogContent(props: DialogContentProps) -> Element {
             return;
         }
 
-        document::eval(&format!(
-            r#"let dialog = document.getElementById("{id}");
-            let is_open = {open};
-
-            if (is_open) {{
-                dialog.trap = window.createFocusTrap(dialog);
-            }}
-            if (!is_open && dialog.trap) {{
-                dialog.trap.remove();
-                dialog.trap = null;
-            }}"#
-        ));
+        let id_str = id();
+        let is_open = open();
+        let mut trap_ref = trap.write();
+        focus_trap::setup_focus_trap(&id_str, is_open, &mut trap_ref);
     });
 
     rsx! {

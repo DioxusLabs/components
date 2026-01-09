@@ -1,8 +1,9 @@
 //! Defines the [`Checkbox`] component and its subcomponents, which manage checkbox inputs with controlled state.
 
 use crate::{use_controlled, use_unique_id};
-use dioxus::{document::eval, prelude::*};
+use dioxus::prelude::*;
 use std::ops::Not;
+use wasm_bindgen::JsCast;
 
 /// The state of a [`Checkbox`] component.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -236,31 +237,35 @@ fn BubbleInput(
     // Update the actual input state to match our virtual state.
     use_effect(move || {
         let checked = checked();
-        let js = eval(
-            r#"
-            let id = await dioxus.recv();
-            let action = await dioxus.recv();
-            let input = document.getElementById(id);
+        let id_str = id();
 
-            switch(action) {
-                case "checked":
-                    input.checked = true;
-                    input.indeterminate = false;
-                    break;
-                case "indeterminate":
-                    input.indeterminate = true;
-                    input.checked = true;
-                    break;
-                case "unchecked":
-                    input.checked = false;
-                    input.indeterminate = false;
-                    break;
+        let Some(window) = web_sys::window() else {
+            return;
+        };
+        let Some(document) = window.document() else {
+            return;
+        };
+        let Some(element) = document.get_element_by_id(&id_str) else {
+            return;
+        };
+        let Ok(input) = element.dyn_into::<web_sys::HtmlInputElement>() else {
+            return;
+        };
+
+        match checked {
+            CheckboxState::Checked => {
+                input.set_checked(true);
+                input.set_indeterminate(false);
             }
-            "#,
-        );
-
-        let _ = js.send(id());
-        let _ = js.send(checked.to_data_state());
+            CheckboxState::Indeterminate => {
+                input.set_checked(true);
+                input.set_indeterminate(true);
+            }
+            CheckboxState::Unchecked => {
+                input.set_checked(false);
+                input.set_indeterminate(false);
+            }
+        }
     });
 
     rsx! {

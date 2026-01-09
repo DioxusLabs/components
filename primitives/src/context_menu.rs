@@ -5,6 +5,7 @@ use crate::{
     use_animated_open, use_controlled, use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::prelude::*;
+use wasm_bindgen::JsCast;
 
 #[derive(Clone, Copy)]
 struct ContextMenuCtx {
@@ -120,15 +121,27 @@ pub fn ContextMenu(props: ContextMenuProps) -> Element {
     });
 
     // If the context menu is open, prevent pointer and scroll events outside of it
-    let pointer_events_disabled = |disabled| {
-        if disabled {
-            dioxus::document::eval(
-                "document.body.style.pointerEvents = 'none'; document.documentElement.style.overflow = 'hidden';",
-            );
+    let pointer_events_disabled = |disabled: bool| {
+        let Some(window) = web_sys::window() else {
+            return;
+        };
+        let Some(document) = window.document() else {
+            return;
+        };
+
+        let (pointer_events, overflow) = if disabled {
+            ("none", "hidden")
         } else {
-            dioxus::document::eval(
-                "document.body.style.pointerEvents = 'auto'; document.documentElement.style.overflow = 'auto';",
-            );
+            ("auto", "auto")
+        };
+
+        if let Some(body) = document.body() {
+            let _ = body.style().set_property("pointer-events", pointer_events);
+        }
+        if let Some(doc_el) = document.document_element() {
+            if let Ok(html_el) = doc_el.dyn_into::<web_sys::HtmlElement>() {
+                let _ = html_el.style().set_property("overflow", overflow);
+            }
         }
     };
     use_effect(move || {
