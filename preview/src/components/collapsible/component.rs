@@ -27,18 +27,12 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
     let base = vec![Attribute::new("class", "collapsible-trigger", None, false)];
     let merged = merge_attributes(vec![base, props.attributes]);
 
-    if props.r#as.is_some() {
-        rsx! {
-            collapsible::CollapsibleTrigger {
-                r#as: props.r#as,
-                attributes: merged,
-                {props.children}
-            }
-        }
-    } else {
-        rsx! {
-            collapsible::CollapsibleTrigger { attributes: merged,
-                {props.children}
+    let show_icon = props.r#as.is_none();
+
+    rsx! {
+        collapsible::CollapsibleTrigger { r#as: props.r#as, attributes: merged,
+            {props.children}
+            if show_icon {
                 svg {
                     class: "collapsible-expand-icon",
                     view_box: "0 0 24 24",
