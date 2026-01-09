@@ -15,3 +15,11 @@ lto = true
 codegen-units = 1
 strip = true
 incremental = false
+
+# Outside of wasm, we need to use our wry/desktop compatible patch for the wasm-bindgen family of libraries
+[patch.crates-io]
+dioxus = { git = "https://github.com/ealmloff/dioxus", branch = "wasm-bindgen" }
+wasm-bindgen = { git = "https://github.com/DioxusLabs/wasm-bindgen-wry" }
+wasm-bindgen-futures = { git = "https://github.com/DioxusLabs/wasm-bindgen-wry" }
+js-sys = { git = "https://github.com/DioxusLabs/wasm-bindgen-wry" }
+web-sys = { git = "https://github.com/DioxusLabs/wasm-bindgen-wry" }

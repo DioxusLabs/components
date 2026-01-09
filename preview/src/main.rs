@@ -4,6 +4,7 @@ use crate::components::{separator::Separator, tabs::component::*};
 use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
 use dioxus_i18n::prelude::*;
+use wasm_bindgen::JsValue;
 
 use std::str::FromStr;
 use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
@@ -155,9 +156,17 @@ fn NavigationLayout() -> Element {
             return;
         }
 
-        document::eval(&format!(
-            "window.top.postMessage({{ 'route': '{route}' }}, '*');"
-        ));
+        if let Some(window) = web_sys::window() {
+            if let Ok(Some(top)) = window.top() {
+                let message = js_sys::Object::new();
+                let _ = js_sys::Reflect::set(
+                    &message,
+                    &JsValue::from_str("route"),
+                    &JsValue::from_str(&route.to_string()),
+                );
+                let _ = top.post_message(&message.into(), "*");
+            }
+        }
     });
 
     rsx! {
@@ -339,9 +348,13 @@ fn CheckIcon() -> Element {
 
 fn set_theme(dark_mode: bool) {
     let theme = if dark_mode { "dark" } else { "light" };
-    _ = document::eval(&format!(
-        "document.documentElement.setAttribute('data-theme', '{theme}');",
-    ));
+    if let Some(window) = web_sys::window() {
+        if let Some(document) = window.document() {
+            if let Some(doc_el) = document.document_element() {
+                let _ = doc_el.set_attribute("data-theme", theme);
+            }
+        }
+    }
 }
 
 #[component]

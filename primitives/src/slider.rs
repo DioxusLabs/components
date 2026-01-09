@@ -1,6 +1,6 @@
 //! Defines the [`Slider`] component and its sub-components, which provide a range input control for selecting a value within a specified range.
 
-use crate::dioxus_core::{queue_effect, Runtime};
+use crate::dioxus_core::queue_effect;
 use crate::use_controlled;
 use dioxus::html::geometry::euclid::Rect;
 use dioxus::html::geometry::euclid::Vector2D;
@@ -8,7 +8,9 @@ use dioxus::html::geometry::Pixels;
 use dioxus::html::geometry::{ClientPoint, ClientSpace};
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
+use gloo_events::EventListener;
 use std::rc::Rc;
+use wasm_bindgen::JsCast;
 
 /// The value of the slider. Currently this can only be a single value, but support for ranges is planned.
 #[derive(Debug, Clone, PartialEq)]
@@ -43,52 +45,40 @@ impl Pointer {
 }
 
 static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
-    let runtime = Runtime::current();
     queue_effect(move || {
-        runtime.spawn(ScopeId::ROOT, async move {
-            let mut pointer_updates = dioxus::document::eval(
-                "window.addEventListener('pointerdown', (e) => {
-                    dioxus.send(['down', [e.pointerId, e.pageX, e.pageY]]);
-                });
-                window.addEventListener('pointermove', (e) => {
-                    dioxus.send(['move', [e.pointerId, e.pageX, e.pageY]]);
-                });
-                window.addEventListener('pointerup', (e) => {
-                    dioxus.send(['up', [e.pointerId, e.pageX, e.pageY]]);
-                });",
-            );
+        let Some(window) = web_sys::window() else {
+            return;
+        };
 
-            while let Ok((event_type, (pointer_id, x, y))) =
-                pointer_updates.recv::<(String, (i32, f64, f64))>().await
-            {
-                let position = ClientPoint::new(x, y);
+        let down_listener = EventListener::new(&window, "pointerdown", |event| {
+            let event = event.dyn_ref::<web_sys::PointerEvent>().unwrap();
+            POINTERS.write().push(Pointer {
+                id: event.pointer_id(),
+                position: ClientPoint::new(event.page_x() as f64, event.page_y() as f64),
+                last_position: None,
+            });
+        });
 
-                match event_type.as_str() {
-                    "down" => {
-                        // Add a new pointer
-                        POINTERS.write().push(Pointer {
-                            id: pointer_id,
-                            position,
-                            last_position: None,
-                        });
-                    }
-                    "move" => {
-                        // Update the position of an existing pointer
-                        if let Some(pointer) =
-                            POINTERS.write().iter_mut().find(|p| p.id == pointer_id)
-                        {
-                            pointer.last_position = Some(pointer.position);
-                            pointer.position = position;
-                        }
-                    }
-                    "up" => {
-                        // Remove the pointer
-                        POINTERS.write().retain(|p| p.id != pointer_id);
-                    }
-                    _ => {}
-                }
+        let move_listener = EventListener::new(&window, "pointermove", |event| {
+            let event = event.dyn_ref::<web_sys::PointerEvent>().unwrap();
+            let pointer_id = event.pointer_id();
+            let position = ClientPoint::new(event.page_x() as f64, event.page_y() as f64);
+            if let Some(pointer) = POINTERS.write().iter_mut().find(|p| p.id == pointer_id) {
+                pointer.last_position = Some(pointer.position);
+                pointer.position = position;
             }
         });
+
+        let up_listener = EventListener::new(&window, "pointerup", |event| {
+            let event = event.dyn_ref::<web_sys::PointerEvent>().unwrap();
+            let pointer_id = event.pointer_id();
+            POINTERS.write().retain(|p| p.id != pointer_id);
+        });
+
+        // Keep the listeners alive for the lifetime of the app
+        std::mem::forget(down_listener);
+        std::mem::forget(move_listener);
+        std::mem::forget(up_listener);
     });
 
     Vec::new()

@@ -8,6 +8,9 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use dioxus::core::{current_scope_id, use_drop};
 use dioxus::prelude::*;
 use dioxus::prelude::{asset, manganis, Asset};
+use gloo_events::EventListener;
+use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::JsFuture;
 
 pub mod accordion;
 pub mod alert_dialog;
@@ -21,6 +24,7 @@ pub mod date_picker;
 pub mod dialog;
 pub mod dropdown_menu;
 mod focus;
+pub(crate) mod focus_trap;
 pub mod hover_card;
 pub mod label;
 pub mod menubar;
@@ -160,25 +164,84 @@ fn use_global_escape_listener(mut on_escape: impl FnMut() + Clone + 'static) {
 
 fn use_global_keydown_listener(key: &'static str, on_escape: impl FnMut() + Clone + 'static) {
     use_effect_with_cleanup(move || {
-        let mut escape = document::eval(&format!(
-            "function listener(event) {{
-                if (event.key === '{key}') {{
-                    event.preventDefault();
-                    dioxus.send(true);
-                }}
-            }}
-            document.addEventListener('keydown', listener);
-            await dioxus.recv();
-            document.removeEventListener('keydown', listener);"
-        ));
-        let mut on_escape = on_escape.clone();
-        spawn(async move {
-            while let Ok(true) = escape.recv().await {
-                on_escape();
-            }
-        });
-        move || _ = escape.send(true)
+        let listener = (|| {
+            let window = web_sys::window()?;
+            let document = window.document()?;
+            let mut on_escape = on_escape.clone();
+            let listener = EventListener::new(&document, "keydown", move |event| {
+                let event = event.dyn_ref::<web_sys::KeyboardEvent>().unwrap();
+                if event.key() == key {
+                    event.prevent_default();
+                    on_escape();
+                }
+            });
+            Some(listener)
+        })();
+        move || drop(listener)
     });
+}
+
+/// Manual bindings for Web Animations API since web-sys doesn't have stable getAnimations.
+mod animations {
+    use wasm_bindgen::prelude::*;
+
+    #[wasm_bindgen]
+    extern "C" {
+        /// Represents a Web Animation.
+        pub type Animation;
+
+        /// The `finished` promise that resolves when the animation completes.
+        #[wasm_bindgen(method, getter)]
+        pub fn finished(this: &Animation) -> js_sys::Promise;
+    }
+
+    /// Get all animations running on an element using js_sys::Reflect.
+    pub fn get_animations(element: &web_sys::Element) -> js_sys::Array {
+        let method = js_sys::Reflect::get(element, &JsValue::from_str("getAnimations"))
+            .ok()
+            .and_then(|f| f.dyn_into::<js_sys::Function>().ok());
+        match method {
+            Some(func) => func
+                .call0(element)
+                .ok()
+                .and_then(|arr| arr.dyn_into::<js_sys::Array>().ok())
+                .unwrap_or_else(js_sys::Array::new),
+            None => js_sys::Array::new(),
+        }
+    }
+}
+
+/// Wait for all animations on an element to finish.
+async fn wait_for_animations(element_id: &str) {
+    let Some(window) = web_sys::window() else {
+        return;
+    };
+    let Some(document) = window.document() else {
+        return;
+    };
+    let Some(element) = document.get_element_by_id(element_id) else {
+        return;
+    };
+
+    let anims = animations::get_animations(&element);
+    if anims.length() == 0 {
+        return;
+    }
+
+    let finished_promises = js_sys::Array::new();
+    for i in 0..anims.length() {
+        let anim = anims.get(i);
+        if !anim.is_undefined() {
+            let anim: animations::Animation = anim.unchecked_into();
+            finished_promises.push(&anim.finished());
+        }
+    }
+    if finished_promises.length() == 0 {
+        return;
+    }
+
+    let all_promise = js_sys::Promise::all(&finished_promises);
+    let _ = JsFuture::from(all_promise).await;
 }
 
 fn use_animated_open(
@@ -198,17 +261,7 @@ fn use_animated_open(
         } else {
             spawn(async move {
                 let id = id.cloned();
-                let script = format!(
-                    "const element = document.getElementById('{id}');
-                    if (element && element.getAnimations().length > 0) {{
-                        Promise.all(element.getAnimations().map((animation) => animation.finished)).then(() => {{
-                            dioxus.send(true);
-                        }});
-                    }} else {{
-                        dioxus.send(true);
-                    }}"
-                );
-                _ = dioxus::document::eval(&script).recv::<bool>().await;
+                wait_for_animations(&id).await;
                 show_in_dom.set(open);
             });
         }
