@@ -239,14 +239,14 @@ pub fn ToggleItem(props: ToggleItemProps) -> Element {
             return "0";
         }
 
-        match ctx.focus.recent_focus_or_default() == props.index.cloned() {
+        match ctx.focus.recent_focus().unwrap_or_default() == props.index.cloned() {
             true => "0",
             false => "-1",
         }
     });
 
     // Handle settings focus
-    let onmounted = use_focus_controlled_item(props.index);
+    let onmounted = use_focus_controlled_item(props.index.cloned(), props.index);
 
     rsx! {
         Toggle {

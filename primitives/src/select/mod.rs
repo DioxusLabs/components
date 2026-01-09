@@ -48,13 +48,13 @@
 //!                 SelectGroup {
 //!                     SelectGroupLabel { "Fruits" }
 //!                     SelectOption::<String> {
-//!                         index: 0usize,
+//!                         tab_index: 0usize,
 //!                         value: "apple",
 //!                         "Apple"
 //!                         SelectItemIndicator { "✔️" }
 //!                     }
 //!                     SelectOption::<String> {
-//!                         index: 1usize,
+//!                         tab_index: 1usize,
 //!                         value: "banana",
 //!                         "Banana"
 //!                         SelectItemIndicator { "✔️" }

@@ -39,13 +39,13 @@ pub struct SelectValueProps {
 ///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
-///                         index: 0usize,
+///                         tab_index: 0usize,
 ///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
-///                         index: 1usize,
+///                         tab_index: 1usize,
 ///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
@@ -70,9 +70,9 @@ pub fn SelectValue(props: SelectValueProps) -> Element {
         value.as_ref().and_then(|v| {
             ctx.options
                 .read()
-                .iter()
-                .find(|opt| opt.value == *v)
-                .map(|opt| opt.text_value.clone())
+                .values()
+                .find(|state| state.value == *v)
+                .map(|state| state.text_value.clone())
         })
     });
 
@@ -80,10 +80,6 @@ pub fn SelectValue(props: SelectValueProps) -> Element {
 
     rsx! {
         // Add placeholder option if needed
-        span {
-            "data-placeholder": ctx.value.read().is_none(),
-            ..props.attributes,
-            {display_value}
-        }
+        span { "data-placeholder": ctx.value.read().is_none(), ..props.attributes, {display_value} }
     }
 }

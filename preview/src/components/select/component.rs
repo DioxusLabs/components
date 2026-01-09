@@ -92,7 +92,7 @@ pub fn SelectOption<T: Clone + PartialEq + 'static>(props: SelectOptionProps<T>)
             text_value: props.text_value,
             disabled: props.disabled,
             id: props.id,
-            index: props.index,
+            tab_index: props.tab_index,
             aria_label: props.aria_label,
             aria_roledescription: props.aria_roledescription,
             attributes: props.attributes,

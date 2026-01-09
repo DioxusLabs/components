@@ -5,10 +5,10 @@ test("test", async ({ page }) => {
         timeout: 20 * 60 * 1000,
     }); // Increase timeout to 20 minutes
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
+    let selectTrigger = page.locator("#select-main .select-trigger");
     await selectTrigger.click();
     // Assert the select menu is open
-    const selectMenu = page.locator(".select-list");
+    const selectMenu = page.locator("#select-main .select-list");
     await expect(selectMenu).toHaveAttribute("data-state", "open");
 
     // Assert the menu is focused
@@ -64,10 +64,10 @@ test("test", async ({ page }) => {
 test("tabbing out of menu closes the select menu", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
+    let selectTrigger = page.locator("#select-main .select-trigger");
     await selectTrigger.click();
     // Assert the select menu is open
-    const selectMenu = page.locator(".select-list");
+    const selectMenu = page.locator("#select-main .select-list");
     await expect(selectMenu).toHaveAttribute("data-state", "open");
 
     // Assert the menu is focused
@@ -80,10 +80,10 @@ test("tabbing out of menu closes the select menu", async ({ page }) => {
 test("tabbing out of item closes the select menu", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
+    let selectTrigger = page.locator("#select-main .select-trigger");
     await selectTrigger.click();
     // Assert the select menu is open
-    const selectMenu = page.locator(".select-list");
+    const selectMenu = page.locator("#select-main .select-list");
     await expect(selectMenu).toHaveAttribute("data-state", "open");
 
     // Assert the menu is focused
@@ -101,10 +101,10 @@ test("tabbing out of item closes the select menu", async ({ page }) => {
 test("options selected", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
+    let selectTrigger = page.locator("#select-main .select-trigger");
     await selectTrigger.click();
     // Assert the select menu is open
-    const selectMenu = page.locator(".select-list");
+    const selectMenu = page.locator("#select-main .select-list");
     await expect(selectMenu).toHaveAttribute("data-state", "open");
 
     // Assert no items have aria-selected
@@ -130,25 +130,126 @@ test("options selected", async ({ page }) => {
 test("down arrow selects first element", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
-    const selectMenu = page.locator(".select-list");
+    let selectTrigger = page.locator("#select-main .select-trigger");
+    const selectMenu = page.locator("#select-main .select-list");
     await selectTrigger.focus();
 
     // Select the first option
     await page.keyboard.press("ArrowDown");
     const firstOption = selectMenu.getByRole("option", { name: "apple" });
     await expect(firstOption).toBeFocused();
+
+    // Same thing but with the first option disabled
+    let disabledSelectTrigger = page.locator("#select-disabled .select-trigger");
+    const disabledSelectMenu = page.locator("#select-disabled .select-list");
+    await disabledSelectTrigger.focus();
+    await page.keyboard.press("ArrowDown");
+    const disabledFirstOption = disabledSelectMenu.getByRole("option", { name: "banana" });
+    await expect(disabledFirstOption).toBeFocused();
 });
 
 test("up arrow selects last element", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
-    const selectMenu = page.locator(".select-list");
+    let selectTrigger = page.locator("#select-main .select-trigger");
+    const selectMenu = page.locator("#select-main .select-list");
     await selectTrigger.focus();
 
     // Select the first option
     await page.keyboard.press("ArrowUp");
-    const firstOption = selectMenu.getByRole("option", { name: "other" });
+    const lastOption = selectMenu.getByRole("option", { name: "other" });
+    await expect(lastOption).toBeFocused();
+
+    // Same thing but with the last option disabled
+    let disabledSelectTrigger = page.locator("#select-disabled .select-trigger");
+    const disabledSelectMenu = page.locator("#select-disabled .select-list");
+    await disabledSelectTrigger.focus();
+
+    await page.keyboard.press("ArrowUp");
+    const disabledLastOption = disabledSelectMenu.getByRole("option", { name: "watermelon" });
+    await expect(disabledLastOption).toBeFocused();
+});
+
+test("rollover on top and bottom", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&");
+
+    // Find Select a fruit...
+    let selectTrigger = page.locator("#select-main .select-trigger");
+    const selectMenu = page.locator("#select-main .select-list");
+    await selectTrigger.focus();
+
+    // open the list and select first option
+    await page.keyboard.press("ArrowDown");
+    const firstOption = selectMenu.getByRole("option", { name: "apple" });
     await expect(firstOption).toBeFocused();
+
+    // up arrow to select last option (rollover)
+    await page.keyboard.press("ArrowUp");
+    const lastOption = selectMenu.getByRole("option", { name: "other" });
+    await expect(lastOption).toBeFocused();
+
+    // down arrow to select first option (rollover)
+    await page.keyboard.press("ArrowDown");
+    await expect(firstOption).toBeFocused();
+
+    // Same thing but with first and last options disabled
+    let disabledSelectTrigger = page.locator("#select-disabled .select-trigger");
+    const disabledSelectMenu = page.locator("#select-disabled .select-list");
+    await disabledSelectTrigger.focus();
+
+    // open the list and select first option
+    await page.keyboard.press("ArrowDown");
+    const disabledFirstOption = disabledSelectMenu.getByRole("option", { name: "banana" });
+    await expect(disabledFirstOption).toBeFocused();
+
+    // up arrow to select last option (rollover)
+    await page.keyboard.press("ArrowUp");
+    const disabledLastOption = disabledSelectMenu.getByRole("option", { name: "watermelon" });
+    await expect(disabledLastOption).toBeFocused();
+
+    // down arrow to select first option (rollover)
+    await page.keyboard.press("ArrowDown");
+    await expect(disabledFirstOption).toBeFocused();
+});
+
+test("disabled elements are skipped", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&");
+
+    // Find Select a fruit...
+    let selectTrigger = page.locator("#select-disabled .select-trigger");
+    const selectMenu = page.locator("#select-disabled .select-list");
+    await selectTrigger.focus();
+
+    // open the list and select first enabled option
+    await page.keyboard.press("ArrowDown");
+    const firstOption = selectMenu.getByRole("option", { name: "banana" });
+    await expect(firstOption).toBeFocused();
+
+    // down arrow to select second enabled option
+    await page.keyboard.press("ArrowDown");
+    const secondOption = selectMenu.getByRole("option", { name: "strawberry" });
+    await expect(secondOption).toBeFocused();
+
+    // up arrow to select first enabled option
+    await page.keyboard.press("ArrowUp");
+    await expect(firstOption).toBeFocused();
+});
+
+test("aria active descendant", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&");
+
+    // Find Select a fruit...
+    let selectTrigger = page.locator("#select-main .select-trigger");
+    const selectMenu = page.locator("#select-main .select-list");
+    await selectTrigger.focus();
+
+    // select first option
+    await page.keyboard.press("ArrowDown");
+    const firstOption = selectMenu.getByRole("option", { name: "apple" });
+    await expect(selectTrigger).toHaveAttribute("aria-activedescendant", await firstOption.getAttribute("id"));
+
+    // select second option
+    await page.keyboard.press("ArrowDown");
+    const secondOption = selectMenu.getByRole("option", { name: "banana" });
+    await expect(selectTrigger).toHaveAttribute("aria-activedescendant", await secondOption.getAttribute("id"));
 });

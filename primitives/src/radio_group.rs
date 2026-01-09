@@ -286,7 +286,8 @@ pub fn RadioItem(props: RadioItemProps) -> Element {
         "-1"
     });
 
-    let onmounted = use_focus_controlled_item_disabled(props.index, props.disabled);
+    let onmounted =
+        use_focus_controlled_item_disabled(props.index.cloned(), props.index, props.disabled);
 
     rsx! {
         button {

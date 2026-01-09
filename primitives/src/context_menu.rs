@@ -463,7 +463,7 @@ pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
     let focused = move || ctx.focus.is_focused(props.index.cloned());
 
     // Handle settings focus
-    let onmounted = use_focus_controlled_item(props.index);
+    let onmounted = use_focus_controlled_item(props.index.cloned(), props.index);
 
     // Determine if this item is currently focused
     let tab_index = use_memo(move || if focused() { "0" } else { "-1" });

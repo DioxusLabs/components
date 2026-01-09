@@ -796,7 +796,7 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
         }
     };
 
-    let onmounted = use_focus_controlled_item(props.index);
+    let onmounted = use_focus_controlled_item(props.index.cloned(), props.index);
 
     let span_id = use_unique_id();
     let id = use_memo(move || format!("span-{span_id}"));

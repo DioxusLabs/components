@@ -1,13 +1,13 @@
 //! Context types and implementations for the select component.
 
-use crate::focus::FocusState;
 use dioxus::prelude::*;
 use dioxus_core::Task;
 use dioxus_sdk_time::sleep;
 
-use std::{any::Any, rc::Rc, time::Duration};
-
 use super::text_search::AdaptiveKeyboard;
+use crate::focus::FocusState;
+use std::collections::HashMap;
+use std::{any::Any, rc::Rc, time::Duration};
 
 trait DynPartialEq: Any {
     fn eq(&self, other: &dyn Any) -> bool;
@@ -57,14 +57,10 @@ pub(super) struct SelectContext {
     pub value: Memo<Option<RcPartialEqValue>>,
     /// Set the value callback
     pub set_value: Callback<Option<RcPartialEqValue>>,
-    /// A list of options with their states
-    pub options: Signal<Vec<OptionState>>,
     /// Adaptive keyboard system for multi-language support
     pub adaptive_keyboard: Signal<AdaptiveKeyboard>,
     /// The ID of the list for ARIA attributes
     pub list_id: Signal<Option<String>>,
-    /// The focus state for the select
-    pub focus_state: FocusState,
     /// Whether the select is disabled
     pub disabled: ReadSignal<bool>,
     /// The placeholder text
@@ -73,19 +69,33 @@ pub(super) struct SelectContext {
     pub typeahead_clear_task: Signal<Option<Task>>,
     /// Timeout before clearing typeahead buffer
     pub typeahead_timeout: ReadSignal<Duration>,
-    /// The initial element to focus once the list is rendered
-    pub initial_focus: Signal<Option<usize>>,
+    /// The focus state for the select
+    pub focus_state: FocusState,
+    /// A list of options with their states
+    pub(crate) options: Signal<HashMap<usize, OptionState>>,
+    /// The initial element to focus once the list is rendered<br>
+    /// true: last element<br>
+    /// false: first element
+    pub initial_focus_last: Signal<Option<bool>>,
 }
 
 impl SelectContext {
+    /// Get the currently focused item ID (used for aria-activedescendant)
+    pub fn current_item_id(&self) -> Option<String> {
+        let current_focus = self.focus_state.current_focus()?;
+        self.options
+            .get(&current_focus)
+            .map(|state| state.id.clone())
+    }
+
     /// Select the currently focused item
     pub fn select_current_item(&mut self) {
         // If the select is open, select the focused item
         if self.open.cloned() {
-            if let Some(focused_index) = self.focus_state.current_focus() {
+            if let Some(focused_id) = self.focus_state.current_focus() {
                 let options = self.options.read();
-                if let Some(option) = options.iter().find(|opt| opt.tab_index == focused_index) {
-                    self.set_value.call(Some(option.value.clone()));
+                if let Some(state) = options.get(&focused_id) {
+                    self.set_value.call(Some(state.value.clone()));
                     self.open.set(false);
                 }
             }
@@ -137,7 +147,7 @@ impl SelectContext {
         let keyboard = self.adaptive_keyboard.read();
 
         if let Some(best_match_index) =
-            super::text_search::best_match(&keyboard, &typeahead, &options)
+            super::text_search::best_match(&keyboard, &typeahead, options.iter())
         {
             self.focus_state.set_focus(Some(best_match_index));
         }
@@ -146,14 +156,14 @@ impl SelectContext {
 
 /// State for individual select options
 pub(super) struct OptionState {
-    /// Tab index for focus management
-    pub tab_index: usize,
+    /// HTML ID for the option.
+    pub id: String,
     /// The value of the option
     pub value: RcPartialEqValue,
     /// Display text for the option
     pub text_value: String,
-    /// Unique ID for the option
-    pub id: String,
+    /// Whether the option is disabled
+    pub disabled: bool,
 }
 
 /// Context for select option components to know if they're selected
