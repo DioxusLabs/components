@@ -1024,12 +1024,17 @@ fn BlockComponentVariantHighlight(
         component: _,
     } = variant;
 
-    let href = Route::ComponentBlockDemo {
+    let route_path = Route::ComponentBlockDemo {
         name: component_name.to_string(),
         variant: Some(name.to_string()),
         dark_mode: Route::in_dark_mode(),
     }
     .to_string();
+
+    let iframe_src = match router().prefix() {
+        Some(prefix) => format!("{prefix}{route_path}"),
+        None => route_path,
+    };
 
     rsx! {
         if !main_variant {
@@ -1060,7 +1065,7 @@ fn BlockComponentVariantHighlight(
                     width: "100%",
                     position: "relative",
                     iframe {
-                        src: "{href}",
+                        src: "{iframe_src}",
                         width: "100%",
                         height: "600px",
                         border: "1px solid var(--primary-color-6)",
