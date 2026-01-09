@@ -84,6 +84,7 @@ impl SidebarCollapsible {
 }
 
 #[derive(Clone, Copy)]
+#[allow(dead_code)]
 pub struct SidebarCtx {
     pub state: Memo<SidebarState>,
     pub side: Signal<SidebarSide>,
@@ -611,6 +612,7 @@ pub fn SidebarMenuItem(
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
+#[allow(dead_code)]
 pub enum SidebarMenuButtonVariant {
     #[default]
     Default,
@@ -627,6 +629,7 @@ impl SidebarMenuButtonVariant {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
+#[allow(dead_code)]
 pub enum SidebarMenuButtonSize {
     #[default]
     Default,
@@ -813,6 +816,7 @@ pub fn SidebarMenuSubItem(
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
+#[allow(dead_code)]
 pub enum SidebarMenuSubButtonSize {
     Sm,
     #[default]
