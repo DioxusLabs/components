@@ -222,7 +222,7 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
 
     let open = ctx.open;
     let disabled = ctx.disabled;
-    let data_state = use_memo(move || if open() { "open" } else { "closed" });
+    let data_state = if open() { "open" } else { "closed" };
 
     let base: Vec<Attribute> = vec![
         Attribute::new("id", ctx.trigger_id, None, false),
