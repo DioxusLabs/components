@@ -15,6 +15,12 @@
       "git": "https://github.com/DioxusLabs/components"
     }
   ],
+  "componentDependencies": [
+    "button",
+    "separator",
+    "sheet",
+    "tooltip"
+  ],
   "globalAssets": [
     "../../../assets/dx-components-theme.css"
   ]
