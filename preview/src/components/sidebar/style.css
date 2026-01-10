@@ -7,7 +7,7 @@
   padding: 0;
   border: 0;
   margin: -1px;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
@@ -522,7 +522,15 @@
 
 .sidebar-desktop[data-collapsible="icon"] .sidebar-menu-button[data-sidebar="menu-button"]:has(> :first-child:is(svg, img))> :not(:first-child),
 .sidebar-desktop[data-collapsible="icon"] .sidebar-menu-button[data-sidebar="menu-button"]:has(> :first-child:has(svg, img))> :not(:first-child) {
-  display: none;
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .sidebar-desktop[data-collapsible="icon"] .sidebar-menu-button[data-sidebar="menu-button"] svg {
