@@ -8,6 +8,9 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use dioxus::core::{current_scope_id, use_drop};
 use dioxus::prelude::*;
 use dioxus::prelude::{asset, manganis, Asset};
+use time::UtcDateTime;
+#[cfg(target_family = "wasm")]
+use web_time::SystemTime;
 
 pub mod accordion;
 pub mod alert_dialog;
@@ -43,6 +46,21 @@ pub mod toolbar;
 pub mod tooltip;
 
 pub(crate) const FOCUS_TRAP_JS: Asset = asset!("/src/js/focus-trap.js");
+
+/// Create a new UtcDateTime with the current date and time.
+///
+/// This is used as a compatibility layer for wasm targets.
+pub fn utc_now() -> UtcDateTime {
+    #[cfg(not(target_family = "wasm"))]
+    return UtcDateTime::now();
+
+    #[cfg(target_family = "wasm")]
+    {
+        let now = SystemTime::now();
+        let duration = now.duration_since(SystemTime::UNIX_EPOCH).unwrap();
+        UtcDateTime::from_unix_timestamp_nanos(duration.as_nanos().try_into().unwrap()).unwrap()
+    }
+}
 
 /// Generate a runtime-unique id.
 fn use_unique_id() -> Signal<String> {

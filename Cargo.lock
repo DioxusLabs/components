@@ -2248,6 +2248,7 @@ dependencies = [
  "num-integer",
  "time",
  "tracing",
+ "web-time",
 ]
 
 [[package]]

@@ -7,9 +7,9 @@ use std::{
     rc::Rc,
 };
 
-use time::{ext::NumericalDuration, macros::date, Date, Month, UtcDateTime, Weekday};
+use time::{ext::NumericalDuration, macros::date, Date, Month, Weekday};
 
-use crate::date_picker::DefaultCalendarProps;
+use crate::{date_picker::DefaultCalendarProps, utc_now};
 
 // A collection of [`Weekday`]s stored as a single byte
 // Implemented as a bitmask where bits 1-7 correspond to Monday-Sunday
@@ -422,11 +422,11 @@ pub struct CalendarProps {
     pub on_format_month: Callback<Month, String>,
 
     /// The month being viewed
-    #[props(default = ReadSignal::new(Signal::new(UtcDateTime::now().date())))]
+    #[props(default = ReadSignal::new(Signal::new(utc_now().date())))]
     pub view_date: ReadSignal<Date>,
 
     /// The current date (used for highlighting today)
-    #[props(default = UtcDateTime::now().date())]
+    #[props(default = utc_now().date())]
     pub today: Date,
 
     /// Callback when view date changes
@@ -481,11 +481,12 @@ impl DefaultCalendarProps for CalendarProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, UtcDateTime};
+/// use dioxus_primitives::utc_now;
+/// use time::{Date, Month};
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
-///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     let mut view_date = use_signal(|| utc_now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -684,11 +685,11 @@ pub struct RangeCalendarProps {
     pub on_format_month: Callback<Month, String>,
 
     /// The month being viewed
-    #[props(default = ReadSignal::new(Signal::new(UtcDateTime::now().date())))]
+    #[props(default = ReadSignal::new(Signal::new(utc_now().date())))]
     pub view_date: ReadSignal<Date>,
 
     /// The current date (used for highlighting today)
-    #[props(default = UtcDateTime::now().date())]
+    #[props(default = utc_now().date())]
     pub today: Date,
 
     /// Callback when view date changes
@@ -741,11 +742,12 @@ impl DefaultCalendarProps for RangeCalendarProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::*;
-/// use time::{Date, Month, UtcDateTime};
+/// use dioxus_primitives::utc_now;
+/// use time::{Date, Month};
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_range = use_signal(|| None::<DateRange>);
-///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     let mut view_date = use_signal(|| utc_now().date());
 ///     rsx! {
 ///         RangeCalendar {
 ///             selected_range: selected_range(),
@@ -971,11 +973,12 @@ pub struct CalendarHeaderProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, UtcDateTime};
+/// use dioxus_primitives::utc_now;
+/// use time::{Date, Month};
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
-///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     let mut view_date = use_signal(|| utc_now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -1041,11 +1044,12 @@ pub struct CalendarNavigationProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, UtcDateTime};
+/// use dioxus_primitives::utc_now;
+/// use time::{Date, Month};
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
-///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     let mut view_date = use_signal(|| utc_now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -1106,11 +1110,12 @@ pub struct CalendarPreviousMonthButtonProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, UtcDateTime};
+/// use dioxus_primitives::utc_now;
+/// use time::{Date, Month};
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
-///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     let mut view_date = use_signal(|| utc_now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -1211,11 +1216,12 @@ pub struct CalendarNextMonthButtonProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, UtcDateTime};
+/// use dioxus_primitives::utc_now;
+/// use time::{Date, Month};
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
-///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     let mut view_date = use_signal(|| utc_now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -1318,11 +1324,12 @@ pub struct CalendarMonthTitleProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, UtcDateTime};
+/// use dioxus_primitives::utc_now;
+/// use time::{Date, Month};
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
-///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     let mut view_date = use_signal(|| utc_now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -1404,11 +1411,12 @@ pub struct CalendarGridProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarMonthTitle, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton
 /// };
-/// use time::{Date, Month, UtcDateTime};
+/// use dioxus_primitives::utc_now;
+/// use time::{Date, Month};
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
-///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     let mut view_date = use_signal(|| utc_now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -1563,11 +1571,12 @@ pub struct CalendarSelectMonthProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton, CalendarSelectMonth
 /// };
-/// use time::{Date, Month, UtcDateTime};
+/// use dioxus_primitives::utc_now;
+/// use time::{Date, Month};
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
-///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     let mut view_date = use_signal(|| utc_now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -1683,11 +1692,12 @@ pub struct CalendarSelectYearProps {
 /// use dioxus_primitives::calendar::{
 ///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton, CalendarSelectYear
 /// };
-/// use time::{Date, Month, UtcDateTime};
+/// use dioxus_primitives::utc_now;
+/// use time::{Date, Month};
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_date = use_signal(|| None::<Date>);
-///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     let mut view_date = use_signal(|| utc_now().date());
 ///     rsx! {
 ///         Calendar {
 ///             selected_date: selected_date(),
@@ -1827,11 +1837,12 @@ pub struct CalendarDayProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::*;
-/// use time::{Date, Month, UtcDateTime};
+/// use dioxus_primitives::utc_now;
+/// use time::{Date, Month};
 /// #[component]
 /// fn Demo() -> Element {
 ///     let mut selected_range = use_signal(|| None::<DateRange>);
-///     let mut view_date = use_signal(|| UtcDateTime::now().date());
+///     let mut view_date = use_signal(|| utc_now().date());
 ///     rsx! {
 ///         RangeCalendar {
 ///             selected_range: selected_range(),

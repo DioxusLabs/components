@@ -1,14 +1,14 @@
 use super::super::component::*;
 use dioxus::prelude::*;
 
-use dioxus_primitives::calendar::DateRange;
+use dioxus_primitives::{calendar::DateRange, utc_now};
 use time::{ext::NumericalDuration, UtcDateTime};
 
 #[component]
 pub fn Demo() -> Element {
     let mut selected_range = use_signal(|| None::<DateRange>);
 
-    let now = UtcDateTime::now().date();
+    let now = utc_now().date();
     let disabled_ranges = use_signal(|| {
         vec![
             DateRange::new(now, now.saturating_add(3.days())),

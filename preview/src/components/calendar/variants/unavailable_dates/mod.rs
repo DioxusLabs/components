@@ -1,6 +1,7 @@
 use super::super::component::*;
 use dioxus::prelude::*;
-use time::{ext::NumericalDuration, macros::date, Date, UtcDateTime};
+use dioxus_primitives::utc_now;
+use time::{ext::NumericalDuration, macros::date, Date};
 
 use dioxus_primitives::calendar::DateRange;
 
@@ -8,7 +9,7 @@ use dioxus_primitives::calendar::DateRange;
 pub fn Demo() -> Element {
     let mut selected_range = use_signal(|| None::<DateRange>);
 
-    let now = UtcDateTime::now().date();
+    let now = utc_now().date();
     let mut view_date = use_signal(|| now);
 
     let disabled_ranges = use_signal(|| {
