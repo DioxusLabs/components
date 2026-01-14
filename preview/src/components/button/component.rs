@@ -1,4 +1,6 @@
 use dioxus::prelude::*;
+use dioxus_primitives::dioxus_attributes::attributes;
+use dioxus_primitives::merge_attributes;
 
 #[derive(Copy, Clone, PartialEq, Default)]
 #[non_exhaustive]
@@ -34,12 +36,16 @@ pub fn Button(
     onmouseup: Option<EventHandler<MouseEvent>>,
     children: Element,
 ) -> Element {
+    let base = attributes!(button {
+        class: "button",
+        "data-style": variant.class(),
+    });
+    let merged = merge_attributes(vec![base, attributes]);
+
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
 
         button {
-            class: "button",
-            "data-style": variant.class(),
             onclick: move |event| {
                 if let Some(f) = &onclick {
                     f.call(event);
@@ -55,7 +61,7 @@ pub fn Button(
                     f.call(event);
                 }
             },
-            ..attributes,
+            ..merged,
             {children}
         }
     }

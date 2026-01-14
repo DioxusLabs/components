@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_primitives::dioxus_attributes::attributes;
 use dioxus_primitives::dialog::{
     self, DialogCtx, DialogDescriptionProps, DialogRootProps, DialogTitleProps,
 };
@@ -143,16 +144,20 @@ pub fn SheetClose(
 ) -> Element {
     let ctx: DialogCtx = use_context();
 
-    let mut merged_attributes: Vec<Attribute> = vec![onclick(move |_| {
-        ctx.set_open(false);
-    })];
-    merged_attributes.extend(attributes);
+    let mut merged: Vec<Attribute> = attributes! {
+        button {
+            onclick: move |_| {
+                ctx.set_open(false);
+            }
+        }
+    };
+    merged.extend(attributes);
 
     if let Some(dynamic) = r#as {
-        dynamic.call(merged_attributes)
+        dynamic.call(merged)
     } else {
         rsx! {
-            button { ..merged_attributes, {children} }
+            button { ..merged, {children} }
         }
     }
 }
