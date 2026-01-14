@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_attributes::attributes;
 use dioxus_primitives::merge_attributes;
 
 #[derive(Copy, Clone, PartialEq, Default)]
@@ -35,10 +36,10 @@ pub fn Button(
     onmouseup: Option<EventHandler<MouseEvent>>,
     children: Element,
 ) -> Element {
-    let base: Vec<Attribute> = vec![
-        Attribute::new("class", "button", None, false),
-        Attribute::new("data-style", variant.class(), None, false),
-    ];
+    let base = attributes!(button {
+        class: "button",
+        "data-style": variant.class(),
+    });
     let merged = merge_attributes(vec![base, attributes]);
 
     rsx! {

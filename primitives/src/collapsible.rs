@@ -2,6 +2,7 @@
 
 use crate::{merge_attributes, use_controlled, use_id_or, use_unique_id};
 use dioxus::prelude::*;
+use dioxus_attributes::attributes;
 
 // TODO: more docs
 
@@ -101,10 +102,10 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
         aria_controls_id,
     });
 
-    let base: Vec<Attribute> = vec![
-        Attribute::new("data-open", open, None, false),
-        Attribute::new("data-disabled", props.disabled, None, false),
-    ];
+    let base = attributes!(div {
+        "data-open": open,
+        "data-disabled": props.disabled,
+    });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     if let Some(dynamic) = props.r#as {
@@ -243,18 +244,18 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
 
     let open = ctx.open;
 
-    let base: Vec<Attribute> = vec![
-        Attribute::new("type", "button", None, false),
-        Attribute::new("data-open", open, None, false),
-        Attribute::new("data-disabled", ctx.disabled, None, false),
-        Attribute::new("disabled", ctx.disabled, None, false),
-        Attribute::new("aria-controls", ctx.aria_controls_id, None, false),
-        Attribute::new("aria-expanded", open, None, false),
-        onclick(move |_| {
+    let base = attributes!(button {
+        r#type: "button",
+        "data-open": open,
+        "data-disabled": ctx.disabled,
+        disabled: ctx.disabled,
+        "aria-controls": ctx.aria_controls_id,
+        "aria-expanded": open,
+        onclick: move |_| {
             let new_open = !open();
             ctx.set_open.call(new_open);
-        }),
-    ];
+        },
+    });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     if let Some(dynamic) = props.r#as {

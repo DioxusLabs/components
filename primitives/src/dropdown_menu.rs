@@ -7,6 +7,7 @@ use crate::{
     merge_attributes, use_animated_open, use_controlled, use_id_or, use_unique_id,
 };
 use dioxus::prelude::*;
+use dioxus_attributes::attributes;
 
 #[derive(Clone, Copy)]
 struct DropdownMenuContext {
@@ -224,18 +225,18 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
     let disabled = ctx.disabled;
     let data_state = if open() { "open" } else { "closed" };
 
-    let base: Vec<Attribute> = vec![
-        Attribute::new("id", ctx.trigger_id, None, false),
-        Attribute::new("type", "button", None, false),
-        Attribute::new("data-state", data_state, None, false),
-        Attribute::new("data-disabled", disabled, None, false),
-        Attribute::new("disabled", disabled, None, false),
-        Attribute::new("aria-expanded", open, None, false),
-        Attribute::new("aria-haspopup", "listbox", None, false),
-        onmounted(move |e: MountedEvent| {
+    let base = attributes!(button {
+        id: ctx.trigger_id,
+        r#type: "button",
+        "data-state": data_state,
+        "data-disabled": disabled,
+        disabled: disabled,
+        aria_expanded: open,
+        aria_haspopup: "listbox",
+        onmounted: move |e: MountedEvent| {
             element.set(Some(e.data()));
-        }),
-        onclick(move |_| {
+        },
+        onclick: move |_| {
             if disabled() {
                 return;
             }
@@ -250,13 +251,13 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
                     _ = data.set_focus(true).await;
                 });
             }
-        }),
-        onblur(move |_| {
+        },
+        onblur: move |_| {
             if !ctx.focus.any_focused() {
                 ctx.focus.blur();
             }
-        }),
-    ];
+        },
+    });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     if let Some(dynamic) = props.r#as {
@@ -470,7 +471,6 @@ pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
                     ctx.focus.blur();
                 }
             },
-
 
             ..props.attributes,
             {props.children}

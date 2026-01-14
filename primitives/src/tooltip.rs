@@ -5,6 +5,7 @@ use crate::{
     ContentSide,
 };
 use dioxus::prelude::*;
+use dioxus_attributes::attributes;
 
 #[derive(Clone, Copy)]
 struct TooltipCtx {
@@ -186,16 +187,16 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
         }
     };
 
-    let base: Vec<Attribute> = vec![
-        Attribute::new("id", props.id.clone(), None, false),
-        Attribute::new("tabindex", "0", None, false),
-        onmouseenter(handle_mouse_enter),
-        onmouseleave(handle_mouse_leave),
-        onfocus(handle_focus),
-        onblur(handle_blur),
-        onkeydown(handle_keydown),
-        Attribute::new("aria-describedby", ctx.tooltip_id.cloned(), None, false),
-    ];
+    let base = attributes!(div {
+        id: props.id.clone(),
+        tabindex: "0",
+        "aria-describedby": ctx.tooltip_id.cloned(),
+        onmouseenter: handle_mouse_enter,
+        onmouseleave: handle_mouse_leave,
+        onfocus: handle_focus,
+        onblur: handle_blur,
+        onkeydown: handle_keydown,
+    });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     if let Some(dynamic) = props.r#as {
