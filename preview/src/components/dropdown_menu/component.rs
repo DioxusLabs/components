@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_attributes::attributes;
+use dioxus_primitives::dioxus_attributes::attributes;
 use dioxus_primitives::dropdown_menu::{
     self, DropdownMenuContentProps, DropdownMenuItemProps, DropdownMenuProps,
     DropdownMenuTriggerProps,

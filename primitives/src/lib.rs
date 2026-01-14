@@ -11,6 +11,8 @@ use dioxus::prelude::*;
 use dioxus::prelude::{asset, manganis, Asset};
 use dioxus_core::AttributeValue::Text;
 
+pub use dioxus_attributes;
+
 pub mod accordion;
 pub mod alert_dialog;
 pub mod aspect_ratio;
