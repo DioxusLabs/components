@@ -61,7 +61,7 @@ examples!(
     alert_dialog,
     aspect_ratio,
     avatar,
-    badge,
+    badge[notify],
     button,
     calendar[simple, internationalized, range, multi_month, unavailable_dates],
     checkbox,

@@ -1,5 +1,4 @@
-Badges are used as a small numerical value or status descriptor for its children elements.
-Badge will be hidden when count is 0, but we can use show_zero to show it.
+The Badge is a component designed to display small, distinct labels that help highlight important content or status indicators. Perfect for use cases like notifications, status labels, or categorization.
 
 ## Component Structure
 
