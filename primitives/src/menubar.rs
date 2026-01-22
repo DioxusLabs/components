@@ -132,7 +132,7 @@ pub fn Menubar(props: MenubarProps) -> Element {
             tabindex: (!ctx.focus.any_focused()).then_some("0"),
             // If the menu receives focus, focus the most recently focused menu item
             onfocus: move |_| {
-                ctx.focus.set_focus(Some(ctx.focus.recent_focus_or_default()));
+                ctx.focus.focus_recent_or_first();
             },
 
             ..props.attributes,
@@ -148,6 +148,10 @@ struct MenubarMenuContext {
     focus: FocusState,
     is_open: Memo<bool>,
     disabled: ReadSignal<bool>,
+    /// The initial element to focus once the list is opened<br>
+    /// true: last element<br>
+    /// false: first element
+    pub initial_focus_last: Signal<Option<bool>>,
 }
 
 impl MenubarMenuContext {
@@ -253,20 +257,28 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
     let mut ctx: MenubarContext = use_context();
     let is_open = use_memo(move || (ctx.open_menu)() == Some(props.index.cloned()));
     let focus = use_focus_provider(ctx.focus.roving_loop);
+    let initial_focus_last = use_signal(|| None);
     let mut menu_ctx = use_context_provider(|| MenubarMenuContext {
         index: props.index,
         focus,
         is_open,
         disabled: props.disabled,
+        initial_focus_last,
     });
 
     use_effect(move || {
         if !is_open() {
             menu_ctx.focus.blur();
+        } else if let Some(last) = (menu_ctx.initial_focus_last)() {
+            if last {
+                menu_ctx.focus.focus_last();
+            } else {
+                menu_ctx.focus.focus_first();
+            }
         }
     });
 
-    use_focus_entry(ctx.focus, menu_ctx.index);
+    use_focus_entry(ctx.focus, menu_ctx.index.cloned(), menu_ctx.index);
 
     let disabled = move || (ctx.disabled)() || (props.disabled)();
 
@@ -286,6 +298,7 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
                     Key::ArrowRight => ctx.focus.focus_next(),
                     Key::ArrowDown if !disabled() => {
                         if !is_open() {
+                            menu_ctx.initial_focus_last.set(Some(false));
                             ctx.set_open_menu.call(Some(props.index.cloned()));
                         }
                         menu_ctx.focus_next();
@@ -385,7 +398,7 @@ pub struct MenubarTriggerProps {
 pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
     let mut ctx: MenubarContext = use_context();
     let menu_ctx: MenubarMenuContext = use_context();
-    let onmounted = use_focus_control(ctx.focus, menu_ctx.index);
+    let onmounted = use_focus_control(ctx.focus, menu_ctx.index.cloned());
     let disabled = move || (ctx.disabled)() || (menu_ctx.disabled)();
     let is_open = menu_ctx.is_open;
     let index = menu_ctx.index;
@@ -627,7 +640,7 @@ pub fn MenubarItem(props: MenubarItemProps) -> Element {
     let disabled = move || (ctx.disabled)() || (props.disabled)();
     let focused = move || menu_ctx.focus.is_focused(props.index.cloned()) && (menu_ctx.is_open)();
 
-    let onmounted = use_focus_controlled_item(props.index);
+    let onmounted = use_focus_controlled_item(props.index.cloned(), props.index);
 
     rsx! {
         div {

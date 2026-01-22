@@ -21,13 +21,25 @@ impl Fruit {
             Fruit::Watermelon => "🍉",
         }
     }
+
+    const fn disabled(&self) -> bool {
+        match self {
+            Fruit::Apple => true,
+            Fruit::Orange => true,
+            _ => false
+        }
+    }
 }
 
 #[component]
 pub fn Demo() -> Element {
     let fruits = Fruit::iter().enumerate().map(|(i, f)| {
         rsx! {
-            SelectOption::<Option<Fruit>> { tab_index: i, value: f, text_value: "{f}",
+            SelectOption::<Option<Fruit>> {
+                tab_index: i,
+                value: f,
+                text_value: "{f}",
+                disabled: f.disabled(),
                 {format!("{} {f}", f.emoji())}
                 SelectItemIndicator {}
             }
@@ -35,8 +47,7 @@ pub fn Demo() -> Element {
     });
 
     rsx! {
-
-        Select::<Option<Fruit>> { id: "select-main", placeholder: "Select a fruit...",
+        Select::<Option<Fruit>> { id: "select-disabled", placeholder: "Select a fruit...",
             SelectTrigger { aria_label: "Select Trigger", width: "12rem", SelectValue {} }
             SelectList { aria_label: "Select Demo",
                 SelectGroup {
@@ -49,6 +60,7 @@ pub fn Demo() -> Element {
                         tab_index: Fruit::COUNT,
                         value: None,
                         text_value: "Other",
+                        disabled: true,
                         "Other"
                         SelectItemIndicator {}
                     }

@@ -52,13 +52,13 @@ pub struct SelectListProps {
 ///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
-///                         index: 0usize,
+///                         tab_index: 0usize,
 ///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
-///                         index: 1usize,
+///                         tab_index: 1usize,
 ///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
@@ -163,9 +163,15 @@ pub fn SelectList(props: SelectListProps) -> Element {
 
     use_effect(move || {
         if render() {
-            ctx.focus_state.set_focus(ctx.initial_focus.cloned());
+            if let Some(last) = (ctx.initial_focus_last)() {
+                if last {
+                    ctx.focus_state.focus_last();
+                } else {
+                    ctx.focus_state.focus_first();
+                }
+            }
         } else {
-            ctx.initial_focus.set(None);
+            ctx.initial_focus_last.set(None);
         }
     });
 

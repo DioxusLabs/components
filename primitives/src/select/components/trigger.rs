@@ -42,13 +42,13 @@ pub struct SelectTriggerProps {
 ///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
-///                         index: 0usize,
+///                         tab_index: 0usize,
 ///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
-///                         index: 1usize,
+///                         tab_index: 1usize,
 ///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
@@ -69,11 +69,13 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
     let mut ctx = use_context::<SelectContext>();
     let mut open = ctx.open;
 
+    let focus_id = use_memo(move || ctx.current_item_id());
+
     rsx! {
         button {
             // Standard HTML attributes
             disabled: (ctx.disabled)(),
-            type: "button",
+            r#type: "button",
 
             onclick: move |_| {
                 open.toggle();
@@ -82,13 +84,13 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
                 match event.key() {
                     Key::ArrowUp => {
                         open.set(true);
-                        ctx.initial_focus.set(ctx.focus_state.item_count().checked_sub(1));
+                        ctx.initial_focus_last.set(Some(true));
                         event.prevent_default();
                         event.stop_propagation();
                     }
                     Key::ArrowDown => {
                         open.set(true);
-                        ctx.initial_focus.set((ctx.focus_state.item_count() > 0).then_some(0));
+                        ctx.initial_focus_last.set(Some(false));
                         event.prevent_default();
                         event.stop_propagation();
                     }
@@ -97,9 +99,11 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
             },
 
             // ARIA attributes
+            role: "combobox",
             aria_haspopup: "listbox",
             aria_expanded: open(),
             aria_controls: ctx.list_id,
+            aria_activedescendant: focus_id,
 
             // Pass through other attributes
             ..props.attributes,

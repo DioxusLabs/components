@@ -1,14 +1,13 @@
 //! SelectOption and SelectItemIndicator component implementations.
 
+use super::super::context::{OptionState, SelectContext, SelectOptionContext};
+use crate::focus::{use_focus_controlled_item_disabled, use_focus_unique_id};
 use crate::{
-    focus::use_focus_controlled_item,
     select::context::{RcPartialEqValue, SelectListContext},
     use_effect, use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
-
-use super::super::context::{OptionState, SelectContext, SelectOptionContext};
 
 /// The props for the [`SelectOption`] component
 #[derive(Props, Clone, PartialEq)]
@@ -24,12 +23,12 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
     #[props(default)]
     pub disabled: ReadSignal<bool>,
 
-    /// Optional ID for the option
+    /// Optional HTML ID for the option.
     #[props(default)]
     pub id: ReadSignal<Option<String>>,
 
-    /// The index of the option in the list. This is used to define the focus order for keyboard navigation.
-    pub index: ReadSignal<usize>,
+    /// The tab_index of the option in the list. This is used to define the focus order for keyboard navigation.
+    pub tab_index: ReadSignal<usize>,
 
     /// Optional label for the option (for accessibility)
     #[props(default)]
@@ -82,13 +81,13 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 ///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
-///                         index: 0usize,
+///                         tab_index: 0usize,
 ///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
-///                         index: 1usize,
+///                         tab_index: 1usize,
 ///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }
@@ -107,7 +106,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
     // Use use_id_or to handle the ID
     let id = use_id_or(option_id, props.id);
 
-    let index = props.index;
+    let tab_index = props.tab_index;
     let value = props.value;
     let text_value = use_memo(move || match (props.text_value)() {
         Some(text) => text,
@@ -127,27 +126,30 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
         }
     });
 
+    let focus_id = use_focus_unique_id();
+
     // Push this option to the context
     let mut ctx: SelectContext = use_context();
+    let disabled = ctx.disabled.cloned() || props.disabled.cloned();
     use_effect(move || {
         let option_state = OptionState {
-            tab_index: index(),
             value: RcPartialEqValue::new(value.cloned()),
             text_value: text_value.cloned(),
             id: id(),
+            disabled,
         };
 
         // Add the option to the context's options
-        ctx.options.write().push(option_state);
+        ctx.options.write().insert(focus_id, option_state);
     });
 
     use_effect_cleanup(move || {
-        ctx.options.write().retain(|opt| opt.id != *id.read());
+        ctx.options.write().remove(&focus_id);
     });
 
-    let onmounted = use_focus_controlled_item(props.index);
-    let focused = move || ctx.focus_state.is_focused(index());
-    let disabled = ctx.disabled.cloned() || props.disabled.cloned();
+    let onmounted = use_focus_controlled_item_disabled(focus_id, tab_index, props.disabled);
+
+    let focused = move || ctx.focus_state.is_focused(focus_id);
     let selected = use_memo(move || {
         ctx.value.read().as_ref().and_then(|v| v.as_ref::<T>()) == Some(&props.value.read())
     });
@@ -172,8 +174,16 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 aria_label: props.aria_label.clone(),
                 aria_roledescription: props.aria_roledescription.clone(),
 
+                // data attributes
+                "data-disabled": disabled,
+
                 onpointerdown: move |event| {
-                    if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
+                    if event.trigger_button() == Some(MouseButton::Primary) {
+                        if disabled {
+                            event.prevent_default();
+                            event.stop_propagation();
+                            return;
+                        }
                         ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
                         ctx.open.set(false);
                     }
@@ -229,13 +239,13 @@ pub struct SelectItemIndicatorProps {
 ///                 SelectGroup {
 ///                     SelectGroupLabel { "Fruits" }
 ///                     SelectOption::<String> {
-///                         index: 0usize,
+///                         tab_index: 0usize,
 ///                         value: "apple",
 ///                         "Apple"
 ///                         SelectItemIndicator { "✔️" }
 ///                     }
 ///                     SelectOption::<String> {
-///                         index: 1usize,
+///                         tab_index: 1usize,
 ///                         value: "banana",
 ///                         "Banana"
 ///                         SelectItemIndicator { "✔️" }

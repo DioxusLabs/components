@@ -17,6 +17,7 @@ dioxus-sdk-time = "0.7.0"
 time = { version = "0.3.44", features = ["std", "macros", "parsing"] }
 num-integer = "0.1.46"
 tracing.workspace = true
+indexmap = "2.12.1"
 
 [build-dependencies]
 lazy-js-bundle = "0.6.2"
