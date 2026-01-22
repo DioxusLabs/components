@@ -66,6 +66,7 @@ examples!(
     checkbox,
     collapsible,
     context_menu,
+    card,
     date_picker[internationalized, range, multi_month, unavailable_dates],
     dialog,
     dropdown_menu,
