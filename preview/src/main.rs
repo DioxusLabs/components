@@ -155,9 +155,11 @@ fn NavigationLayout() -> Element {
             return;
         }
 
-        document::eval(&format!(
-            "window.top.postMessage({{ 'route': '{route}' }}, '*');"
-        ));
+        let eval = document::eval(
+            "let route = await dioxus.recv();
+            window.top.postMessage({ 'route': route }, '*');",
+        );
+        let _ = eval.send(route.to_string());
     });
 
     rsx! {
@@ -338,10 +340,11 @@ fn CheckIcon() -> Element {
 }
 
 fn set_theme(dark_mode: bool) {
-    let theme = if dark_mode { "dark" } else { "light" };
-    _ = document::eval(&format!(
-        "document.documentElement.setAttribute('data-theme', '{theme}');",
-    ));
+    let eval = document::eval(
+        "let theme = await dioxus.recv();
+        document.documentElement.setAttribute('data-theme', theme);",
+    );
+    let _ = eval.send(if dark_mode { "dark" } else { "light" });
 }
 
 #[component]

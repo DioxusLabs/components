@@ -187,18 +187,21 @@ pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
     let gen_id = use_unique_id();
     let id = use_id_or(gen_id, props.id);
     use_effect(move || {
-        document::eval(&format!(
-            r#"let dialog = document.getElementById("{id}");
-            let is_open = {open};
+        let eval = document::eval(
+            r#"let id = await dioxus.recv();
+            let is_open = await dioxus.recv();
+            let dialog = document.getElementById(id);
 
-            if (is_open) {{
+            if (is_open) {
                 dialog.trap = window.createFocusTrap(dialog);
-            }}
-            if (!is_open && dialog.trap) {{
+            }
+            if (!is_open && dialog.trap) {
                 dialog.trap.remove();
                 dialog.trap = null;
-            }}"#
-        ));
+            }"#,
+        );
+        let _ = eval.send(id.to_string());
+        let _ = eval.send(open.cloned());
     });
 
     rsx! {
