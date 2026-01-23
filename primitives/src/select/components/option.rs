@@ -151,6 +151,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
     let selected = use_memo(move || {
         ctx.value.read().as_ref().and_then(|v| v.as_ref::<T>()) == Some(&props.value.read())
     });
+    let mut did_drag = use_signal(||false);
 
     use_context_provider(|| SelectOptionContext {
         selected: selected.into(),
@@ -173,10 +174,22 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 aria_roledescription: props.aria_roledescription.clone(),
 
                 onpointerdown: move |event| {
-                    if !disabled && event.trigger_button() == Some(MouseButton::Primary) {
+                    if !disabled && &event.pointer_type() == "mouse" && event.trigger_button() == Some(MouseButton::Primary){
                         ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
                         ctx.open.set(false);
                     }
+                },
+                ontouchstart: move |_| {
+                    did_drag.set(false);
+                },
+                ontouchend: move |_| {
+                    if !disabled && !did_drag(){
+                        ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
+                        ctx.open.set(false);
+                    }
+                },
+                ontouchmove: move |_| {
+                    did_drag.set(true);
                 },
                 onblur: move |_| {
                     if focused() {
