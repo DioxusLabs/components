@@ -151,7 +151,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
     let selected = use_memo(move || {
         ctx.value.read().as_ref().and_then(|v| v.as_ref::<T>()) == Some(&props.value.read())
     });
-    let mut did_drag = use_signal(||false);
+    let mut did_drag = use_signal(|| false);
 
     use_context_provider(|| SelectOptionContext {
         selected: selected.into(),
