@@ -37,6 +37,7 @@
     "preview/src/components/textarea",
     "preview/src/components/skeleton",
     "preview/src/components/card",
-    "preview/src/components/sheet"
+    "preview/src/components/sheet",
+    "preview/src/components/badge"
   ]
 }

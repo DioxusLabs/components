@@ -28,11 +28,28 @@ pub fn Demo() -> Element {
                 }
             }
             div { class: "avatar-item",
+                p { class: "avatar-label", "Rounded" }
+                Avatar {
+                    size: AvatarImageSize::Small,
+                    shape: AvatarShape::Rounded,
+                    on_state_change: move |state| {
+                        avatar_state.set(format!("Avatar 2: {state:?}"));
+                    },
+                    aria_label: "Basic avatar",
+                    AvatarImage {
+                        class: "avatar-image",
+                        src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
+                        alt: "User avatar",
+                    }
+                    AvatarFallback { class: "avatar-fallback", "EA" }
+                }
+            }
+            div { class: "avatar-item",
                 p { class: "avatar-label", "Error State" }
                 Avatar {
                     size: AvatarImageSize::Medium,
                     on_state_change: move |state| {
-                        avatar_state.set(format!("Avatar 2: {state:?}"));
+                        avatar_state.set(format!("Avatar 3: {state:?}"));
                     },
                     aria_label: "Error avatar",
                     AvatarImage {
