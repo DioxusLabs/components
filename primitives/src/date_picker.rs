@@ -7,13 +7,13 @@ use crate::{
     dioxus_core::Properties,
     focus::{use_focus_controlled_item, use_focus_provider, FocusState},
     popover::*,
-    use_unique_id,
+    use_unique_id, LocalDateExt as _,
 };
 
 use dioxus::prelude::*;
 use num_integer::Integer;
 use std::{fmt::Display, str::FromStr};
-use time::{macros::date, Date, Month, UtcDateTime, Weekday};
+use time::{macros::date, Date, Month, OffsetDateTime, Weekday};
 
 /// The context provided by the [`DatePicker`] component to its children.
 #[derive(Copy, Clone)]
@@ -415,11 +415,11 @@ pub struct DatePickerCalendarProps<T: DefaultCalendarProps + Properties + Partia
     pub on_format_month: Callback<Month, String>,
 
     /// The month being viewed
-    #[props(default = ReadSignal::new(Signal::new(UtcDateTime::now().date())))]
+    #[props(default = ReadSignal::new(Signal::new(OffsetDateTime::now_local_date())))]
     pub view_date: ReadSignal<Date>,
 
     /// The current date (used for highlighting today)
-    #[props(default = UtcDateTime::now().date())]
+    #[props(default = OffsetDateTime::now_local_date())]
     pub today: Date,
 
     /// Callback when view date changes
@@ -506,7 +506,7 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps<CalendarProps>) -> Elem
 
     #[allow(non_snake_case)]
     let Calendar = props.calendar;
-    let mut view_date = use_signal(|| UtcDateTime::now().date());
+    let mut view_date = use_signal(|| OffsetDateTime::now_local_date());
     use_effect(move || {
         if let Some(date) = (ctx.selected_date)() {
             view_date.set(date);
@@ -583,7 +583,7 @@ pub fn DateRangePickerCalendar(props: DatePickerCalendarProps<RangeCalendarProps
 
     #[allow(non_snake_case)]
     let RangeCalendar = props.calendar;
-    let mut view_date = use_signal(|| UtcDateTime::now().date());
+    let mut view_date = use_signal(|| OffsetDateTime::now_local_date());
     use_effect(move || {
         if let Some(r) = (ctx.date_range)() {
             view_date.set(r.start());
@@ -904,7 +904,7 @@ fn DateElement(props: DateElementProps) -> Element {
         }
     });
 
-    let today = UtcDateTime::now().date();
+    let today = OffsetDateTime::now_local_date();
 
     let min_date = ctx.enabled_date_range.start();
     let max_date = ctx.enabled_date_range.end();
