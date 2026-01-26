@@ -1,5 +1,5 @@
 {
-  "name": "Badge",
+  "name": "badge",
   "description": "A small label to display status or categorization",
   "authors": ["Evan Almloff"],
   "exclude": ["variants", "docs.md", "component.json"],
