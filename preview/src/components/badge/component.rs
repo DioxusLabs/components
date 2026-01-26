@@ -64,6 +64,7 @@ fn BadgeElement(props: BadgeProps) -> Element {
 #[component]
 pub fn VerifiedIcon() -> Element {
     rsx! {
+        // Badge icon from lucide https://lucide.dev/icons/badge
         svg {
             view_box: "0 0 24 24",
             xmlns: "http://www.w3.org/2000/svg",
