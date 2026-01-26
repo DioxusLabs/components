@@ -506,7 +506,7 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps<CalendarProps>) -> Elem
 
     #[allow(non_snake_case)]
     let Calendar = props.calendar;
-    let mut view_date = use_signal(|| OffsetDateTime::now_local_date());
+    let mut view_date = use_signal(OffsetDateTime::now_local_date);
     use_effect(move || {
         if let Some(date) = (ctx.selected_date)() {
             view_date.set(date);
@@ -583,7 +583,7 @@ pub fn DateRangePickerCalendar(props: DatePickerCalendarProps<RangeCalendarProps
 
     #[allow(non_snake_case)]
     let RangeCalendar = props.calendar;
-    let mut view_date = use_signal(|| OffsetDateTime::now_local_date());
+    let mut view_date = use_signal(OffsetDateTime::now_local_date);
     use_effect(move || {
         if let Some(r) = (ctx.date_range)() {
             view_date.set(r.start());
