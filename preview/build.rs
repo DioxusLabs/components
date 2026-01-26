@@ -32,6 +32,9 @@ fn walk_highlight_dir(dir: &std::path::Path, out_dir: &std::path::Path) -> std::
             walk_highlight_dir(&file.path(), &out_folder)?;
             continue;
         }
+        if file.file_name().to_string_lossy().starts_with('.') {
+            continue;
+        }
         if file.path().extension() == Some(std::ffi::OsStr::new("md")) {
             let markdown = process_markdown_to_html(&file.path());
             let out_file_path = out_folder.join(file.file_name()).with_extension("html");
