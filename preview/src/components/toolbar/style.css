@@ -21,7 +21,7 @@
 
 .toolbar button:hover:not([disabled]),
 .toolbar button:focus-visible {
-    background: var(--light, var(--primary-color-4)) 
+    background: var(--light, var(--primary-color-4))
         var(--dark, var(--primary-color-7));
     color: var(--secondary-color-1);
 }
