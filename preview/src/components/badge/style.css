@@ -4,18 +4,6 @@
   gap: 1rem;
 }
 
-.badge-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.badge-label {
-  color: var(--secondary-color-4);
-  font-size: 0.875rem;
-}
-
 .badge {
   display: inline-flex;
   min-width: 20px;
@@ -28,18 +16,8 @@
   gap: 4px
 }
 
-.badge[notify="true"] {
-  position: absolute;
-  transform: translate(-50%, -50%);
-}
-
 .badge[padding="true"] {
   padding: 0 8px;
-}
-
-.badge[dot="true"] {
-  min-width: 8px;
-  height: 8px;
 }
 
 .badge[data-style="primary"] {
