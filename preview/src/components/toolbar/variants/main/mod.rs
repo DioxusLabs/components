@@ -2,6 +2,25 @@ use super::super::component::*;
 use dioxus::prelude::*;
 
 #[component]
+fn ToggleToolbarButton(
+    index: usize,
+    is_on: bool,
+    on_click: Callback<()>,
+    children: Element,
+) -> Element {
+    rsx! {
+        ToolbarButton {
+            index,
+            on_click,
+            "data-state": if is_on { "on" } else { "off" },
+            background: if is_on { "var(--light, var(--primary-color-5)) var(--dark, var(--primary-color-6))" } else { "" },
+            color: if is_on { "var(--secondary-color-1)" } else { "" },
+            {children}
+        }
+    }
+}
+
+#[component]
 pub fn Demo() -> Element {
     let mut is_bold = use_signal(|| false);
     let mut is_italic = use_signal(|| false);
@@ -11,43 +30,43 @@ pub fn Demo() -> Element {
     rsx! {
         Toolbar { aria_label: "Text formatting",
             ToolbarGroup {
-                ToolbarButton {
+                ToggleToolbarButton {
                     index: 0usize,
+                    is_on: is_bold(),
                     on_click: move |_| is_bold.toggle(),
-                    "data-state": if is_bold() { "on" } else { "off" },
                     "Bold"
                 }
-                ToolbarButton {
+                ToggleToolbarButton {
                     index: 1usize,
+                    is_on: is_italic(),
                     on_click: move |_| is_italic.toggle(),
-                    "data-state": if is_italic() { "on" } else { "off" },
                     "Italic"
                 }
-                ToolbarButton {
+                ToggleToolbarButton {
                     index: 2usize,
+                    is_on: is_underline(),
                     on_click: move |_| is_underline.toggle(),
-                    "data-state": if is_underline() { "on" } else { "off" },
                     "Underline"
                 }
             }
             ToolbarSeparator {}
             ToolbarGroup {
-                ToolbarButton {
+                ToggleToolbarButton {
                     index: 3usize,
+                    is_on: text_align() == "left",
                     on_click: move |_| text_align.set("left".to_string()),
-                    "data-state": if text_align() == "left" { "on" } else { "off" },
                     "Align Left"
                 }
-                ToolbarButton {
+                ToggleToolbarButton {
                     index: 4usize,
+                    is_on: text_align() == "center",
                     on_click: move |_| text_align.set("center".to_string()),
-                    "data-state": if text_align() == "center" { "on" } else { "off" },
                     "Align Center"
                 }
-                ToolbarButton {
+                ToggleToolbarButton {
                     index: 5usize,
+                    is_on: text_align() == "right",
                     on_click: move |_| text_align.set("right".to_string()),
-                    "data-state": if text_align() == "right" { "on" } else { "off" },
                     "Align Right"
                 }
             }

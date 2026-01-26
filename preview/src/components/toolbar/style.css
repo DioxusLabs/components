@@ -26,12 +26,6 @@
     color: var(--secondary-color-1);
 }
 
-.toolbar button[data-state="on"] {
-    background: var(--light, var(--primary-color-5))
-        var(--dark, var(--primary-color-6));
-    color: var(--secondary-color-1);
-}
-
 .toolbar button:disabled {
     color: var(--secondary-color-5);
     cursor: not-allowed;
