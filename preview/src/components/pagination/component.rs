@@ -89,6 +89,9 @@ pub struct PaginationLinkProps {
     pub size: PaginationLinkSize,
     #[props(default)]
     pub data_kind: Option<PaginationLinkKind>,
+    onclick: Option<EventHandler<MouseEvent>>,
+    onmousedown: Option<EventHandler<MouseEvent>>,
+    onmouseup: Option<EventHandler<MouseEvent>>,
     #[props(extends = GlobalAttributes)]
     #[props(extends = a)]
     pub attributes: Vec<Attribute>,
@@ -107,6 +110,21 @@ pub fn PaginationLink(props: PaginationLinkProps) -> Element {
             "data-size": props.size.class(),
             "data-kind": data_kind,
             aria_current: aria_current,
+            onclick: move |event| {
+                if let Some(f) = &props.onclick {
+                    f.call(event);
+                }
+            },
+            onmousedown: move |event| {
+                if let Some(f) = &props.onmousedown {
+                    f.call(event);
+                }
+            },
+            onmouseup: move |event| {
+                if let Some(f) = &props.onmouseup {
+                    f.call(event);
+                }
+            },
             ..props.attributes,
             {props.children}
         }
@@ -115,6 +133,9 @@ pub fn PaginationLink(props: PaginationLinkProps) -> Element {
 
 #[component]
 pub fn PaginationPrevious(
+    onclick: Option<EventHandler<MouseEvent>>,
+    onmousedown: Option<EventHandler<MouseEvent>>,
+    onmouseup: Option<EventHandler<MouseEvent>>,
     #[props(extends = GlobalAttributes)]
     #[props(extends = a)]
     attributes: Vec<Attribute>,
@@ -124,6 +145,9 @@ pub fn PaginationPrevious(
             size: PaginationLinkSize::Default,
             aria_label: "Go to previous page",
             data_kind: Some(PaginationLinkKind::Previous),
+            onclick,
+            onmousedown,
+            onmouseup,
             attributes,
             // ChevronLeft icon from lucide https://lucide.dev/icons/chevron-left
             svg {
@@ -139,6 +163,9 @@ pub fn PaginationPrevious(
 
 #[component]
 pub fn PaginationNext(
+    onclick: Option<EventHandler<MouseEvent>>,
+    onmousedown: Option<EventHandler<MouseEvent>>,
+    onmouseup: Option<EventHandler<MouseEvent>>,
     #[props(extends = GlobalAttributes)]
     #[props(extends = a)]
     attributes: Vec<Attribute>,
@@ -148,6 +175,9 @@ pub fn PaginationNext(
             size: PaginationLinkSize::Default,
             aria_label: "Go to next page",
             data_kind: Some(PaginationLinkKind::Next),
+            onclick,
+            onmousedown,
+            onmouseup,
             attributes,
             span { class: "pagination-label", "Next" }
             // ChevronRight icon from lucide https://lucide.dev/icons/chevron-right
