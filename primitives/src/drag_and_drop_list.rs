@@ -15,6 +15,7 @@ impl DragAndDropContext {
         self.drag_from.set(Some(index));
         self.drop_to.set(None);
         self.is_dragging.set(true);
+        self.temp_list.set((self.original_list)());
     }
 
     fn drag_over(&mut self, index: usize) {
@@ -26,7 +27,7 @@ impl DragAndDropContext {
         if (self.drop_to)().is_some_and(|to| to == index) {
             return;
         }
-        
+
         self.drop_to.set(Some(index));
 
         let mut list = (self.original_list)();
@@ -41,6 +42,12 @@ impl DragAndDropContext {
         self.drop_to.set(None);
         self.is_dragging.set(false);
     }
+
+    fn remove(&mut self, index: usize) {
+        let mut list = (self.original_list)();
+        let _ = list.remove(index);
+        self.original_list.set(list);
+    }
 }
 
 /// The props for the [`DragAndDropListItem`] component.
@@ -48,6 +55,10 @@ impl DragAndDropContext {
 pub struct DragAndDropListProps {
     /// Items (labels) to be rendered.
     pub items: Vec<Element>,
+
+    /// Set if the list items should be removable
+    #[props(default)]
+    pub is_removable: bool,
 
     /// Additional attributes to apply to the list element.
     #[props(extends = GlobalAttributes)]
@@ -85,7 +96,11 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
             .enumerate()
             .map(|(index, children)| {
                 rsx! {
-                    DragAndDropListItem { index, {children} }
+                    DragAndDropListItem {
+                        index,
+                        is_removable: props.is_removable,
+                        {children}
+                    }
                 }
             })
             .collect::<Vec<Element>>()
@@ -115,6 +130,9 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
 pub struct DragAndDropListItemProps {
     /// The index of the index trigger
     pub index: usize,
+
+    /// Set if the list item should be removable
+    pub is_removable: bool,
 
     /// Additional attributes to apply to the list element.
     #[props(extends = GlobalAttributes)]
@@ -157,12 +175,39 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             ..props.attributes,
             div { class: "item-icon-div", DragIcon {} }
             div { class: "item-body-div", {props.children} }
+            if props.is_removable {
+                RemoveButton { on_click: move || ctx.remove(index) }
+            }
+        }
+    }
+}
+
+#[component]
+fn RemoveButton(on_click: Callback<()>) -> Element {
+    rsx! {
+        button {
+            class: "remove-button",
+            onclick: move |_| on_click.call(()),
+            BaseIcon {
+                path { d: "M18 6 6 18" }
+                path { d: "m6 6 12 12" }
+            }
         }
     }
 }
 
 #[component]
 fn DragIcon() -> Element {
+    rsx! {
+        BaseIcon {
+            line { x1: "5", x2: "19", y1: "9", y2: "9", }
+            line { x1: "5", x2: "19", y1: "15", y2: "15", }
+        }
+    }
+}
+
+#[component]
+fn BaseIcon(children: Element) -> Element {
     rsx! {
         svg {
             view_box: "0 0 24 24",
@@ -174,8 +219,7 @@ fn DragIcon() -> Element {
             stroke_linecap: "round",
             stroke_linejoin: "round",
             stroke_width: 2,
-            line { x1: "5", x2: "19", y1: "9", y2: "9", }
-            line { x1: "5", x2: "19", y1: "15", y2: "15", }
+            {children}
         }
     }
 }

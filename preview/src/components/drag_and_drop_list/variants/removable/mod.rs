@@ -5,6 +5,9 @@ use dioxus::prelude::*;
 pub fn Demo() -> Element {
     let items = default_items();
     rsx! {
-        DragAndDropList { items }
+        DragAndDropList {
+            items,
+            is_removable: true
+        }
     }
 }

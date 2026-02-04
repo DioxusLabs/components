@@ -70,7 +70,7 @@ examples!(
     card,
     date_picker[internationalized, range, multi_month, unavailable_dates],
     dialog,
-    drag_and_drop_list,
+    drag_and_drop_list[removable],
     dropdown_menu,
     hover_card,
     input,

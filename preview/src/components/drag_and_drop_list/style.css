@@ -7,6 +7,10 @@
   pointer-events: auto;
 }
 
+.dnd-list-ul[is-grabbing="true"] {
+  pointer-events: none;
+}
+
 .dnd-list-item {
   position: relative;
   z-index: 0;
@@ -25,11 +29,8 @@
 }
 
 .dnd-list-item[is-grabbing="true"] {
+  border-color: var(--focused-border-color) var(--focused-border-color) var(--focused-border-color) var(--focused-border-color);
   cursor: grabbing;
-  border-top-color: var(--focused-border-color);
-  border-bottom-color: var(--focused-border-color);
-  border-left-color: var(--focused-border-color);
-  border-right-color: var(--focused-border-color);
 }
 
 .dnd-list-item[is-grabbing="false"] {
@@ -53,4 +54,16 @@
   font-size: 16px;
   font-weight: normal;
   line-height: 24px;
+}
+
+.remove-button {
+  display: flex;
+  overflow: visible;
+  width: 24px;
+  align-items: center;
+  padding: 0;
+  border-style: none;
+  margin-left: 16px;
+  background-color: transparent;
+  cursor: pointer;
 }
