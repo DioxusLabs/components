@@ -1,0 +1,10 @@
+Allows users to create vertically sortable lists supporting drag and drop and touch input.
+
+## Component Structure
+
+```rust
+DragAndDropList {
+    // Items to be rendered
+    items
+}
+```

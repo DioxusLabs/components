@@ -39,5 +39,6 @@
     "preview/src/components/card",
     "preview/src/components/sheet",
     "preview/src/components/badge"
+    "preview/src/components/drag_and_drop_list"
   ]
 }
