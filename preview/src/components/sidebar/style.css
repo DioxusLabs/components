@@ -110,6 +110,11 @@
 
 [data-collapsible="icon"] .sidebar-container {
   width: var(--sidebar-width-icon);
+  overflow: visible;
+}
+
+[data-collapsible="icon"] .sidebar-inner {
+  overflow: visible;
 }
 
 [data-variant="sidebar"][data-side="left"] .sidebar-container {
@@ -304,7 +309,7 @@
 }
 
 [data-collapsible="icon"] .sidebar-content {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .sidebar-footer {
@@ -369,7 +374,7 @@
   color: var(--sidebar-foreground);
   cursor: pointer;
   outline: none;
-  transition: transform 150ms ease-out;
+  transition: transform 150ms ease-out, opacity 200ms ease-out, visibility 0ms 0ms;
 }
 
 .sidebar-group-action:hover {
@@ -397,7 +402,10 @@
 }
 
 [data-collapsible="icon"] .sidebar-group-action {
-  display: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 150ms ease-out, opacity 200ms ease-out, visibility 0ms 200ms;
 }
 
 .sidebar-group-content {
@@ -476,6 +484,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: opacity 200ms ease-out;
+}
+
+.sidebar-desktop[data-collapsible="icon"] .sidebar-menu-button[data-sidebar="menu-button"]>span:last-child {
+  opacity: 0;
 }
 
 /* Size variants */
@@ -557,7 +570,7 @@
   color: var(--sidebar-foreground);
   cursor: pointer;
   outline: none;
-  transition: transform 150ms ease-out;
+  transition: transform 150ms ease-out, opacity 200ms ease-out, visibility 0ms 0ms;
 }
 
 .sidebar-menu-action[data-sidebar="menu-action"]:hover {
@@ -596,7 +609,10 @@
 }
 
 [data-collapsible="icon"] .sidebar-menu-action[data-sidebar="menu-action"] {
-  display: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 150ms ease-out, opacity 200ms ease-out, visibility 0ms 200ms;
 }
 
 .sidebar-menu-action[data-sidebar="menu-action"][data-show-on-hover="true"] {
@@ -631,6 +647,7 @@
   font-weight: 500;
   pointer-events: none;
   user-select: none;
+  transition: opacity 200ms ease-out;
 }
 
 .sidebar-menu-button:hover~.sidebar-menu-badge {
@@ -654,7 +671,8 @@
 }
 
 [data-collapsible="icon"] .sidebar-menu-badge {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .sidebar-menu-skeleton {
@@ -686,10 +704,18 @@
   gap: 0.25rem;
   list-style: none;
   transform: translateX(1px);
+  transition: opacity 200ms ease-out, max-height 200ms ease-out, padding 200ms ease-out, margin 200ms ease-out, visibility 0ms 0ms;
 }
 
 [data-collapsible="icon"] .sidebar-menu-sub {
-  display: none;
+  max-height: 0;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 200ms ease-out, max-height 200ms ease-out, padding 200ms ease-out, margin 200ms ease-out, visibility 0ms 200ms;
 }
 
 .sidebar-menu-sub-item {
@@ -715,6 +741,7 @@
   outline: none;
   text-decoration: none;
   transform: translateX(-1px);
+  transition: opacity 200ms ease-out;
 }
 
 .sidebar-menu-sub-button:hover {
@@ -764,5 +791,6 @@
 }
 
 [data-collapsible="icon"] .sidebar-menu-sub-button {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
 }
