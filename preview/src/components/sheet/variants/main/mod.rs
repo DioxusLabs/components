@@ -60,7 +60,7 @@ pub fn Demo() -> Element {
                 SheetFooter {
                     Button { "Save changes" }
                     SheetClose {
-                        r#as: |attributes| rsx! {
+                        as: |attributes| rsx! {
                             Button { variant: ButtonVariant::Outline, attributes, "Cancel" }
                         },
                     }

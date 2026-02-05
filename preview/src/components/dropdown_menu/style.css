@@ -88,6 +88,7 @@
   color: var(--secondary-color-4);
   cursor: pointer;
   font-size: 14px;
+  gap: 0.5rem;
   outline: none;
   user-select: none;
 }
