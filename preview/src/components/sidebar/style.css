@@ -404,8 +404,8 @@
 [data-collapsible="icon"] .sidebar-group-action {
   opacity: 0;
   pointer-events: none;
-  visibility: hidden;
   transition: transform 150ms ease-out, opacity 200ms ease-out, visibility 0ms 200ms;
+  visibility: hidden;
 }
 
 .sidebar-group-content {
@@ -611,8 +611,8 @@
 [data-collapsible="icon"] .sidebar-menu-action[data-sidebar="menu-action"] {
   opacity: 0;
   pointer-events: none;
-  visibility: hidden;
   transition: transform 150ms ease-out, opacity 200ms ease-out, visibility 0ms 200ms;
+  visibility: hidden;
 }
 
 .sidebar-menu-action[data-sidebar="menu-action"][data-show-on-hover="true"] {
@@ -714,8 +714,8 @@
   margin: 0;
   opacity: 0;
   pointer-events: none;
-  visibility: hidden;
   transition: opacity 200ms ease-out, max-height 200ms ease-out, padding 200ms ease-out, margin 200ms ease-out, visibility 0ms 200ms;
+  visibility: hidden;
 }
 
 .sidebar-menu-sub-item {
