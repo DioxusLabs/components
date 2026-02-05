@@ -23,7 +23,7 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
         tooltip::TooltipTrigger {
             class: "tooltip-trigger",
             id: props.id,
-            r#as: props.r#as,
+            as: props.r#as,
             attributes: props.attributes,
             {props.children}
         }

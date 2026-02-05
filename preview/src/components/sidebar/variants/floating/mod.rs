@@ -164,7 +164,6 @@ pub fn Demo() -> Element {
     let collapsible = use_signal(|| SidebarCollapsible::Offcanvas);
 
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         SidebarProvider {
             Sidebar {
                 variant: SidebarVariant::Floating,
@@ -207,7 +206,7 @@ fn TeamSwitcher(teams: &'static [Team]) -> Element {
             SidebarMenuItem {
                 DropdownMenu {
                     DropdownMenuTrigger {
-                        r#as: move |attributes: Vec<Attribute>| rsx! {
+                        as: move |attributes: Vec<Attribute>| rsx! {
                             SidebarMenuButton { size: SidebarMenuButtonSize::Lg, attributes,
                                 div { style: "display:flex; flex-shrink:0; align-items:center; justify-content:center; width:2rem; height:2rem; aspect-ratio:1; border-radius:0.5rem; background:var(--sidebar-accent); color:var(--sidebar-accent-foreground);",
                                     Icon {}
@@ -260,10 +259,10 @@ fn NavMain(items: &'static [NavMainItem]) -> Element {
                 for item in items.iter() {
                     Collapsible {
                         default_open: item.is_active,
-                        r#as: move |attributes: Vec<Attribute>| rsx! {
+                        as: move |attributes: Vec<Attribute>| rsx! {
                             SidebarMenuItem { key: "{item.title}", attributes,
                                 CollapsibleTrigger {
-                                    r#as: move |attributes: Vec<Attribute>| rsx! {
+                                    as: move |attributes: Vec<Attribute>| rsx! {
                                         SidebarMenuButton {
                                             tooltip: rsx! {
                                                 {item.title}
@@ -280,7 +279,7 @@ fn NavMain(items: &'static [NavMainItem]) -> Element {
                                         for sub_item in item.items {
                                             SidebarMenuSubItem { key: "{sub_item.title}",
                                                 SidebarMenuSubButton {
-                                                    r#as: move |attributes: Vec<Attribute>| rsx! {
+                                                    as: move |attributes: Vec<Attribute>| rsx! {
                                                         a { href: sub_item.url, ..attributes,
                                                             span { {sub_item.title} }
                                                         }
@@ -308,7 +307,7 @@ fn NavProjects(projects: &'static [Project]) -> Element {
                 for project in projects.iter() {
                     SidebarMenuItem { key: "{project.name}",
                         SidebarMenuButton {
-                            r#as: move |attributes: Vec<Attribute>| rsx! {
+                            as: move |attributes: Vec<Attribute>| rsx! {
                                 a { href: project.url, ..attributes,
                                     Icon {}
                                     span { {project.name} }
@@ -317,7 +316,7 @@ fn NavProjects(projects: &'static [Project]) -> Element {
                         }
                         DropdownMenu {
                             DropdownMenuTrigger {
-                                r#as: move |attributes: Vec<Attribute>| rsx! {
+                                as: move |attributes: Vec<Attribute>| rsx! {
                                     SidebarMenuAction { show_on_hover: true, attributes,
                                         Icon {}
                                         span { class: "sr-only", "More" }
@@ -370,7 +369,7 @@ fn NavUser() -> Element {
             SidebarMenuItem {
                 DropdownMenu {
                     DropdownMenuTrigger {
-                        r#as: move |attributes: Vec<Attribute>| rsx! {
+                        as: move |attributes: Vec<Attribute>| rsx! {
                             SidebarMenuButton { size: SidebarMenuButtonSize::Lg, attributes,
                                 Avatar { size: AvatarImageSize::Small, style: "border-radius:0.5rem;",
                                     AvatarImage {

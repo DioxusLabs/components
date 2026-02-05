@@ -12,30 +12,30 @@ SidebarProvider {
 
         // Layout - Header
         SidebarHeader {
-            SidebarTrigger {}                        // toggle button (r#as)
+            SidebarTrigger {}                        // toggle button (as)
         }
 
         // Layout - Scrollable content area
         SidebarContent {
             SidebarGroup {
-                SidebarGroupLabel { "..." }          // optional label (r#as)
-                SidebarGroupAction { "..." }         // optional action (r#as)
+                SidebarGroupLabel { "..." }          // optional label (as)
+                SidebarGroupAction { "..." }         // optional action (as)
                 SidebarGroupContent {                // wraps menus
                     SidebarMenu {
                         SidebarMenuItem {
-                            SidebarMenuButton {      // primary item (r#as)
+                            SidebarMenuButton {      // primary item (as)
                                 is_active: true,     // highlight state
                                 tooltip: rsx!("..."),// Option<Element>; wraps tooltip only when Some
                                 Icon {}              // icon node
                                 span { "..." }       // text node
                             }
-                            SidebarMenuAction { show_on_hover: true, Icon {} } // trailing action (r#as)
+                            SidebarMenuAction { show_on_hover: true, Icon {} } // trailing action (as)
                             SidebarMenuBadge { "+..." }                        // optional badge
                         }
                         SidebarMenuItem {            // nested submenu
                             SidebarMenuSub {
                                 SidebarMenuSubItem {
-                                    SidebarMenuSubButton { "..." } // submenu button/link (r#as)
+                                    SidebarMenuSubButton { "..." } // submenu button/link (as)
                                 }
                             }
                         }
@@ -64,5 +64,5 @@ SidebarProvider {
 - Keyboard: ⌘/Ctrl+B toggles via provider. Focus rings are defined in `sidebar/style.css`; keep or replace with `:focus-visible` styles.
 - Tooltips: `tooltip: Option<Element>` on `SidebarMenuButton`; `None` skips wrapping in Tooltip.
 
-## Custom Rendering with `r#as`
-Supported components: `SidebarTrigger`, `SidebarGroupLabel`, `SidebarGroupAction`, `SidebarMenuButton`, `SidebarMenuAction`, `SidebarMenuSubButton`. Use `r#as: |attrs| rsx! { ... }` and spread `..attrs` to retain merged attributes, state data, and handlers.
+## Custom Rendering with `as`
+Supported components: `SidebarTrigger`, `SidebarGroupLabel`, `SidebarGroupAction`, `SidebarMenuButton`, `SidebarMenuAction`, `SidebarMenuSubButton`. Use `as: |attrs| rsx! { ... }` and spread `..attrs` to retain merged attributes, state data, and handlers.

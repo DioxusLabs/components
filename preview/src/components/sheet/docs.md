@@ -44,7 +44,7 @@ SheetClose { "Close" }
 
 // Custom element: attributes include the preset onclick handler
 SheetClose {
-    r#as: |attributes| rsx! {
+    as: |attributes| rsx! {
         a { href: "#", ..attributes, "Go back" }
     }
 }

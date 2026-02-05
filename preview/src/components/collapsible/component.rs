@@ -15,7 +15,7 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
             disabled: props.disabled,
             open: props.open,
             on_open_change: props.on_open_change,
-            r#as: props.r#as,
+            as: props.r#as,
             attributes: props.attributes,
             class: "collapsible",
             {props.children}
@@ -31,7 +31,7 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
     let show_icon = props.r#as.is_none();
 
     rsx! {
-        collapsible::CollapsibleTrigger { r#as: props.r#as, attributes: merged,
+        collapsible::CollapsibleTrigger { as: props.r#as, attributes: merged,
             {props.children}
             if show_icon {
                 svg {

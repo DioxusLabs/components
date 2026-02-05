@@ -69,7 +69,7 @@ macro_rules! examples {
         }
     };
 
-    // Block components: require variants/<variant>/style.css and expose it as css_highlighted
+    // Block components: rendered in iframe, no variant-level CSS required
     (@demo $name:ident block $([$($variant:ident),*])?) => {
         ComponentDemoData {
             name: stringify!($name),
@@ -90,10 +90,7 @@ macro_rules! examples {
                         light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.light.html")),
                         dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.dark.html")),
                     },
-                    css_highlighted: Some(HighlightedCode {
-                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/style.css.base16-ocean.light.html")),
-                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/style.css.base16-ocean.dark.html")),
-                    }),
+                    css_highlighted: None,
                     component: $name::variants::main::Demo,
                 },
                 $(
@@ -104,10 +101,7 @@ macro_rules! examples {
                                 light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.light.html")),
                                 dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.dark.html")),
                             },
-                            css_highlighted: Some(HighlightedCode {
-                                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/style.css.base16-ocean.light.html")),
-                                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/style.css.base16-ocean.dark.html")),
-                            }),
+                            css_highlighted: None,
                             component: $name::variants::$variant::Demo,
                         },
                     )*

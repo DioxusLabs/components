@@ -766,3 +766,117 @@
 [data-collapsible="icon"] .sidebar-menu-sub-button {
   display: none;
 }
+
+/* ==========================================================================
+   Demo/Variant Shared Styles
+   ========================================================================== */
+
+.sidebar-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.sidebar-info-block {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.sidebar-info-title,
+.sidebar-info-subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-info-title {
+  font-weight: 600;
+}
+
+.sidebar-info-subtitle {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.sidebar-chevron {
+  margin-left: auto;
+  transition: transform 200ms ease-out;
+}
+
+.sidebar-menu-button[data-open="true"] .sidebar-chevron {
+  transform: rotate(90deg);
+}
+
+[data-collapsible="icon"] .sidebar-hide-on-collapse {
+  display: none;
+}
+
+.sidebar-menu :is(.dropdown-menu, .tooltip) {
+  display: block;
+  width: 100%;
+}
+
+.dropdown-menu-content .separator[data-orientation="horizontal"] {
+  margin: 0.25rem 0;
+}
+
+.sidebar-menu-item>.dropdown-menu:has(.sidebar-menu-action) {
+  position: static;
+}
+
+.sidebar-header .sidebar-menu-button[data-sidebar="menu-button"].dropdown-menu-trigger:not(:focus-visible),
+.sidebar-footer .sidebar-menu-button[data-sidebar="menu-button"].dropdown-menu-trigger:not(:focus-visible) {
+  box-shadow: none;
+}
+
+.sidebar-sheet .sidebar-header .dropdown-menu-content {
+  margin-top: 4px;
+  margin-bottom: 0;
+  inset: 100% auto auto 0;
+}
+
+.sidebar-sheet .sidebar-footer .dropdown-menu-content {
+  margin-top: 0;
+  margin-bottom: 4px;
+  inset: auto auto 100% 0;
+}
+
+.sidebar-menu-button[data-sidebar="menu-button"].collapsible-trigger:hover {
+  text-decoration: none;
+  text-decoration-line: none;
+}
+
+@media (width >= 768px) {
+  .sidebar-desktop[data-side="left"] :is(.sidebar-header, .sidebar-menu-item:has(.sidebar-menu-action)) .dropdown-menu-content {
+    top: 0;
+    left: 100%;
+    margin-top: 0;
+    margin-left: 0.5rem;
+  }
+
+  .sidebar-desktop[data-side="left"] .sidebar-footer .dropdown-menu-content {
+    top: auto;
+    bottom: 0;
+    left: 100%;
+    margin-bottom: 0;
+    margin-left: 0.5rem;
+  }
+
+  .sidebar-desktop[data-side="right"] :is(.sidebar-header, .sidebar-menu-item:has(.sidebar-menu-action)) .dropdown-menu-content {
+    top: 0;
+    right: 100%;
+    left: auto;
+    margin-top: 0;
+    margin-right: 0.5rem;
+  }
+
+  .sidebar-desktop[data-side="right"] .sidebar-footer .dropdown-menu-content {
+    margin-right: 0.5rem;
+    margin-bottom: 0;
+    inset: auto 100% 0 auto;
+  }
+}

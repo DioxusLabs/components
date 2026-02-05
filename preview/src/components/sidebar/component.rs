@@ -685,7 +685,7 @@ pub fn SidebarMenuButton(
         Tooltip {
             disabled: hidden,
             TooltipTrigger {
-                r#as: move |tooltip_attrs: Vec<Attribute>| {
+                as: move |tooltip_attrs: Vec<Attribute>| {
                     let final_attrs = merge_attributes(vec![tooltip_attrs, merged.clone()]);
                     let children = children.clone();
                     if let Some(dynamic) = &r#as {
