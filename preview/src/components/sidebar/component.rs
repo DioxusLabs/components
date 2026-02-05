@@ -8,6 +8,7 @@ use dioxus::core::use_drop;
 use dioxus::prelude::*;
 use dioxus_primitives::dioxus_attributes::attributes;
 use dioxus_primitives::merge_attributes;
+use dioxus_primitives::use_controlled;
 
 // constants
 const SIDEBAR_WIDTH: &str = "16rem";
@@ -89,11 +90,41 @@ impl SidebarCollapsible {
 pub struct SidebarCtx {
     pub state: Memo<SidebarState>,
     pub side: Signal<SidebarSide>,
-    pub set_open: Callback<bool>,
-    pub open_mobile: Signal<bool>,
-    pub set_open_mobile: Callback<bool>,
     pub is_mobile: Signal<bool>,
-    pub toggle_sidebar: Callback<()>,
+    // From use_controlled:
+    open: Memo<bool>,
+    set_open: Callback<bool>,
+    // Mobile state:
+    open_mobile: Signal<bool>,
+}
+
+impl SidebarCtx {
+    /// Toggle the sidebar open/closed state
+    pub fn toggle(&self) {
+        if (self.is_mobile)() {
+            let current = (self.open_mobile)();
+            let mut open_mobile = self.open_mobile;
+            open_mobile.set(!current);
+        } else {
+            self.set_open.call(!self.open());
+        }
+    }
+
+    /// Set the mobile sidebar open state
+    pub fn set_open_mobile(&self, value: bool) {
+        let mut open_mobile = self.open_mobile;
+        open_mobile.set(value);
+    }
+
+    /// Get the current open state (desktop)
+    pub fn open(&self) -> bool {
+        self.open.cloned()
+    }
+
+    /// Get the current mobile open state
+    pub fn open_mobile(&self) -> bool {
+        (self.open_mobile)()
+    }
 }
 
 pub fn use_sidebar() -> SidebarCtx {
@@ -142,47 +173,35 @@ pub fn use_is_mobile() -> Signal<bool> {
 #[component]
 pub fn SidebarProvider(
     #[props(default = true)] default_open: bool,
-    #[props(default)] open: Option<Signal<bool>>,
-    #[props(default)] on_open_change: Option<Callback<bool>>,
+    #[props(default)] open: ReadSignal<Option<bool>>,
+    #[props(default)] on_open_change: Callback<bool>,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
     children: Element,
 ) -> Element {
     let is_mobile = use_is_mobile();
     let side = use_signal(|| SidebarSide::Left);
-    let mut open_mobile = use_signal(|| false);
-    let mut internal_open = use_signal(move || default_open);
+    let open_mobile = use_signal(|| false);
 
-    let open_signal = open.unwrap_or(internal_open);
-
-    let set_open = use_callback(move |value: bool| {
-        if let Some(callback) = on_open_change {
-            callback.call(value);
-        }
-        if open.is_none() {
-            internal_open.set(value);
-        }
-    });
-
-    let set_open_mobile = use_callback(move |value: bool| {
-        open_mobile.set(value);
-    });
-
-    let toggle_sidebar = use_callback(move |_: ()| {
-        if is_mobile() {
-            open_mobile.set(!open_mobile());
-        } else {
-            let new_value = !open_signal();
-            set_open.call(new_value);
-        }
-    });
+    let (open, set_open) = use_controlled(open, default_open, on_open_change);
 
     let state = use_memo(move || {
-        if open_signal() {
+        if open() {
             SidebarState::Expanded
         } else {
             SidebarState::Collapsed
         }
     });
+
+    let ctx = SidebarCtx {
+        state,
+        side,
+        is_mobile,
+        open,
+        set_open,
+        open_mobile,
+    };
+
+    use_context_provider(|| ctx);
 
     use_effect(move || {
         spawn(async move {
@@ -203,7 +222,7 @@ pub fn SidebarProvider(
 
             loop {
                 if eval.recv::<bool>().await.is_ok() {
-                    toggle_sidebar.call(());
+                    ctx.toggle();
                 }
             }
         });
@@ -217,18 +236,6 @@ pub fn SidebarProvider(
             "#,
         );
     });
-
-    let ctx = SidebarCtx {
-        state,
-        side,
-        set_open,
-        open_mobile,
-        set_open_mobile,
-        is_mobile,
-        toggle_sidebar,
-    };
-
-    use_context_provider(|| ctx);
 
     let sidebar_style = format!(
         r#"
@@ -291,7 +298,7 @@ pub fn Sidebar(
         return rsx! {
             Sheet {
                 open: open_mobile(),
-                on_open_change: move |v| ctx.set_open_mobile.call(v),
+                on_open_change: move |v| ctx.set_open_mobile(v),
                 SheetContent {
                     side: sheet_side,
                     class: "sidebar-sheet",
@@ -365,7 +372,7 @@ pub fn SidebarTrigger(
                 if let Some(handler) = &onclick {
                     handler.call(e);
                 }
-                ctx.toggle_sidebar.call(());
+                ctx.toggle();
             },
             attributes: merged,
             svg {
@@ -406,7 +413,7 @@ pub fn SidebarRail(#[props(extends = GlobalAttributes)] attributes: Vec<Attribut
         button {
             aria_label: "Toggle Sidebar",
             tabindex: -1,
-            onclick: move |_| ctx.toggle_sidebar.call(()),
+            onclick: move |_| ctx.toggle(),
             title: "Toggle Sidebar",
             ..merged,
         }

@@ -94,7 +94,7 @@ fn use_id_or<T: Clone + PartialEq + 'static>(
 }
 
 /// Allows some state to be either controlled or uncontrolled.
-fn use_controlled<T: Clone + PartialEq + 'static>(
+pub fn use_controlled<T: Clone + PartialEq + 'static>(
     prop: ReadSignal<Option<T>>,
     default: T,
     on_change: Callback<T>,
