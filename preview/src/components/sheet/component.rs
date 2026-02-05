@@ -146,7 +146,6 @@ pub fn SheetClose(
 
     let mut merged: Vec<Attribute> = attributes! {
         button {
-            aria_label: "Close",
             onclick: move |_| {
                 ctx.set_open(false);
             }
