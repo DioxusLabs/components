@@ -12,6 +12,16 @@ body {
   overflow-x: hidden;
 }
 
+body {
+  padding: 0;
+  margin: 0;
+  font-family: Inter, sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 400;
+  background-color: var(--primary-color);
+}
+
 .dark-mode-only {
   display: var(--dark, initial) var(--light, none);
 }
