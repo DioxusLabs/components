@@ -393,20 +393,14 @@ mod tests {
 
     #[test]
     fn later_list_overwrites() {
-        let result = merge_attributes(vec![
-            vec![attr("a", "first")],
-            vec![attr("a", "second")],
-        ]);
+        let result = merge_attributes(vec![vec![attr("a", "first")], vec![attr("a", "second")]]);
         assert_eq!(result.len(), 1);
         assert_eq!(get_value(&result[0]), "second");
     }
 
     #[test]
     fn class_attributes_are_merged() {
-        let result = merge_attributes(vec![
-            vec![attr("class", "foo")],
-            vec![attr("class", "bar")],
-        ]);
+        let result = merge_attributes(vec![vec![attr("class", "foo")], vec![attr("class", "bar")]]);
         assert_eq!(result.len(), 1);
         assert_eq!(get_value(&result[0]), "foo bar");
     }
@@ -422,10 +416,7 @@ mod tests {
 
     #[test]
     fn class_merge_handles_empty() {
-        let result = merge_attributes(vec![
-            vec![attr("class", "")],
-            vec![attr("class", "bar")],
-        ]);
+        let result = merge_attributes(vec![vec![attr("class", "")], vec![attr("class", "bar")]]);
         assert_eq!(get_value(&result[0]), "bar");
     }
 
