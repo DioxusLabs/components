@@ -164,17 +164,19 @@ fn use_global_escape_listener(mut on_escape: impl FnMut() + Clone + 'static) {
 
 fn use_global_keydown_listener(key: &'static str, on_escape: impl FnMut() + Clone + 'static) {
     use_effect_with_cleanup(move || {
-        let mut escape = document::eval(&format!(
-            "function listener(event) {{
-                if (event.key === '{key}') {{
+        let mut escape = document::eval(
+            "let targetKey = await dioxus.recv();
+            function listener(event) {
+                if (event.key === targetKey) {
                     event.preventDefault();
                     dioxus.send(true);
-                }}
-            }}
+                }
+            }
             document.addEventListener('keydown', listener);
             await dioxus.recv();
-            document.removeEventListener('keydown', listener);"
-        ));
+            document.removeEventListener('keydown', listener);",
+        );
+        let _ = escape.send(key);
         let mut on_escape = on_escape.clone();
         spawn(async move {
             while let Ok(true) = escape.recv().await {
@@ -202,17 +204,19 @@ fn use_animated_open(
         } else {
             spawn(async move {
                 let id = id.cloned();
-                let script = format!(
-                    "const element = document.getElementById('{id}');
-                    if (element && element.getAnimations().length > 0) {{
-                        Promise.all(element.getAnimations().map((animation) => animation.finished)).then(() => {{
+                let mut eval = dioxus::document::eval(
+                    "const id = await dioxus.recv();
+                    const element = document.getElementById(id);
+                    if (element && element.getAnimations().length > 0) {
+                        Promise.all(element.getAnimations().map((animation) => animation.finished)).then(() => {
                             dioxus.send(true);
-                        }});
-                    }} else {{
+                        });
+                    } else {
                         dioxus.send(true);
-                    }}"
+                    }"
                 );
-                _ = dioxus::document::eval(&script).recv::<bool>().await;
+                let _ = eval.send(id);
+                _ = eval.recv::<bool>().await;
                 show_in_dom.set(open);
             });
         }

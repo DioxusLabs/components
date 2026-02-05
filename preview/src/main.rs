@@ -184,9 +184,11 @@ fn NavigationLayout() -> Element {
             return;
         }
 
-        document::eval(&format!(
-            "window.top.postMessage({{ 'route': '{route}' }}, '*');"
-        ));
+        let eval = document::eval(
+            "let route = await dioxus.recv();
+            window.top.postMessage({ 'route': route }, '*');",
+        );
+        let _ = eval.send(route.to_string());
     });
 
     rsx! {
