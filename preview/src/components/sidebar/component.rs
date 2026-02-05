@@ -120,11 +120,6 @@ impl SidebarCtx {
     pub fn open(&self) -> bool {
         self.open.cloned()
     }
-
-    /// Get the current mobile open state
-    pub fn open_mobile(&self) -> bool {
-        (self.open_mobile)()
-    }
 }
 
 pub fn use_sidebar() -> SidebarCtx {
