@@ -134,7 +134,7 @@ pub fn use_is_mobile() -> Signal<bool> {
             let js_code = format!(
                 r#"
                 function checkMobile() {{
-                    return window.innerWidth < {};
+                    return window.innerWidth < {MOBILE_BREAKPOINT};
                 }}
                 function handleResize() {{
                     dioxus.send(checkMobile());
@@ -142,8 +142,7 @@ pub fn use_is_mobile() -> Signal<bool> {
                 window.__sidebarResizeHandler = handleResize;
                 window.addEventListener('resize', window.__sidebarResizeHandler);
                 dioxus.send(checkMobile());
-                "#,
-                MOBILE_BREAKPOINT
+                "#
             );
             let mut eval = document::eval(&js_code);
 
@@ -203,15 +202,14 @@ pub fn SidebarProvider(
             let js_code = format!(
                 r#"
                 function sidebarKeyHandler(event) {{
-                    if (event.key === '{}' && (event.metaKey || event.ctrlKey)) {{
+                    if (event.key === '{SIDEBAR_KEYBOARD_SHORTCUT}' && (event.metaKey || event.ctrlKey)) {{
                         event.preventDefault();
                         dioxus.send(true);
                     }}
                 }}
                 window.__sidebarKeyHandler = sidebarKeyHandler;
                 window.addEventListener('keydown', window.__sidebarKeyHandler);
-                "#,
-                SIDEBAR_KEYBOARD_SHORTCUT
+                "#
             );
             let mut eval = document::eval(&js_code);
 
@@ -234,11 +232,10 @@ pub fn SidebarProvider(
 
     let sidebar_style = format!(
         r#"
-        --sidebar-width: {};
-        --sidebar-width-mobile: {};
-        --sidebar-width-icon: {}
-        "#,
-        SIDEBAR_WIDTH, SIDEBAR_WIDTH_MOBILE, SIDEBAR_WIDTH_ICON
+        --sidebar-width: {SIDEBAR_WIDTH};
+        --sidebar-width-mobile: {SIDEBAR_WIDTH_MOBILE};
+        --sidebar-width-icon: {SIDEBAR_WIDTH_ICON}
+        "#
     );
 
     let base = attributes!(div {
