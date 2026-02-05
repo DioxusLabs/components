@@ -69,7 +69,7 @@ macro_rules! examples {
         }
     };
 
-    // Block components: rendered in iframe, no variant-level CSS required
+    // Block components: rendered in iframe
     (@demo $name:ident block $([$($variant:ident),*])?) => {
         ComponentDemoData {
             name: stringify!($name),

@@ -164,6 +164,7 @@ pub fn Demo() -> Element {
     let collapsible = use_signal(|| SidebarCollapsible::Offcanvas);
 
     rsx! {
+        document::Link { rel: "stylesheet", href: asset!("../demo.css") }
         SidebarProvider {
             Sidebar {
                 variant: SidebarVariant::Floating,
