@@ -10,8 +10,8 @@ pub fn theme_seed() {
           if (window.__dx_theme_seeded) return;
           window.__dx_theme_seeded = true;
 
-          const COOKIE_NAME = '{cookie_name}';
-          const CHANNEL_NAME = '{channel_name}';
+          const COOKIE_NAME = '{COOKIE_NAME}';
+          const CHANNEL_NAME = '{CHANNEL_NAME}';
 
           function getCookie(name) {{
             const prefix = name + '=';
@@ -43,8 +43,6 @@ pub fn theme_seed() {
           }} catch (_) {{}}
         }})();
         "#,
-        cookie_name = COOKIE_NAME,
-        channel_name = CHANNEL_NAME
     ));
 }
 
@@ -54,8 +52,8 @@ pub fn set_theme(dark_mode: bool) {
     _ = document::eval(&format!(
         r#"
         (function () {{
-          const COOKIE_NAME = '{cookie_name}';
-          const CHANNEL_NAME = '{channel_name}';
+          const COOKIE_NAME = '{COOKIE_NAME}';
+          const CHANNEL_NAME = '{CHANNEL_NAME}';
 
           function getCookie(name) {{
             const prefix = name + '=';
@@ -70,7 +68,7 @@ pub fn set_theme(dark_mode: bool) {
           document.documentElement.setAttribute('data-theme', '{theme}');
           if (getCookie(COOKIE_NAME) === '{theme}') return;
 
-          document.cookie = '{cookie_name}={theme}; path=/; max-age=31536000; samesite=lax';
+          document.cookie = '{COOKIE_NAME}={theme}; path=/; max-age=31536000; samesite=lax';
 
           try {{
             const ch = window.__dx_theme_channel;
@@ -83,8 +81,6 @@ pub fn set_theme(dark_mode: bool) {
             }}
           }} catch (_) {{}}
         }})();
-        "#,
-        cookie_name = COOKIE_NAME,
-        channel_name = CHANNEL_NAME
+        "#
     ));
 }
