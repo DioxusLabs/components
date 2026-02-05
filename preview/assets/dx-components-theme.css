@@ -5,6 +5,10 @@
 
 body {
   color: var(--secondary-color-4);
+  font-family: Inter, sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 400;
 }
 
 html[data-theme="dark"] {
