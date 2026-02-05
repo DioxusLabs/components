@@ -15,11 +15,11 @@ body {
 body {
   padding: 0;
   margin: 0;
+  background-color: var(--primary-color);
   font-family: Inter, sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   font-weight: 400;
-  background-color: var(--primary-color);
 }
 
 .dark-mode-only {
