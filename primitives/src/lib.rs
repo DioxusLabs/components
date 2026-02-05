@@ -314,9 +314,7 @@ pub fn merge_attributes(lists: Vec<Vec<Attribute>>) -> Vec<Attribute> {
 fn join_class(a: &str, b: &str) -> String {
     let (a, b) = (a.trim(), b.trim());
     match (a.is_empty(), b.is_empty()) {
-        (true, true) => String::new(),
-        (true, false) => b.to_string(),
-        (false, true) => a.to_string(),
         (false, false) => format!("{a} {b}"),
+        _ => format!("{a}{b}"),
     }
 }
