@@ -313,8 +313,9 @@ pub fn merge_attributes(lists: Vec<Vec<Attribute>>) -> Vec<Attribute> {
 
 fn join_class(a: &str, b: &str) -> String {
     let (a, b) = (a.trim(), b.trim());
-    match (a.is_empty(), b.is_empty()) {
-        (false, false) => format!("{a} {b}"),
-        _ => format!("{a}{b}"),
+    if !a.is_empty() && !b.is_empty() {
+        format!("{a} {b}")
+    } else {
+        format!("{a}{b}")
     }
 }
