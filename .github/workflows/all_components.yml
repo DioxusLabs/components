@@ -61,6 +61,7 @@ jobs:
           cd test-harness
           # Add dependencies manually; TODO: remove this once dx components supports local dependencies
           dx components add calendar,popover --path ..
+          dx components add button,separator,sheet,tooltip --path ..
           # Add all components
           dx components add --all --path .. --force
           # Switch to the local version of dioxus-primitives
@@ -106,6 +107,8 @@ jobs:
             # Add dependencies manually; TODO: remove this once dx components supports local dependencies
             if [ "$file" = "date_picker" ]; then
               dx components add calendar,popover --path ..
+            elif [ "$file" = "sidebar" ]; then
+              dx components add button,separator,sheet,tooltip --path ..
             fi
             # Add the component
             dx components add "$file" --path ..
