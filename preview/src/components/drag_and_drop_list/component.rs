@@ -24,7 +24,7 @@ impl Animals {
     }
 }
 
-pub fn default_items() -> Vec<Element> {
+pub fn example_items() -> Vec<Element> {
     Animals::iter()
         .map(|a| {
             rsx! {

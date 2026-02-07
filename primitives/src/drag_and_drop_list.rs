@@ -18,12 +18,13 @@ impl DragAndDropContext {
         self.temp_list.set((self.original_list)());
     }
 
-    fn drag_over(&mut self, index: usize) {
-        let from = (self.drag_from)().unwrap();
-        if from == index {
-            return;
-        }
+    fn end_drag(&mut self) {
+        self.drag_from.set(None);
+        self.drop_to.set(None);
+        self.is_dragging.set(false);
+    }
 
+    fn drag_over(&mut self, index: usize) {
         if (self.drop_to)().is_some_and(|to| to == index) {
             return;
         }
@@ -31,6 +32,7 @@ impl DragAndDropContext {
         self.drop_to.set(Some(index));
 
         let mut list = (self.original_list)();
+        let from = (self.drag_from)().unwrap();
         let element = list.remove(from);
         list.insert(index, element);
         self.temp_list.set(list);
@@ -38,15 +40,13 @@ impl DragAndDropContext {
 
     fn drop(&mut self) {
         self.original_list.set((self.temp_list)());
-        self.drag_from.set(None);
-        self.drop_to.set(None);
-        self.is_dragging.set(false);
     }
 
     fn remove(&mut self, index: usize) {
         let mut list = (self.original_list)();
-        let _ = list.remove(index);
-        self.original_list.set(list);
+        if list.remove(index).is_ok() {
+            self.original_list.set(list);
+        }
     }
 }
 
@@ -70,9 +70,26 @@ pub struct DragAndDropListProps {
 
 /// # DragAndDropList
 ///
+/// A list can be used to display content related to a single subject.
+/// The content can consist of multiple elements of varying type and size.
+/// Used when a user wants to change a collection order.
+///
 /// ## Example
 ///
 /// ```rust
+///use dioxus::prelude::*;
+///use dioxus_primitives::drag_and_drop_list::{DragAndDropList, DragAndDropListItem};
+///#[component]
+///pub fn Demo() -> Element {
+///    let items = ["Item1", "Item2", "Item3"]
+///        .map(|t| {
+///            rsx! { {t} }
+///        })
+///        .to_vec();
+///    rsx! {
+///        DragAndDropList { items }
+///    }
+///}
 /// ```
 #[component]
 pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
@@ -134,19 +151,35 @@ pub struct DragAndDropListItemProps {
     /// Set if the list item should be removable
     pub is_removable: bool,
 
-    /// Additional attributes to apply to the list element.
+    /// Additional attributes to apply to the list item element.
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 
-    /// The children of the tabs component.
+    /// The children of the list item component.
     pub children: Element,
 }
 
 /// # DragAndDropListItem
 ///
+/// This component represents an individual draggable item in the dnd list.
+/// This must be used inside a [`DragAndDropList`] component.
+///
 /// ## Example
 ///
 /// ```rust
+///use dioxus::prelude::*;
+///use dioxus_primitives::drag_and_drop_list::{DragAndDropList, DragAndDropListItem};
+///#[component]
+///pub fn Demo() -> Element {
+///    let items = ["Item1", "Item2", "Item3"]
+///        .map(|t| {
+///            rsx! { {t} }
+///        })
+///        .to_vec();
+///    rsx! {
+///        DragAndDropList { items }
+///    }
+///}
 /// ```
 #[component]
 pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
@@ -154,29 +187,38 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
 
     let index = props.index;
 
+    let render_body = move |to: Option<usize>| match to {
+        None => true,
+        Some(v) => v != index,
+    };
+
     rsx! {
         li {
             class: "dnd-list-item",
             draggable: "true",
-            "is-grabbing": (ctx.drag_from)().is_some_and(|from| from == index),
-            //visibility: if Some(index) == (ctx.drag_from)() { "hidden" },
+            "is-grabbing": if (ctx.drag_from)().is_some_and(|from| from == index) { "true" },
             ondragstart: move |event: Event<DragData>| {
                 ctx.start_drag(index);
                 // Note: this is only for Firefox (without it, DnD won't work)
                 let _ = event.data_transfer().set_data("text/html", "");
             },
+            ondragend: move |_| ctx.end_drag(),
             ondragover: move |event: Event<DragData>| {
                 // default is to cancel out the drop
                 event.prevent_default();
                 ctx.drag_over(index);
             },
             ondrop: move |_| ctx.drop(),
-            ondragleave: move |_| ctx.drop_to.set(None),
+            //ondragleave: move |_| ctx.drop_to.set(None),
             ..props.attributes,
-            div { class: "item-icon-div", DragIcon {} }
-            div { class: "item-body-div", {props.children} }
-            if props.is_removable {
-                RemoveButton { on_click: move || ctx.remove(index) }
+            if render_body((ctx.drop_to)()) {
+                div { class: "item-icon-div", DragIcon {} }
+                div { class: "item-body-div", {props.children} }
+                if props.is_removable {
+                    RemoveButton { on_click: move || ctx.remove(index) }
+                }
+            } else {
+                div { class: "space-item" }
             }
         }
     }
