@@ -19,7 +19,7 @@
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
-  border-radius: 0.5rem;
+  border-radius: 0.625rem;
   color: var(--secondary-color-4);
   font-size: 0.875rem;
   font-weight: 500;
