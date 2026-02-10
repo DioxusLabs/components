@@ -34,8 +34,8 @@
 }
 
 .pagination-link[data-size="icon"] {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2rem;
+  height: 2rem;
   padding: 0;
 }
 
@@ -48,12 +48,12 @@
 
 .pagination-link[data-size="icon"],
 .pagination-ellipsis {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2rem;
+  height: 2rem;
 }
 
 .pagination-link[data-size="default"] {
-  height: 2.25rem;
+  height: 2rem;
   padding: 0.5rem 1rem;
 }
 
