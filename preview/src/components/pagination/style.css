@@ -46,6 +46,10 @@
   color: var(--secondary-color-4);
 }
 
+.pagination-ellipsis .pagination-icon {
+  fill: currentcolor;
+}
+
 .pagination-link[data-size="icon"],
 .pagination-ellipsis {
   width: 2rem;
