@@ -38,7 +38,8 @@
     "preview/src/components/skeleton",
     "preview/src/components/card",
     "preview/src/components/sheet",
-    "preview/src/components/badge",
     "preview/src/components/pagination"
+    "preview/src/components/sidebar",
+    "preview/src/components/badge"
   ]
 }

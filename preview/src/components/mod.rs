@@ -1,6 +1,7 @@
-use super::{ComponentDemoData, ComponentVariantDemoData, HighlightedCode};
+use super::{ComponentDemoData, ComponentType, ComponentVariantDemoData, HighlightedCode};
+
 macro_rules! examples {
-    ($($name:ident $([$($variant:ident),*])?),*) => {
+    ($($name:ident $(($kind:ident))? $([$($variant:ident),*])?),* $(,)?) => {
         $(
             pub(crate) mod $name {
                 pub(crate) mod component;
@@ -16,46 +17,106 @@ macro_rules! examples {
                 }
             }
         )*
-        pub (crate) static DEMOS: &[ComponentDemoData] = &[
+        pub(crate) static DEMOS: &[ComponentDemoData] = &[
             $(
-                ComponentDemoData {
-                    name: stringify!($name),
-                    docs: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/docs.html")),
-                    component: HighlightedCode {
-                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.light.html")),
-                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.dark.html")),
-                    },
-                    style: HighlightedCode {
-                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.light.html")),
-                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.dark.html")),
-                    },
-                    variants: &[
-                        ComponentVariantDemoData {
-                            name: "main",
-                            rs_highlighted: HighlightedCode {
-                                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.light.html")),
-                                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.dark.html")),
-                            },
-                            component: $name::variants::main::Demo,
-                        },
-                        $(
-                            $(
-                                ComponentVariantDemoData {
-                                    name: stringify!($variant),
-                                    rs_highlighted: HighlightedCode {
-                                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.light.html")),
-                                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.dark.html")),
-                                    },
-                                    component: $name::variants::$variant::Demo,
-                                },
-                            )*
-                        )?
-                    ]
-                },
+                examples!(@demo $name $( $kind )? $([$($variant),*])?),
             )*
         ];
     };
+
+    (@kind) => { ComponentType::Normal };
+    (@kind normal) => { ComponentType::Normal };
+    (@kind block) => { ComponentType::Block };
+
+    // Normal components: no variant-level css_highlighted
+    (@demo $name:ident $([$($variant:ident),*])?) => {
+        ComponentDemoData {
+            name: stringify!($name),
+            r#type: ComponentType::Normal,
+            docs: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/docs.html")),
+            component: HighlightedCode {
+                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.light.html")),
+                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.dark.html")),
+            },
+            style: HighlightedCode {
+                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.light.html")),
+                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.dark.html")),
+            },
+            variants: &[
+                ComponentVariantDemoData {
+                    name: "main",
+                    rs_highlighted: HighlightedCode {
+                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.light.html")),
+                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.dark.html")),
+                    },
+                    css_highlighted: None,
+                    component: $name::variants::main::Demo,
+                },
+                $(
+                    $(
+                        ComponentVariantDemoData {
+                            name: stringify!($variant),
+                            rs_highlighted: HighlightedCode {
+                                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.light.html")),
+                                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.dark.html")),
+                            },
+                            css_highlighted: None,
+                            component: $name::variants::$variant::Demo,
+                        },
+                    )*
+                )?
+            ],
+        }
+    };
+
+    // Block components: rendered in iframe, with shared demo.css
+    (@demo $name:ident block $([$($variant:ident),*])?) => {
+        ComponentDemoData {
+            name: stringify!($name),
+            r#type: ComponentType::Block,
+            docs: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/docs.html")),
+            component: HighlightedCode {
+                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.light.html")),
+                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.dark.html")),
+            },
+            style: HighlightedCode {
+                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.light.html")),
+                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/style.css.base16-ocean.dark.html")),
+            },
+            variants: &[
+                ComponentVariantDemoData {
+                    name: "main",
+                    rs_highlighted: HighlightedCode {
+                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.light.html")),
+                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/main/mod.rs.base16-ocean.dark.html")),
+                    },
+                    css_highlighted: Some(HighlightedCode {
+                        light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/demo.css.base16-ocean.light.html")),
+                        dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/demo.css.base16-ocean.dark.html")),
+                    }),
+                    component: $name::variants::main::Demo,
+                },
+                $(
+                    $(
+                        ComponentVariantDemoData {
+                            name: stringify!($variant),
+                            rs_highlighted: HighlightedCode {
+                                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.light.html")),
+                                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/", stringify!($variant), "/mod.rs.base16-ocean.dark.html")),
+                            },
+                            css_highlighted: Some(HighlightedCode {
+                                light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/demo.css.base16-ocean.light.html")),
+                                dark: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/variants/demo.css.base16-ocean.dark.html")),
+                            }),
+                            component: $name::variants::$variant::Demo,
+                        },
+                    )*
+                )?
+            ],
+        }
+    };
 }
+
 examples!(
     accordion,
     alert_dialog,
@@ -83,8 +144,9 @@ examples!(
     scroll_area,
     select,
     separator,
-    skeleton,
     sheet,
+    sidebar(block)[floating, inset],
+    skeleton,
     slider,
     switch,
     tabs,
@@ -93,5 +155,5 @@ examples!(
     toggle_group,
     toggle,
     toolbar,
-    tooltip
+    tooltip,
 );

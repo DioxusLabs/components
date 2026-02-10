@@ -10,10 +10,20 @@ use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
 use unic_langid::{langid, LanguageIdentifier};
 
 mod components;
+mod theme;
+
+#[derive(Copy, Clone, PartialEq)]
+enum ComponentType {
+    /// Normal componet as default.
+    Normal,
+    /// Component that render the preview inside an iframe for isolation.
+    Block,
+}
 
 #[derive(Clone, PartialEq)]
 struct ComponentDemoData {
     name: &'static str,
+    r#type: ComponentType,
     docs: &'static str,
     component: HighlightedCode,
     style: HighlightedCode,
@@ -25,6 +35,7 @@ struct ComponentDemoData {
 struct ComponentVariantDemoData {
     name: &'static str,
     rs_highlighted: HighlightedCode,
+    css_highlighted: Option<HighlightedCode>,
     component: fn() -> Element,
 }
 
@@ -70,6 +81,7 @@ fn App() -> Element {
 
 #[derive(Routable, Clone, PartialEq)]
 pub(crate) enum Route {
+    #[layout(AppLayout)]
     #[layout(NavigationLayout)]
     #[route("/?:iframe&:dark_mode")]
     Home {
@@ -82,6 +94,13 @@ pub(crate) enum Route {
         iframe: Option<bool>,
         dark_mode: Option<bool>,
     },
+    #[end_layout]
+    #[route("/component/block/?:name&:variant&:dark_mode")]
+    ComponentBlockDemo {
+        name: String,
+        variant: Option<String>,
+        dark_mode: Option<bool>,
+    },
 }
 
 impl Route {
@@ -89,6 +108,7 @@ impl Route {
         match self {
             Route::Home { iframe, .. } => *iframe,
             Route::ComponentDemo { iframe, .. } => *iframe,
+            Route::ComponentBlockDemo { .. } => None,
         }
     }
 
@@ -101,6 +121,7 @@ impl Route {
         match self {
             Route::Home { dark_mode, .. } => *dark_mode,
             Route::ComponentDemo { dark_mode, .. } => *dark_mode,
+            Route::ComponentBlockDemo { dark_mode, .. } => *dark_mode,
         }
     }
 
@@ -137,13 +158,21 @@ async fn static_routes() -> Result<Vec<String>, ServerFnError> {
 }
 
 #[component]
-fn NavigationLayout() -> Element {
+fn AppLayout() -> Element {
     use_effect(move || {
+        theme::theme_seed();
         if let Some(dark_mode) = Route::in_dark_mode() {
-            set_theme(dark_mode);
+            theme::set_theme(dark_mode);
         }
     });
 
+    rsx! {
+        Outlet::<Route> {}
+    }
+}
+
+#[component]
+fn NavigationLayout() -> Element {
     // Send the route to the parent window if in an iframe
     let mut initial_route = use_hook(|| CopyValue::new(true));
     use_effect(move || {
@@ -339,21 +368,13 @@ fn CheckIcon() -> Element {
     }
 }
 
-fn set_theme(dark_mode: bool) {
-    let eval = document::eval(
-        "let theme = await dioxus.recv();
-        document.documentElement.setAttribute('data-theme', theme);",
-    );
-    let _ = eval.send(if dark_mode { "dark" } else { "light" });
-}
-
 #[component]
 fn DarkModeToggle() -> Element {
     rsx! {
         button {
             class: "dark-mode-toggle dark-mode-only",
             onclick: move |_| {
-                set_theme(false);
+                theme::set_theme(false);
             },
             r#type: "button",
             aria_label: "Enable light mode",
@@ -362,7 +383,7 @@ fn DarkModeToggle() -> Element {
         button {
             class: "dark-mode-toggle light-mode-only",
             onclick: move |_| {
-                set_theme(true);
+                theme::set_theme(true);
             },
             r#type: "button",
             aria_label: "Enable dark mode",
@@ -605,7 +626,11 @@ fn LanguageSelect() -> Element {
 }
 
 #[component]
-fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCode) -> Element {
+fn ComponentCode(
+    rs_highlighted: HighlightedCode,
+    css_highlighted: HighlightedCode,
+    #[props(default = ComponentType::Normal)] component_type: ComponentType,
+) -> Element {
     let mut collapsed = use_signal(|| true);
 
     let expand = rsx! {
@@ -662,7 +687,9 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
             TabList {
                 TabTrigger { value: "main.rs", index: 0usize, "main.rs" }
                 TabTrigger { value: "style.css", index: 1usize, "style.css" }
-                TabTrigger { value: "dx-components-theme.css", index: 2usize, "dx-components-theme.css" }
+                if component_type != ComponentType::Block {
+                    TabTrigger { value: "dx-components-theme.css", index: 2usize, "dx-components-theme.css" }
+                }
             }
             div {
                 width: "100%",
@@ -687,13 +714,15 @@ fn ComponentCode(rs_highlighted: HighlightedCode, css_highlighted: HighlightedCo
                     CodeBlock { source: css_highlighted, collapsed: collapsed() }
                     {expand.clone()}
                 }
-                TabContent {
-                    index: 2usize,
-                    value: "dx-components-theme.css",
-                    width: "100%",
-                    position: "relative",
-                    CodeBlock { source: THEME_CSS, collapsed: collapsed() }
-                    {expand.clone()}
+                if component_type != ComponentType::Block {
+                    TabContent {
+                        index: 2usize,
+                        value: "dx-components-theme.css",
+                        width: "100%",
+                        position: "relative",
+                        CodeBlock { source: THEME_CSS, collapsed: collapsed() }
+                        {expand.clone()}
+                    }
                 }
             }
         }
@@ -792,6 +821,7 @@ fn ComponentDemo(iframe: Option<bool>, dark_mode: Option<bool>, name: String) ->
 fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     let ComponentDemoData {
         name: raw_name,
+        r#type,
         docs,
         variants,
         component,
@@ -807,7 +837,14 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
             h1 { class: "component-title", "{name}" }
             div { class: "component-preview",
                 div { class: "component-preview-contents",
-                    ComponentVariantHighlight { variant: main.clone(), main_variant: true }
+                    match r#type {
+                        ComponentType::Normal => rsx! {
+                            ComponentVariantHighlight { variant: main.clone(), main_variant: true }
+                        },
+                        ComponentType::Block => rsx! {
+                            BlockComponentVariantHighlight { variant: main.clone(), main_variant: true, component_name: raw_name }
+                        },
+                    }
                     div { class: "component-installation",
                         h2 { "Installation" }
                         Tabs {
@@ -851,7 +888,14 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
                     if !variants.is_empty() {
                         h2 { class: "component-variants-title", "Variants" }
                         for variant in variants {
-                            ComponentVariantHighlight { variant: variant.clone(), main_variant: false }
+                            match r#type {
+                                ComponentType::Normal => rsx! {
+                                    ComponentVariantHighlight { variant: variant.clone(), main_variant: false }
+                                },
+                                ComponentType::Block => rsx! {
+                                    BlockComponentVariantHighlight { variant: variant.clone(), main_variant: false, component_name: raw_name }
+                                },
+                            }
                         }
                     }
                 }
@@ -871,7 +915,11 @@ fn ManualComponentInstallation(component: HighlightedCode, style: HighlightedCod
             li { "Create a component based on the main.rs below." }
             li { "Modify your components and styles as needed." }
         }
-        ComponentCode { rs_highlighted: component, css_highlighted: style }
+        ComponentCode {
+            rs_highlighted: component,
+            css_highlighted: style,
+            component_type: ComponentType::Normal,
+        }
     }
 }
 
@@ -918,6 +966,7 @@ fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bo
     let ComponentVariantDemoData {
         name,
         rs_highlighted: highlighted,
+        css_highlighted: _,
         component: Comp,
     } = variant;
     rsx! {
@@ -961,6 +1010,121 @@ fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bo
                 }
             }
         }
+    }
+}
+
+#[component]
+fn BlockComponentVariantHighlight(
+    component_name: &'static str,
+    variant: ComponentVariantDemoData,
+    main_variant: bool,
+) -> Element {
+    let ComponentVariantDemoData {
+        name,
+        rs_highlighted: highlighted,
+        css_highlighted,
+        component: _,
+    } = variant;
+
+    let route_path = Route::ComponentBlockDemo {
+        name: component_name.to_string(),
+        variant: Some(name.to_string()),
+        dark_mode: Route::in_dark_mode(),
+    }
+    .to_string();
+
+    let iframe_src = match router().prefix() {
+        Some(prefix) => format!("{prefix}{route_path}"),
+        None => route_path,
+    };
+
+    rsx! {
+        if !main_variant {
+            h3 { "{name}" }
+        }
+        Tabs {
+            default_value: "Preview",
+            border_bottom_left_radius: "0.5rem",
+            border_bottom_right_radius: "0.5rem",
+            horizontal: true,
+            width: "100%",
+            variant: TabsVariant::Ghost,
+            TabList {
+                TabTrigger { value: "Preview", index: 0usize, "PREVIEW" }
+                TabTrigger { value: "Code", index: 1usize, "CODE" }
+            }
+            div {
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                flex_direction: "column",
+                justify_content: "center",
+                align_items: "center",
+                TabContent {
+                    index: 0usize,
+                    id: "component-preview-frame",
+                    value: "Preview",
+                    width: "100%",
+                    position: "relative",
+                    iframe {
+                        src: "{iframe_src}",
+                        width: "100%",
+                        height: "600px",
+                        border: "1px solid var(--primary-color-6)",
+                        border_radius: "0.5em",
+                    }
+                }
+                TabContent {
+                    index: 1usize,
+                    value: "Code",
+                    width: "100%",
+                    position: "relative",
+                    if let Some(css) = css_highlighted {
+                        ComponentCode {
+                            rs_highlighted: highlighted,
+                            css_highlighted: css,
+                            component_type: ComponentType::Block,
+                        }
+                    } else {
+                        ColapsibleCodeBlock { highlighted }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn ComponentBlockDemo(name: String, variant: Option<String>, dark_mode: Option<bool>) -> Element {
+    let Some(demo) = components::DEMOS.iter().find(|d| d.name == name).cloned() else {
+        return rsx! {
+            div { "Block component not found" }
+        };
+    };
+
+    let variant = match variant.as_deref() {
+        Some(wanted) => match demo.variants.iter().find(|v| v.name == wanted) {
+            Some(v) => v,
+            None => {
+                return rsx! {
+                    div {
+                        style: "min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;",
+                        "Variant content not found: {wanted}"
+                    }
+                };
+            }
+        },
+        None => &demo.variants[0],
+    };
+
+    let Comp = variant.component;
+
+    rsx! {
+        document::Link {
+            rel: "stylesheet",
+            href: asset!("/assets/dx-components-theme.css"),
+        }
+        div { style: "min-height: 100vh;", Comp {} }
     }
 }
 
@@ -1047,9 +1211,27 @@ fn ComponentGallery(search: String) -> Element {
 
 #[component]
 fn ComponentGalleryPreview(component: ComponentDemoData) -> Element {
-    let ComponentDemoData { name, variants, .. } = component;
+    let ComponentDemoData {
+        name,
+        r#type,
+        variants,
+        ..
+    } = component;
+
     let first_variant = &variants[0];
     let Comp = first_variant.component;
+
+    let preview = match r#type {
+        ComponentType::Normal => rsx! {
+            Comp {}
+        },
+        ComponentType::Block => rsx! {
+            div { style: "display: flex; align-items: center; justify-content: center; height: 150px; color: var(--secondary-color-4);",
+                "Click to view full preview"
+            }
+        },
+    };
+
     rsx! {
         div { class: "masonry-preview-frame", position: "relative",
             h3 { class: "component-title", {name.replace("_", " ")} }
@@ -1062,7 +1244,7 @@ fn ComponentGalleryPreview(component: ComponentDemoData) -> Element {
                 aria_label: "{name} details",
                 to: Route::component(name),
             }
-            div { class: "masonry-component-frame", Comp {} }
+            div { class: "masonry-component-frame", {preview} }
         }
     }
 }
