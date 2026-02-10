@@ -1,13 +1,14 @@
 //! Defines the [`DragAndDropList`] component and its sub-components.
 use dioxus::prelude::*;
+use std::rc::Rc;
 
 #[derive(Clone, Copy)]
 struct DragAndDropContext {
     drag_from: Signal<Option<usize>>,
     drop_to: Signal<Option<usize>>,
     is_dragging: Signal<bool>,
-    original_list: Signal<Vec<Element>>,
-    temp_list: Signal<Vec<Element>>,
+    list_items: Signal<Vec<Element>>,
+    focused_index: Signal<Option<usize>>,
 }
 
 impl DragAndDropContext {
@@ -15,7 +16,6 @@ impl DragAndDropContext {
         self.drag_from.set(Some(index));
         self.drop_to.set(None);
         self.is_dragging.set(true);
-        self.temp_list.set((self.original_list)());
     }
 
     fn end_drag(&mut self) {
@@ -30,23 +30,63 @@ impl DragAndDropContext {
         }
 
         self.drop_to.set(Some(index));
-
-        let mut list = (self.original_list)();
-        let from = (self.drag_from)().unwrap();
-        let element = list.remove(from);
-        list.insert(index, element);
-        self.temp_list.set(list);
     }
 
     fn drop(&mut self) {
-        self.original_list.set((self.temp_list)());
+        let Some(index) = (self.drop_to)() else {
+            return;
+        };
+
+        let mut list = (self.list_items)();
+        let from = (self.drag_from)().unwrap();
+        let element = list.remove(from);
+        list.insert(index, element);
+        self.list_items.set(list);
     }
 
     fn remove(&mut self, index: usize) {
-        let mut list = (self.original_list)();
+        let mut list = (self.list_items)();
         if list.remove(index).is_ok() {
-            self.original_list.set(list);
+            self.list_items.set(list);
         }
+    }
+
+    fn is_focused(&self, index: usize) -> bool {
+        (self.focused_index)().is_some_and(|focus| focus == index)
+    }
+
+    fn set_focus(&mut self, id: Option<usize>) {
+        self.focused_index.set(id);
+    }
+
+    fn focus_next(&mut self) {
+        let Some(index) = (self.focused_index)() else {
+            return;
+        };
+
+        let mut next_focused = index.saturating_add(1);
+
+        let count = (self.list_items)().len() - 1;
+        if index == count {
+            next_focused = 0;
+        }
+
+        self.focused_index.set(Some(next_focused));
+    }
+
+    fn focus_prev(&mut self) {
+        let Some(index) = (self.focused_index)() else {
+            return;
+        };
+
+        let mut next_focused = index.saturating_sub(1);
+
+        let count = (self.list_items)().len() - 1;
+        if index == 0 {
+            next_focused = count;
+        }
+
+        self.focused_index.set(Some(next_focused));
     }
 }
 
@@ -97,14 +137,13 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     let drop_to = use_signal(|| None);
     let is_dragging = use_signal(|| false);
     let list_items = use_signal(|| props.items.clone());
-    let temp_list = use_signal(|| props.items.clone());
 
     use_context_provider(|| DragAndDropContext {
         drag_from,
         drop_to,
         is_dragging,
-        original_list: list_items,
-        temp_list,
+        list_items,
+        focused_index: Signal::new(None),
     });
 
     let display_list = move |elements: Vec<Element>| {
@@ -129,13 +168,7 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
             ..props.attributes,
             ul {
                 class: "dnd-list-ul",
-                {
-                    display_list(if is_dragging() {
-                        temp_list()
-                    } else {
-                        list_items()
-                    }).iter()
-                }
+                { display_list(list_items()).iter() }
             }
             {props.children}
         }
@@ -187,16 +220,31 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
 
     let index = props.index;
 
-    let render_body = move |to: Option<usize>| match to {
-        None => true,
-        Some(v) => v != index,
+    let mut item_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    use_effect(move || {
+        if ctx.is_focused(index) {
+            if let Some(md) = item_ref() {
+                spawn(async move {
+                    let _ = md.set_focus(true).await;
+                });
+            }
+        }
+    });
+
+    let render_drop_indicator = move |to: Option<usize>| match to {
+        None => false,
+        Some(v) => v == index,
     };
 
     rsx! {
         li {
             class: "dnd-list-item",
             draggable: "true",
+            tabindex: if ctx.is_focused(index) { "0" } else { "-1" },
             "is-grabbing": if (ctx.drag_from)().is_some_and(|from| from == index) { "true" },
+            "data-focus-visible": if ctx.is_focused(index) && !(ctx.is_dragging)() { "true" },
+            onmounted: move |data| item_ref.set(Some(data.data())),
+            onfocus: move |_| ctx.set_focus(Some(index)),
             ondragstart: move |event: Event<DragData>| {
                 ctx.start_drag(index);
                 // Note: this is only for Firefox (without it, DnD won't work)
@@ -210,16 +258,59 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             },
             ondrop: move |_| ctx.drop(),
             //ondragleave: move |_| ctx.drop_to.set(None),
+            onkeydown: move |event| {
+                let key = event.key();
+
+                match key {
+                    Key::ArrowUp => {
+                        event.prevent_default();
+                        ctx.focus_prev();
+                        if (ctx.is_dragging)() {
+                            if let Some(focus_index) = (ctx.focused_index)() {
+                                ctx.drag_over(focus_index);
+                            }
+                        }
+                    },
+                    Key::ArrowDown => {
+                        event.prevent_default();
+                        ctx.focus_next();
+                        if (ctx.is_dragging)() {
+                            if let Some(focus_index) = (ctx.focused_index)() {
+                                ctx.drag_over(focus_index);
+                            }
+                        }
+                    },
+                    Key::Enter => {
+                        event.prevent_default();
+                        if (ctx.is_dragging)() {
+                            ctx.end_drag();
+                            ctx.drop();
+                        } else {
+                            ctx.start_drag(index);
+                            ctx.drag_over(index);
+                        }
+                    }
+                    _ => {},
+                };
+            },
             ..props.attributes,
-            if render_body((ctx.drop_to)()) {
-                div { class: "item-icon-div", DragIcon {} }
-                div { class: "item-body-div", {props.children} }
-                if props.is_removable {
-                    RemoveButton { on_click: move || ctx.remove(index) }
-                }
-            } else {
-                div { class: "space-item" }
+            div { class: "item-icon-div", DragIcon {} }
+            div { class: "item-body-div", {props.children} }
+            if props.is_removable {
+                 RemoveButton { on_click: move || ctx.remove(index) }
             }
+        }
+        if render_drop_indicator((ctx.drop_to)()) {
+            DropIndicator {  }
+        }
+    }
+}
+
+#[component]
+fn DropIndicator() -> Element {
+    rsx! {
+        div {
+            class: "drop-indicator",
         }
     }
 }

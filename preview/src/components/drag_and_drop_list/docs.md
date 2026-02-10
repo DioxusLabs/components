@@ -1,4 +1,4 @@
-Allows users to create vertically sortable lists supporting drag and drop and touch input.
+Allows users to create vertically sortable lists supporting drag and drop, touch or keyboard input.
 
 ## Component Structure
 
