@@ -7,9 +7,9 @@ use std::{
     rc::Rc,
 };
 
-use time::{ext::NumericalDuration, macros::date, Date, Month, UtcDateTime, Weekday};
+use time::{ext::NumericalDuration, macros::date, Date, Month, OffsetDateTime, Weekday};
 
-use crate::date_picker::DefaultCalendarProps;
+use crate::{date_picker::DefaultCalendarProps, LocalDateExt as _};
 
 // A collection of [`Weekday`]s stored as a single byte
 // Implemented as a bitmask where bits 1-7 correspond to Monday-Sunday
@@ -422,11 +422,11 @@ pub struct CalendarProps {
     pub on_format_month: Callback<Month, String>,
 
     /// The month being viewed
-    #[props(default = ReadSignal::new(Signal::new(UtcDateTime::now().date())))]
+    #[props(default = ReadSignal::new(Signal::new(OffsetDateTime::now_local_date())))]
     pub view_date: ReadSignal<Date>,
 
     /// The current date (used for highlighting today)
-    #[props(default = UtcDateTime::now().date())]
+    #[props(default = OffsetDateTime::now_local_date())]
     pub today: Date,
 
     /// Callback when view date changes
@@ -684,11 +684,11 @@ pub struct RangeCalendarProps {
     pub on_format_month: Callback<Month, String>,
 
     /// The month being viewed
-    #[props(default = ReadSignal::new(Signal::new(UtcDateTime::now().date())))]
+    #[props(default = ReadSignal::new(Signal::new(OffsetDateTime::now_local_date())))]
     pub view_date: ReadSignal<Date>,
 
     /// The current date (used for highlighting today)
-    #[props(default = UtcDateTime::now().date())]
+    #[props(default = OffsetDateTime::now_local_date())]
     pub today: Date,
 
     /// Callback when view date changes
