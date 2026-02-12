@@ -8,8 +8,8 @@ test("test", async ({ page }) => {
   let image = avatar.locator("img");
   await expect(image).toHaveAttribute("src", "https://avatars.githubusercontent.com/u/66571940?s=96&v=4");
 
-  // Get the second avatar element
-  const secondAvatar = page.locator(".avatar-item").nth(1);
-  // Verify the second avatar has fallback text
-  await expect(secondAvatar).toContainText("JK");
+  // Get the third avatar element (Error State - has invalid image URL, shows fallback)
+  const errorAvatar = page.locator(".avatar-item").nth(2);
+  // Verify the error state avatar has fallback text
+  await expect(errorAvatar).toContainText("JK");
 });

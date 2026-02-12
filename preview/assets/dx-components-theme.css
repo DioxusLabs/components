@@ -4,14 +4,21 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
 body {
-  padding: 0;
-  margin: 0;
-  background-color: var(--primary-color);
   color: var(--secondary-color-4);
   font-family: Inter, sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   font-weight: 400;
+}
+
+html[data-theme="dark"] {
+  --dark: initial;
+  --light: ;
+}
+
+html[data-theme="light"] {
+  --dark: ;
+  --light: initial;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -56,12 +63,9 @@ body {
   --secondary-warning-color: var(--dark, #feeac7) var(--light, #f59e0b);
   --primary-error-color: var(--dark, #a22e2e) var(--light, #dc2626);
   --secondary-error-color: var(--dark, #9b1c1c) var(--light, #ef4444);
-  --contrast-error-color: var(--dark, var(--secondary-color-3))
-    var(--light, var(--primary-color));
-  --primary-info-color: var(--dark, var(--primary-color-5))
-    var(--light, var(--primary-color));
-  --secondary-info-color: var(--dark, var(--primary-color-7))
-    var(--light, var(--secondary-color-3));
+  --contrast-error-color: var(--dark, var(--secondary-color-3)) var(--light, var(--primary-color));
+  --primary-info-color: var(--dark, var(--primary-color-5)) var(--light, var(--primary-color));
+  --secondary-info-color: var(--dark, var(--primary-color-7)) var(--light, var(--secondary-color-3));
 }
 
 /* Modern browsers with `scrollbar-*` support */
