@@ -2,10 +2,18 @@
 use dioxus::prelude::*;
 use std::rc::Rc;
 
+#[derive(Clone, Copy, PartialEq, Debug)]
+enum DropPosition {
+    Before,
+    After,
+    Undefined,
+}
+
 #[derive(Clone, Copy)]
 struct DragAndDropContext {
     drag_from: Signal<Option<usize>>,
     drop_to: Signal<Option<usize>>,
+    drop_position: Signal<DropPosition>,
     is_dragging: Signal<bool>,
     list_items: Signal<Vec<Element>>,
     focused_index: Signal<Option<usize>>,
@@ -15,19 +23,33 @@ impl DragAndDropContext {
     fn start_drag(&mut self, index: usize) {
         self.drag_from.set(Some(index));
         self.drop_to.set(None);
+        self.drop_position.set(DropPosition::After);
         self.is_dragging.set(true);
     }
 
     fn end_drag(&mut self) {
+        self.set_focus((self.drop_to)());
         self.drag_from.set(None);
         self.drop_to.set(None);
+        self.drop_position.set(DropPosition::Undefined);
         self.is_dragging.set(false);
     }
 
     fn drag_over(&mut self, index: usize) {
-        if (self.drop_to)().is_some_and(|to| to == index) {
+        let Some(to) = (self.drop_to)() else {
+            self.drop_to.set(Some(index));
+            return;
+        };
+
+        if to == index {
             return;
         }
+
+        self.drop_position.set(if to < index {
+            DropPosition::After
+        } else {
+            DropPosition::Before
+        });
 
         self.drop_to.set(Some(index));
     }
@@ -88,6 +110,38 @@ impl DragAndDropContext {
 
         self.focused_index.set(Some(next_focused));
     }
+
+    fn move_up(&mut self, from: usize) {
+        let mut index = (self.drop_to)().unwrap_or(from);
+
+        if (self.drop_position)() == DropPosition::After {
+            self.drop_position.set(DropPosition::Before);
+        } else if (self.drop_to)().is_some_and(|to| to == 0) {
+            index = (self.list_items)().len() - 1;
+        } else {
+            index -= 1;
+        }
+
+        self.drag_over(index);
+    }
+
+    fn move_down(&mut self, from: usize) {
+        let mut index = (self.drop_to)().unwrap_or(from);
+
+        if (self.drop_position)() == DropPosition::Before {
+            self.drop_position.set(DropPosition::After);
+        } else {
+            let count = (self.list_items)().len();
+
+            if (self.drop_to)().is_some_and(|to| to == count - 1) {
+                index = 0;
+            } else {
+                index += 1;
+            }
+        }
+
+        self.drag_over(index);
+    }
 }
 
 /// The props for the [`DragAndDropListItem`] component.
@@ -135,12 +189,14 @@ pub struct DragAndDropListProps {
 pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     let drag_from = use_signal(|| None);
     let drop_to = use_signal(|| None);
+    let drop_position = use_signal(|| DropPosition::Undefined);
     let is_dragging = use_signal(|| false);
     let list_items = use_signal(|| props.items.clone());
 
     use_context_provider(|| DragAndDropContext {
         drag_from,
         drop_to,
+        drop_position,
         is_dragging,
         list_items,
         focused_index: Signal::new(None),
@@ -236,7 +292,51 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
         Some(v) => v == index,
     };
 
+    let onkeydown = move |event: Event<KeyboardData>| {
+        let key = event.key();
+
+        match key {
+            Key::ArrowUp => {
+                event.prevent_default();
+                if (ctx.is_dragging)() {
+                    ctx.move_up(index);
+                } else {
+                    ctx.focus_prev();
+                }
+            }
+            Key::ArrowDown => {
+                event.prevent_default();
+                if (ctx.is_dragging)() {
+                    ctx.move_down(index);
+                } else {
+                    ctx.focus_next();
+                }
+            }
+            Key::Enter => {
+                event.prevent_default();
+                if (ctx.is_dragging)() {
+                    ctx.drop();
+                    ctx.end_drag();
+                } else {
+                    ctx.start_drag(index);
+                    ctx.drag_over(index);
+                }
+            }
+            Key::Escape => {
+                event.prevent_default();
+                if (ctx.is_dragging)() {
+                    ctx.end_drag();
+                }
+                ctx.set_focus(None);
+            }
+            _ => {}
+        };
+    };
+
     rsx! {
+        if (ctx.drop_position)() == DropPosition::Before && render_drop_indicator((ctx.drop_to)()) {
+            DropIndicator {  }
+        }
         li {
             class: "dnd-list-item",
             draggable: "true",
@@ -258,41 +358,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             },
             ondrop: move |_| ctx.drop(),
             //ondragleave: move |_| ctx.drop_to.set(None),
-            onkeydown: move |event| {
-                let key = event.key();
-
-                match key {
-                    Key::ArrowUp => {
-                        event.prevent_default();
-                        ctx.focus_prev();
-                        if (ctx.is_dragging)() {
-                            if let Some(focus_index) = (ctx.focused_index)() {
-                                ctx.drag_over(focus_index);
-                            }
-                        }
-                    },
-                    Key::ArrowDown => {
-                        event.prevent_default();
-                        ctx.focus_next();
-                        if (ctx.is_dragging)() {
-                            if let Some(focus_index) = (ctx.focused_index)() {
-                                ctx.drag_over(focus_index);
-                            }
-                        }
-                    },
-                    Key::Enter => {
-                        event.prevent_default();
-                        if (ctx.is_dragging)() {
-                            ctx.end_drag();
-                            ctx.drop();
-                        } else {
-                            ctx.start_drag(index);
-                            ctx.drag_over(index);
-                        }
-                    }
-                    _ => {},
-                };
-            },
+            onkeydown,
             ..props.attributes,
             div { class: "item-icon-div", DragIcon {} }
             div { class: "item-body-div", {props.children} }
@@ -300,7 +366,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
                  RemoveButton { on_click: move || ctx.remove(index) }
             }
         }
-        if render_drop_indicator((ctx.drop_to)()) {
+        if (ctx.drop_position)() == DropPosition::After && render_drop_indicator((ctx.drop_to)()) {
             DropIndicator {  }
         }
     }
