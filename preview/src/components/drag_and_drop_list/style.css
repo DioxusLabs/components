@@ -20,7 +20,7 @@
 }
 
 .dnd-list-item[data-focus-visible="true"] {
-  border: 2px solid var(--focused-border-color);
+  box-shadow: 0 0 0 2px var(--focused-border-color);
 }
 
 .dnd-list-item[is-grabbing="true"] {
@@ -56,6 +56,9 @@
 }
 
 .drop-indicator {
-  margin: 16px 0;
-  outline: 1px solid var(--focused-border-color);
+  height: 2px;
+  margin: -1px 0;
+  position: relative;
+  z-index: 1;
+  background-color: var(--focused-border-color);
 }
