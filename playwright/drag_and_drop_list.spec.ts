@@ -153,6 +153,32 @@ test.describe("Data attributes and focus during drag", () => {
   });
 });
 
+test.describe("Cancel focus behavior", () => {
+  test("escape during drag returns focus to source item", async ({
+    page,
+  }) => {
+    const list = await loadMainList(page);
+    const options = list.locator('[role="option"]');
+    await options.first().click();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Escape");
+    await expect(options.first()).toBeFocused();
+  });
+
+  test("escape during drag from middle returns focus to that item", async ({
+    page,
+  }) => {
+    const list = await loadMainList(page);
+    const options = list.locator('[role="option"]');
+    await options.nth(2).click();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Escape");
+    await expect(options.nth(2)).toBeFocused();
+  });
+});
+
 test.describe("Axe automated scan", () => {
   test("no automatically detectable a11y issues", async ({ page }) => {
     await loadMainList(page);

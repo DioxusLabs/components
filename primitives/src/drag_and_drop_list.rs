@@ -37,6 +37,14 @@ impl DragAndDropContext {
         self.is_dragging.set(false);
     }
 
+    fn cancel_drag(&mut self) {
+        self.set_focus((self.drag_from)());
+        self.drag_from.set(None);
+        self.drop_to.set(None);
+        self.drop_position.set(DropPosition::Undefined);
+        self.is_dragging.set(false);
+    }
+
     fn drag_over(&mut self, index: usize) {
         let Some(to) = (self.drop_to)() else {
             self.drop_to.set(Some(index));
@@ -368,10 +376,9 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             Key::Escape => {
                 event.prevent_default();
                 if (ctx.is_dragging)() {
-                    ctx.end_drag();
+                    ctx.cancel_drag();
                     ctx.announce("Reorder cancelled".to_string());
                 }
-                ctx.set_focus(None);
             }
             _ => {}
         };
