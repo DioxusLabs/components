@@ -18,6 +18,7 @@ struct DragAndDropContext {
     is_dragging: Signal<bool>,
     list_items: Signal<Vec<Element>>,
     focused_index: Signal<Option<usize>>,
+    announcement: Signal<String>,
 }
 
 impl DragAndDropContext {
@@ -72,6 +73,14 @@ impl DragAndDropContext {
         if list.remove(index).is_ok() {
             self.list_items.set(list);
         }
+    }
+
+    fn announce(&mut self, msg: String) {
+        self.announcement.set(msg);
+    }
+
+    fn item_count(&self) -> usize {
+        (self.list_items)().len()
     }
 
     fn is_focused(&self, index: usize) -> bool {
@@ -155,6 +164,10 @@ pub struct DragAndDropListProps {
     #[props(default)]
     pub is_removable: bool,
 
+    /// Accessible label for the list
+    #[props(default)]
+    pub aria_label: Option<String>,
+
     /// Additional attributes to apply to the list element.
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -193,6 +206,7 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     let drop_position = use_signal(|| DropPosition::Undefined);
     let is_dragging = use_signal(|| false);
     let list_items = use_signal(|| props.items.clone());
+    let announcement = use_signal(|| String::new());
 
     use_context_provider(|| DragAndDropContext {
         drag_from,
@@ -201,7 +215,14 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
         is_dragging,
         list_items,
         focused_index: Signal::new(None),
+        announcement,
     });
+
+    let label = props
+        .aria_label
+        .as_deref()
+        .unwrap_or("Sortable list")
+        .to_string();
 
     let display_list = move |elements: Vec<Element>| {
         elements
@@ -225,7 +246,14 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
             ..props.attributes,
             ul {
                 class: "dnd-list-ul",
+                role: "listbox",
+                aria_label: "{label}",
                 { display_list(list_items()).iter() }
+            }
+            div {
+                aria_live: "assertive",
+                style: "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);",
+                "{announcement}"
             }
             {props.children}
         }
@@ -301,6 +329,9 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
                 event.prevent_default();
                 if (ctx.is_dragging)() {
                     ctx.move_up(index);
+                    let pos = (ctx.drop_to)().unwrap_or(index) + 1;
+                    let count = ctx.item_count();
+                    ctx.announce(format!("Moved to position {pos} of {count}"));
                 } else {
                     ctx.focus_prev();
                 }
@@ -309,6 +340,9 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
                 event.prevent_default();
                 if (ctx.is_dragging)() {
                     ctx.move_down(index);
+                    let pos = (ctx.drop_to)().unwrap_or(index) + 1;
+                    let count = ctx.item_count();
+                    ctx.announce(format!("Moved to position {pos} of {count}"));
                 } else {
                     ctx.focus_next();
                 }
@@ -316,17 +350,26 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             Key::Enter => {
                 event.prevent_default();
                 if (ctx.is_dragging)() {
+                    let pos = (ctx.drop_to)().unwrap_or(index) + 1;
+                    let count = ctx.item_count();
                     ctx.drop();
                     ctx.end_drag();
+                    ctx.announce(format!("Dropped at position {pos} of {count}"));
                 } else {
+                    let count = ctx.item_count();
                     ctx.start_drag(index);
                     ctx.drag_over(index);
+                    ctx.announce(format!(
+                        "Grabbed item, position {} of {count}",
+                        index + 1
+                    ));
                 }
             }
             Key::Escape => {
                 event.prevent_default();
                 if (ctx.is_dragging)() {
                     ctx.end_drag();
+                    ctx.announce("Reorder cancelled".to_string());
                 }
                 ctx.set_focus(None);
             }
@@ -334,16 +377,20 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
         };
     };
 
+    let is_tab_reachable = ctx.is_focused(index)
+        || ((ctx.focused_index)().is_none() && index == 0);
+
     rsx! {
         if (ctx.drop_position)() == DropPosition::Before && render_drop_indicator((ctx.drop_to)()) {
             DropIndicator {  }
         }
         li {
             class: "dnd-list-item",
+            role: "option",
             draggable: "true",
-            tabindex: if ctx.is_focused(index) { "0" } else { "-1" },
-            "is-grabbing": if (ctx.drag_from)().is_some_and(|from| from == index) { "true" },
-            "data-focus-visible": if ctx.is_focused(index) && !(ctx.is_dragging)() { "true" },
+            tabindex: if is_tab_reachable { "0" } else { "-1" },
+            "data-is-grabbing": if (ctx.drag_from)().is_some_and(|from| from == index) { "true" },
+            "data-focus-visible": if ctx.is_focused(index) { "true" },
             onmounted: move |data| item_ref.set(Some(data.data())),
             onfocus: move |_| ctx.set_focus(Some(index)),
             ondragstart: move |event: Event<DragData>| {
@@ -361,10 +408,10 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             //ondragleave: move |_| ctx.drop_to.set(None),
             onkeydown,
             ..props.attributes,
-            div { class: "item-icon-div", DragIcon {} }
+            div { class: "item-icon-div", aria_hidden: "true", DragIcon {} }
             div { class: "item-body-div", {props.children} }
             if props.is_removable {
-                 RemoveButton { on_click: move || ctx.remove(index) }
+                 RemoveButton { index, on_click: move || ctx.remove(index) }
             }
         }
         if (ctx.drop_position)() == DropPosition::After && render_drop_indicator((ctx.drop_to)()) {
@@ -383,10 +430,12 @@ fn DropIndicator() -> Element {
 }
 
 #[component]
-fn RemoveButton(on_click: Callback<()>) -> Element {
+fn RemoveButton(index: usize, on_click: Callback<()>) -> Element {
+    let label = format!("Remove item {}", index + 1);
     rsx! {
         button {
             class: "remove-button",
+            aria_label: "{label}",
             onclick: move |_| on_click.call(()),
             Icon {
                 // X icon from lucide https://lucide.dev/icons/x

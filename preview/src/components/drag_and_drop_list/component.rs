@@ -21,6 +21,7 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
         drag_and_drop_list::DragAndDropList {
             items: props.items,
             is_removable: props.is_removable,
+            aria_label: props.aria_label,
             attributes: props.attributes,
             {props.children}
         }

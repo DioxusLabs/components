@@ -23,7 +23,7 @@
   box-shadow: 0 0 0 2px var(--focused-border-color);
 }
 
-.dnd-list-item[is-grabbing="true"] {
+.dnd-list-item[data-is-grabbing="true"] {
   cursor: grabbing;
   opacity: 0.6;
 }
