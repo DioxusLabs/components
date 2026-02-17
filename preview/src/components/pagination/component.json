@@ -1,0 +1,21 @@
+{
+  "name": "pagination",
+  "description": "Navigation controls for paged content.",
+  "authors": [
+    "zhiyanzhaijie"
+  ],
+  "exclude": [
+    "variants",
+    "docs.md",
+    "component.json"
+  ],
+  "cargoDependencies": [
+    {
+      "name": "dioxus-primitives",
+      "git": "https://github.com/DioxusLabs/components"
+    }
+  ],
+  "globalAssets": [
+    "../../../assets/dx-components-theme.css"
+  ]
+}

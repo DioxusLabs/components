@@ -138,6 +138,7 @@ examples!(
     label,
     menubar,
     navbar,
+    pagination,
     popover,
     progress,
     radio_group,
