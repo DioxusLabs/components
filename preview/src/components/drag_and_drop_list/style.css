@@ -1,0 +1,64 @@
+.dnd-list {
+  width: 100%;
+}
+
+.dnd-list-ul {
+  padding-left: 0;
+}
+
+.dnd-list-item {
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  color: var(--secondary-color-4);
+  cursor: grab;
+  list-style: none;
+  outline: none;
+  user-select: none;
+}
+
+.dnd-list-item[data-focus-visible="true"] {
+  box-shadow: 0 0 0 2px var(--focused-border-color);
+}
+
+.dnd-list-item[is-grabbing="true"] {
+  cursor: grabbing;
+  opacity: 0.6;
+}
+
+.item-icon-div {
+  display: flex;
+  width: 24px;
+  align-items: center;
+  margin-right: 16px;
+  color: var(--secondary-color-4);
+}
+
+.item-body-div {
+  flex-grow: 1;
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 24px;
+}
+
+.remove-button {
+  display: flex;
+  overflow: visible;
+  width: 24px;
+  align-items: center;
+  padding: 0;
+  border-style: none;
+  margin-left: 16px;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.drop-indicator {
+  position: relative;
+  z-index: 1;
+  height: 2px;
+  margin: -1px 0;
+  background-color: var(--focused-border-color);
+}
