@@ -27,6 +27,7 @@ pub mod drag_and_drop_list;
 pub mod dropdown_menu;
 mod focus;
 pub mod hover_card;
+pub mod icon;
 pub mod label;
 pub mod menubar;
 #[cfg(feature = "router")]
