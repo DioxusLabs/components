@@ -6,6 +6,10 @@ use dioxus::prelude::*;
 /// The props for the [`Toggle`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ToggleProps {
+    /// The class to apply to the toggle.
+    #[props(default)]
+    pub class: Option<String>,
+
     /// The controlled pressed state of the toggle.
     pub pressed: ReadSignal<Option<bool>>,
 
@@ -85,6 +89,7 @@ pub fn Toggle(props: ToggleProps) -> Element {
             "data-state": if pressed() { "on" } else { "off" },
             "data-disabled": props.disabled,
 
+            class: props.class.clone().unwrap_or_else(|| "toggle".to_string()),
             onclick: move |_| {
                 let new_pressed = !pressed();
                 set_pressed.call(new_pressed);
