@@ -4,9 +4,9 @@
 }
 
 .recycle-list-demo {
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
+  margin: 0 auto;
   gap: 0.75rem;
 }
 
@@ -18,21 +18,21 @@
 }
 
 .recycle-list-card {
+  padding: 0.75rem 0.9rem;
   border: 1px solid var(--primary-color-6);
   border-radius: 0.625rem;
-  padding: 0.75rem 0.9rem;
   background: var(--primary-color-2);
 }
 
 .recycle-list-card h3 {
   margin: 0 0 0.3rem;
-  font-size: 0.95rem;
   color: var(--primary-color-12);
+  font-size: 0.95rem;
 }
 
 .recycle-list-card p {
   margin: 0;
+  color: var(--primary-color-11);
   font-size: 0.875rem;
   line-height: 1.4;
-  color: var(--primary-color-11);
 }

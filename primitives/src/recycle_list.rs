@@ -148,7 +148,7 @@ where
 
     // Rebuild prefix sums when measured heights change.
     let prefix_and_total = use_memo({
-        let measured_heights = measured_heights.clone();
+        let measured_heights = measured_heights;
         move || {
             let heights = measured_heights.read();
             let mut prefix: Vec<u32> = Vec::with_capacity(heights.len() + 1);
@@ -209,13 +209,13 @@ where
                     .enumerate()
                     .map(|(i, item)| {
                         let idx = render_start + i;
-                        let measured_heights_for_item = measured_heights.clone();
+                        let measured_heights_for_item = measured_heights;
 
                         rsx! {
                             div {
                                 key: "{idx}",
                                 onmounted: move |event: Event<MountedData>| {
-                                    let mut measured_heights_for_item = measured_heights_for_item.clone();
+                                    let mut measured_heights_for_item = measured_heights_for_item;
                                     spawn(async move {
                                         let rect = event.get_client_rect().await.unwrap_or_default();
                                         let measured = rect.height().max(1.0).round() as u32;
