@@ -196,6 +196,7 @@ where
         div {
             id: "recycle-list-root",
             class: "recycle-list-container",
+            tabindex: "0",
             ..attributes,
 
             div { style: "height:{top_spacer}px; width:1px;" }
