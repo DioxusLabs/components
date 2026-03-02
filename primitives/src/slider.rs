@@ -4,8 +4,8 @@ use crate::dioxus_core::{queue_effect, Runtime};
 use crate::use_controlled;
 use dioxus::html::geometry::euclid::Rect;
 use dioxus::html::geometry::euclid::Vector2D;
+use dioxus::html::geometry::ClientPoint;
 use dioxus::html::geometry::Pixels;
-use dioxus::html::geometry::{ClientPoint, ClientSpace};
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 use std::rc::Rc;
@@ -29,17 +29,6 @@ impl std::fmt::Display for SliderValue {
 struct Pointer {
     id: i32,
     position: ClientPoint,
-    last_position: Option<ClientPoint>,
-}
-
-impl Pointer {
-    fn delta(&self) -> Vector2D<f64, ClientSpace> {
-        if let Some(last_position) = self.last_position {
-            self.position - last_position
-        } else {
-            Vector2D::zero()
-        }
-    }
 }
 
 static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
@@ -69,7 +58,6 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
                         POINTERS.write().push(Pointer {
                             id: pointer_id,
                             position,
-                            last_position: None,
                         });
                     }
                     "move" => {
@@ -77,7 +65,6 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
                         if let Some(pointer) =
                             POINTERS.write().iter_mut().find(|p| p.id == pointer_id)
                         {
-                            pointer.last_position = Some(pointer.position);
                             pointer.position = position;
                         }
                     }
@@ -216,6 +203,7 @@ pub fn Slider(props: SliderProps) -> Element {
     });
 
     let mut current_pointer_id: Signal<Option<i32>> = use_signal(|| None);
+    let mut last_processed_pos = use_hook(|| CopyValue::new(None));
 
     use_effect(move || {
         let pointers = POINTERS.read();
@@ -234,9 +222,15 @@ pub fn Slider(props: SliderProps) -> Element {
 
         let Some(pointer) = pointers.iter().find(|p| p.id == active_pointer_id) else {
             current_pointer_id.take();
+            last_processed_pos.set(None);
             return;
         };
-        let delta = pointer.delta();
+
+        let delta = if let Some(last_pos) = last_processed_pos.replace(Some(pointer.position)) {
+            pointer.position - last_pos
+        } else {
+            Vector2D::zero()
+        };
 
         let delta_pos = if ctx.horizontal { delta.x } else { delta.y } as f64;
 
@@ -289,7 +283,6 @@ pub fn Slider(props: SliderProps) -> Element {
                 POINTERS.write().push(Pointer {
                     id: evt.data().pointer_id(),
                     position: evt.client_coordinates(),
-                    last_position: None,
                 });
 
                 // Handle pointer interaction
