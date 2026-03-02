@@ -43,10 +43,21 @@ test("test", async ({ page }) => {
   const nextDay = focusedDay.first();
   // Assert the next day is focused
   const nextDayNumber = parseInt((await nextDay.textContent()) || "", 10);
-  expect(nextDayNumber).toBe(dayNumber + 1);
-  // Pressing left arrow should move focus back to the first day
+  let current_date = new Date();
+  let daysInMonth = new Date(
+    current_date.getFullYear(),
+    current_date.getMonth() + 1,
+    0
+  ).getDate();
+  if (dayNumber + 1 > daysInMonth) {
+    // If the next day is in the next month, it should wrap around
+    expect(nextDayNumber).toBe(1);
+  } else {
+    expect(nextDayNumber).toBe(dayNumber + 1);
+  }
+  // Pressing left arrow should move focus back to the original day
   await page.keyboard.press("ArrowLeft");
-  await expect(firstDay).toContainText(day || "failure");
+  await expect(focusedDay.first()).toContainText(day || "failure");
   // Pressing down arrow should move focus to the next week
   await page.keyboard.press("ArrowDown");
   const nextWeekDay = focusedDay.first();
@@ -55,21 +66,15 @@ test("test", async ({ page }) => {
     (await nextWeekDay.textContent()) || "",
     10
   );
-  let current_date = new Date();
-  let daysInMonth = new Date(
-    current_date.getFullYear(),
-    current_date.getMonth() + 1,
-    0
-  ).getDate();
   if (dayNumber + 7 > daysInMonth) {
     // If the next week day is in the next month, it should wrap around
     expect(nextWeekDayNumber).toBe(dayNumber + 7 - daysInMonth);
   } else {
     expect(nextWeekDayNumber).toBe(dayNumber + 7);
   }
-  // Pressing up arrow should move focus back to the first day of the month
+  // Pressing up arrow should move focus back to the original day
   await page.keyboard.press("ArrowUp");
-  await expect(firstDay).toContainText(day || "failure");
+  await expect(focusedDay.first()).toContainText(day || "failure");
 });
 
 test("year navigation by moving 52 weeks with arrow keys", async ({ page }) => {
