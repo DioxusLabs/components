@@ -142,6 +142,7 @@ examples!(
     popover,
     progress,
     radio_group,
+    recycle_list,
     scroll_area,
     select,
     separator,

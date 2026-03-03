@@ -36,6 +36,7 @@ pub mod popover;
 mod portal;
 pub mod progress;
 pub mod radio_group;
+pub mod recycle_list;
 pub mod scroll_area;
 pub mod select;
 pub mod separator;
