@@ -61,9 +61,9 @@
 }
 
 .remove-button:focus-visible {
+  border-radius: 2px;
   outline: 2px solid var(--focused-border-color);
   outline-offset: 2px;
-  border-radius: 2px;
 }
 
 .drop-indicator {
@@ -75,13 +75,13 @@
 }
 
 .drop-indicator::before {
-  content: "";
   position: absolute;
-  left: -6px;
   top: -4px;
+  left: -6px;
   width: 0;
   height: 0;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
   border-left: 6px solid var(--focused-border-color);
+  content: "";
 }
