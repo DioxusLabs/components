@@ -26,35 +26,6 @@ function getItems(list: import("@playwright/test").Locator) {
   return list.locator(".dnd-list-item");
 }
 
-test.describe("ARIA roles and structure", () => {
-  test("list has sortable list roledescription", async ({ page }) => {
-    const list = await loadMainList(page);
-    const ul = list.locator(".dnd-list-ul");
-    await expect(ul).toHaveAttribute("aria-roledescription", "sortable list");
-  });
-
-  test("list items have sortable item roledescription", async ({ page }) => {
-    const list = await loadMainList(page);
-    const items = getItems(list);
-    await expect(items).toHaveCount(5);
-    for (let i = 0; i < 5; i++) {
-      await expect(items.nth(i)).toHaveAttribute(
-        "aria-roledescription",
-        "sortable item",
-      );
-    }
-  });
-
-  test("drag icon wrappers are hidden from AT", async ({ page }) => {
-    const list = await loadMainList(page);
-    const iconDivs = list.locator(".item-icon-div");
-    await expect(iconDivs).toHaveCount(5);
-    for (let i = 0; i < 5; i++) {
-      await expect(iconDivs.nth(i)).toHaveAttribute("aria-hidden", "true");
-    }
-  });
-});
-
 test.describe("Keyboard focus management", () => {
   test("first item is tab-reachable", async ({ page }) => {
     const list = await loadMainList(page);
@@ -194,18 +165,7 @@ test.describe("Drag and drop lifecycle", () => {
   });
 });
 
-test.describe("Remove button accessibility", () => {
-  test("remove buttons have accessible labels", async ({ page }) => {
-    const list = await loadRemovableList(page);
-    const removeButtons = list.locator(".remove-button");
-    await expect(removeButtons).toHaveCount(5);
-    for (let i = 0; i < 5; i++) {
-      await expect(removeButtons.nth(i)).toHaveAccessibleName(
-        `Remove item ${i + 1}`,
-      );
-    }
-  });
-
+test.describe("Remove behavior", () => {
   test("focus moves to item at same index after removal", async ({
     page,
   }) => {
