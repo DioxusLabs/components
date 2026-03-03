@@ -148,7 +148,7 @@ examples!(
     sheet,
     sidebar(block)[floating, inset],
     skeleton,
-    slider,
+    slider[dynamic_range],
     switch,
     tabs,
     textarea[outline, fade, ghost],

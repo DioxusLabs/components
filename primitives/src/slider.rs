@@ -4,8 +4,8 @@ use crate::dioxus_core::{queue_effect, Runtime};
 use crate::use_controlled;
 use dioxus::html::geometry::euclid::Rect;
 use dioxus::html::geometry::euclid::Vector2D;
+use dioxus::html::geometry::ClientPoint;
 use dioxus::html::geometry::Pixels;
-use dioxus::html::geometry::{ClientPoint, ClientSpace};
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 use std::rc::Rc;
@@ -29,17 +29,6 @@ impl std::fmt::Display for SliderValue {
 struct Pointer {
     id: i32,
     position: ClientPoint,
-    last_position: Option<ClientPoint>,
-}
-
-impl Pointer {
-    fn delta(&self) -> Vector2D<f64, ClientSpace> {
-        if let Some(last_position) = self.last_position {
-            self.position - last_position
-        } else {
-            Vector2D::zero()
-        }
-    }
 }
 
 static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
@@ -69,7 +58,6 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
                         POINTERS.write().push(Pointer {
                             id: pointer_id,
                             position,
-                            last_position: None,
                         });
                     }
                     "move" => {
@@ -77,7 +65,6 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
                         if let Some(pointer) =
                             POINTERS.write().iter_mut().find(|p| p.id == pointer_id)
                         {
-                            pointer.last_position = Some(pointer.position);
                             pointer.position = position;
                         }
                     }
@@ -106,15 +93,15 @@ pub struct SliderProps {
 
     /// The minimum value
     #[props(default = 0.0)]
-    pub min: f64,
+    pub min: ReadSignal<f64>,
 
     /// The maximum value
     #[props(default = 100.0)]
-    pub max: f64,
+    pub max: ReadSignal<f64>,
 
     /// The step value
     #[props(default = 1.0)]
-    pub step: f64,
+    pub step: ReadSignal<f64>,
 
     /// Whether the slider is disabled
     #[props(default)]
@@ -216,6 +203,7 @@ pub fn Slider(props: SliderProps) -> Element {
     });
 
     let mut current_pointer_id: Signal<Option<i32>> = use_signal(|| None);
+    let mut last_processed_pos = use_hook(|| CopyValue::new(None));
 
     use_effect(move || {
         let pointers = POINTERS.read();
@@ -234,9 +222,15 @@ pub fn Slider(props: SliderProps) -> Element {
 
         let Some(pointer) = pointers.iter().find(|p| p.id == active_pointer_id) else {
             current_pointer_id.take();
+            last_processed_pos.set(None);
             return;
         };
-        let delta = pointer.delta();
+
+        let delta = if let Some(last_pos) = last_processed_pos.replace(Some(pointer.position)) {
+            pointer.position - last_pos
+        } else {
+            Vector2D::zero()
+        };
 
         let delta_pos = if ctx.horizontal { delta.x } else { delta.y } as f64;
 
@@ -245,9 +239,8 @@ pub fn Slider(props: SliderProps) -> Element {
         let SliderValue::Single(current_value) = granular_value.cloned();
         let new = current_value + delta;
         granular_value.set(SliderValue::Single(new));
-        let clamped = new.clamp(ctx.min, ctx.max);
-        let stepped = (clamped / ctx.step).round() * ctx.step;
-        ctx.set_value.call(SliderValue::Single(stepped));
+        ctx.set_value
+            .call(SliderValue::Single(ctx.clamp_and_snap(new)));
     });
 
     rsx! {
@@ -289,7 +282,6 @@ pub fn Slider(props: SliderProps) -> Element {
                 POINTERS.write().push(Pointer {
                     id: evt.data().pointer_id(),
                     position: evt.client_coordinates(),
-                    last_position: None,
                 });
 
                 // Handle pointer interaction
@@ -317,10 +309,9 @@ pub fn Slider(props: SliderProps) -> Element {
                         } else {
                             relative_pos.y
                         };
-                        let new = (offset / size) * ctx.range_size() + ctx.min;
+                        let new = (offset / size) * ctx.range_size() + (ctx.min)();
                         granular_value.set(SliderValue::Single(new));
-                        let stepped = (new / ctx.step).round() * ctx.step;
-                        ctx.set_value.call(SliderValue::Single(stepped));
+                        ctx.set_value.call(SliderValue::Single(ctx.snap(new)));
                     }
 
                     dragging.set(true);
@@ -452,11 +443,11 @@ pub fn SliderRange(props: SliderRangeProps) -> Element {
 
     let style = use_memo(move || {
         let (start, end) = match (ctx.value)() {
-            SliderValue::Single(v) => (ctx.min, v),
+            SliderValue::Single(v) => ((ctx.min)(), v),
         };
 
-        let start_percent = ((start - ctx.min) / (ctx.max - ctx.min) * 100.0).clamp(0.0, 100.0);
-        let end_percent = ((end - ctx.min) / (ctx.max - ctx.min) * 100.0).clamp(0.0, 100.0);
+        let start_percent = ctx.as_percent(start);
+        let end_percent = ctx.as_percent(end);
 
         if ctx.horizontal {
             format!("left: {}%; right: {}%", start_percent, 100.0 - end_percent)
@@ -540,7 +531,7 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
         (SliderValue::Single(v), _) => v,
     });
 
-    let percent = ((value() - ctx.min) / (ctx.max - ctx.min) * 100.0).clamp(0.0, 100.0);
+    let percent = ctx.as_percent(value());
     let style = if ctx.horizontal {
         format!("left: {percent}%")
     } else {
@@ -569,8 +560,8 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
         button {
             type: "button",
             role: "slider",
-            aria_valuemin: ctx.min,
-            aria_valuemax: ctx.max,
+            aria_valuemin: (ctx.min)(),
+            aria_valuemax: (ctx.max)(),
             aria_valuenow: value,
             aria_orientation: orientation,
             aria_label,
@@ -597,14 +588,14 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
                 }
 
                 let key = evt.data().key();
-                let mut step = ctx.step;
+                let mut step = (ctx.step)();
                 if evt.data().modifiers().shift() {
                     // If shift is pressed, increase the step size
                     step *= 10.0;
                 }
 
                 // Handle keyboard navigation
-                let mut new_value = match key {
+                let new_value = match key {
                     Key::ArrowUp | Key::ArrowRight => {
                         value() + step
                     }
@@ -614,12 +605,8 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
                     _ => return,
                 };
 
-                // Clamp the new value to the range
-                new_value = new_value.clamp(ctx.min, ctx.max);
-                let stepped_value = (new_value / ctx.step).round() * ctx.step;
-
-                // Update the value
-                ctx.set_value.call(SliderValue::Single(stepped_value));
+                // Clamp and snap the new value
+                ctx.set_value.call(SliderValue::Single(ctx.clamp_and_snap(new_value)));
             },
             ..props.attributes,
             {props.children}
@@ -632,9 +619,9 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
 struct SliderContext {
     value: Memo<SliderValue>,
     set_value: Callback<SliderValue>,
-    min: f64,
-    max: f64,
-    step: f64,
+    min: ReadSignal<f64>,
+    max: ReadSignal<f64>,
+    step: ReadSignal<f64>,
     disabled: ReadSignal<bool>,
     horizontal: bool,
     inverted: bool,
@@ -645,14 +632,30 @@ struct SliderContext {
 impl SliderContext {
     fn range(&self) -> [f64; 2] {
         if !self.inverted {
-            [self.min, self.max]
+            [(self.min)(), (self.max)()]
         } else {
-            [self.max, self.min]
+            [(self.max)(), (self.min)()]
         }
     }
 
     fn range_size(&self) -> f64 {
         let [range_min, range_max] = self.range();
         range_max - range_min
+    }
+
+    fn snap(&self, value: f64) -> f64 {
+        let step = (self.step)();
+        (value / step).round() * step
+    }
+
+    fn clamp_and_snap(&self, value: f64) -> f64 {
+        let clamped = value.clamp((self.min)(), (self.max)());
+        self.snap(clamped)
+    }
+
+    fn as_percent(&self, value: f64) -> f64 {
+        let min = (self.min)();
+        let max = (self.max)();
+        ((value - min) / (max - min) * 100.0).clamp(0.0, 100.0)
     }
 }
