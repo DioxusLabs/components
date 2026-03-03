@@ -46,23 +46,9 @@ impl DragAndDropContext {
         self.is_dragging.set(false);
     }
 
-    fn drag_over(&mut self, index: usize) {
-        let Some(to) = (self.drop_to)() else {
-            self.drop_to.set(Some(index));
-            return;
-        };
-
-        if to == index {
-            return;
-        }
-
-        self.drop_position.set(if to < index {
-            DropPosition::After
-        } else {
-            DropPosition::Before
-        });
-
+    fn drag_over(&mut self, index: usize, position: DropPosition) {
         self.drop_to.set(Some(index));
+        self.drop_position.set(position);
     }
 
     fn drop(&mut self) {
@@ -173,7 +159,7 @@ impl DragAndDropContext {
         } else {
             let count = self.item_count();
             self.start_drag(index);
-            self.drag_over(index);
+            self.drag_over(index, DropPosition::Undefined);
             self.announce(format!(
                 "You have lifted an item in position {} of {count}",
                 index + 1
@@ -446,9 +432,21 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             },
             ondragend: move |_| ctx.end_drag(),
             ondragover: move |event: Event<DragData>| {
-                // default is to cancel out the drop
                 event.prevent_default();
-                ctx.drag_over(index);
+                async move {
+                    if let Some(md) = item_ref() {
+                        let cursor_y = event.client_coordinates().y;
+                        if let Ok(rect) = md.get_client_rect().await {
+                            let mid_y = rect.origin.y + rect.size.height / 2.0;
+                            let position = if cursor_y < mid_y {
+                                DropPosition::Before
+                            } else {
+                                DropPosition::After
+                            };
+                            ctx.drag_over(index, position);
+                        }
+                    }
+                }
             },
             ondrop: move |_| ctx.drop(),
             //ondragleave: move |_| ctx.drop_to.set(None),
