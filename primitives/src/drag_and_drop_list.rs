@@ -25,12 +25,13 @@ impl DragAndDropContext {
     fn start_drag(&mut self, index: usize) {
         self.drag_from.set(Some(index));
         self.drop_to.set(None);
-        self.drop_position.set(DropPosition::After);
+        self.drop_position.set(DropPosition::Undefined);
         self.is_dragging.set(true);
     }
 
     fn end_drag(&mut self) {
-        self.set_focus((self.drop_to)());
+        let focus_target = (self.drop_to)().or((self.drag_from)());
+        self.set_focus(focus_target);
         self.drag_from.set(None);
         self.drop_to.set(None);
         self.drop_position.set(DropPosition::Undefined);
@@ -79,7 +80,15 @@ impl DragAndDropContext {
     fn remove(&mut self, index: usize) {
         let mut list = (self.list_items)();
         if list.remove(index).is_ok() {
+            let new_len = list.len();
             self.list_items.set(list);
+            self.focused_index
+                .set(new_len.checked_sub(1).map(|last| index.min(last)));
+            self.announcement.set(format!(
+                "Removed item from position {}. {} items remaining",
+                index + 1,
+                new_len
+            ));
         }
     }
 
@@ -103,62 +112,73 @@ impl DragAndDropContext {
         let Some(index) = (self.focused_index)() else {
             return;
         };
-
-        let mut next_focused = index.saturating_add(1);
-
-        let count = (self.list_items)().len() - 1;
-        if index == count {
-            next_focused = 0;
-        }
-
-        self.focused_index.set(Some(next_focused));
+        let len = (self.list_items)().len();
+        self.focused_index.set(Some((index + 1) % len));
     }
 
     fn focus_prev(&mut self) {
         let Some(index) = (self.focused_index)() else {
             return;
         };
-
-        let mut next_focused = index.saturating_sub(1);
-
-        let count = (self.list_items)().len() - 1;
-        if index == 0 {
-            next_focused = count;
-        }
-
-        self.focused_index.set(Some(next_focused));
+        let len = (self.list_items)().len();
+        self.focused_index
+            .set(Some(index.checked_sub(1).unwrap_or(len - 1)));
     }
 
     fn move_up(&mut self, from: usize) {
-        let mut index = (self.drop_to)().unwrap_or(from);
-
-        if (self.drop_position)() == DropPosition::After {
-            self.drop_position.set(DropPosition::Before);
-        } else if (self.drop_to)().is_some_and(|to| to == 0) {
-            index = (self.list_items)().len() - 1;
-        } else {
-            index -= 1;
-        }
-
-        self.drag_over(index);
+        let current = (self.drop_to)().unwrap_or(from);
+        let len = (self.list_items)().len();
+        let new_index = current.checked_sub(1).unwrap_or(len - 1);
+        self.drop_to.set(Some(new_index));
+        self.update_keyboard_drop_position(from);
     }
 
     fn move_down(&mut self, from: usize) {
-        let mut index = (self.drop_to)().unwrap_or(from);
+        let current = (self.drop_to)().unwrap_or(from);
+        let len = (self.list_items)().len();
+        let new_index = (current + 1) % len;
+        self.drop_to.set(Some(new_index));
+        self.update_keyboard_drop_position(from);
+    }
 
-        if (self.drop_position)() == DropPosition::Before {
-            self.drop_position.set(DropPosition::After);
+    fn update_keyboard_drop_position(&mut self, from: usize) {
+        let drag_from = (self.drag_from)().unwrap_or(from);
+        let drop_to = (self.drop_to)().unwrap_or(from);
+        self.drop_position.set(if drop_to < drag_from {
+            DropPosition::Before
+        } else if drop_to > drag_from {
+            DropPosition::After
         } else {
-            let count = (self.list_items)().len();
+            DropPosition::Undefined
+        });
+    }
 
-            if (self.drop_to)().is_some_and(|to| to == count - 1) {
-                index = 0;
-            } else {
-                index += 1;
-            }
+    fn announce_move(&mut self, index: usize) {
+        let pos = (self.drop_to)().unwrap_or(index) + 1;
+        let count = self.item_count();
+        self.announce(format!(
+            "You have moved the item to position {pos} of {count}"
+        ));
+    }
+
+    fn toggle_drag(&mut self, index: usize) {
+        if (self.is_dragging)() {
+            let from = (self.drag_from)().unwrap_or(index) + 1;
+            let to = (self.drop_to)().unwrap_or(index) + 1;
+            self.drop();
+            self.end_drag();
+            self.announce(format!(
+                "You have dropped the item. It has moved from position {from} to position {to}"
+            ));
+        } else {
+            let count = self.item_count();
+            self.start_drag(index);
+            self.drag_over(index);
+            self.announce(format!(
+                "You have lifted an item in position {} of {count}",
+                index + 1
+            ));
         }
-
-        self.drag_over(index);
     }
 }
 
@@ -214,7 +234,7 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     let drop_position = use_signal(|| DropPosition::Undefined);
     let is_dragging = use_signal(|| false);
     let list_items = use_signal(|| props.items.clone());
-    let announcement = use_signal(|| String::new());
+    let announcement = use_signal(String::new);
 
     use_context_provider(|| DragAndDropContext {
         drag_from,
@@ -252,14 +272,22 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
         div {
             class: "dnd-list",
             ..props.attributes,
+            div {
+                id: "dnd-instructions",
+                style: "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);",
+                "Press Enter to start reordering. Use Arrow keys to change position. Press Enter to confirm or Escape to cancel."
+            }
             ul {
                 class: "dnd-list-ul",
-                role: "listbox",
                 aria_label: "{label}",
+                aria_roledescription: "sortable list",
+                aria_describedby: "dnd-instructions",
                 { display_list(list_items()).iter() }
             }
             div {
+                role: "status",
                 aria_live: "assertive",
+                aria_atomic: "true",
                 style: "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);",
                 "{announcement}"
             }
@@ -337,9 +365,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
                 event.prevent_default();
                 if (ctx.is_dragging)() {
                     ctx.move_up(index);
-                    let pos = (ctx.drop_to)().unwrap_or(index) + 1;
-                    let count = ctx.item_count();
-                    ctx.announce(format!("Moved to position {pos} of {count}"));
+                    ctx.announce_move(index);
                 } else {
                     ctx.focus_prev();
                 }
@@ -348,44 +374,52 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
                 event.prevent_default();
                 if (ctx.is_dragging)() {
                     ctx.move_down(index);
-                    let pos = (ctx.drop_to)().unwrap_or(index) + 1;
-                    let count = ctx.item_count();
-                    ctx.announce(format!("Moved to position {pos} of {count}"));
+                    ctx.announce_move(index);
                 } else {
                     ctx.focus_next();
                 }
             }
             Key::Enter => {
                 event.prevent_default();
-                if (ctx.is_dragging)() {
-                    let pos = (ctx.drop_to)().unwrap_or(index) + 1;
-                    let count = ctx.item_count();
-                    ctx.drop();
-                    ctx.end_drag();
-                    ctx.announce(format!("Dropped at position {pos} of {count}"));
-                } else {
-                    let count = ctx.item_count();
-                    ctx.start_drag(index);
-                    ctx.drag_over(index);
-                    ctx.announce(format!(
-                        "Grabbed item, position {} of {count}",
-                        index + 1
-                    ));
-                }
+                ctx.toggle_drag(index);
+            }
+            Key::Character(ref c) if c == " " => {
+                event.prevent_default();
+                ctx.toggle_drag(index);
             }
             Key::Escape => {
                 event.prevent_default();
                 if (ctx.is_dragging)() {
+                    let pos = (ctx.drag_from)().unwrap_or(index) + 1;
                     ctx.cancel_drag();
-                    ctx.announce("Reorder cancelled".to_string());
+                    ctx.announce(format!(
+                        "Movement cancelled. The item has returned to its starting position of {pos}"
+                    ));
+                }
+            }
+            Key::Delete | Key::Backspace => {
+                event.prevent_default();
+                if !(ctx.is_dragging)() && props.is_removable {
+                    ctx.remove(index);
+                }
+            }
+            Key::Home => {
+                event.prevent_default();
+                if !(ctx.is_dragging)() {
+                    ctx.set_focus(Some(0));
+                }
+            }
+            Key::End => {
+                event.prevent_default();
+                if !(ctx.is_dragging)() {
+                    ctx.set_focus(ctx.item_count().checked_sub(1));
                 }
             }
             _ => {}
         };
     };
 
-    let is_tab_reachable = ctx.is_focused(index)
-        || ((ctx.focused_index)().is_none() && index == 0);
+    let is_tab_reachable = ctx.is_focused(index) || ((ctx.focused_index)().is_none() && index == 0);
 
     rsx! {
         if (ctx.drop_position)() == DropPosition::Before && render_drop_indicator((ctx.drop_to)()) {
@@ -393,13 +427,18 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
         }
         li {
             class: "dnd-list-item",
-            role: "option",
+            aria_roledescription: "sortable item",
             draggable: "true",
             tabindex: if is_tab_reachable { "0" } else { "-1" },
+            aria_grabbed: if (ctx.drag_from)().is_some_and(|from| from == index) { "true" } else { "false" },
             "data-is-grabbing": if (ctx.drag_from)().is_some_and(|from| from == index) { "true" },
             "data-focus-visible": if ctx.is_focused(index) { "true" },
             onmounted: move |data| item_ref.set(Some(data.data())),
-            onfocus: move |_| ctx.set_focus(Some(index)),
+            onfocus: move |_| {
+                if !(ctx.is_dragging)() {
+                    ctx.set_focus(Some(index));
+                }
+            },
             ondragstart: move |event: Event<DragData>| {
                 ctx.start_drag(index);
                 // Note: this is only for Firefox (without it, DnD won't work)

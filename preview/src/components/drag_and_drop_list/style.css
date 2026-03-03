@@ -23,9 +23,14 @@
   box-shadow: 0 0 0 2px var(--focused-border-color);
 }
 
+.dnd-list-item:focus-visible {
+  box-shadow: 0 0 0 2px var(--focused-border-color);
+}
+
 .dnd-list-item[data-is-grabbing="true"] {
   cursor: grabbing;
   opacity: 0.6;
+  outline: 2px dashed var(--focused-border-color);
 }
 
 .item-icon-div {
@@ -55,10 +60,28 @@
   cursor: pointer;
 }
 
+.remove-button:focus-visible {
+  outline: 2px solid var(--focused-border-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .drop-indicator {
   position: relative;
   z-index: 1;
   height: 2px;
   margin: -1px 0;
   background-color: var(--focused-border-color);
+}
+
+.drop-indicator::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: -4px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid var(--focused-border-color);
 }
