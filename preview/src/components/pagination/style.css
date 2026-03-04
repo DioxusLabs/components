@@ -46,10 +46,6 @@
   color: var(--secondary-color-4);
 }
 
-.pagination-ellipsis .pagination-icon {
-  fill: currentcolor;
-}
-
 .pagination-link[data-size="icon"],
 .pagination-ellipsis {
   width: 2rem;
@@ -90,17 +86,6 @@
   .pagination-label {
     display: inline;
   }
-}
-
-
-.pagination-icon {
-  width: 1rem;
-  height: 1rem;
-  fill: none;
-  stroke: currentcolor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
 }
 
 /* TODO: move to shared css */

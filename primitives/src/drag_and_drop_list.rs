@@ -482,6 +482,8 @@ fn RemoveButton(index: usize, on_click: Callback<()>) -> Element {
             aria_label: "{label}",
             onclick: move |_| on_click.call(()),
             Icon {
+                width: 24,
+                height: 24,
                 // X icon from lucide https://lucide.dev/icons/x
                 path { d: "M18 6 6 18" }
                 path { d: "m6 6 12 12" }
@@ -494,6 +496,8 @@ fn RemoveButton(index: usize, on_click: Callback<()>) -> Element {
 fn DragIcon() -> Element {
     rsx! {
         Icon {
+            width: 24,
+            height: 24,
             // equal icon from lucide https://lucide.dev/icons/equal
             line { x1: "5", x2: "19", y1: "9", y2: "9", }
             line { x1: "5", x2: "19", y1: "15", y2: "15", }

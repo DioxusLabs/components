@@ -36,14 +36,7 @@
     position: absolute;
     top: 38rem;
     left: 50%;
-    width: 20px;
-    height: 20px;
     animation: scroll-down-icon-animation 3000ms ease-in-out infinite;
-    fill: none;
-    stroke: var(--secondary-color-4);
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 2;
     transform: translate(-50%, -50%);
 }
 
@@ -103,7 +96,7 @@
     background-color: var(--primary-color-3);
 }
 
-.explaination {
+.explanation {
     min-width: 50vw;
     padding-right: 5vw;
     padding-left: 5vw;
@@ -111,12 +104,12 @@
     text-align: center;
 }
 
-.explaination-box h3 {
+.explanation-box h3 {
     margin-top: 0;
     margin-bottom: 0.5rem;
 }
 
-.explaination-box {
+.explanation-box {
     display: flex;
     width: 10rem;
     max-width: 30vw;

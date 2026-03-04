@@ -4,6 +4,7 @@ use dioxus_primitives::calendar::{
     CalendarNavigationProps, CalendarProps, CalendarSelectMonthProps, CalendarSelectYearProps,
     RangeCalendarProps,
 };
+use dioxus_primitives::icon;
 
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
@@ -89,10 +90,9 @@ pub fn CalendarPreviousMonthButton(
 ) -> Element {
     rsx! {
         calendar::CalendarPreviousMonthButton { attributes,
-            svg {
-                class: "calendar-previous-month-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
+            icon::Icon {
+                width: 20,
+                height: 20,
                 polyline { points: "15 6 9 12 15 18" }
             }
         }
@@ -105,10 +105,9 @@ pub fn CalendarNextMonthButton(
 ) -> Element {
     rsx! {
         calendar::CalendarNextMonthButton { attributes,
-            svg {
-                class: "calendar-next-month-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
+            icon::Icon {
+                width: 20,
+                height: 20,
                 polyline { points: "9 18 15 12 9 6" }
             }
         }

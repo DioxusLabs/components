@@ -5,6 +5,7 @@ use dioxus_primitives::{
     popover::{PopoverContentProps, PopoverTriggerProps},
     ContentAlign,
 };
+use dioxus_primitives::icon;
 
 use super::super::calendar::*;
 use super::super::popover::*;
@@ -122,10 +123,9 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
 pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
         PopoverTrigger { aria_label: "Show Calendar", attributes: props.attributes,
-            svg {
-                class: "date-picker-expand-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
+            icon::Icon {
+                width: 20,
+                height: 20,
                 polyline { points: "6 9 12 15 18 9" }
             }
         }
