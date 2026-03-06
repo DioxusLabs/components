@@ -28,13 +28,3 @@
 .collapsible-content {
   display: contents;
 }
-
-.collapsible-expand-icon {
-  width: 1rem;
-  height: 1rem;
-  fill: none;
-  stroke: var(--secondary-color-3);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
-}

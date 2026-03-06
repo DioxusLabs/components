@@ -74,13 +74,6 @@
 }
 
 .accordion-expand-icon {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: var(--secondary-color-4);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
   transition: rotate 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 

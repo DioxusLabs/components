@@ -186,11 +186,6 @@
   line-height: 0;
 }
 
-.sidebar-trigger-icon {
-  width: 1rem;
-  height: 1rem;
-}
-
 .sidebar-rail {
   position: absolute;
   z-index: 20;

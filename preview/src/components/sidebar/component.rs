@@ -9,6 +9,7 @@ use dioxus::prelude::*;
 use dioxus_primitives::dioxus_attributes::attributes;
 use dioxus_primitives::merge_attributes;
 use dioxus_primitives::use_controlled;
+use dioxus_primitives::icon;
 
 // constants
 const SIDEBAR_WIDTH: &str = "16rem";
@@ -367,15 +368,9 @@ pub fn SidebarTrigger(
                 ctx.toggle();
             },
             attributes: merged,
-            svg {
-                class: "sidebar-trigger-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
-                fill: "none",
-                stroke: "currentColor",
-                stroke_width: "2",
-                stroke_linecap: "round",
-                stroke_linejoin: "round",
+            icon::Icon {
+                width: "1rem",
+                height: "1rem",
                 rect {
                     x: "3",
                     y: "3",

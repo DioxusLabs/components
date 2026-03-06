@@ -251,13 +251,3 @@
 .sheet-close:hover {
   color: var(--secondary-color-4);
 }
-
-.sheet-close-icon {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentcolor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
-}

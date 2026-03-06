@@ -9,7 +9,7 @@ use std::{
 
 use time::{ext::NumericalDuration, macros::date, Date, Month, OffsetDateTime, Weekday};
 
-use crate::{date_picker::DefaultCalendarProps, LocalDateExt as _};
+use crate::{date_picker::DefaultCalendarProps, icon::Icon, LocalDateExt as _};
 
 // A collection of [`Weekday`]s stored as a single byte
 // Implemented as a bitmask where bits 1-7 correspond to Monday-Sunday
@@ -1652,12 +1652,7 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
             }
             span { class: "calendar-month-select-value",
                 {base_ctx.format_month.call(month)}
-                svg {
-                    class: "select-expand-icon",
-                    view_box: "0 0 24 24",
-                    xmlns: "http://www.w3.org/2000/svg",
-                    polyline { points: "6 9 12 15 18 9" }
-                }
+                DropDownIcon { }
             }
         }
     }
@@ -1763,12 +1758,7 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
             }
             span { class: "calendar-year-select-value",
                 "{year}"
-                svg {
-                    class: "select-expand-icon",
-                    view_box: "0 0 24 24",
-                    xmlns: "http://www.w3.org/2000/svg",
-                    polyline { points: "6 9 12 15 18 9" }
-                }
+                DropDownIcon { }
             }
         }
     }
@@ -2113,6 +2103,17 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             onmounted,
             ..attributes,
             {day.to_string()}
+        }
+    }
+}
+
+#[component]
+fn DropDownIcon() -> Element {
+    rsx! {
+        Icon {
+            width: 20,
+            height: 20,
+            polyline { points: "6 9 12 15 18 9" }
         }
     }
 }
