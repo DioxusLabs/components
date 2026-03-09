@@ -1,6 +1,8 @@
 .recycle-list-container {
   max-height: 36rem;
   overflow-y: auto;
+  position: relative;
+  contain: layout paint;
 }
 
 .recycle-list-demo {

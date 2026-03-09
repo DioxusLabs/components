@@ -1,6 +1,7 @@
 //! Defines the [`RecycleList`] component for rendering large lists with virtualization.
 
 use dioxus::prelude::*;
+use std::collections::HashMap;
 use std::sync::Arc;
 
 /// The props for the [`RecycleList`] component.
@@ -21,7 +22,8 @@ pub struct RecycleListProps {
 /// # RecycleList
 ///
 /// The `RecycleList` component virtualizes a large list by rendering only the visible slice plus a
-/// configurable buffer. It supports dynamic row heights and keeps total scroll height with spacers.
+/// configurable buffer. It supports dynamic row heights and keeps total scroll height with a
+/// virtual canvas.
 ///
 /// Each rendered item receives `aria-setsize` and `aria-posinset` attributes for accessibility,
 /// allowing screen readers to announce the total list size even though only a subset of items
@@ -73,64 +75,91 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
 
     // Estimated item height used before the first measurement.
     let estimated_item_height: u32 = 100;
-
     let container_id = crate::use_unique_id();
 
     // Scroll position signal (relative to list top, in px).
     let mut scroll_top = use_signal(|| 0u32);
     let mut viewport_height = use_signal(|| estimated_item_height.saturating_mul(8));
     let mut measured_heights = use_signal(|| vec![estimated_item_height; count]);
+    let mut measured_flags = use_signal(|| vec![false; count]);
+
+    // Buffer height measurements during active scrolling to prevent scrollHeight jumps.
+    let mut is_scrolling = use_signal(|| false);
+    let mut pending_heights: Signal<HashMap<usize, u32>> = use_signal(HashMap::new);
 
     // Keep height cache length aligned with current items.
     if measured_heights.read().len() != count {
         measured_heights.with_mut(|heights| heights.resize(count, estimated_item_height));
+        measured_flags.with_mut(|flags| flags.resize(count, false));
     }
 
-    // Subscribe to scroll events via a JS eval bridge.
-    // Listens to both container and window scroll, dynamically detecting the
-    // correct scroll mode on each event (handles async CSS loading).
+    // Subscribe to the container scroll via a JS eval bridge.
+    // We keep the list in a single scroll mode and coalesce updates into
+    // requestAnimationFrame so dragging the native scrollbar stays responsive.
     use_effect(move || {
-        let mut eval = document::eval(
-            r#"
+        let script = r#"
             const container = document.getElementById(await dioxus.recv());
             if (!container) return;
 
-            const winScrollY = () => window.scrollY || window.pageYOffset || 0;
-            const initRect = container.getBoundingClientRect();
-            const containerPageTop = initRect.top + winScrollY();
+            let idleTimer = null;
+            let frame = null;
 
-            function sendUpdate() {
-                const isContainerScroll =
-                    container.scrollHeight > container.clientHeight + 1 &&
-                    container.clientHeight > 0;
-
-                let scroll, viewport;
-                if (isContainerScroll) {
-                    scroll = container.scrollTop;
-                    viewport = container.clientHeight;
-                } else {
-                    scroll = Math.max(0, winScrollY() - containerPageTop);
-                    viewport = window.innerHeight || 600;
-                }
+            function publish(force = false) {
+                frame = null;
+                const scroll = container.scrollTop;
+                const viewport = container.clientHeight || 600;
                 dioxus.send(JSON.stringify([Math.round(scroll), viewport]));
             }
 
-            sendUpdate();
-            container.addEventListener("scroll", sendUpdate, { passive: true });
-            window.addEventListener("scroll", sendUpdate, { passive: true });
-            window.addEventListener("resize", sendUpdate, { passive: true });
+            function scheduleUpdate() {
+                if (frame === null) {
+                    frame = requestAnimationFrame(() => publish(false));
+                }
+
+                if (idleTimer) clearTimeout(idleTimer);
+                idleTimer = setTimeout(() => {
+                    publish(true);
+                    dioxus.send("idle");
+                }, 180);
+            }
+
+            scheduleUpdate();
+            container.addEventListener("scroll", scheduleUpdate, { passive: true });
+            window.addEventListener("resize", scheduleUpdate, { passive: true });
             await dioxus.recv();
-            container.removeEventListener("scroll", sendUpdate);
-            window.removeEventListener("scroll", sendUpdate);
-            window.removeEventListener("resize", sendUpdate);
-            "#,
-        );
+            if (frame !== null) cancelAnimationFrame(frame);
+            if (idleTimer) clearTimeout(idleTimer);
+            container.removeEventListener("scroll", scheduleUpdate);
+            window.removeEventListener("resize", scheduleUpdate);
+            "#;
+        let mut eval = document::eval(script);
 
         let _ = eval.send(container_id.peek().clone());
 
         spawn(async move {
             while let Ok(msg) = eval.recv::<String>().await {
-                if let Some((s, v)) = parse_scroll_msg(&msg) {
+                if msg.trim() == "idle" {
+                    is_scrolling.set(false);
+                    // Flush pending height measurements.
+                    let pending = pending_heights.with_mut(std::mem::take);
+                    if !pending.is_empty() {
+                        measured_heights.with_mut(|heights| {
+                            for (&idx, &h) in &pending {
+                                if idx < heights.len() && heights[idx] != h {
+                                    heights[idx] = h;
+                                }
+                            }
+                        });
+                        measured_flags.with_mut(|flags| {
+                            for &idx in pending.keys() {
+                                if idx < flags.len() {
+                                    flags[idx] = true;
+                                }
+                            }
+                        });
+                    }
+                } else if let Some((s, v)) = parse_scroll_msg(&msg) {
+                    is_scrolling.set(true);
                     if s != *scroll_top.peek() {
                         scroll_top.set(s);
                     }
@@ -190,8 +219,8 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
         end_idx = (render_start + 1).min(count);
     }
 
-    let top_spacer = prefix[render_start];
-    let bottom_spacer = total_height.saturating_sub(prefix[end_idx]);
+    let top_offset = prefix[render_start];
+    let canvas_height = total_height.max(viewport_px);
 
     let set_size = count.to_string();
 
@@ -203,37 +232,62 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
             tabindex: "0",
             ..attributes,
 
-            div { style: "height:{top_spacer}px; width:1px;" }
+            div {
+                style: "position: relative; height:{canvas_height}px; width: 100%;",
+                div {
+                    style: "position: absolute; inset: 0 auto auto 0; width: 100%; transform: translateY({top_offset}px); will-change: transform;",
+                    {(render_start..end_idx).map(|idx| {
+                        let measured_heights_for_item = measured_heights;
+                        let measured_flags_for_item = measured_flags;
+                        let set_size = set_size.clone();
 
-            {(render_start..end_idx).map(|idx| {
-                let measured_heights_for_item = measured_heights;
-                let set_size = set_size.clone();
+                        rsx! {
+                            div {
+                                key: "{idx}",
+                                role: "listitem",
+                                "aria-setsize": set_size,
+                                "aria-posinset": "{idx + 1}",
+                                onmounted: move |event: Event<MountedData>| {
+                                    let mut measured_heights_for_item = measured_heights_for_item;
+                                    let mut measured_flags_for_item = measured_flags_for_item;
+                                    let already_measured = measured_flags_for_item
+                                        .read()
+                                        .get(idx)
+                                        .copied()
+                                        .unwrap_or(false);
 
-                rsx! {
-                    div {
-                        key: "{idx}",
-                        role: "listitem",
-                        "aria-setsize": set_size,
-                        "aria-posinset": "{idx + 1}",
-                        onmounted: move |event: Event<MountedData>| {
-                            let mut measured_heights_for_item = measured_heights_for_item;
-                            spawn(async move {
-                                let rect = event.get_client_rect().await.unwrap_or_default();
-                                let measured = rect.height().max(1.0).round() as u32;
-                                measured_heights_for_item
-                                    .with_mut(|heights| {
-                                        if idx < heights.len() && heights[idx] != measured {
-                                            heights[idx] = measured;
+                                    if already_measured {
+                                        return;
+                                    }
+
+                                    spawn(async move {
+                                        let rect = event.get_client_rect().await.unwrap_or_default();
+                                        let measured = rect.height().max(1.0).round() as u32;
+                                        if *is_scrolling.peek() {
+                                            // Buffer during scroll to prevent scrollHeight jumps.
+                                            pending_heights.with_mut(|p| {
+                                                p.insert(idx, measured);
+                                            });
+                                        } else {
+                                            measured_heights_for_item.with_mut(|heights| {
+                                                if idx < heights.len() && heights[idx] != measured {
+                                                    heights[idx] = measured;
+                                                }
+                                            });
+                                            measured_flags_for_item.with_mut(|flags| {
+                                                if idx < flags.len() {
+                                                    flags[idx] = true;
+                                                }
+                                            });
                                         }
                                     });
-                            });
-                        },
-                        {render_item(idx)}
-                    }
+                                },
+                                {render_item(idx)}
+                            }
+                        }
+                    })}
                 }
-            })}
-
-            div { style: "height:{bottom_spacer}px; width:1px;" }
+            }
         }
     }
 }
