@@ -42,18 +42,12 @@ pub struct RecycleListProps {
 ///
 /// #[component]
 /// fn Demo() -> Element {
-///     let rows: Vec<Row> = (0..2000)
-///         .map(|i| Row {
-///             title: format!("Row {i}"),
-///         })
-///         .collect();
-///
 ///     rsx! {
 ///         RecycleList {
-///             count: rows.len(),
+///             count: 100,
 ///             buffer: 8,
 ///             render_item: move |idx: usize| rsx! {
-///                 article { key: "{idx}", "{rows[idx].title}" }
+///                 article { key: "{idx}", "Row {idx}" }
 ///             },
 ///         }
 ///     }
