@@ -6,7 +6,6 @@ test("recycle list virtualizes rows and updates on scroll", async ({ page }) => 
   const cards = page.locator(".recycle-list-card");
   await expect(cards.first()).toBeVisible({ timeout: 30000 });
 
-  const beforeFirstHeading = (await page.locator(".recycle-list-card h3").first().textContent()) ?? "";
   const initialCount = await cards.count();
 
   expect(initialCount).toBeGreaterThan(0);
@@ -16,13 +15,21 @@ test("recycle list virtualizes rows and updates on scroll", async ({ page }) => 
   // re-renders may reset scrollTop, especially on slower engines (WebKit).
   await expect(async () => {
     await page.evaluate(() => {
-      const container = document.querySelector(".recycle-list-container");
-      if (container) {
-        container.scrollTop = 6000;
-      }
+      document.querySelectorAll(".recycle-list-container").forEach((c) => {
+        if (c.scrollHeight > c.clientHeight + 1) {
+          c.scrollTop = 6000;
+        }
+      });
+      window.scrollTo(0, 6000);
     });
-    await page.waitForTimeout(200);
-    const afterFirstHeading = (await page.locator(".recycle-list-card h3").first().textContent()) ?? "";
-    expect(afterFirstHeading).not.toEqual(beforeFirstHeading);
+    await page.waitForTimeout(300);
+    const headings = await page.locator(".recycle-list-card h3").allTextContents();
+    // After scrolling to offset 6000, at least some items with index > 30
+    // should be visible, proving the virtual list responded to the scroll.
+    const hasScrolledContent = headings.some((h) => {
+      const match = h.match(/#(\d+)/);
+      return match != null && parseInt(match[1]) > 30;
+    });
+    expect(hasScrolledContent).toBe(true);
   }).toPass({ timeout: 15000 });
 });

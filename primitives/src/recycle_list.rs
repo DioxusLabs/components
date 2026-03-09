@@ -107,7 +107,7 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
             function publish(force = false) {
                 frame = null;
                 const scroll = container.scrollTop;
-                const viewport = container.clientHeight || 600;
+                const viewport = Math.min(container.clientHeight, window.innerHeight) || 600;
                 dioxus.send(JSON.stringify([Math.round(scroll), viewport]));
             }
 
@@ -125,11 +125,13 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
 
             scheduleUpdate();
             container.addEventListener("scroll", scheduleUpdate, { passive: true });
+            window.addEventListener("scroll", scheduleUpdate, { passive: true });
             window.addEventListener("resize", scheduleUpdate, { passive: true });
             await dioxus.recv();
             if (frame !== null) cancelAnimationFrame(frame);
             if (idleTimer) clearTimeout(idleTimer);
             container.removeEventListener("scroll", scheduleUpdate);
+            window.removeEventListener("scroll", scheduleUpdate);
             window.removeEventListener("resize", scheduleUpdate);
             "#;
         let mut eval = document::eval(script);
