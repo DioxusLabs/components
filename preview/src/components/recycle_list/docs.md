@@ -3,14 +3,14 @@ The RecycleList component virtualizes large lists by rendering only visible rows
 ## Component Structure
 
 ```rust
-{RecycleList(RecycleListProps {
-    // Full data source.
-    items: rows.as_slice(),
+RecycleList {
+    // Total number of items.
+    count: 2000,
     // Render buffer (approximate row count) above and below viewport.
     buffer: 8,
-    // Row renderer callback receives (item, absolute_index).
-    render_item: move |row, idx| rsx! {
-        article { key: "{idx}", "{row.title}" }
+    // Row renderer callback receives the absolute index.
+    render_item: move |idx: usize| rsx! {
+        article { key: "{idx}", "{rows[idx].title}" }
     },
-})}
+}
 ```

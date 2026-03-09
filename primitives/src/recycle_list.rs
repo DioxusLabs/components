@@ -4,17 +4,17 @@ use dioxus::prelude::*;
 use std::sync::Arc;
 
 /// The props for the [`RecycleList`] component.
-pub struct RecycleListProps<'a, T, F>
-where
-    F: Fn(&T, usize) -> Element,
-{
-    /// The complete list of items.
-    pub items: &'a [T],
+#[derive(Props, Clone, PartialEq)]
+pub struct RecycleListProps {
+    /// The total number of items in the list.
+    pub count: usize,
     /// The amount of render buffer (in estimated row counts) above and below the viewport.
+    #[props(default = 8)]
     pub buffer: usize,
-    /// Renders a single item and receives `(item, absolute_index)`.
-    pub render_item: F,
+    /// Renders a single item by its absolute index.
+    pub render_item: Callback<usize, Element>,
     /// Additional attributes to apply to the container element.
+    #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 }
 
@@ -23,11 +23,15 @@ where
 /// The `RecycleList` component virtualizes a large list by rendering only the visible slice plus a
 /// configurable buffer. It supports dynamic row heights and keeps total scroll height with spacers.
 ///
+/// Each rendered item receives `aria-setsize` and `aria-posinset` attributes for accessibility,
+/// allowing screen readers to announce the total list size even though only a subset of items
+/// is present in the DOM.
+///
 /// ## Example
 ///
 /// ```rust
 /// use dioxus::prelude::*;
-/// use dioxus_primitives::recycle_list::{RecycleList, RecycleListProps};
+/// use dioxus_primitives::recycle_list::RecycleList;
 ///
 /// #[derive(Clone, PartialEq)]
 /// struct Row {
@@ -43,14 +47,13 @@ where
 ///         .collect();
 ///
 ///     rsx! {
-///         {RecycleList(RecycleListProps {
-///             items: rows.as_slice(),
+///         RecycleList {
+///             count: rows.len(),
 ///             buffer: 8,
-///             render_item: move |row, idx| rsx! {
-///                 article { key: "{idx}", "{row.title}" }
+///             render_item: move |idx: usize| rsx! {
+///                 article { key: "{idx}", "{rows[idx].title}" }
 ///             },
-///             attributes: vec![],
-///         })}
+///         }
 ///     }
 /// }
 /// ```
@@ -59,30 +62,28 @@ where
 ///
 /// The [`RecycleList`] component renders a container `div` with the class `recycle-list-container`.
 /// All user-provided `attributes` are spread onto the container element.
-#[allow(non_snake_case)]
-pub fn RecycleList<T: PartialEq + 'static, F>(props: RecycleListProps<'_, T, F>) -> Element
-where
-    F: Fn(&T, usize) -> Element,
-{
+#[component]
+pub fn RecycleList(props: RecycleListProps) -> Element {
     let RecycleListProps {
-        items,
+        count,
         buffer,
         render_item,
         attributes,
     } = props;
-    let total = items.len();
 
     // Estimated item height used before the first measurement.
     let estimated_item_height: u32 = 100;
 
+    let container_id = crate::use_unique_id();
+
     // Scroll position signal (relative to list top, in px).
     let mut scroll_top = use_signal(|| 0u32);
     let mut viewport_height = use_signal(|| estimated_item_height.saturating_mul(8));
-    let mut measured_heights = use_signal(|| vec![estimated_item_height; total]);
+    let mut measured_heights = use_signal(|| vec![estimated_item_height; count]);
 
     // Keep height cache length aligned with current items.
-    if measured_heights.read().len() != total {
-        measured_heights.with_mut(|heights| heights.resize(total, estimated_item_height));
+    if measured_heights.read().len() != count {
+        measured_heights.with_mut(|heights| heights.resize(count, estimated_item_height));
     }
 
     // Subscribe to scroll events via a JS eval bridge.
@@ -125,7 +126,7 @@ where
             "#,
         );
 
-        let _ = eval.send("recycle-list-root");
+        let _ = eval.send(container_id.peek().clone());
 
         spawn(async move {
             while let Ok(msg) = eval.recv::<String>().await {
@@ -170,7 +171,7 @@ where
     let (prefix, total_height) = prefix_and_total();
     let prefix: &[u32] = prefix.as_ref();
 
-    let (render_start, mut end_idx) = if total == 0 {
+    let (render_start, mut end_idx) = if count == 0 {
         (0, 0)
     } else {
         let item_at = |y: u32| prefix.partition_point(|&acc| acc <= y).saturating_sub(1);
@@ -180,58 +181,57 @@ where
         let end_target = clamped_scroll
             .saturating_add(viewport_px)
             .saturating_add(buffer_px);
-        let end_idx = prefix.partition_point(|&acc| acc < end_target).min(total);
+        let end_idx = prefix.partition_point(|&acc| acc < end_target).min(count);
 
         (render_start, end_idx)
     };
 
-    if total > 0 && end_idx <= render_start {
-        end_idx = (render_start + 1).min(total);
+    if count > 0 && end_idx <= render_start {
+        end_idx = (render_start + 1).min(count);
     }
 
     let top_spacer = prefix[render_start];
     let bottom_spacer = total_height.saturating_sub(prefix[end_idx]);
 
+    let set_size = count.to_string();
+
     rsx! {
         div {
-            id: "recycle-list-root",
+            id: container_id,
             class: "recycle-list-container",
+            role: "list",
             tabindex: "0",
             ..attributes,
 
             div { style: "height:{top_spacer}px; width:1px;" }
 
-            {
-                items
-                    .iter()
-                    .skip(render_start)
-                    .take(end_idx - render_start)
-                    .enumerate()
-                    .map(|(i, item)| {
-                        let idx = render_start + i;
-                        let measured_heights_for_item = measured_heights;
+            {(render_start..end_idx).map(|idx| {
+                let measured_heights_for_item = measured_heights;
+                let set_size = set_size.clone();
 
-                        rsx! {
-                            div {
-                                key: "{idx}",
-                                onmounted: move |event: Event<MountedData>| {
-                                    let mut measured_heights_for_item = measured_heights_for_item;
-                                    spawn(async move {
-                                        let rect = event.get_client_rect().await.unwrap_or_default();
-                                        let measured = rect.height().max(1.0).round() as u32;
-                                        measured_heights_for_item
-                                            .with_mut(|heights| {
-                                                if idx < heights.len() && heights[idx] != measured {
-                                                    heights[idx] = measured;
-                                                }
-                                            });
+                rsx! {
+                    div {
+                        key: "{idx}",
+                        role: "listitem",
+                        "aria-setsize": set_size,
+                        "aria-posinset": "{idx + 1}",
+                        onmounted: move |event: Event<MountedData>| {
+                            let mut measured_heights_for_item = measured_heights_for_item;
+                            spawn(async move {
+                                let rect = event.get_client_rect().await.unwrap_or_default();
+                                let measured = rect.height().max(1.0).round() as u32;
+                                measured_heights_for_item
+                                    .with_mut(|heights| {
+                                        if idx < heights.len() && heights[idx] != measured {
+                                            heights[idx] = measured;
+                                        }
                                     });
-                                },
-                                {render_item(item, idx)}
-                            }
-                        }
-                    })
-            }
+                            });
+                        },
+                        {render_item(idx)}
+                    }
+                }
+            })}
 
             div { style: "height:{bottom_spacer}px; width:1px;" }
         }
