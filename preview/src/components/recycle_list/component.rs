@@ -5,7 +5,6 @@ pub use dioxus_primitives::recycle_list::RecycleListProps;
 #[component]
 pub fn RecycleList(props: RecycleListProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         dioxus_primitives::recycle_list::RecycleList {
             count: props.count,
             buffer: props.buffer,
