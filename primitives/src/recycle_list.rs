@@ -139,13 +139,93 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
                     // Flush pending height measurements.
                     let pending = pending_heights.with_mut(std::mem::take);
                     if !pending.is_empty() {
-                        measured_heights.with_mut(|heights| {
+                        let current_scroll = *scroll_top.peek();
+                        let (new_heights, compensated_scroll) = {
+                            let heights = measured_heights.read();
+                            let flags = measured_flags.read();
+                            let mut old_prefix = Vec::with_capacity(heights.len() + 1);
+                            old_prefix.push(0u32);
+                            for &height in heights.iter() {
+                                let next = old_prefix
+                                    .last()
+                                    .copied()
+                                    .unwrap_or(0)
+                                    .saturating_add(height.max(1));
+                                old_prefix.push(next);
+                            }
+
+                            let max_scroll =
+                                old_prefix.last().copied().unwrap_or(0).saturating_sub(1);
+                            let clamped_scroll = current_scroll.min(max_scroll);
+                            let anchor_idx = old_prefix
+                                .partition_point(|&acc| acc <= clamped_scroll)
+                                .saturating_sub(1);
+                            let anchor_idx = anchor_idx.min(heights.len().saturating_sub(1));
+                            let anchor_offset =
+                                clamped_scroll.saturating_sub(old_prefix[anchor_idx]);
+
+                            let mut next_heights = heights.clone();
+                            let mut next_flags = flags.clone();
                             for (&idx, &h) in &pending {
-                                if idx < heights.len() && heights[idx] != h {
-                                    heights[idx] = h;
+                                if idx < next_heights.len() && next_heights[idx] != h {
+                                    next_heights[idx] = h;
+                                }
+                                if idx < next_flags.len() {
+                                    next_flags[idx] = true;
                                 }
                             }
-                        });
+
+                            let measured_count =
+                                next_flags.iter().filter(|&&measured| measured).count();
+                            let measured_total_height: u64 = next_heights
+                                .iter()
+                                .zip(next_flags.iter())
+                                .filter_map(|(height, measured)| {
+                                    measured.then_some(u64::from(*height))
+                                })
+                                .sum();
+                            let adaptive_estimate = if measured_count > 0 {
+                                (measured_total_height / measured_count as u64)
+                                    .clamp(1, u64::from(u32::MAX))
+                                    as u32
+                            } else {
+                                estimated_item_height
+                            };
+
+                            for (idx, measured) in next_flags.iter().copied().enumerate() {
+                                if !measured && idx < next_heights.len() {
+                                    next_heights[idx] = adaptive_estimate;
+                                }
+                            }
+
+                            let mut new_prefix = Vec::with_capacity(next_heights.len() + 1);
+                            new_prefix.push(0u32);
+                            for &height in next_heights.iter() {
+                                let next = new_prefix
+                                    .last()
+                                    .copied()
+                                    .unwrap_or(0)
+                                    .saturating_add(height.max(1));
+                                new_prefix.push(next);
+                            }
+
+                            let compensated_scroll = if next_heights.is_empty() {
+                                0
+                            } else {
+                                let new_anchor_height = next_heights
+                                    .get(anchor_idx)
+                                    .copied()
+                                    .unwrap_or(estimated_item_height)
+                                    .max(1);
+                                new_prefix[anchor_idx].saturating_add(
+                                    anchor_offset.min(new_anchor_height.saturating_sub(1)),
+                                )
+                            };
+
+                            (next_heights, compensated_scroll)
+                        };
+
+                        measured_heights.set(new_heights);
                         measured_flags.with_mut(|flags| {
                             for &idx in pending.keys() {
                                 if idx < flags.len() {
@@ -153,6 +233,14 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
                                 }
                             }
                         });
+
+                        if compensated_scroll != current_scroll {
+                            scroll_top.set(compensated_scroll);
+                            let container_id = container_id.peek().clone();
+                            spawn(async move {
+                                sync_container_scroll(container_id, compensated_scroll).await;
+                            });
+                        }
                     }
                 } else if let Some((s, v)) = parse_scroll_msg(&msg) {
                     is_scrolling.set(true);
@@ -295,4 +383,19 @@ fn parse_scroll_msg(msg: &str) -> Option<(u32, u32)> {
     let s = parts.next()?.trim().parse::<f64>().ok()?;
     let v = parts.next()?.trim().parse::<f64>().ok()?;
     Some((s.max(0.0).round() as u32, v.max(1.0).round() as u32))
+}
+
+async fn sync_container_scroll(container_id: String, scroll_top: u32) {
+    let eval = document::eval(
+        r#"
+        const id = await dioxus.recv();
+        const targetScroll = await dioxus.recv();
+        const container = document.getElementById(id);
+        if (container) {
+            container.scrollTop = targetScroll;
+        }
+        "#,
+    );
+    let _ = eval.send(container_id);
+    let _ = eval.send(scroll_top);
 }
