@@ -140,106 +140,41 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
                     let pending = pending_heights.with_mut(std::mem::take);
                     if !pending.is_empty() {
                         let current_scroll = *scroll_top.peek();
-                        let (new_heights, compensated_scroll) = {
+                        let dom_anchor = capture_visible_anchor(container_id.peek().clone()).await;
+                        let (new_heights, new_flags, compensated_scroll) = {
                             let heights = measured_heights.read();
                             let flags = measured_flags.read();
-                            let mut old_prefix = Vec::with_capacity(heights.len() + 1);
-                            old_prefix.push(0u32);
-                            for &height in heights.iter() {
-                                let next = old_prefix
-                                    .last()
-                                    .copied()
-                                    .unwrap_or(0)
-                                    .saturating_add(height.max(1));
-                                old_prefix.push(next);
-                            }
-
-                            let max_scroll =
-                                old_prefix.last().copied().unwrap_or(0).saturating_sub(1);
-                            let clamped_scroll = current_scroll.min(max_scroll);
-                            let anchor_idx = old_prefix
-                                .partition_point(|&acc| acc <= clamped_scroll)
-                                .saturating_sub(1);
-                            let anchor_idx = anchor_idx.min(heights.len().saturating_sub(1));
-                            let anchor_offset =
-                                clamped_scroll.saturating_sub(old_prefix[anchor_idx]);
-
-                            let mut next_heights = heights.clone();
-                            let mut next_flags = flags.clone();
-                            for (&idx, &h) in &pending {
-                                if idx < next_heights.len() && next_heights[idx] != h {
-                                    next_heights[idx] = h;
-                                }
-                                if idx < next_flags.len() {
-                                    next_flags[idx] = true;
-                                }
-                            }
-
-                            let measured_count =
-                                next_flags.iter().filter(|&&measured| measured).count();
-                            let measured_total_height: u64 = next_heights
-                                .iter()
-                                .zip(next_flags.iter())
-                                .filter_map(|(height, measured)| {
-                                    measured.then_some(u64::from(*height))
-                                })
-                                .sum();
-                            let adaptive_estimate = if measured_count > 0 {
-                                (measured_total_height / measured_count as u64)
-                                    .clamp(1, u64::from(u32::MAX))
-                                    as u32
-                            } else {
-                                estimated_item_height
-                            };
-
-                            for (idx, measured) in next_flags.iter().copied().enumerate() {
-                                if !measured && idx < next_heights.len() {
-                                    next_heights[idx] = adaptive_estimate;
-                                }
-                            }
-
-                            let mut new_prefix = Vec::with_capacity(next_heights.len() + 1);
-                            new_prefix.push(0u32);
-                            for &height in next_heights.iter() {
-                                let next = new_prefix
-                                    .last()
-                                    .copied()
-                                    .unwrap_or(0)
-                                    .saturating_add(height.max(1));
-                                new_prefix.push(next);
-                            }
-
-                            let compensated_scroll = if next_heights.is_empty() {
-                                0
-                            } else {
-                                let new_anchor_height = next_heights
-                                    .get(anchor_idx)
-                                    .copied()
-                                    .unwrap_or(estimated_item_height)
-                                    .max(1);
-                                new_prefix[anchor_idx].saturating_add(
-                                    anchor_offset.min(new_anchor_height.saturating_sub(1)),
-                                )
-                            };
-
-                            (next_heights, compensated_scroll)
+                            apply_pending_measurements(
+                                &heights,
+                                &flags,
+                                &pending,
+                                current_scroll,
+                                estimated_item_height,
+                            )
                         };
 
                         measured_heights.set(new_heights);
-                        measured_flags.with_mut(|flags| {
-                            for &idx in pending.keys() {
-                                if idx < flags.len() {
-                                    flags[idx] = true;
-                                }
-                            }
-                        });
+                        measured_flags.set(new_flags);
 
-                        if compensated_scroll != current_scroll {
-                            scroll_top.set(compensated_scroll);
-                            let container_id = container_id.peek().clone();
-                            spawn(async move {
-                                sync_container_scroll(container_id, compensated_scroll).await;
-                            });
+                        let restored_scroll = if let Some((anchor_idx, anchor_offset)) = dom_anchor
+                        {
+                            restore_visible_anchor(
+                                container_id.peek().clone(),
+                                anchor_idx,
+                                anchor_offset,
+                            )
+                            .await
+                        } else {
+                            None
+                        };
+                        let final_scroll = restored_scroll.unwrap_or(compensated_scroll);
+
+                        if final_scroll != current_scroll {
+                            scroll_top.set(final_scroll);
+                            if restored_scroll.is_none() {
+                                sync_container_scroll(container_id.peek().clone(), final_scroll)
+                                    .await;
+                            }
                         }
                     }
                 } else if let Some((s, v)) = parse_scroll_msg(&msg) {
@@ -265,16 +200,7 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
         let measured_heights = measured_heights;
         move || {
             let heights = measured_heights.read();
-            let mut prefix: Vec<u32> = Vec::with_capacity(heights.len() + 1);
-            prefix.push(0);
-            for height in heights.iter() {
-                let next = prefix
-                    .last()
-                    .copied()
-                    .unwrap_or(0)
-                    .saturating_add((*height).max(1));
-                prefix.push(next);
-            }
+            let prefix = build_prefix_sums(&heights);
             let total_height = *prefix.last().unwrap_or(&0);
             (Arc::new(prefix), total_height)
         }
@@ -329,6 +255,7 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
                             div {
                                 key: "{idx}",
                                 role: "listitem",
+                                "data-recycle-index": "{idx}",
                                 "aria-setsize": set_size,
                                 "aria-posinset": "{idx + 1}",
                                 onmounted: move |event: Event<MountedData>| {
@@ -385,6 +312,132 @@ fn parse_scroll_msg(msg: &str) -> Option<(u32, u32)> {
     Some((s.max(0.0).round() as u32, v.max(1.0).round() as u32))
 }
 
+fn apply_pending_measurements(
+    heights: &[u32],
+    flags: &[bool],
+    pending: &HashMap<usize, u32>,
+    current_scroll: u32,
+    estimated_item_height: u32,
+) -> (Vec<u32>, Vec<bool>, u32) {
+    let old_prefix = build_prefix_sums(heights);
+    let (anchor_idx, anchor_offset) = find_scroll_anchor(&old_prefix, current_scroll);
+
+    let mut next_heights = heights.to_vec();
+    let mut next_flags = flags.to_vec();
+    for (&idx, &height) in pending {
+        if idx < next_heights.len() {
+            next_heights[idx] = height;
+        }
+        if idx < next_flags.len() {
+            next_flags[idx] = true;
+        }
+    }
+
+    let adaptive_estimate =
+        estimate_unmeasured_height(&next_heights, &next_flags, estimated_item_height);
+    for (idx, measured) in next_flags.iter().copied().enumerate() {
+        if !measured && idx < next_heights.len() {
+            next_heights[idx] = adaptive_estimate;
+        }
+    }
+
+    let new_prefix = build_prefix_sums(&next_heights);
+    let compensated_scroll = if next_heights.is_empty() {
+        0
+    } else {
+        let anchor_height = next_heights
+            .get(anchor_idx)
+            .copied()
+            .unwrap_or(estimated_item_height)
+            .max(1);
+        new_prefix[anchor_idx].saturating_add(anchor_offset.min(anchor_height.saturating_sub(1)))
+    };
+
+    (next_heights, next_flags, compensated_scroll)
+}
+
+fn build_prefix_sums(heights: &[u32]) -> Vec<u32> {
+    let mut prefix = Vec::with_capacity(heights.len() + 1);
+    prefix.push(0u32);
+    for &height in heights {
+        let next = prefix
+            .last()
+            .copied()
+            .unwrap_or(0)
+            .saturating_add(height.max(1));
+        prefix.push(next);
+    }
+    prefix
+}
+
+fn find_scroll_anchor(prefix: &[u32], current_scroll: u32) -> (usize, u32) {
+    if prefix.len() <= 1 {
+        return (0, 0);
+    }
+
+    let max_scroll = prefix.last().copied().unwrap_or(0).saturating_sub(1);
+    let clamped_scroll = current_scroll.min(max_scroll);
+    let anchor_idx = prefix
+        .partition_point(|&acc| acc <= clamped_scroll)
+        .saturating_sub(1)
+        .min(prefix.len().saturating_sub(2));
+    let anchor_offset = clamped_scroll.saturating_sub(prefix[anchor_idx]);
+
+    (anchor_idx, anchor_offset)
+}
+
+fn estimate_unmeasured_height(heights: &[u32], flags: &[bool], fallback: u32) -> u32 {
+    let measured_count = flags.iter().filter(|&&measured| measured).count();
+    if measured_count == 0 {
+        return fallback;
+    }
+
+    let measured_total: u64 = heights
+        .iter()
+        .zip(flags.iter())
+        .filter_map(|(height, measured)| measured.then_some(u64::from(*height)))
+        .sum();
+
+    (measured_total / measured_count as u64).clamp(1, u64::from(u32::MAX)) as u32
+}
+
+fn parse_anchor_msg(msg: &str) -> Option<(usize, f64)> {
+    let (idx, offset) = msg.trim().split_once(',')?;
+    Some((idx.trim().parse().ok()?, offset.trim().parse().ok()?))
+}
+
+async fn capture_visible_anchor(container_id: String) -> Option<(usize, f64)> {
+    let mut eval = document::eval(
+        r#"
+        const id = await dioxus.recv();
+        const container = document.getElementById(id);
+        if (!container) {
+            dioxus.send("missing");
+            return;
+        }
+
+        const containerRect = container.getBoundingClientRect();
+        const items = container.querySelectorAll("[data-recycle-index]");
+        for (const item of items) {
+            const rect = item.getBoundingClientRect();
+            if (rect.bottom > containerRect.top && rect.top < containerRect.bottom) {
+                const idx = item.getAttribute("data-recycle-index");
+                const offset = rect.top - containerRect.top;
+                dioxus.send(`${idx},${offset}`);
+                return;
+            }
+        }
+
+        dioxus.send("missing");
+        "#,
+    );
+    let _ = eval.send(container_id);
+    match eval.recv::<String>().await.ok() {
+        Some(msg) if msg.trim() != "missing" => parse_anchor_msg(&msg),
+        _ => None,
+    }
+}
+
 async fn sync_container_scroll(container_id: String, scroll_top: u32) {
     let eval = document::eval(
         r#"
@@ -398,4 +451,46 @@ async fn sync_container_scroll(container_id: String, scroll_top: u32) {
     );
     let _ = eval.send(container_id);
     let _ = eval.send(scroll_top);
+}
+
+async fn restore_visible_anchor(
+    container_id: String,
+    anchor_idx: usize,
+    anchor_offset: f64,
+) -> Option<u32> {
+    let mut eval = document::eval(
+        r#"
+        const id = await dioxus.recv();
+        const anchorIdx = await dioxus.recv();
+        const anchorOffset = await dioxus.recv();
+
+        await new Promise(resolve => requestAnimationFrame(resolve));
+
+        const container = document.getElementById(id);
+        if (!container) {
+            dioxus.send("missing");
+            return;
+        }
+
+        const item = container.querySelector(`[data-recycle-index="${anchorIdx}"]`);
+        if (!item) {
+            dioxus.send("missing");
+            return;
+        }
+
+        const containerRect = container.getBoundingClientRect();
+        const itemRect = item.getBoundingClientRect();
+        const targetTop = containerRect.top + anchorOffset;
+        const delta = itemRect.top - targetTop;
+        container.scrollTop += delta;
+        dioxus.send(String(Math.round(container.scrollTop)));
+        "#,
+    );
+    let _ = eval.send(container_id);
+    let _ = eval.send(anchor_idx);
+    let _ = eval.send(anchor_offset);
+    match eval.recv::<String>().await.ok() {
+        Some(msg) if msg.trim() != "missing" => msg.trim().parse::<u32>().ok(),
+        _ => None,
+    }
 }
