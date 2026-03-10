@@ -60,7 +60,6 @@ pub fn AccordionContent(props: AccordionContentProps) -> Element {
     rsx! {
         accordion::AccordionContent {
             class: "accordion-content",
-            style: "--collapsible-content-width: 140px",
             id: props.id,
             attributes: props.attributes,
             {props.children}
