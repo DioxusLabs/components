@@ -139,8 +139,9 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
                     // Flush pending height measurements.
                     let pending = pending_heights.with_mut(std::mem::take);
                     if !pending.is_empty() {
+                        let cid = container_id.peek().clone();
                         let current_scroll = *scroll_top.peek();
-                        let dom_anchor = capture_visible_anchor(container_id.peek().clone()).await;
+                        let dom_anchor = capture_visible_anchor(cid.clone()).await;
                         let (new_heights, new_flags, compensated_scroll) = {
                             let heights = measured_heights.read();
                             let flags = measured_flags.read();
@@ -158,12 +159,7 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
 
                         let restored_scroll = if let Some((anchor_idx, anchor_offset)) = dom_anchor
                         {
-                            restore_visible_anchor(
-                                container_id.peek().clone(),
-                                anchor_idx,
-                                anchor_offset,
-                            )
-                            .await
+                            restore_visible_anchor(cid.clone(), anchor_idx, anchor_offset).await
                         } else {
                             None
                         };
@@ -172,8 +168,7 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
                         if final_scroll != current_scroll {
                             scroll_top.set(final_scroll);
                             if restored_scroll.is_none() {
-                                sync_container_scroll(container_id.peek().clone(), final_scroll)
-                                    .await;
+                                sync_container_scroll(cid, final_scroll).await;
                             }
                         }
                     }
@@ -198,9 +193,12 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
     // Rebuild prefix sums when measured heights change.
     let prefix_and_total = use_memo({
         let measured_heights = measured_heights;
+        let measured_flags = measured_flags;
         move || {
             let heights = measured_heights.read();
-            let prefix = build_prefix_sums(&heights);
+            let flags = measured_flags.read();
+            let adaptive = estimate_unmeasured_height(&heights, &flags, estimated_item_height);
+            let prefix = build_prefix_sums_adaptive(&heights, &flags, adaptive);
             let total_height = *prefix.last().unwrap_or(&0);
             (Arc::new(prefix), total_height)
         }
@@ -262,7 +260,7 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
                                     let mut measured_heights_for_item = measured_heights_for_item;
                                     let mut measured_flags_for_item = measured_flags_for_item;
                                     let already_measured = measured_flags_for_item
-                                        .read()
+                                        .peek()
                                         .get(idx)
                                         .copied()
                                         .unwrap_or(false);
@@ -319,7 +317,9 @@ fn apply_pending_measurements(
     current_scroll: u32,
     estimated_item_height: u32,
 ) -> (Vec<u32>, Vec<bool>, u32) {
-    let old_prefix = build_prefix_sums(heights);
+    // Build old prefix using adaptive estimates (matching what use_memo renders).
+    let old_adaptive = estimate_unmeasured_height(heights, flags, estimated_item_height);
+    let old_prefix = build_prefix_sums_adaptive(heights, flags, old_adaptive);
     let (anchor_idx, anchor_offset) = find_scroll_anchor(&old_prefix, current_scroll);
 
     let mut next_heights = heights.to_vec();
@@ -333,39 +333,39 @@ fn apply_pending_measurements(
         }
     }
 
-    let adaptive_estimate =
+    // Build new prefix using adaptive estimates (matching what use_memo will render).
+    let new_adaptive =
         estimate_unmeasured_height(&next_heights, &next_flags, estimated_item_height);
-    for (idx, measured) in next_flags.iter().copied().enumerate() {
-        if !measured && idx < next_heights.len() {
-            next_heights[idx] = adaptive_estimate;
-        }
-    }
-
-    let new_prefix = build_prefix_sums(&next_heights);
+    let new_prefix = build_prefix_sums_adaptive(&next_heights, &next_flags, new_adaptive);
     let compensated_scroll = if next_heights.is_empty() {
         0
     } else {
-        let anchor_height = next_heights
-            .get(anchor_idx)
-            .copied()
-            .unwrap_or(estimated_item_height)
-            .max(1);
+        let anchor_height = if next_flags.get(anchor_idx).copied().unwrap_or(false) {
+            next_heights[anchor_idx]
+        } else {
+            new_adaptive
+        }
+        .max(1);
         new_prefix[anchor_idx].saturating_add(anchor_offset.min(anchor_height.saturating_sub(1)))
     };
 
     (next_heights, next_flags, compensated_scroll)
 }
 
-fn build_prefix_sums(heights: &[u32]) -> Vec<u32> {
+/// Build prefix sums substituting `adaptive` for unmeasured items.
+/// Avoids allocating an intermediate effective-heights Vec.
+fn build_prefix_sums_adaptive(heights: &[u32], flags: &[bool], adaptive: u32) -> Vec<u32> {
     let mut prefix = Vec::with_capacity(heights.len() + 1);
     prefix.push(0u32);
-    for &height in heights {
-        let next = prefix
-            .last()
-            .copied()
-            .unwrap_or(0)
-            .saturating_add(height.max(1));
-        prefix.push(next);
+    let mut acc = 0u32;
+    for (i, &height) in heights.iter().enumerate() {
+        let h = if flags.get(i).copied().unwrap_or(false) {
+            height
+        } else {
+            adaptive
+        };
+        acc = acc.saturating_add(h.max(1));
+        prefix.push(acc);
     }
     prefix
 }
