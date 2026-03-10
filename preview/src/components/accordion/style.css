@@ -30,8 +30,8 @@
 }
 
 .accordion-content > * {
-  min-height: 0;
   overflow: hidden;
+  min-height: 0;
 }
 
 .accordion-content[data-open="false"] {
@@ -46,6 +46,7 @@
   from {
     grid-template-rows: 1fr;
   }
+
   to {
     grid-template-rows: 0fr;
   }
@@ -55,6 +56,7 @@
   from {
     grid-template-rows: 0fr;
   }
+
   to {
     grid-template-rows: 1fr;
   }
