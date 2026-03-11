@@ -1,0 +1,87 @@
+.dnd-list {
+  width: 100%;
+}
+
+.dnd-list-ul {
+  padding-left: 0;
+}
+
+.dnd-list-item {
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  color: var(--secondary-color-4);
+  cursor: grab;
+  list-style: none;
+  outline: none;
+  user-select: none;
+}
+
+.dnd-list-item[data-focus-visible="true"] {
+  box-shadow: 0 0 0 2px var(--focused-border-color);
+}
+
+.dnd-list-item:focus-visible {
+  box-shadow: 0 0 0 2px var(--focused-border-color);
+}
+
+.dnd-list-item[data-is-grabbing="true"] {
+  cursor: grabbing;
+  opacity: 0.6;
+  outline: 2px dashed var(--focused-border-color);
+}
+
+.item-icon-div {
+  display: flex;
+  width: 24px;
+  align-items: center;
+  margin-right: 16px;
+  color: var(--secondary-color-4);
+}
+
+.item-body-div {
+  flex-grow: 1;
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 24px;
+}
+
+.remove-button {
+  display: flex;
+  overflow: visible;
+  width: 24px;
+  align-items: center;
+  padding: 0;
+  border-style: none;
+  margin-left: 16px;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.remove-button:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--focused-border-color);
+  outline-offset: 2px;
+}
+
+.drop-indicator {
+  position: relative;
+  z-index: 1;
+  height: 2px;
+  margin: -1px 0;
+  background-color: var(--focused-border-color);
+}
+
+.drop-indicator::before {
+  position: absolute;
+  top: -4px;
+  left: -6px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid var(--focused-border-color);
+  content: "";
+}

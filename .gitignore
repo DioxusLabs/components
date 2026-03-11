@@ -11,4 +11,6 @@ package-lock.json
 /blob-report/
 /playwright/.cache/
 **/._*
-.DS_Store
+
+# macOS
+**/.DS_Store

@@ -83,7 +83,7 @@ npx stylelint "src/**/*.css"
 To run the Playwright end-to-end tests, use:
 
 ```sh
-cd preview
+cd playwright
 npm install
 npx playwright test
 ```
