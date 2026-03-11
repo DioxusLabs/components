@@ -4,7 +4,7 @@ test('test', async ({ page }) => {
   await page.goto('http://127.0.0.1:8080/component/?name=dialog&', { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
   await page.getByRole('button', { name: 'Show Dialog' }).click();
   // Assert the dialog is open
-  const dialog = page.locator('.dialog-backdrop');
+  const dialog = page.locator('.dx-dialog-backdrop');
   await expect(dialog).toHaveAttribute('data-state', 'open');
   // Assert the close button is focused
   const closeButton = dialog.getByRole('button');

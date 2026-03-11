@@ -7,7 +7,7 @@ test('pointer navigation', async ({ page }) => {
   });
 
   // Assert the context menu is visible
-  const contextMenu = page.locator('.context-menu-content');
+  const contextMenu = page.locator('.dx-context-menu-content');
   await expect(contextMenu).toHaveAttribute('data-state', 'open');
   // Click on the "Edit" menu item
   await page.getByRole('menuitem', { name: 'Edit' }).click();
@@ -22,7 +22,7 @@ test('keyboard navigation', async ({ page }) => {
   });
 
   // Assert the context menu is visible
-  const contextMenu = page.locator('.context-menu-content');
+  const contextMenu = page.locator('.dx-context-menu-content');
   await expect(contextMenu).toHaveAttribute('data-state', 'open');
   // Hit escape to close the context menu
   await page.keyboard.press('Escape');

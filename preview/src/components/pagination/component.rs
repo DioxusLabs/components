@@ -41,7 +41,7 @@ pub fn Pagination(
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         nav {
-            class: "pagination",
+            class: "dx-pagination",
             "data-slot": "pagination",
             role: "navigation",
             aria_label: "pagination",
@@ -58,7 +58,7 @@ pub fn PaginationContent(
 ) -> Element {
     rsx! {
         ul {
-            class: "pagination-content",
+            class: "dx-pagination-content",
             "data-slot": "pagination-content",
             ..attributes,
             {children}
@@ -73,7 +73,7 @@ pub fn PaginationItem(
 ) -> Element {
     rsx! {
         li {
-            class: "pagination-item",
+            class: "dx-pagination-item",
             "data-slot": "pagination-item",
             ..attributes,
             {children}
@@ -104,7 +104,7 @@ pub fn PaginationLink(props: PaginationLinkProps) -> Element {
     let data_kind = props.data_kind.map(|kind| kind.attr());
     rsx! {
         a {
-            class: "pagination-link",
+            class: "dx-pagination-link",
             "data-slot": "pagination-link",
             "data-active": props.is_active,
             "data-size": props.size.class(),
@@ -151,12 +151,12 @@ pub fn PaginationPrevious(
             attributes,
             // ChevronLeft icon from lucide https://lucide.dev/icons/chevron-left
             svg {
-                class: "pagination-icon",
+                class: "dx-pagination-icon",
                 view_box: "0 0 24 24",
                 xmlns: "http://www.w3.org/2000/svg",
                 polyline { points: "15 6 9 12 15 18" }
             }
-            span { class: "pagination-label", "Previous" }
+            span { class: "dx-pagination-label", "Previous" }
         }
     }
 }
@@ -179,10 +179,10 @@ pub fn PaginationNext(
             onmousedown,
             onmouseup,
             attributes,
-            span { class: "pagination-label", "Next" }
+            span { class: "dx-pagination-label", "Next" }
             // ChevronRight icon from lucide https://lucide.dev/icons/chevron-right
             svg {
-                class: "pagination-icon",
+                class: "dx-pagination-icon",
                 view_box: "0 0 24 24",
                 xmlns: "http://www.w3.org/2000/svg",
                 polyline { points: "9 6 15 12 9 18" }
@@ -197,20 +197,20 @@ pub fn PaginationEllipsis(
 ) -> Element {
     rsx! {
         span {
-            class: "pagination-ellipsis",
+            class: "dx-pagination-ellipsis",
             "data-slot": "pagination-ellipsis",
             aria_hidden: "true",
             ..attributes,
             // MoreHorizontal icon from lucide https://lucide.dev/icons/more-horizontal
             svg {
-                class: "pagination-icon",
+                class: "dx-pagination-icon",
                 view_box: "0 0 24 24",
                 xmlns: "http://www.w3.org/2000/svg",
                 circle { cx: "5", cy: "12", r: "1.5" }
                 circle { cx: "12", cy: "12", r: "1.5" }
                 circle { cx: "19", cy: "12", r: "1.5" }
             }
-            span { class: "sr-only", "More pages" }
+            span { class: "dx-sr-only", "More pages" }
         }
     }
 }

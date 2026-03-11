@@ -5,10 +5,10 @@ test("test", async ({ page }) => {
         timeout: 20 * 60 * 1000,
     }); // Increase timeout to 20 minutes
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
+    let selectTrigger = page.locator(".dx-select-trigger");
     await selectTrigger.click();
     // Assert the select menu is open
-    const selectMenu = page.locator(".select-list");
+    const selectMenu = page.locator(".dx-select-list");
     await expect(selectMenu).toHaveAttribute("data-state", "open");
 
     // Assert the menu is focused
@@ -64,10 +64,10 @@ test("test", async ({ page }) => {
 test("tabbing out of menu closes the select menu", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
+    let selectTrigger = page.locator(".dx-select-trigger");
     await selectTrigger.click();
     // Assert the select menu is open
-    const selectMenu = page.locator(".select-list");
+    const selectMenu = page.locator(".dx-select-list");
     await expect(selectMenu).toHaveAttribute("data-state", "open");
 
     // Assert the menu is focused
@@ -80,10 +80,10 @@ test("tabbing out of menu closes the select menu", async ({ page }) => {
 test("tabbing out of item closes the select menu", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
+    let selectTrigger = page.locator(".dx-select-trigger");
     await selectTrigger.click();
     // Assert the select menu is open
-    const selectMenu = page.locator(".select-list");
+    const selectMenu = page.locator(".dx-select-list");
     await expect(selectMenu).toHaveAttribute("data-state", "open");
 
     // Assert the menu is focused
@@ -101,10 +101,10 @@ test("tabbing out of item closes the select menu", async ({ page }) => {
 test("options selected", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
+    let selectTrigger = page.locator(".dx-select-trigger");
     await selectTrigger.click();
     // Assert the select menu is open
-    const selectMenu = page.locator(".select-list");
+    const selectMenu = page.locator(".dx-select-list");
     await expect(selectMenu).toHaveAttribute("data-state", "open");
 
     // Assert no items have aria-selected
@@ -130,8 +130,8 @@ test("options selected", async ({ page }) => {
 test("down arrow selects first element", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
-    const selectMenu = page.locator(".select-list");
+    let selectTrigger = page.locator(".dx-select-trigger");
+    const selectMenu = page.locator(".dx-select-list");
     await selectTrigger.focus();
 
     // Select the first option
@@ -143,8 +143,8 @@ test("down arrow selects first element", async ({ page }) => {
 test("up arrow selects last element", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".select-trigger");
-    const selectMenu = page.locator(".select-list");
+    let selectTrigger = page.locator(".dx-select-trigger");
+    const selectMenu = page.locator(".dx-select-list");
     await selectTrigger.focus();
 
     // Select the first option

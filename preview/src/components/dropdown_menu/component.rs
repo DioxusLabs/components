@@ -8,7 +8,7 @@ use dioxus_primitives::merge_attributes;
 
 #[component]
 pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
-    let base = attributes!(div { class: "dropdown-menu" });
+    let base = attributes!(div { class: "dx-dropdown-menu" });
     let merged = merge_attributes(vec![base, props.attributes.clone()]);
 
     rsx! {
@@ -27,7 +27,7 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 
 #[component]
 pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
-    let base = attributes!(button { class: "dropdown-menu-trigger" });
+    let base = attributes!(button { class: "dx-dropdown-menu-trigger" });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
@@ -37,7 +37,7 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
 
 #[component]
 pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
-    let base = attributes!(div { class: "dropdown-menu-content" });
+    let base = attributes!(div { class: "dx-dropdown-menu-content" });
     let merged = merge_attributes(vec![base, props.attributes.clone()]);
 
     rsx! {
@@ -49,7 +49,7 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
 pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
     props: DropdownMenuItemProps<T>,
 ) -> Element {
-    let base = attributes!(div { class: "dropdown-menu-item" });
+    let base = attributes!(div { class: "dx-dropdown-menu-item" });
     let merged = merge_attributes(vec![base, props.attributes.clone()]);
 
     rsx! {

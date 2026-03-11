@@ -1,3 +1,6 @@
+/* Typography */
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
 /* Theme style variables */
 :root {
   --highlight-color-main: #dd7230;
@@ -16,6 +19,11 @@ body {
   padding: 0;
   margin: 0;
   background-color: var(--primary-color);
+  color: var(--secondary-color-4);
+  font-family: Inter, sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .dark-mode-only {

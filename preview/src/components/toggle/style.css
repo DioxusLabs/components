@@ -1,4 +1,4 @@
-.toggle {
+.dx-toggle {
   display: inline-flex;
   width: fit-content;
   min-width: 2rem;
@@ -15,12 +15,12 @@
   outline: none;
 }
 
-.toggle:hover, .toggle:focus-visible {
+.dx-toggle:hover, .dx-toggle:focus-visible {
   background-color: var(--primary-color-4);
   cursor: pointer;
 }
 
-.toggle[data-state="on"] {
+.dx-toggle[data-state="on"] {
   background-color: var(--primary-color-7);
   color: var(--secondary-color-1);
 }

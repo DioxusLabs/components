@@ -44,7 +44,7 @@ fn SheetRoot(props: DialogRootProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         dialog::DialogRoot {
-            class: "sheet-root",
+            class: "dx-sheet-root",
             "data-slot": "sheet-root",
             id: props.id,
             is_modal: props.is_modal,
@@ -66,8 +66,8 @@ pub fn SheetContent(
     children: Element,
 ) -> Element {
     let class = class
-        .map(|c| format!("sheet {c}"))
-        .unwrap_or("sheet".to_string());
+        .map(|c| format!("dx-sheet {c}"))
+        .unwrap_or("dx-sheet".to_string());
 
     rsx! {
         dialog::DialogContent {
@@ -77,9 +77,9 @@ pub fn SheetContent(
             "data-side": side.as_str(),
             attributes,
             {children}
-            SheetClose { class: "sheet-close",
+            SheetClose { class: "dx-sheet-close",
                 svg {
-                    class: "sheet-close-icon",
+                    class: "dx-sheet-close-icon",
                     view_box: "0 0 24 24",
                     xmlns: "http://www.w3.org/2000/svg",
                     path { d: "M18 6 6 18" }
@@ -96,7 +96,7 @@ pub fn SheetHeader(
     children: Element,
 ) -> Element {
     rsx! {
-        div { class: "sheet-header", "data-slot": "sheet-header", ..attributes, {children} }
+        div { class: "dx-sheet-header", "data-slot": "sheet-header", ..attributes, {children} }
     }
 }
 
@@ -106,7 +106,7 @@ pub fn SheetFooter(
     children: Element,
 ) -> Element {
     rsx! {
-        div { class: "sheet-footer", "data-slot": "sheet-footer", ..attributes, {children} }
+        div { class: "dx-sheet-footer", "data-slot": "sheet-footer", ..attributes, {children} }
     }
 }
 
@@ -115,7 +115,7 @@ pub fn SheetTitle(props: DialogTitleProps) -> Element {
     rsx! {
         dialog::DialogTitle {
             id: props.id,
-            class: "sheet-title",
+            class: "dx-sheet-title",
             "data-slot": "sheet-title",
             attributes: props.attributes,
             {props.children}
@@ -128,7 +128,7 @@ pub fn SheetDescription(props: DialogDescriptionProps) -> Element {
     rsx! {
         dialog::DialogDescription {
             id: props.id,
-            class: "sheet-description",
+            class: "dx-sheet-description",
             "data-slot": "sheet-description",
             attributes: props.attributes,
             {props.children}

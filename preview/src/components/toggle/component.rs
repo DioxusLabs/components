@@ -6,7 +6,7 @@ pub fn Toggle(props: ToggleProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         toggle::Toggle {
-            class: "toggle",
+            class: "dx-toggle",
             pressed: props.pressed,
             default_pressed: props.default_pressed,
             disabled: props.disabled,

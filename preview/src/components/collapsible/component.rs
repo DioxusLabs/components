@@ -17,7 +17,7 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
             on_open_change: props.on_open_change,
             as: props.r#as,
             attributes: props.attributes,
-            class: "collapsible",
+            class: "dx-collapsible",
             {props.children}
         }
     }
@@ -25,7 +25,7 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
 
 #[component]
 pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
-    let base = attributes!(button { class: "collapsible-trigger" });
+    let base = attributes!(button { class: "dx-collapsible-trigger" });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     let show_icon = props.r#as.is_none();
@@ -35,7 +35,7 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
             {props.children}
             if show_icon {
                 svg {
-                    class: "collapsible-expand-icon",
+                    class: "dx-collapsible-expand-icon",
                     view_box: "0 0 24 24",
                     xmlns: "http://www.w3.org/2000/svg",
                     // shifted up by 6 polyline { points: "6 9 12 15 18 9" }
@@ -52,7 +52,7 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
 pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
     rsx! {
         collapsible::CollapsibleContent {
-            class: "collapsible-content",
+            class: "dx-collapsible-content",
             id: props.id,
             attributes: props.attributes,
             {props.children}

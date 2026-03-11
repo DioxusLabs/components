@@ -15,7 +15,7 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         div {
             date_picker::DatePicker {
-                class: "date-picker",
+                class: "dx-date-picker",
                 on_value_change: props.on_value_change,
                 selected_date: props.selected_date,
                 disabled: props.disabled,
@@ -41,7 +41,7 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         div {
             date_picker::DateRangePicker {
-                class: "date-picker",
+                class: "dx-date-picker",
                 on_range_change: props.on_range_change,
                 selected_range: props.selected_range,
                 disabled: props.disabled,
@@ -123,7 +123,7 @@ pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
         PopoverTrigger { aria_label: "Show Calendar", attributes: props.attributes,
             svg {
-                class: "date-picker-expand-icon",
+                class: "dx-date-picker-expand-icon",
                 view_box: "0 0 24 24",
                 xmlns: "http://www.w3.org/2000/svg",
                 polyline { points: "6 9 12 15 18 9" }
@@ -136,7 +136,7 @@ pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
 pub fn DatePickerPopoverContent(props: PopoverContentProps) -> Element {
     rsx! {
         PopoverContent {
-            class: "popover-content",
+            class: "dx-popover-content",
             id: props.id,
             side: props.side,
             align: props.align,

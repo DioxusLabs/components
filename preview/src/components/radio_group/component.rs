@@ -6,7 +6,7 @@ pub fn RadioGroup(props: RadioGroupProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         radio_group::RadioGroup {
-            class: "radio-group",
+            class: "dx-radio-group",
             value: props.value,
             default_value: props.default_value,
             on_value_change: props.on_value_change,
@@ -25,7 +25,7 @@ pub fn RadioGroup(props: RadioGroupProps) -> Element {
 pub fn RadioItem(props: RadioItemProps) -> Element {
     rsx! {
         radio_group::RadioItem {
-            class: "radio-item",
+            class: "dx-radio-item",
             value: props.value,
             index: props.index,
             disabled: props.disabled,

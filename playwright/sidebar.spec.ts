@@ -7,7 +7,7 @@ async function gotoSidebarBlock(page: Page) {
     timeout: 20 * 60 * 1000,
   });
 
-  await expect(page.locator(".sidebar-wrapper")).toBeVisible();
+  await expect(page.locator(".dx-sidebar-wrapper")).toBeVisible();
 }
 
 test("sidebar: preview page renders block", async ({ page }) => {
@@ -31,14 +31,14 @@ test("sidebar: preview page renders block", async ({ page }) => {
     throw new Error("Sidebar preview iframe has no content frame");
   }
 
-  await expect(frame.locator(".sidebar-wrapper")).toBeVisible();
+  await expect(frame.locator(".dx-sidebar-wrapper")).toBeVisible();
 });
 
 test.describe("sidebar: block route", () => {
   test("desktop: toggles via button and Ctrl+B", async ({ page }) => {
     await gotoSidebarBlock(page);
 
-    const sidebar = page.locator(".sidebar-desktop");
+    const sidebar = page.locator(".dx-sidebar-desktop");
     await expect(sidebar).toHaveAttribute("data-state", "expanded");
     const trigger = page.locator('[data-slot="sidebar-trigger"]');
     await expect(trigger).toHaveAccessibleName("Toggle Sidebar");
@@ -59,7 +59,7 @@ test.describe("sidebar: block route", () => {
   test("desktop: side switch updates data-side", async ({ page }) => {
     await gotoSidebarBlock(page);
 
-    const sidebar = page.locator(".sidebar-desktop");
+    const sidebar = page.locator(".dx-sidebar-desktop");
     await expect(sidebar).toHaveAttribute("data-side", "left");
 
     await page.getByRole("button", { name: "Right" }).click();
@@ -73,7 +73,7 @@ test.describe("sidebar: block route", () => {
   }) => {
     await gotoSidebarBlock(page);
 
-    const sidebar = page.locator(".sidebar-desktop");
+    const sidebar = page.locator(".dx-sidebar-desktop");
     const trigger = page.locator('[data-slot="sidebar-trigger"]');
 
     await page.getByRole("button", { name: "Icon" }).click();
@@ -106,7 +106,7 @@ test.describe("sidebar: block route", () => {
     const trigger = page.locator('[data-slot="sidebar-trigger"]');
     await trigger.tap();
 
-    const sheet = page.locator(".sheet-root");
+    const sheet = page.locator(".dx-sheet-root");
     await expect(sheet).toHaveAttribute("data-state", "open");
     await page.keyboard.press("Escape");
     await expect(sheet).toHaveCount(0);

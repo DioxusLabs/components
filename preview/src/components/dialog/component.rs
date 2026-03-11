@@ -8,7 +8,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         dialog::DialogRoot {
-            class: "dialog-backdrop",
+            class: "dx-dialog-backdrop",
             id: props.id,
             is_modal: props.is_modal,
             open: props.open,
@@ -23,7 +23,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
 #[component]
 pub fn DialogContent(props: DialogContentProps) -> Element {
     rsx! {
-        dialog::DialogContent { class: "dialog", id: props.id, attributes: props.attributes, {props.children} }
+        dialog::DialogContent { class: "dx-dialog", id: props.id, attributes: props.attributes, {props.children} }
     }
 }
 
@@ -31,7 +31,7 @@ pub fn DialogContent(props: DialogContentProps) -> Element {
 pub fn DialogTitle(props: DialogTitleProps) -> Element {
     rsx! {
         dialog::DialogTitle {
-            class: "dialog-title",
+            class: "dx-dialog-title",
             id: props.id,
             attributes: props.attributes,
             {props.children}
@@ -43,7 +43,7 @@ pub fn DialogTitle(props: DialogTitleProps) -> Element {
 pub fn DialogDescription(props: DialogDescriptionProps) -> Element {
     rsx! {
         dialog::DialogDescription {
-            class: "dialog-description",
+            class: "dx-dialog-description",
             id: props.id,
             attributes: props.attributes,
             {props.children}
