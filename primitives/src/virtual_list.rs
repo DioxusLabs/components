@@ -107,31 +107,32 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
             const container = document.getElementById(await dioxus.recv());
             if (!container) return;
 
-            let frame = null;
             let scrollEndTimer = null;
+            let lastOffset = null;
 
             function publish(isScrolling) {
-                frame = null;
-                const scroll = container.scrollTop;
+                const scroll = Math.round(container.scrollTop);
+                // Deduplicate: don't send if offset hasn't changed
+                if (!isScrolling && scroll === lastOffset) return;
+                lastOffset = scroll;
                 const viewport = Math.min(container.clientHeight, window.innerHeight) || 600;
                 dioxus.send(JSON.stringify({
                     type: "scroll",
-                    offset: Math.round(scroll),
+                    offset: scroll,
                     viewport: viewport,
                     isScrolling: isScrolling
                 }));
             }
 
-            function scheduleUpdate() {
+            function onScroll() {
                 // Clear any pending scroll-end detection
                 if (scrollEndTimer !== null) {
                     clearTimeout(scrollEndTimer);
                 }
 
-                // Schedule the scroll update
-                if (frame === null) {
-                    frame = requestAnimationFrame(() => publish(true));
-                }
+                // Send scroll event immediately (no RAF batching)
+                // This ensures Rust receives the event before the next render
+                publish(true);
 
                 // Debounce scroll-end detection (150ms after last scroll event)
                 scrollEndTimer = setTimeout(() => {
@@ -143,13 +144,12 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
             // Initial publish
             publish(false);
 
-            container.addEventListener("scroll", scheduleUpdate, { passive: true });
+            container.addEventListener("scroll", onScroll, { passive: true });
             window.addEventListener("resize", () => publish(false), { passive: true });
 
             await dioxus.recv();
-            if (frame !== null) cancelAnimationFrame(frame);
             if (scrollEndTimer !== null) clearTimeout(scrollEndTimer);
-            container.removeEventListener("scroll", scheduleUpdate);
+            container.removeEventListener("scroll", onScroll);
         "#;
         let mut eval = document::eval(script);
         let _ = eval.send(container_id.peek().clone());
@@ -194,18 +194,19 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
     });
 
     // Read scroll state to establish reactive dependency
-    let _current_scroll = *scroll_offset.read();
+    let current_scroll = *scroll_offset.read();
     let current_viewport = *viewport_height.read();
     // Read is_scrolling to trigger re-render on scroll-end (for unfreezing total_size)
     let _ = *is_scrolling.read();
 
     // Get computed values from virtualizer
-    // Note: Don't call set_scroll_offset here - the event handler manages scroll state.
-    // Calling it here with potentially stale is_scrolling can prematurely unfreeze
-    // stable_total_size, causing scrollbar drift on some browsers (e.g., Firefox).
+    // Use sync_scroll_offset instead of set_scroll_offset to update the position
+    // without affecting is_scrolling state - the event handler manages scroll state
+    // transitions and stable_total_size freezing.
     let (virtual_items, total_height) = {
         let v_rc = virtualizer.peek();
         let mut v = v_rc.borrow_mut();
+        v.sync_scroll_offset(current_scroll);
         v.set_viewport_size(Rect::new(0, current_viewport));
         let items = v.get_virtual_items();
         let total = v.get_total_size();

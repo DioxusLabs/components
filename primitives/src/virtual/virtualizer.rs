@@ -288,6 +288,27 @@ where
         correction
     }
 
+    /// Updates only the scroll offset for range calculation, without affecting
+    /// the is_scrolling state or stable_total_size. Use this in render functions
+    /// where you need to sync the offset but don't want to interfere with scroll
+    /// state transitions managed by event handlers.
+    ///
+    /// If the scroll position has changed and stable_total_size is not yet set,
+    /// this will freeze the total size to prevent drift during the first scroll
+    /// events before the async event handler has processed them.
+    pub fn sync_scroll_offset(&mut self, offset: u32) {
+        if self.scroll_offset != offset {
+            // If scroll position changed and we haven't frozen yet, freeze now.
+            // This handles the case where render runs before the async event
+            // handler has processed the scroll event.
+            if self.stable_total_size.is_none() {
+                self.stable_total_size = Some(self.calculate_total_size());
+            }
+            self.scroll_offset = offset;
+            self.range_dirty = true;
+        }
+    }
+
     /// Returns the current scroll offset.
     pub fn scroll_offset(&self) -> u32 {
         self.scroll_offset
@@ -621,11 +642,10 @@ where
     /// Returns the total scrollable size.
     /// During active scrolling, returns a frozen value to prevent scrollbar drift.
     pub fn get_total_size(&mut self) -> u32 {
-        // During scrolling, use the frozen value to prevent scrollbar drift
-        if self.is_scrolling {
-            if let Some(stable) = self.stable_total_size {
-                return stable;
-            }
+        // Use frozen value if set - this prevents scrollbar drift during scrolling.
+        // The frozen value is set when scrolling starts and cleared when it stops.
+        if let Some(stable) = self.stable_total_size {
+            return stable;
         }
         self.calculate_total_size()
     }
