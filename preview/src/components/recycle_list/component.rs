@@ -8,6 +8,7 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
         dioxus_primitives::recycle_list::RecycleList {
             count: props.count,
             buffer: props.buffer,
+            estimate_size: props.estimate_size,
             render_item: props.render_item,
             attributes: props.attributes,
         }
