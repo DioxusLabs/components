@@ -1,4 +1,4 @@
-//! Defines the [`RecycleList`] component for rendering large lists with virtualization.
+//! Defines the [`VirtualList`] component for rendering large lists with virtualization.
 
 use dioxus::prelude::*;
 use serde::Deserialize;
@@ -7,9 +7,9 @@ use std::rc::Rc;
 
 use crate::r#virtual::{Rect, Virtualizer, VirtualizerOptions};
 
-/// The props for the [`RecycleList`] component.
+/// The props for the [`VirtualList`] component.
 #[derive(Props, Clone, PartialEq)]
-pub struct RecycleListProps {
+pub struct VirtualListProps {
     /// The total number of items in the list.
     pub count: usize,
     /// The amount of render buffer (in estimated row counts) above and below the viewport.
@@ -26,9 +26,9 @@ pub struct RecycleListProps {
     pub attributes: Vec<Attribute>,
 }
 
-/// # RecycleList
+/// # VirtualList
 ///
-/// The `RecycleList` component virtualizes a large list by rendering only the visible slice plus a
+/// The `VirtualList` component virtualizes a large list by rendering only the visible slice plus a
 /// configurable buffer. It supports dynamic row heights and keeps total scroll height with a
 /// virtual canvas.
 ///
@@ -40,7 +40,7 @@ pub struct RecycleListProps {
 ///
 /// ```rust
 /// use dioxus::prelude::*;
-/// use dioxus_primitives::recycle_list::RecycleList;
+/// use dioxus_primitives::virtual_list::VirtualList;
 ///
 /// #[derive(Clone, PartialEq)]
 /// struct Row {
@@ -50,7 +50,7 @@ pub struct RecycleListProps {
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
-///         RecycleList {
+///         VirtualList {
 ///             count: 100,
 ///             buffer: 8,
 ///             // Optional: estimate height per item for smoother scrolling
@@ -66,11 +66,11 @@ pub struct RecycleListProps {
 ///
 /// ## Styling
 ///
-/// The [`RecycleList`] component renders a container `div` with the class `recycle-list-container`.
+/// The [`VirtualList`] component renders a container `div` with the class `virtual-list-container`.
 /// All user-provided `attributes` are spread onto the container element.
 #[component]
-pub fn RecycleList(props: RecycleListProps) -> Element {
-    let RecycleListProps {
+pub fn VirtualList(props: VirtualListProps) -> Element {
+    let VirtualListProps {
         count,
         buffer,
         estimate_size,
@@ -194,17 +194,18 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
     });
 
     // Read scroll state to establish reactive dependency
-    let current_scroll = *scroll_offset.read();
+    let _current_scroll = *scroll_offset.read();
     let current_viewport = *viewport_height.read();
-    let currently_scrolling = *is_scrolling.read();
+    // Read is_scrolling to trigger re-render on scroll-end (for unfreezing total_size)
+    let _ = *is_scrolling.read();
 
     // Get computed values from virtualizer
+    // Note: Don't call set_scroll_offset here - the event handler manages scroll state.
+    // Calling it here with potentially stale is_scrolling can prematurely unfreeze
+    // stable_total_size, causing scrollbar drift on some browsers (e.g., Firefox).
     let (virtual_items, total_height) = {
         let v_rc = virtualizer.peek();
         let mut v = v_rc.borrow_mut();
-        // Update virtualizer with current scroll state before getting items
-        // Pass the actual scrolling state to keep stable_total_size frozen during scroll
-        let _ = v.set_scroll_offset(current_scroll, currently_scrolling);
         v.set_viewport_size(Rect::new(0, current_viewport));
         let items = v.get_virtual_items();
         let total = v.get_total_size();
@@ -219,7 +220,7 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
     rsx! {
         div {
             id: container_id,
-            class: "recycle-list-container",
+            class: "virtual-list-container",
             role: "list",
             tabindex: "0",
             ..attributes,
@@ -237,7 +238,7 @@ pub fn RecycleList(props: RecycleListProps) -> Element {
                             div {
                                 key: "{idx}",
                                 role: "listitem",
-                                "data-recycle-index": "{idx}",
+                                "data-virtual-index": "{idx}",
                                 "aria-setsize": set_size,
                                 "aria-posinset": "{idx + 1}",
                                 onresize: move |event: Event<ResizeData>| {

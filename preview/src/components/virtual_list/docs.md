@@ -1,9 +1,9 @@
-The RecycleList component virtualizes large lists by rendering only visible rows plus a buffer. It is useful for long, dynamic-height datasets where rendering every row at once would be expensive.
+The VirtualList component virtualizes large lists by rendering only visible rows plus a buffer. It is useful for long, dynamic-height datasets where rendering every row at once would be expensive.
 
 ## Component Structure
 
 ```rust
-RecycleList {
+VirtualList {
     // Total number of items.
     count: 2000,
     // Render buffer (approximate row count) above and below viewport.

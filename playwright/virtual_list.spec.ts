@@ -5,11 +5,11 @@ async function testScrollHeightStability(
   page: import("@playwright/test").Page,
   tolerancePx: number
 ) {
-  await page.goto("http://127.0.0.1:8080/component/?name=recycle_list&", {
+  await page.goto("http://127.0.0.1:8080/component/?name=virtual_list&", {
     timeout: 20 * 60 * 1000,
   });
 
-  const container = page.locator(".recycle-list-container").first();
+  const container = page.locator(".virtual-list-container").first();
   await expect(container).toBeVisible({ timeout: 30000 });
 
   // Wait for initial render
@@ -94,15 +94,15 @@ test("scrollHeight remains stable during continuous scroll", async ({ page }) =>
 // Test with random_heights variant which has highly variable item sizes
 // This reproduces production failure where adaptive estimation struggles
 test("scrollHeight stable with random heights variant", async ({ page }) => {
-  await page.goto("http://127.0.0.1:8080/component/block/?name=recycle_list&variant=random_heights", {
+  await page.goto("http://127.0.0.1:8080/component/block/?name=virtual_list&variant=random_heights", {
     timeout: 20 * 60 * 1000,
   });
 
-  const container = page.locator(".recycle-list-container").first();
+  const container = page.locator(".virtual-list-container").first();
   await expect(container).toBeVisible({ timeout: 30000 });
 
   // Verify variant is loaded by checking for variant-specific content
-  const firstCard = page.locator(".recycle-list-card h3").first();
+  const firstCard = page.locator(".virtual-list-card h3").first();
   const cardText = await firstCard.textContent();
   console.log("First card text:", cardText);
   // Random heights variant shows "X repeats" in the heading
@@ -166,10 +166,10 @@ test("scrollHeight stable with random heights variant", async ({ page }) => {
   ).toBeLessThan(15000);
 });
 
-test("recycle list virtualizes rows and updates on scroll", async ({ page }) => {
-  await page.goto("http://127.0.0.1:8080/component/?name=recycle_list&", { timeout: 20 * 60 * 1000 });
+test("virtual list virtualizes rows and updates on scroll", async ({ page }) => {
+  await page.goto("http://127.0.0.1:8080/component/?name=virtual_list&", { timeout: 20 * 60 * 1000 });
 
-  const cards = page.locator(".recycle-list-card");
+  const cards = page.locator(".virtual-list-card");
   await expect(cards.first()).toBeVisible({ timeout: 30000 });
 
   const initialCount = await cards.count();
@@ -181,7 +181,7 @@ test("recycle list virtualizes rows and updates on scroll", async ({ page }) => 
   // re-renders may reset scrollTop, especially on slower engines (WebKit).
   await expect(async () => {
     await page.evaluate(() => {
-      document.querySelectorAll(".recycle-list-container").forEach((c) => {
+      document.querySelectorAll(".virtual-list-container").forEach((c) => {
         if (c.scrollHeight > c.clientHeight + 1) {
           c.scrollTop = 6000;
         }
@@ -189,7 +189,7 @@ test("recycle list virtualizes rows and updates on scroll", async ({ page }) => 
       window.scrollTo(0, 6000);
     });
     await page.waitForTimeout(300);
-    const headings = await page.locator(".recycle-list-card h3").allTextContents();
+    const headings = await page.locator(".virtual-list-card h3").allTextContents();
     // After scrolling to offset 6000, at least some items with index > 30
     // should be visible, proving the virtual list responded to the scroll.
     const hasScrolledContent = headings.some((h) => {

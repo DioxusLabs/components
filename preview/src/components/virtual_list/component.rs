@@ -1,11 +1,11 @@
 use dioxus::prelude::*;
-pub use dioxus_primitives::recycle_list::RecycleListProps;
+pub use dioxus_primitives::virtual_list::VirtualListProps;
 
-/// Styled wrapper around the primitive `RecycleList`.
+/// Styled wrapper around the primitive `VirtualList`.
 #[component]
-pub fn RecycleList(props: RecycleListProps) -> Element {
+pub fn VirtualList(props: VirtualListProps) -> Element {
     rsx! {
-        dioxus_primitives::recycle_list::RecycleList {
+        dioxus_primitives::virtual_list::VirtualList {
             count: props.count,
             buffer: props.buffer,
             estimate_size: props.estimate_size,

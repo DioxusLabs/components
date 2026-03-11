@@ -1,5 +1,5 @@
 {
-  "name": "recycle_list",
+  "name": "virtual_list",
   "description": "A virtualized list component for large datasets.",
   "authors": ["brian"],
   "exclude": ["variants", "docs.md", "component.json"],
