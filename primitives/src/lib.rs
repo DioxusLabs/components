@@ -36,7 +36,6 @@ pub mod popover;
 mod portal;
 pub mod progress;
 pub mod radio_group;
-pub mod virtual_list;
 pub mod scroll_area;
 pub mod select;
 pub mod separator;
@@ -49,6 +48,7 @@ pub mod toggle_group;
 pub mod toolbar;
 pub mod tooltip;
 pub mod r#virtual;
+pub mod virtual_list;
 
 pub(crate) const FOCUS_TRAP_JS: Asset = asset!("/src/js/focus-trap.js");
 
