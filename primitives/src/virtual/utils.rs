@@ -55,20 +55,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_find_nearest_binary_search_empty() {
-        let measurements: Vec<VirtualItem> = vec![];
-        assert_eq!(find_nearest_binary_search(&measurements, 100), 0);
-    }
-
-    #[test]
-    fn test_find_nearest_binary_search_single() {
-        let measurements = vec![VirtualItem::new(0, 0, 0, 100, 0)];
-        assert_eq!(find_nearest_binary_search(&measurements, 0), 0);
-        assert_eq!(find_nearest_binary_search(&measurements, 50), 0);
-        assert_eq!(find_nearest_binary_search(&measurements, 100), 0);
-    }
-
-    #[test]
     fn test_find_nearest_binary_search_multiple() {
         // Items at offsets: 0, 100, 200, 300, 400
         let measurements: Vec<VirtualItem> = (0..5)

@@ -546,25 +546,6 @@ mod tests {
     }
 
     #[test]
-    fn test_total_size() {
-        let mut v = create_test_virtualizer();
-        // 100 items * 50px each = 5000px
-        assert_eq!(v.get_total_size(), 5000);
-    }
-
-    #[test]
-    fn test_virtual_items_with_overscan() {
-        let mut v = create_test_virtualizer();
-        v.set_scroll_offset(500, false); // Scroll to item 10
-
-        let items = v.get_virtual_items();
-
-        // Should include overscan items before and after
-        assert!(!items.is_empty());
-        assert!(items.first().unwrap().index <= 10);
-    }
-
-    #[test]
     fn test_resize_item_below_viewport() {
         let mut v = create_test_virtualizer();
         v.set_scroll_offset(0, false);

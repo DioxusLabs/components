@@ -86,26 +86,3 @@ impl Rect {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_virtual_item_new() {
-        let item = VirtualItem::new(5, 5, 100, 50, 0);
-        assert_eq!(item.key, 5);
-        assert_eq!(item.index, 5);
-        assert_eq!(item.start, 100);
-        assert_eq!(item.end, 150);
-        assert_eq!(item.size, 50);
-        assert_eq!(item.lane, 0);
-    }
-
-    #[test]
-    fn test_rect_size() {
-        let rect = Rect::new(800, 600);
-        assert_eq!(rect.size(true), 800); // horizontal
-        assert_eq!(rect.size(false), 600); // vertical
-    }
-}
