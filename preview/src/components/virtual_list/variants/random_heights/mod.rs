@@ -53,8 +53,8 @@ pub fn Demo() -> Element {
             }
             style { {INLINE_STYLE} }
             VirtualList {
-                count: 2000,
-                buffer: 12,
+                count: 2000usize,
+                buffer: 12usize,
                 // NO estimate_size - uses adaptive estimation which will struggle
                 // with random heights until many items are measured
                 render_item: move |idx: usize| {
