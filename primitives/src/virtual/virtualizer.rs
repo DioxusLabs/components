@@ -283,8 +283,7 @@ where
         let adjusted_scroll = self.adjusted_scroll_offset();
         let is_above_viewport = item.start < adjusted_scroll;
 
-        let should_adjust_now =
-            significant_delta && !self.is_scrolling && is_above_viewport;
+        let should_adjust_now = significant_delta && !self.is_scrolling && is_above_viewport;
 
         // Update the size cache and adaptive estimation tracking
         let was_measured = self.item_size_cache.contains_key(&key);
