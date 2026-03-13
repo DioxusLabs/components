@@ -5,9 +5,9 @@ The VirtualList component virtualizes large lists by rendering only visible rows
 ```rust
 VirtualList {
     // Total number of items.
-    count: 2000,
+    count: 2000usize,
     // Render buffer (approximate row count) above and below viewport.
-    buffer: 8,
+    buffer: 8usize,
     // Row renderer callback receives the absolute index.
     render_item: move |idx: usize| rsx! {
         article { key: "{idx}", "{rows[idx].title}" }

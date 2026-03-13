@@ -49,8 +49,8 @@ pub struct VirtualListProps {
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         VirtualList {
-///             count: 100,
-///             buffer: 8,
+///             count: 100usize,
+///             buffer: 8usize,
 ///             // Optional: estimate height per item for smoother scrolling
 ///             // If omitted, uses adaptive estimation based on measured items
 ///             estimate_size: |_idx| 48,
