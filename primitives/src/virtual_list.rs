@@ -98,12 +98,8 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
     use_effect(move || {
         virtualizer.write().set_count(count());
     });
-    use_effect(move || {
-        virtualizer.write().sync_scroll_offset(scroll_offset());
-    });
-    use_effect(move || {
-        virtualizer.write().set_viewport_size(viewport_height());
-    });
+    // scroll_offset and viewport_height are read in the render body below,
+    // which subscribes the component and triggers re-renders on change.
 
     // Subscribe to scroll events via JS bridge
     use_effect(move || {
@@ -216,10 +212,12 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
     };
     let mut v = virtualizer.write();
 
+    // Sync scroll state into the virtualizer during render so that reading
+    // these signals subscribes the component and triggers re-renders on scroll.
+    v.sync_scroll_offset(scroll_offset());
+    v.set_viewport_size(viewport_height());
+
     // Get computed values from virtualizer
-    // Use sync_scroll_offset instead of set_scroll_offset to update the position
-    // without affecting is_scrolling state - the event handler manages scroll state
-    // transitions and stable_total_size freezing.
     let (mut virtual_items, total_height) = {
         let total = v.get_total_size();
         let items = v.get_virtual_items().peekable();
