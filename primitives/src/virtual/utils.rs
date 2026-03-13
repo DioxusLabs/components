@@ -1,30 +1,11 @@
 //! Utility functions for the virtual list implementation.
-//!
-//! These utilities are framework-agnostic and mirror TanStack Virtual's utils.
 
 use super::types::VirtualItem;
-
-/// Approximate equality for scroll positions.
-///
-/// Returns true if the two values are within 1 pixel of each other.
-/// This is used to determine if scroll has settled at the target position.
-#[inline]
-pub fn approx_equal(a: u32, b: u32) -> bool {
-    (a as i32 - b as i32).abs() < 2
-}
 
 /// Binary search to find the nearest item at or before the given offset.
 ///
 /// Returns the index of the item whose `start` position is closest to
-/// (but not exceeding) the given offset. This is used for calculating
-/// the visible range.
-///
-/// # Arguments
-/// * `measurements` - The sorted list of virtual items
-/// * `offset` - The scroll offset to search for
-///
-/// # Returns
-/// The index of the nearest item, or 0 if measurements is empty.
+/// (but not exceeding) the given offset.
 pub fn find_nearest_binary_search(measurements: &[VirtualItem], offset: u32) -> usize {
     if measurements.is_empty() {
         return 0;
@@ -53,18 +34,6 @@ pub fn find_nearest_binary_search(measurements: &[VirtualItem], offset: u32) -> 
 }
 
 /// Extract indices from a range with overscan applied.
-///
-/// This is the default range extractor that adds overscan items
-/// before and after the visible range.
-///
-/// # Arguments
-/// * `start_index` - First visible item index
-/// * `end_index` - Last visible item index
-/// * `overscan` - Number of items to render outside visible range
-/// * `count` - Total number of items
-///
-/// # Returns
-/// A vector of indices to render.
 pub fn default_range_extractor(
     start_index: usize,
     end_index: usize,
@@ -84,15 +53,6 @@ pub fn default_range_extractor(
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_approx_equal() {
-        assert!(approx_equal(100, 100));
-        assert!(approx_equal(100, 101));
-        assert!(approx_equal(101, 100));
-        assert!(!approx_equal(100, 102));
-        assert!(!approx_equal(102, 100));
-    }
 
     #[test]
     fn test_find_nearest_binary_search_empty() {
