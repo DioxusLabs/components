@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 use crate::r#virtual::{
     compute_measurements, get_total_size, get_virtual_items, resize_item, set_scroll_offset,
-    set_viewport_size, EstimateSizeFn, VirtualizerState, VirtualizerStateStoreExt,
+    set_viewport_size, VirtualizerState, VirtualizerStateStoreExt,
 };
 
 /// The props for the [`VirtualList`] component.
@@ -82,7 +82,6 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
     } = props;
 
     let container_id = crate::use_unique_id();
-    let use_adaptive = estimate_size.is_none();
 
     // Create the Store — only holds mutable shared state
     let state: Store<VirtualizerState> = use_store(|| VirtualizerState {
@@ -95,16 +94,18 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
         deferred_adjustments: 0,
     });
 
-    // Estimate function stored separately (closures can't go in Store)
-    let estimate_fn = move |i: usize| estimate_size.as_ref().map(|c| c(i)).unwrap_or(100);
-
     // Measurements as a memo — recomputes when count or item_size_cache change.
     // Peeked (not read) by the component, so recomputation doesn't trigger re-renders.
     let measurements: Memo<Vec<crate::r#virtual::types::VirtualItem>> = use_memo(move || {
         let count = count();
         let isc = state.item_size_cache();
         let item_size_cache = isc.read();
-        compute_measurements(count, &item_size_cache, use_adaptive, &estimate_fn)
+        let estimate_cb = estimate_size.as_ref().map(|c| move |i: usize| c(i));
+        compute_measurements(
+            count,
+            &item_size_cache,
+            estimate_cb.as_ref().map(|f| f as &dyn Fn(usize) -> u32),
+        )
     });
 
     // Subscribe to scroll events via JS bridge
@@ -163,9 +164,10 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
             while let Ok(scroll_msg) = eval.recv::<ScrollMsg>().await {
                 let scrolling = scroll_msg.is_scrolling;
 
-                let m = measurements.peek();
-                let correction = set_scroll_offset(&state, &m, scroll_msg.offset, scrolling);
-                drop(m);
+                let correction = {
+                    let m = measurements.peek();
+                    set_scroll_offset(&state, &m, scroll_msg.offset, scrolling)
+                };
                 set_viewport_size(&state, scroll_msg.viewport);
 
                 if let Some(delta) = correction {

@@ -8,12 +8,10 @@ use dioxus::prelude::*;
 use super::types::{Key, VirtualItem};
 use super::utils::{default_range_extractor, find_nearest_binary_search};
 
-
 /// Reactive virtualizer state.
 ///
 /// Only holds mutable state shared between event handlers and the render body.
-/// Prop-derived values (`count`, `overscan`, `use_adaptive_estimation`) live
-/// outside the Store and are read directly from signals or captured in closures.
+/// Prop-derived values live outside the Store and are read directly from signals.
 #[derive(Clone, PartialEq, Store)]
 pub struct VirtualizerState {
     // --- Reactive (`.read()` in render body → triggers re-renders) ---
@@ -46,13 +44,15 @@ pub struct VirtualizerState {
 /// This is a pure function suitable for use inside a `use_memo`.
 /// Adaptive estimation (average of measured sizes) is derived directly
 /// from `item_size_cache` rather than tracked separately.
+///
+/// If `estimate` is provided, it is always used for unmeasured items.
+/// Otherwise, falls back to the adaptive average of measured sizes, or 100px.
 pub fn compute_measurements(
     count: usize,
     item_size_cache: &HashMap<Key, u32>,
-    use_adaptive: bool,
-    estimate: &dyn Fn(usize) -> u32,
+    estimate: Option<&dyn Fn(usize) -> u32>,
 ) -> Vec<VirtualItem> {
-    let adaptive_size = if use_adaptive && !item_size_cache.is_empty() {
+    let adaptive_size = if estimate.is_none() && !item_size_cache.is_empty() {
         let sum: u64 = item_size_cache.values().map(|&v| v as u64).sum();
         Some((sum / item_size_cache.len() as u64) as u32)
     } else {
@@ -63,10 +63,17 @@ pub fn compute_measurements(
     for i in 0..count {
         let key = i;
         let size = item_size_cache.get(&key).copied().unwrap_or_else(|| {
-            adaptive_size.unwrap_or_else(|| estimate(i))
+            if let Some(est) = estimate {
+                est(i)
+            } else {
+                adaptive_size.unwrap_or(100)
+            }
         });
 
-        let start = measurements.last().map(|m: &VirtualItem| m.end()).unwrap_or(0);
+        let start = measurements
+            .last()
+            .map(|m: &VirtualItem| m.end())
+            .unwrap_or(0);
         measurements.push(VirtualItem::new(key, i, start, size));
     }
     measurements
@@ -210,10 +217,7 @@ pub fn get_virtual_items(
 /// Return the total scrollable size.
 ///
 /// During active scrolling returns a frozen value to prevent scrollbar drift.
-pub fn get_total_size(
-    state: &Store<VirtualizerState>,
-    measurements: &[VirtualItem],
-) -> u32 {
+pub fn get_total_size(state: &Store<VirtualizerState>, measurements: &[VirtualItem]) -> u32 {
     if let Some(stable) = *state.stable_total_size().peek() {
         return stable;
     }
@@ -317,7 +321,7 @@ mod tests {
     fn make_measurements(state: &Store<VirtualizerState>) -> Vec<VirtualItem> {
         let isc = state.item_size_cache();
         let cache = isc.peek();
-        compute_measurements(100, &cache, false, &|_| 50)
+        compute_measurements(100, &cache, Some(&|_| 50))
     }
 
     #[test]
