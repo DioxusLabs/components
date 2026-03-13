@@ -2266,7 +2266,6 @@ dependencies = [
  "lazy-js-bundle 0.6.2",
  "num-integer",
  "serde",
- "serde_json",
  "time",
  "tracing",
 ]

@@ -155,39 +155,37 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
         let _ = eval.send(container_id.peek().clone());
 
         spawn(async move {
-            while let Ok(msg) = eval.recv::<String>().await {
-                if let Some(scroll_msg) = parse_scroll_msg(&msg) {
-                    let scrolling = scroll_msg.is_scrolling;
+            while let Ok(scroll_msg) = eval.recv::<ScrollMsg>().await {
+                let scrolling = scroll_msg.is_scrolling;
 
-                    // Update virtualizer state and get any scroll correction
-                    let correction = {
-                        let v_rc = virtualizer.peek();
-                        let mut v = v_rc.borrow_mut();
-                        let correction = v.set_scroll_offset(scroll_msg.offset, scrolling);
-                        v.set_viewport_size(scroll_msg.viewport);
-                        correction
-                    };
+                // Update virtualizer state and get any scroll correction
+                let correction = {
+                    let v_rc = virtualizer.peek();
+                    let mut v = v_rc.borrow_mut();
+                    let correction = v.set_scroll_offset(scroll_msg.offset, scrolling);
+                    v.set_viewport_size(scroll_msg.viewport);
+                    correction
+                };
 
-                    // Update is_scrolling FIRST so re-renders see correct state
-                    if scrolling != *is_scrolling.peek() {
-                        is_scrolling.set(scrolling);
-                    }
+                // Update is_scrolling FIRST so re-renders see correct state
+                if scrolling != *is_scrolling.peek() {
+                    is_scrolling.set(scrolling);
+                }
 
-                    // Apply scroll correction when scrolling stops (to compensate for
-                    // height changes that occurred during scrolling)
-                    if let Some(delta) = correction {
-                        let new_scroll = (scroll_msg.offset as i32 + delta).max(0) as u32;
-                        sync_container_scroll(container_id.peek().clone(), new_scroll).await;
-                        scroll_offset.set(new_scroll);
-                    } else {
-                        // Update scroll offset to trigger re-render
-                        if scroll_msg.offset != *scroll_offset.peek() {
-                            scroll_offset.set(scroll_msg.offset);
-                        }
+                // Apply scroll correction when scrolling stops (to compensate for
+                // height changes that occurred during scrolling)
+                if let Some(delta) = correction {
+                    let new_scroll = (scroll_msg.offset as i32 + delta).max(0) as u32;
+                    sync_container_scroll(container_id.peek().clone(), new_scroll).await;
+                    scroll_offset.set(new_scroll);
+                } else {
+                    // Update scroll offset to trigger re-render
+                    if scroll_msg.offset != *scroll_offset.peek() {
+                        scroll_offset.set(scroll_msg.offset);
                     }
-                    if scroll_msg.viewport != *viewport_height.peek() {
-                        viewport_height.set(scroll_msg.viewport);
-                    }
+                }
+                if scroll_msg.viewport != *viewport_height.peek() {
+                    viewport_height.set(scroll_msg.viewport);
                 }
             }
         });
@@ -282,11 +280,6 @@ struct ScrollMsg {
     offset: u32,
     viewport: u32,
     is_scrolling: bool,
-}
-
-/// Parse a scroll message from the JS bridge.
-fn parse_scroll_msg(msg: &str) -> Option<ScrollMsg> {
-    serde_json::from_str(msg).ok()
 }
 
 async fn sync_container_scroll(container_id: String, scroll_top: u32) {
