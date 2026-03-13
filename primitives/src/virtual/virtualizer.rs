@@ -335,8 +335,7 @@ where
         let mut end_index = start_index;
         let last_index = measurements.len() - 1;
 
-        while end_index < last_index
-            && measurements[end_index].end < scroll_offset + viewport_size
+        while end_index < last_index && measurements[end_index].end < scroll_offset + viewport_size
         {
             end_index += 1;
         }
