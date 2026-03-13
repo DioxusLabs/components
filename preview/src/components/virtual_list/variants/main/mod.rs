@@ -49,8 +49,8 @@ pub fn Demo() -> Element {
             p { class: "virtual-list-subtitle", "Scroll this page to verify virtualized rendering with dynamic row heights." }
             style { {INLINE_STYLE} }
             VirtualList {
-                count: 2000,
-                buffer: 12,
+                count: 2000usize,
+                buffer: 12usize,
                 // Estimate height based on content pattern (idx % 6 repeats)
                 // Measured: min=68.4px (0 repeats), max=127.2px (5 repeats)
                 estimate_size: |idx| {
