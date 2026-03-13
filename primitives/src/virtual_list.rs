@@ -5,7 +5,7 @@ use serde::Deserialize;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::r#virtual::{Rect, Virtualizer, VirtualizerOptions};
+use crate::r#virtual::{Virtualizer, VirtualizerOptions};
 
 /// The props for the [`VirtualList`] component.
 #[derive(Props, Clone, PartialEq)]
@@ -164,7 +164,7 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
                         let v_rc = virtualizer.peek();
                         let mut v = v_rc.borrow_mut();
                         let correction = v.set_scroll_offset(scroll_msg.offset, scrolling);
-                        v.set_viewport_size(Rect::new(0, scroll_msg.viewport));
+                        v.set_viewport_size(scroll_msg.viewport);
                         correction
                     };
 
@@ -207,7 +207,7 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
         let v_rc = virtualizer.peek();
         let mut v = v_rc.borrow_mut();
         v.sync_scroll_offset(current_scroll);
-        v.set_viewport_size(Rect::new(0, current_viewport));
+        v.set_viewport_size(current_viewport);
         let items = v.get_virtual_items();
         let total = v.get_total_size();
         (items, total)

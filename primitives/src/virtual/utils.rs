@@ -6,7 +6,7 @@ use super::types::VirtualItem;
 ///
 /// Returns the index of the item whose `start` position is closest to
 /// (but not exceeding) the given offset.
-pub fn find_nearest_binary_search(measurements: &[VirtualItem], offset: u32) -> usize {
+pub(crate) fn find_nearest_binary_search(measurements: &[VirtualItem], offset: u32) -> usize {
     if measurements.is_empty() {
         return 0;
     }
@@ -34,7 +34,7 @@ pub fn find_nearest_binary_search(measurements: &[VirtualItem], offset: u32) -> 
 }
 
 /// Extract indices from a range with overscan applied.
-pub fn default_range_extractor(
+pub(crate) fn default_range_extractor(
     start_index: usize,
     end_index: usize,
     overscan: usize,
@@ -58,7 +58,7 @@ mod tests {
     fn test_find_nearest_binary_search_multiple() {
         // Items at offsets: 0, 100, 200, 300, 400
         let measurements: Vec<VirtualItem> = (0..5)
-            .map(|i| VirtualItem::new(i, i, i as u32 * 100, 100, 0))
+            .map(|i| VirtualItem::new(i, i, i as u32 * 100, 100))
             .collect();
 
         assert_eq!(find_nearest_binary_search(&measurements, 0), 0);

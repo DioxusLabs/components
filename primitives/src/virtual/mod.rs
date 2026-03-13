@@ -10,6 +10,4 @@ mod types;
 mod utils;
 mod virtualizer;
 
-pub(crate) use types::Rect;
-
 pub(crate) use virtualizer::{Virtualizer, VirtualizerOptions};

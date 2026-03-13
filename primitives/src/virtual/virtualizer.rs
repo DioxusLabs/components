@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use super::types::{Key, Range, Rect, ScrollDirection, VirtualItem};
+use super::types::{Key, Range, VirtualItem};
 use super::utils::{default_range_extractor, find_nearest_binary_search};
 
 /// Core virtualizer that manages item positions and scroll state.
@@ -22,11 +22,6 @@ where
     estimate_size: F,
     get_item_key: K,
     overscan: usize,
-    padding_start: u32,
-    padding_end: u32,
-    gap: u32,
-    lanes: usize,
-    horizontal: bool,
 
     // Measurements cache
     measurements_cache: Vec<VirtualItem>,
@@ -47,8 +42,7 @@ where
 
     // Scroll state
     scroll_offset: u32,
-    scroll_rect: Rect,
-    scroll_direction: Option<ScrollDirection>,
+    viewport_size: u32,
     scroll_adjustments: i32,
     is_scrolling: bool,
 
@@ -64,25 +58,10 @@ where
     F: Fn(usize) -> u32,
     K: Fn(usize) -> Key,
 {
-    /// Total number of items.
     pub count: usize,
-    /// Function to estimate the size of an item before measurement.
     pub estimate_size: F,
-    /// Function to get a unique key for an item.
     pub get_item_key: K,
-    /// Number of items to render outside the visible range (default: 1).
     pub overscan: usize,
-    /// Padding at the start of the list in pixels.
-    pub padding_start: u32,
-    /// Padding at the end of the list in pixels.
-    pub padding_end: u32,
-    /// Gap between items in pixels.
-    pub gap: u32,
-    /// Number of lanes (columns) for masonry/grid layouts (default: 1).
-    pub lanes: usize,
-    /// Whether to virtualize horizontally instead of vertically.
-    pub horizontal: bool,
-    /// Whether to use adaptive estimation (average of measured sizes) instead of estimate_size.
     pub use_adaptive_estimation: bool,
 }
 
@@ -98,11 +77,6 @@ where
             estimate_size,
             get_item_key,
             overscan: 1,
-            padding_start: 0,
-            padding_end: 0,
-            gap: 0,
-            lanes: 1,
-            horizontal: false,
             use_adaptive_estimation: false,
         }
     }
@@ -132,11 +106,6 @@ where
             estimate_size: options.estimate_size,
             get_item_key: options.get_item_key,
             overscan: options.overscan,
-            padding_start: options.padding_start,
-            padding_end: options.padding_end,
-            gap: options.gap,
-            lanes: options.lanes.max(1),
-            horizontal: options.horizontal,
 
             measurements_cache: Vec::new(),
             item_size_cache: HashMap::new(),
@@ -151,8 +120,7 @@ where
             deferred_adjustments: 0,
 
             scroll_offset: 0,
-            scroll_rect: Rect::default(),
-            scroll_direction: None,
+            viewport_size: 0,
             scroll_adjustments: 0,
             is_scrolling: false,
 
@@ -175,20 +143,8 @@ where
     /// Returns an optional scroll correction to apply when scrolling stops,
     /// to compensate for height changes that occurred during scrolling.
     pub fn set_scroll_offset(&mut self, offset: u32, is_scrolling: bool) -> Option<i32> {
-        let prev_offset = self.scroll_offset;
         let was_scrolling = self.is_scrolling;
         let mut correction = None;
-
-        // Detect scroll direction
-        if is_scrolling && offset != prev_offset {
-            self.scroll_direction = Some(if offset > prev_offset {
-                ScrollDirection::Forward
-            } else {
-                ScrollDirection::Backward
-            });
-        } else if !is_scrolling {
-            self.scroll_direction = None;
-        }
 
         // Reset adjustments when user starts a new scroll
         if is_scrolling && !was_scrolling {
@@ -237,16 +193,11 @@ where
     }
 
     /// Updates the viewport size. Call this from resize event handlers.
-    pub fn set_viewport_size(&mut self, rect: Rect) {
-        if self.scroll_rect != rect {
-            self.scroll_rect = rect;
+    pub fn set_viewport_size(&mut self, size: u32) {
+        if self.viewport_size != size {
+            self.viewport_size = size;
             self.range_dirty = true;
         }
-    }
-
-    /// Returns the viewport size.
-    fn viewport_size(&self) -> u32 {
-        self.scroll_rect.size(self.horizontal)
     }
 
     /// Resizes an item and returns the scroll adjustment if needed.
@@ -255,7 +206,6 @@ where
     /// above the viewport changes size, we need to adjust the scroll position
     /// by the size delta to keep the visible content stable.
     pub fn resize_item(&mut self, index: usize, new_size: u32) -> Option<i32> {
-        // Ensure measurements are up to date
         self.ensure_measurements();
 
         let item = self.measurements_cache.get(index)?;
@@ -335,7 +285,6 @@ where
             return;
         }
 
-        // Determine the starting index for recalculation
         let min_index = if self.pending_measured_indexes.is_empty() {
             0
         } else {
@@ -343,48 +292,12 @@ where
         };
         self.pending_measured_indexes.clear();
 
-        // Reuse existing measurements up to min_index
         let mut measurements: Vec<VirtualItem> =
             if min_index > 0 && min_index < self.measurements_cache.len() {
                 self.measurements_cache[..min_index].to_vec()
             } else {
                 Vec::with_capacity(self.count)
             };
-
-        if self.lanes == 1 {
-            // Single lane: simple sequential layout
-            for i in measurements.len()..self.count {
-                let key = (self.get_item_key)(i);
-                let size = self
-                    .item_size_cache
-                    .get(&key)
-                    .copied()
-                    .unwrap_or_else(|| self.get_estimate(i));
-
-                let start = measurements
-                    .last()
-                    .map(|m| m.end + self.gap)
-                    .unwrap_or(self.padding_start);
-
-                measurements.push(VirtualItem::new(key, i, start, size, 0));
-            }
-        } else {
-            // Multi-lane: masonry layout
-            self.recalculate_multi_lane(&mut measurements);
-        }
-
-        self.measurements_cache = measurements;
-    }
-
-    /// Recalculates measurements for multi-lane (masonry) layout.
-    fn recalculate_multi_lane(&mut self, measurements: &mut Vec<VirtualItem>) {
-        let mut lane_ends: Vec<u32> = vec![self.padding_start; self.lanes];
-
-        for item in measurements.iter() {
-            if item.lane < self.lanes {
-                lane_ends[item.lane] = item.end;
-            }
-        }
 
         for i in measurements.len()..self.count {
             let key = (self.get_item_key)(i);
@@ -394,69 +307,38 @@ where
                 .copied()
                 .unwrap_or_else(|| self.get_estimate(i));
 
-            let (lane, &lane_end) = lane_ends
-                .iter()
-                .enumerate()
-                .min_by_key(|(_, &end)| end)
-                .unwrap();
+            let start = measurements.last().map(|m| m.end).unwrap_or(0);
 
-            let start = if lane_end > self.padding_start {
-                lane_end + self.gap
-            } else {
-                lane_end
-            };
-
-            measurements.push(VirtualItem::new(key, i, start, size, lane));
-            lane_ends[lane] = start + size;
+            measurements.push(VirtualItem::new(key, i, start, size));
         }
+
+        self.measurements_cache = measurements;
     }
 
     /// Calculates the visible range based on current scroll position.
     fn calculate_range(&mut self) -> Option<Range> {
         self.ensure_measurements();
 
-        if self.measurements_cache.is_empty() || self.viewport_size() == 0 {
+        if self.measurements_cache.is_empty() || self.viewport_size == 0 {
             return None;
         }
 
         let scroll_offset = self.scroll_offset;
-        let viewport_size = self.viewport_size();
+        let viewport_size = self.viewport_size;
         let measurements = &self.measurements_cache;
 
-        // Handle case when item count <= lanes
-        if measurements.len() <= self.lanes {
+        if measurements.len() <= 1 {
             return Some(Range::new(0, measurements.len() - 1));
         }
 
-        // Find start index using binary search
-        let mut start_index = find_nearest_binary_search(measurements, scroll_offset);
+        let start_index = find_nearest_binary_search(measurements, scroll_offset);
         let mut end_index = start_index;
         let last_index = measurements.len() - 1;
 
-        if self.lanes == 1 {
-            while end_index < last_index
-                && measurements[end_index].end < scroll_offset + viewport_size
-            {
-                end_index += 1;
-            }
-        } else {
-            let mut end_per_lane = vec![0u32; self.lanes];
-            while end_index < last_index
-                && end_per_lane
-                    .iter()
-                    .any(|&pos| pos < scroll_offset + viewport_size)
-            {
-                let item = &measurements[end_index];
-                end_per_lane[item.lane] = item.end;
-                end_index += 1;
-            }
-
-            let mut start_per_lane = vec![scroll_offset + viewport_size; self.lanes];
-            while start_index > 0 && start_per_lane.iter().any(|&pos| pos >= scroll_offset) {
-                let item = &measurements[start_index];
-                start_per_lane[item.lane] = item.start;
-                start_index = start_index.saturating_sub(1);
-            }
+        while end_index < last_index
+            && measurements[end_index].end < scroll_offset + viewport_size
+        {
+            end_index += 1;
         }
 
         Some(Range::new(start_index, end_index))
@@ -509,27 +391,7 @@ where
     /// Calculates the actual total size from measurements.
     fn calculate_total_size(&mut self) -> u32 {
         self.ensure_measurements();
-
-        if self.measurements_cache.is_empty() {
-            return self.padding_start + self.padding_end;
-        }
-
-        let end = if self.lanes == 1 {
-            self.measurements_cache.last().map(|m| m.end).unwrap_or(0)
-        } else {
-            let mut max_end_per_lane = vec![0u32; self.lanes];
-            for item in self.measurements_cache.iter().rev() {
-                if max_end_per_lane[item.lane] == 0 {
-                    max_end_per_lane[item.lane] = item.end;
-                }
-                if max_end_per_lane.iter().all(|&e| e > 0) {
-                    break;
-                }
-            }
-            max_end_per_lane.into_iter().max().unwrap_or(0)
-        };
-
-        (end + self.padding_end).max(self.padding_start)
+        self.measurements_cache.last().map(|m| m.end).unwrap_or(0)
     }
 }
 
@@ -540,7 +402,7 @@ mod tests {
     fn create_test_virtualizer() -> Virtualizer<impl Fn(usize) -> u32, impl Fn(usize) -> Key> {
         let options = VirtualizerOptions::new(100, |_| 50, |i| i).overscan(2);
         let mut v = Virtualizer::new(options);
-        v.set_viewport_size(Rect::new(800, 600));
+        v.set_viewport_size(600);
         v
     }
 
