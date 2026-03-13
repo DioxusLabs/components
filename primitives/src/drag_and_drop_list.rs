@@ -10,8 +10,10 @@ enum DropPosition {
     Undefined,
 }
 
+/// Context provided by [`DragAndDropList`] to its descendants.
+/// Use `use_context::<DragAndDropContext>()` to access list-level operations.
 #[derive(Clone, Copy)]
-struct DragAndDropContext {
+pub struct DragAndDropContext {
     drag_from: Signal<Option<usize>>,
     drop_to: Signal<Option<usize>>,
     drop_position: Signal<DropPosition>,
@@ -63,7 +65,8 @@ impl DragAndDropContext {
         self.list_items.set(list);
     }
 
-    fn remove(&mut self, index: usize) {
+    /// Remove the item at the given index from the list.
+    pub fn remove(&mut self, index: usize) {
         let mut list = (self.list_items)();
         if list.remove(index).is_ok() {
             let new_len = list.len();
@@ -168,15 +171,16 @@ impl DragAndDropContext {
     }
 }
 
-/// The props for the [`DragAndDropListItem`] component.
+/// The props for the [`DragAndDropList`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct DragAndDropListProps {
     /// Items (labels) to be rendered.
     pub items: Vec<Element>,
 
-    /// Set if the list items should be removable
+    /// Optional callback to customize the rendering of each list item's content.
+    /// Receives the item's index and default content, and returns the final content to render.
     #[props(default)]
-    pub is_removable: bool,
+    pub render_item: Option<Callback<(usize, Element), Element>>,
 
     /// Accessible label for the list
     #[props(default)]
@@ -243,11 +247,14 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
             .iter()
             .enumerate()
             .map(|(index, children)| {
+                let content = match &props.render_item {
+                    Some(cb) => cb.call((index, children.clone())),
+                    None => children.clone(),
+                };
                 rsx! {
                     DragAndDropListItem {
                         index,
-                        is_removable: props.is_removable,
-                        {children}
+                        {content}
                     }
                 }
             })
@@ -285,11 +292,8 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
 /// The props for the [`DragAndDropListItemProps`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct DragAndDropListItemProps {
-    /// The index of the index trigger
+    /// The index of the item in the list
     pub index: usize,
-
-    /// Set if the list item should be removable
-    pub is_removable: bool,
 
     /// Additional attributes to apply to the list item element.
     #[props(extends = GlobalAttributes)]
@@ -385,7 +389,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             }
             Key::Delete | Key::Backspace => {
                 event.prevent_default();
-                if !(ctx.is_dragging)() && props.is_removable {
+                if !(ctx.is_dragging)() {
                     ctx.remove(index);
                 }
             }
@@ -454,9 +458,6 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             ..props.attributes,
             div { class: "item-icon-div", aria_hidden: "true", DragIcon {} }
             div { class: "item-body-div", {props.children} }
-            if props.is_removable {
-                 RemoveButton { index, on_click: move || ctx.remove(index) }
-            }
         }
         if (ctx.drop_position)() == DropPosition::After && render_drop_indicator((ctx.drop_to)()) {
             DropIndicator {  }
@@ -469,23 +470,6 @@ fn DropIndicator() -> Element {
     rsx! {
         div {
             class: "drop-indicator",
-        }
-    }
-}
-
-#[component]
-fn RemoveButton(index: usize, on_click: Callback<()>) -> Element {
-    let label = format!("Remove item {}", index + 1);
-    rsx! {
-        button {
-            class: "remove-button",
-            aria_label: "{label}",
-            onclick: move |_| on_click.call(()),
-            Icon {
-                // X icon from lucide https://lucide.dev/icons/x
-                path { d: "M18 6 6 18" }
-                path { d: "m6 6 12 12" }
-            }
         }
     }
 }
