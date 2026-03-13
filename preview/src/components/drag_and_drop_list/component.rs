@@ -1,19 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_primitives::drag_and_drop_list::{self, DragAndDropListItemProps, DragAndDropListProps};
 
-pub fn example_items() -> Vec<Element> {
-    let animals = ["Cat 🐱", "Cow 🐮", "Dog 🐶", "Fox 🦊", "Pig 🐷"];
-
-    animals
-        .iter()
-        .map(|&text| {
-            rsx! {
-                {text}
-            }
-        })
-        .collect()
-}
-
 #[component]
 pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     rsx! {
