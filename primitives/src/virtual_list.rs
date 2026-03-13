@@ -2,8 +2,6 @@
 
 use dioxus::prelude::*;
 use serde::Deserialize;
-use std::cell::RefCell;
-use std::rc::Rc;
 
 use crate::r#virtual::{Virtualizer, VirtualizerOptions};
 
@@ -11,10 +9,10 @@ use crate::r#virtual::{Virtualizer, VirtualizerOptions};
 #[derive(Props, Clone, PartialEq)]
 pub struct VirtualListProps {
     /// The total number of items in the list.
-    pub count: usize,
+    pub count: ReadSignal<usize>,
     /// The amount of render buffer (in estimated row counts) above and below the viewport.
-    #[props(default = 8)]
-    pub buffer: usize,
+    #[props(default = ReadSignal::new(Signal::new(8)))]
+    pub buffer: ReadSignal<usize>,
     /// Estimates the height of an item by index (used before measurement).
     /// For best scrollbar stability, return values close to actual heights.
     /// If not provided, uses adaptive estimation based on measured items.
@@ -81,14 +79,14 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
     let container_id = crate::use_unique_id();
 
     // Create virtualizer wrapped in Rc<RefCell> for shared mutable access
-    let virtualizer: Signal<Rc<RefCell<Virtualizer<_, _>>>> = use_signal(|| {
+    let mut virtualizer: CopyValue<Virtualizer<_, _>> = use_hook(|| {
         let estimate_fn = move |i| {
             estimate_size.map(|cb| cb(i)).unwrap_or(100) // Default 100px, will adapt
         };
-        let options = VirtualizerOptions::new(count, estimate_fn, |i| i)
-            .overscan(buffer)
+        let options = VirtualizerOptions::new(count(), estimate_fn, |i| i)
+            .overscan(buffer())
             .use_adaptive_estimation(estimate_size.is_none());
-        Rc::new(RefCell::new(Virtualizer::new(options)))
+        CopyValue::new(Virtualizer::new(options))
     });
 
     // Track scroll state
@@ -96,9 +94,15 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
     let mut viewport_height = use_signal(|| 600);
     let mut is_scrolling = use_signal(|| false);
 
-    // Update virtualizer when count changes
+    // Update virtualizer when props change
     use_effect(move || {
-        virtualizer.peek().borrow_mut().set_count(count);
+        virtualizer.write().set_count(count());
+    });
+    use_effect(move || {
+        virtualizer.write().sync_scroll_offset(scroll_offset());
+    });
+    use_effect(move || {
+        virtualizer.write().set_viewport_size(viewport_height());
     });
 
     // Subscribe to scroll events via JS bridge
@@ -159,8 +163,7 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
 
                 // Update virtualizer state and get any scroll correction
                 let correction = {
-                    let v_rc = virtualizer.peek();
-                    let mut v = v_rc.borrow_mut();
+                    let mut v = virtualizer.write();
                     let correction = v.set_scroll_offset(scroll_msg.offset, scrolling);
                     v.set_viewport_size(scroll_msg.viewport);
                     correction
@@ -190,29 +193,42 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
         });
     });
 
-    // Read scroll state to establish reactive dependency
-    let current_scroll = *scroll_offset.read();
-    let current_viewport = *viewport_height.read();
-    // Read is_scrolling to trigger re-render on scroll-end (for unfreezing total_size)
-    let _ = *is_scrolling.read();
+    let onresize = move |idx| {
+        move |event: Event<ResizeData>| {
+            let rect = event.data().get_content_box_size().unwrap_or_default();
+            let measured = rect.height.max(1.0).round() as u32;
+
+            // Apply measurement and get scroll adjustment
+            let adjustment = {
+                let mut v = virtualizer.write();
+                v.resize_item(idx, measured)
+            };
+
+            // Apply scroll correction immediately if needed
+            if let Some(delta) = adjustment {
+                let current = *scroll_offset.peek();
+                let new_scroll = (current as i32 + delta).max(0) as u32;
+                spawn(async move {
+                    sync_container_scroll(container_id.peek().clone(), new_scroll).await;
+                });
+            }
+        }
+    };
+    let mut v = virtualizer.write();
 
     // Get computed values from virtualizer
     // Use sync_scroll_offset instead of set_scroll_offset to update the position
     // without affecting is_scrolling state - the event handler manages scroll state
     // transitions and stable_total_size freezing.
-    let (virtual_items, total_height) = {
-        let v_rc = virtualizer.peek();
-        let mut v = v_rc.borrow_mut();
-        v.sync_scroll_offset(current_scroll);
-        v.set_viewport_size(current_viewport);
-        let items = v.get_virtual_items();
+    let (mut virtual_items, total_height) = {
         let total = v.get_total_size();
+        let items = v.get_virtual_items().peekable();
         (items, total)
     };
 
     // Calculate the top offset for the content wrapper
-    let top_offset = virtual_items.first().map(|item| item.start).unwrap_or(0);
-    let canvas_height = total_height.max(current_viewport);
+    let top_offset = virtual_items.peek().map(|item| item.start()).unwrap_or(0);
+    let canvas_height = total_height.max(viewport_height());
     let set_size = count.to_string();
 
     rsx! {
@@ -227,41 +243,17 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
                 style: "position: relative; height:{canvas_height}px; width: 100%;",
                 div {
                     style: "position: absolute; inset: 0 auto auto 0; width: 100%; transform: translateY({top_offset}px); will-change: transform;",
-                    {virtual_items.iter().map(|item| {
-                        let idx = item.index;
-                        let scroll_offset = scroll_offset;
-                        let set_size = set_size.clone();
+                    {virtual_items.map(move |item| {
+                        let idx = item.index();
 
                         rsx! {
                             div {
-                                key: "{idx}",
+                                key: "{item.key()}",
                                 role: "listitem",
                                 "data-virtual-index": "{idx}",
-                                "aria-setsize": set_size,
+                                "aria-setsize": "{set_size}",
                                 "aria-posinset": "{idx + 1}",
-                                onresize: move |event: Event<ResizeData>| {
-                                    let rect = event.data().get_content_box_size().unwrap_or_default();
-                                    let measured = rect.height.max(1.0).round() as u32;
-
-                                    // Apply measurement and get scroll adjustment
-                                    let adjustment = {
-                                        let v_rc = virtualizer.peek();
-                                        let mut v = v_rc.borrow_mut();
-                                        v.resize_item(idx, measured)
-                                    };
-
-                                    // Apply scroll correction immediately if needed
-                                    if let Some(delta) = adjustment {
-                                        let current = *scroll_offset.peek();
-                                        let new_scroll = (current as i32 + delta).max(0) as u32;
-                                        spawn(async move {
-                                            sync_container_scroll(
-                                                container_id.peek().clone(),
-                                                new_scroll,
-                                            ).await;
-                                        });
-                                    }
-                                },
+                                onresize: onresize(idx),
                                 {render_item(idx)}
                             }
                         }

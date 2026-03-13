@@ -1,8 +1,9 @@
 //! Core Virtualizer implementation.
 
 use std::collections::HashMap;
+use std::ops::{Range, RangeInclusive};
 
-use super::types::{Key, Range, VirtualItem};
+use super::types::{Key, VirtualItem};
 use super::utils::{default_range_extractor, find_nearest_binary_search};
 
 /// Core virtualizer that manages item positions and scroll state.
@@ -47,7 +48,7 @@ where
     is_scrolling: bool,
 
     // Range cache
-    range: Option<Range>,
+    range: Option<Range<usize>>,
     range_dirty: bool,
 }
 
@@ -209,7 +210,7 @@ where
         self.ensure_measurements();
 
         let item = self.measurements_cache.get(index)?;
-        let key = item.key;
+        let key = item.key();
 
         // If already measured, only update if significantly different (>2px)
         if let Some(&cached_size) = self.item_size_cache.get(&key) {
@@ -219,7 +220,11 @@ where
             }
         }
 
-        let old_size = self.item_size_cache.get(&key).copied().unwrap_or(item.size);
+        let old_size = self
+            .item_size_cache
+            .get(&key)
+            .copied()
+            .unwrap_or(item.size());
         let delta = new_size as i32 - old_size as i32;
 
         // For tiny deltas (sub-pixel rounding), still cache but don't adjust scroll
@@ -231,7 +236,7 @@ where
 
         // Only adjust scroll for items ABOVE the viewport.
         let adjusted_scroll = self.adjusted_scroll_offset();
-        let is_above_viewport = item.start < adjusted_scroll;
+        let is_above_viewport = item.start() < adjusted_scroll;
 
         let should_adjust_now = significant_delta && !self.is_scrolling && is_above_viewport;
 
@@ -307,7 +312,7 @@ where
                 .copied()
                 .unwrap_or_else(|| self.get_estimate(i));
 
-            let start = measurements.last().map(|m| m.end).unwrap_or(0);
+            let start = measurements.last().map(|m| m.end()).unwrap_or(0);
 
             measurements.push(VirtualItem::new(key, i, start, size));
         }
@@ -316,7 +321,7 @@ where
     }
 
     /// Calculates the visible range based on current scroll position.
-    fn calculate_range(&mut self) -> Option<Range> {
+    fn calculate_range(&mut self) -> Option<Range<usize>> {
         self.ensure_measurements();
 
         if self.measurements_cache.is_empty() || self.viewport_size == 0 {
@@ -328,54 +333,49 @@ where
         let measurements = &self.measurements_cache;
 
         if measurements.len() <= 1 {
-            return Some(Range::new(0, measurements.len() - 1));
+            return Some(0..measurements.len());
         }
 
         let start_index = find_nearest_binary_search(measurements, scroll_offset);
         let mut end_index = start_index;
         let last_index = measurements.len() - 1;
 
-        while end_index < last_index && measurements[end_index].end < scroll_offset + viewport_size
+        while end_index < last_index
+            && measurements[end_index].end() < scroll_offset + viewport_size
         {
             end_index += 1;
         }
 
-        Some(Range::new(start_index, end_index))
+        Some(start_index..(end_index + 1))
     }
 
     /// Returns the visible range, calculating if needed.
-    fn get_range(&mut self) -> Option<Range> {
+    fn get_range(&mut self) -> Option<Range<usize>> {
         if self.range_dirty {
             self.range = self.calculate_range();
             self.range_dirty = false;
         }
-        self.range
+        self.range.clone()
     }
 
     /// Returns the indices of items to render (with overscan applied).
-    fn get_virtual_indexes(&mut self) -> Vec<usize> {
+    fn get_virtual_indexes(&mut self) -> RangeInclusive<usize> {
         let range = match self.get_range() {
             Some(r) => r,
-            None => return Vec::new(),
+            None => return 0..=0,
         };
 
-        default_range_extractor(
-            range.start_index,
-            range.end_index,
-            self.overscan,
-            self.count,
-        )
+        default_range_extractor(range, self.overscan, self.count)
     }
 
     /// Returns the virtual items to render.
-    pub fn get_virtual_items(&mut self) -> Vec<VirtualItem> {
+    pub fn get_virtual_items(&mut self) -> impl Iterator<Item = VirtualItem> + use<'_, F, K> {
         let indexes = self.get_virtual_indexes();
         self.ensure_measurements();
 
         indexes
             .into_iter()
             .filter_map(|i| self.measurements_cache.get(i).cloned())
-            .collect()
     }
 
     /// Returns the total scrollable size.
@@ -390,7 +390,7 @@ where
     /// Calculates the actual total size from measurements.
     fn calculate_total_size(&mut self) -> u32 {
         self.ensure_measurements();
-        self.measurements_cache.last().map(|m| m.end).unwrap_or(0)
+        self.measurements_cache.last().map(|m| m.end()).unwrap_or(0)
     }
 }
 

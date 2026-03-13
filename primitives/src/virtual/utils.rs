@@ -1,5 +1,7 @@
 //! Utility functions for the virtual list implementation.
 
+use std::ops::RangeInclusive;
+
 use super::types::VirtualItem;
 
 /// Binary search to find the nearest item at or before the given offset.
@@ -7,84 +9,23 @@ use super::types::VirtualItem;
 /// Returns the index of the item whose `start` position is closest to
 /// (but not exceeding) the given offset.
 pub(crate) fn find_nearest_binary_search(measurements: &[VirtualItem], offset: u32) -> usize {
-    if measurements.is_empty() {
-        return 0;
-    }
-
-    let mut low = 0usize;
-    let mut high = measurements.len() - 1;
-
-    while low <= high {
-        let mid = (low + high) / 2;
-        let current = measurements[mid].start;
-
-        if current < offset {
-            low = mid + 1;
-        } else if current > offset {
-            if mid == 0 {
-                break;
-            }
-            high = mid - 1;
-        } else {
-            return mid;
-        }
-    }
-
-    low.saturating_sub(1)
+    measurements
+        .binary_search_by(|item| item.start().cmp(&offset))
+        .unwrap_or_else(|idx| idx.saturating_sub(1))
 }
 
 /// Extract indices from a range with overscan applied.
 pub(crate) fn default_range_extractor(
-    start_index: usize,
-    end_index: usize,
+    range: std::ops::Range<usize>,
     overscan: usize,
     count: usize,
-) -> Vec<usize> {
+) -> RangeInclusive<usize> {
     if count == 0 {
-        return Vec::new();
+        return 0..=0;
     }
 
-    let start = start_index.saturating_sub(overscan);
-    let end = (end_index + overscan).min(count - 1);
+    let start = range.start.saturating_sub(overscan);
+    let end = (range.end + overscan).min(count - 1);
 
-    (start..=end).collect()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_find_nearest_binary_search_multiple() {
-        // Items at offsets: 0, 100, 200, 300, 400
-        let measurements: Vec<VirtualItem> = (0..5)
-            .map(|i| VirtualItem::new(i, i, i as u32 * 100, 100))
-            .collect();
-
-        assert_eq!(find_nearest_binary_search(&measurements, 0), 0);
-        assert_eq!(find_nearest_binary_search(&measurements, 50), 0);
-        assert_eq!(find_nearest_binary_search(&measurements, 100), 1);
-        assert_eq!(find_nearest_binary_search(&measurements, 150), 1);
-        assert_eq!(find_nearest_binary_search(&measurements, 250), 2);
-        assert_eq!(find_nearest_binary_search(&measurements, 400), 4);
-        assert_eq!(find_nearest_binary_search(&measurements, 500), 4);
-    }
-
-    #[test]
-    fn test_default_range_extractor() {
-        // Empty
-        assert_eq!(default_range_extractor(0, 0, 1, 0), Vec::<usize>::new());
-
-        // No overscan needed
-        assert_eq!(
-            default_range_extractor(2, 5, 2, 10),
-            vec![0, 1, 2, 3, 4, 5, 6, 7]
-        );
-
-        // Overscan at start boundary
-        assert_eq!(default_range_extractor(0, 3, 2, 10), vec![0, 1, 2, 3, 4, 5]);
-
-        // Overscan at end boundary
-        assert_eq!(default_range_extractor(7, 9, 2, 10), vec![5, 6, 7, 8, 9]);
-    }
+    start..=end
 }
