@@ -1,471 +1,396 @@
-//! Core Virtualizer implementation.
+//! Core Virtualizer implementation using Dioxus Store for fine-grained reactivity.
 
 use std::collections::HashMap;
-use std::ops::{Range, RangeInclusive};
+use std::ops::Range;
+
+use dioxus::prelude::*;
 
 use super::types::{Key, VirtualItem};
 use super::utils::{default_range_extractor, find_nearest_binary_search};
 
-/// Core virtualizer that manages item positions and scroll state.
+
+/// Reactive virtualizer state.
 ///
-/// This struct is framework-agnostic and contains pure algorithms for:
-/// - Computing item positions from sizes
-/// - Calculating the visible range
-/// - Handling scroll position corrections when items resize
-#[derive(Debug)]
-pub struct Virtualizer<F, K>
-where
-    F: Fn(usize) -> u32,
-    K: Fn(usize) -> Key,
-{
-    // Configuration
+/// Only holds mutable state shared between event handlers and the render body.
+/// Prop-derived values (`count`, `overscan`, `use_adaptive_estimation`) live
+/// outside the Store and are read directly from signals or captured in closures.
+#[derive(Clone, PartialEq, Store)]
+pub struct VirtualizerState {
+    // --- Reactive (`.read()` in render body → triggers re-renders) ---
+    /// Current scroll offset from the container's `scrollTop`.
+    pub scroll_offset: u32,
+    /// Current viewport height.
+    pub viewport_size: u32,
+    /// Whether the user is actively scrolling.
+    pub is_scrolling: bool,
+
+    // --- Cache (`.peek()` only → never triggers re-renders) ---
+    /// Measured sizes keyed by item key, populated by resize callbacks.
+    pub item_size_cache: HashMap<Key, u32>,
+
+    // --- Scroll adjustments (`.peek()`, bundled with cache) ---
+    /// Accumulated scroll adjustment from items resizing above viewport.
+    pub scroll_adjustments: i32,
+    /// Frozen total size during active scrolling to prevent scrollbar drift.
+    pub stable_total_size: Option<u32>,
+    /// Deferred scroll adjustments accumulated while scrolling.
+    pub deferred_adjustments: i32,
+}
+
+// ---------------------------------------------------------------------------
+// Public API – free functions operating on Store<VirtualizerState>
+// ---------------------------------------------------------------------------
+
+/// Compute item measurements from current state.
+///
+/// This is a pure function suitable for use inside a `use_memo`.
+/// Adaptive estimation (average of measured sizes) is derived directly
+/// from `item_size_cache` rather than tracked separately.
+pub fn compute_measurements(
     count: usize,
-    estimate_size: F,
-    get_item_key: K,
-    overscan: usize,
+    item_size_cache: &HashMap<Key, u32>,
+    use_adaptive: bool,
+    estimate: &dyn Fn(usize) -> u32,
+) -> Vec<VirtualItem> {
+    let adaptive_size = if use_adaptive && !item_size_cache.is_empty() {
+        let sum: u64 = item_size_cache.values().map(|&v| v as u64).sum();
+        Some((sum / item_size_cache.len() as u64) as u32)
+    } else {
+        None
+    };
 
-    // Measurements cache
-    measurements_cache: Vec<VirtualItem>,
-    item_size_cache: HashMap<Key, u32>,
-    pending_measured_indexes: Vec<usize>,
-    measurements_dirty: bool,
+    let mut measurements = Vec::with_capacity(count);
+    for i in 0..count {
+        let key = i;
+        let size = item_size_cache.get(&key).copied().unwrap_or_else(|| {
+            adaptive_size.unwrap_or_else(|| estimate(i))
+        });
 
-    // Adaptive estimation: track sum and count of measured items
-    measured_sizes_sum: u64,
-    measured_sizes_count: usize,
-    use_adaptive_estimation: bool,
+        let start = measurements.last().map(|m: &VirtualItem| m.end()).unwrap_or(0);
+        measurements.push(VirtualItem::new(key, i, start, size));
+    }
+    measurements
+}
 
-    // Stable total size (frozen during scrolling to prevent scrollbar drift)
-    stable_total_size: Option<u32>,
-
-    // Accumulated scroll adjustment during scrolling (for items above viewport)
-    deferred_adjustments: i32,
-
-    // Scroll state
-    scroll_offset: u32,
-    viewport_size: u32,
-    scroll_adjustments: i32,
+/// Handle a scroll event.  Writes reactive fields (`scroll_offset`,
+/// `is_scrolling`) which trigger component re-renders.
+///
+/// Returns an optional correction to apply when scrolling stops.
+pub fn set_scroll_offset(
+    state: &Store<VirtualizerState>,
+    measurements: &[VirtualItem],
+    offset: u32,
     is_scrolling: bool,
+) -> Option<i32> {
+    let was_scrolling = *state.is_scrolling().peek();
+    let mut correction = None;
 
-    // Range cache
-    range: Option<Range<usize>>,
-    range_dirty: bool,
-}
+    // Reset adjustments when user starts a new scroll
+    if is_scrolling && !was_scrolling {
+        state.scroll_adjustments().set(0);
+        state.deferred_adjustments().set(0);
+        // Freeze total size when scrolling starts to prevent scrollbar drift
+        let total = calculate_total_size(measurements);
+        state.stable_total_size().set(Some(total));
+    }
 
-/// Configuration options for creating a Virtualizer.
-#[derive(Debug, Clone)]
-pub struct VirtualizerOptions<F, K>
-where
-    F: Fn(usize) -> u32,
-    K: Fn(usize) -> Key,
-{
-    pub count: usize,
-    pub estimate_size: F,
-    pub get_item_key: K,
-    pub overscan: usize,
-    pub use_adaptive_estimation: bool,
-}
+    // When scrolling stops, apply accumulated deferred adjustments
+    if !is_scrolling && was_scrolling {
+        state.stable_total_size().set(None);
 
-impl<F, K> VirtualizerOptions<F, K>
-where
-    F: Fn(usize) -> u32,
-    K: Fn(usize) -> Key,
-{
-    /// Creates a new VirtualizerOptions with required fields and defaults.
-    pub fn new(count: usize, estimate_size: F, get_item_key: K) -> Self {
-        Self {
-            count,
-            estimate_size,
-            get_item_key,
-            overscan: 1,
-            use_adaptive_estimation: false,
+        let deferred = *state.deferred_adjustments().peek();
+        if deferred != 0 {
+            correction = Some(deferred);
+            state.deferred_adjustments().set(0);
         }
     }
 
-    /// Sets the overscan value.
-    pub fn overscan(mut self, overscan: usize) -> Self {
-        self.overscan = overscan;
-        self
-    }
+    // Reactive writes – these trigger re-renders.
+    state.scroll_offset().set(offset);
+    state.is_scrolling().set(is_scrolling);
 
-    /// Sets whether to use adaptive estimation (average of measured sizes).
-    pub fn use_adaptive_estimation(mut self, use_adaptive: bool) -> Self {
-        self.use_adaptive_estimation = use_adaptive;
-        self
+    correction
+}
+
+/// Set the viewport size. Reactive write.
+pub fn set_viewport_size(state: &Store<VirtualizerState>, size: u32) {
+    if *state.viewport_size().peek() != size {
+        state.viewport_size().set(size);
     }
 }
 
-impl<F, K> Virtualizer<F, K>
-where
-    F: Fn(usize) -> u32,
-    K: Fn(usize) -> Key,
-{
-    /// Creates a new Virtualizer with the given options.
-    pub fn new(options: VirtualizerOptions<F, K>) -> Self {
-        Self {
-            count: options.count,
-            estimate_size: options.estimate_size,
-            get_item_key: options.get_item_key,
-            overscan: options.overscan,
+/// Resize an item and return an optional scroll adjustment.
+///
+/// Called from resize event handlers.  All access uses `.peek()` so this
+/// never triggers a component re-render.
+pub fn resize_item(
+    state: &Store<VirtualizerState>,
+    measurements: &[VirtualItem],
+    index: usize,
+    new_size: u32,
+) -> Option<i32> {
+    let item = measurements.get(index)?;
+    let key = item.key();
+    let item_start = item.start();
+    let item_size = item.size();
 
-            measurements_cache: Vec::new(),
-            item_size_cache: HashMap::new(),
-            pending_measured_indexes: Vec::new(),
-            measurements_dirty: true,
-
-            measured_sizes_sum: 0,
-            measured_sizes_count: 0,
-            use_adaptive_estimation: options.use_adaptive_estimation,
-
-            stable_total_size: None,
-            deferred_adjustments: 0,
-
-            scroll_offset: 0,
-            viewport_size: 0,
-            scroll_adjustments: 0,
-            is_scrolling: false,
-
-            range: None,
-            range_dirty: true,
-        }
-    }
-
-    /// Updates the item count. Call this when the data source changes.
-    pub fn set_count(&mut self, count: usize) {
-        if self.count != count {
-            self.count = count;
-            self.measurements_dirty = true;
-            self.range_dirty = true;
-        }
-    }
-
-    /// Updates the scroll offset. Call this from scroll event handlers.
-    ///
-    /// Returns an optional scroll correction to apply when scrolling stops,
-    /// to compensate for height changes that occurred during scrolling.
-    pub fn set_scroll_offset(&mut self, offset: u32, is_scrolling: bool) -> Option<i32> {
-        let was_scrolling = self.is_scrolling;
-        let mut correction = None;
-
-        // Reset adjustments when user starts a new scroll
-        if is_scrolling && !was_scrolling {
-            self.scroll_adjustments = 0;
-            self.deferred_adjustments = 0;
-            // Freeze total size when scrolling starts to prevent scrollbar drift
-            self.stable_total_size = Some(self.calculate_total_size());
-        }
-
-        // When scrolling stops, apply accumulated deferred adjustments
-        if !is_scrolling && was_scrolling {
-            self.stable_total_size = None;
-
-            // Return accumulated adjustments from items measured above viewport during scrolling
-            if self.deferred_adjustments != 0 {
-                correction = Some(self.deferred_adjustments);
-                self.deferred_adjustments = 0;
-            }
-        }
-
-        self.scroll_offset = offset;
-        self.is_scrolling = is_scrolling;
-        self.range_dirty = true;
-
-        correction
-    }
-
-    /// Updates only the scroll offset for range calculation, without affecting
-    /// the is_scrolling state or stable_total_size. Use this in render functions
-    /// where you need to sync the offset but don't want to interfere with scroll
-    /// state transitions managed by event handlers.
-    pub fn sync_scroll_offset(&mut self, offset: u32) {
-        if self.scroll_offset != offset {
-            // If scroll position changed and we haven't frozen yet, freeze now.
-            if self.stable_total_size.is_none() {
-                self.stable_total_size = Some(self.calculate_total_size());
-            }
-            self.scroll_offset = offset;
-            self.range_dirty = true;
-        }
-    }
-
-    /// Returns the scroll offset with pending adjustments applied.
-    fn adjusted_scroll_offset(&self) -> u32 {
-        (self.scroll_offset as i32 + self.scroll_adjustments).max(0) as u32
-    }
-
-    /// Updates the viewport size. Call this from resize event handlers.
-    pub fn set_viewport_size(&mut self, size: u32) {
-        if self.viewport_size != size {
-            self.viewport_size = size;
-            self.range_dirty = true;
-        }
-    }
-
-    /// Resizes an item and returns the scroll adjustment if needed.
-    ///
-    /// This is the **key method for preventing scroll jumping**. When an item
-    /// above the viewport changes size, we need to adjust the scroll position
-    /// by the size delta to keep the visible content stable.
-    pub fn resize_item(&mut self, index: usize, new_size: u32) -> Option<i32> {
-        self.ensure_measurements();
-
-        let item = self.measurements_cache.get(index)?;
-        let key = item.key();
-
-        // If already measured, only update if significantly different (>2px)
-        if let Some(&cached_size) = self.item_size_cache.get(&key) {
+    // If already measured, only update if significantly different (>2px)
+    {
+        let isc = state.item_size_cache();
+        let size_cache = isc.peek();
+        if let Some(&cached_size) = size_cache.get(&key) {
             let remeasure_delta = (new_size as i32 - cached_size as i32).abs();
             if remeasure_delta <= 2 {
                 return None;
             }
         }
-
-        let old_size = self
-            .item_size_cache
-            .get(&key)
-            .copied()
-            .unwrap_or(item.size());
-        let delta = new_size as i32 - old_size as i32;
-
-        // For tiny deltas (sub-pixel rounding), still cache but don't adjust scroll
-        let significant_delta = delta.abs() > 1;
-
-        if delta == 0 {
-            return None;
-        }
-
-        // Only adjust scroll for items ABOVE the viewport.
-        let adjusted_scroll = self.adjusted_scroll_offset();
-        let is_above_viewport = item.start() < adjusted_scroll;
-
-        let should_adjust_now = significant_delta && !self.is_scrolling && is_above_viewport;
-
-        // Update the size cache and adaptive estimation tracking
-        let was_measured = self.item_size_cache.contains_key(&key);
-        if was_measured {
-            self.measured_sizes_sum = self.measured_sizes_sum.saturating_sub(old_size as u64);
-            self.measured_sizes_sum = self.measured_sizes_sum.saturating_add(new_size as u64);
-        } else {
-            self.measured_sizes_sum = self.measured_sizes_sum.saturating_add(new_size as u64);
-            self.measured_sizes_count += 1;
-        }
-
-        self.item_size_cache.insert(key, new_size);
-        self.pending_measured_indexes.push(index);
-        self.measurements_dirty = true;
-        self.range_dirty = true;
-
-        if should_adjust_now {
-            self.scroll_adjustments += delta;
-            return Some(delta);
-        } else if significant_delta && self.is_scrolling && is_above_viewport {
-            // Defer scroll adjustment until scrolling stops
-            self.deferred_adjustments += delta;
-        }
-
-        None
     }
 
-    /// Returns the estimated size for an item.
-    fn get_estimate(&self, index: usize) -> u32 {
-        if self.use_adaptive_estimation && self.measured_sizes_count > 0 {
-            (self.measured_sizes_sum / self.measured_sizes_count as u64) as u32
-        } else {
-            (self.estimate_size)(index)
-        }
+    let old_size = {
+        let isc = state.item_size_cache();
+        let size_cache = isc.peek();
+        size_cache.get(&key).copied().unwrap_or(item_size)
+    };
+    let delta = new_size as i32 - old_size as i32;
+
+    // For tiny deltas (sub-pixel rounding), still cache but don't adjust scroll
+    let significant_delta = delta.abs() > 1;
+
+    if delta == 0 {
+        return None;
     }
 
-    /// Ensures measurements are up to date.
-    fn ensure_measurements(&mut self) {
-        if self.measurements_dirty {
-            self.recalculate_measurements();
-            self.measurements_dirty = false;
-        }
+    // Only adjust scroll for items ABOVE the viewport.
+    let adjusted_scroll = {
+        let offset = *state.scroll_offset().peek() as i32;
+        let adj = *state.scroll_adjustments().peek();
+        (offset + adj).max(0) as u32
+    };
+    let is_above_viewport = item_start < adjusted_scroll;
+    let is_scrolling_now = *state.is_scrolling().peek();
+    let should_adjust_now = significant_delta && !is_scrolling_now && is_above_viewport;
+
+    state.item_size_cache().write().insert(key, new_size);
+
+    if should_adjust_now {
+        let adj = *state.scroll_adjustments().peek();
+        state.scroll_adjustments().set(adj + delta);
+        return Some(delta);
+    } else if significant_delta && is_scrolling_now && is_above_viewport {
+        let deferred = *state.deferred_adjustments().peek();
+        state.deferred_adjustments().set(deferred + delta);
     }
 
-    /// Recalculates all item measurements.
-    fn recalculate_measurements(&mut self) {
-        if self.count == 0 {
-            self.measurements_cache.clear();
-            return;
-        }
-
-        let min_index = if self.pending_measured_indexes.is_empty() {
-            0
-        } else {
-            *self.pending_measured_indexes.iter().min().unwrap_or(&0)
-        };
-        self.pending_measured_indexes.clear();
-
-        let mut measurements: Vec<VirtualItem> =
-            if min_index > 0 && min_index < self.measurements_cache.len() {
-                self.measurements_cache[..min_index].to_vec()
-            } else {
-                Vec::with_capacity(self.count)
-            };
-
-        for i in measurements.len()..self.count {
-            let key = (self.get_item_key)(i);
-            let size = self
-                .item_size_cache
-                .get(&key)
-                .copied()
-                .unwrap_or_else(|| self.get_estimate(i));
-
-            let start = measurements.last().map(|m| m.end()).unwrap_or(0);
-
-            measurements.push(VirtualItem::new(key, i, start, size));
-        }
-
-        self.measurements_cache = measurements;
-    }
-
-    /// Calculates the visible range based on current scroll position.
-    fn calculate_range(&mut self) -> Option<Range<usize>> {
-        self.ensure_measurements();
-
-        if self.measurements_cache.is_empty() || self.viewport_size == 0 {
-            return None;
-        }
-
-        let scroll_offset = self.scroll_offset;
-        let viewport_size = self.viewport_size;
-        let measurements = &self.measurements_cache;
-
-        if measurements.len() <= 1 {
-            return Some(0..measurements.len());
-        }
-
-        let start_index = find_nearest_binary_search(measurements, scroll_offset);
-        let mut end_index = start_index;
-        let last_index = measurements.len() - 1;
-
-        while end_index < last_index
-            && measurements[end_index].end() < scroll_offset + viewport_size
-        {
-            end_index += 1;
-        }
-
-        Some(start_index..(end_index + 1))
-    }
-
-    /// Returns the visible range, calculating if needed.
-    fn get_range(&mut self) -> Option<Range<usize>> {
-        if self.range_dirty {
-            self.range = self.calculate_range();
-            self.range_dirty = false;
-        }
-        self.range.clone()
-    }
-
-    /// Returns the indices of items to render (with overscan applied).
-    fn get_virtual_indexes(&mut self) -> RangeInclusive<usize> {
-        let range = match self.get_range() {
-            Some(r) => r,
-            None => return 0..=0,
-        };
-
-        default_range_extractor(range, self.overscan, self.count)
-    }
-
-    /// Returns the virtual items to render.
-    pub fn get_virtual_items(&mut self) -> impl Iterator<Item = VirtualItem> + use<'_, F, K> {
-        let indexes = self.get_virtual_indexes();
-        self.ensure_measurements();
-
-        indexes
-            .into_iter()
-            .filter_map(|i| self.measurements_cache.get(i).cloned())
-    }
-
-    /// Returns the total scrollable size.
-    /// During active scrolling, returns a frozen value to prevent scrollbar drift.
-    pub fn get_total_size(&mut self) -> u32 {
-        if let Some(stable) = self.stable_total_size {
-            return stable;
-        }
-        self.calculate_total_size()
-    }
-
-    /// Calculates the actual total size from measurements.
-    fn calculate_total_size(&mut self) -> u32 {
-        self.ensure_measurements();
-        self.measurements_cache.last().map(|m| m.end()).unwrap_or(0)
-    }
+    None
 }
+
+/// Return the virtual items to render.
+///
+/// **This is meant to be called in the render body.**  It `.read()`s
+/// `scroll_offset` and `viewport_size` to subscribe the component.
+pub fn get_virtual_items(
+    state: &Store<VirtualizerState>,
+    measurements: &[VirtualItem],
+    overscan: usize,
+) -> Vec<VirtualItem> {
+    let range = match calculate_range(state, measurements) {
+        Some(r) => r,
+        None => return Vec::new(),
+    };
+
+    let count = measurements.len();
+    let indexes = default_range_extractor(range, overscan, count);
+
+    indexes
+        .into_iter()
+        .filter_map(|i| measurements.get(i).cloned())
+        .collect()
+}
+
+/// Return the total scrollable size.
+///
+/// During active scrolling returns a frozen value to prevent scrollbar drift.
+pub fn get_total_size(
+    state: &Store<VirtualizerState>,
+    measurements: &[VirtualItem],
+) -> u32 {
+    if let Some(stable) = *state.stable_total_size().peek() {
+        return stable;
+    }
+    calculate_total_size(measurements)
+}
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+/// Calculate the visible range.
+///
+/// `.read()`s `scroll_offset` and `viewport_size` (reactive subscription).
+fn calculate_range(
+    state: &Store<VirtualizerState>,
+    measurements: &[VirtualItem],
+) -> Option<Range<usize>> {
+    // Reactive reads – subscribes the calling component.
+    let scroll_offset = *state.scroll_offset().read();
+    let viewport_size = *state.viewport_size().read();
+
+    if measurements.is_empty() || viewport_size == 0 {
+        return None;
+    }
+
+    if measurements.len() <= 1 {
+        return Some(0..measurements.len());
+    }
+
+    let start_index = find_nearest_binary_search(measurements, scroll_offset);
+    let mut end_index = start_index;
+    let last_index = measurements.len() - 1;
+
+    while end_index < last_index && measurements[end_index].end() < scroll_offset + viewport_size {
+        end_index += 1;
+    }
+
+    Some(start_index..(end_index + 1))
+}
+
+/// Calculate total size from measurements.
+fn calculate_total_size(measurements: &[VirtualItem]) -> u32 {
+    measurements.last().map(|m| m.end()).unwrap_or(0)
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::cell::Cell;
+    use std::rc::Rc;
 
-    fn create_test_virtualizer() -> Virtualizer<impl Fn(usize) -> u32, impl Fn(usize) -> Key> {
-        let options = VirtualizerOptions::new(100, |_| 50, |i| i).overscan(2);
-        let mut v = Virtualizer::new(options);
-        v.set_viewport_size(600);
-        v
+    /// Run a closure inside a Dioxus runtime context so that Store/CopyValue
+    /// APIs are available.  The closure runs inside a component render.
+    fn with_runtime(f: impl Fn() + 'static) {
+        let result = Rc::new(Cell::new(false));
+        let result2 = result.clone();
+        let test_fn = Rc::new(f);
+        let mut dom = VirtualDom::new_with_props(
+            |props: TestHarnessProps| {
+                (props.test_fn)();
+                props.result.set(true);
+                rsx! { div {} }
+            },
+            TestHarnessProps {
+                test_fn,
+                result: result2,
+            },
+        );
+        dom.rebuild_in_place();
+        assert!(result.get(), "Test component did not run");
+    }
+
+    #[derive(Clone, Props)]
+    struct TestHarnessProps {
+        test_fn: Rc<dyn Fn()>,
+        result: Rc<Cell<bool>>,
+    }
+
+    impl PartialEq for TestHarnessProps {
+        fn eq(&self, _: &Self) -> bool {
+            true
+        }
+    }
+
+    fn create_test_state() -> Store<VirtualizerState> {
+        Store::new(VirtualizerState {
+            scroll_offset: 0,
+            viewport_size: 600,
+            is_scrolling: false,
+            item_size_cache: HashMap::new(),
+            scroll_adjustments: 0,
+            stable_total_size: None,
+            deferred_adjustments: 0,
+        })
+    }
+
+    fn make_measurements(state: &Store<VirtualizerState>) -> Vec<VirtualItem> {
+        let isc = state.item_size_cache();
+        let cache = isc.peek();
+        compute_measurements(100, &cache, false, &|_| 50)
     }
 
     #[test]
     fn test_resize_item_below_viewport() {
-        let mut v = create_test_virtualizer();
-        v.set_scroll_offset(0, false);
+        with_runtime(|| {
+            let state = create_test_state();
+            let m = make_measurements(&state);
+            set_scroll_offset(&state, &m, 0, false);
 
-        // Resize an item below the viewport - should not cause adjustment
-        let adjustment = v.resize_item(50, 100);
-        assert!(adjustment.is_none());
+            let m = make_measurements(&state);
+            let adjustment = resize_item(&state, &m, 50, 100);
+            assert!(adjustment.is_none());
+        });
     }
 
     #[test]
     fn test_resize_item_above_viewport() {
-        let mut v = create_test_virtualizer();
-        v.set_scroll_offset(1000, false); // Scroll to item 20
+        with_runtime(|| {
+            let state = create_test_state();
+            let m = make_measurements(&state);
+            set_scroll_offset(&state, &m, 1000, false);
 
-        // Resize an item above the viewport
-        let adjustment = v.resize_item(5, 100); // Item 5 is above viewport
-        assert!(adjustment.is_some());
-        assert_eq!(adjustment.unwrap(), 50); // Delta: 100 - 50 = 50
+            let m = make_measurements(&state);
+            let adjustment = resize_item(&state, &m, 5, 100);
+            assert!(adjustment.is_some());
+            assert_eq!(adjustment.unwrap(), 50);
+        });
     }
 
     #[test]
     fn test_deferred_adjustments_during_scrolling() {
-        let mut v = create_test_virtualizer();
+        with_runtime(|| {
+            let state = create_test_state();
 
-        // Start scrolling to item 20 (offset 1000)
-        v.set_scroll_offset(1000, true);
+            let m = make_measurements(&state);
+            set_scroll_offset(&state, &m, 1000, true);
 
-        // Resize item 5 (above viewport) while scrolling
-        let adjustment = v.resize_item(5, 100); // 100 - 50 = +50
-        assert!(adjustment.is_none(), "Should not adjust during scrolling");
+            let m = make_measurements(&state);
+            let adjustment = resize_item(&state, &m, 5, 100);
+            assert!(adjustment.is_none(), "Should not adjust during scrolling");
 
-        // Resize another item above viewport
-        let adjustment = v.resize_item(3, 80); // 80 - 50 = +30
-        assert!(adjustment.is_none(), "Should not adjust during scrolling");
+            let m = make_measurements(&state);
+            let adjustment = resize_item(&state, &m, 3, 80);
+            assert!(adjustment.is_none(), "Should not adjust during scrolling");
 
-        // When scrolling stops, should return accumulated deferred adjustments
-        let correction = v.set_scroll_offset(1000, false);
-        assert_eq!(
-            correction,
-            Some(80),
-            "Should return accumulated delta: 50 + 30 = 80"
-        );
+            let m = make_measurements(&state);
+            let correction = set_scroll_offset(&state, &m, 1000, false);
+            assert_eq!(
+                correction,
+                Some(80),
+                "Should return accumulated delta: 50 + 30 = 80"
+            );
+        });
     }
 
     #[test]
     fn test_no_deferred_adjustments_for_items_below_viewport() {
-        let mut v = create_test_virtualizer();
+        with_runtime(|| {
+            let state = create_test_state();
 
-        // Start scrolling to item 20 (offset 1000)
-        v.set_scroll_offset(1000, true);
+            let m = make_measurements(&state);
+            set_scroll_offset(&state, &m, 1000, true);
 
-        // Resize item 50 (below viewport) while scrolling
-        let adjustment = v.resize_item(50, 100);
-        assert!(adjustment.is_none());
+            let m = make_measurements(&state);
+            let adjustment = resize_item(&state, &m, 50, 100);
+            assert!(adjustment.is_none());
 
-        // When scrolling stops, should return no correction since item was below viewport
-        let correction = v.set_scroll_offset(1000, false);
-        assert!(
-            correction.is_none(),
-            "No deferred adjustment for items below viewport"
-        );
+            let m = make_measurements(&state);
+            let correction = set_scroll_offset(&state, &m, 1000, false);
+            assert!(
+                correction.is_none(),
+                "No deferred adjustment for items below viewport"
+            );
+        });
     }
 }

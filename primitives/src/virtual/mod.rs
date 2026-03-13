@@ -1,4 +1,4 @@
-//! Framework-agnostic virtual list implementation.
+//! Virtual list implementation using Dioxus Store for fine-grained reactivity.
 //!
 //! This module provides the core algorithms needed for efficient list virtualization:
 //!
@@ -6,8 +6,11 @@
 //! - Calculating the visible range using binary search
 //! - Handling scroll position corrections when items resize
 
-mod types;
+pub(crate) mod types;
 mod utils;
 mod virtualizer;
 
-pub(crate) use virtualizer::{Virtualizer, VirtualizerOptions};
+pub(crate) use virtualizer::{
+    VirtualizerState, VirtualizerStateStoreExt, compute_measurements,
+    get_total_size, get_virtual_items, resize_item, set_scroll_offset, set_viewport_size,
+};
