@@ -116,12 +116,11 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
                 if (!isScrolling && scroll === lastOffset) return;
                 lastOffset = scroll;
                 const viewport = Math.min(container.clientHeight, window.innerHeight) || 600;
-                dioxus.send(JSON.stringify({
-                    type: "scroll",
+                dioxus.send({
                     offset: scroll,
                     viewport: viewport,
                     isScrolling: isScrolling
-                }));
+                });
             }
 
             function onScroll() {
