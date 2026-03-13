@@ -212,9 +212,9 @@ fn TeamSwitcher(teams: &'static [Team]) -> Element {
                                 div { style: "display:flex; flex-shrink:0; align-items:center; justify-content:center; width:2rem; height:2rem; aspect-ratio:1; border-radius:0.5rem; background:var(--sidebar-accent); color:var(--sidebar-accent-foreground);",
                                     Icon {}
                                 }
-                                div { class: "sidebar-info-block",
-                                    span { class: "sidebar-info-title", {teams[active_team()].name} }
-                                    span { class: "sidebar-info-subtitle", {teams[active_team()].plan} }
+                                div { class: "dx-sidebar-info-block",
+                                    span { class: "dx-sidebar-info-title", {teams[active_team()].name} }
+                                    span { class: "dx-sidebar-info-subtitle", {teams[active_team()].plan} }
                                 }
                                 ChevronIcon {}
                             }
@@ -302,7 +302,7 @@ fn NavMain(items: &'static [NavMainItem]) -> Element {
 #[component]
 fn NavProjects(projects: &'static [Project]) -> Element {
     rsx! {
-        SidebarGroup { class: "sidebar-hide-on-collapse",
+        SidebarGroup { class: "dx-sidebar-hide-on-collapse",
             SidebarGroupLabel { "Projects" }
             SidebarMenu {
                 for project in projects.iter() {
@@ -320,7 +320,7 @@ fn NavProjects(projects: &'static [Project]) -> Element {
                                 as: move |attributes: Vec<Attribute>| rsx! {
                                     SidebarMenuAction { show_on_hover: true, attributes,
                                         Icon {}
-                                        span { class: "sr-only", "More" }
+                                        span { class: "dx-sr-only", "More" }
                                     }
                                 },
                             }
@@ -379,9 +379,9 @@ fn NavUser() -> Element {
                                     }
                                     AvatarFallback { "DX" }
                                 }
-                                div { class: "sidebar-info-block",
-                                    span { class: "sidebar-info-title", "Dioxus" }
-                                    span { class: "sidebar-info-subtitle", "m@example.com" }
+                                div { class: "dx-sidebar-info-block",
+                                    span { class: "dx-sidebar-info-title", "Dioxus" }
+                                    span { class: "dx-sidebar-info-subtitle", "m@example.com" }
                                 }
                                 ChevronIcon {}
                             }
@@ -398,9 +398,9 @@ fn NavUser() -> Element {
                                 }
                                 AvatarFallback { "DX" }
                             }
-                            div { class: "sidebar-info-block",
-                                span { class: "sidebar-info-title", "Dioxus" }
-                                span { class: "sidebar-info-subtitle", "m@example.com" }
+                            div { class: "dx-sidebar-info-block",
+                                span { class: "dx-sidebar-info-title", "Dioxus" }
+                                span { class: "dx-sidebar-info-subtitle", "m@example.com" }
                             }
                         }
                         Separator { decorative: true }
@@ -504,7 +504,7 @@ fn DemoSettingControls(
 }
 
 #[component]
-fn Icon(#[props(default = "sidebar-icon")] class: &'static str) -> Element {
+fn Icon(#[props(default = "dx-sidebar-icon")] class: &'static str) -> Element {
     rsx! {
         svg {
             xmlns: "http://www.w3.org/2000/svg",
@@ -525,7 +525,7 @@ fn ChevronIcon() -> Element {
     rsx! {
         svg {
             xmlns: "http://www.w3.org/2000/svg",
-            class: "sidebar-icon sidebar-chevron",
+            class: "dx-sidebar-icon dx-sidebar-chevron",
             view_box: "0 0 24 24",
             fill: "none",
             stroke: "currentColor",

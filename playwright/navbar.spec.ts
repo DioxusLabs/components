@@ -24,7 +24,7 @@ test('mobile navigation', async ({ page }) => {
 
 test('keyboard navigation', async ({ page }) => {
   await page.goto('http://127.0.0.1:8080/component/?name=navbar&', { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
-  await page.locator('.navbar').focus();
+  await page.locator('.dx-navbar').focus();
   // Go right with the keyboard
   await page.keyboard.press('ArrowRight');
   // Assert the focus is on the information menu item

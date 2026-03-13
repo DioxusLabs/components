@@ -1,10 +1,10 @@
-.radio-group {
+.dx-radio-group {
   display: flex;
   flex-direction: column;
   gap: .75rem;
 }
 
-.radio-item {
+.dx-radio-item {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -22,7 +22,7 @@
     box-sizing: border-box;
     border-radius: 1.5rem;
     background: var(--light, var(--primary-color)) var(--dark, var(--primary-color-3));
-    box-shadow: 0 0 0 1px var(--light, var(--primary-color-6)) 
+    box-shadow: 0 0 0 1px var(--light, var(--primary-color-6))
       var(--dark, var(--primary-color-7));
     content: "";
     cursor: pointer;

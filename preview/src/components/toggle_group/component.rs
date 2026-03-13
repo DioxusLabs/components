@@ -6,7 +6,7 @@ pub fn ToggleGroup(props: ToggleGroupProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         toggle_group::ToggleGroup {
-            class: "toggle-group",
+            class: "dx-toggle-group",
             default_pressed: props.default_pressed,
             pressed: props.pressed,
             on_pressed_change: props.on_pressed_change,
@@ -24,7 +24,7 @@ pub fn ToggleGroup(props: ToggleGroupProps) -> Element {
 pub fn ToggleItem(props: ToggleItemProps) -> Element {
     rsx! {
         toggle_group::ToggleItem {
-            class: "toggle-item",
+            class: "dx-toggle-item",
             index: props.index,
             disabled: props.disabled,
             attributes: props.attributes,

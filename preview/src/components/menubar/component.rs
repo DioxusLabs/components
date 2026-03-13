@@ -9,7 +9,7 @@ pub fn Menubar(props: MenubarProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         menubar::Menubar {
-            class: "menubar",
+            class: "dx-menubar",
             disabled: props.disabled,
             roving_loop: props.roving_loop,
             attributes: props.attributes,
@@ -22,7 +22,7 @@ pub fn Menubar(props: MenubarProps) -> Element {
 pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
     rsx! {
         menubar::MenubarMenu {
-            class: "menubar-menu",
+            class: "dx-menubar-menu",
             index: props.index,
             disabled: props.disabled,
             attributes: props.attributes,
@@ -34,7 +34,7 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
 #[component]
 pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
     rsx! {
-        menubar::MenubarTrigger { class: "menubar-trigger", attributes: props.attributes, {props.children} }
+        menubar::MenubarTrigger { class: "dx-menubar-trigger", attributes: props.attributes, {props.children} }
     }
 }
 
@@ -42,7 +42,7 @@ pub fn MenubarTrigger(props: MenubarTriggerProps) -> Element {
 pub fn MenubarContent(props: MenubarContentProps) -> Element {
     rsx! {
         menubar::MenubarContent {
-            class: "menubar-content",
+            class: "dx-menubar-content",
             id: props.id,
             attributes: props.attributes,
             {props.children}
@@ -54,7 +54,7 @@ pub fn MenubarContent(props: MenubarContentProps) -> Element {
 pub fn MenubarItem(props: MenubarItemProps) -> Element {
     rsx! {
         menubar::MenubarItem {
-            class: "menubar-item",
+            class: "dx-menubar-item",
             index: props.index,
             value: props.value,
             disabled: props.disabled,
