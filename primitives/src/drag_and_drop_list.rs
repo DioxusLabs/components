@@ -1,5 +1,4 @@
 //! Defines the [`DragAndDropList`] component and its sub-components.
-use crate::icon::Icon;
 use dioxus::prelude::*;
 use std::rc::Rc;
 
@@ -39,8 +38,24 @@ fn resolve_drop_position(from: usize, to: usize) -> DropPosition {
     to.cmp(&from).into()
 }
 
+/// Context provided by [`DragAndDropListItem`] to its children.
+/// Use `use_context::<DragAndDropItemContext>()` to access the current item's index.
 #[derive(Clone, Copy)]
-struct DragAndDropContext {
+pub struct DragAndDropItemContext {
+    index: usize,
+}
+
+impl DragAndDropItemContext {
+    /// Returns the index of the current item in the list.
+    pub fn index(&self) -> usize {
+        self.index
+    }
+}
+
+/// Context provided by [`DragAndDropList`] to its descendants.
+/// Use `use_context::<DragAndDropContext>()` to access list-level operations.
+#[derive(Clone, Copy)]
+pub struct DragAndDropContext {
     drag_from: Signal<Option<usize>>,
     drop_to: Signal<Option<usize>>,
     drop_position: Signal<DropPosition>,
@@ -96,7 +111,8 @@ impl DragAndDropContext {
         self.list_items.set(list);
     }
 
-    fn remove(&mut self, index: usize) {
+    /// Remove the item at the given index from the list.
+    pub fn remove(&mut self, index: usize) {
         let mut list = (self.list_items)();
         if list.remove(index).is_ok() {
             let new_len = list.len();
@@ -196,15 +212,11 @@ impl DragAndDropContext {
     }
 }
 
-/// The props for the [`DragAndDropListItem`] component.
+/// The props for the [`DragAndDropList`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct DragAndDropListProps {
     /// Items (labels) to be rendered.
     pub items: Vec<Element>,
-
-    /// Set if the list items should be removable
-    #[props(default)]
-    pub is_removable: bool,
 
     /// Accessible label for the list
     #[props(default)]
@@ -274,7 +286,6 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
                 rsx! {
                     DragAndDropListItem {
                         index,
-                        is_removable: props.is_removable,
                         {children}
                     }
                 }
@@ -313,11 +324,8 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
 /// The props for the [`DragAndDropListItemProps`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct DragAndDropListItemProps {
-    /// The index of the index trigger
+    /// The index of the item in the list
     pub index: usize,
-
-    /// Set if the list item should be removable
-    pub is_removable: bool,
 
     /// Additional attributes to apply to the list item element.
     #[props(extends = GlobalAttributes)]
@@ -354,6 +362,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
     let mut ctx: DragAndDropContext = use_context();
 
     let index = props.index;
+    use_context_provider(|| DragAndDropItemContext { index });
 
     let mut item_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
     use_effect(move || {
@@ -413,7 +422,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             }
             Key::Delete | Key::Backspace => {
                 event.prevent_default();
-                if !(ctx.is_dragging)() && props.is_removable {
+                if !(ctx.is_dragging)() {
                     ctx.remove(index);
                 }
             }
@@ -480,11 +489,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             //ondragleave: move |_| ctx.drop_to.set(None),
             onkeydown,
             ..props.attributes,
-            div { class: "item-icon-div", aria_hidden: "true", DragIcon {} }
-            div { class: "item-body-div", {props.children} }
-            if props.is_removable {
-                 RemoveButton { index, on_click: move || ctx.remove(index) }
-            }
+            {props.children}
         }
         if (ctx.drop_position)() == DropPosition::After && render_drop_indicator((ctx.drop_to)()) {
             DropIndicator {  }
@@ -497,34 +502,6 @@ fn DropIndicator() -> Element {
     rsx! {
         div {
             class: "drop-indicator",
-        }
-    }
-}
-
-#[component]
-fn RemoveButton(index: usize, on_click: Callback<()>) -> Element {
-    let label = format!("Remove item {}", index + 1);
-    rsx! {
-        button {
-            class: "remove-button",
-            aria_label: "{label}",
-            onclick: move |_| on_click.call(()),
-            Icon {
-                // X icon from lucide https://lucide.dev/icons/x
-                path { d: "M18 6 6 18" }
-                path { d: "m6 6 12 12" }
-            }
-        }
-    }
-}
-
-#[component]
-fn DragIcon() -> Element {
-    rsx! {
-        Icon {
-            // equal icon from lucide https://lucide.dev/icons/equal
-            line { x1: "5", x2: "19", y1: "9", y2: "9", }
-            line { x1: "5", x2: "19", y1: "15", y2: "15", }
         }
     }
 }
