@@ -1,5 +1,4 @@
 //! Defines the [`DragAndDropList`] component and its sub-components.
-use crate::icon::Icon;
 use dioxus::prelude::*;
 use std::rc::Rc;
 
@@ -8,6 +7,20 @@ enum DropPosition {
     Before,
     After,
     Undefined,
+}
+
+/// Context provided by [`DragAndDropListItem`] to its children.
+/// Use `use_context::<DragAndDropItemContext>()` to access the current item's index.
+#[derive(Clone, Copy)]
+pub struct DragAndDropItemContext {
+    index: usize,
+}
+
+impl DragAndDropItemContext {
+    /// Returns the index of the current item in the list.
+    pub fn index(&self) -> usize {
+        self.index
+    }
 }
 
 /// Context provided by [`DragAndDropList`] to its descendants.
@@ -177,11 +190,6 @@ pub struct DragAndDropListProps {
     /// Items (labels) to be rendered.
     pub items: Vec<Element>,
 
-    /// Optional callback to customize the rendering of each list item's content.
-    /// Receives the item's index and default content, and returns the final content to render.
-    #[props(default)]
-    pub render_item: Option<Callback<(usize, Element), Element>>,
-
     /// Accessible label for the list
     #[props(default)]
     pub aria_label: Option<String>,
@@ -247,14 +255,10 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
             .iter()
             .enumerate()
             .map(|(index, children)| {
-                let content = match &props.render_item {
-                    Some(cb) => cb.call((index, children.clone())),
-                    None => children.clone(),
-                };
                 rsx! {
                     DragAndDropListItem {
                         index,
-                        {content}
+                        {children}
                     }
                 }
             })
@@ -330,6 +334,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
     let mut ctx: DragAndDropContext = use_context();
 
     let index = props.index;
+    use_context_provider(|| DragAndDropItemContext { index });
 
     let mut item_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
     use_effect(move || {
@@ -456,8 +461,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             //ondragleave: move |_| ctx.drop_to.set(None),
             onkeydown,
             ..props.attributes,
-            div { class: "item-icon-div", aria_hidden: "true", DragIcon {} }
-            div { class: "item-body-div", {props.children} }
+            {props.children}
         }
         if (ctx.drop_position)() == DropPosition::After && render_drop_indicator((ctx.drop_to)()) {
             DropIndicator {  }
@@ -474,13 +478,3 @@ fn DropIndicator() -> Element {
     }
 }
 
-#[component]
-fn DragIcon() -> Element {
-    rsx! {
-        Icon {
-            // equal icon from lucide https://lucide.dev/icons/equal
-            line { x1: "5", x2: "19", y1: "9", y2: "9", }
-            line { x1: "5", x2: "19", y1: "15", y2: "15", }
-        }
-    }
-}

@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
-use dioxus_primitives::drag_and_drop_list::{self, DragAndDropContext, DragAndDropListItemProps};
+use dioxus_primitives::drag_and_drop_list::{
+    self, DragAndDropContext, DragAndDropItemContext, DragAndDropListItemProps,
+};
 use dioxus_primitives::icon::Icon;
 
 #[derive(Props, Clone, PartialEq)]
@@ -25,22 +27,25 @@ pub struct DragAndDropListProps {
 
 #[component]
 pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
-    let render_item = if props.is_removable {
-        Some(Callback::new(|(index, children): (usize, Element)| {
+    let is_removable = props.is_removable;
+    let items = props
+        .items
+        .iter()
+        .map(|item| {
             rsx! {
-                {children}
-                RemoveButton { index }
+                DragIcon {}
+                div { class: "item-body-div", {item} }
+                if is_removable {
+                    RemoveButton {}
+                }
             }
-        }))
-    } else {
-        None
-    };
+        })
+        .collect();
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         drag_and_drop_list::DragAndDropList {
-            items: props.items,
-            render_item,
+            items,
             aria_label: props.aria_label,
             attributes: props.attributes,
             {props.children}
@@ -60,12 +65,26 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
 }
 
 #[component]
+fn DragIcon() -> Element {
+    rsx! {
+        div { class: "item-icon-div", aria_hidden: "true",
+            Icon {
+                // equal icon from lucide https://lucide.dev/icons/equal
+                line { x1: "5", x2: "19", y1: "9", y2: "9" }
+                line { x1: "5", x2: "19", y1: "15", y2: "15" }
+            }
+        }
+    }
+}
+
+#[component]
 pub fn RemoveButton(
-    index: usize,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
     children: Element,
 ) -> Element {
     let mut ctx: DragAndDropContext = use_context();
+    let item_ctx: DragAndDropItemContext = use_context();
+    let index = item_ctx.index();
     let label = format!("Remove item {}", index + 1);
     rsx! {
         button {
