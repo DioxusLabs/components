@@ -477,4 +477,3 @@ fn DropIndicator() -> Element {
         }
     }
 }
-
