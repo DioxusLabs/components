@@ -6,8 +6,18 @@ use std::rc::Rc;
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum DropPosition {
     Before,
-    After,
     Undefined,
+    After,
+}
+
+impl From<std::cmp::Ordering> for DropPosition {
+    fn from(ord: std::cmp::Ordering) -> Self {
+        match ord {
+            std::cmp::Ordering::Less => Self::Before,
+            std::cmp::Ordering::Equal => Self::Undefined,
+            std::cmp::Ordering::Greater => Self::After,
+        }
+    }
 }
 
 /// Resolves the final insertion index from a hovered item and pointer position.
@@ -26,13 +36,7 @@ fn resolve_drop_index(from: usize, hovered: usize, position: DropPosition) -> us
 
 /// Resolves whether the final insertion index is before or after the source item.
 fn resolve_drop_position(from: usize, to: usize) -> DropPosition {
-    if to < from {
-        DropPosition::Before
-    } else if to > from {
-        DropPosition::After
-    } else {
-        DropPosition::Undefined
-    }
+    to.cmp(&from).into()
 }
 
 #[derive(Clone, Copy)]
