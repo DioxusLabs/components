@@ -6,8 +6,37 @@ use std::rc::Rc;
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum DropPosition {
     Before,
-    After,
     Undefined,
+    After,
+}
+
+impl From<std::cmp::Ordering> for DropPosition {
+    fn from(ord: std::cmp::Ordering) -> Self {
+        match ord {
+            std::cmp::Ordering::Less => Self::Before,
+            std::cmp::Ordering::Equal => Self::Undefined,
+            std::cmp::Ordering::Greater => Self::After,
+        }
+    }
+}
+
+/// Resolves the final insertion index from a hovered item and pointer position.
+fn resolve_drop_index(from: usize, hovered: usize, position: DropPosition) -> usize {
+    let slot = match position {
+        DropPosition::Before | DropPosition::Undefined => hovered,
+        DropPosition::After => hovered + 1,
+    };
+
+    if from < slot {
+        slot - 1
+    } else {
+        slot
+    }
+}
+
+/// Resolves whether the final insertion index is before or after the source item.
+fn resolve_drop_position(from: usize, to: usize) -> DropPosition {
+    to.cmp(&from).into()
 }
 
 #[derive(Clone, Copy)]
@@ -46,9 +75,13 @@ impl DragAndDropContext {
         self.is_dragging.set(false);
     }
 
-    fn drag_over(&mut self, index: usize, position: DropPosition) {
-        self.drop_to.set(Some(index));
-        self.drop_position.set(position);
+    fn drag_over(&mut self, hovered: usize, position: DropPosition) {
+        let from = (self.drag_from)().unwrap_or(hovered);
+        let resolved = resolve_drop_index(from, hovered, position);
+
+        self.drop_to.set(Some(resolved));
+        self.drop_position
+            .set(resolve_drop_position(from, resolved));
     }
 
     fn drop(&mut self) {
@@ -130,13 +163,8 @@ impl DragAndDropContext {
     fn update_keyboard_drop_position(&mut self, from: usize) {
         let drag_from = (self.drag_from)().unwrap_or(from);
         let drop_to = (self.drop_to)().unwrap_or(from);
-        self.drop_position.set(if drop_to < drag_from {
-            DropPosition::Before
-        } else if drop_to > drag_from {
-            DropPosition::After
-        } else {
-            DropPosition::Undefined
-        });
+        self.drop_position
+            .set(resolve_drop_position(drag_from, drop_to));
     }
 
     fn announce_move(&mut self, index: usize) {
