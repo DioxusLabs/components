@@ -142,6 +142,7 @@ examples!(
     popover,
     progress,
     radio_group,
+    virtual_list[random_heights],
     scroll_area,
     select,
     separator,
