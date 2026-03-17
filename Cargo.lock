@@ -2265,6 +2265,7 @@ dependencies = [
  "dioxus-sdk-time",
  "lazy-js-bundle 0.6.2",
  "num-integer",
+ "serde",
  "time",
  "tracing",
 ]
