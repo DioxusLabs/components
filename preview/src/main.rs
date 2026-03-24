@@ -351,6 +351,7 @@ fn CheckIcon() -> Element {
         Icon {
             width: 24,
             height: 25,
+            stroke: "currentColor",
             path { d: "M5 13l4 4L19 7" }
         }
     }
