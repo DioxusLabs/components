@@ -9,7 +9,7 @@ use std::{
 
 use time::{ext::NumericalDuration, macros::date, Date, Month, OffsetDateTime, Weekday};
 
-use crate::{date_picker::DefaultCalendarProps, icon::Icon, LocalDateExt as _};
+use crate::{date_picker::DefaultCalendarProps, LocalDateExt as _};
 
 // A collection of [`Weekday`]s stored as a single byte
 // Implemented as a bitmask where bits 1-7 correspond to Monday-Sunday
@@ -1549,6 +1549,9 @@ pub struct CalendarSelectMonthProps {
     /// Additional attributes to extend the select month element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
+
+    /// The children of the select element
+    pub children: Element,
 }
 
 /// # CalendarSelectMonth
@@ -1652,7 +1655,7 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
             }
             span { class: "calendar-month-select-value",
                 {base_ctx.format_month.call(month)}
-                DropDownIcon { }
+                {props.children}
             }
         }
     }
@@ -1664,6 +1667,9 @@ pub struct CalendarSelectYearProps {
     /// Additional attributes to extend the select year element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
+
+    /// The children of the select element
+    pub children: Element,
 }
 
 /// # CalendarSelectYear
@@ -1758,7 +1764,7 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
             }
             span { class: "calendar-year-select-value",
                 "{year}"
-                DropDownIcon { }
+                {props.children}
             }
         }
     }
@@ -2103,17 +2109,6 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             onmounted,
             ..attributes,
             {day.to_string()}
-        }
-    }
-}
-
-#[component]
-fn DropDownIcon() -> Element {
-    rsx! {
-        Icon {
-            width: 20,
-            height: 20,
-            polyline { points: "6 9 12 15 18 9" }
         }
     }
 }
