@@ -49,6 +49,13 @@ jobs:
         run: cargo binstall dioxus-cli -y --force --version 0.7.0
       - name: Build preview app
         run: cd ./preview && dx build --web
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-target-${{ github.run_id }}-${{ github.run_attempt }}
+          path: target
+          retention-days: 1
+          compression-level: 0
 
   playwright-setup:
     if: github.event.pull_request.draft == false
@@ -70,6 +77,7 @@ jobs:
           cache-on-failure: "false"
           cache-directories: "target/dx"
           shared-key: ubuntu-24.04-build
+          save-if: false
       - name: Check
         run: cargo check --workspace --all-features
 
@@ -90,6 +98,12 @@ jobs:
         with:
           cache-all-crates: "true"
           shared-key: ubuntu-24.04-build
+          save-if: false
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-target-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
       - uses: browser-actions/setup-firefox@latest
       - run: cargo test --workspace
 
@@ -103,6 +117,7 @@ jobs:
         with:
           cache-all-crates: "true"
           shared-key: ubuntu-24.04-build
+          save-if: false
       - run: cargo fmt --all -- --check
 
   docs:
@@ -120,6 +135,12 @@ jobs:
         with:
           cache-all-crates: "true"
           shared-key: ubuntu-24.04-build
+          save-if: false
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-target-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
       - name: "doc --lib --all-features"
         run: |
           cargo doc --workspace --no-deps --all-features --document-private-items
@@ -141,6 +162,12 @@ jobs:
         with:
           cache-all-crates: "true"
           shared-key: ubuntu-24.04-build
+          save-if: false
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-target-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
       - run: cargo clippy --workspace --examples --tests --all-features --all-targets -- -D warnings
 
   add-all-components:
@@ -162,6 +189,12 @@ jobs:
           cache-all-crates: "true"
           cache-on-failure: "false"
           shared-key: ubuntu-24.04-build
+          save-if: false
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-target-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
       - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
         run: cargo binstall dioxus-cli -y --force --version 0.7.0
@@ -197,6 +230,12 @@ jobs:
           cache-all-crates: "true"
           cache-on-failure: "false"
           shared-key: ubuntu-24.04-build
+          save-if: false
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-target-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
       - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
         run: cargo binstall dioxus-cli -y --force --version 0.7.0
@@ -253,6 +292,11 @@ jobs:
           cache-directories: "target/dx"
           shared-key: ubuntu-24.04-build
           save-if: false
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-target-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
       - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
         run: cargo binstall dioxus-cli -y --force --version 0.7.0
