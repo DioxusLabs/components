@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_primitives::icon;
 
 #[derive(Copy, Clone, PartialEq, Default)]
 #[non_exhaustive]
@@ -150,10 +151,9 @@ pub fn PaginationPrevious(
             onmouseup,
             attributes,
             // ChevronLeft icon from lucide https://lucide.dev/icons/chevron-left
-            svg {
-                class: "pagination-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
+            icon::Icon {
+                width: "1rem",
+                height: "1rem",
                 polyline { points: "15 6 9 12 15 18" }
             }
             span { class: "pagination-label", "Previous" }
@@ -181,10 +181,9 @@ pub fn PaginationNext(
             attributes,
             span { class: "pagination-label", "Next" }
             // ChevronRight icon from lucide https://lucide.dev/icons/chevron-right
-            svg {
-                class: "pagination-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
+            icon::Icon {
+                width: "1rem",
+                height: "1rem",
                 polyline { points: "9 6 15 12 9 18" }
             }
         }
@@ -202,10 +201,10 @@ pub fn PaginationEllipsis(
             aria_hidden: "true",
             ..attributes,
             // MoreHorizontal icon from lucide https://lucide.dev/icons/more-horizontal
-            svg {
-                class: "pagination-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
+            icon::Icon {
+                width: "1rem",
+                height: "1rem",
+                fill: "currentColor",
                 circle { cx: "5", cy: "12", r: "1.5" }
                 circle { cx: "12", cy: "12", r: "1.5" }
                 circle { cx: "19", cy: "12", r: "1.5" }

@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 use dioxus_primitives::navbar::{
     self, NavbarContentProps, NavbarItemProps, NavbarNavProps, NavbarProps, NavbarTriggerProps,
 };
+use dioxus_primitives::icon;
 
 #[component]
 pub fn Navbar(props: NavbarProps) -> Element {
@@ -35,10 +36,11 @@ pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
     rsx! {
         navbar::NavbarTrigger { class: "navbar-trigger", attributes: props.attributes,
             {props.children}
-            svg {
+            icon::Icon {
                 class: "navbar-expand-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
+                width: 20,
+                height: 20,
+                stroke: "var(--secondary-color-4)",
                 polyline { points: "6 9 12 15 18 9" }
             }
         }

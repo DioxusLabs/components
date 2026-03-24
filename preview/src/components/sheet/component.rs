@@ -3,6 +3,7 @@ use dioxus_primitives::dioxus_attributes::attributes;
 use dioxus_primitives::dialog::{
     self, DialogCtx, DialogDescriptionProps, DialogRootProps, DialogTitleProps,
 };
+use dioxus_primitives::icon;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub enum SheetSide {
@@ -78,10 +79,9 @@ pub fn SheetContent(
             attributes,
             {children}
             SheetClose { class: "sheet-close",
-                svg {
-                    class: "sheet-close-icon",
-                    view_box: "0 0 24 24",
-                    xmlns: "http://www.w3.org/2000/svg",
+                icon::Icon {
+                    width: 20,
+                    height: 20,
                     path { d: "M18 6 6 18" }
                     path { d: "m6 6 12 12" }
                 }

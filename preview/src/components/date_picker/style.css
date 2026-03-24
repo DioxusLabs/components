@@ -19,16 +19,6 @@
     rotate: 180deg;
 }
 
-.date-picker-expand-icon {
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: var(--primary-color-7);
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 2;
-}
-
 [data-disabled="true"] {
     cursor: not-allowed;
     opacity: 0.5;

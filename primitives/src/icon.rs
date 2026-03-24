@@ -110,17 +110,9 @@ pub struct IconProps {
     #[props(default = ViewBox::new(0, 0, 24, 24))]
     pub view_box: ViewBox,
 
-    /// The horizontal length in the user coordinate system
-    #[props(default = 24)]
-    pub width: u16,
-
-    /// The vertical length in the user coordinate system
-    #[props(default = 24)]
-    pub height: u16,
-
     /// The width of the stroke to be applied to the shape
-    #[props(default = 2)]
-    pub stroke_width: u8,
+    #[props(default = 2.)]
+    pub stroke_width: f64,
 
     /// The shape to be used at the end of open sub-paths when they are stroked
     #[props(default)]
@@ -131,7 +123,7 @@ pub struct IconProps {
     pub stroke_line_join: LineJoin,
 
     /// The color used to paint the outline of the shape.
-    #[props(default = "var(--secondary-color-4)")]
+    #[props(default = "currentColor")]
     pub stroke: &'static str,
 
     /// The color used to paint the element.
@@ -158,6 +150,8 @@ pub struct IconProps {
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         Icon {
+///             width: 24,
+///             height: 24,
 ///             circle { cx: 12, cy:12, r: 10 }
 ///             path { d: "M8 14s1.5 2 4 2 4-2 4-2" }
 ///             line { x1: 9, x2: 9.01, y1: 9, y2: 9 }
@@ -172,8 +166,6 @@ pub fn Icon(props: IconProps) -> Element {
         svg {
             xmlns: "http://www.w3.org/2000/svg",
             view_box: props.view_box.to_string(),
-            width: props.width,
-            height: props.height,
             fill: props.fill,
             stroke: props.stroke,
             stroke_linecap: props.stroke_line_cap.to_class(),

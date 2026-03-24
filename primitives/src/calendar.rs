@@ -1549,6 +1549,9 @@ pub struct CalendarSelectMonthProps {
     /// Additional attributes to extend the select month element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
+
+    /// The children of the select element
+    pub children: Element,
 }
 
 /// # CalendarSelectMonth
@@ -1652,12 +1655,7 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
             }
             span { class: "calendar-month-select-value",
                 {base_ctx.format_month.call(month)}
-                svg {
-                    class: "select-expand-icon",
-                    view_box: "0 0 24 24",
-                    xmlns: "http://www.w3.org/2000/svg",
-                    polyline { points: "6 9 12 15 18 9" }
-                }
+                {props.children}
             }
         }
     }
@@ -1669,6 +1667,9 @@ pub struct CalendarSelectYearProps {
     /// Additional attributes to extend the select year element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
+
+    /// The children of the select element
+    pub children: Element,
 }
 
 /// # CalendarSelectYear
@@ -1763,12 +1764,7 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
             }
             span { class: "calendar-year-select-value",
                 "{year}"
-                svg {
-                    class: "select-expand-icon",
-                    view_box: "0 0 24 24",
-                    xmlns: "http://www.w3.org/2000/svg",
-                    polyline { points: "6 9 12 15 18 9" }
-                }
+                {props.children}
             }
         }
     }
