@@ -38,10 +38,6 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.88.0
-        with:
-          targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
         with:
           cache-all-crates: "true"
@@ -68,7 +64,6 @@ jobs:
           packages: libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev libxdo-dev
           version: 1.0
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.88.0
       - uses: Swatinem/rust-cache@v2
         with:
           cache-all-crates: "true"
@@ -91,9 +86,6 @@ jobs:
         with:
           packages: libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev libxdo-dev
           version: 1.0
-      - uses: dtolnay/rust-toolchain@1.88.0
-        with:
-          components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
         with:
           cache-all-crates: "true"
@@ -107,9 +99,6 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.88.0
-        with:
-          components: rustfmt
       - uses: Swatinem/rust-cache@v2
         with:
           cache-all-crates: "true"
@@ -127,8 +116,6 @@ jobs:
         with:
           packages: libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev libxdo-dev
           version: 1.0
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@nightly
       - uses: Swatinem/rust-cache@v2
         with:
           cache-all-crates: "true"
@@ -150,9 +137,6 @@ jobs:
         with:
           packages: libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev libxdo-dev
           version: 1.0
-      - uses: dtolnay/rust-toolchain@1.88.0
-        with:
-          components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
         with:
           cache-all-crates: "true"
@@ -173,10 +157,6 @@ jobs:
         with:
           packages: libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev libxdo-dev
           version: 1.0
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.88.0
-        with:
-          targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
         with:
           cache-all-crates: "true"
@@ -212,10 +192,6 @@ jobs:
         with:
           packages: libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev libxdo-dev
           version: 1.0
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.88.0
-        with:
-          targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
         with:
           cache-all-crates: "true"
@@ -270,10 +246,6 @@ jobs:
           node-version: lts/*
           cache: npm
           cache-dependency-path: playwright/package-lock.json
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.88.0
-        with:
-          targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
         with:
           cache-all-crates: "true"
