@@ -31,10 +31,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    uses: ./.github/workflows/build.yml
+
   playwright-tests:
-    if: github.event.pull_request.draft == false
+    needs: build
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     timeout-minutes: 30
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -46,6 +51,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: npm
+          cache-dependency-path: playwright/package-lock.json
       - name: Install Rust
         uses: dtolnay/rust-toolchain@1.88.0
         with:
@@ -54,6 +61,9 @@ jobs:
         with:
           cache-all-crates: "true"
           cache-on-failure: "true"
+          cache-directories: "target/dx"
+          shared-key: ubuntu-24.04-build
+          save-if: false
       - uses: cargo-bins/cargo-binstall@main
       - name: Install CLI
         run: cargo binstall dioxus-cli -y --force --version 0.7.0
