@@ -126,6 +126,7 @@ pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
             icon::Icon {
                 width: 20,
                 height: 20,
+                stroke: "var(--primary-color-7)",
                 polyline { points: "6 9 12 15 18 9" }
             }
         }

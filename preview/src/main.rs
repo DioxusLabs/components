@@ -223,6 +223,7 @@ fn Navbar() -> Element {
                         Icon {
                             width: "2rem",
                             height: "2rem",
+                            stroke: "var(--secondary-color-4)",
                             path { d: "M15 18 L9 12 L15 6" }
                         }
                     }
@@ -351,7 +352,6 @@ fn CheckIcon() -> Element {
         Icon {
             width: 24,
             height: 25,
-            stroke: "currentColor",
             path { d: "M5 13l4 4L19 7" }
         }
     }
@@ -570,6 +570,7 @@ fn LanguageSelect() -> Element {
                     Icon {
                         width: 20,
                         height: 20,
+                        stroke: "var(--secondary-color-4)",
                         polyline { points: "6 9 12 15 18 9" }
                     }
                 }
@@ -603,6 +604,7 @@ fn ComponentCode(
             Icon {
                 width: 20,
                 height: 20,
+                stroke: "var(--secondary-color-4)",
                 if collapsed() {
                     polyline { points: "6 9 12 15 18 9" }
                 } else {
@@ -685,6 +687,7 @@ fn CollapsibleCodeBlock(highlighted: HighlightedCode) -> Element {
             Icon {
                 width: 20,
                 height: 20,
+                stroke: "var(--secondary-color-4)",
                 if collapsed() {
                     polyline { points: "6 9 12 15 18 9" }
                 } else {
@@ -1064,6 +1067,7 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                     id: "scroll-down-icon",
                     width: 20,
                     height: 20,
+                    stroke: "var(--secondary-color-4)",
                     polyline { points: "6 9 12 15 18 9" }
                 }
             }
@@ -1172,6 +1176,7 @@ fn GotoIcon(mut props: LinkProps) -> Element {
         Icon {
             width: 20,
             height: 20,
+            stroke: "var(--secondary-color-4)",
             stroke_width: 0.25,
             path {
                 d: "M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h14v-7h2v7q0 .825-.587 1.413T19 21zm4.7-5.3l-1.4-1.4L17.6 5H14V3h7v7h-2V6.4z",

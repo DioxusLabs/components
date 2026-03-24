@@ -164,6 +164,7 @@ fn DropDownIcon() -> Element {
         Icon {
             width: 20,
             height: 20,
+            stroke: "var(--secondary-color-4)",
             path { d: "m6 9 6 6 6-6" }
         }
     }

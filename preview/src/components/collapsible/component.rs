@@ -38,6 +38,7 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
                 icon::Icon {
                     width: "1rem",
                     height: "1rem",
+                    stroke: "var(--secondary-color-3)",
                     // shifted up by 6 polyline { points: "6 9 12 15 18 9" }
                     polyline { points: "6 15 12 21 18 15" }
                     // shifted down by 6 polyline { points: "6 15 12 9 18 15" }

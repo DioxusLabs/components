@@ -20,7 +20,6 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
                 icon::Icon {
                     width: "1rem",
                     height: "1rem",
-                    stroke: "currentColor",
                     path { d: "M5 13l4 4L19 7" }
                 }
             }

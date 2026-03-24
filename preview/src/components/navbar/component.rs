@@ -40,6 +40,7 @@ pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
                 class: "navbar-expand-icon",
                 width: 20,
                 height: 20,
+                stroke: "var(--secondary-color-4)",
                 polyline { points: "6 9 12 15 18 9" }
             }
         }

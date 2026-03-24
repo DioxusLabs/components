@@ -123,7 +123,7 @@ pub struct IconProps {
     pub stroke_line_join: LineJoin,
 
     /// The color used to paint the outline of the shape.
-    #[props(default = "var(--secondary-color-4)")]
+    #[props(default = "currentColor")]
     pub stroke: &'static str,
 
     /// The color used to paint the element.
