@@ -33,7 +33,26 @@ concurrency:
 jobs:
   build:
     if: github.event.pull_request.draft == false
-    uses: ./.github/workflows/build.yml
+    name: Build
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: "true"
+          cache-on-failure: "true"
+          cache-directories: "target/dx"
+          shared-key: ubuntu-24.04-build
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Install CLI
+        run: cargo binstall dioxus-cli -y --force --version 0.7.0
+      - name: Build preview app
+        run: cd ./preview && dx build --web
 
   playwright-setup:
     if: github.event.pull_request.draft == false
@@ -140,6 +159,99 @@ jobs:
           shared-key: ubuntu-24.04-build
       - run: cargo clippy --workspace --examples --tests --all-features --all-targets -- -D warnings
 
+  add-all-components:
+    needs: build
+    if: github.event.pull_request.draft == false
+    name: Add All Components
+    runs-on: ubuntu-24.04
+    env:
+      CARGO_INCREMENTAL: 1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev libxdo-dev
+          version: 1.0
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: "true"
+          cache-on-failure: "false"
+          shared-key: ubuntu-24.04-build
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Install CLI
+        run: cargo binstall dioxus-cli -y --force --version 0.7.0
+      - name: Add components and check
+        run: |
+          cd test-harness
+          # Add dependencies manually; TODO: remove this once dx components supports local dependencies
+          dx components add calendar,popover --path ..
+          dx components add button,separator,sheet,tooltip --path ..
+          # Add all components
+          dx components add --all --path .. --force
+          # Switch to the local version of dioxus-primitives
+          cargo add dioxus-primitives --path ../primitives
+          # Make sure it still builds
+          cargo check --all-features
+
+  add-each-component:
+    needs: build
+    if: github.event.pull_request.draft == false
+    name: Add Each Components
+    runs-on: ubuntu-24.04
+    env:
+      CARGO_INCREMENTAL: 1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev libxdo-dev
+          version: 1.0
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: "true"
+          cache-on-failure: "false"
+          shared-key: ubuntu-24.04-build
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Install CLI
+        run: cargo binstall dioxus-cli -y --force --version 0.7.0
+      - name: Add each component and check
+        run: |
+          cd preview/src/components/
+          for file in *; do
+            if [ -d "$file" ]; then
+              echo "Testing component: $file"
+            else
+              continue
+            fi
+            # Go to test harness
+            cd ../../../test-harness
+            # Add dependencies manually; TODO: remove this once dx components supports local dependencies
+            if [ "$file" = "date_picker" ]; then
+              dx components add calendar,popover --path ..
+            elif [ "$file" = "sidebar" ]; then
+              dx components add button,separator,sheet,tooltip --path ..
+            fi
+            # Add the component
+            dx components add "$file" --path ..
+            # Switch to the local version of dioxus-primitives
+            cargo add dioxus-primitives --path ../primitives
+            # Make sure it still builds
+            cargo check --all-features
+            # Undo changes
+            dx components remove --all --path ..
+            cd ../preview/src/components/
+          done
+
   playwright-tests:
     needs: [build, playwright-setup]
     if: github.event.pull_request.draft == false
@@ -179,8 +291,6 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: ubuntu-24.04-playwright-${{ hashFiles('playwright/package-lock.json') }}
-      - name: Install Playwright Browsers
-        run: cd ./playwright && npx playwright install --with-deps
       - name: Run Playwright tests
         run: cd ./playwright && npx playwright test --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
       - name: Upload blob report to GitHub Actions Artifacts
