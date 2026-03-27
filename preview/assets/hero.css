@@ -35,7 +35,7 @@
 #scroll-down-icon {
     position: absolute;
     top: 38rem;
-    left: 50%;
+    left: calc(50% - 10px);
     animation: scroll-down-icon-animation 3000ms ease-in-out infinite;
     transform: translate(-50%, -50%);
 }
