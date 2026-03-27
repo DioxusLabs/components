@@ -124,8 +124,8 @@ pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
         PopoverTrigger { aria_label: "Show Calendar", attributes: props.attributes,
             icon::Icon {
-                width: 20,
-                height: 20,
+                width: "20px",
+                height: "20px",
                 stroke: "var(--primary-color-7)",
                 polyline { points: "6 9 12 15 18 9" }
             }

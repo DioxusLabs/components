@@ -248,8 +248,8 @@ fn Navbar() -> Element {
                 //     class: "navbar-link",
                 //     aria_label: "Dioxus components crates.io",
                 //     Icon {
-                //         width: 24,
-                //         height: 24,
+                //         width: "24px",
+                //         height: "24px",
                 //         viewBox: ViewBox::new(0, 0, 576, 512),
                 //         path {
                 //             d: "M290.8 48.6l78.4 29.7L288 109.5 206.8 78.3l78.4-29.7c1.8-.7 3.8-.7 5.7 0zM136 92.5l0 112.2c-1.3 .4-2.6 .8-3.9 1.3l-96 36.4C14.4 250.6 0 271.5 0 294.7L0 413.9c0 22.2 13.1 42.3 33.5 51.3l96 42.2c14.4 6.3 30.7 6.3 45.1 0L288 457.5l113.5 49.9c14.4 6.3 30.7 6.3 45.1 0l96-42.2c20.3-8.9 33.5-29.1 33.5-51.3l0-119.1c0-23.3-14.4-44.1-36.1-52.4l-96-36.4c-1.3-.5-2.6-.9-3.9-1.3l0-112.2c0-23.3-14.4-44.1-36.1-52.4l-96-36.4c-12.8-4.8-26.9-4.8-39.7 0l-96 36.4C150.4 48.4 136 69.3 136 92.5zM392 210.6l-82.4 31.2 0-89.2L392 121l0 89.6zM154.8 250.9l78.4 29.7L152 311.7 70.8 280.6l78.4-29.7c1.8-.7 3.8-.7 5.7 0zm18.8 204.4l0-100.5L256 323.2l0 95.9-82.4 36.2zM421.2 250.9c1.8-.7 3.8-.7 5.7 0l78.4 29.7L424 311.7l-81.2-31.1 78.4-29.7zM523.2 421.2l-77.6 34.1 0-100.5L528 323.2l0 90.7c0 3.2-1.9 6-4.8 7.3z",
@@ -334,8 +334,8 @@ fn CopyButton(#[props(extends=GlobalAttributes)] attributes: Vec<Attribute>) -> 
 fn CopyIcon() -> Element {
     rsx! {
         Icon {
-            width: 24,
-            height: 25,
+            width: "24px",
+            height: "25px",
             fill: "currentColor",
             stroke: "none",
             stroke_width: 1.5,
@@ -350,8 +350,8 @@ fn CopyIcon() -> Element {
 fn CheckIcon() -> Element {
     rsx! {
         Icon {
-            width: 24,
-            height: 25,
+            width: "24px",
+            height: "25px",
             path { d: "M5 13l4 4L19 7" }
         }
     }
@@ -385,8 +385,8 @@ fn DarkModeToggle() -> Element {
 fn DarkModeIcon() -> Element {
     rsx! {
         Icon {
-            width: 24,
-            height: 24,
+            width: "24px",
+            height: "24px",
             path { d: "M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" }
         }
     }
@@ -396,8 +396,8 @@ fn DarkModeIcon() -> Element {
 fn LightModeIcon() -> Element {
     rsx! {
         Icon {
-            width: 24,
-            height: 24,
+            width: "24px",
+            height: "24px",
             circle { cx: "12", cy: "12", r: "4" }
             line {
                 x1: "12",
@@ -568,8 +568,8 @@ fn LanguageSelect() -> Element {
                 span { class: "language-select-value",
                     {current_lang.read().flag()}
                     Icon {
-                        width: 20,
-                        height: 20,
+                        width: "20px",
+                        height: "20px",
                         stroke: "var(--secondary-color-4)",
                         polyline { points: "6 9 12 15 18 9" }
                     }
@@ -602,8 +602,8 @@ fn ComponentCode(
                 collapsed.toggle();
             },
             Icon {
-                width: 20,
-                height: 20,
+                width: "20px",
+                height: "20px",
                 stroke: "var(--secondary-color-4)",
                 if collapsed() {
                     polyline { points: "6 9 12 15 18 9" }
@@ -685,8 +685,8 @@ fn CollapsibleCodeBlock(highlighted: HighlightedCode) -> Element {
                 collapsed.toggle();
             },
             Icon {
-                width: 20,
-                height: 20,
+                width: "20px",
+                height: "20px",
                 stroke: "var(--secondary-color-4)",
                 if collapsed() {
                     polyline { points: "6 9 12 15 18 9" }
@@ -1065,8 +1065,8 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                 Explanation {}
                 Icon {
                     id: "scroll-down-icon",
-                    width: 20,
-                    height: 20,
+                    width: "20px",
+                    height: "20px",
                     stroke: "var(--secondary-color-4)",
                     polyline { points: "6 9 12 15 18 9" }
                 }
@@ -1174,8 +1174,8 @@ fn ComponentGalleryPreview(component: ComponentDemoData) -> Element {
 fn GotoIcon(mut props: LinkProps) -> Element {
     props.children = rsx! {
         Icon {
-            width: 20,
-            height: 20,
+            width: "20px",
+            height: "20px",
             stroke: "var(--secondary-color-4)",
             stroke_width: 0.25,
             path {

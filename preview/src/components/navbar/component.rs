@@ -38,8 +38,8 @@ pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
             {props.children}
             icon::Icon {
                 class: "navbar-expand-icon",
-                width: 20,
-                height: 20,
+                width: "20px",
+                height: "20px",
                 stroke: "var(--secondary-color-4)",
                 polyline { points: "6 9 12 15 18 9" }
             }

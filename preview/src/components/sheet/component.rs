@@ -80,8 +80,8 @@ pub fn SheetContent(
             {children}
             SheetClose { class: "sheet-close",
                 icon::Icon {
-                    width: 20,
-                    height: 20,
+                    width: "20px",
+                    height: "20px",
                     path { d: "M18 6 6 18" }
                     path { d: "m6 6 12 12" }
                 }

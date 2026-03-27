@@ -91,8 +91,8 @@ pub fn CalendarPreviousMonthButton(
     rsx! {
         calendar::CalendarPreviousMonthButton { attributes,
             Icon {
-                width: 20,
-                height: 20,
+                width: "20px",
+                height: "20px",
                 path { d: "m15 18-6-6 6-6" }
             }
         }
@@ -106,8 +106,8 @@ pub fn CalendarNextMonthButton(
     rsx! {
         calendar::CalendarNextMonthButton { attributes,
             Icon {
-                width: 20,
-                height: 20,
+                width: "20px",
+                height: "20px",
                 path { d: "m9 18 6-6-6-6" }
             }
         }
@@ -162,8 +162,8 @@ pub fn CalendarDay(props: CalendarDayProps) -> Element {
 fn DropDownIcon() -> Element {
     rsx! {
         Icon {
-            width: 20,
-            height: 20,
+            width: "20px",
+            height: "20px",
             stroke: "var(--secondary-color-4)",
             path { d: "m6 9 6 6 6-6" }
         }
