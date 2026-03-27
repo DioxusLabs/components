@@ -37,7 +37,7 @@ impl fmt::Display for ViewBox {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{} {} {} {}",
+            "{}px {}px {}px {}px",
             self.min_x, self.min_y, self.width, self.height
         )
     }
