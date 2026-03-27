@@ -509,8 +509,8 @@ fn Icon(#[props(default = "sidebar-icon")] class: &'static str) -> Element {
     rsx! {
         icon::Icon {
             class,
-            width: 24,
-            height: 24,
+            width: "24px",
+            height: "24px",
             circle { cx: "12", cy: "12", r: "10" }
         }
     }
@@ -521,8 +521,8 @@ fn ChevronIcon() -> Element {
     rsx! {
         icon::Icon {
             class: "sidebar-icon sidebar-chevron",
-            width: 24,
-            height: 24,
+            width: "24px",
+            height: "24px",
             path { d: "m9 18 6-6-6-6" }
         }
     }

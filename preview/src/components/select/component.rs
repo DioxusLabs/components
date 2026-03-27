@@ -31,8 +31,8 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
         select::SelectTrigger { class: "select-trigger", attributes: props.attributes,
             {props.children}
             icon::Icon {
-                width: 20,
-                height: 20,
+                width: "20px",
+                height: "20px",
                 stroke: "var(--primary-color-7)",
                 polyline { points: "6 9 12 15 18 9" }
             }
