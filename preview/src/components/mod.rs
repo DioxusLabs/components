@@ -139,7 +139,7 @@ examples!(
     menubar,
     navbar,
     pagination,
-    popover,
+    popover[sides, flip],
     progress,
     radio_group,
     virtual_list[random_heights],
@@ -157,5 +157,5 @@ examples!(
     toggle_group,
     toggle,
     toolbar,
-    tooltip,
+    tooltip[sides, flip],
 );

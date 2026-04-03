@@ -19,6 +19,8 @@ time = { version = "0.3.44", features = ["std", "macros", "parsing", "local-offs
 num-integer = "0.1.46"
 tracing.workspace = true
 serde = { version = "1.0", features = ["derive"] }
+floating-ui-core.workspace = true
+euclid.workspace = true
 
 [build-dependencies]
 lazy-js-bundle = "0.6.2"

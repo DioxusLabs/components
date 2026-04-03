@@ -3,6 +3,7 @@
 use dioxus::document;
 use dioxus::prelude::*;
 
+use crate::floating::{self, FloatingPosition};
 use crate::use_global_escape_listener;
 use crate::{
     use_animated_open, use_controlled, use_id_or, use_unique_id, ContentAlign, ContentSide,
@@ -208,6 +209,10 @@ pub fn PopoverContent(props: PopoverContentProps) -> Element {
 
     let render = use_animated_open(id, ctx.open);
 
+    // Compute floating position using floating-ui
+    let floating =
+        floating::use_floating(ctx.labelledby, id, props.side, props.align, 0.0, ctx.open);
+
     use_effect(move || {
         if !render() {
             return;
@@ -246,6 +251,7 @@ pub fn PopoverContent(props: PopoverContentProps) -> Element {
                 class: props.class,
                 side: props.side,
                 align: props.align,
+                floating,
                 attributes: props.attributes,
                 children: props.children
             }
@@ -261,6 +267,7 @@ pub fn PopoverContentRendered(
     class: Option<String>,
     side: ContentSide,
     align: ContentAlign,
+    floating: Signal<Option<FloatingPosition>>,
     attributes: Vec<Attribute>,
     children: Element,
 ) -> Element {
@@ -274,6 +281,14 @@ pub fn PopoverContentRendered(
     // is highlighting text or interacting with another element.
     use_global_escape_listener(move || set_open.call(false));
 
+    // Derive actual side/align from computed placement (may differ due to flip)
+    let actual_side = floating()
+        .map(|f| floating::placement_to_side(f.placement))
+        .unwrap_or(side);
+    let actual_align = floating()
+        .map(|f| floating::placement_to_align(f.placement))
+        .unwrap_or(align);
+
     rsx! {
         div {
             id,
@@ -283,8 +298,8 @@ pub fn PopoverContentRendered(
             aria_hidden: (!is_open).then_some("true"),
             class: class.unwrap_or_else(|| "popover-content".to_string()),
             "data-state": if is_open { "open" } else { "closed" },
-            "data-side": side.as_str(),
-            "data-align": align.as_str(),
+            "data-side": actual_side.as_str(),
+            "data-align": actual_align.as_str(),
             ..attributes,
             {children}
         }

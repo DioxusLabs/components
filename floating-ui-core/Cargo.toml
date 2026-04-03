@@ -1,0 +1,9 @@
+[package]
+name = "floating-ui-core"
+version = "0.1.0"
+edition = "2021"
+description = "Platform-agnostic floating UI positioning engine"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+euclid.workspace = true

@@ -25,6 +25,7 @@ pub mod date_picker;
 pub mod dialog;
 pub mod drag_and_drop_list;
 pub mod dropdown_menu;
+pub(crate) mod floating;
 mod focus;
 pub mod hover_card;
 pub mod icon;

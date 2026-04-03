@@ -1,5 +1,6 @@
 //! Defines the [`Tooltip`] component and its sub-components, which provide contextual information when hovering or focusing on elements.
 
+use crate::floating;
 use crate::{
     merge_attributes, use_animated_open, use_controlled, use_id_or, use_unique_id, ContentAlign,
     ContentSide,
@@ -16,6 +17,7 @@ struct TooltipCtx {
 
     // ARIA attributes
     tooltip_id: Signal<String>,
+    trigger_id: Signal<String>,
 }
 
 /// The props for the [`Tooltip`] component
@@ -83,12 +85,14 @@ pub struct TooltipProps {
 pub fn Tooltip(props: TooltipProps) -> Element {
     let (open, set_open) = use_controlled(props.open, props.default_open, props.on_open_change);
     let tooltip_id = use_unique_id();
+    let trigger_id = use_unique_id();
 
     let _ctx = use_context_provider(|| TooltipCtx {
         open,
         set_open,
         disabled: props.disabled,
         tooltip_id,
+        trigger_id,
     });
 
     rsx! {
@@ -151,7 +155,15 @@ pub struct TooltipTriggerProps {
 /// ```
 #[component]
 pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
-    let ctx: TooltipCtx = use_context();
+    let mut ctx: TooltipCtx = use_context();
+
+    // If the user provided their own id, update the trigger_id in context
+    let user_id = props.id.clone();
+    use_effect(use_reactive!(|user_id| {
+        if let Some(uid) = user_id {
+            ctx.trigger_id.set(uid);
+        }
+    }));
 
     // Handle mouse events
     let handle_mouse_enter = move |_: Event<MouseData>| {
@@ -188,7 +200,7 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
     };
 
     let base = attributes!(div {
-        id: props.id.clone(),
+        id: ctx.trigger_id.cloned(),
         tabindex: "0",
         "aria-describedby": ctx.tooltip_id.cloned(),
         onmouseenter: handle_mouse_enter,
@@ -285,6 +297,22 @@ pub fn TooltipContent(props: TooltipContentProps) -> Element {
     // Only render if the tooltip is open
     let render = use_animated_open(id, ctx.open);
 
+    // Compute floating position using floating-ui
+    let floating =
+        floating::use_floating(ctx.trigger_id, id, props.side, props.align, 5.0, ctx.open);
+
+    // Derive actual side/align from computed placement (may differ due to flip)
+    let actual_side = use_memo(move || {
+        floating()
+            .map(|f| floating::placement_to_side(f.placement))
+            .unwrap_or(props.side)
+    });
+    let actual_align = use_memo(move || {
+        floating()
+            .map(|f| floating::placement_to_align(f.placement))
+            .unwrap_or(props.align)
+    });
+
     // Create the tooltip content
     rsx! {
         if render() {
@@ -292,8 +320,8 @@ pub fn TooltipContent(props: TooltipContentProps) -> Element {
                 id,
                 role: "tooltip",
                 "data-state": if ctx.open.cloned() { "open" } else { "closed" },
-                "data-side": props.side.as_str(),
-                "data-align": props.align.as_str(),
+                "data-side": actual_side().as_str(),
+                "data-align": actual_align().as_str(),
                 ..props.attributes,
                 {props.children}
             }

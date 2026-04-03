@@ -1,11 +1,14 @@
 [workspace]
 resolver = "3"
-members = ["primitives", "preview", "test-harness", "dioxus-attributes"]
+members = ["primitives", "preview", "test-harness", "dioxus-attributes", "floating-ui-core", "floating-ui-dom"]
 
 [workspace.dependencies]
 dioxus-primitives = { path = "primitives" }
+floating-ui-core = { path = "floating-ui-core" }
+floating-ui-dom = { path = "floating-ui-dom" }
 
 dioxus = "0.7.0"
+euclid = "0.22"
 tracing = { version = "0.1", features = ["std"] }
 
 [profile.release]
