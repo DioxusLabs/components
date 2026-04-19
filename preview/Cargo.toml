@@ -12,6 +12,9 @@ unic-langid = { version = "0.9", features = ["macros"] }
 strum = { version = "0.27.2", features = ["derive"] }
 tracing.workspace = true
 time = { version = "0.3.44", features = ["std", "macros"] }
+getrandom = { version = "0.4.2", features = ["wasm_js"] }
+rand = "0.10.1"
+palette = "0.7.6"
 
 [build-dependencies]
 syntect = "5.2"

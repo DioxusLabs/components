@@ -1,0 +1,145 @@
+.field-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.description {
+    color: var(--secondary-color-5);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.color-swatch {
+    box-sizing: border-box;
+    border: 1px solid color-mix(in oklab, var(--primary-color) 10%, transparent);
+    background-color: var(--swatch-color);
+    background-image:
+        linear-gradient(var(--swatch-color), var(--swatch-color)),
+        repeating-conic-gradient(#CCC 0% 25%, white 0% 50%);
+    forced-color-adjust: none;
+}
+
+/* Swatch sizes */
+.swatch-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+.swatch-md {
+    width: 2rem;
+    height: 2rem;
+}
+
+.swatch-lg {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Swatch shape */
+.swatch-circle {
+    border-radius: 50%;
+}
+
+.swatch-rounded {
+    border-radius: 0.25rem;
+}
+
+.color-slider-container {
+    display: grid;
+    width: 224px;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    grid-template-columns: 1fr auto;
+}
+
+.color-slider-title {
+    width: fit-content;
+    color: var(--secondary-color-4);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.5rem;
+}
+
+.color-slider-output {
+    color: var(--secondary-color-5);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.5rem;
+}
+
+.color-slider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    grid-column: span 2 / span 2;
+    touch-action: none;
+}
+
+.color-slider-track {
+    position: relative;
+    height: 24px;
+    box-sizing: border-box;
+    flex-grow: 1;
+    border-radius: 0.375rem;
+    background: linear-gradient(to right, rgb(255 0 0), rgb(255 255 0), rgb(0 255 0), rgb(0 255 255), rgb(0 0 255), rgb(255 0 255), rgb(255 0 0)), repeating-conic-gradient(rgb(204 204 204) 0%, rgb(204 204 204) 25%, white 0%, white 50%) 50% center / 16px 16px;
+}
+
+.color-slider-thumb {
+    all: unset;
+    position: absolute;
+    top: 50%;
+    display: block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--secondary-color-2);
+    border-radius: 50%;
+    background-color: hsl(var(--hue-value) 100% 50%);
+    box-shadow: black 0 0 0 1px, black 0 0 0 1px inset;
+    cursor: pointer;
+    forced-color-adjust: none;
+    transform: translate(-50%, -50%);
+    transition: border-color .15s;
+}
+
+.color-area-container {
+    position: relative;
+    width: 100%;
+    max-width: 224px;
+    min-height: 116px;
+    border-radius: 10px;
+    aspect-ratio: 1;
+    forced-color-adjust: none;
+    touch-action: none;
+}
+
+.color-picker-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0 solid;
+    border-radius: 0.125rem;
+    background-color: transparent;
+    color: var(--secondary-color-4);
+    cursor: default;
+    gap: 8px;
+    line-height: 1.5;
+    outline: 0 solid;
+}
+
+.color-picker-dialog {
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column;
+    padding: 8px;
+    gap: 8px;
+}
+
+.color-picker-input {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: flex-end;
+}
