@@ -1,8 +1,8 @@
 .field-container {
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 4px;
-    flex: 1;
 }
 
 .description {
@@ -96,7 +96,6 @@
     height: 16px;
     border: 2px solid var(--secondary-color-2);
     border-radius: 50%;
-    background-color: hsl(var(--hue-value) 100% 50%);
     box-shadow: black 0 0 0 1px, black 0 0 0 1px inset;
     cursor: pointer;
     forced-color-adjust: none;
@@ -106,13 +105,34 @@
 
 .color-area-container {
     position: relative;
+    display: flex;
     width: 100%;
     max-width: 224px;
     min-height: 116px;
-    border-radius: 10px;
     aspect-ratio: 1;
     forced-color-adjust: none;
     touch-action: none;
+}
+
+.color-area-track {
+    box-sizing: border-box;
+    flex-grow: 1;
+    border-radius: 10px;
+    background: linear-gradient(to top, black, transparent), linear-gradient(to right, white, transparent), var(--area-color);
+}
+
+.color-area-thumb {
+    all: unset;
+    position: absolute;
+    display: block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--secondary-color-2);
+    border-radius: 50%;
+    box-shadow: black 0 0 0 1px, black 0 0 0 1px inset;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: border-color 150ms;
 }
 
 .color-picker-button {
@@ -140,6 +160,6 @@
 .color-picker-input {
     display: flex;
     flex-direction: row;
-    gap: 4px;
     align-items: flex-end;
+    gap: 4px;
 }

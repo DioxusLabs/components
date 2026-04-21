@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 
 use super::super::component::*;
+use dioxus_primitives::color_picker::Color;
 
 #[component]
 pub fn Demo() -> Element {
@@ -11,10 +12,11 @@ pub fn Demo() -> Element {
         ColorPicker {
             label: "Pick",
             color: color(),
-            on_value_change: move |c| {
+            on_color_change: move |c| {
                 tracing::info!("Color changed: {:?}", c);
                 color.set(c);
             },
+            ColorPickerSelect { }
         }
     }
 }
