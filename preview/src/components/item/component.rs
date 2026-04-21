@@ -110,6 +110,7 @@ pub fn Item(
 ) -> Element {
     let base = attributes!(div {
         class: "item",
+        role: "listitem",
         "data-slot": "item",
         "data-style": variant.class(),
         "data-size": size.class(),

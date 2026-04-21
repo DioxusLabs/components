@@ -17,7 +17,7 @@ pub fn Demo() -> Element {
 
         // Section 1: Variants
         div {
-          h3 { class: "mb-4 font-bold", "Variants" }
+          h2 { class: "mb-4 font-bold", "Variants" }
           ItemGroup {
             Item { variant: ItemVariant::Default,
               ItemMedia { variant: ItemMediaVariant::Icon,
@@ -70,7 +70,7 @@ pub fn Demo() -> Element {
 
         // Section 2: Sizes & Composition
         div {
-          h3 { class: "mb-4 font-bold", "Sizes & Composition" }
+          h2 { class: "mb-4 font-bold", "Sizes & Composition" }
           ItemGroup {
             // Full composition example
             Item {
