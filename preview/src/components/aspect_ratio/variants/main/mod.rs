@@ -6,7 +6,7 @@ pub fn Demo() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("../../style.css") }
         div {
-            class: "aspect-ratio-container",
+            class: "dx-aspect-ratio-container",
             width: "20rem",
             max_width: "30vw",
             AspectRatio { ratio: 4.0 / 3.0,

@@ -8,14 +8,32 @@ import { test, expect } from "@playwright/test";
  */
 
 test.describe("Style Isolation", () => {
+  // Disable CSS transitions to prevent flaky color comparisons during animation
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      const style = document.createElement("style");
+      style.id = "disable-transitions";
+      style.textContent = "*, *::before, *::after { transition: none !important; }";
+      if (document.head) {
+        document.head.appendChild(style);
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!document.getElementById("disable-transitions")) {
+          document.head.appendChild(style);
+        }
+      });
+    });
+  });
+
   test("button component resists external CSS conflicts", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=button&", {
       timeout: 20 * 60 * 1000,
     });
 
-    // Wait for the component to load
+    // Wait for the component to load and styles to settle
     const button = page.locator(".dx-button").first();
     await expect(button).toBeVisible({ timeout: 30000 });
+    await page.waitForTimeout(500);
 
     // Capture original computed styles
     const originalStyles = await button.evaluate((el) => {
@@ -66,9 +84,10 @@ test.describe("Style Isolation", () => {
       timeout: 20 * 60 * 1000,
     });
 
-    // Wait for the component to load
+    // Wait for the component to load and styles to settle
     const checkbox = page.locator(".dx-checkbox").first();
     await expect(checkbox).toBeVisible({ timeout: 30000 });
+    await page.waitForTimeout(500);
 
     // Capture original computed styles
     const originalStyles = await checkbox.evaluate((el) => {
@@ -114,9 +133,10 @@ test.describe("Style Isolation", () => {
       timeout: 20 * 60 * 1000,
     });
 
-    // Wait for the component to load
+    // Wait for the component to load and styles to settle
     const slider = page.locator(".dx-slider").first();
     await expect(slider).toBeVisible({ timeout: 30000 });
+    await page.waitForTimeout(500);
 
     // Capture original computed styles
     const originalStyles = await slider.evaluate((el) => {
@@ -172,7 +192,7 @@ test.describe("Style Isolation", () => {
     const dialog = page.locator(".dx-dialog-backdrop");
     await expect(dialog).toHaveAttribute("data-state", "open");
 
-    const dialogContent = page.locator(".dx-dialog-content").first();
+    const dialogContent = page.locator(".dx-dialog").first();
     await expect(dialogContent).toBeVisible();
 
     // Capture original computed styles
@@ -249,27 +269,15 @@ test.describe("Style Isolation", () => {
         const elements = document.querySelectorAll("[class]");
         const problematicClasses: string[] = [];
 
-        // List of known app-level classes that don't need dx- prefix
-        const allowedUnprefixed = [
-          "component-demo",
-          "component-preview",
-          "preview-frame",
-          "recycle-list-card",
-          "recycle-list-container",
-          "recycle-list-demo",
-          "recycle-list-subtitle",
-        ];
-
         elements.forEach((el) => {
-          const classes = el.className.split(" ");
+          const classAttr = el.getAttribute("class") || "";
+          const classes = classAttr.split(" ");
           classes.forEach((cls) => {
             // Skip if it's:
             // - already prefixed with dx-
-            // - an allowed unprefixed class
             // - doesn't look like a component class (no hyphens or too short)
             if (
               cls.startsWith("dx-") ||
-              allowedUnprefixed.includes(cls) ||
               !cls.includes("-") ||
               cls.length < 3
             ) {
@@ -295,6 +303,82 @@ test.describe("Style Isolation", () => {
       expect(
         unprefixedClasses,
         `Component ${component} has unprefixed classes: ${unprefixedClasses.join(", ")}`
+      ).toHaveLength(0);
+    }
+  });
+
+  test("all CSS selectors targeting components use dx- prefix", async ({ page }) => {
+    const components = [
+      "button",
+      "checkbox",
+      "slider",
+      "dialog",
+      "accordion",
+      "tabs",
+      "calendar",
+      "select",
+      "menubar",
+      "tooltip",
+    ];
+
+    // Component name patterns that should always be prefixed in CSS selectors
+    const componentPattern =
+      /\.(button|checkbox|slider|dialog|accordion|tabs|calendar|select|menubar|tooltip|avatar|badge|card|sheet|sidebar|popover|progress|radio|switch|textarea|toggle)(?:-[a-z][\w-]*)?(?=[^a-zA-Z\w-]|$)/;
+
+    for (const component of components) {
+      await page.goto(`http://127.0.0.1:8080/component/?name=${component}&`, {
+        timeout: 20 * 60 * 1000,
+      });
+
+      await page.waitForTimeout(1000);
+
+      const unprefixedSelectors = await page.evaluate((pattern) => {
+        const re = new RegExp(pattern);
+        const dxRe = /\.dx-/;
+        const problematic: string[] = [];
+
+        for (const sheet of Array.from(document.styleSheets)) {
+          let rules: CSSRuleList;
+          try {
+            rules = sheet.cssRules;
+          } catch {
+            // Cross-origin stylesheet, skip
+            continue;
+          }
+
+          const checkRule = (rule: CSSRule) => {
+            if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule) {
+              for (const child of Array.from(rule.cssRules)) {
+                checkRule(child);
+              }
+              return;
+            }
+            if (!(rule instanceof CSSStyleRule)) return;
+
+            // Split compound selectors and check each part
+            const selectors = rule.selectorText.split(",");
+            for (const sel of selectors) {
+              const trimmed = sel.trim();
+              // Skip selectors that already use dx- prefix
+              if (dxRe.test(trimmed)) continue;
+              // Flag selectors that match bare component class names
+              if (re.test(trimmed)) {
+                problematic.push(rule.selectorText.trim());
+              }
+            }
+          };
+
+          for (const rule of Array.from(rules)) {
+            checkRule(rule);
+          }
+        }
+
+        return [...new Set(problematic)];
+      }, componentPattern.source);
+
+      expect(
+        unprefixedSelectors,
+        `Component page "${component}" has CSS selectors targeting component classes without dx- prefix:\n${unprefixedSelectors.join("\n")}`
       ).toHaveLength(0);
     }
   });

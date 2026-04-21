@@ -103,7 +103,7 @@
     background-color: var(--primary-color-3);
 }
 
-.explaination {
+.dx-explaination {
     min-width: 50vw;
     padding-right: 5vw;
     padding-left: 5vw;
@@ -111,12 +111,12 @@
     text-align: center;
 }
 
-.explaination-box h3 {
+.dx-explaination-box h3 {
     margin-top: 0;
     margin-bottom: 0.5rem;
 }
 
-.explaination-box {
+.dx-explaination-box {
     display: flex;
     width: 10rem;
     max-width: 30vw;

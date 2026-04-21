@@ -210,14 +210,14 @@ fn Navbar() -> Element {
     if in_iframe {
         return rsx! {
             nav {
-                class: "preview-navbar",
+                class: "dx-preview-navbar",
                 border: "none",
                 padding: "1rem",
                 justify_content: "flex-start",
                 if in_component {
                     Link {
                         to: Route::home(),
-                        class: "navbar-brand",
+                        class: "dx-navbar-brand",
                         aria_label: "Back",
                         svg {
                             view_box: "0 0 24 24",
@@ -237,8 +237,8 @@ fn Navbar() -> Element {
         };
     }
     rsx! {
-        nav { class: "preview-navbar",
-            Link { to: Route::home(), class: "navbar-brand",
+        nav { class: "dx-preview-navbar",
+            Link { to: Route::home(), class: "dx-navbar-brand",
                 img {
                     src: asset!("/assets/dioxus_color.svg"),
                     alt: "Dioxus Logo",
@@ -246,11 +246,11 @@ fn Navbar() -> Element {
                     height: "32",
                 }
             }
-            div { class: "navbar-links",
+            div { class: "dx-navbar-links",
                 // TODO: restore once the primitives crate is published
                 // Link {
                 //     to: "https://crates.io/crates/dioxus-components",
-                //     class: "navbar-link",
+                //     class: "dx-navbar-link",
                 //     aria_label: "Dioxus components crates.io",
                 //     svg {
                 //         "viewBox": "0 0 576 512",
@@ -266,16 +266,16 @@ fn Navbar() -> Element {
                 // }
                 Link {
                     to: "https://github.com/DioxusLabs/components",
-                    class: "navbar-link",
+                    class: "dx-navbar-link",
                     img {
-                        class: "light-mode-only",
+                        class: "dx-light-mode-only",
                         src: asset!("/assets/github-mark/github-mark.svg"),
                         alt: "GitHub",
                         width: "24",
                         height: "24",
                     }
                     img {
-                        class: "dark-mode-only",
+                        class: "dx-dark-mode-only",
                         src: asset!("/assets/github-mark/github-mark-white.svg"),
                         alt: "GitHub",
                         width: "24",
@@ -299,13 +299,13 @@ struct HighlightedCode {
 fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
     rsx! {
         div {
-            class: "code-block dark-code-block",
+            class: "dx-code-block dx-dark-code-block",
             tabindex: "0",
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.dark,
         }
         div {
-            class: "code-block light-code-block",
+            class: "dx-code-block dx-light-code-block",
             tabindex: "0",
             "data-collapsed": "{collapsed}",
             dangerous_inner_html: source.light,
@@ -320,7 +320,7 @@ fn CopyButton(#[props(extends=GlobalAttributes)] attributes: Vec<Attribute>) -> 
 
     rsx! {
         button {
-            class: "copy-button",
+            class: "dx-copy-button",
             r#type: "button",
             aria_label: "Copy code",
             "data-copied": copied,
@@ -372,7 +372,7 @@ fn CheckIcon() -> Element {
 fn DarkModeToggle() -> Element {
     rsx! {
         button {
-            class: "dark-mode-toggle dark-mode-only",
+            class: "dx-dark-mode-toggle dx-dark-mode-only",
             onclick: move |_| {
                 theme::set_theme(false);
             },
@@ -381,7 +381,7 @@ fn DarkModeToggle() -> Element {
             DarkModeIcon {}
         }
         button {
-            class: "dark-mode-toggle light-mode-only",
+            class: "dx-dark-mode-toggle dx-light-mode-only",
             onclick: move |_| {
                 theme::set_theme(true);
             },
@@ -589,10 +589,10 @@ fn LanguageSelect() -> Element {
 
     rsx! {
         document::Stylesheet { href: asset!("/assets/language-select.css") }
-        div { class: "language-container",
-            span { class: "language-select-container",
+        div { class: "dx-language-container",
+            span { class: "dx-language-select-container",
                 select {
-                    class: "language-select",
+                    class: "dx-language-select",
                     aria_label: "Language",
                     onchange: move |e| {
                         let name = e.value().parse().unwrap_or(current_lang.to_string());
@@ -611,10 +611,10 @@ fn LanguageSelect() -> Element {
                         }
                     }
                 }
-                span { class: "language-select-value",
+                span { class: "dx-language-select-value",
                     {current_lang.read().flag()}
                     svg {
-                        class: "select-expand-icon",
+                        class: "dx-select-expand-icon",
                         view_box: "0 0 24 24",
                         xmlns: "http://www.w3.org/2000/svg",
                         polyline { points: "6 9 12 15 18 9" }
@@ -779,7 +779,7 @@ fn ColapsibleCodeBlock(highlighted: HighlightedCode) -> Element {
 
     rsx! {
         div {
-            class: "tabs-content",
+            class: "dx-tabs-content-extra",
             width: "100%",
             height: "100%",
             display: "flex",
@@ -804,7 +804,7 @@ fn ComponentDemo(iframe: Option<bool>, dark_mode: Option<bool>, name: String) ->
         .cloned()
     else {
         return rsx! {
-            main { class: "component-demo-not-found",
+            main { class: "dx-component-demo-not-found",
                 h3 { "Component not found" }
                 p { "The requested component does not exist." }
             }
@@ -833,10 +833,10 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     };
 
     rsx! {
-        main { class: "component-demo",
-            h1 { class: "component-title", "{name}" }
-            div { class: "component-preview",
-                div { class: "component-preview-contents",
+        main { class: "dx-component-demo",
+            h1 { class: "dx-component-title", "{name}" }
+            div { class: "dx-component-preview",
+                div { class: "dx-component-preview-contents",
                     match r#type {
                         ComponentType::Normal => rsx! {
                             ComponentVariantHighlight { variant: main.clone(), main_variant: true }
@@ -845,7 +845,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
                             BlockComponentVariantHighlight { variant: main.clone(), main_variant: true, component_name: raw_name }
                         },
                     }
-                    div { class: "component-installation",
+                    div { class: "dx-component-installation",
                         h2 { "Installation" }
                         Tabs {
                             default_value: "Automatic",
@@ -882,11 +882,11 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
                             }
                         }
                     }
-                    div { class: "component-description",
+                    div { class: "dx-component-description",
                         div { dangerous_inner_html: docs }
                     }
                     if !variants.is_empty() {
-                        h2 { class: "component-variants-title", "Variants" }
+                        h2 { class: "dx-component-variants-title", "Variants" }
                         for variant in variants {
                             match r#type {
                                 ComponentType::Normal => rsx! {
@@ -907,7 +907,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
 #[component]
 fn ManualComponentInstallation(component: HighlightedCode, style: HighlightedCode) -> Element {
     rsx! {
-        ol { class: "component-installation-list",
+        ol { class: "dx-component-installation-list",
             li {
                 "If you haven't already, add the dx-components-theme.css file to your project and import it in the root of your app."
             }
@@ -926,7 +926,7 @@ fn ManualComponentInstallation(component: HighlightedCode, style: HighlightedCod
 #[component]
 fn CliComponentInstallation(name: String) -> Element {
     rsx! {
-        ol { class: "component-installation-list",
+        ol { class: "dx-component-installation-list",
             li {
                 "Install the 0.7.0 version of the CLI"
                 div { id: "hero-installation",
@@ -993,7 +993,7 @@ fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bo
                 align_items: "center",
                 TabContent {
                     index: 0usize,
-                    class: "component-preview-frame",
+                    class: "dx-component-preview-frame",
                     id: "component-preview-frame",
                     value: "Demo",
                     width: "100%",
@@ -1002,7 +1002,7 @@ fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bo
                 }
                 TabContent {
                     index: 1usize,
-                    class: "component-preview-frame",
+                    class: "dx-component-preview-frame",
                     value: "Code",
                     width: "100%",
                     position: "relative",
@@ -1174,20 +1174,20 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
 #[component]
 fn Explaination() -> Element {
     rsx! {
-        div { class: "explaination",
+        div { class: "dx-explaination",
             p {
                 "Dioxus components is a shadcn-inspired library of components built on top of Dioxus primitives"
             }
             div { display: "flex", justify_content: "space-between",
-                div { class: "explaination-box",
+                div { class: "dx-explaination-box",
                     h3 { SearchIcon {} }
                     p { "Find a component" }
                 }
-                div { class: "explaination-box",
+                div { class: "dx-explaination-box",
                     h3 { PlusIcon {} }
                     p { "Add it with dx" }
                 }
-                div { class: "explaination-box",
+                div { class: "dx-explaination-box",
                     h3 { EditIcon {} }
                     p { "Customize it for your project" }
                 }
@@ -1199,7 +1199,7 @@ fn Explaination() -> Element {
 #[component]
 fn ComponentGallery(search: String) -> Element {
     rsx! {
-        div { class: "masonry-with-columns",
+        div { class: "dx-masonry-with-columns",
             for component in components::DEMOS.iter().cloned() {
                 if search.is_empty() || component.name.to_lowercase().contains(&search.to_lowercase()) {
                     ComponentGalleryPreview { component }
@@ -1233,10 +1233,10 @@ fn ComponentGalleryPreview(component: ComponentDemoData) -> Element {
     };
 
     rsx! {
-        div { class: "masonry-preview-frame", position: "relative",
-            h3 { class: "component-title", {name.replace("_", " ")} }
+        div { class: "dx-masonry-preview-frame", position: "relative",
+            h3 { class: "dx-component-title", {name.replace("_", " ")} }
             GotoIcon {
-                class: "goto-icon",
+                class: "dx-goto-icon",
                 position: "absolute",
                 margin: "0.5rem",
                 top: "0",
@@ -1244,7 +1244,7 @@ fn ComponentGalleryPreview(component: ComponentDemoData) -> Element {
                 aria_label: "{name} details",
                 to: Route::component(name),
             }
-            div { class: "masonry-component-frame", {preview} }
+            div { class: "dx-masonry-component-frame", {preview} }
         }
     }
 }

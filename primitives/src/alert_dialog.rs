@@ -106,7 +106,7 @@ pub fn AlertDialogRoot(props: AlertDialogRootProps) -> Element {
         if render_element() {
             div {
                 id,
-                class: "alert-dialog-overlay",
+                class: "dx-alert-dialog-overlay",
                 "data-state": if open() { "open" } else { "closed" },
                 ..props.attributes,
                 {props.children}
@@ -271,7 +271,7 @@ pub struct AlertDialogTitleProps {
 pub fn AlertDialogTitle(props: AlertDialogTitleProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
     rsx! {
-        h2 { id: ctx.labelledby.clone(), class: "alert-dialog-title", ..props.attributes, {props.children} }
+        h2 { id: ctx.labelledby.clone(), class: "dx-alert-dialog-title", ..props.attributes, {props.children} }
     }
 }
 
@@ -328,7 +328,7 @@ pub struct AlertDialogDescriptionProps {
 pub fn AlertDialogDescription(props: AlertDialogDescriptionProps) -> Element {
     let ctx: AlertDialogCtx = use_context();
     rsx! {
-        p { id: ctx.describedby.clone(), class: "alert-dialog-description", ..props.attributes, {props.children} }
+        p { id: ctx.describedby.clone(), class: "dx-alert-dialog-description", ..props.attributes, {props.children} }
     }
 }
 

@@ -26,15 +26,15 @@ body {
   font-weight: 400;
 }
 
-.dark-mode-only {
+.dx-dark-mode-only {
   display: var(--dark, initial) var(--light, none);
 }
 
-.light-mode-only {
+.dx-light-mode-only {
   display: var(--dark, none) var(--light, initial);
 }
 
-.preview-navbar {
+.dx-preview-navbar {
   position: sticky;
   z-index: 1000;
   top: 0;
@@ -48,7 +48,7 @@ body {
   background-color: var(--primary-color);
 }
 
-.navbar-link {
+.dx-navbar-link {
   padding: 0.5em 0;
   color: var(--secondary-color-4);
   font-size: 1.2em;
@@ -56,16 +56,16 @@ body {
   text-decoration: none;
 }
 
-.navbar-link:hover {
+.dx-navbar-link:hover {
   color: var(--secondary-color-3);
 }
 
-.navbar-links {
+.dx-navbar-links {
   display: flex;
   gap: 1rem;
 }
 
-.navbar-brand {
+.dx-navbar-brand {
   display: flex;
   align-items: center;
   color: var(--secondary-color-4);
@@ -75,7 +75,7 @@ body {
 }
 
 /* Code block styles */
-.code-block {
+.dx-code-block {
   overflow: scroll;
   width: 100%;
   max-width: calc(100vw - 2rem);
@@ -89,15 +89,15 @@ body {
   white-space: pre;
 }
 
-.dark-code-block {
+.dx-dark-code-block {
   display: var(--dark, block) var(--light, none);
 }
 
-.light-code-block {
+.dx-light-code-block {
   display: var(--dark, none) var(--light, block);
 }
 
-.code-block[data-collapsed="true"] {
+.dx-code-block[data-collapsed="true"] {
   height: 20em;
   backdrop-filter: blur(1px);
   mask: linear-gradient(to bottom,
@@ -107,14 +107,14 @@ body {
   user-select: none;
 }
 
-.dark-mode-toggle {
+.dx-dark-mode-toggle {
   border: none;
   background: none;
   color: var(--secondary-color-4);
   cursor: pointer;
 }
 
-.copy-button {
+.dx-copy-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,16 +128,16 @@ body {
   gap: 0.5em;
 }
 
-.copy-button:hover {
+.dx-copy-button:hover {
   color: var(--highlight-color-tertiary);
 }
 
-.copy-button[data-copied="true"] {
+.dx-copy-button[data-copied="true"] {
   color: var(--secondary-success-color);
 }
 
 /* Demo frame styles */
-.component-preview {
+.dx-component-preview {
   display: flex;
   width: 100vw;
   flex-direction: column;
@@ -145,7 +145,7 @@ body {
   justify-content: center;
 }
 
-.component-preview-contents {
+.dx-component-preview-contents {
   display: flex;
   width: 75vw;
   flex-direction: column;
@@ -154,7 +154,7 @@ body {
   margin: 20px 0;
 }
 
-.component-preview-frame {
+.dx-component-preview-frame {
   display: flex;
   width: 100%;
   min-height: 20rem;
@@ -170,7 +170,7 @@ body {
 }
 
 /* component info styles */
-.component-title {
+.dx-component-title {
   width: 100%;
   margin-top: 20px;
   margin-bottom: 20px;
@@ -179,7 +179,7 @@ body {
   text-transform: capitalize;
 }
 
-.component-variants-title {
+.dx-component-variants-title {
   width: 100%;
   margin-top: 20px;
   margin-bottom: 20px;
@@ -188,7 +188,7 @@ body {
   text-transform: capitalize;
 }
 
-.component-description {
+.dx-component-description {
   max-width: 90vw;
   margin-right: 5vw;
   margin-left: 5vw;
@@ -196,22 +196,22 @@ body {
   overflow-x: scroll;
 }
 
-.component-installation {
+.dx-component-installation {
   width: 100%;
   padding: 1rem;
 }
 
-.component-installation-list {
+.dx-component-installation-list {
   padding-left: 2rem;
   list-style-type: decimal;
 }
 
-.component-installation-list li {
+.dx-component-installation-list li {
   margin-bottom: 0.5rem;
   font-size: 1em;
 }
 
-.component-code {
+.dx-component-code {
   display: flex;
   width: 100%;
   min-height: 20rem;
@@ -226,13 +226,13 @@ body {
 }
 
 /* Masonry styles */
-.masonry-with-columns {
+.dx-masonry-with-columns {
   display: flex;
   flex-wrap: wrap;
   padding: 0 0 0 1rem;
 }
 
-.masonry-with-columns .masonry-preview-frame {
+.dx-masonry-with-columns .dx-masonry-preview-frame {
   display: flex;
   max-width: calc(100vw - 2rem);
   min-height: 10rem;
@@ -247,7 +247,7 @@ body {
   background-color: var(--primary-color-2);
 }
 
-.masonry-with-columns .masonry-component-frame {
+.dx-masonry-with-columns .dx-masonry-component-frame {
   display: flex;
   width: 100%;
   height: 100%;
@@ -257,7 +257,7 @@ body {
 }
 
 /* Disable animations while the page is loading */
-.preload * {
+.dx-preload * {
   animation-duration: 0.001s !important;
   transition: none !important;
 }

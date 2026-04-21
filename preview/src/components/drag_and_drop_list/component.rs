@@ -34,7 +34,7 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
         .map(|item| {
             rsx! {
                 DragIcon {}
-                div { class: "item-body-div", {item} }
+                div { class: "dx-item-body-div", {item} }
                 if is_removable {
                     RemoveButton {}
                 }
@@ -67,7 +67,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
 #[component]
 fn DragIcon() -> Element {
     rsx! {
-        div { class: "item-icon-div", aria_hidden: "true",
+        div { class: "dx-item-icon-div", aria_hidden: "true",
             Icon {
                 // equal icon from lucide https://lucide.dev/icons/equal
                 line { x1: "5", x2: "19", y1: "9", y2: "9" }
@@ -88,7 +88,7 @@ pub fn RemoveButton(
     let label = format!("Remove item {}", index + 1);
     rsx! {
         button {
-            class: "remove-button",
+            class: "dx-remove-button",
             aria_label: "{label}",
             onclick: move |_| ctx.remove(index),
             ..attributes,

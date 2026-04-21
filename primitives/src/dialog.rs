@@ -137,7 +137,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
         if render() {
             div {
                 id,
-                class: "dialog-overlay",
+                class: "dx-dialog-overlay",
                 aria_hidden: (!open()).then_some("true"),
                 onclick: move |_| {
                     set_open.call(false);

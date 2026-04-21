@@ -5,7 +5,7 @@ use super::super::component::*;
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        div { class: "badge-example",
+        div { class: "dx-badge-example",
 
             Badge { "Primary" }
             Badge { variant: BadgeVariant::Secondary, "Secondary" }

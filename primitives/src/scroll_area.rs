@@ -67,7 +67,7 @@ pub enum ScrollType {
 ///             height: "10em",
 ///             direction: ScrollDirection::Vertical,
 ///             tabindex: "0",
-///             div { class: "scroll-content",
+///             div { class: "dx-scroll-content",
 ///                 for i in 1..=20 {
 ///                     p {
 ///                         "Scrollable content item {i}"

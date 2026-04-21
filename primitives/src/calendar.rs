@@ -545,7 +545,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
 
     rsx! {
         div {
-            class: "calendar",
+            class: "dx-calendar",
             role: "application",
             aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
@@ -813,7 +813,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
 
     rsx! {
         div {
-            class: "calendar",
+            class: "dx-calendar",
             role: "application",
             aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
@@ -1077,7 +1077,7 @@ pub struct CalendarNavigationProps {
 #[component]
 pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
     rsx! {
-        div { class: "calendar-navigation", ..props.attributes,
+        div { class: "dx-calendar-navigation", ..props.attributes,
             {props.children}
         }
     }
@@ -1176,7 +1176,7 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
 
     rsx! {
         button {
-            class: "calendar-nav-prev",
+            class: "dx-calendar-nav-prev",
             aria_label: "Previous month",
             type: "button",
             onclick: handle_prev_month,
@@ -1285,7 +1285,7 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
 
     rsx! {
         button {
-            class: "calendar-nav-next",
+            class: "dx-calendar-nav-next",
             aria_label: "Next month",
             type: "button",
             onclick: handle_next_month,
@@ -1362,7 +1362,7 @@ pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
 
     rsx! {
         div {
-            class: "calendar-month-title",
+            class: "dx-calendar-month-title",
             ..props.attributes,
 
             {month_year}
@@ -1506,18 +1506,18 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         table {
             role: "grid",
             id: props.id,
-            class: "calendar-grid",
+            class: "dx-calendar-grid",
             ..props.attributes,
 
             // Day headers
             thead { aria_hidden: "true",
                 tr {
-                    class: "calendar-grid-header",
+                    class: "dx-calendar-grid-header",
                     // Day name headers
                     for (weekday, label) in weekday_headers() {
                         th {
                             key: "{weekday:?}", // Add key for efficient diffing
-                            class: "calendar-grid-day-header",
+                            class: "dx-calendar-grid-day-header",
                             {label}
                         }
                     }
@@ -1525,12 +1525,12 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             }
 
             // Calendar days grid
-            tbody { class: "calendar-grid-body",
+            tbody { class: "dx-calendar-grid-body",
                 // Display all days in a grid
                 for row in &*days_grid.read() {
                     tr {
                         role: "row",
-                        class: "calendar-grid-week",
+                        class: "dx-calendar-grid-week",
                         for date in row.iter().copied() {
                             td {
                                 {props.render_day.call(date)}
@@ -1631,7 +1631,7 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     });
 
     rsx! {
-        span { class: "calendar-month-select-container",
+        span { class: "dx-calendar-month-select-container",
             select {
                 aria_label: "Month",
                 onchange: move |e| {
@@ -1650,10 +1650,10 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
                     }
                 }
             }
-            span { class: "calendar-month-select-value",
+            span { class: "dx-calendar-month-select-value",
                 {base_ctx.format_month.call(month)}
                 svg {
-                    class: "select-expand-icon",
+                    class: "dx-select-expand-icon",
                     view_box: "0 0 24 24",
                     xmlns: "http://www.w3.org/2000/svg",
                     polyline { points: "6 9 12 15 18 9" }
@@ -1743,7 +1743,7 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
     });
 
     rsx! {
-        span { class: "calendar-year-select-container",
+        span { class: "dx-calendar-year-select-container",
             select {
                 aria_label: "Year",
                 onchange: move |e| {
@@ -1761,10 +1761,10 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
                     }
                 }
             }
-            span { class: "calendar-year-select-value",
+            span { class: "dx-calendar-year-select-value",
                 "{year}"
                 svg {
-                    class: "select-expand-icon",
+                    class: "dx-select-expand-icon",
                     view_box: "0 0 24 24",
                     xmlns: "http://www.w3.org/2000/svg",
                     polyline { points: "6 9 12 15 18 9" }
@@ -1984,7 +1984,7 @@ fn SingleCalendarDay(props: CalendarDayProps) -> Element {
 
     rsx! {
         button {
-            class: "calendar-grid-cell",
+            class: "dx-calendar-grid-cell",
             type: "button",
             tabindex: if date == focusable_date {
                 "0"
@@ -2078,7 +2078,7 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
 
     rsx! {
         button {
-            class: "calendar-grid-cell",
+            class: "dx-calendar-grid-cell",
             type: "button",
             tabindex: if date == focusable_date {
                 "0"
