@@ -11,16 +11,14 @@
   white-space: nowrap;
 }
 
-:root {
+.dx-sidebar-wrapper {
   --dx-sidebar-background: var(--primary-color-2);
   --dx-sidebar-foreground: var(--secondary-color-4);
   --dx-sidebar-border: var(--primary-color-6);
   --dx-sidebar-accent: var(--primary-color-4);
   --dx-sidebar-accent-foreground: var(--secondary-color-4);
   --dx-sidebar-ring: var(--primary-color-7);
-}
 
-.dx-sidebar-wrapper {
   display: flex;
   overflow: hidden;
   width: 100%;

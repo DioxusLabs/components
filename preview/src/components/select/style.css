@@ -56,6 +56,7 @@
 .dx-select[data-disabled="true"] .dx-select-trigger {
   color: var(--secondary-color-5);
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .dx-select-trigger:hover:not([data-disabled="true"]),
@@ -133,6 +134,7 @@
 .dx-select-option[data-disabled="true"] {
   color: var(--secondary-color-5);
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .dx-select-option:hover:not([data-disabled="true"]),
@@ -147,9 +149,4 @@
   padding: 4px 12px;
   color: var(--secondary-color-5);
   font-size: 0.75rem;
-}
-
-[data-disabled="true"] {
-  cursor: not-allowed;
-  opacity: 0.5;
 }

@@ -29,7 +29,8 @@
     stroke-width: 2;
 }
 
-[data-disabled="true"] {
+.dx-date-picker[data-disabled="true"],
+.dx-date-picker [data-disabled="true"] {
     cursor: not-allowed;
     opacity: 0.5;
 }

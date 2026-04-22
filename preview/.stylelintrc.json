@@ -10,6 +10,13 @@
     {
       "files": ["src/components/**/*.css"],
       "rules": {
+        "selector-disallowed-list": [
+          "/^(?!.*\\.dx-[a-z0-9-]+).*$/",
+          {
+            "ignore": ["keyframe-selectors"],
+            "splitList": true
+          }
+        ],
         "selector-max-specificity": "0,6,1"
       }
     }
