@@ -19,16 +19,6 @@
     rotate: 180deg;
 }
 
-.dx-date-picker-expand-icon {
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: var(--primary-color-7);
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 2;
-}
-
 .dx-date-picker[data-disabled="true"],
 .dx-date-picker [data-disabled="true"] {
     cursor: not-allowed;

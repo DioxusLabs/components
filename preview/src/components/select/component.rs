@@ -3,6 +3,7 @@ use dioxus_primitives::select::{
     self, SelectGroupLabelProps, SelectGroupProps, SelectListProps, SelectOptionProps, SelectProps,
     SelectTriggerProps, SelectValueProps,
 };
+use dioxus_primitives::icon;
 
 #[component]
 pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element {
@@ -29,10 +30,11 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
     rsx! {
         select::SelectTrigger { class: "dx-select-trigger", attributes: props.attributes,
             {props.children}
-            svg {
+            icon::Icon {
                 class: "dx-select-expand-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
+                width: "20px",
+                height: "20px",
+                stroke: "var(--primary-color-7)",
                 polyline { points: "6 9 12 15 18 9" }
             }
         }
@@ -105,10 +107,11 @@ pub fn SelectOption<T: Clone + PartialEq + 'static>(props: SelectOptionProps<T>)
 pub fn SelectItemIndicator() -> Element {
     rsx! {
         select::SelectItemIndicator {
-            svg {
+            icon::Icon {
                 class: "dx-select-check-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
+                width: "1rem",
+                height: "1rem",
+                stroke: "var(--secondary-color-5)",
                 path { d: "M5 13l4 4L19 7" }
             }
         }

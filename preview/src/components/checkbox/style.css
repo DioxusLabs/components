@@ -27,13 +27,3 @@
 .dx-checkbox:focus-visible {
     box-shadow: 0 0 0 2px var(--focused-border-color);
 }
-
-.dx-checkbox-check-icon {
-    width: 1rem;
-    height: 1rem;
-    fill: none;
-    stroke: currentcolor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 2;
-}

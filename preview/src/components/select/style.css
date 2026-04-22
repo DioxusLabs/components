@@ -33,26 +33,6 @@
   pointer-events: none;
 }
 
-.dx-select-expand-icon {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: var(--primary-color-7);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
-}
-
-.dx-select-check-icon {
-  width: 1rem;
-  height: 1rem;
-  fill: none;
-  stroke: var(--secondary-color-5);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
-}
-
 .dx-select[data-disabled="true"] .dx-select-trigger {
   color: var(--secondary-color-5);
   cursor: not-allowed;

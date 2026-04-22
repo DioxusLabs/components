@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 use dioxus_primitives::accordion::{
     self, AccordionContentProps, AccordionItemProps, AccordionProps, AccordionTriggerProps,
 };
+use dioxus_primitives::icon;
 
 #[component]
 pub fn Accordion(props: AccordionProps) -> Element {
@@ -45,10 +46,11 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
             id: props.id,
             attributes: props.attributes,
             {props.children}
-            svg {
+            icon::Icon {
                 class: "dx-accordion-expand-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
+                width: "20px",
+                height: "20px",
+                stroke: "var(--secondary-color-4)",
                 polyline { points: "6 9 12 15 18 9" }
             }
         }

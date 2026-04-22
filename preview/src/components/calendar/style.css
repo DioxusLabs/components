@@ -237,17 +237,6 @@ td:has(.dx-calendar-grid-cell[data-selection-end="true"]) {
     pointer-events: none;
 }
 
-.dx-calendar-next-month-icon,
-.dx-calendar-previous-month-icon {
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: currentcolor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 2;
-}
-
 .dx-calendar-month-select-container,
 .dx-calendar-year-select-container {
     position: relative;
@@ -284,14 +273,4 @@ td:has(.dx-calendar-grid-cell[data-selection-end="true"]) {
     transition:
         background-color 0.2s ease,
         color 0.2s ease;
-}
-
-.dx-select-expand-icon {
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: var(--secondary-color-4);
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 2;
 }

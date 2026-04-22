@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_primitives::checkbox::{self, CheckboxProps};
+use dioxus_primitives::icon;
 
 #[component]
 pub fn Checkbox(props: CheckboxProps) -> Element {
@@ -16,10 +17,10 @@ pub fn Checkbox(props: CheckboxProps) -> Element {
             on_checked_change: props.on_checked_change,
             attributes: props.attributes,
             checkbox::CheckboxIndicator { class: "dx-checkbox-indicator",
-                svg {
+                icon::Icon {
                     class: "dx-checkbox-check-icon",
-                    view_box: "0 0 24 24",
-                    xmlns: "http://www.w3.org/2000/svg",
+                    width: "1rem",
+                    height: "1rem",
                     path { d: "M5 13l4 4L19 7" }
                 }
             }

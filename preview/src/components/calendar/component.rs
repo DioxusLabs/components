@@ -4,6 +4,7 @@ use dioxus_primitives::calendar::{
     CalendarNavigationProps, CalendarProps, CalendarSelectMonthProps, CalendarSelectYearProps,
     RangeCalendarProps,
 };
+use dioxus_primitives::icon::Icon;
 
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
@@ -89,11 +90,11 @@ pub fn CalendarPreviousMonthButton(
 ) -> Element {
     rsx! {
         calendar::CalendarPreviousMonthButton { attributes,
-            svg {
+            Icon {
                 class: "dx-calendar-previous-month-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
-                polyline { points: "15 6 9 12 15 18" }
+                width: "20px",
+                height: "20px",
+                path { d: "m15 18-6-6 6-6" }
             }
         }
     }
@@ -105,11 +106,11 @@ pub fn CalendarNextMonthButton(
 ) -> Element {
     rsx! {
         calendar::CalendarNextMonthButton { attributes,
-            svg {
+            Icon {
                 class: "dx-calendar-next-month-icon",
-                view_box: "0 0 24 24",
-                xmlns: "http://www.w3.org/2000/svg",
-                polyline { points: "9 18 15 12 9 6" }
+                width: "20px",
+                height: "20px",
+                path { d: "m9 18 6-6-6-6" }
             }
         }
     }
@@ -118,14 +119,22 @@ pub fn CalendarNextMonthButton(
 #[component]
 pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     rsx! {
-        calendar::CalendarSelectMonth { class: "dx-calendar-month-select", attributes: props.attributes }
+        calendar::CalendarSelectMonth {
+            class: "dx-calendar-month-select",
+            attributes: props.attributes,
+            DropDownIcon { }
+        }
     }
 }
 
 #[component]
 pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
     rsx! {
-        calendar::CalendarSelectYear { class: "dx-calendar-year-select", attributes: props.attributes }
+        calendar::CalendarSelectYear {
+            class: "dx-calendar-year-select",
+            attributes: props.attributes,
+            DropDownIcon { }
+        }
     }
 }
 
@@ -149,4 +158,16 @@ pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
 #[component]
 pub fn CalendarDay(props: CalendarDayProps) -> Element {
     calendar::CalendarDay(props)
+}
+
+#[component]
+fn DropDownIcon() -> Element {
+    rsx! {
+        Icon {
+            width: "20px",
+            height: "20px",
+            stroke: "var(--secondary-color-4)",
+            path { d: "m6 9 6 6 6-6" }
+        }
+    }
 }

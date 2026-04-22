@@ -35,15 +35,8 @@
 #scroll-down-icon {
     position: absolute;
     top: 38rem;
-    left: 50%;
-    width: 20px;
-    height: 20px;
+    left: calc(50% - 10px);
     animation: scroll-down-icon-animation 3000ms ease-in-out infinite;
-    fill: none;
-    stroke: var(--secondary-color-4);
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 2;
     transform: translate(-50%, -50%);
 }
 

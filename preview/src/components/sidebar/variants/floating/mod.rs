@@ -13,6 +13,7 @@ use crate::components::sidebar::{
     SidebarTrigger, SidebarVariant,
 };
 use crate::components::skeleton::Skeleton;
+use dioxus_primitives::icon;
 use dioxus::prelude::*;
 
 #[derive(Clone, PartialEq)]
@@ -506,15 +507,10 @@ fn DemoSettingControls(
 #[component]
 fn Icon(#[props(default = "dx-sidebar-icon")] class: &'static str) -> Element {
     rsx! {
-        svg {
-            xmlns: "http://www.w3.org/2000/svg",
+        icon::Icon {
             class,
-            view_box: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            stroke_width: "2",
-            stroke_linecap: "round",
-            stroke_linejoin: "round",
+            width: "24px",
+            height: "24px",
             circle { cx: "12", cy: "12", r: "10" }
         }
     }
@@ -523,15 +519,10 @@ fn Icon(#[props(default = "dx-sidebar-icon")] class: &'static str) -> Element {
 #[component]
 fn ChevronIcon() -> Element {
     rsx! {
-        svg {
-            xmlns: "http://www.w3.org/2000/svg",
+        icon::Icon {
             class: "dx-sidebar-icon dx-sidebar-chevron",
-            view_box: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            stroke_width: "2",
-            stroke_linecap: "round",
-            stroke_linejoin: "round",
+            width: "24px",
+            height: "24px",
             path { d: "m9 18 6-6-6-6" }
         }
     }
