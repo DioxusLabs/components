@@ -211,7 +211,7 @@ pub fn AlertDialogContent(props: AlertDialogContentProps) -> Element {
             aria_modal: "true",
             aria_labelledby: ctx.labelledby.clone(),
             aria_describedby: ctx.describedby.clone(),
-            class: props.class.clone().unwrap_or_else(|| "alert-dialog".to_string()),
+            class: props.class.clone().unwrap_or_else(|| "dx-alert-dialog".to_string()),
             ..props.attributes,
             {props.children}
         }

@@ -109,9 +109,9 @@ pub fn ScrollArea(props: ScrollAreaProps) -> Element {
 
     let visibility_class = use_memo(move || {
         if always_show() {
-            "scroll-area-always-show"
+            "dx-scroll-area-always-show"
         } else {
-            "scroll-area-auto-hide"
+            "dx-scroll-area-auto-hide"
         }
     });
 

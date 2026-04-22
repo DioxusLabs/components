@@ -182,7 +182,7 @@ pub fn Demo() -> Element {
                 SidebarRail {}
             }
             SidebarInset {
-                header { style: "display:flex; align-items:center; justify-content:space-between; height:3.5rem; flex-shrink:0; padding:0 1rem; border-bottom:1px solid var(--sidebar-border); background:var(--primary-color-1);",
+                header { style: "display:flex; align-items:center; justify-content:space-between; height:3.5rem; flex-shrink:0; padding:0 1rem; border-bottom:1px solid var(--dx-sidebar-border); background:var(--primary-color-1);",
                     div { style: "display: flex; align-items: center; gap: 0.75rem;",
                         SidebarTrigger {}
                         Separator { height: "1rem", horizontal: false }
@@ -210,7 +210,7 @@ fn TeamSwitcher(teams: &'static [Team]) -> Element {
                     DropdownMenuTrigger {
                         as: move |attributes: Vec<Attribute>| rsx! {
                             SidebarMenuButton { size: SidebarMenuButtonSize::Lg, attributes,
-                                div { style: "display:flex; flex-shrink:0; align-items:center; justify-content:center; width:2rem; height:2rem; aspect-ratio:1; border-radius:0.5rem; background:var(--sidebar-accent); color:var(--sidebar-accent-foreground);",
+                                div { style: "display:flex; flex-shrink:0; align-items:center; justify-content:center; width:2rem; height:2rem; aspect-ratio:1; border-radius:0.5rem; background:var(--dx-sidebar-accent); color:var(--dx-sidebar-accent-foreground);",
                                     Icon {}
                                 }
                                 div { class: "dx-sidebar-info-block",
@@ -455,7 +455,7 @@ fn DemoSettingControls(
     collapsible: Signal<SidebarCollapsible>,
 ) -> Element {
     rsx! {
-        div { style: "display: flex; flex-direction: column; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--sidebar-border); border-radius: 0.75rem; background: var(--primary-color-2);",
+        div { style: "display: flex; flex-direction: column; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--dx-sidebar-border); border-radius: 0.75rem; background: var(--primary-color-2);",
             div { style: "display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;",
                 span { style: "font-size: 0.75rem; font-weight: 600; color: var(--secondary-color-4);",
                     "Side"

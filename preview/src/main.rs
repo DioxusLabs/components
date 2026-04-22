@@ -1041,6 +1041,7 @@ fn ComponentBlockDemo(name: String, variant: Option<String>, dark_mode: Option<b
     let Comp = variant.component;
 
     rsx! {
+        document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
         document::Link {
             rel: "stylesheet",
             href: asset!("/assets/dx-components-theme.css"),
