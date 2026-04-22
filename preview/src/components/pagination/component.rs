@@ -42,7 +42,7 @@ pub fn Pagination(
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         nav {
-            class: "pagination",
+            class: "dx-pagination",
             "data-slot": "pagination",
             role: "navigation",
             aria_label: "pagination",
@@ -59,7 +59,7 @@ pub fn PaginationContent(
 ) -> Element {
     rsx! {
         ul {
-            class: "pagination-content",
+            class: "dx-pagination-content",
             "data-slot": "pagination-content",
             ..attributes,
             {children}
@@ -74,7 +74,7 @@ pub fn PaginationItem(
 ) -> Element {
     rsx! {
         li {
-            class: "pagination-item",
+            class: "dx-pagination-item",
             "data-slot": "pagination-item",
             ..attributes,
             {children}
@@ -105,7 +105,7 @@ pub fn PaginationLink(props: PaginationLinkProps) -> Element {
     let data_kind = props.data_kind.map(|kind| kind.attr());
     rsx! {
         a {
-            class: "pagination-link",
+            class: "dx-pagination-link",
             "data-slot": "pagination-link",
             "data-active": props.is_active,
             "data-size": props.size.class(),
@@ -152,11 +152,12 @@ pub fn PaginationPrevious(
             attributes,
             // ChevronLeft icon from lucide https://lucide.dev/icons/chevron-left
             icon::Icon {
+                class: "dx-pagination-icon",
                 width: "1rem",
                 height: "1rem",
                 polyline { points: "15 6 9 12 15 18" }
             }
-            span { class: "pagination-label", "Previous" }
+            span { class: "dx-pagination-label", "Previous" }
         }
     }
 }
@@ -179,9 +180,10 @@ pub fn PaginationNext(
             onmousedown,
             onmouseup,
             attributes,
-            span { class: "pagination-label", "Next" }
+            span { class: "dx-pagination-label", "Next" }
             // ChevronRight icon from lucide https://lucide.dev/icons/chevron-right
             icon::Icon {
+                class: "dx-pagination-icon",
                 width: "1rem",
                 height: "1rem",
                 polyline { points: "9 6 15 12 9 18" }
@@ -196,12 +198,13 @@ pub fn PaginationEllipsis(
 ) -> Element {
     rsx! {
         span {
-            class: "pagination-ellipsis",
+            class: "dx-pagination-ellipsis",
             "data-slot": "pagination-ellipsis",
             aria_hidden: "true",
             ..attributes,
             // MoreHorizontal icon from lucide https://lucide.dev/icons/more-horizontal
             icon::Icon {
+                class: "dx-pagination-icon",
                 width: "1rem",
                 height: "1rem",
                 fill: "currentColor",
@@ -209,7 +212,7 @@ pub fn PaginationEllipsis(
                 circle { cx: "12", cy: "12", r: "1.5" }
                 circle { cx: "19", cy: "12", r: "1.5" }
             }
-            span { class: "sr-only", "More pages" }
+            span { class: "dx-sr-only", "More pages" }
         }
     }
 }

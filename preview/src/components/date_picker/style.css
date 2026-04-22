@@ -1,10 +1,10 @@
-.date-picker {
+.dx-date-picker {
     position: relative;
     display: inline-flex;
     align-items: center;
 }
 
-.date-picker-group .popover-trigger {
+.dx-date-picker-group .dx-popover-trigger {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -15,16 +15,17 @@
     transition: rotate 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.popover[data-state="open"] div .date-picker-trigger {
+.dx-popover[data-state="open"] div .dx-date-picker-trigger {
     rotate: 180deg;
 }
 
-[data-disabled="true"] {
+.dx-date-picker[data-disabled="true"],
+.dx-date-picker [data-disabled="true"] {
     cursor: not-allowed;
     opacity: 0.5;
 }
 
-.date-picker-group {
+.dx-date-picker-group {
     display: flex;
     width: fit-content;
     min-width: 150px;
@@ -44,24 +45,24 @@
     transition: background-color 100ms ease-out;
 }
 
-.date-picker-group .popover-content {
+.dx-date-picker-group .dx-popover-content {
     max-width: unset;
     padding: 0;
 }
 
-.date-segment {
+.dx-date-segment {
     caret-color: transparent;
 }
 
-.date-segment[no-date="true"] {
+.dx-date-segment[no-date="true"] {
     color: var(--secondary-color-5);
 }
 
-.date-segment[is-separator="true"] {
+.dx-date-segment[is-separator="true"] {
     padding: 0;
 }
 
-.date-segment:focus-visible {
+.dx-date-segment:focus-visible {
     border-radius: 0.25rem;
     background: var(--secondary-color-3);
     color: var(--primary-color);

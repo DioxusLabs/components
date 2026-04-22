@@ -1,8 +1,8 @@
-.select {
+.dx-select {
   position: relative;
 }
 
-.select-trigger {
+.dx-select-trigger {
   position: relative;
   display: flex;
   box-sizing: border-box;
@@ -25,28 +25,29 @@
   transition: background-color 100ms ease-out;
 }
 
-.select-trigger span[data-placeholder="true"] {
+.dx-select-trigger span[data-placeholder="true"] {
   color: var(--secondary-color-5);
 }
 
-.select[data-state="open"] .select-trigger {
+.dx-select[data-state="open"] .dx-select-trigger {
   pointer-events: none;
 }
 
-.select[data-disabled="true"] .select-trigger {
+.dx-select[data-disabled="true"] .dx-select-trigger {
   color: var(--secondary-color-5);
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
-.select-trigger:hover:not([data-disabled="true"]),
-.select-trigger:focus-visible {
+.dx-select-trigger:hover:not([data-disabled="true"]),
+.dx-select-trigger:focus-visible {
   background: var(--light, var(--primary-color-4))
     var(--dark, var(--primary-color-5));
   color: var(--secondary-color-1);
   outline: none;
 }
 
-.select-list {
+.dx-select-list {
   position: absolute;
   z-index: 1000;
   top: 100%;
@@ -66,12 +67,12 @@
   will-change: transform, opacity;
 }
 
-.select-list[data-state="closed"] {
-  animation: select-list-animate-out 150ms ease-in forwards;
+.dx-select-list[data-state="closed"] {
+  animation: dx-select-list-animate-out 150ms ease-in forwards;
   pointer-events: none;
 }
 
-@keyframes select-list-animate-out {
+@keyframes dx-select-list-animate-out {
   0% {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -83,12 +84,12 @@
   }
 }
 
-.select-list[data-state="open"] {
-  animation: select-list-animate-in 150ms ease-out forwards;
+.dx-select-list[data-state="open"] {
+  animation: dx-select-list-animate-in 150ms ease-out forwards;
   pointer-events: auto;
 }
 
-@keyframes select-list-animate-in {
+@keyframes dx-select-list-animate-in {
   0% {
     opacity: 0;
     transform: scale(0.95) translateY(-2px);
@@ -100,7 +101,7 @@
   }
 }
 
-.select-option {
+.dx-select-option {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -110,26 +111,22 @@
   font-size: 14px;
 }
 
-.select-option[data-disabled="true"] {
+.dx-select-option[data-disabled="true"] {
   color: var(--secondary-color-5);
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
-.select-option:hover:not([data-disabled="true"]),
-.select-option:focus-visible {
+.dx-select-option:hover:not([data-disabled="true"]),
+.dx-select-option:focus-visible {
   background: var(--light, var(--primary-color-4))
     var(--dark, var(--primary-color-7));
   color: var(--secondary-color-1);
   outline: none;
 }
 
-.select-group-label {
+.dx-select-group-label {
   padding: 4px 12px;
   color: var(--secondary-color-5);
   font-size: 0.75rem;
-}
-
-[data-disabled="true"] {
-  cursor: not-allowed;
-  opacity: 0.5;
 }

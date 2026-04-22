@@ -12,7 +12,7 @@ test("test", async ({ page }) => {
   await expect(tooltip).toHaveCount(0);
 
   // hovering over the trigger element should show the tooltip
-  await page.locator(".tooltip-trigger").hover();
+  await page.locator(".dx-tooltip-trigger").hover();
   await expect(tooltip).toBeVisible();
 
   // moving the mouse away from the trigger element should hide the tooltip

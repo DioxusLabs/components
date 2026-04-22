@@ -20,7 +20,7 @@ pub fn Demo() -> Element {
     });
 
     rsx! {
-        div { class: "calendar-example", style: "padding: 20px;",
+        div { class: "dx-calendar-example", style: "padding: 20px;",
             RangeCalendar {
                 selected_range: selected_range(),
                 on_range_change: move |range| {

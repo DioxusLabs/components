@@ -25,7 +25,7 @@ pub fn Demo() -> Element {
             }
             TabContent {
                 index: 1usize,
-                class: "tabs-content",
+                class: "dx-tabs-content-extra",
                 value: "tab2".to_string(),
                 div {
                     width: "100%",

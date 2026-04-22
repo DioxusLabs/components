@@ -6,7 +6,7 @@ pub fn Tooltip(props: TooltipProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         tooltip::Tooltip {
-            class: "tooltip",
+            class: "dx-tooltip",
             disabled: props.disabled,
             open: props.open,
             default_open: props.default_open,
@@ -21,7 +21,7 @@ pub fn Tooltip(props: TooltipProps) -> Element {
 pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
     rsx! {
         tooltip::TooltipTrigger {
-            class: "tooltip-trigger",
+            class: "dx-tooltip-trigger",
             id: props.id,
             as: props.r#as,
             attributes: props.attributes,
@@ -34,7 +34,7 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
 pub fn TooltipContent(props: TooltipContentProps) -> Element {
     rsx! {
         tooltip::TooltipContent {
-            class: "tooltip-content",
+            class: "dx-tooltip-content",
             id: props.id,
             side: props.side,
             align: props.align,

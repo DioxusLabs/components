@@ -18,7 +18,7 @@ pub fn Demo() -> Element {
         DialogRoot { open: open(), on_open_change: move |v| open.set(v),
             DialogContent {
                 button {
-                    class: "dialog-close",
+                    class: "dx-dialog-close",
                     r#type: "button",
                     aria_label: "Close",
                     tabindex: if open() { "0" } else { "-1" },
