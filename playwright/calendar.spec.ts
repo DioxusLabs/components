@@ -5,16 +5,16 @@ test("test", async ({ page }) => {
     timeout: 20 * 60 * 1000,
   }); // Increase timeout to 20 minutes
   // Find the calendar element
-  const calendar = page.locator(".calendar").nth(0);
+  const calendar = page.locator(".dx-calendar").nth(0);
   // Find the calendar-nav-prev button
-  const prevButton = calendar.locator(".calendar-nav-prev");
+  const prevButton = calendar.locator(".dx-calendar-nav-prev");
   // Find the calendar-nav-next button
-  const nextButton = calendar.locator(".calendar-nav-next");
+  const nextButton = calendar.locator(".dx-calendar-nav-next");
 
   // Assert the calendar is displayed
   await expect(calendar).toBeVisible({ timeout: 30000 });
   // Assert the current month is displayed
-  const currentMonth = calendar.locator(".calendar-month-select");
+  const currentMonth = calendar.locator(".dx-calendar-month-select");
   let currentMonthText = await currentMonth.inputValue();
 
   // Click the previous button to go to the previous month
@@ -31,7 +31,7 @@ test("test", async ({ page }) => {
   // Move focus to the calendar with tab
   await page.keyboard.press("Tab");
   const focusedDay = calendar.locator(
-    '.calendar-grid-cell[data-month="current"]:focus'
+    '.dx-calendar-grid-cell[data-month="current"]:focus'
   );
   // Assert a day is focused
   const firstDay = focusedDay.first();
@@ -83,9 +83,9 @@ test("year navigation by moving 52 weeks with arrow keys", async ({ page }) => {
   });
 
   // Find the calendar element
-  const calendar = page.locator(".calendar").nth(0);
-  const monthSelect = calendar.locator(".calendar-month-select");
-  const yearSelect = calendar.locator(".calendar-year-select");
+  const calendar = page.locator(".dx-calendar").nth(0);
+  const monthSelect = calendar.locator(".dx-calendar-month-select");
+  const yearSelect = calendar.locator(".dx-calendar-year-select");
 
   // Assert the calendar is displayed
   await expect(calendar).toBeVisible({ timeout: 30000 });
@@ -110,7 +110,7 @@ test("year navigation by moving 52 weeks with arrow keys", async ({ page }) => {
 
   // Move focus to the calendar manually
   const firstDay = calendar
-    .locator('.calendar-grid-cell[data-month="current"]')
+    .locator('.dx-calendar-grid-cell[data-month="current"]')
     .first();
   await firstDay.focus();
 
@@ -148,9 +148,9 @@ test("shift + arrow keys navigation", async ({ page }) => {
   });
 
   // Find the calendar element
-  const calendar = page.locator(".calendar").nth(0);
-  const monthSelect = calendar.locator(".calendar-month-select");
-  const yearSelect = calendar.locator(".calendar-year-select");
+  const calendar = page.locator(".dx-calendar").nth(0);
+  const monthSelect = calendar.locator(".dx-calendar-month-select");
+  const yearSelect = calendar.locator(".dx-calendar-year-select");
 
   // Assert the calendar is displayed
   await expect(calendar).toBeVisible({ timeout: 30000 });
@@ -163,7 +163,7 @@ test("shift + arrow keys navigation", async ({ page }) => {
 
   // Move focus to the calendar
   const firstDay = calendar
-    .locator('.calendar-grid-cell[data-month="current"]')
+    .locator('.dx-calendar-grid-cell[data-month="current"]')
     .first();
   await firstDay.focus();
 
@@ -199,9 +199,9 @@ async function testArrowKeyNavigation(
   });
 
   // Find the calendar element
-  const calendar = page.locator(".calendar").nth(0);
-  const monthSelect = calendar.locator(".calendar-month-select");
-  const yearSelect = calendar.locator(".calendar-year-select");
+  const calendar = page.locator(".dx-calendar").nth(0);
+  const monthSelect = calendar.locator(".dx-calendar-month-select");
+  const yearSelect = calendar.locator(".dx-calendar-year-select");
 
   // Assert the calendar is displayed
   await expect(calendar).toBeVisible({ timeout: 30000 });
@@ -217,13 +217,13 @@ async function testArrowKeyNavigation(
 
   // Move focus to the starting day of the current month
   const startDay = calendar
-    .locator('.calendar-grid-cell[data-month="current"]')
+    .locator('.dx-calendar-grid-cell[data-month="current"]')
     [startPosition]();
   await startDay.focus();
 
   // Get the focused day selector
   const focusedDay = calendar.locator(
-    '.calendar-grid-cell[data-month="current"]:focus'
+    '.dx-calendar-grid-cell[data-month="current"]:focus'
   );
 
   // Array to track all days visited

@@ -50,7 +50,7 @@ pub fn Textarea(
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         textarea {
-            class: "textarea",
+            class: "dx-textarea",
             "data-slot": "textarea",
             "data-style": variant.class(),
             oninput: move |e| _ = oninput.map(|callback| callback(e)),

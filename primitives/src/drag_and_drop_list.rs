@@ -295,7 +295,7 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
 
     rsx! {
         div {
-            class: "dnd-list",
+            class: "dx-dnd-list",
             ..props.attributes,
             div {
                 id: "dnd-instructions",
@@ -303,7 +303,7 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
                 "Press Enter to start reordering. Use Arrow keys to change position. Press Enter to confirm or Escape to cancel."
             }
             ul {
-                class: "dnd-list-ul",
+                class: "dx-dnd-list-ul",
                 aria_label: "{label}",
                 aria_roledescription: "sortable list",
                 aria_describedby: "dnd-instructions",
@@ -449,7 +449,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             DropIndicator {  }
         }
         li {
-            class: "dnd-list-item",
+            class: "dx-dnd-list-item",
             aria_roledescription: "sortable item",
             draggable: "true",
             tabindex: if is_tab_reachable { "0" } else { "-1" },
@@ -501,7 +501,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
 fn DropIndicator() -> Element {
     rsx! {
         div {
-            class: "drop-indicator",
+            class: "dx-drop-indicator",
         }
     }
 }

@@ -68,7 +68,7 @@ pub fn Tabs(props: TabsProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         tabs::Tabs {
-            class: props.class + " tabs",
+            class: props.class + " dx-tabs",
             "data-variant": props.variant.to_class(),
             value: props.value,
             default_value: props.default_value,
@@ -85,7 +85,7 @@ pub fn Tabs(props: TabsProps) -> Element {
 #[component]
 pub fn TabList(props: TabListProps) -> Element {
     rsx! {
-        tabs::TabList { class: "tabs-list", attributes: props.attributes, {props.children} }
+        tabs::TabList { class: "dx-tabs-list", attributes: props.attributes, {props.children} }
     }
 }
 
@@ -93,7 +93,7 @@ pub fn TabList(props: TabListProps) -> Element {
 pub fn TabTrigger(props: TabTriggerProps) -> Element {
     rsx! {
         tabs::TabTrigger {
-            class: "tabs-trigger",
+            class: "dx-tabs-trigger",
             id: props.id,
             value: props.value,
             index: props.index,
@@ -108,7 +108,7 @@ pub fn TabTrigger(props: TabTriggerProps) -> Element {
 pub fn TabContent(props: TabContentProps) -> Element {
     rsx! {
         tabs::TabContent {
-            class: props.class.unwrap_or_default() + " tabs-content tabs-content-themed",
+            class: props.class.unwrap_or_default() + " dx-tabs-content dx-tabs-content-themed",
             value: props.value,
             id: props.id,
             index: props.index,

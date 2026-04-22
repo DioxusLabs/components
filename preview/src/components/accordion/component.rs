@@ -9,7 +9,7 @@ pub fn Accordion(props: AccordionProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         accordion::Accordion {
-            class: "accordion",
+            class: "dx-accordion",
             width: "15rem",
             id: props.id,
             allow_multiple_open: props.allow_multiple_open,
@@ -26,7 +26,7 @@ pub fn Accordion(props: AccordionProps) -> Element {
 pub fn AccordionItem(props: AccordionItemProps) -> Element {
     rsx! {
         accordion::AccordionItem {
-            class: "accordion-item",
+            class: "dx-accordion-item",
             disabled: props.disabled,
             default_open: props.default_open,
             on_change: props.on_change,
@@ -42,12 +42,12 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
 pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
     rsx! {
         accordion::AccordionTrigger {
-            class: "accordion-trigger",
+            class: "dx-accordion-trigger",
             id: props.id,
             attributes: props.attributes,
             {props.children}
             icon::Icon {
-                class: "accordion-expand-icon",
+                class: "dx-accordion-expand-icon",
                 width: "20px",
                 height: "20px",
                 stroke: "var(--secondary-color-4)",
@@ -61,7 +61,8 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
 pub fn AccordionContent(props: AccordionContentProps) -> Element {
     rsx! {
         accordion::AccordionContent {
-            class: "accordion-content",
+            class: "dx-accordion-content",
+            style: "--collapsible-content-width: 140px",
             id: props.id,
             attributes: props.attributes,
             {props.children}

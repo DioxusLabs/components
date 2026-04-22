@@ -70,7 +70,7 @@ pub struct AvatarProps {
 ///                 src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
 ///                 alt: "ealmloff user avatar",
 ///             }
-///             AvatarFallback { class: "avatar-fallback", "EA" }
+///             AvatarFallback { class: "dx-avatar-fallback", "EA" }
 ///         }
 ///     }
 /// }
@@ -165,7 +165,7 @@ pub struct AvatarFallbackProps {
 ///                 src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
 ///                 alt: "ealmloff user avatar",
 ///             }
-///             AvatarFallback { class: "avatar-fallback", "EA" }
+///             AvatarFallback { class: "dx-avatar-fallback", "EA" }
 ///         }
 ///     }
 /// }
@@ -226,7 +226,7 @@ pub struct AvatarImageProps {
 ///                 src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
 ///                 alt: "ealmloff user avatar",
 ///             }
-///             AvatarFallback { class: "avatar-fallback", "EA" }
+///             AvatarFallback { class: "dx-avatar-fallback", "EA" }
 ///         }
 ///     }
 /// }

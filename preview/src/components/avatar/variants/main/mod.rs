@@ -11,8 +11,8 @@ pub fn Demo() -> Element {
             align_items: "center",
             justify_content: "between",
             gap: "1rem",
-            div { class: "avatar-item",
-                p { class: "avatar-label", "Basic Usage" }
+            div { class: "dx-avatar-item",
+                p { class: "dx-avatar-label", "Basic Usage" }
                 Avatar {
                     size: AvatarImageSize::Small,
                     on_state_change: move |state| {
@@ -20,15 +20,15 @@ pub fn Demo() -> Element {
                     },
                     aria_label: "Basic avatar",
                     AvatarImage {
-                        class: "avatar-image",
+                        class: "dx-avatar-image",
                         src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
                         alt: "User avatar",
                     }
-                    AvatarFallback { class: "avatar-fallback", "EA" }
+                    AvatarFallback { class: "dx-avatar-fallback", "EA" }
                 }
             }
-            div { class: "avatar-item",
-                p { class: "avatar-label", "Rounded" }
+            div { class: "dx-avatar-item",
+                p { class: "dx-avatar-label", "Rounded" }
                 Avatar {
                     size: AvatarImageSize::Small,
                     shape: AvatarShape::Rounded,
@@ -37,15 +37,15 @@ pub fn Demo() -> Element {
                     },
                     aria_label: "Basic avatar",
                     AvatarImage {
-                        class: "avatar-image",
+                        class: "dx-avatar-image",
                         src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
                         alt: "User avatar",
                     }
-                    AvatarFallback { class: "avatar-fallback", "EA" }
+                    AvatarFallback { class: "dx-avatar-fallback", "EA" }
                 }
             }
-            div { class: "avatar-item",
-                p { class: "avatar-label", "Error State" }
+            div { class: "dx-avatar-item",
+                p { class: "dx-avatar-label", "Error State" }
                 Avatar {
                     size: AvatarImageSize::Medium,
                     on_state_change: move |state| {
@@ -53,15 +53,15 @@ pub fn Demo() -> Element {
                     },
                     aria_label: "Error avatar",
                     AvatarImage {
-                        class: "avatar-image",
+                        class: "dx-avatar-image",
                         src: "https://invalid-url.example/image.jpg",
                         alt: "Invalid image",
                     }
-                    AvatarFallback { class: "avatar-fallback", "JK" }
+                    AvatarFallback { class: "dx-avatar-fallback", "JK" }
                 }
             }
-            div { class: "avatar-item",
-                p { class: "avatar-label", "Large Size" }
+            div { class: "dx-avatar-item",
+                p { class: "dx-avatar-label", "Large Size" }
                 Avatar {
                     size: AvatarImageSize::Large,
                     on_state_change: move |state| {
@@ -69,11 +69,11 @@ pub fn Demo() -> Element {
                     },
                     aria_label: "Large avatar",
                     AvatarImage {
-                        class: "avatar-image",
+                        class: "dx-avatar-image",
                         src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif()),
                         alt: "Large avatar",
                     }
-                    AvatarFallback { class: "avatar-fallback", "DX" }
+                    AvatarFallback { class: "dx-avatar-fallback", "DX" }
                 }
             }
         }

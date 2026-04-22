@@ -8,7 +8,7 @@ pub fn HoverCard(props: HoverCardProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         hover_card::HoverCard {
-            class: "hover-card",
+            class: "dx-hover-card",
             open: props.open,
             default_open: props.default_open,
             on_open_change: props.on_open_change,
@@ -23,7 +23,7 @@ pub fn HoverCard(props: HoverCardProps) -> Element {
 pub fn HoverCardTrigger(props: HoverCardTriggerProps) -> Element {
     rsx! {
         hover_card::HoverCardTrigger {
-            class: "hover-card-trigger",
+            class: "dx-hover-card-trigger",
             id: props.id,
             attributes: props.attributes,
             {props.children}
@@ -35,7 +35,7 @@ pub fn HoverCardTrigger(props: HoverCardTriggerProps) -> Element {
 pub fn HoverCardContent(props: HoverCardContentProps) -> Element {
     rsx! {
         hover_card::HoverCardContent {
-            class: "hover-card-content",
+            class: "dx-hover-card-content",
             side: props.side,
             align: props.align,
             id: props.id,

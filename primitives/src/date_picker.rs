@@ -804,7 +804,7 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
 
     rsx! {
         span {
-            class: "date-segment",
+            class: "dx-date-segment",
             id,
             role: "spinbutton",
             aria_valuemin: props.min.to_string(),
@@ -837,7 +837,7 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
 fn DateSeparator(#[props(default = '-')] symbol: char) -> Element {
     rsx! {
         span {
-            class: "date-segment",
+            class: "dx-date-segment",
             aria_hidden: "true",
             tabindex: "-1",
             "is-separator": true,
@@ -1044,7 +1044,7 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
     let mut ctx = use_context::<DatePickerContext>();
 
     rsx! {
-        div { class: "date-picker-group", ..props.attributes,
+        div { class: "dx-date-picker-group", ..props.attributes,
             DateElement {
                 selected_date: ctx.selected_date,
                 on_date_change: move |date| {
@@ -1132,7 +1132,7 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
     });
 
     rsx! {
-        div { class: "date-picker-group", ..props.attributes,
+        div { class: "dx-date-picker-group", ..props.attributes,
             DateElement {
                 selected_date: start_date(),
                 on_date_change: move |date| start_date.set(date),

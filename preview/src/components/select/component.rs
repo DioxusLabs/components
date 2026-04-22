@@ -10,7 +10,7 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         select::Select {
-            class: "select",
+            class: "dx-select",
             value: props.value,
             default_value: props.default_value,
             on_value_change: props.on_value_change,
@@ -28,9 +28,10 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
 #[component]
 pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
     rsx! {
-        select::SelectTrigger { class: "select-trigger", attributes: props.attributes,
+        select::SelectTrigger { class: "dx-select-trigger", attributes: props.attributes,
             {props.children}
             icon::Icon {
+                class: "dx-select-expand-icon",
                 width: "20px",
                 height: "20px",
                 stroke: "var(--primary-color-7)",
@@ -51,7 +52,7 @@ pub fn SelectValue(props: SelectValueProps) -> Element {
 pub fn SelectList(props: SelectListProps) -> Element {
     rsx! {
         select::SelectList {
-            class: "select-list",
+            class: "dx-select-list",
             id: props.id,
             attributes: props.attributes,
             {props.children}
@@ -63,7 +64,7 @@ pub fn SelectList(props: SelectListProps) -> Element {
 pub fn SelectGroup(props: SelectGroupProps) -> Element {
     rsx! {
         select::SelectGroup {
-            class: "select-group",
+            class: "dx-select-group",
             disabled: props.disabled,
             id: props.id,
             attributes: props.attributes,
@@ -76,7 +77,7 @@ pub fn SelectGroup(props: SelectGroupProps) -> Element {
 pub fn SelectGroupLabel(props: SelectGroupLabelProps) -> Element {
     rsx! {
         select::SelectGroupLabel {
-            class: "select-group-label",
+            class: "dx-select-group-label",
             id: props.id,
             attributes: props.attributes,
             {props.children}
@@ -88,7 +89,7 @@ pub fn SelectGroupLabel(props: SelectGroupLabelProps) -> Element {
 pub fn SelectOption<T: Clone + PartialEq + 'static>(props: SelectOptionProps<T>) -> Element {
     rsx! {
         select::SelectOption::<T> {
-            class: "select-option",
+            class: "dx-select-option",
             value: props.value,
             text_value: props.text_value,
             disabled: props.disabled,
@@ -107,6 +108,7 @@ pub fn SelectItemIndicator() -> Element {
     rsx! {
         select::SelectItemIndicator {
             icon::Icon {
+                class: "dx-select-check-icon",
                 width: "1rem",
                 height: "1rem",
                 stroke: "var(--secondary-color-5)",

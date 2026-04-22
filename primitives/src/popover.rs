@@ -281,7 +281,7 @@ pub fn PopoverContentRendered(
             aria_modal: "true",
             aria_labelledby: ctx.labelledby,
             aria_hidden: (!is_open).then_some("true"),
-            class: class.unwrap_or_else(|| "popover-content".to_string()),
+            class: class.unwrap_or_else(|| "dx-popover-content".to_string()),
             "data-state": if is_open { "open" } else { "closed" },
             "data-side": side.as_str(),
             "data-align": align.as_str(),

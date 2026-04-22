@@ -6,7 +6,7 @@ pub fn Toolbar(props: ToolbarProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         toolbar::Toolbar {
-            class: "toolbar",
+            class: "dx-toolbar",
             aria_label: props.aria_label,
             disabled: props.disabled,
             horizontal: props.horizontal,
@@ -20,7 +20,7 @@ pub fn Toolbar(props: ToolbarProps) -> Element {
 pub fn ToolbarButton(props: ToolbarButtonProps) -> Element {
     rsx! {
         toolbar::ToolbarButton {
-            class: "toolbar-button",
+            class: "dx-toolbar-button",
             index: props.index,
             disabled: props.disabled,
             on_click: props.on_click,
@@ -34,7 +34,7 @@ pub fn ToolbarButton(props: ToolbarButtonProps) -> Element {
 pub fn ToolbarSeparator(props: ToolbarSeparatorProps) -> Element {
     rsx! {
         toolbar::ToolbarSeparator {
-            class: "toolbar-separator",
+            class: "dx-toolbar-separator",
             decorative: props.decorative,
             horizontal: props.horizontal,
             attributes: props.attributes,
@@ -50,6 +50,6 @@ pub fn ToolbarGroup(
     children: Element,
 ) -> Element {
     rsx! {
-        div { class: "toolbar-group", ..attributes, {children} }
+        div { class: "dx-toolbar-group", ..attributes, {children} }
     }
 }

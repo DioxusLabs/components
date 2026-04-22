@@ -37,7 +37,7 @@ pub fn Button(
     children: Element,
 ) -> Element {
     let base = attributes!(button {
-        class: "button",
+        class: "dx-button",
         "data-style": variant.class(),
     });
     let merged = merge_attributes(vec![base, attributes]);
