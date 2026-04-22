@@ -3,85 +3,194 @@
 }
 
 .dx-dnd-list-ul {
+  display: flex;
+  flex-direction: column;
   padding-left: 0;
+  margin: 0;
+  gap: 6px;
 }
 
 .dx-dnd-list-item {
+  position: relative;
   display: flex;
   box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
+  padding: 12px 14px 12px 10px;
+  border: 1px solid var(--primary-color-6);
+  border-radius: 10px;
+  background-color: var(--light, #fff)
+    var(--dark, var(--primary-color-4));
   color: var(--secondary-color-4);
   cursor: grab;
   list-style: none;
   outline: none;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease,
+    opacity 150ms ease;
   user-select: none;
 }
 
-.dx-dnd-list-item[data-focus-visible="true"] {
-  box-shadow: 0 0 0 2px var(--focused-border-color);
+.dx-dnd-list-item:hover {
+  border-color: var(--primary-color-7);
+
+  /* Dark: color-4 (#1a1a1a) → color-6 (#232323), a smaller step than
+     color-4 → color-5 (#262626) so the hover lift doesn't flash. */
+  background-color: var(--light, #fff) var(--dark, var(--primary-color-6));
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 4%),
+    0 3px 8px rgb(0 0 0 / 4%);
+  transform: translateY(-1px);
 }
 
+.dx-dnd-list-item:active {
+  transform: translateY(0);
+  transition-duration: 80ms;
+}
+
+/* Only hook the ring off the browser's `:focus-visible`. The primitive's
+   `data-focus-visible` attribute tracks roving-tabindex active state and
+   stays set even after tabbing out of the list, which would otherwise
+   leave the ring glued to the last-focused item. */
 .dx-dnd-list-item:focus-visible {
-  box-shadow: 0 0 0 2px var(--focused-border-color);
+  border-color: var(--focused-border-color);
+  box-shadow: 0 0 0 3px
+    var(--light, rgb(43 127 255 / 18%)) var(--dark, rgb(43 127 255 / 30%));
 }
 
 .dx-dnd-list-item[data-is-grabbing="true"] {
+  border-style: dashed;
+  border-color: var(--primary-color-7);
+  background-color: transparent;
+  box-shadow: none;
   cursor: grabbing;
-  opacity: 0.6;
-  outline: 2px dashed var(--focused-border-color);
+  opacity: 0.5;
+  transform: none;
 }
 
-.dx-item-icon-div {
-  display: flex;
-  width: 24px;
-  align-items: center;
-  margin-right: 16px;
-  color: var(--secondary-color-4);
+.dx-dnd-list-item[data-is-grabbing="true"]:hover {
+  background-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+/* When the drop target has wrapped back to the grabbed tile's origin,
+   the primitive doesn't render a drop-indicator line (there's no gap to
+   point to). Surface the "drop here = stays put" state by giving the
+   tile itself the focus-ring treatment so the user still has feedback. */
+.dx-dnd-list-item[data-is-grabbing="true"][data-drop-at-origin="true"] {
+  border-style: solid;
+  border-color: var(--focused-border-color);
+  box-shadow: 0 0 0 3px
+    var(--light, rgb(43 127 255 / 18%)) var(--dark, rgb(43 127 255 / 30%));
+  opacity: 0.75;
+}
+
+.dx-item-icon {
+  flex-shrink: 0;
+  margin-right: 6px;
+  color: var(--secondary-color-6);
+  transition: color 150ms ease;
+}
+
+.dx-dnd-list-item:hover .dx-item-icon {
+  color: var(--secondary-color-2);
 }
 
 .dx-item-body-div {
+  min-width: 0;
   flex-grow: 1;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: normal;
-  line-height: 24px;
+  line-height: 20px;
 }
 
 .dx-remove-button {
   display: flex;
   overflow: visible;
-  width: 24px;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
   align-items: center;
+  justify-content: center;
   padding: 0;
   border-style: none;
-  margin-left: 16px;
+  border-radius: 6px;
+  margin-left: 10px;
   background-color: transparent;
+  color: var(--secondary-color-6);
   cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    transform 80ms ease;
+}
+
+.dx-remove-button:hover {
+  background-color: var(--light, var(--primary-color-5))
+    var(--dark, var(--primary-color-6));
+  color: var(--secondary-color-2);
+}
+
+.dx-remove-button:active {
+  transform: scale(0.92);
 }
 
 .dx-remove-button:focus-visible {
-  border-radius: 2px;
   outline: 2px solid var(--focused-border-color);
   outline-offset: 2px;
 }
 
+/* The primitive renders a real .dx-drop-indicator element as a sibling of
+   list items. Including it in flex layout would shift all items by a gap +
+   line height whenever the drop target changes. Instead, take it out of
+   layout entirely and draw the line as an absolutely-positioned pseudo on
+   the adjacent item — so layout is stable while dragging. */
 .dx-drop-indicator {
-  position: relative;
-  z-index: 1;
-  height: 2px;
-  margin: -1px 0;
-  background-color: var(--focused-border-color);
+  display: none;
 }
 
-.dx-drop-indicator::before {
+/* The 3px line is centered in the 6px gap between cards. The containing
+   block for an abspos child is the parent's padding-box, so `top: 0` sits
+   1px *inside* the item's 1px border. To get the pseudo's midline at the
+   visual gap center (border-box-top - 3px), we offset by half the gap +
+   half the line + one border: 3 + 1.5 + 1 = 5.5px. */
+.dx-dnd-list-item::before,
+.dx-dnd-list-item::after {
   position: absolute;
-  top: -4px;
-  left: -6px;
-  width: 0;
-  height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 6px solid var(--focused-border-color);
+  right: 10px;
+  left: 10px;
+  height: 3px;
+  border-radius: 999px;
+  background-color: var(--focused-border-color);
   content: "";
+  opacity: 0;
+  pointer-events: none;
+  transform: scaleX(0.7);
+  transform-origin: center;
+  transition:
+    opacity 140ms ease-out,
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dx-dnd-list-item::before {
+  top: -5.5px;
+}
+
+.dx-dnd-list-item::after {
+  bottom: -5.5px;
+}
+
+/* Pick exactly one side of the indicator. For a "before" drop the line
+   sits above the target card (the li that follows the indicator). For an
+   "after" drop it sits below the target card (the li that precedes it).
+   Without the data-position filter, both adjacent lis would activate at
+   once and we'd get a line on *each* side of the indicator. */
+.dx-drop-indicator[data-position="before"] + .dx-dnd-list-item::before,
+.dx-dnd-list-item:has(+ .dx-drop-indicator[data-position="after"])::after {
+  opacity: 0.9;
+  transform: scaleX(1);
 }

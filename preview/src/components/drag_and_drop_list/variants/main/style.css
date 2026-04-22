@@ -1,0 +1,279 @@
+.dx-tasks-demo {
+  --dx-item-h: 66px;
+  --dx-item-gap: 6px;
+
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+/* Stable keys + :nth-of-type positioning give a pure-CSS reorder
+   animation. The UL is relative with an explicit height; items are
+   absolutely positioned at a per-slot top. When Dioxus moves a keyed
+   <li> to a new sibling position, its :nth-of-type match changes, so
+   `top` changes — and `transition: top` animates the move.
+
+   Using :nth-of-type (li) rather than :nth-child matters because the
+   primitive renders <div class="dx-drop-indicator"> siblings while
+   dragging, which would otherwise shift every li's :nth-child index on
+   hover and animate cards that shouldn't move. */
+.dx-tasks-demo .dx-dnd-list-ul {
+  position: relative;
+  display: block;
+  height: calc(6 * var(--dx-item-h) + 5 * var(--dx-item-gap));
+  gap: 0;
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+}
+
+/* A ball at the cursor tilts the nearest tile away. `d` is signed
+   distance to the cursor in items (negative = cursor is above the tile).
+   `prox` is a triangular 1→0 window over |d|<1, so only immediate
+   neighbours react. `d * prox` peaks at |d|=0.5 with value 0.25, so the
+   -16deg scalar makes the peak exactly 4° — the old Tilt slider value.
+
+   `--tile-rx` and `--tile-ty` are exposed so the drop-indicator pseudo
+   can invert them and stay level relative to world space. */
+.dx-tasks-demo .dx-dnd-list-item {
+  /* Active-gate: 0 until the primitive renders a `.dx-drop-indicator`,
+     so pickups don't jitter neighbours. Flipped to 1 by the rule below. */
+  --active: 0;
+  --d: calc((var(--dx-ball-i, var(--i)) - var(--i)) * var(--active));
+
+  /* CSS abs() isn't universally honoured; max trick works anywhere. */
+  --abs-d: max(var(--d), calc(-1 * var(--d)));
+  --prox: max(0, calc(1 - var(--abs-d)));
+  --gap-shift: 0px;
+  --tile-rx: calc(var(--d) * var(--prox) * -16deg);
+  --tile-ty: var(--gap-shift);
+
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: var(--dx-item-h);
+  transform: translateY(var(--tile-ty)) rotateX(var(--tile-rx));
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  transition:
+    top 320ms cubic-bezier(0.2, 0.9, 0.3, 1),
+    border-color 150ms ease,
+    background-color 150ms ease,
+    transform 120ms cubic-bezier(0.2, 0.9, 0.3, 1),
+    opacity 150ms ease;
+}
+
+/* The dragged source tile should stay put — its base state already
+   disables transforms (see ../../style.css). Our rule above is more
+   specific, so restore the "no transform" state here. */
+.dx-tasks-demo .dx-dnd-list-item[data-is-grabbing="true"] {
+  transform: none;
+}
+
+/* Flip the push effect on only once the primitive has decided on a drop
+   target (i.e. rendered a drop indicator). While the cursor is still
+   over the source tile after pickup, the primitive reports a `Undefined`
+   drop position and no indicator renders — so this rule doesn't match,
+   --active stays 0, and no tile jitters.
+
+   Also scoped out of keyboard drag (`:focus-visible` is present): the
+   tilt is cursor-driven, so without a live ball_i it would replay the
+   last mouse position. Keyboard drag gets the drop-indicator line
+   instead (see ../../style.css). */
+.dx-tasks-demo:has(.dx-drop-indicator):not(:has(:focus-visible)) .dx-dnd-list-item {
+  --active: 1;
+}
+
+/* Keep the drop-indicator line level and centred in the gap regardless
+   of tile tilt. The pseudo is a child of the tile, so the tile's
+   transform is applied to it too; applying the inverse cancels it out
+   in world space. The pseudo's transform-origin is pulled to the tile's
+   rotation pivot (its border-box centre, y=33 in border-box coords) in
+   pseudo-local coords:
+
+     ::before sits 5.5px above the tile's padding box top → tile centre
+       is 33 − (−4.5) = 37.5px below the pseudo top.
+     ::after sits 2.5px below the tile's border-box bottom → tile centre
+       is 33 − 67.5 = −34.5px (above the pseudo top).
+
+   Transform duration matches the tile's so the line doesn't trail the
+   rotation. */
+.dx-tasks-demo .dx-dnd-list-item::before,
+.dx-tasks-demo .dx-dnd-list-item::after {
+  transform:
+    rotateX(calc(-1 * var(--tile-rx)))
+    translateY(calc(-1 * var(--tile-ty)))
+    scaleX(0.7);
+  transition:
+    opacity 140ms ease-out,
+    transform 120ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.dx-tasks-demo .dx-dnd-list-item::before {
+  transform-origin: 50% 37.5px;
+}
+
+.dx-tasks-demo .dx-dnd-list-item::after {
+  transform-origin: 50% -34.5px;
+}
+
+.dx-tasks-demo .dx-drop-indicator[data-position="before"] + .dx-dnd-list-item::before,
+.dx-tasks-demo .dx-dnd-list-item:has(+ .dx-drop-indicator[data-position="after"])::after {
+  transform:
+    rotateX(calc(-1 * var(--tile-rx)))
+    translateY(calc(-1 * var(--tile-ty)))
+    scaleX(1);
+}
+
+.dx-tasks-demo .dx-dnd-list-item:nth-of-type(1) {
+  top: 0;
+
+  --i: 0;
+}
+
+.dx-tasks-demo .dx-dnd-list-item:nth-of-type(2) {
+  top: calc(1 * (var(--dx-item-h) + var(--dx-item-gap)));
+
+  --i: 1;
+}
+
+.dx-tasks-demo .dx-dnd-list-item:nth-of-type(3) {
+  top: calc(2 * (var(--dx-item-h) + var(--dx-item-gap)));
+
+  --i: 2;
+}
+
+.dx-tasks-demo .dx-dnd-list-item:nth-of-type(4) {
+  top: calc(3 * (var(--dx-item-h) + var(--dx-item-gap)));
+
+  --i: 3;
+}
+
+.dx-tasks-demo .dx-dnd-list-item:nth-of-type(5) {
+  top: calc(4 * (var(--dx-item-h) + var(--dx-item-gap)));
+
+  --i: 4;
+}
+
+/* Slide the pair straddling the drop indicator apart so the line sits
+   in a real gap rather than crowding the tiles. Purely a transform, so
+   the tile's `top` slot is unchanged and the reorder animation remains
+   pure CSS. */
+.dx-tasks-demo .dx-dnd-list-item:has(+ .dx-drop-indicator) {
+  --gap-shift: -1px;
+}
+
+.dx-tasks-demo .dx-drop-indicator + .dx-dnd-list-item {
+  --gap-shift: 1px;
+}
+
+.dx-tasks-demo .dx-dnd-list-item:nth-of-type(6) {
+  top: calc(5 * (var(--dx-item-h) + var(--dx-item-gap)));
+
+  --i: 5;
+}
+
+.dx-tasks-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 2px 14px;
+  gap: 16px;
+}
+
+.dx-tasks-title {
+  margin: 0;
+  color: var(--secondary-color-2);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.dx-tasks-subtitle {
+  margin: 4px 0 0;
+  color: var(--secondary-color-5);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.dx-tasks-count {
+  color: var(--secondary-color-5);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.dx-tasks-list-wrap {
+  position: relative;
+}
+
+.dx-task-card {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.dx-task-body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dx-task-title {
+  overflow: hidden;
+  color: var(--secondary-color-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  transition: color 120ms ease;
+  white-space: nowrap;
+}
+
+.dx-task-meta {
+  display: flex;
+  align-items: center;
+  color: var(--secondary-color-5);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  gap: 7px;
+  line-height: 1.3;
+}
+
+.dx-task-code {
+  color: var(--secondary-color-6);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.dx-task-sep {
+  width: 2px;
+  height: 2px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--primary-color-7);
+}
+
+.dx-task-due[data-urgent="true"] {
+  color: var(--secondary-color-2);
+  font-weight: 500;
+}
+
+.dx-dnd-list-item:hover .dx-task-code {
+  color: var(--secondary-color-4);
+}
+
+/* Text-selection drag on the fallback initials would otherwise steal the
+   gesture from the sortable LI — block selection inside the avatar. */
+.dx-tasks-demo .dx-avatar {
+  user-select: none;
+}
+

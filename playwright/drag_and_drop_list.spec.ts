@@ -37,15 +37,17 @@ test.describe("Keyboard focus management", () => {
   test("arrow up from first wraps to last", async ({ page }) => {
     const list = await loadMainList(page);
     const items = getItems(list);
+    const lastIndex = (await items.count()) - 1;
     await items.first().click();
     await page.keyboard.press("ArrowUp");
-    await expect(items.nth(4)).toBeFocused();
+    await expect(items.nth(lastIndex)).toBeFocused();
   });
 
   test("arrow down from last wraps to first", async ({ page }) => {
     const list = await loadMainList(page);
     const items = getItems(list);
-    await items.nth(4).click();
+    const lastIndex = (await items.count()) - 1;
+    await items.nth(lastIndex).click();
     await page.keyboard.press("ArrowDown");
     await expect(items.first()).toBeFocused();
   });
@@ -67,42 +69,43 @@ test.describe("Drag and drop lifecycle", () => {
     const list = await loadMainList(page);
     const items = getItems(list);
     const liveRegion = list.locator('[aria-live="assertive"]');
+    const itemCount = await items.count();
 
     // Grab item 3 (index 2)
     await items.nth(2).click();
     await page.keyboard.press("Enter");
     await expect(liveRegion).toContainText(
-      "You have lifted an item in position 3 of 5",
+      `You have lifted an item in position 3 of ${itemCount}`,
     );
 
     // First ArrowUp immediately moves to position 2
     await page.keyboard.press("ArrowUp");
     await expect(liveRegion).toContainText(
-      "You have moved the item to position 2 of 5",
+      `You have moved the item to position 2 of ${itemCount}`,
     );
 
     // Second ArrowUp moves to position 1
     await page.keyboard.press("ArrowUp");
     await expect(liveRegion).toContainText(
-      "You have moved the item to position 1 of 5",
+      `You have moved the item to position 1 of ${itemCount}`,
     );
 
     // ArrowDown back to position 2
     await page.keyboard.press("ArrowDown");
     await expect(liveRegion).toContainText(
-      "You have moved the item to position 2 of 5",
+      `You have moved the item to position 2 of ${itemCount}`,
     );
 
     // ArrowDown past original position to position 3
     await page.keyboard.press("ArrowDown");
     await expect(liveRegion).toContainText(
-      "You have moved the item to position 3 of 5",
+      `You have moved the item to position 3 of ${itemCount}`,
     );
 
     // ArrowDown to position 4
     await page.keyboard.press("ArrowDown");
     await expect(liveRegion).toContainText(
-      "You have moved the item to position 4 of 5",
+      `You have moved the item to position 4 of ${itemCount}`,
     );
 
     // Drop
@@ -151,17 +154,144 @@ test.describe("Drag and drop lifecycle", () => {
   test("space key grabs and drops items", async ({ page }) => {
     const list = await loadMainList(page);
     const items = getItems(list);
+    const itemCount = await items.count();
     await items.first().click();
     await page.keyboard.press("Space");
     const liveRegion = list.locator('[aria-live="assertive"]');
     await expect(liveRegion).toContainText(
-      "You have lifted an item in position 1 of 5",
+      `You have lifted an item in position 1 of ${itemCount}`,
     );
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("Space");
     await expect(liveRegion).toContainText(
       "You have dropped the item. It has moved from position 1 to position 2",
     );
+  });
+
+  async function dropIndicatorOpacity(
+    page: import("@playwright/test").Page,
+  ): Promise<number> {
+    return page.evaluate(() => {
+      const beforeTarget = document.querySelector(
+        '.dx-drop-indicator[data-position="before"] + .dx-dnd-list-item',
+      );
+      if (beforeTarget) {
+        return Number.parseFloat(
+          getComputedStyle(beforeTarget, "::before").opacity,
+        );
+      }
+      const afterTarget = document.querySelector(
+        '.dx-dnd-list-item:has(+ .dx-drop-indicator[data-position="after"])',
+      );
+      if (afterTarget) {
+        return Number.parseFloat(
+          getComputedStyle(afterTarget, "::after").opacity,
+        );
+      }
+      return 0;
+    });
+  }
+
+  test("mouse drag shows the drop-indicator line", async ({ page }) => {
+    const list = await loadMainList(page);
+    const items = getItems(list);
+    const sourceBox = await items.nth(2).boundingBox();
+    const targetBox = await items.nth(3).boundingBox();
+    expect(sourceBox).not.toBeNull();
+    expect(targetBox).not.toBeNull();
+
+    await page.mouse.move(
+      sourceBox!.x + sourceBox!.width / 2,
+      sourceBox!.y + sourceBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      targetBox!.x + targetBox!.width / 2,
+      targetBox!.y + targetBox!.height * 0.8,
+      { steps: 20 },
+    );
+
+    await expect(page.locator(".dx-drop-indicator")).toHaveCount(1);
+    await expect.poll(() => dropIndicatorOpacity(page)).toBeGreaterThan(0.5);
+
+    await page.mouse.up();
+  });
+
+  test("keyboard drag shows the drop-indicator line", async ({ page }) => {
+    const list = await loadMainList(page);
+    const items = getItems(list);
+    // Use keyboard navigation so `:focus-visible` genuinely applies to
+    // the item the primitive re-focuses during drag.
+    await page.keyboard.press("Tab");
+    for (let i = 0; i < 2; i++) {
+      await page.keyboard.press("ArrowDown");
+    }
+    await expect(items.nth(2)).toBeFocused();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("ArrowDown");
+
+    await expect.poll(() => dropIndicatorOpacity(page)).toBeGreaterThan(0.5);
+
+    await page.keyboard.press("Escape");
+  });
+
+  test("mouse drop to the side commits without cancelling the native drop", async ({
+    page,
+  }) => {
+    const runtimeErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") {
+        runtimeErrors.push(message.text());
+      }
+    });
+    page.on("pageerror", (error) => {
+      runtimeErrors.push(error.message);
+    });
+
+    const list = await loadMainList(page);
+    const items = getItems(list);
+    const sourceTitle = await items.nth(2).locator(".dx-task-title").innerText();
+    const sourceBox = await items.nth(2).boundingBox();
+    const targetBox = await items.nth(3).boundingBox();
+    expect(sourceBox).not.toBeNull();
+    expect(targetBox).not.toBeNull();
+
+    await page.evaluate(() => {
+      (window as any).__dxLastDropEffect = null;
+      document.addEventListener(
+        "dragend",
+        (event) => {
+          (window as any).__dxLastDropEffect =
+            event.dataTransfer?.dropEffect ?? null;
+        },
+        { capture: true, once: true },
+      );
+    });
+
+    await page.mouse.move(
+      sourceBox!.x + sourceBox!.width / 2,
+      sourceBox!.y + sourceBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      targetBox!.x + targetBox!.width / 2,
+      targetBox!.y + targetBox!.height * 0.8,
+      { steps: 20 },
+    );
+    await page.mouse.move(
+      targetBox!.x + targetBox!.width + 120,
+      targetBox!.y + targetBox!.height * 0.8,
+      { steps: 10 },
+    );
+    await page.mouse.up();
+
+    await expect
+      .poll(() => page.evaluate(() => (window as any).__dxLastDropEffect))
+      .toBe("move");
+    await expect(items.nth(3).locator(".dx-task-title")).toHaveText(
+      sourceTitle,
+    );
+    expect(runtimeErrors).toEqual([]);
   });
 });
 
