@@ -1,21 +1,21 @@
 /* Item Group */
-.item-group {
+.dx-item-group {
   display: flex;
   width: 100%;
   flex-direction: column;
   gap: 1rem;
 }
 
-.item-group:has([data-size="sm"]) {
+.dx-item-group:has([data-size="sm"]) {
   gap: 0.625rem;
 }
 
-.item-group:has([data-size="xs"]) {
+.dx-item-group:has([data-size="xs"]) {
   gap: 0.5rem;
 }
 
 /* Item Separator */
-.item-separator {
+.dx-item-separator {
   width: 100%;
   height: 1px;
   border: none;
@@ -24,7 +24,7 @@
 }
 
 /* Base Item */
-.item {
+.dx-item {
   display: flex;
   width: 100%;
   box-sizing: border-box;
@@ -40,50 +40,50 @@
     border-color 0.1s ease;
 }
 
-.item:focus-visible {
+.dx-item:focus-visible {
   border-color: var(--focused-border-color);
   box-shadow: 0 0 0 3px
     color-mix(in srgb, var(--focused-border-color) 50%, transparent);
 }
 
-.item a {
+.dx-item a {
   transition:
     color 0.1s ease,
     background-color 0.1s ease;
 }
 
-.item a:hover {
+.dx-item a:hover {
   background-color: var(--primary-color-5);
 }
 
 /* Item Variants */
-.item[data-style="default"] {
+.dx-item[data-style="default"] {
   border-color: transparent;
 }
 
-.item[data-style="outline"] {
+.dx-item[data-style="outline"] {
   border-color: var(--primary-color-6);
 }
 
-.item[data-style="muted"] {
+.dx-item[data-style="muted"] {
   border-color: transparent;
   background-color: var(--primary-color-5);
 }
 
 /* Item Sizes */
-.item[data-size="default"],
-.item[data-size="sm"] {
+.dx-item[data-size="default"],
+.dx-item[data-size="sm"] {
   padding: 0.625rem 0.75rem;
   gap: 0.625rem;
 }
 
-.item[data-size="xs"] {
+.dx-item[data-size="xs"] {
   padding: 0.5rem 0.625rem;
   gap: 0.5rem;
 }
 
 /* Item Media */
-.item-media {
+.dx-item-media {
   display: flex;
   flex-shrink: 0;
   align-items: center;
@@ -91,65 +91,65 @@
   gap: 0.5rem;
 }
 
-.item:has([data-slot="item-description"]) .item-media {
+.dx-item:has([data-slot="item-description"]) .dx-item-media {
   align-self: flex-start;
   transform: translateY(0.125rem);
 }
 
-.item-media svg {
+.dx-item-media svg {
   pointer-events: none;
 }
 
-.item-media[data-style="default"] {
+.dx-item-media[data-style="default"] {
   background-color: transparent;
 }
 
-.item-media[data-style="icon"] svg {
+.dx-item-media[data-style="icon"] svg {
   width: 1rem;
   height: 1rem;
 }
 
-.item-media[data-style="image"] {
+.dx-item-media[data-style="image"] {
   overflow: hidden;
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 0.125rem;
 }
 
-.item-media[data-style="image"] img {
+.dx-item-media[data-style="image"] img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.item[data-size="sm"] .item-media[data-style="image"] {
+.dx-item[data-size="sm"] .dx-item-media[data-style="image"] {
   width: 2rem;
   height: 2rem;
 }
 
-.item[data-size="xs"] .item-media[data-style="image"] {
+.dx-item[data-size="xs"] .dx-item-media[data-style="image"] {
   width: 1.5rem;
   height: 1.5rem;
 }
 
 /* Item Content */
-.item-content {
+.dx-item-content {
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.item[data-size="xs"] .item-content {
+.dx-item[data-size="xs"] .dx-item-content {
   gap: 0;
 }
 
-.item-content + .item-content {
+.dx-item-content + .dx-item-content {
   flex: none;
 }
 
 /* Item Title */
-.item-title {
+.dx-item-title {
   display: flex;
   overflow: hidden;
   width: fit-content;
@@ -164,7 +164,7 @@
 }
 
 /* Item Description */
-.item-description {
+.dx-item-description {
   display: -webkit-box;
   overflow: hidden;
   margin: 0;
@@ -177,29 +177,29 @@
   text-align: left;
 }
 
-.item[data-size="xs"] .item-description {
+.dx-item[data-size="xs"] .dx-item-description {
   font-size: 0.75rem;
 }
 
-.item-description a {
+.dx-item-description a {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 
-.item-description a:hover {
+.dx-item-description a:hover {
   color: var(--secondary-color-1);
 }
 
 /* Item Actions */
-.item-actions {
+.dx-item-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 /* Item Header & Footer */
-.item-header,
-.item-footer {
+.dx-item-header,
+.dx-item-footer {
   display: flex;
   flex-basis: 100%;
   align-items: center;

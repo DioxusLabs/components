@@ -67,7 +67,7 @@ pub fn ItemGroup(
     children: Element,
 ) -> Element {
     let base = attributes!(div {
-        class: "item-group",
+        class: "dx-item-group",
         role: "list",
         "data-slot": "item-group",
     });
@@ -86,7 +86,7 @@ pub fn ItemSeparator(
     attributes: Vec<Attribute>,
 ) -> Element {
     let base = attributes!(div {
-        class: "item-separator",
+        class: "dx-item-separator",
         role: "separator",
         "data-slot": "item-separator",
     });
@@ -109,7 +109,7 @@ pub fn Item(
     children: Element,
 ) -> Element {
     let base = attributes!(div {
-        class: "item",
+        class: "dx-item",
         role: "listitem",
         "data-slot": "item",
         "data-style": variant.class(),
@@ -140,7 +140,7 @@ pub fn ItemMedia(
     children: Element,
 ) -> Element {
     let base = attributes!(div {
-        class: "item-media",
+        class: "dx-item-media",
         "data-slot": "item-media",
         "data-style": variant.class(),
     });
@@ -159,7 +159,7 @@ pub fn ItemContent(
     children: Element,
 ) -> Element {
     let base = attributes!(div {
-        class: "item-content",
+        class: "dx-item-content",
         "data-slot": "item-content",
     });
     let merged = merge_attributes(vec![base, attributes]);
@@ -177,7 +177,7 @@ pub fn ItemTitle(
     children: Element,
 ) -> Element {
     let base = attributes!(div {
-        class: "item-title",
+        class: "dx-item-title",
         "data-slot": "item-title",
     });
     let merged = merge_attributes(vec![base, attributes]);
@@ -195,7 +195,7 @@ pub fn ItemDescription(
     children: Element,
 ) -> Element {
     let base = attributes!(p {
-        class: "item-description",
+        class: "dx-item-description",
         "data-slot": "item-description",
     });
     let merged = merge_attributes(vec![base, attributes]);
@@ -213,7 +213,7 @@ pub fn ItemActions(
     children: Element,
 ) -> Element {
     let base = attributes!(div {
-        class: "item-actions",
+        class: "dx-item-actions",
         "data-slot": "item-actions",
     });
     let merged = merge_attributes(vec![base, attributes]);
@@ -231,7 +231,7 @@ pub fn ItemHeader(
     children: Element,
 ) -> Element {
     let base = attributes!(div {
-        class: "item-header",
+        class: "dx-item-header",
         "data-slot": "item-header",
     });
     let merged = merge_attributes(vec![base, attributes]);
@@ -249,7 +249,7 @@ pub fn ItemFooter(
     children: Element,
 ) -> Element {
     let base = attributes!(div {
-        class: "item-footer",
+        class: "dx-item-footer",
         "data-slot": "item-footer",
     });
     let merged = merge_attributes(vec![base, attributes]);
