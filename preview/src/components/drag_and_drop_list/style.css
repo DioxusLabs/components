@@ -1,5 +1,6 @@
 .dx-dnd-list {
   width: 100%;
+  --dx-item-gap: 6px;
 }
 
 .dx-dnd-list-ul {
@@ -7,10 +8,14 @@
   flex-direction: column;
   padding-left: 0;
   margin: 0;
-  gap: 6px;
+  gap: var(--dx-item-gap);
+  perspective: 1200px;
 }
 
 .dx-dnd-list-item {
+  --gap-shift: 0px;
+  --tilt: 0deg;
+
   position: relative;
   display: flex;
   box-sizing: border-box;
@@ -25,36 +30,31 @@
   cursor: grab;
   list-style: none;
   outline: none;
+  transform: translateY(var(--gap-shift)) rotateX(var(--tilt));
+  transform-style: preserve-3d;
   transition:
     border-color 150ms ease,
     background-color 150ms ease,
     box-shadow 150ms ease,
-    transform 150ms ease,
+    transform 180ms cubic-bezier(0.2, 0.9, 0.3, 1),
     opacity 150ms ease;
   user-select: none;
 }
 
 .dx-dnd-list-item:hover {
   border-color: var(--primary-color-7);
-
-  /* Dark: color-4 (#1a1a1a) → color-6 (#232323), a smaller step than
-     color-4 → color-5 (#262626) so the hover lift doesn't flash. */
   background-color: var(--light, #fff) var(--dark, var(--primary-color-6));
   box-shadow:
     0 1px 2px rgb(0 0 0 / 4%),
     0 3px 8px rgb(0 0 0 / 4%);
-  transform: translateY(-1px);
+  --gap-shift: -1px;
 }
 
 .dx-dnd-list-item:active {
-  transform: translateY(0);
+  --gap-shift: 0px;
   transition-duration: 80ms;
 }
 
-/* Only hook the ring off the browser's `:focus-visible`. The primitive's
-   `data-focus-visible` attribute tracks roving-tabindex active state and
-   stays set even after tabbing out of the list, which would otherwise
-   leave the ring glued to the last-focused item. */
 .dx-dnd-list-item:focus-visible {
   border-color: var(--focused-border-color);
   box-shadow: 0 0 0 3px
@@ -68,19 +68,10 @@
   box-shadow: none;
   cursor: grabbing;
   opacity: 0.5;
-  transform: none;
+  --gap-shift: 0px;
+  --tilt: 0deg;
 }
 
-.dx-dnd-list-item[data-is-grabbing="true"]:hover {
-  background-color: transparent;
-  box-shadow: none;
-  transform: none;
-}
-
-/* When the drop target has wrapped back to the grabbed tile's origin,
-   the primitive doesn't render a drop-indicator line (there's no gap to
-   point to). Surface the "drop here = stays put" state by giving the
-   tile itself the focus-ring treatment so the user still has feedback. */
 .dx-dnd-list-item[data-is-grabbing="true"][data-drop-at-origin="true"] {
   border-style: solid;
   border-color: var(--focused-border-color);
@@ -144,20 +135,10 @@
   outline-offset: 2px;
 }
 
-/* The primitive renders a real .dx-drop-indicator element as a sibling of
-   list items. Including it in flex layout would shift all items by a gap +
-   line height whenever the drop target changes. Instead, take it out of
-   layout entirely and draw the line as an absolutely-positioned pseudo on
-   the adjacent item — so layout is stable while dragging. */
 .dx-drop-indicator {
   display: none;
 }
 
-/* The 3px line is centered in the 6px gap between cards. The containing
-   block for an abspos child is the parent's padding-box, so `top: 0` sits
-   1px *inside* the item's 1px border. To get the pseudo's midline at the
-   visual gap center (border-box-top - 3px), we offset by half the gap +
-   half the line + one border: 3 + 1.5 + 1 = 5.5px. */
 .dx-dnd-list-item::before,
 .dx-dnd-list-item::after {
   position: absolute;
@@ -169,28 +150,52 @@
   content: "";
   opacity: 0;
   pointer-events: none;
-  transform: scaleX(0.7);
-  transform-origin: center;
   transition:
     opacity 140ms ease-out,
     transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .dx-dnd-list-item::before {
-  top: -5.5px;
+  top: calc(-1 * (var(--dx-item-gap) / 2 + 2.5px));
 }
 
 .dx-dnd-list-item::after {
-  bottom: -5.5px;
+  bottom: calc(-1 * (var(--dx-item-gap) / 2 + 2.5px));
 }
 
-/* Pick exactly one side of the indicator. For a "before" drop the line
-   sits above the target card (the li that follows the indicator). For an
-   "after" drop it sits below the target card (the li that precedes it).
-   Without the data-position filter, both adjacent lis would activate at
-   once and we'd get a line on *each* side of the indicator. */
+.dx-dnd-list-item::before,
+.dx-dnd-list-item::after {
+  transform:
+    rotateX(calc(-1 * var(--tilt)))
+    translateY(calc(-1 * var(--gap-shift)))
+    scaleX(0.7);
+}
+
+.dx-dnd-list-item::before {
+  transform-origin: center bottom;
+}
+
+.dx-dnd-list-item::after {
+  transform-origin: center top;
+}
+
 .dx-drop-indicator[data-position="before"] + .dx-dnd-list-item::before,
 .dx-dnd-list-item:has(+ .dx-drop-indicator[data-position="after"])::after {
   opacity: 0.9;
-  transform: scaleX(1);
+  transform:
+    rotateX(calc(-1 * var(--tilt)))
+    translateY(calc(-1 * var(--gap-shift)))
+    scaleX(1);
+}
+
+.dx-dnd-list-item:has(+ .dx-drop-indicator) {
+  --gap-shift: -1px;
+  --tilt: -3deg;
+  transform-origin: center bottom;
+}
+
+.dx-drop-indicator + .dx-dnd-list-item {
+  --gap-shift: 1px;
+  --tilt: 3deg;
+  transform-origin: center top;
 }

@@ -29,10 +29,11 @@ pub struct DragAndDropListProps {
 pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     let is_removable = props.is_removable;
     // Wrap each item in a `display: contents` div carrying the caller's key.
-    // The wrapping element is required because rsx! fragments can't hold a key,
-    // and without a stable key per item the primitive falls back to an index
-    // key — which means reorders don't move DOM nodes, so the CSS `top`
-    // transition that animates list shuffling never fires.
+    // rsx! fragments can't hold a key, and without a stable key per item
+    // Dioxus falls back to an index key — which makes reorders swap
+    // *content* between <li>s instead of moving the elements themselves.
+    // Stable keys keep element state (focus, transitions mid-flight)
+    // attached to the content as it moves.
     let items: Vec<Element> = props
         .items
         .iter()
