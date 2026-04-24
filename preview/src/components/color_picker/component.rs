@@ -18,11 +18,14 @@ pub fn ColorPicker(props: ColorPickerProps) -> Element {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
 
         color_picker::ColorPicker {
+            class: "dx-color-picker",
             color: props.color,
             on_color_change: props.on_color_change,
+            disabled: props.disabled,
             attributes: props.attributes,
             button {
-                class: "color-picker-button",
+                class: "dx-color-picker-button",
+                disabled: if (props.disabled)() { true },
                 onclick: move |_| open.set(true),
                 ColorSwatch { color: props.color }
                 if let Some(label) = props.label { span { {label} } }
@@ -66,6 +69,9 @@ pub struct ColorFieldProps {
     pub children: Element,
 }
 
+/// # ColorField
+///
+/// The [`ColorField`] allows users to edit a hex color.
 #[component]
 fn ColorField(props: ColorFieldProps) -> Element {
     let mut value = use_signal(|| (props.color)().map(|c| c.to_hex()).unwrap_or_default());
@@ -117,12 +123,12 @@ fn ColorField(props: ColorFieldProps) -> Element {
 
     rsx! {
         div {
-            class: "field-container",
+            class: "dx-color-field-container",
             ..props.attributes,
             if let Some(label) = props.label {
                 Label {
                     html_for: "color_field",
-                    class: "color-slider-title",
+                    class: "dx-color-slider-title",
                     {label}
                 }
             }
@@ -156,7 +162,7 @@ fn ColorField(props: ColorFieldProps) -> Element {
                 onkeydown
             }
             if let Some(text) = props.description {
-                span { class: "description", {text} }
+                span { class: "dx-color-field-description", {text} }
             }
             {props.children}
         }
@@ -220,13 +226,16 @@ pub struct ColorSwatchProps {
     pub children: Element,
 }
 
+/// # ColorSwatch
+///
+/// The [`ColorSwatch`] displays a preview of a selected color.
 #[component]
 fn ColorSwatch(props: ColorSwatchProps) -> Element {
     let hex_color = use_memo(move || (props.color)().to_hex());
 
     rsx! {
         div {
-            class: "color-swatch {props.size.to_class()} {props.shape.to_class()}",
+            class: "dx-color-swatch dx-{props.size.to_class()} dx-{props.shape.to_class()}",
             style: "--swatch-color: {hex_color}",
             ..props.attributes,
             {props.children}
@@ -254,6 +263,9 @@ pub struct ColorSliderProps {
     pub children: Element,
 }
 
+/// # ColorSlider
+///
+/// The [`ColorSlider`] allows users to adjust a hue of a color value.
 #[component]
 fn ColorSlider(props: ColorSliderProps) -> Element {
     let mut current_hue = use_signal(|| (props.color)().hue());
@@ -286,25 +298,30 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
     rsx! {
 
         div {
-            class: "color-slider-container",
+            class: "dx-color-slider-container",
             ..props.attributes,
-            label { class: "color-slider-title", {props.title} }
-            output { class: "color-slider-output", "{display_value}" }
+            label { class: "dx-color-slider-title", {props.title} }
+            output { class: "dx-color-slider-output", "{display_value}" }
             Slider {
-                class: "color-slider",
+                class: "dx-color-slider",
                 label: "Color Slider",
                 horizontal: true,
                 max: 360.0,
                 value: SliderValue::Single(current_hue()),
                 on_value_change: move |value: SliderValue| {
                     let SliderValue::Single(h) = value;
+
+                    // Allow the value to be exactly 360.0
+                    // The palette will understand that 360.0 == 0.0, but the signal will remain 360.0 for the UI.
+                    current_hue.set(h);
+
                     let color = (props.color)().with_hue(h);
                     props.on_color_change.call(color);
                 },
                 SliderTrack {
-                    class: "color-slider-track",
+                    class: "dx-color-slider-track",
                     SliderThumb {
-                        class: "color-slider-thumb",
+                        class: "dx-color-slider-thumb",
                         background_color: format!("{}", thumb_color().to_css_rgb()),
                     }
                 }
@@ -318,7 +335,7 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
 fn ColorArea(props: ColorAreaProps) -> Element {
     rsx! {
         color_picker::ColorArea {
-            class: "color-area-container",
+            class: "dx-color-area-container",
             color: props.color,
             min: props.min,
             max: props.max,
@@ -366,7 +383,7 @@ pub fn ColorPickerSelect(props: ColorPickerSelectProps) -> Element {
 
     rsx! {
         div {
-            class: "color-picker-dialog",
+            class: "dx-color-picker-dialog",
             ..props.attributes,
             ColorArea {
                 color: current_color(),
@@ -378,7 +395,7 @@ pub fn ColorPickerSelect(props: ColorPickerSelectProps) -> Element {
                 on_color_change: update_color,
             }
             div {
-                class: "color-picker-input",
+                class: "dx-color-picker-input",
                 ColorField {
                     label: "Hex",
                     color: current_color(),

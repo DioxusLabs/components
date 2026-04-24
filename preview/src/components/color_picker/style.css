@@ -1,17 +1,17 @@
-.field-container {
+.dx-color-field-container {
     display: flex;
     flex: 1;
     flex-direction: column;
     gap: 4px;
 }
 
-.description {
+.dx-color-field-description {
     color: var(--secondary-color-5);
     font-size: 14px;
     line-height: 1.5;
 }
 
-.color-swatch {
+.dx-color-swatch {
     box-sizing: border-box;
     border: 1px solid color-mix(in oklab, var(--primary-color) 10%, transparent);
     background-color: var(--swatch-color);
@@ -22,31 +22,31 @@
 }
 
 /* Swatch sizes */
-.swatch-sm {
+.dx-swatch-sm {
     width: 1rem;
     height: 1rem;
 }
 
-.swatch-md {
+.dx-swatch-md {
     width: 2rem;
     height: 2rem;
 }
 
-.swatch-lg {
+.dx-swatch-lg {
     width: 3rem;
     height: 3rem;
 }
 
 /* Swatch shape */
-.swatch-circle {
+.dx-swatch-circle {
     border-radius: 50%;
 }
 
-.swatch-rounded {
+.dx-swatch-rounded {
     border-radius: 0.25rem;
 }
 
-.color-slider-container {
+.dx-color-slider-container {
     display: grid;
     width: 224px;
     flex-direction: column;
@@ -55,7 +55,7 @@
     grid-template-columns: 1fr auto;
 }
 
-.color-slider-title {
+.dx-color-slider-title {
     width: fit-content;
     color: var(--secondary-color-4);
     font-size: 0.875rem;
@@ -63,14 +63,14 @@
     line-height: 1.5rem;
 }
 
-.color-slider-output {
+.dx-color-slider-output {
     color: var(--secondary-color-5);
     font-size: 0.875rem;
     font-weight: 500;
     line-height: 1.5rem;
 }
 
-.color-slider {
+.dx-color-slider {
     position: relative;
     display: flex;
     align-items: center;
@@ -78,7 +78,7 @@
     touch-action: none;
 }
 
-.color-slider-track {
+.dx-color-slider-track {
     position: relative;
     height: 24px;
     box-sizing: border-box;
@@ -87,7 +87,7 @@
     background: linear-gradient(to right, rgb(255 0 0), rgb(255 255 0), rgb(0 255 0), rgb(0 255 255), rgb(0 0 255), rgb(255 0 255), rgb(255 0 0)), repeating-conic-gradient(rgb(204 204 204) 0%, rgb(204 204 204) 25%, white 0%, white 50%) 50% center / 16px 16px;
 }
 
-.color-slider-thumb {
+.dx-color-slider-thumb {
     all: unset;
     position: absolute;
     top: 50%;
@@ -103,7 +103,7 @@
     transition: border-color .15s;
 }
 
-.color-area-container {
+.dx-color-area-container {
     position: relative;
     display: flex;
     width: 100%;
@@ -114,14 +114,14 @@
     touch-action: none;
 }
 
-.color-area-track {
+.dx-color-area-track {
     box-sizing: border-box;
     flex-grow: 1;
     border-radius: 10px;
     background: linear-gradient(to top, black, transparent), linear-gradient(to right, white, transparent), var(--area-color);
 }
 
-.color-area-thumb {
+.dx-color-area-thumb {
     all: unset;
     position: absolute;
     display: block;
@@ -135,7 +135,7 @@
     transition: border-color 150ms;
 }
 
-.color-picker-button {
+.dx-color-picker-button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -149,7 +149,7 @@
     outline: 0 solid;
 }
 
-.color-picker-dialog {
+.dx-color-picker-dialog {
     display: flex;
     box-sizing: border-box;
     flex-direction: column;
@@ -157,9 +157,15 @@
     gap: 8px;
 }
 
-.color-picker-input {
+.dx-color-picker-input {
     display: flex;
     flex-direction: row;
     align-items: flex-end;
     gap: 4px;
+}
+
+.dx-color-picker[data-disabled="true"],
+.dx-color-picker [data-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.5;
 }

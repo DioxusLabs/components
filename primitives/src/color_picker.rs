@@ -135,6 +135,10 @@ pub struct ColorPickerProps {
     #[props(default)]
     pub on_color_change: Callback<Color>,
 
+    /// Whether the color picker is disabled
+    #[props(default)]
+    pub disabled: ReadSignal<bool>,
+
     /// Optional label on the button
     #[props(default)]
     pub label: Option<String>,
@@ -147,6 +151,37 @@ pub struct ColorPickerProps {
     pub children: Element,
 }
 
+/// # ColorPicker
+///
+/// The [`ColorPicker`] component provides an accessible color input interface
+/// and synchronizes a color value between multiple color components.
+///
+/// ## Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::color_picker::*;
+/// #[component]
+/// fn Demo() -> Element {
+///    let rgb = Color::random_rgb();
+///    let mut color = use_signal(|| rgb);
+///    rsx! {
+///            ColorPicker {
+///                label: "Pick",
+///                color: color(),
+///                on_color_change: move |c| {
+///                    tracing::info!("Color changed: {:?}", c);
+///                    color.set(c);
+///                },
+///                ColorPickerSelect { }
+///            }
+///    }
+///}
+/// ```
+///
+/// # Styling
+///
+/// The [`ColorPicker`] component defines the following data attributes you can use to control styling:
+/// - `data-disabled`: Indicates if the ColorPicker is disabled. Possible values are `true` or `false`.
 #[component]
 pub fn ColorPicker(props: ColorPickerProps) -> Element {
     use_context_provider(|| ColorPickerContext {
@@ -157,6 +192,8 @@ pub fn ColorPicker(props: ColorPickerProps) -> Element {
     rsx! {
         div {
             role: "group",
+            aria_label: "Color picker",
+            "data-disabled": (props.disabled)(),
             ..props.attributes,
             {props.children}
         }
@@ -280,14 +317,40 @@ pub struct ColorAreaProps {
     pub children: Element,
 }
 
+/// # ColorArea
+///
+/// The [`ColorArea`] allows users to adjust two channels of color value against a two-dimensional gradient background.
+///
+/// ## Example
+/// ```rust
+/// use dioxus::prelude::*;
+/// use dioxus_primitives::color_picker::*;
+/// #[component]
+/// fn Demo() -> Element {
+///    let rgb = Color::random_rgb();
+///    let mut color = use_signal(|| rgb);
+///    rsx! {
+///            ColorPicker {
+///                label: "Pick",
+///                color: color(),
+///                on_color_change: move |c| {
+///                    tracing::info!("Color changed: {:?}", c);
+///                    color.set(c);
+///                },
+///                ColorPickerSelect { }
+///            }
+///    }
+///}
+/// ```
 #[component]
 pub fn ColorArea(props: ColorAreaProps) -> Element {
     let mut dragging = use_signal(|| false);
 
     let value = use_memo(move || {
-        let current_color = (props.color)().to_hsv();
-        SV::new(current_color.1 * 255.0, current_color.2 * 255.0)
+        let hsv = (props.color)().to_hsv();
+        SV::new(hsv.1 * 255.0, hsv.2 * 255.0)
     });
+
     let update_sv = Callback::new(move |sv: SV| {
         let new_color = (props.color)().with_sv(sv.s / 255.0, sv.v / 255.0);
         props.on_color_change.call(new_color);
@@ -437,7 +500,7 @@ struct AreaTrackProps {
 fn AreaTrack(props: AreaTrackProps) -> Element {
     rsx! {
         div {
-            class: "color-area-track",
+            class: "dx-color-area-track",
             ..props.attributes,
             {props.children}
         }
@@ -476,7 +539,7 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
 
     rsx! {
         button {
-            class: "color-area-thumb",
+            class: "dx-color-area-thumb",
             type: "button",
             role: "region",
             aria_valuemin: format!("({} {})", ctx.min, ctx.min),
