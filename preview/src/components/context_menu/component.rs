@@ -40,7 +40,7 @@ pub fn ContextMenuTrigger(props: ContextMenuTriggerProps) -> Element {
 pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
     rsx! {
         context_menu::ContextMenuContent {
-            class: "context-menu-content",
+            class: "dx-context-menu-content",
             id: props.id,
             attributes: props.attributes,
             {props.children}
@@ -52,7 +52,7 @@ pub fn ContextMenuContent(props: ContextMenuContentProps) -> Element {
 pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
     rsx! {
         context_menu::ContextMenuItem {
-            class: "context-menu-item",
+            class: "dx-context-menu-item",
             disabled: props.disabled,
             value: props.value,
             index: props.index,

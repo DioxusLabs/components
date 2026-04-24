@@ -230,19 +230,19 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
                 role: "region",
                 aria_label: "{length} notifications",
                 tabindex: "-1",
-                class: "toast-container",
+                class: "dx-toast-container",
                 style: "--toast-count: {length}",
                 onmounted: move |e| {
                     region_ref.set(Some(e.data()));
                 },
 
                 ol {
-                    class: "toast-list",
+                    class: "dx-toast-list",
                     // Render all toasts
                     for (index, toast) in toast_list.read().iter().rev().enumerate() {
                         li {
                             key: "{toast.id}",
-                            class: "toast-item",
+                            class: "dx-toast-item",
                             {
                                 props.render_toast.call(ToastProps::builder().id(toast.id)
                                     .index(index)
@@ -395,7 +395,7 @@ pub fn Toast(props: ToastProps) -> Element {
             aria_modal: "false",
             tabindex: "0",
 
-            class: "toast",
+            class: "dx-toast",
             "data-type": props.toast_type.as_str(),
             "data-permanent": props.permanent,
             "data-toast-even": (props.index % 2 == 0).then_some("true"),
@@ -404,27 +404,27 @@ pub fn Toast(props: ToastProps) -> Element {
             style: "--toast-index: {props.index}",
             ..props.attributes,
 
-            div { class: "toast-content",
+            div { class: "dx-toast-content",
                 role: "alert",
                 aria_atomic: "true",
 
                 div {
                     id: label_id,
-                    class: "toast-title",
+                    class: "dx-toast-title",
                     {props.title.clone()}
                 }
 
                 if let Some(description) = &props.description {
                     div {
                         id: description_id.clone(),
-                        class: "toast-description",
+                        class: "dx-toast-description",
                         {description.clone()}
                     }
                 }
             }
 
             button {
-                class: "toast-close",
+                class: "dx-toast-close",
                 aria_label: "close",
                 type: "button",
                 onclick: move |e| {

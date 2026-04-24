@@ -6,7 +6,7 @@ pub fn Progress(props: ProgressProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         progress::Progress {
-            class: "progress",
+            class: "dx-progress",
             value: props.value,
             max: props.max,
             attributes: props.attributes,
@@ -18,6 +18,6 @@ pub fn Progress(props: ProgressProps) -> Element {
 #[component]
 pub fn ProgressIndicator(props: ProgressIndicatorProps) -> Element {
     rsx! {
-        progress::ProgressIndicator { class: "progress-indicator", attributes: props.attributes, {props.children} }
+        progress::ProgressIndicator { class: "dx-progress-indicator", attributes: props.attributes, {props.children} }
     }
 }

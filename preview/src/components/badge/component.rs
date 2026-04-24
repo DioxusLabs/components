@@ -54,7 +54,7 @@ pub fn Badge(props: BadgeProps) -> Element {
 fn BadgeElement(props: BadgeProps) -> Element {
     rsx! {
         span {
-            class: "badge",
+            class: "dx-badge",
             "data-style": props.variant.class(),
             ..props.attributes,
             {props.children}

@@ -11,7 +11,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         calendar::Calendar {
-            class: "calendar",
+            class: "dx-calendar",
             selected_date: props.selected_date,
             on_date_change: props.on_date_change,
             on_format_weekday: props.on_format_weekday,
@@ -36,7 +36,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         calendar::RangeCalendar {
-            class: "calendar",
+            class: "dx-calendar",
             selected_range: props.selected_range,
             on_range_change: props.on_range_change,
             on_format_weekday: props.on_format_weekday,
@@ -63,7 +63,7 @@ pub fn CalendarView(
 ) -> Element {
     rsx! {
         div {
-            class: "calendar-view",
+            class: "dx-calendar-view",
             ..attributes,
             {children}
         }
@@ -91,6 +91,7 @@ pub fn CalendarPreviousMonthButton(
     rsx! {
         calendar::CalendarPreviousMonthButton { attributes,
             Icon {
+                class: "dx-calendar-previous-month-icon",
                 width: "20px",
                 height: "20px",
                 path { d: "m15 18-6-6 6-6" }
@@ -106,6 +107,7 @@ pub fn CalendarNextMonthButton(
     rsx! {
         calendar::CalendarNextMonthButton { attributes,
             Icon {
+                class: "dx-calendar-next-month-icon",
                 width: "20px",
                 height: "20px",
                 path { d: "m9 18 6-6-6-6" }
@@ -118,7 +120,7 @@ pub fn CalendarNextMonthButton(
 pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     rsx! {
         calendar::CalendarSelectMonth {
-            class: "calendar-month-select",
+            class: "dx-calendar-month-select",
             attributes: props.attributes,
             DropDownIcon { }
         }
@@ -129,7 +131,7 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
 pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
     rsx! {
         calendar::CalendarSelectYear {
-            class: "calendar-year-select",
+            class: "dx-calendar-year-select",
             attributes: props.attributes,
             DropDownIcon { }
         }

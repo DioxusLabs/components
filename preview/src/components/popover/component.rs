@@ -8,7 +8,7 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         popover::PopoverRoot {
-            class: "popover",
+            class: "dx-popover",
             is_modal: props.is_modal,
             open: props.open,
             default_open: props.default_open,
@@ -22,7 +22,7 @@ pub fn PopoverRoot(props: PopoverRootProps) -> Element {
 #[component]
 pub fn PopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
-        popover::PopoverTrigger { class: "popover-trigger", attributes: props.attributes, {props.children} }
+        popover::PopoverTrigger { class: "dx-popover-trigger", attributes: props.attributes, {props.children} }
     }
 }
 
@@ -30,7 +30,7 @@ pub fn PopoverTrigger(props: PopoverTriggerProps) -> Element {
 pub fn PopoverContent(props: PopoverContentProps) -> Element {
     rsx! {
         popover::PopoverContent {
-            class: "popover-content",
+            class: "dx-popover-content",
             id: props.id,
             side: props.side,
             align: props.align,

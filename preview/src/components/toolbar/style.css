@@ -1,4 +1,4 @@
-.toolbar {
+.dx-toolbar {
     display: flex;
     flex-flow: row wrap;
     align-items: center;
@@ -10,7 +10,7 @@
     gap: .25rem;
 }
 
-.toolbar button {
+.dx-toolbar button {
     padding: 8px 12px;
     border: none;
     border-radius: calc(.5rem - .25rem);
@@ -19,32 +19,32 @@
     cursor: pointer;
 }
 
-.toolbar button:hover:not([disabled]),
-.toolbar button:focus-visible {
+.dx-toolbar button:hover:not([disabled]),
+.dx-toolbar button:focus-visible {
     background: var(--light, var(--primary-color-4))
         var(--dark, var(--primary-color-7));
     color: var(--secondary-color-1);
 }
 
-.toolbar button:disabled {
+.dx-toolbar button:disabled {
     color: var(--secondary-color-5);
     cursor: not-allowed;
 }
 
-.toolbar-group {
+.dx-toolbar-group {
     display: flex;
     flex-direction: row;
     gap: 5px;
 }
 
-.toolbar-separator {
+.dx-toolbar-separator {
     width: 1px;
     height: 24px;
     margin: 0 5px;
     background-color: var(--primary-color-6);
 }
 
-.toolbar-content p {
+.dx-toolbar-content p {
     padding: 0;
     margin: 0;
 }

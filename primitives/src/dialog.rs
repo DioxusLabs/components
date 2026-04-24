@@ -137,7 +137,7 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
         if render() {
             div {
                 id,
-                class: "dialog-overlay",
+                class: "dx-dialog-overlay",
                 aria_hidden: (!open()).then_some("true"),
                 onclick: move |_| {
                     set_open.call(false);
@@ -260,7 +260,7 @@ pub fn DialogContent(props: DialogContentProps) -> Element {
             aria_modal: "true",
             aria_labelledby: ctx.dialog_labelledby,
             aria_describedby: ctx.dialog_describedby,
-            class: props.class.clone().unwrap_or_else(|| "dialog".to_string()),
+            class: props.class.clone().unwrap_or_else(|| "dx-dialog".to_string()),
             onclick: move |e| {
                 // Prevent the click event from propagating to the overlay.
                 e.stop_propagation();

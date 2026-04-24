@@ -8,7 +8,7 @@ const LOAD_TIMEOUT = 20 * 60 * 1000;
 /** Navigate to the DnD page and return the first (main) variant list. */
 async function loadMainList(page: import("@playwright/test").Page) {
   await page.goto(URL, { timeout: LOAD_TIMEOUT });
-  const list = page.locator(".dnd-list").first();
+  const list = page.locator(".dx-dnd-list").first();
   await expect(list).toBeVisible({ timeout: 30000 });
   return list;
 }
@@ -16,14 +16,14 @@ async function loadMainList(page: import("@playwright/test").Page) {
 /** Navigate to the DnD page and return the second (removable) variant list. */
 async function loadRemovableList(page: import("@playwright/test").Page) {
   await page.goto(URL, { timeout: LOAD_TIMEOUT });
-  const list = page.locator(".dnd-list").nth(1);
+  const list = page.locator(".dx-dnd-list").nth(1);
   await expect(list).toBeVisible({ timeout: 30000 });
   return list;
 }
 
 /** Helper to get list items from a dnd-list container. */
 function getItems(list: import("@playwright/test").Locator) {
-  return list.locator(".dnd-list-item");
+  return list.locator(".dx-dnd-list-item");
 }
 
 test.describe("Keyboard focus management", () => {
@@ -172,7 +172,7 @@ test.describe("Remove behavior", () => {
     const list = await loadRemovableList(page);
     const items = getItems(list);
     const initialCount = await items.count();
-    const removeButtons = list.locator(".remove-button");
+    const removeButtons = list.locator(".dx-remove-button");
     await removeButtons.nth(2).click();
     await expect(items).toHaveCount(initialCount - 1);
     await expect(items.nth(2)).toBeFocused();
@@ -184,7 +184,7 @@ test.describe("Remove behavior", () => {
     const list = await loadRemovableList(page);
     const items = getItems(list);
     const initialCount = await items.count();
-    const removeButtons = list.locator(".remove-button");
+    const removeButtons = list.locator(".dx-remove-button");
     await removeButtons.nth(initialCount - 1).click();
     await expect(items).toHaveCount(initialCount - 1);
     await expect(items.nth(initialCount - 2)).toBeFocused();
@@ -196,7 +196,7 @@ test.describe("Axe automated scan", () => {
     await loadMainList(page);
 
     const accessibilityScanResults = await new AxeBuilder({ page })
-      .include(".dnd-list")
+      .include(".dx-dnd-list")
       .disableRules(["color-contrast"])
       .analyze();
 

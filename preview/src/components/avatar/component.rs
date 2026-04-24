@@ -12,9 +12,9 @@ pub enum AvatarImageSize {
 impl AvatarImageSize {
     fn to_class(self) -> &'static str {
         match self {
-            AvatarImageSize::Small => "avatar-sm",
-            AvatarImageSize::Medium => "avatar-md",
-            AvatarImageSize::Large => "avatar-lg",
+            AvatarImageSize::Small => "dx-avatar-sm",
+            AvatarImageSize::Medium => "dx-avatar-md",
+            AvatarImageSize::Large => "dx-avatar-lg",
         }
     }
 }
@@ -29,8 +29,8 @@ pub enum AvatarShape {
 impl AvatarShape {
     fn to_class(self) -> &'static str {
         match self {
-            AvatarShape::Circle => "avatar-circle",
-            AvatarShape::Rounded => "avatar-rounded",
+            AvatarShape::Circle => "dx-avatar-circle",
+            AvatarShape::Rounded => "dx-avatar-rounded",
         }
     }
 }
@@ -70,7 +70,7 @@ pub fn Avatar(props: AvatarProps) -> Element {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
 
         avatar::Avatar {
-            class: "avatar {props.size.to_class()} {props.shape.to_class()}",
+            class: "dx-avatar {props.size.to_class()} {props.shape.to_class()}",
             on_load: props.on_load,
             on_error: props.on_error,
             on_state_change: props.on_state_change,
@@ -84,7 +84,7 @@ pub fn Avatar(props: AvatarProps) -> Element {
 pub fn AvatarImage(props: AvatarImageProps) -> Element {
     rsx! {
         avatar::AvatarImage {
-            class: "avatar-image",
+            class: "dx-avatar-image",
             src: props.src,
             alt: props.alt,
             attributes: props.attributes,
@@ -95,6 +95,6 @@ pub fn AvatarImage(props: AvatarImageProps) -> Element {
 #[component]
 pub fn AvatarFallback(props: AvatarFallbackProps) -> Element {
     rsx! {
-        avatar::AvatarFallback { class: "avatar-fallback", attributes: props.attributes, {props.children} }
+        avatar::AvatarFallback { class: "dx-avatar-fallback", attributes: props.attributes, {props.children} }
     }
 }

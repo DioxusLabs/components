@@ -69,7 +69,7 @@ pub struct VirtualListProps {
 ///
 /// ## Styling
 ///
-/// The [`VirtualList`] component renders a container `div` with the class `virtual-list-container`.
+/// The [`VirtualList`] component renders a container `div` with the class `dx-virtual-list-container`.
 /// All user-provided `attributes` are spread onto the container element.
 #[component]
 pub fn VirtualList(props: VirtualListProps) -> Element {
@@ -209,7 +209,7 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
     rsx! {
         div {
             id: container_id,
-            class: "virtual-list-container",
+            class: "dx-virtual-list-container",
             role: "list",
             tabindex: "0",
             ..attributes,

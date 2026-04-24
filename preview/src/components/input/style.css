@@ -1,5 +1,5 @@
 /* Input Styles */
-.input {
+.dx-input {
   position: relative;
   display: flex;
   box-sizing: border-box;
@@ -21,17 +21,17 @@
   transition: background-color 100ms ease-out;
 }
 
-.input::placeholder {
+.dx-input::placeholder {
   color: var(--secondary-color-5);
 }
 
-.input:disabled {
+.dx-input:disabled {
   color: var(--secondary-color-5);
   cursor: not-allowed;
 }
 
-.input:hover:not(:disabled),
-.input:focus-visible {
+.dx-input:hover:not(:disabled),
+.dx-input:focus-visible {
   background: var(--light, var(--primary-color-4))
     var(--dark, color-mix(in oklab, #FFFFFF26 50%, transparent));
   color: var(--secondary-color-1);

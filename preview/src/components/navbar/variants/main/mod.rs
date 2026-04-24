@@ -5,11 +5,11 @@ use dioxus::prelude::*;
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        div { class: "navbar-example",
+        div { class: "dx-navbar-example",
             Navbar { aria_label: "Components",
                 NavbarNav { index: 0usize,
                     NavbarTrigger { "Inputs" }
-                    NavbarContent { class: "navbar-content",
+                    NavbarContent { class: "dx-navbar-content-extra",
                         NavbarItem {
                             index: 0usize,
                             value: "calendar".to_string(),
