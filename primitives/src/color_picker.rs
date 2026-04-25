@@ -1,10 +1,10 @@
 //! Defines the [`ColorPicker`] component and its sub-components.
 
 use crate::dioxus_core::{queue_effect, Runtime};
-use crate::dioxus_elements::geometry::Pixels;
-use crate::dioxus_elements::{geometry::ClientPoint, input_data::MouseButton};
-use dioxus::html::geometry::euclid::Rect;
-use dioxus::html::geometry::euclid::Vector2D;
+use crate::dioxus_elements::geometry::{ClientPoint, Pixels};
+use crate::dioxus_elements::input_data::MouseButton;
+use dioxus::html::geometry::euclid::{Rect, Size2D, Vector2D};
+use dioxus::html::geometry::PixelsSize;
 use dioxus::prelude::*;
 use palette::{encoding, Hsv, IntoColor, RgbHue, Srgb};
 
@@ -14,7 +14,30 @@ use std::{rc::Rc, str::FromStr};
 #[derive(Clone, Copy, PartialEq, Debug, Default)]
 pub struct Color(pub Srgb<u8>);
 
+/// HSV components with explicit achromatic handling.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct HsvColor {
+    /// Hue in degrees [0-360). `None` means hue is undefined for achromatic colors.
+    pub hue: Option<f64>,
+    /// Saturation in [0-1].
+    pub saturation: f64,
+    /// Value in [0-1].
+    pub value: f64,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+/// Error returned when parsing a [`Color`] from a string.
+pub enum ParseColorError {
+    /// The input doesn't match a supported HEX length (`#RGB` or `#RRGGBB`).
+    InvalidLength,
+    /// The input contains non-hexadecimal digits.
+    InvalidHex,
+}
+
 impl Color {
+    /// Small epsilon used to classify achromatic colors in sRGB (1 channel step).
+    const ACHROMATIC_EPSILON: f64 = 1.0 / 255.0;
+
     /// Create an RGB color.
     pub fn new(red: u8, green: u8, blue: u8) -> Self {
         Self(Srgb::new(red, green, blue))
@@ -44,9 +67,25 @@ impl Color {
         (hsv.hue.into_positive_degrees(), hsv.saturation, hsv.value)
     }
 
+    /// Converts RGB to HSV and marks hue as undefined for achromatic colors.
+    pub fn to_hsv_achromatic(self) -> HsvColor {
+        let (h, s, v) = self.to_hsv();
+        let hue = if s <= Self::ACHROMATIC_EPSILON || v <= Self::ACHROMATIC_EPSILON {
+            None
+        } else {
+            Some(h)
+        };
+        HsvColor {
+            hue,
+            saturation: s,
+            value: v,
+        }
+    }
+
     /// Creates a Color instance from HSV components
     pub fn from_hsv(h: f64, s: f64, v: f64) -> Self {
-        let hsv = Hsv::new(RgbHue::new(h), s.clamp(0.0, 1.0), v.clamp(0.0, 1.0));
+        let hue = h.rem_euclid(360.0);
+        let hsv = Hsv::new(RgbHue::new(hue), s.clamp(0.0, 1.0), v.clamp(0.0, 1.0));
         // Convert HSV back to f64 RGB and then to u8 RGB
         let rgb: Srgb<f64> = hsv.into_color();
         Self(rgb.into_format())
@@ -55,6 +94,11 @@ impl Color {
     /// Extracts the Hue component from the current color.
     pub fn hue(&self) -> f64 {
         self.to_hsv().0
+    }
+
+    /// Returns hue if chromatic, otherwise provided fallback hue.
+    pub fn hue_or(&self, fallback: f64) -> f64 {
+        self.to_hsv_achromatic().hue.unwrap_or(fallback)
     }
 
     /// Update only Hue while keeping current Saturation and Value.
@@ -71,7 +115,7 @@ impl Color {
 }
 
 impl FromStr for Color {
-    type Err = ();
+    type Err = ParseColorError;
 
     /// Parses a HEX string into a Color.
     /// Supports shorthand (e.g., "#ABC" -> "#AABBCC") and standard formats (e.g., "#FF0000").
@@ -81,20 +125,20 @@ impl FromStr for Color {
         match s.len() {
             // Shorthand format: "ABC"
             3 => {
-                let r = u8::from_str_radix(&s[0..1], radix).map_err(|_| ())?;
-                let g = u8::from_str_radix(&s[1..2], radix).map_err(|_| ())?;
-                let b = u8::from_str_radix(&s[2..3], 16).map_err(|_| ())?;
+                let r = u8::from_str_radix(&s[0..1], radix).map_err(|_| ParseColorError::InvalidHex)?;
+                let g = u8::from_str_radix(&s[1..2], radix).map_err(|_| ParseColorError::InvalidHex)?;
+                let b = u8::from_str_radix(&s[2..3], radix).map_err(|_| ParseColorError::InvalidHex)?;
                 // Expand 4-bit to 8-bit (e.g., 0xf -> 0xff)
                 Ok(Color::new(r << 4 | r, g << 4 | g, b << 4 | b))
             }
             // Standard format: "AABBCC"
             6 => {
-                let r = u8::from_str_radix(&s[0..2], 16).map_err(|_| ())?;
-                let g = u8::from_str_radix(&s[2..4], 16).map_err(|_| ())?;
-                let b = u8::from_str_radix(&s[4..6], 16).map_err(|_| ())?;
+                let r = u8::from_str_radix(&s[0..2], radix).map_err(|_| ParseColorError::InvalidHex)?;
+                let g = u8::from_str_radix(&s[2..4], radix).map_err(|_| ParseColorError::InvalidHex)?;
+                let b = u8::from_str_radix(&s[4..6], radix).map_err(|_| ParseColorError::InvalidHex)?;
                 Ok(Color::new(r, g, b))
             }
-            _ => Err(()),
+            _ => Err(ParseColorError::InvalidLength),
         }
     }
 }
@@ -256,37 +300,6 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
     Vec::new()
 });
 
-#[derive(Copy, Clone, PartialEq)]
-struct SV {
-    pub s: f64,
-    pub v: f64,
-}
-
-impl SV {
-    pub fn new(s: f64, v: f64) -> Self {
-        Self { s, v }
-    }
-
-    pub fn shift(&self, d_s: f64, d_v: f64) -> Self {
-        let s = self.s + d_s;
-        let v = self.v + d_v;
-        SV::new(s, v)
-    }
-
-    pub fn snap(&self, step: f64) -> Self {
-        let s = (self.s / step).round() * step;
-        let v = (self.v / step).round() * step;
-        SV::new(s, v)
-    }
-
-    pub fn clamp(self, min: f64, max: f64) -> Self {
-        Self {
-            s: self.s.clamp(min, max),
-            v: self.v.clamp(min, max),
-        }
-    }
-}
-
 /// The props for the [`ColorArea`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ColorAreaProps {
@@ -307,7 +320,7 @@ pub struct ColorAreaProps {
 
     /// Callback when value changes
     #[props(default)]
-    pub on_color_change: Callback<Color>,
+    pub on_value_change: Callback<ClientPoint>,
 
     /// Additional attributes to extend the color area element
     #[props(extends = GlobalAttributes)]
@@ -320,6 +333,7 @@ pub struct ColorAreaProps {
 /// # ColorArea
 ///
 /// The [`ColorArea`] allows users to adjust two channels of color value against a two-dimensional gradient background.
+/// It is part of [`ColorPickerSelect`]
 ///
 /// ## Example
 /// ```rust
@@ -345,20 +359,45 @@ pub struct ColorAreaProps {
 #[component]
 pub fn ColorArea(props: ColorAreaProps) -> Element {
     let mut dragging = use_signal(|| false);
+    let mut stable_hue = use_signal(|| (props.color)().hue());
 
-    let value = use_memo(move || {
+    let initial_value = {
         let hsv = (props.color)().to_hsv();
-        SV::new(hsv.1 * 255.0, hsv.2 * 255.0)
+        ClientPoint::new(hsv.1, hsv.2) * (props.max)()
+    };
+    let mut value = use_memo(move || initial_value);
+
+    // Keep local pointer position stable during drag.
+    use_effect(move || {
+        if dragging() {
+            return;
+        }
+
+        let hsv = (props.color)().to_hsv();
+        let next = ClientPoint::new(hsv.1, hsv.2) * (props.max)();
+        if next != value() {
+            value.set(next);
+        }
     });
 
-    let update_sv = Callback::new(move |sv: SV| {
-        let new_color = (props.color)().with_sv(sv.s / 255.0, sv.v / 255.0);
-        props.on_color_change.call(new_color);
+    // Preserve the last chromatic hue while current color is achromatic.
+    use_effect(move || {
+        if let Some(h) = (props.color)().to_hsv_achromatic().hue {
+            if h != stable_hue() {
+                stable_hue.set(h);
+            }
+        }
+    });
+
+    let update_xy = Callback::new(move |point: ClientPoint| {
+        value.set(point);
+        let new_value = point / (props.max)();
+        props.on_value_change.call(new_value);
     });
 
     let ctx = use_context_provider(|| ColorAreaContext {
         value,
-        set_value: update_sv,
+        set_value: update_xy,
         min: props.min,
         max: props.max,
         step: props.step,
@@ -406,7 +445,7 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
         let d_s = delta.x / size.width * range + min;
         let d_h = delta.y / size.height * range + min;
 
-        let new_value = granular_value().shift(d_s, -d_h);
+        let new_value = granular_value() + Size2D::new(d_s, -d_h);
         granular_value.set(new_value);
         ctx.set_value.call(ctx.clamp_and_snap(new_value));
     });
@@ -464,11 +503,11 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
                         let min = (props.min)();
                         let range = ctx.range_size();
 
-                        let s = (relative_pos.x / size.width) * range + min;
-                        let h = (props.max)() - ((relative_pos.y / size.height) * range + min);
-                        let sv = SV::new(s, h);
-                        granular_value.set(sv);
-                        ctx.set_value.call(ctx.snap(sv));
+                        let x = (relative_pos.x / size.width) * range + min;
+                        let y = (props.max)() - ((relative_pos.y / size.height) * range + min);
+                        let pt = ClientPoint::new(x, y);
+                        granular_value.set(pt);
+                        ctx.set_value.call(ctx.snap(pt));
                     }
 
                     dragging.set(true);
@@ -476,7 +515,10 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
             },
             ..props.attributes,
             AreaTrack {
-                style: format!("--area-color: {}", Color::from_hsv((props.color)().hue(), 1.0, 1.0).to_css_rgb()),
+                style: format!(
+                    "--area-color: {}",
+                    Color::from_hsv((props.color)().hue_or(stable_hue()), 1.0, 1.0).to_css_rgb()
+                ),
                 AreaThumb {
                     background_color: (props.color)().to_css_rgb(),
                 }
@@ -535,7 +577,11 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
     });
 
     let percent = ctx.as_percent((ctx.value)());
-    let style = format!("left: {:.2}%; top: {:.2}%;", percent.0, 100. - percent.1);
+    let style = format!(
+        "left: {:.2}%; top: {:.2}%;",
+        percent.width,
+        100. - percent.height
+    );
 
     rsx! {
         button {
@@ -544,7 +590,7 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
             role: "region",
             aria_valuemin: format!("({} {})", ctx.min, ctx.min),
             aria_valuemax: format!("({} {})", ctx.max, ctx.max),
-            aria_valuetext: format!("({:.2} {:.2})", (ctx.value)().s, (ctx.value)().v),
+            aria_valuetext: format!("({:.2} {:.2})", (ctx.value)().x, (ctx.value)().y),
             aria_label: "area-thumb",
             "data-dragging": ctx.dragging,
             style,
@@ -569,8 +615,8 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
 
 #[derive(Copy, Clone)]
 struct ColorAreaContext {
-    value: Memo<SV>,
-    set_value: Callback<SV>,
+    value: Memo<ClientPoint>,
+    set_value: Callback<ClientPoint>,
     min: ReadSignal<f64>,
     max: ReadSignal<f64>,
     step: ReadSignal<f64>,
@@ -587,22 +633,20 @@ impl ColorAreaContext {
         range_max - range_min
     }
 
-    fn snap(&self, value: SV) -> SV {
+    fn snap(&self, value: ClientPoint) -> ClientPoint {
         let step = (self.step)();
-        value.snap(step)
+        value.map(|v| (v / step).round() * step)
     }
 
-    fn clamp_and_snap(&self, value: SV) -> SV {
-        let clamped = value.clamp((self.min)(), (self.max)());
+    fn clamp_and_snap(&self, value: ClientPoint) -> ClientPoint {
+        let clamped = value.map(|v| v.clamp((self.min)(), (self.max)()));
         self.snap(clamped)
     }
 
-    fn as_percent(&self, value: SV) -> (f64, f64) {
+    fn as_percent(&self, value: ClientPoint) -> PixelsSize {
         let min = (self.min)();
         let size = self.range_size();
-        (
-            ((value.s - min) / size * 100.0).clamp(0.0, 100.0),
-            ((value.v - min) / size * 100.0).clamp(0.0, 100.0),
-        )
+        let scaled = value.map(|v| ((v - min) / size * 100.0).clamp(0.0, 100.0));
+        PixelsSize::new(scaled.x, scaled.y)
     }
 }

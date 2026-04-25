@@ -7,6 +7,7 @@ use dioxus_primitives::slider::*;
 
 use crate::components::dialog::*;
 use crate::components::input::Input;
+use crate::dioxus_elements::geometry::ClientPoint;
 
 use std::str::FromStr;
 
@@ -181,9 +182,9 @@ pub enum SwatchSize {
 impl SwatchSize {
     fn to_class(self) -> &'static str {
         match self {
-            SwatchSize::Small => "swatch-sm",
-            SwatchSize::Medium => "swatch-md",
-            SwatchSize::Large => "swatch-lg",
+            SwatchSize::Small => "dx-swatch-sm",
+            SwatchSize::Medium => "dx-swatch-md",
+            SwatchSize::Large => "dx-swatch-lg",
         }
     }
 }
@@ -199,8 +200,8 @@ pub enum SwatchShape {
 impl SwatchShape {
     fn to_class(self) -> &'static str {
         match self {
-            SwatchShape::Circle => "swatch-circle",
-            SwatchShape::Rounded => "swatch-rounded",
+            SwatchShape::Circle => "dx-swatch-circle",
+            SwatchShape::Rounded => "dx-swatch-rounded",
         }
     }
 }
@@ -235,7 +236,8 @@ fn ColorSwatch(props: ColorSwatchProps) -> Element {
 
     rsx! {
         div {
-            class: "dx-color-swatch dx-{props.size.to_class()} dx-{props.shape.to_class()}",
+            role: "img",
+            class: "dx-color-swatch {props.size.to_class()} {props.shape.to_class()}",
             style: "--swatch-color: {hex_color}",
             ..props.attributes,
             {props.children}
@@ -247,11 +249,11 @@ fn ColorSwatch(props: ColorSwatchProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct ColorSliderProps {
     /// The controlled value of the slider
-    pub color: ReadSignal<Color>,
+    pub value: ReadSignal<f64>,
 
     /// Callback when value changes
     #[props(default)]
-    pub on_color_change: Callback<Color>,
+    pub on_value_change: Callback<f64>,
 
     pub title: ReadSignal<String>,
 
@@ -268,12 +270,12 @@ pub struct ColorSliderProps {
 /// The [`ColorSlider`] allows users to adjust a hue of a color value.
 #[component]
 fn ColorSlider(props: ColorSliderProps) -> Element {
-    let mut current_hue = use_signal(|| (props.color)().hue());
+    let mut current_hue = use_signal(|| (props.value)());
 
-    let mut thumb_color = use_signal(|| (props.color)().with_sv(1.0, 1.0));
+    let mut thumb_color = use_signal(|| Color::from_hsv(current_hue(), 1.0, 1.0));
 
     use_effect(move || {
-        let value = (props.color)().hue();
+        let value = (props.value)();
         let current = current_hue();
 
         let is_wrap_around = (value - current).abs() > 350.0;
@@ -282,7 +284,7 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
         // and not a "flip" of the circle by the palette library.
         if !is_wrap_around && value != current {
             current_hue.set(value);
-            thumb_color.set(thumb_color().with_hue(value));
+            thumb_color.set(Color::from_hsv(value, 1.0, 1.0));
         }
     });
 
@@ -314,15 +316,15 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
                     // Allow the value to be exactly 360.0
                     // The palette will understand that 360.0 == 0.0, but the signal will remain 360.0 for the UI.
                     current_hue.set(h);
+                    thumb_color.set(Color::from_hsv(h, 1.0, 1.0));
 
-                    let color = (props.color)().with_hue(h);
-                    props.on_color_change.call(color);
+                    props.on_value_change.call(h);
                 },
                 SliderTrack {
                     class: "dx-color-slider-track",
                     SliderThumb {
                         class: "dx-color-slider-thumb",
-                        background_color: format!("{}", thumb_color().to_css_rgb()),
+                        background_color: thumb_color().to_css_rgb(),
                     }
                 }
             }
@@ -340,7 +342,7 @@ fn ColorArea(props: ColorAreaProps) -> Element {
             min: props.min,
             max: props.max,
             step: props.step,
-            on_color_change: props.on_color_change,
+            on_value_change: props.on_value_change,
             attributes: props.attributes,
             {props.children}
         }
@@ -362,22 +364,34 @@ pub struct ColorPickerSelectProps {
 pub fn ColorPickerSelect(props: ColorPickerSelectProps) -> Element {
     let ctx = use_context::<ColorPickerContext>();
 
-    let mut current_color = use_signal(|| (ctx.color)());
+    // Keep local HSV state to avoid slider/area "jumps" caused by RGB<->HSV round trips
+    let (_h, _s, _v) = (ctx.color)().to_hsv();
+    let mut hue = use_signal(|| _h);
+    let mut sat = use_signal(|| _s);
+    let mut val = use_signal(|| _v);
+
+    let current_color = use_memo(move || Color::from_hsv(hue(), sat(), val()));
 
     // Synchronization on external change
     use_effect(move || {
         let external_color = (ctx.color)();
         if external_color != current_color() {
-            current_color.set(external_color);
+            let (h, s, v) = external_color.to_hsv();
+            hue.set(h);
+            sat.set(s);
+            val.set(v);
         }
     });
 
-    let update_color = Callback::new(move |color| {
+    let update_color = Callback::new(move |color: Color| {
         if color == current_color() {
             return;
         }
 
-        current_color.set(color);
+        let (h, s, v) = color.to_hsv();
+        hue.set(h);
+        sat.set(s);
+        val.set(v);
         ctx.on_color_change.call(color);
     });
 
@@ -387,12 +401,20 @@ pub fn ColorPickerSelect(props: ColorPickerSelectProps) -> Element {
             ..props.attributes,
             ColorArea {
                 color: current_color(),
-                on_color_change: update_color,
-                }
+                on_value_change: move |value: ClientPoint| {
+                    sat.set(value.x);
+                    val.set(value.y);
+                    ctx.on_color_change
+                        .call(Color::from_hsv(hue(), value.x, value.y));
+                },
+            }
             ColorSlider {
                 title: "Hue",
-                color: current_color(),
-                on_color_change: update_color,
+                value: hue,
+                on_value_change: move |h: f64| {
+                    hue.set(h);
+                    ctx.on_color_change.call(Color::from_hsv(h, sat(), val()));
+                },
             }
             div {
                 class: "dx-color-picker-input",
