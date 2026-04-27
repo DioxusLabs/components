@@ -8,7 +8,7 @@ ItemGroup {
         // Available variants: Default, Outline, Muted
         variant: ItemVariant::Outline,
 
-        // Available sizes: Default, Sm, Xs
+        // Available sizes: Default, Sm
         size: ItemSize::Default,
 
         ItemHeader {

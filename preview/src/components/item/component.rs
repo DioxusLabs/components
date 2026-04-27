@@ -1,3 +1,4 @@
+use crate::components::separator::Separator;
 use dioxus::prelude::*;
 use dioxus_primitives::dioxus_attributes::attributes;
 use dioxus_primitives::merge_attributes;
@@ -27,7 +28,6 @@ pub enum ItemSize {
     #[default]
     Default,
     Sm,
-    Xs,
 }
 
 impl ItemSize {
@@ -35,7 +35,6 @@ impl ItemSize {
         match self {
             ItemSize::Default => "default",
             ItemSize::Sm => "sm",
-            ItemSize::Xs => "xs",
         }
     }
 }
@@ -87,14 +86,13 @@ pub fn ItemSeparator(
 ) -> Element {
     let base = attributes!(div {
         class: "dx-item-separator",
-        role: "separator",
         "data-slot": "item-separator",
     });
     let merged = merge_attributes(vec![base, attributes]);
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
-        div { ..merged }
+        Separator { horizontal: true, decorative: true, attributes: merged }
     }
 }
 
@@ -106,27 +104,31 @@ pub fn Item(
     #[props(extends=div)]
     attributes: Vec<Attribute>,
     onclick: Option<EventHandler<MouseEvent>>,
+    r#as: Option<Callback<Vec<Attribute>, Element>>,
     children: Element,
 ) -> Element {
     let base = attributes!(div {
         class: "dx-item",
-        role: "listitem",
         "data-slot": "item",
-        "data-style": variant.class(),
+        "data-variant": variant.class(),
         "data-size": size.class(),
     });
     let merged = merge_attributes(vec![base, attributes]);
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
-        div {
-            onclick: move |event| {
-                if let Some(f) = &onclick {
-                    f.call(event);
-                }
-            },
-            ..merged,
-            {children}
+        if let Some(dynamic) = r#as {
+            {dynamic.call(merged)}
+        } else {
+            div {
+                onclick: move |event| {
+                    if let Some(f) = &onclick {
+                        f.call(event);
+                    }
+                },
+                ..merged,
+                {children}
+            }
         }
     }
 }
@@ -142,7 +144,7 @@ pub fn ItemMedia(
     let base = attributes!(div {
         class: "dx-item-media",
         "data-slot": "item-media",
-        "data-style": variant.class(),
+        "data-variant": variant.class(),
     });
     let merged = merge_attributes(vec![base, attributes]);
 
