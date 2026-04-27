@@ -87,7 +87,7 @@ pub fn SelectValue(props: SelectValueProps) -> Element {
         }
     });
 
-    let is_empty = use_memo(move || ctx.values.read().is_empty());
+    let is_empty = move || ctx.values.read().is_empty();
     let display_value = selected_text_value().unwrap_or_else(|| ctx.placeholder.cloned());
 
     rsx! {
