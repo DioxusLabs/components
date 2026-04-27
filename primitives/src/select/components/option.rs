@@ -71,11 +71,10 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         Select::<String> {
-///             placeholder: "Select a fruit...",
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue {}
+///                 SelectValue { placeholder: "Select a fruit..." }
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",
@@ -179,6 +178,9 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
                 onpointerdown: move |event| {
                     if !disabled && &event.pointer_type() == "mouse" && event.trigger_button() == Some(MouseButton::Primary){
+                        if ctx.multi {
+                            event.prevent_default();
+                        }
                         ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
                         if !ctx.multi {
                             ctx.open.set(false);
@@ -239,11 +241,10 @@ pub struct SelectItemIndicatorProps {
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         Select::<String> {
-///             placeholder: "Select a fruit...",
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue {}
+///                 SelectValue { placeholder: "Select a fruit..." }
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",

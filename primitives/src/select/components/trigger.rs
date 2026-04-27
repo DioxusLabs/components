@@ -31,11 +31,10 @@ pub struct SelectTriggerProps {
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         Select::<String> {
-///             placeholder: "Select a fruit...",
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue {}
+///                 SelectValue { placeholder: "Select a fruit..." }
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",

@@ -156,11 +156,10 @@ fn use_select_root(
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         Select::<String> {
-///             placeholder: "Select a fruit...",
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue {}
+///                 SelectValue { placeholder: "Select a fruit..." }
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",
@@ -252,12 +251,11 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         SelectMulti::<String> {
-///             placeholder: "Pick toppings...",
 ///             default_values: vec!["pepperoni".into()],
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "16rem",
-///                 SelectValue {}
+///                 SelectValue { placeholder: "Pick toppings..." }
 ///             }
 ///             SelectList {
 ///                 aria_label: "Topping Picker",
