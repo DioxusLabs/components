@@ -36,8 +36,10 @@ pub fn Demo() -> Element {
 
     rsx! {
 
-        Select::<Option<Fruit>> { placeholder: "Select a fruit...",
-            SelectTrigger { aria_label: "Select Trigger", width: "12rem", SelectValue {} }
+        Select::<Option<Fruit>> {
+            SelectTrigger { aria_label: "Select Trigger", width: "12rem",
+                SelectValue { placeholder: "Select a fruit..." }
+            }
             SelectList { aria_label: "Select Demo",
                 SelectGroup {
                     SelectGroupLabel { "Fruits" }

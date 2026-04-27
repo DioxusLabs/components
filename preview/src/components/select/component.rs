@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_primitives::select::{
-    self, SelectGroupLabelProps, SelectGroupProps, SelectListProps, SelectOptionProps, SelectProps,
-    SelectTriggerProps, SelectValueProps,
+    self, SelectGroupLabelProps, SelectGroupProps, SelectListProps, SelectMultiProps,
+    SelectOptionProps, SelectProps, SelectTriggerProps, SelectValueProps,
 };
 use dioxus_primitives::icon;
 
@@ -16,7 +16,25 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
             on_value_change: props.on_value_change,
             disabled: props.disabled,
             name: props.name,
-            placeholder: props.placeholder,
+            roving_loop: props.roving_loop,
+            typeahead_timeout: props.typeahead_timeout,
+            attributes: props.attributes,
+            {props.children}
+        }
+    }
+}
+
+#[component]
+pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -> Element {
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("./style.css") }
+        select::SelectMulti {
+            class: "dx-select",
+            values: props.values,
+            default_values: props.default_values,
+            on_values_change: props.on_values_change,
+            disabled: props.disabled,
+            name: props.name,
             roving_loop: props.roving_loop,
             typeahead_timeout: props.typeahead_timeout,
             attributes: props.attributes,
@@ -44,7 +62,10 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
 #[component]
 pub fn SelectValue(props: SelectValueProps) -> Element {
     rsx! {
-        select::SelectValue { attributes: props.attributes }
+        select::SelectValue {
+            placeholder: props.placeholder,
+            attributes: props.attributes,
+        }
     }
 }
 

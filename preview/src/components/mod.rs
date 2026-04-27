@@ -145,7 +145,7 @@ examples!(
     radio_group,
     virtual_list[random_heights],
     scroll_area,
-    select,
+    select[multi],
     separator,
     sheet,
     sidebar(block)[floating, inset],

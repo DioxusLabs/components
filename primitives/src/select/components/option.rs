@@ -71,11 +71,10 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         Select::<String> {
-///             placeholder: "Select a fruit...",
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue {}
+///                 SelectValue { placeholder: "Select a fruit..." }
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",
@@ -149,7 +148,11 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
     let focused = move || ctx.focus_state.is_focused(index());
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
     let selected = use_memo(move || {
-        ctx.value.read().as_ref().and_then(|v| v.as_ref::<T>()) == Some(&*props.value.read())
+        let value = props.value.read();
+        ctx.values
+            .read()
+            .iter()
+            .any(|v| v.as_ref::<T>() == Some(&*value))
     });
     let mut did_drag = use_signal(|| false);
 
@@ -175,8 +178,13 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
                 onpointerdown: move |event| {
                     if !disabled && &event.pointer_type() == "mouse" && event.trigger_button() == Some(MouseButton::Primary){
+                        if ctx.multi {
+                            event.prevent_default();
+                        }
                         ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
-                        ctx.open.set(false);
+                        if !ctx.multi {
+                            ctx.open.set(false);
+                        }
                     }
                 },
                 ontouchstart: move |_| {
@@ -185,7 +193,9 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 ontouchend: move |_| {
                     if !disabled && !did_drag(){
                         ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
-                        ctx.open.set(false);
+                        if !ctx.multi {
+                            ctx.open.set(false);
+                        }
                     }
                 },
                 ontouchmove: move |_| {
@@ -231,11 +241,10 @@ pub struct SelectItemIndicatorProps {
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         Select::<String> {
-///             placeholder: "Select a fruit...",
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue {}
+///                 SelectValue { placeholder: "Select a fruit..." }
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",
