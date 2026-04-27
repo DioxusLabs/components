@@ -13,20 +13,19 @@ use crate::focus::use_focus_provider;
 /// Props for the [`Select`] (single-select) component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
-    /// The controlled value of the select. The select is in controlled mode whenever
-    /// the inner signal yields `Some(_)`. For a controllable "no selection" state,
-    /// use `Select::<Option<MyType>>` and set the value to `Some(None)`.
+    /// The controlled value of the select. If supplied, the select is controlled
+    /// and the signal's `None` value means no option is selected.
     #[props(default)]
-    pub value: ReadSignal<Option<T>>,
+    pub value: Option<ReadSignal<Option<T>>>,
 
     /// The initial value of the select when uncontrolled. `None` means no initial
     /// selection — the placeholder is shown until the user picks an option.
     #[props(default)]
     pub default_value: Option<T>,
 
-    /// Callback fired when the user selects a value.
+    /// Callback fired when the selected value changes.
     #[props(default)]
-    pub on_value_change: Callback<T>,
+    pub on_value_change: Callback<Option<T>>,
 
     /// Whether the select is disabled
     #[props(default)]
@@ -202,11 +201,13 @@ fn use_select_root(
 /// - `data-state`: Indicates the current state of the select. Values are `open` or `closed`.
 #[component]
 pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element {
-    let prop_value = props.value;
+    let controlled_value = props.value;
     let on_change = props.on_value_change;
-    let mut internal_value: Signal<Option<T>> =
-        use_signal(|| prop_value.cloned().or_else(|| props.default_value.clone()));
-    let single_value = use_memo(move || prop_value.cloned().or_else(|| internal_value.cloned()));
+    let mut internal_value: Signal<Option<T>> = use_signal(|| props.default_value.clone());
+    let single_value = use_memo(move || match controlled_value {
+        Some(value) => value.cloned(),
+        None => internal_value.cloned(),
+    });
 
     let values = use_memo(move || match single_value() {
         Some(v) => vec![RcPartialEqValue::new(v)],
@@ -221,7 +222,7 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
             .unwrap_or_else(|| panic!("The values of select and all options must match types"))
             .clone();
         internal_value.set(Some(value_t.clone()));
-        on_change.call(value_t);
+        on_change.call(Some(value_t));
     });
 
     let open = use_select_root(
