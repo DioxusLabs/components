@@ -312,7 +312,6 @@ pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -
     });
     let set_value = use_callback(move |cursor_opt: Option<RcPartialEqValue>| {
         let Some(value) = cursor_opt else {
-            set_multi_internal.call(Vec::new());
             return;
         };
         let value_t = value

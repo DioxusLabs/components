@@ -115,6 +115,44 @@ test("multi-select toggles options and stays open", async ({ page }) => {
     await expect(selectTrigger).not.toContainText("Pepperoni");
 });
 
+test("multi-select keyboard toggles and exposes aria-multiselectable", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&variant=multi&", {
+        timeout: 20 * 60 * 1000,
+    });
+    const selectTrigger = page.locator(".dx-select-trigger");
+    await selectTrigger.click();
+
+    const selectMenu = page.locator(".dx-select-list");
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    // Listbox advertises multi-select mode for assistive tech
+    await expect(selectMenu).toHaveAttribute("aria-multiselectable", "true");
+
+    // Arrow down to focus the first option (Pepperoni — already selected by default)
+    await page.keyboard.press("ArrowDown");
+    const pepperoni = selectMenu.getByRole("option", { name: "Pepperoni" });
+    await expect(pepperoni).toBeFocused();
+
+    // Space toggles the focused option off without closing
+    await page.keyboard.press(" ");
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    await expect(pepperoni).toHaveAttribute("aria-selected", "false");
+
+    // Arrow down to Onion and toggle on with Enter — menu still open in multi-mode
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("ArrowDown");
+    const onion = selectMenu.getByRole("option", { name: "Onion" });
+    await expect(onion).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    await expect(onion).toHaveAttribute("aria-selected", "true");
+
+    await page.keyboard.press("Escape");
+    await expect(selectMenu).toHaveCount(0);
+    await expect(selectTrigger).toContainText("Mushroom");
+    await expect(selectTrigger).toContainText("Onion");
+    await expect(selectTrigger).not.toContainText("Pepperoni");
+});
+
 test("tabbing out of item closes the select menu", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...

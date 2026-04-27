@@ -177,6 +177,7 @@ pub fn SelectList(props: SelectListProps) -> Element {
                 id,
                 role: "listbox",
                 tabindex: if focused() { "0" } else { "-1" },
+                aria_multiselectable: ctx.multi,
 
                 // Data attributes
                 "data-state": if open() { "open" } else { "closed" },
