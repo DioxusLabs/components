@@ -135,6 +135,7 @@ examples!(
     dropdown_menu,
     hover_card,
     input,
+    item[variant, size, image, group],
     label,
     menubar,
     navbar,
