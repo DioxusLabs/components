@@ -74,7 +74,7 @@ pub(crate) mod text_search;
 // Re-export all public components and types
 pub use components::{
     Select, SelectGroup, SelectGroupLabel, SelectGroupLabelProps, SelectGroupProps,
-    SelectItemIndicator, SelectItemIndicatorProps, SelectList, SelectListProps, SelectOption,
-    SelectOptionProps, SelectProps, SelectTrigger, SelectTriggerProps, SelectValue,
-    SelectValueProps,
+    SelectItemIndicator, SelectItemIndicatorProps, SelectList, SelectListProps, SelectMulti,
+    SelectMultiProps, SelectOption, SelectOptionProps, SelectProps, SelectTrigger,
+    SelectTriggerProps, SelectValue, SelectValueProps,
 };

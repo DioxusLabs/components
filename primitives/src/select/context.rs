@@ -53,10 +53,13 @@ pub(super) struct SelectContext {
     pub typeahead_buffer: Signal<String>,
     /// If the select is open
     pub open: Signal<bool>,
-    /// Current value
-    pub value: Memo<Option<RcPartialEqValue>>,
-    /// Set the value callback
+    /// Currently selected values. In single-select mode this contains at most one entry.
+    pub values: Memo<Vec<RcPartialEqValue>>,
+    /// Set the value callback. In single mode this replaces the selection;
+    /// in multi mode it toggles the given value in/out of the selection.
     pub set_value: Callback<Option<RcPartialEqValue>>,
+    /// Whether the select allows multiple values to be selected
+    pub multi: bool,
     /// A list of options with their states
     pub options: Signal<Vec<OptionState>>,
     /// Adaptive keyboard system for multi-language support
@@ -86,7 +89,9 @@ impl SelectContext {
                 let options = self.options.read();
                 if let Some(option) = options.iter().find(|opt| opt.tab_index == focused_index) {
                     self.set_value.call(Some(option.value.clone()));
-                    self.open.set(false);
+                    if !self.multi {
+                        self.open.set(false);
+                    }
                 }
             }
         }

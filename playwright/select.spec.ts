@@ -77,6 +77,44 @@ test("tabbing out of menu closes the select menu", async ({ page }) => {
     await expect(selectMenu).toHaveCount(0);
 });
 
+test("multi-select toggles options and stays open", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&variant=multi&", {
+        timeout: 20 * 60 * 1000,
+    });
+    const selectTrigger = page.locator(".dx-select-trigger");
+    // Default values from the demo: Pepperoni and Mushroom
+    await expect(selectTrigger).toContainText("Pepperoni");
+    await expect(selectTrigger).toContainText("Mushroom");
+
+    await selectTrigger.click();
+    const selectMenu = page.locator(".dx-select-list");
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+
+    const pepperoni = selectMenu.getByRole("option", { name: "Pepperoni" });
+    const onion = selectMenu.getByRole("option", { name: "Onion" });
+
+    await expect(pepperoni).toHaveAttribute("aria-selected", "true");
+    await expect(onion).toHaveAttribute("aria-selected", "false");
+
+    // Click an unselected option — it should toggle on without closing
+    await onion.click();
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    await expect(onion).toHaveAttribute("aria-selected", "true");
+
+    // Click an already-selected option — it should toggle off without closing
+    await pepperoni.click();
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    await expect(pepperoni).toHaveAttribute("aria-selected", "false");
+
+    // Escape closes the menu without selecting
+    await page.keyboard.press("Escape");
+    await expect(selectMenu).toHaveCount(0);
+    // Trigger reflects the updated multi-selection
+    await expect(selectTrigger).toContainText("Mushroom");
+    await expect(selectTrigger).toContainText("Onion");
+    await expect(selectTrigger).not.toContainText("Pepperoni");
+});
+
 test("tabbing out of item closes the select menu", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...

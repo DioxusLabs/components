@@ -141,7 +141,9 @@ pub fn SelectList(props: SelectListProps) -> Element {
             }
             Key::Enter => {
                 ctx.select_current_item();
-                open.set(false);
+                if !ctx.multi {
+                    open.set(false);
+                }
                 event.prevent_default();
                 event.stop_propagation();
             }
