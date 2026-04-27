@@ -109,6 +109,8 @@ jobs:
               dx components add calendar,popover --path ..
             elif [ "$file" = "sidebar" ]; then
               dx components add button,separator,sheet,tooltip --path ..
+            elif [ "$file" = "item" ]; then
+              dx components add separator --path ..
             fi
             # Add the component
             dx components add "$file" --path ..
