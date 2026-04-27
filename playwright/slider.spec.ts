@@ -48,3 +48,31 @@ test('dynamic min/max', async ({ page }) => {
   await expect(thumb).toHaveAttribute('aria-valuemax', '100');
 });
 
+test('range two thumbs', async ({ page }) => {
+  await page.goto('http://127.0.0.1:8080/component/block?name=slider&variant=range&', { timeout: 20 * 60 * 1000 });
+  const thumbs = page.locator('.dx-slider-thumb');
+  await expect(thumbs).toHaveCount(2);
+  const t0 = thumbs.nth(0);
+  const t1 = thumbs.nth(1);
+
+  // Initial values
+  await expect(t0).toHaveAttribute('aria-valuenow', '20');
+  await expect(t1).toHaveAttribute('aria-valuenow', '80');
+
+  // Per-thumb ARIA bounds reflect the live neighbor constraint
+  await expect(t0).toHaveAttribute('aria-valuemax', '80');
+  await expect(t1).toHaveAttribute('aria-valuemin', '20');
+
+  // Keyboard nudges thumb 0
+  await t0.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(t0).toHaveAttribute('aria-valuenow', '21');
+
+  // Spam right past thumb 1's value — thumb 0 must clamp at 80, not cross
+  for (let i = 0; i < 200; i++) await page.keyboard.press('ArrowRight');
+  await expect(t0).toHaveAttribute('aria-valuenow', '80');
+  await expect(t1).toHaveAttribute('aria-valuenow', '80');
+  // After clamping, thumb 1's lower bound moves up to thumb 0's value
+  await expect(t1).toHaveAttribute('aria-valuemin', '80');
+});
+

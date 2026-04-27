@@ -150,7 +150,7 @@ examples!(
     sheet,
     sidebar(block)[floating, inset],
     skeleton,
-    slider[dynamic_range],
+    slider[dynamic_range, range],
     switch,
     tabs,
     textarea[outline, fade, ghost],
