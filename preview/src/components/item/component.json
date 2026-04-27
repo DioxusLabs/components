@@ -9,5 +9,6 @@
       "git": "https://github.com/DioxusLabs/components"
     }
   ],
+  "componentDependencies": ["separator"],
   "globalAssets": ["../../../assets/dx-components-theme.css"]
 }

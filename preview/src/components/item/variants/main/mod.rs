@@ -28,7 +28,7 @@ pub fn Demo() -> Element {
                 size: ItemSize::Sm,
                 as: move |attrs: Vec<Attribute>| rsx! {
                     a { href: "#", ..attrs,
-                        ItemMedia {
+                        ItemMedia { variant: ItemMediaVariant::Icon,
                             BadgeCheckIcon {}
                         }
                         ItemContent {
