@@ -16,7 +16,6 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
             on_value_change: props.on_value_change,
             disabled: props.disabled,
             name: props.name,
-            placeholder: props.placeholder,
             roving_loop: props.roving_loop,
             typeahead_timeout: props.typeahead_timeout,
             attributes: props.attributes,
@@ -36,7 +35,6 @@ pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -
             on_values_change: props.on_values_change,
             disabled: props.disabled,
             name: props.name,
-            placeholder: props.placeholder,
             roving_loop: props.roving_loop,
             typeahead_timeout: props.typeahead_timeout,
             attributes: props.attributes,
@@ -64,7 +62,10 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
 #[component]
 pub fn SelectValue(props: SelectValueProps) -> Element {
     rsx! {
-        select::SelectValue { attributes: props.attributes }
+        select::SelectValue {
+            placeholder: props.placeholder,
+            attributes: props.attributes,
+        }
     }
 }
 

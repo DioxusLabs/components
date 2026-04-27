@@ -35,10 +35,6 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
     #[props(default)]
     pub name: ReadSignal<String>,
 
-    /// Optional placeholder text
-    #[props(default = ReadSignal::new(Signal::new(String::from("Select an option"))))]
-    pub placeholder: ReadSignal<String>,
-
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadSignal::new(Signal::new(true)))]
     pub roving_loop: ReadSignal<bool>,
@@ -78,10 +74,6 @@ pub struct SelectMultiProps<T: Clone + PartialEq + 'static = String> {
     #[props(default)]
     pub name: ReadSignal<String>,
 
-    /// Optional placeholder text
-    #[props(default = ReadSignal::new(Signal::new(String::from("Select an option"))))]
-    pub placeholder: ReadSignal<String>,
-
     /// Whether focus should loop around when reaching the end.
     #[props(default = ReadSignal::new(Signal::new(true)))]
     pub roving_loop: ReadSignal<bool>,
@@ -105,7 +97,6 @@ fn use_select_root(
     set_value: Callback<Option<RcPartialEqValue>>,
     multi: bool,
     disabled: ReadSignal<bool>,
-    placeholder: ReadSignal<String>,
     roving_loop: ReadSignal<bool>,
     typeahead_timeout: ReadSignal<Duration>,
 ) -> Signal<bool> {
@@ -139,7 +130,6 @@ fn use_select_root(
         list_id,
         focus_state,
         disabled,
-        placeholder,
         typeahead_clear_task,
         typeahead_timeout,
         initial_focus,
@@ -230,7 +220,6 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
         set_value,
         false,
         props.disabled,
-        props.placeholder,
         props.roving_loop,
         props.typeahead_timeout,
     );
@@ -330,7 +319,6 @@ pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -
         set_value,
         true,
         props.disabled,
-        props.placeholder,
         props.roving_loop,
         props.typeahead_timeout,
     );

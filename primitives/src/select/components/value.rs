@@ -7,6 +7,10 @@ use super::super::context::SelectContext;
 /// The props for the [`SelectValue`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SelectValueProps {
+    /// Optional placeholder text shown when no option is selected.
+    #[props(default = ReadSignal::new(Signal::new(String::from("Select an option"))))]
+    pub placeholder: ReadSignal<String>,
+
     /// Additional attributes for the value element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -88,7 +92,7 @@ pub fn SelectValue(props: SelectValueProps) -> Element {
     });
 
     let is_empty = move || ctx.values.read().is_empty();
-    let display_value = selected_text_value().unwrap_or_else(|| ctx.placeholder.cloned());
+    let display_value = selected_text_value().unwrap_or_else(|| props.placeholder.cloned());
 
     rsx! {
         // Add placeholder option if needed

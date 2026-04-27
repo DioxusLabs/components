@@ -37,8 +37,9 @@ pub fn Demo() -> Element {
     rsx! {
         SelectMulti::<Topping> {
             default_values: vec![Topping::Pepperoni, Topping::Mushroom],
-            placeholder: "Pick toppings...",
-            SelectTrigger { aria_label: "Select Trigger", width: "16rem", SelectValue {} }
+            SelectTrigger { aria_label: "Select Trigger", width: "16rem",
+                SelectValue { placeholder: "Pick toppings..." }
+            }
             SelectList { aria_label: "Topping Picker",
                 SelectGroup {
                     SelectGroupLabel { "Toppings" }
