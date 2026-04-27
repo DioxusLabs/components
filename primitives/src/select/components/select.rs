@@ -298,11 +298,8 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
 /// - `data-state`: Indicates the current state of the select. Values are `open` or `closed`.
 #[component]
 pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -> Element {
-    let (multi_values, set_multi_internal) = use_controlled(
-        props.values,
-        props.default_values,
-        props.on_values_change,
-    );
+    let (multi_values, set_multi_internal) =
+        use_controlled(props.values, props.default_values, props.on_values_change);
 
     let values = use_memo(move || {
         multi_values()
