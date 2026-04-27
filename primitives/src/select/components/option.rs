@@ -200,11 +200,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                     did_drag.set(true);
                 },
                 onblur: move |_| {
-                    // In multi-select mode the dropdown stays open across option clicks
-                    // and is closed explicitly via Escape, the trigger, or tabbing out
-                    // of the listbox. Touching focus state on blur would cause the
-                    // listbox to steal focus back when interacting with another option.
-                    if focused() && !ctx.multi {
+                    if focused() {
                         ctx.focus_state.blur();
                         ctx.open.set(false);
                     }
