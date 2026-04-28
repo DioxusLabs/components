@@ -47,6 +47,7 @@ pub fn EmailClient() -> Element {
     let mut selected_tags = use_signal(Vec::<MessageTag>::new);
     let selected_id = use_signal(|| String::from("m1#0"));
     let mut read_open = use_signal(|| false);
+    let mut reply_draft = use_signal(String::new);
     let active_folder_id = active_folder.read().clone();
     let active_tab_id = active_tab.read().clone();
     let active_search_query = search_query.read().clone();
@@ -601,13 +602,17 @@ pub fn EmailClient() -> Element {
                                         Textarea {
                                             placeholder: format!("Reply to {}…", selected_static.from),
                                             rows: "2",
+                                            value: "{reply_draft}",
+                                            oninput: move |event: FormEvent| reply_draft.set(event.value()),
                                         }
                                     }
                                     div { class: "ec-thread-compose-actions",
                                         Button { variant: ButtonVariant::Secondary,
                                             LucideIcon { kind: IconKind::Paperclip, size: 14 }
                                         }
-                                        Button { variant: ButtonVariant::Primary,
+                                        Button {
+                                            variant: ButtonVariant::Primary,
+                                            disabled: reply_draft.read().trim().is_empty(),
                                             LucideIcon { kind: IconKind::Send, size: 14 }
                                             "Send"
                                         }

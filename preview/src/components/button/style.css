@@ -4,11 +4,16 @@
   border-radius: 0.5rem;
   cursor: pointer;
   font-size: 1rem;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }
 
 .dx-button:focus-visible {
   box-shadow: 0 0 0 2px var(--focused-border-color);
+}
+
+.dx-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .dx-button[data-style="primary"] {
@@ -16,7 +21,7 @@
   color: var(--primary-color);
 }
 
-.dx-button[data-style="primary"]:hover {
+.dx-button[data-style="primary"]:not(:disabled):hover {
   background-color: var(--secondary-color-1);
 }
 
@@ -25,7 +30,7 @@
   color: var(--secondary-color-1);
 }
 
-.dx-button[data-style="secondary"]:hover {
+.dx-button[data-style="secondary"]:not(:disabled):hover {
   background-color: var(--primary-color-4);
 }
 
@@ -34,7 +39,7 @@
   color: var(--secondary-color-4);
 }
 
-.dx-button[data-style="ghost"]:hover {
+.dx-button[data-style="ghost"]:not(:disabled):hover {
   background-color: var(--primary-color-5);
   color: var(--secondary-color-1);
 }
@@ -46,7 +51,7 @@
   color: var(--secondary-color-4);
 }
 
-.dx-button[data-style="outline"]:hover {
+.dx-button[data-style="outline"]:not(:disabled):hover {
   background-color: var(--primary-color-4);
 }
 
@@ -55,6 +60,6 @@
   color: var(--contrast-error-color);
 }
 
-.dx-button[data-style="destructive"]:hover {
+.dx-button[data-style="destructive"]:not(:disabled):hover {
   background-color: var(--secondary-error-color);
 }
