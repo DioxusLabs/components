@@ -76,6 +76,59 @@ test('drag survives pointercancel (iPad system gesture)', async ({ page }) => {
   await expect(thumb).toHaveAttribute('aria-valuenow', '70');
 });
 
+test('drag ignores pageX/clientX mismatch (iPad pinch-zoom analog)', async ({ page }) => {
+  // On iPad pinch-zoomed, `e.pageX` and `e.clientX` differ by the visual
+  // viewport offset. The slider's onpointerdown stored client coords in the
+  // global POINTERS table while the window pointermove listener wrote pageX —
+  // so the very first pointermove produced a delta equal to that offset and
+  // jammed the value at 100%. Reproduce by forging pageX on synthetic events.
+  await page.goto('http://127.0.0.1:8080/component/?name=slider&', { timeout: 20 * 60 * 1000 });
+
+  const slider = page.locator('.dx-slider').first();
+  const thumb = page.locator('.dx-slider-thumb').first();
+  await expect(thumb).toHaveAttribute('aria-valuenow', '50');
+
+  const box = await slider.boundingBox();
+  if (!box) throw new Error('slider has no bounding box');
+  const x = box.x + box.width * 0.3;
+  const y = box.y + box.height / 2;
+  const pageOffset = 1000; // way larger than the slider width — would clamp to 100
+
+  // Slider's onpointerdown reads client_coordinates, so push that.
+  await slider.evaluate((el, { x, y }) => {
+    el.dispatchEvent(new PointerEvent('pointerdown', {
+      pointerId: 1,
+      pointerType: 'touch',
+      isPrimary: true,
+      clientX: x,
+      clientY: y,
+      button: 0,
+      buttons: 1,
+      bubbles: true,
+      cancelable: true,
+    }));
+  }, { x, y });
+  await expect(thumb).toHaveAttribute('aria-valuenow', '30');
+
+  // Pointermove with clientX unchanged but pageX forged so it differs.
+  // Mirrors what iPad sends when the visual viewport is offset from layout.
+  await page.evaluate(({ x, y, pageOffset }) => {
+    const evt = new PointerEvent('pointermove', {
+      pointerId: 1,
+      clientX: x,
+      clientY: y,
+      bubbles: true,
+    });
+    Object.defineProperty(evt, 'pageX', { value: x + pageOffset });
+    Object.defineProperty(evt, 'pageY', { value: y });
+    window.dispatchEvent(evt);
+  }, { x, y, pageOffset });
+
+  // Without the fix the value jumps to ~100. With consistent coords it stays.
+  const after = await thumb.getAttribute('aria-valuenow');
+  expect(parseInt(after!, 10)).toBeLessThan(50);
+});
+
 test('dynamic min/max', async ({ page }) => {
   await page.goto('http://127.0.0.1:8080/component/block?name=slider&variant=dynamic_range&', { timeout: 20 * 60 * 1000 });
   const slider = page.locator('.dx-slider');

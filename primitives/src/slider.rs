@@ -36,17 +36,21 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
     queue_effect(move || {
         runtime.spawn(ScopeId::ROOT, async move {
             let mut pointer_updates = dioxus::document::eval(
+                // clientX/clientY (not pageX/pageY) — must match the slider's
+                // onpointerdown which stores `evt.client_coordinates()` and the
+                // viewport-relative rect from getBoundingClientRect. On iPad
+                // with the page pinch-zoomed they diverge, jamming the slider.
                 "window.addEventListener('pointerdown', (e) => {
-                    dioxus.send(['down', [e.pointerId, e.pageX, e.pageY]]);
+                    dioxus.send(['down', [e.pointerId, e.clientX, e.clientY]]);
                 });
                 window.addEventListener('pointermove', (e) => {
-                    dioxus.send(['move', [e.pointerId, e.pageX, e.pageY]]);
+                    dioxus.send(['move', [e.pointerId, e.clientX, e.clientY]]);
                 });
                 window.addEventListener('pointerup', (e) => {
-                    dioxus.send(['up', [e.pointerId, e.pageX, e.pageY]]);
+                    dioxus.send(['up', [e.pointerId, e.clientX, e.clientY]]);
                 });
                 window.addEventListener('pointercancel', (e) => {
-                    dioxus.send(['up', [e.pointerId, e.pageX, e.pageY]]);
+                    dioxus.send(['up', [e.pointerId, e.clientX, e.clientY]]);
                 });",
             );
 
