@@ -36,6 +36,9 @@ pub fn ColorPicker(props: ColorPickerProps) -> Element {
                 on_open_change: move |v| open.set(v),
                 DialogContent {
                     width: "auto",
+                    if props.use_default_dialog {
+                        ColorPickerSelect { }
+                    }
                     {props.children}
                 }
             }

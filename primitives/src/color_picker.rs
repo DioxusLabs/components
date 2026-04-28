@@ -193,6 +193,10 @@ pub struct ColorPickerProps {
     #[props(default)]
     pub label: Option<String>,
 
+    /// Render built-in dialog content (`ColorPickerSelect`) before `children`.
+    #[props(default = true)]
+    pub use_default_dialog: bool,
+
     /// Additional attributes to extend the color picker element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -222,7 +226,6 @@ pub struct ColorPickerProps {
 ///                    tracing::info!("Color changed: {:?}", c);
 ///                    color.set(c);
 ///                },
-///                ColorPickerSelect { }
 ///            }
 ///    }
 ///}
@@ -357,7 +360,6 @@ pub struct ColorAreaProps {
 ///                    tracing::info!("Color changed: {:?}", c);
 ///                    color.set(c);
 ///                },
-///                ColorPickerSelect { }
 ///            }
 ///    }
 ///}

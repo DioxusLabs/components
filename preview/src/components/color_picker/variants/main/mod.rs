@@ -16,7 +16,6 @@ pub fn Demo() -> Element {
                 tracing::info!("Color changed: {:?}", c);
                 color.set(c);
             },
-            ColorPickerSelect { }
         }
     }
 }

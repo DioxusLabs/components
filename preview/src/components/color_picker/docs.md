@@ -11,8 +11,30 @@ ColorPicker {
         // The color parameter contains the selected color.
     },
 
-    // The ColorPickerSelect (standard color picker container) contains the content that will be displayed when the user
-    // clicks on the trigger, can be replaced with a custom implementation
-    ColorPickerSelect { }
+    // Enable built-in dialog content (ColorPickerSelect).
+    // This is the default.
+    use_default_dialog: true,
 }
 ```
+
+### Custom Dialog
+
+If you want to fully replace the default dialog UI, disable the built-in content
+and pass your custom UI via `children` to `ColorPicker`:
+
+```rust
+ColorPicker {
+    color,
+    on_color_change: move |c: Color| { /* ... */ },
+
+    use_default_dialog: false,
+
+    // Your custom dialog UI:
+    div {
+        "Custom color picker content"
+    }
+}
+```
+
+Note: if `use_default_dialog: true`, do not add `ColorPickerSelect` to `children`,
+otherwise it will render twice.
