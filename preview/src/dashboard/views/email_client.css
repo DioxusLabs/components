@@ -1,0 +1,368 @@
+/* Topbar */
+.ec-topbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 3.5rem;
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--primary-color-6);
+    background: var(--primary-color);
+    flex-shrink: 0;
+}
+.ec-topbar .ec-title {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--secondary-color-1);
+}
+.ec-topbar .ec-search {
+    flex: 1;
+    max-width: 480px;
+    margin-left: auto;
+    height: 2.25rem;
+    border-radius: 0.375rem;
+    box-shadow: inset 0 0 0 1px var(--primary-color-6);
+    font-size: 0.875rem;
+}
+
+.ec-muted {
+    color: var(--secondary-color-5);
+    font-weight: 400;
+}
+
+/* Compose: primary look layered on SidebarMenuButton */
+.ec-compose[data-sidebar="menu-button"] {
+    background: var(--secondary-color-1);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+.ec-compose[data-sidebar="menu-button"]:hover {
+    background: var(--secondary-color-2);
+    color: var(--primary-color);
+}
+
+/* Split layout */
+.ec-main {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    background: var(--primary-color);
+}
+.ec-list-pane {
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    flex-shrink: 0;
+    min-width: 0;
+    border-right: 1px solid var(--primary-color-6);
+    background: var(--primary-color);
+}
+.ec-list-pane > .dx-tabs {
+    border-bottom: 1px solid var(--primary-color-6);
+    padding: 0.5rem 0.75rem;
+    flex-shrink: 0;
+}
+.ec-list-pane .dx-tabs-list {
+    border-radius: 0.5rem;
+    background: var(--primary-color-5);
+    padding: 0.25rem;
+}
+.ec-list-pane .dx-tabs-trigger {
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+.ec-list-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    position: relative;
+    contain: layout paint;
+}
+
+/* Day header */
+.ec-day {
+    padding: 0.875rem 1rem 0.375rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--secondary-color-5);
+    font-weight: 600;
+}
+
+/* Message row — leans on Item, just adds hover/selected/unread */
+.ec-row {
+    border-radius: 0.5rem;
+    cursor: pointer;
+    margin: 0.125rem 0.5rem;
+    padding: 0.875rem 0.875rem !important;
+    border: 1px solid transparent;
+}
+.ec-row:hover:not([data-selected="true"]) {
+    background: var(--primary-color-3);
+    border-color: var(--primary-color-6);
+}
+.ec-row[data-selected="true"] {
+    background: var(--primary-color-3);
+    border-color: var(--primary-color-6);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
+}
+.ec-unread .dx-item-title,
+.ec-unread .ec-row > .dx-item-content > div {
+    color: var(--secondary-color-1);
+    font-weight: 600;
+}
+.ec-row .dx-item-title {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+.ec-row-time {
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+}
+.ec-row-tags {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    margin-top: 0.125rem;
+}
+.ec-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--secondary-color-1);
+}
+
+/* Read pane */
+.ec-read-pane {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    background: var(--primary-color-3);
+}
+.ec-read-pane > .dx-toolbar {
+    border-bottom: 1px solid var(--primary-color-6);
+    padding: 0.5rem 1rem;
+    background: var(--primary-color);
+    flex-shrink: 0;
+}
+.ec-read-pane .dx-toolbar button,
+.ec-topbar .dx-button {
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+.ec-toolbar-end {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.ec-read-body {
+    overflow-y: auto;
+    flex: 1;
+    width: 100%;
+    max-width: 880px;
+    align-self: center;
+    padding: 2rem clamp(1.5rem, 5vw, 4rem) 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Status bar */
+.ec-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 2.25rem;
+    padding: 0 1rem;
+    border-top: 1px solid var(--primary-color-6);
+    background: var(--primary-color);
+    font-size: 0.75rem;
+    color: var(--secondary-color-5);
+    flex-shrink: 0;
+}
+.ec-status-shortcuts {
+    margin-left: auto;
+}
+
+/* =====================================================================
+   Read-pane layout: Threaded Conversation
+   Visual styling (surfaces, borders, shadows, typography) comes from
+   the component library (Card, Avatar, Badge, Button, Textarea). This
+   sheet only adds layout/positioning specific to the email reading view.
+   ===================================================================== */
+
+/* Hero card meta row holds the thread count + tag badges inline */
+.ec-thread > .dx-card {
+    border-color: var(--primary-color-6);
+    border-radius: 0.75rem;
+    background: var(--primary-color);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+}
+.ec-thread .dx-card-header {
+    padding: 0 2rem;
+}
+.ec-thread .dx-card-content {
+    padding: 0 2rem;
+}
+.ec-thread-hero.dx-card {
+    gap: 0.75rem;
+    padding: 2rem 0;
+}
+.ec-thread-hero .dx-card-title {
+    font-size: 1.375rem;
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--secondary-color-1);
+}
+.ec-thread-hero .dx-card-description {
+    font-size: 0.875rem;
+}
+.ec-thread-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Wrap card content for messages: head row + body */
+.ec-thread-msg-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Avatar + sender meta row */
+.ec-thread-msg-head {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+}
+.ec-thread-msg-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-width: 0;
+    flex: 1;
+}
+.ec-thread-msg-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--secondary-color-1);
+}
+.ec-thread-msg-addr {
+    font-size: 0.8125rem;
+    color: var(--secondary-color-5);
+}
+.ec-thread-msg-time {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--secondary-color-5);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Message body prose */
+.ec-thread-msg-body {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--secondary-color-3);
+    white-space: pre-wrap;
+    padding: 0.25rem 0 0;
+}
+.ec-thread-msg-body p {
+    margin: 0 0 1em;
+}
+.ec-thread-msg-body p:last-child {
+    margin: 0;
+}
+
+/* Highlight the current/latest message in the thread */
+.ec-thread-msg-current.dx-card {
+    border-color: color-mix(in oklab, var(--secondary-color-1) 20%, var(--primary-color-6));
+    box-shadow: 0 1px 2px rgb(0 0 0 / 4%), 0 0 0 1px color-mix(in oklab, var(--secondary-color-1) 10%, transparent);
+}
+
+/* Composer card: avatar + textarea row, then action buttons row */
+.ec-thread-compose.dx-card,
+.ec-thread-msg.dx-card {
+    padding: 1.5rem 0;
+}
+.ec-thread-compose-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.ec-thread-compose-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+}
+.ec-thread-compose-row .dx-textarea {
+    flex: 1;
+    min-height: 6rem;
+    border-radius: 0.5rem;
+    font-size: 0.9375rem;
+    box-shadow: inset 0 0 0 1px var(--primary-color-6);
+    resize: vertical;
+}
+.ec-thread-compose-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+.ec-thread-compose-actions .dx-button {
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 900px) {
+    .ec-list-pane {
+        width: 340px;
+    }
+
+    .ec-read-body {
+        padding: 1.5rem 1rem 2rem;
+    }
+}
+
+@media (max-width: 720px) {
+    .ec-main {
+        flex-direction: column;
+    }
+
+    .ec-list-pane {
+        width: 100%;
+        max-height: 45%;
+        border-right: 0;
+        border-bottom: 1px solid var(--primary-color-6);
+    }
+
+    .ec-topbar {
+        flex-wrap: wrap;
+        height: auto;
+        min-height: 3.5rem;
+        padding: 0.75rem;
+    }
+
+    .ec-topbar .ec-search {
+        order: 10;
+        flex-basis: 100%;
+        max-width: none;
+        margin-left: 0;
+    }
+
+    .ec-thread .dx-card-header,
+    .ec-thread .dx-card-content {
+        padding: 0 1.25rem;
+    }
+}

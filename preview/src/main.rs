@@ -11,6 +11,7 @@ use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
 use unic_langid::{langid, LanguageIdentifier};
 
 mod components;
+mod dashboard;
 mod theme;
 
 #[derive(Copy, Clone, PartialEq)]
@@ -102,6 +103,10 @@ pub(crate) enum Route {
         variant: Option<String>,
         dark_mode: Option<bool>,
     },
+    #[route("/dashboard/email-client?:dark_mode")]
+    EmailClientDashboard {
+        dark_mode: Option<bool>,
+    },
 }
 
 impl Route {
@@ -110,6 +115,7 @@ impl Route {
             Route::Home { iframe, .. } => *iframe,
             Route::ComponentDemo { iframe, .. } => *iframe,
             Route::ComponentBlockDemo { .. } => None,
+            Route::EmailClientDashboard { .. } => None,
         }
     }
 
@@ -123,6 +129,7 @@ impl Route {
             Route::Home { dark_mode, .. } => *dark_mode,
             Route::ComponentDemo { dark_mode, .. } => *dark_mode,
             Route::ComponentBlockDemo { dark_mode, .. } => *dark_mode,
+            Route::EmailClientDashboard { dark_mode, .. } => *dark_mode,
         }
     }
 
@@ -1012,6 +1019,15 @@ fn BlockComponentVariantHighlight(
                 }
             }
         }
+    }
+}
+
+#[component]
+fn EmailClientDashboard(dark_mode: Option<bool>) -> Element {
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
+        document::Link { rel: "stylesheet", href: asset!("/assets/dx-components-theme.css") }
+        dashboard::views::email_client::EmailClient {}
     }
 }
 
