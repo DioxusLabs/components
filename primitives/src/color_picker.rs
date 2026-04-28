@@ -125,17 +125,23 @@ impl FromStr for Color {
         match s.len() {
             // Shorthand format: "ABC"
             3 => {
-                let r = u8::from_str_radix(&s[0..1], radix).map_err(|_| ParseColorError::InvalidHex)?;
-                let g = u8::from_str_radix(&s[1..2], radix).map_err(|_| ParseColorError::InvalidHex)?;
-                let b = u8::from_str_radix(&s[2..3], radix).map_err(|_| ParseColorError::InvalidHex)?;
+                let r =
+                    u8::from_str_radix(&s[0..1], radix).map_err(|_| ParseColorError::InvalidHex)?;
+                let g =
+                    u8::from_str_radix(&s[1..2], radix).map_err(|_| ParseColorError::InvalidHex)?;
+                let b =
+                    u8::from_str_radix(&s[2..3], radix).map_err(|_| ParseColorError::InvalidHex)?;
                 // Expand 4-bit to 8-bit (e.g., 0xf -> 0xff)
                 Ok(Color::new(r << 4 | r, g << 4 | g, b << 4 | b))
             }
             // Standard format: "AABBCC"
             6 => {
-                let r = u8::from_str_radix(&s[0..2], radix).map_err(|_| ParseColorError::InvalidHex)?;
-                let g = u8::from_str_radix(&s[2..4], radix).map_err(|_| ParseColorError::InvalidHex)?;
-                let b = u8::from_str_radix(&s[4..6], radix).map_err(|_| ParseColorError::InvalidHex)?;
+                let r =
+                    u8::from_str_radix(&s[0..2], radix).map_err(|_| ParseColorError::InvalidHex)?;
+                let g =
+                    u8::from_str_radix(&s[2..4], radix).map_err(|_| ParseColorError::InvalidHex)?;
+                let b =
+                    u8::from_str_radix(&s[4..6], radix).map_err(|_| ParseColorError::InvalidHex)?;
                 Ok(Color::new(r, g, b))
             }
             _ => Err(ParseColorError::InvalidLength),
@@ -311,7 +317,7 @@ pub struct ColorAreaProps {
     pub min: ReadSignal<f64>,
 
     /// The maximum value
-    #[props(default = 255.0)]
+    #[props(default = 100.0)]
     pub max: ReadSignal<f64>,
 
     /// The step value
@@ -333,7 +339,7 @@ pub struct ColorAreaProps {
 /// # ColorArea
 ///
 /// The [`ColorArea`] allows users to adjust two channels of color value against a two-dimensional gradient background.
-/// It is part of [`ColorPickerSelect`]
+/// It is part of `ColorPickerSelect`
 ///
 /// ## Example
 /// ```rust
@@ -582,16 +588,16 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
         percent.width,
         100. - percent.height
     );
+    let current = (ctx.value)();
+    let min = (ctx.min)();
+    let max = (ctx.max)();
+    let step = (ctx.step)();
 
     rsx! {
-        button {
+        div {
             class: "dx-color-area-thumb",
-            type: "button",
-            role: "region",
-            aria_valuemin: format!("({} {})", ctx.min, ctx.min),
-            aria_valuemax: format!("({} {})", ctx.max, ctx.max),
-            aria_valuetext: format!("({:.2} {:.2})", (ctx.value)().x, (ctx.value)().y),
-            aria_label: "area-thumb",
+            role: "presentation",
+            aria_label: "Color area thumb",
             "data-dragging": ctx.dragging,
             style,
             tabindex: 0,
@@ -608,6 +614,30 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
                 evt.prevent_default();
             },
             ..props.attributes,
+            input {
+                class: "dx-color-area-input",
+                r#type: "range",
+                aria_label: "Saturation",
+                aria_roledescription: "2D Slider",
+                aria_valuetext: format!("Saturation {:.0}%", (current.x / max * 100.0).clamp(0.0, 100.0)),
+                aria_orientation: "horizontal",
+                min: "{min}",
+                max: "{max}",
+                step: "{step}",
+                value: format!("{}", current.x),
+            }
+            input {
+                class: "dx-color-area-input",
+                r#type: "range",
+                aria_label: "Value",
+                aria_roledescription: "2D Slider",
+                aria_valuetext: format!("Value {:.0}%", (current.y / max * 100.0).clamp(0.0, 100.0)),
+                aria_orientation: "vertical",
+                min: "{min}",
+                max: "{max}",
+                step: "{step}",
+                value: format!("{}", current.y),
+            }
             {props.children}
         }
     }

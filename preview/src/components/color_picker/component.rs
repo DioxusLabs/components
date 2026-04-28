@@ -237,6 +237,7 @@ fn ColorSwatch(props: ColorSwatchProps) -> Element {
     rsx! {
         div {
             role: "img",
+            aria_label: (props.color)().to_css_rgb(),
             class: "dx-color-swatch {props.size.to_class()} {props.shape.to_class()}",
             style: "--swatch-color: {hex_color}",
             ..props.attributes,
@@ -290,7 +291,7 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
 
     let display_value = {
         let value = current_hue();
-        format!("{:.2}", value)
+        format!("{value:.2}")
             .trim_end_matches('0')
             .trim_end_matches('.')
             .to_string()
