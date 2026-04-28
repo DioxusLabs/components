@@ -44,6 +44,9 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
                 });
                 window.addEventListener('pointerup', (e) => {
                     dioxus.send(['up', [e.pointerId, e.pageX, e.pageY]]);
+                });
+                window.addEventListener('pointercancel', (e) => {
+                    dioxus.send(['up', [e.pointerId, e.pageX, e.pageY]]);
                 });",
             );
 
