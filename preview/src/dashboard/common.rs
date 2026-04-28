@@ -88,6 +88,51 @@ pub struct Message {
     pub has_attachment: bool,
 }
 
+pub const EMAIL_REPEAT_COUNT: usize = 5;
+
+#[derive(Clone, PartialEq)]
+pub struct MessageState {
+    pub uid: String,
+    pub source_id: &'static str,
+    pub folder_id: String,
+    pub tags: Vec<MessageTag>,
+    pub unread: bool,
+    pub starred: bool,
+    pub flagged: bool,
+    pub snoozed: bool,
+}
+
+pub fn seed_message_states() -> Vec<MessageState> {
+    let mut out = Vec::with_capacity(MESSAGES.len() * EMAIL_REPEAT_COUNT);
+    for rep in 0..EMAIL_REPEAT_COUNT {
+        for msg in MESSAGES.iter() {
+            let folder_id = MESSAGE_PROPERTIES
+                .iter()
+                .find(|p| p.message_id == msg.id)
+                .map(|p| p.folder_id.to_string())
+                .unwrap_or_else(|| DEFAULT_MESSAGE_FOLDER_ID.to_string());
+            out.push(MessageState {
+                uid: format!("{}#{}", msg.id, rep),
+                source_id: msg.id,
+                folder_id,
+                tags: msg.tags.to_vec(),
+                unread: msg.unread,
+                starred: msg.starred,
+                flagged: msg.starred,
+                snoozed: false,
+            });
+        }
+    }
+    out
+}
+
+pub fn lookup_message(source_id: &str) -> &'static Message {
+    MESSAGES
+        .iter()
+        .find(|m| m.id == source_id)
+        .unwrap_or(&MESSAGES[0])
+}
+
 pub const FOLDERS: &[Folder] = &[
     Folder {
         id: "inbox",

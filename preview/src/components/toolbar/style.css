@@ -11,6 +11,10 @@
 }
 
 .dx-toolbar button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
     padding: 8px 12px;
     border: none;
     border-radius: calc(.5rem - .25rem);

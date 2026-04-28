@@ -15,7 +15,7 @@
     font-weight: 600;
     color: var(--secondary-color-1);
 }
-.ec-topbar .ec-search {
+.ec-topbar .dx-input {
     flex: 1;
     max-width: 480px;
     margin-left: auto;
@@ -206,6 +206,8 @@
     padding: 0.5rem 1rem;
     background: var(--primary-color);
     flex-shrink: 0;
+    box-shadow: none;
+    border-radius: 0;
 }
 .ec-read-pane .dx-toolbar button,
 .ec-topbar .dx-button {
@@ -274,6 +276,38 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
+}
+.ec-thread-hero-meta button.ec-tag-remove {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    display: inline-flex;
+}
+.ec-thread-hero-meta button.ec-tag-remove:hover .dx-badge,
+.ec-thread-hero-meta button.ec-tag-remove:focus-visible .dx-badge {
+    background: color-mix(in oklab, var(--primary-color-6) 65%, transparent);
+}
+.ec-thread-hero-meta .ec-tag-edit-trigger {
+    background: transparent;
+    border: 1px dashed var(--primary-color-6);
+    border-radius: 999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    color: var(--secondary-color-3);
+    cursor: pointer;
+}
+.ec-thread-hero-meta .ec-tag-edit-trigger:hover,
+.ec-thread-hero-meta .ec-tag-edit-trigger:focus-visible {
+    border-color: var(--secondary-color-1);
+    color: var(--secondary-color-1);
+}
+.ec-row .ec-row-tags svg {
+    flex-shrink: 0;
 }
 .ec-thread-msg.dx-card {
     position: relative;
@@ -436,7 +470,7 @@
         padding: 0 0.75rem;
     }
 
-    .ec-topbar .ec-search {
+    .ec-topbar .dx-input {
         display: none;
     }
 
