@@ -1,11 +1,17 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+const singleSelectTrigger = (page: Page) =>
+    page.locator(".dx-select-trigger").filter({ hasText: /Select a fruit|Apple|Banana/ });
+
+const multiSelectTrigger = (page: Page) =>
+    page.locator(".dx-select-trigger").filter({ hasText: /Pepperoni|Mushroom|Onion/ });
 
 test("test", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&", {
         timeout: 20 * 60 * 1000,
     }); // Increase timeout to 20 minutes
     // Find Select a fruit...
-    let selectTrigger = page.locator(".dx-select-trigger");
+    let selectTrigger = singleSelectTrigger(page);
     await selectTrigger.click();
     // Assert the select menu is open
     const selectMenu = page.locator(".dx-select-list");
@@ -64,7 +70,7 @@ test("test", async ({ page }) => {
 test("tabbing out of menu closes the select menu", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".dx-select-trigger");
+    let selectTrigger = singleSelectTrigger(page);
     await selectTrigger.click();
     // Assert the select menu is open
     const selectMenu = page.locator(".dx-select-list");
@@ -77,10 +83,86 @@ test("tabbing out of menu closes the select menu", async ({ page }) => {
     await expect(selectMenu).toHaveCount(0);
 });
 
+test("multi-select toggles options and stays open", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&variant=multi&", {
+        timeout: 20 * 60 * 1000,
+    });
+    const selectTrigger = multiSelectTrigger(page);
+    // Default values from the demo: Pepperoni and Mushroom
+    await expect(selectTrigger).toContainText("Pepperoni");
+    await expect(selectTrigger).toContainText("Mushroom");
+
+    await selectTrigger.click();
+    const selectMenu = page.locator(".dx-select-list");
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+
+    const pepperoni = selectMenu.getByRole("option", { name: "Pepperoni" });
+    const onion = selectMenu.getByRole("option", { name: "Onion" });
+
+    await expect(pepperoni).toHaveAttribute("aria-selected", "true");
+    await expect(onion).toHaveAttribute("aria-selected", "false");
+
+    // Click an unselected option — it should toggle on without closing
+    await onion.click();
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    await expect(onion).toHaveAttribute("aria-selected", "true");
+
+    // Click an already-selected option — it should toggle off without closing
+    await pepperoni.click();
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    await expect(pepperoni).toHaveAttribute("aria-selected", "false");
+
+    // Escape closes the menu without selecting
+    await page.keyboard.press("Escape");
+    await expect(selectMenu).toHaveCount(0);
+    // Trigger reflects the updated multi-selection
+    await expect(selectTrigger).toContainText("Mushroom");
+    await expect(selectTrigger).toContainText("Onion");
+    await expect(selectTrigger).not.toContainText("Pepperoni");
+});
+
+test("multi-select keyboard toggles and exposes aria-multiselectable", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&variant=multi&", {
+        timeout: 20 * 60 * 1000,
+    });
+    const selectTrigger = multiSelectTrigger(page);
+    await selectTrigger.click();
+
+    const selectMenu = page.locator(".dx-select-list");
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    // Listbox advertises multi-select mode for assistive tech
+    await expect(selectMenu).toHaveAttribute("aria-multiselectable", "true");
+
+    // Arrow down to focus the first option (Pepperoni — already selected by default)
+    await page.keyboard.press("ArrowDown");
+    const pepperoni = selectMenu.getByRole("option", { name: "Pepperoni" });
+    await expect(pepperoni).toBeFocused();
+
+    // Space toggles the focused option off without closing
+    await page.keyboard.press(" ");
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    await expect(pepperoni).toHaveAttribute("aria-selected", "false");
+
+    // Arrow down to Onion and toggle on with Enter — menu still open in multi-mode
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("ArrowDown");
+    const onion = selectMenu.getByRole("option", { name: "Onion" });
+    await expect(onion).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    await expect(onion).toHaveAttribute("aria-selected", "true");
+
+    await page.keyboard.press("Escape");
+    await expect(selectMenu).toHaveCount(0);
+    await expect(selectTrigger).toContainText("Mushroom");
+    await expect(selectTrigger).toContainText("Onion");
+    await expect(selectTrigger).not.toContainText("Pepperoni");
+});
+
 test("tabbing out of item closes the select menu", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".dx-select-trigger");
+    let selectTrigger = singleSelectTrigger(page);
     await selectTrigger.click();
     // Assert the select menu is open
     const selectMenu = page.locator(".dx-select-list");
@@ -101,7 +183,7 @@ test("tabbing out of item closes the select menu", async ({ page }) => {
 test("options selected", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".dx-select-trigger");
+    let selectTrigger = singleSelectTrigger(page);
     await selectTrigger.click();
     // Assert the select menu is open
     const selectMenu = page.locator(".dx-select-list");
@@ -130,7 +212,7 @@ test("options selected", async ({ page }) => {
 test("down arrow selects first element", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".dx-select-trigger");
+    let selectTrigger = singleSelectTrigger(page);
     const selectMenu = page.locator(".dx-select-list");
     await selectTrigger.focus();
 
@@ -143,7 +225,7 @@ test("down arrow selects first element", async ({ page }) => {
 test("up arrow selects last element", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&");
     // Find Select a fruit...
-    let selectTrigger = page.locator(".dx-select-trigger");
+    let selectTrigger = singleSelectTrigger(page);
     const selectMenu = page.locator(".dx-select-list");
     await selectTrigger.focus();
 

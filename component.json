@@ -44,5 +44,6 @@
     "preview/src/components/badge",
     "preview/src/components/drag_and_drop_list",
     "preview/src/components/color_picker"
+    "preview/src/components/item"
   ]
 }
