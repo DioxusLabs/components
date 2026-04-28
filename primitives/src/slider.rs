@@ -226,6 +226,7 @@ pub fn Slider(props: SliderProps) -> Element {
         let Some(pointer) = pointers.iter().find(|p| p.id == active_pointer_id) else {
             current_pointer_id.take();
             last_processed_pos.set(None);
+            dragging.set(false);
             return;
         };
 
