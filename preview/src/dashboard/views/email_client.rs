@@ -11,6 +11,10 @@ use crate::components::input::Input;
 use crate::components::item::{
     Item, ItemContent, ItemDescription, ItemMedia, ItemMediaVariant, ItemTitle,
 };
+use crate::components::select::{
+    SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectMulti, SelectOption,
+    SelectTrigger,
+};
 use crate::components::separator::Separator;
 use crate::components::sidebar::{
     Sidebar, SidebarCollapsible, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel,
@@ -25,19 +29,25 @@ use crate::components::toolbar::component::{
 };
 use crate::components::virtual_list::VirtualList;
 use crate::dashboard::common::{
-    IconKind, LucideIcon, Message, DEFAULT_MESSAGE_FOLDER_ID, FOLDERS, MESSAGES,
+    IconKind, LucideIcon, Message, MessageTag, DEFAULT_MESSAGE_FOLDER_ID, FOLDERS, MESSAGES,
     MESSAGE_PROPERTIES, TABS,
 };
 
 const STYLE: &str = include_str!("email_client.css");
+const EMAIL_REPEAT_COUNT: usize = 5;
 
 #[component]
 pub fn EmailClient() -> Element {
     let active_folder = use_signal(|| String::from("inbox"));
     let mut active_tab = use_signal(|| String::from("all"));
+    let mut search_query = use_signal(String::new);
+    let mut selected_tags = use_signal(Vec::<MessageTag>::new);
     let selected_id = use_signal(|| String::from("m3"));
+    let mut read_open = use_signal(|| false);
     let active_folder_id = active_folder.read().clone();
     let active_tab_id = active_tab.read().clone();
+    let active_search_query = search_query.read().clone();
+    let active_selected_tags = selected_tags.read().clone();
 
     let folder_label: String = FOLDERS
         .iter()
@@ -45,13 +55,23 @@ pub fn EmailClient() -> Element {
         .map(|f| f.label.to_string())
         .unwrap_or_else(|| "Inbox".to_string());
 
-    let visible_messages = filtered_messages(active_folder_id.as_str(), active_tab_id.as_str());
+    let visible_messages = filtered_messages(
+        active_folder_id.as_str(),
+        active_tab_id.as_str(),
+        active_search_query.as_str(),
+        &active_selected_tags,
+    );
 
-    let selected: Message = MESSAGES
-        .iter()
+    let selected: Message = message_pool()
         .find(|m| {
             m.id == selected_id.read().as_str()
-                && message_matches_filters(m, active_folder_id.as_str(), active_tab_id.as_str())
+                && message_matches_filters(
+                    m,
+                    active_folder_id.as_str(),
+                    active_tab_id.as_str(),
+                    active_search_query.as_str(),
+                    &active_selected_tags,
+                )
         })
         .or_else(|| visible_messages.first().copied())
         .cloned()
@@ -120,6 +140,7 @@ pub fn EmailClient() -> Element {
                                     icon: f.icon,
                                     count: folder_count(f.id),
                                     active_folder,
+                                    read_open,
                                 }
                             }
                         }
@@ -162,22 +183,61 @@ pub fn EmailClient() -> Element {
                     Input {
                         class: "ec-search",
                         r#type: "search",
+                        "aria-label": "Search mail",
+                        name: "mail-search",
+                        value: search_query,
+                        oninput: move |event: FormEvent| {
+                            search_query.set(event.value());
+                            read_open.set(false);
+                        },
                         placeholder: "Search mail, people, attachments…",
                     }
                     Button { variant: ButtonVariant::Ghost,
                         LucideIcon { kind: IconKind::Refresh }
                     }
-                    Button { variant: ButtonVariant::Ghost,
-                        LucideIcon { kind: IconKind::Filter }
+                    SelectMulti::<MessageTag> {
+                        default_values: vec![],
+                        on_values_change: move |values| {
+                            selected_tags.set(values);
+                            read_open.set(false);
+                        },
+                        SelectTrigger {
+                            class: "ec-filter-trigger",
+                            aria_label: "Filter by tag",
+                            LucideIcon { kind: IconKind::Filter }
+                            if !active_selected_tags.is_empty() {
+                                span { class: "ec-filter-count", "{active_selected_tags.len()}" }
+                            }
+                        }
+                        SelectList {
+                            class: "ec-filter-list",
+                            aria_label: "Filter by tag",
+                            SelectGroup {
+                                SelectGroupLabel { "Tags" }
+                                for (index, tag) in MessageTag::ALL.iter().enumerate() {
+                                    SelectOption::<MessageTag> {
+                                        key: "{tag.label()}",
+                                        index,
+                                        value: *tag,
+                                        text_value: "{tag.label()}",
+                                        {tag.label()}
+                                        SelectItemIndicator {}
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
-                div { class: "ec-main",
+                div { class: if read_open() { "ec-main ec-reading" } else { "ec-main" },
                     section { class: "ec-list-pane",
                         Tabs {
                             default_value: "all".to_string(),
                             horizontal: true,
-                            on_value_change: move |v: String| active_tab.set(v),
+                            on_value_change: move |v: String| {
+                                active_tab.set(v);
+                                read_open.set(false);
+                            },
                             TabList {
                                 for (idx, tab) in TABS.iter().enumerate() {
                                     TabTrigger {
@@ -185,7 +245,7 @@ pub fn EmailClient() -> Element {
                                         value: tab.id.to_string(),
                                         index: idx,
                                         {tab.label}
-                                        span { class: "ec-muted", " {tab_count(active_folder_id.as_str(), tab.id)}" }
+                                        span { class: "ec-muted", " {tab_count(active_folder_id.as_str(), tab.id, active_search_query.as_str(), &active_selected_tags)}" }
                                     }
                                 }
                             }
@@ -207,7 +267,14 @@ pub fn EmailClient() -> Element {
                                     div { class: "ec-day", {day} }
                                 },
                                 ListRow::Message(msg) => {
-                                    rsx! { MessageRow { msg: msg.clone(), selected_id, selected_message_id: selected.id } }
+                                    rsx! {
+                                        MessageRow {
+                                            msg: msg.clone(),
+                                            selected_id,
+                                            selected_message_id: selected.id,
+                                            read_open,
+                                        }
+                                    }
                                 }
                             },
                         }
@@ -216,7 +283,7 @@ pub fn EmailClient() -> Element {
                     section { class: "ec-read-pane",
                         Toolbar { aria_label: "Message actions",
                             ToolbarGroup {
-                                ToolbarButton { index: 0usize, on_click: move |_| {},
+                                ToolbarButton { index: 0usize, on_click: move |_| read_open.set(false),
                                     LucideIcon { kind: IconKind::ArrowLeft }
                                 }
                             }
@@ -276,9 +343,9 @@ pub fn EmailClient() -> Element {
                                                     }
                                                     for tag in selected.tags.iter() {
                                                         Badge {
-                                                            key: "{tag}",
+                                                            key: "{tag.label()}",
                                                             variant: BadgeVariant::Secondary,
-                                                            {*tag}
+                                                            {tag.label()}
                                                         }
                                                     }
                                                 }
@@ -386,6 +453,13 @@ pub fn EmailClient() -> Element {
     }
 }
 
+fn message_pool() -> impl Iterator<Item = &'static Message> {
+    MESSAGES
+        .iter()
+        .cycle()
+        .take(MESSAGES.len() * EMAIL_REPEAT_COUNT)
+}
+
 #[component]
 fn FolderItem(
     folder_id: &'static str,
@@ -393,6 +467,7 @@ fn FolderItem(
     icon: IconKind,
     count: Option<u32>,
     mut active_folder: Signal<String>,
+    mut read_open: Signal<bool>,
 ) -> Element {
     let is_active = active_folder.read().as_str() == folder_id;
 
@@ -404,7 +479,10 @@ fn FolderItem(
                 as: move |attrs: Vec<Attribute>| rsx! {
                     button {
                         r#type: "button",
-                        onclick: move |_| active_folder.set(folder_id.to_string()),
+                        onclick: move |_| {
+                            active_folder.set(folder_id.to_string());
+                            read_open.set(false);
+                        },
                         ..attrs,
                         LucideIcon { kind: icon }
                         span { {label} }
@@ -460,28 +538,62 @@ fn message_matches_tab(msg: &Message, tab_id: &str) -> bool {
     }
 }
 
-fn message_matches_filters(msg: &Message, folder_id: &str, tab_id: &str) -> bool {
-    message_matches_folder(msg, folder_id) && message_matches_tab(msg, tab_id)
+fn message_matches_search(msg: &Message, query: &str) -> bool {
+    let query = query.trim().to_lowercase();
+    if query.is_empty() {
+        return true;
+    }
+
+    msg.from.to_lowercase().contains(&query)
+        || msg.from_addr.to_lowercase().contains(&query)
+        || msg.subject.to_lowercase().contains(&query)
+        || msg.snippet.to_lowercase().contains(&query)
+        || msg.body.to_lowercase().contains(&query)
+        || msg.tags.iter().any(|tag| tag.label().contains(&query))
+        || (msg.has_attachment && "attachment".contains(&query))
 }
 
-fn filtered_messages(folder_id: &str, tab_id: &str) -> Vec<&'static Message> {
-    MESSAGES
-        .iter()
-        .filter(|msg| message_matches_filters(msg, folder_id, tab_id))
+fn message_matches_selected_tags(msg: &Message, selected_tags: &[MessageTag]) -> bool {
+    selected_tags.is_empty()
+        || msg
+            .tags
+            .iter()
+            .any(|tag| selected_tags.iter().any(|selected| selected == tag))
+}
+
+fn message_matches_filters(
+    msg: &Message,
+    folder_id: &str,
+    tab_id: &str,
+    query: &str,
+    selected_tags: &[MessageTag],
+) -> bool {
+    message_matches_folder(msg, folder_id)
+        && message_matches_tab(msg, tab_id)
+        && message_matches_search(msg, query)
+        && message_matches_selected_tags(msg, selected_tags)
+}
+
+fn filtered_messages(
+    folder_id: &str,
+    tab_id: &str,
+    query: &str,
+    selected_tags: &[MessageTag],
+) -> Vec<&'static Message> {
+    message_pool()
+        .filter(|msg| message_matches_filters(msg, folder_id, tab_id, query, selected_tags))
         .collect()
 }
 
 fn folder_count(folder_id: &str) -> u32 {
-    MESSAGES
-        .iter()
+    message_pool()
         .filter(|msg| message_matches_folder(msg, folder_id))
         .count() as u32
 }
 
-fn tab_count(folder_id: &str, tab_id: &str) -> u32 {
-    MESSAGES
-        .iter()
-        .filter(|msg| message_matches_filters(msg, folder_id, tab_id))
+fn tab_count(folder_id: &str, tab_id: &str, query: &str, selected_tags: &[MessageTag]) -> u32 {
+    message_pool()
+        .filter(|msg| message_matches_filters(msg, folder_id, tab_id, query, selected_tags))
         .count() as u32
 }
 
@@ -510,6 +622,7 @@ fn MessageRow(
     msg: Message,
     selected_id: Signal<String>,
     selected_message_id: &'static str,
+    mut read_open: Signal<bool>,
 ) -> Element {
     let mid = msg.id;
     let is_selected = selected_message_id == mid;
@@ -521,7 +634,10 @@ fn MessageRow(
     rsx! {
         Item {
             class: classes,
-            onclick: move |_| selected_id.set(mid.to_string()),
+            onclick: move |_| {
+                selected_id.set(mid.to_string());
+                read_open.set(true);
+            },
             "aria-selected": if is_selected { "true" } else { "false" },
             "data-selected": if is_selected { "true" } else { "false" },
 
@@ -551,9 +667,9 @@ fn MessageRow(
                 if !msg.tags.is_empty() || msg.has_attachment {
                     div { class: "ec-muted ec-row-tags",
                         for (i, tag) in msg.tags.iter().enumerate() {
-                            span { key: "{tag}",
+                            span { key: "{tag.label()}",
                                 if i > 0 { " · " }
-                                {*tag}
+                                {tag.label()}
                             }
                         }
                         if msg.has_attachment {
