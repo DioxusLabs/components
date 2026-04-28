@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::components::avatar::{Avatar, AvatarFallback, AvatarImageSize, AvatarShape};
+use crate::components::avatar::{
+    Avatar, AvatarFallback, AvatarImage, AvatarImageSize, AvatarProfile, AvatarShape,
+    AVATAR_PROFILE_OPTIONS,
+};
 use crate::components::badge::{Badge, BadgeVariant};
 use crate::components::button::{Button, ButtonVariant};
 use crate::components::card::{Card, CardContent, CardDescription, CardHeader, CardTitle};
@@ -9,8 +12,6 @@ use crate::components::item::{
     Item, ItemContent, ItemDescription, ItemMedia, ItemMediaVariant, ItemTitle,
 };
 use crate::components::separator::Separator;
-use crate::components::textarea::Textarea;
-use crate::components::virtual_list::VirtualList;
 use crate::components::sidebar::{
     Sidebar, SidebarCollapsible, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel,
     SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuBadge, SidebarMenuButton,
@@ -18,8 +19,15 @@ use crate::components::sidebar::{
     SidebarVariant,
 };
 use crate::components::tabs::component::{TabList, TabTrigger, Tabs};
-use crate::components::toolbar::component::{Toolbar, ToolbarButton, ToolbarGroup, ToolbarSeparator};
-use crate::dashboard::common::{IconKind, LucideIcon, Message, FOLDERS, MESSAGES, TABS};
+use crate::components::textarea::Textarea;
+use crate::components::toolbar::component::{
+    Toolbar, ToolbarButton, ToolbarGroup, ToolbarSeparator,
+};
+use crate::components::virtual_list::VirtualList;
+use crate::dashboard::common::{
+    IconKind, LucideIcon, Message, DEFAULT_MESSAGE_FOLDER_ID, FOLDERS, MESSAGES,
+    MESSAGE_PROPERTIES, TABS,
+};
 
 const STYLE: &str = include_str!("email_client.css");
 
@@ -28,23 +36,31 @@ pub fn EmailClient() -> Element {
     let active_folder = use_signal(|| String::from("inbox"));
     let mut active_tab = use_signal(|| String::from("all"));
     let selected_id = use_signal(|| String::from("m3"));
+    let active_folder_id = active_folder.read().clone();
+    let active_tab_id = active_tab.read().clone();
 
     let folder_label: String = FOLDERS
         .iter()
-        .find(|f| f.id == active_folder.read().as_str())
+        .find(|f| f.id == active_folder_id.as_str())
         .map(|f| f.label.to_string())
         .unwrap_or_else(|| "Inbox".to_string());
 
+    let visible_messages = filtered_messages(active_folder_id.as_str(), active_tab_id.as_str());
+
     let selected: Message = MESSAGES
         .iter()
-        .find(|m| m.id == selected_id.read().as_str())
+        .find(|m| {
+            m.id == selected_id.read().as_str()
+                && message_matches_filters(m, active_folder_id.as_str(), active_tab_id.as_str())
+        })
+        .or_else(|| visible_messages.first().copied())
         .cloned()
         .unwrap_or_else(|| MESSAGES[0].clone());
 
-    let rows = flatten_rows();
+    let rows = flatten_rows(&visible_messages);
     let row_count = rows.len();
-    let total_count = MESSAGES.len();
-    let selected_index = MESSAGES
+    let total_count = visible_messages.len();
+    let selected_index = visible_messages
         .iter()
         .position(|m| m.id == selected.id)
         .map(|i| i + 1)
@@ -63,15 +79,19 @@ pub fn EmailClient() -> Element {
                     SidebarMenu { SidebarMenuItem {
                         SidebarMenuButton {
                             size: SidebarMenuButtonSize::Lg,
-                            tooltip: rsx! { "Mail · dan@yourcompany.com" },
+                            tooltip: rsx! { "Mail · you@yourcompany.com" },
                             Avatar {
                                 size: AvatarImageSize::Small,
                                 shape: AvatarShape::Rounded,
+                                AvatarImage {
+                                    src: "{AVATAR_PROFILE_OPTIONS[2].src}",
+                                    alt: "Mail",
+                                }
                                 AvatarFallback { "M" }
                             }
                             div { class: "dx-sidebar-info-block",
                                 span { class: "dx-sidebar-info-title", "Mail" }
-                                span { class: "dx-sidebar-info-subtitle", "dan@yourcompany.com" }
+                                span { class: "dx-sidebar-info-subtitle", "you@yourcompany.com" }
                             }
                         }
                     } }
@@ -98,7 +118,7 @@ pub fn EmailClient() -> Element {
                                     folder_id: f.id,
                                     label: f.label,
                                     icon: f.icon,
-                                    count: f.count,
+                                    count: folder_count(f.id),
                                     active_folder,
                                 }
                             }
@@ -110,15 +130,19 @@ pub fn EmailClient() -> Element {
                     SidebarMenu { SidebarMenuItem {
                         SidebarMenuButton {
                             size: SidebarMenuButtonSize::Lg,
-                            tooltip: rsx! { "Dan Kowalski" },
+                            tooltip: rsx! { "You" },
                             Avatar {
                                 size: AvatarImageSize::Small,
                                 shape: AvatarShape::Rounded,
-                                AvatarFallback { "DK" }
+                                AvatarImage {
+                                    src: "{AVATAR_PROFILE_OPTIONS[0].src}",
+                                    alt: "You",
+                                }
+                                AvatarFallback { "Y" }
                             }
                             div { class: "dx-sidebar-info-block",
-                                span { class: "dx-sidebar-info-title", "Dan Kowalski" }
-                                span { class: "dx-sidebar-info-subtitle", "dan@yourcompany.com" }
+                                span { class: "dx-sidebar-info-title", "You" }
+                                span { class: "dx-sidebar-info-subtitle", "you@yourcompany.com" }
                             }
                         }
                     } }
@@ -161,7 +185,7 @@ pub fn EmailClient() -> Element {
                                         value: tab.id.to_string(),
                                         index: idx,
                                         {tab.label}
-                                        span { class: "ec-muted", " {tab.count}" }
+                                        span { class: "ec-muted", " {tab_count(active_folder_id.as_str(), tab.id)}" }
                                     }
                                 }
                             }
@@ -175,20 +199,15 @@ pub fn EmailClient() -> Element {
                                 let rows = rows.clone();
                                 move |idx: usize| match rows[idx] {
                                     ListRow::DayHeader(_) => 34,
-                                    ListRow::Message(mid) => MESSAGES
-                                        .iter()
-                                        .find(|m| m.id == mid)
-                                        .map(estimate_message_row_height)
-                                        .unwrap_or(132),
+                                    ListRow::Message(msg) => estimate_message_row_height(msg),
                                 }
                             },
                             render_item: move |idx: usize| match rows[idx] {
                                 ListRow::DayHeader(day) => rsx! {
                                     div { class: "ec-day", {day} }
                                 },
-                                ListRow::Message(mid) => {
-                                    let msg = MESSAGES.iter().find(|m| m.id == mid).cloned().unwrap();
-                                    rsx! { MessageRow { msg, selected_id } }
+                                ListRow::Message(msg) => {
+                                    rsx! { MessageRow { msg: msg.clone(), selected_id, selected_message_id: selected.id } }
                                 }
                             },
                         }
@@ -265,16 +284,6 @@ pub fn EmailClient() -> Element {
                                                 }
                                             }
                                         }
-                                        div { class: "ec-thread-hero-actions",
-                                            Button { variant: ButtonVariant::Ghost,
-                                                LucideIcon { kind: IconKind::Reply, size: 14 }
-                                                "Reply"
-                                            }
-                                            Button { variant: ButtonVariant::Ghost,
-                                                LucideIcon { kind: IconKind::Forward, size: 14 }
-                                                "Forward"
-                                            }
-                                        }
                                     }
                                 }
                             }
@@ -286,7 +295,11 @@ pub fn EmailClient() -> Element {
                                             Avatar {
                                                 size: AvatarImageSize::Small,
                                                 shape: AvatarShape::Circle,
-                                                AvatarFallback { "DK" }
+                                                AvatarImage {
+                                                    src: "{AVATAR_PROFILE_OPTIONS[0].src}",
+                                                    alt: "You",
+                                                }
+                                                AvatarFallback { "Y" }
                                             }
                                             div { class: "ec-thread-msg-meta",
                                                 div { class: "ec-thread-msg-sender",
@@ -313,6 +326,10 @@ pub fn EmailClient() -> Element {
                                         Avatar {
                                             size: AvatarImageSize::Small,
                                             shape: AvatarShape::Circle,
+                                            AvatarImage {
+                                                src: "{avatar_profile_for_key(selected.from_addr).src}",
+                                                alt: "{selected.from}",
+                                            }
                                             AvatarFallback { {selected.initials} }
                                         }
                                         div { class: "ec-thread-msg-meta",
@@ -339,7 +356,11 @@ pub fn EmailClient() -> Element {
                                         Avatar {
                                             size: AvatarImageSize::Small,
                                             shape: AvatarShape::Circle,
-                                            AvatarFallback { "DK" }
+                                            AvatarImage {
+                                                src: "{AVATAR_PROFILE_OPTIONS[0].src}",
+                                                alt: "You",
+                                            }
+                                            AvatarFallback { "Y" }
                                         }
                                         Textarea {
                                             placeholder: format!("Reply to {}…", selected.from),
@@ -358,13 +379,6 @@ pub fn EmailClient() -> Element {
                                 }
                             }
                         }
-                    }
-                }
-
-                footer { class: "ec-status",
-                    span { "● Connected · synced 11:43" }
-                    span { class: "ec-status-shortcuts",
-                        "J/K navigate · ⏎ open · E archive · R reply · C compose · ? help"
                     }
                 }
             }
@@ -407,20 +421,68 @@ fn FolderItem(
 #[derive(Clone, Copy)]
 enum ListRow {
     DayHeader(&'static str),
-    Message(&'static str),
+    Message(&'static Message),
 }
 
-fn flatten_rows() -> Vec<ListRow> {
-    let mut out = Vec::with_capacity(MESSAGES.len() + 4);
+fn flatten_rows(messages: &[&'static Message]) -> Vec<ListRow> {
+    let mut out = Vec::with_capacity(messages.len() + 4);
     let mut last_day: Option<&'static str> = None;
-    for m in MESSAGES.iter() {
+    for m in messages.iter() {
         if last_day != Some(m.day) {
             out.push(ListRow::DayHeader(m.day));
             last_day = Some(m.day);
         }
-        out.push(ListRow::Message(m.id));
+        out.push(ListRow::Message(m));
     }
     out
+}
+
+fn message_folder_id(msg: &Message) -> &'static str {
+    MESSAGE_PROPERTIES
+        .iter()
+        .find(|properties| properties.message_id == msg.id)
+        .map(|properties| properties.folder_id)
+        .unwrap_or(DEFAULT_MESSAGE_FOLDER_ID)
+}
+
+fn message_matches_folder(msg: &Message, folder_id: &str) -> bool {
+    match folder_id {
+        "starred" => msg.starred,
+        id => message_folder_id(msg) == id,
+    }
+}
+
+fn message_matches_tab(msg: &Message, tab_id: &str) -> bool {
+    match tab_id {
+        "unread" => msg.unread,
+        "flagged" => msg.starred,
+        _ => true,
+    }
+}
+
+fn message_matches_filters(msg: &Message, folder_id: &str, tab_id: &str) -> bool {
+    message_matches_folder(msg, folder_id) && message_matches_tab(msg, tab_id)
+}
+
+fn filtered_messages(folder_id: &str, tab_id: &str) -> Vec<&'static Message> {
+    MESSAGES
+        .iter()
+        .filter(|msg| message_matches_filters(msg, folder_id, tab_id))
+        .collect()
+}
+
+fn folder_count(folder_id: &str) -> u32 {
+    MESSAGES
+        .iter()
+        .filter(|msg| message_matches_folder(msg, folder_id))
+        .count() as u32
+}
+
+fn tab_count(folder_id: &str, tab_id: &str) -> u32 {
+    MESSAGES
+        .iter()
+        .filter(|msg| message_matches_filters(msg, folder_id, tab_id))
+        .count() as u32
 }
 
 fn estimate_message_row_height(msg: &Message) -> u32 {
@@ -435,10 +497,22 @@ fn estimate_message_row_height(msg: &Message) -> u32 {
         + if has_meta_row { 12 } else { 8 } // content row gaps
 }
 
+fn avatar_profile_for_key(key: &str) -> &'static AvatarProfile {
+    let index = key.bytes().fold(0usize, |hash, byte| {
+        hash.wrapping_mul(31).wrapping_add(byte as usize)
+    }) % AVATAR_PROFILE_OPTIONS.len();
+
+    &AVATAR_PROFILE_OPTIONS[index]
+}
+
 #[component]
-fn MessageRow(msg: Message, selected_id: Signal<String>) -> Element {
+fn MessageRow(
+    msg: Message,
+    selected_id: Signal<String>,
+    selected_message_id: &'static str,
+) -> Element {
     let mid = msg.id;
-    let is_selected = selected_id.read().as_str() == mid;
+    let is_selected = selected_message_id == mid;
     let mut classes = String::from("ec-row");
     if msg.unread {
         classes.push_str(" ec-unread");
@@ -452,10 +526,14 @@ fn MessageRow(msg: Message, selected_id: Signal<String>) -> Element {
             "data-selected": if is_selected { "true" } else { "false" },
 
             ItemMedia { variant: ItemMediaVariant::Icon,
-                if msg.starred {
-                    LucideIcon { kind: IconKind::StarFilled, size: 14 }
-                } else if msg.unread {
-                    span { class: "ec-dot" }
+                Avatar {
+                    size: AvatarImageSize::Small,
+                    shape: AvatarShape::Circle,
+                    AvatarImage {
+                        src: "{avatar_profile_for_key(msg.from_addr).src}",
+                        alt: "{msg.from}",
+                    }
+                    AvatarFallback { {msg.initials} }
                 }
             }
             ItemContent {

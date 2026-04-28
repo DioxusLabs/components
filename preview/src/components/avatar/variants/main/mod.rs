@@ -4,6 +4,10 @@ use dioxus::prelude::*;
 #[component]
 pub fn Demo() -> Element {
     let mut avatar_state = use_signal(|| "No state yet".to_string());
+    let basic_profile = AVATAR_PROFILE_OPTIONS[0];
+    let rounded_profile = AVATAR_PROFILE_OPTIONS[1];
+    let large_profile = AVATAR_PROFILE_OPTIONS[2];
+
     rsx! {
         div {
             display: "flex",
@@ -21,10 +25,10 @@ pub fn Demo() -> Element {
                     aria_label: "Basic avatar",
                     AvatarImage {
                         class: "dx-avatar-image",
-                        src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
-                        alt: "User avatar",
+                        src: "{basic_profile.src}",
+                        alt: "{basic_profile.name}",
                     }
-                    AvatarFallback { class: "dx-avatar-fallback", "EA" }
+                    AvatarFallback { class: "dx-avatar-fallback", "{basic_profile.initials}" }
                 }
             }
             div { class: "dx-avatar-item",
@@ -38,10 +42,10 @@ pub fn Demo() -> Element {
                     aria_label: "Basic avatar",
                     AvatarImage {
                         class: "dx-avatar-image",
-                        src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
-                        alt: "User avatar",
+                        src: "{rounded_profile.src}",
+                        alt: "{rounded_profile.name}",
                     }
-                    AvatarFallback { class: "dx-avatar-fallback", "EA" }
+                    AvatarFallback { class: "dx-avatar-fallback", "{rounded_profile.initials}" }
                 }
             }
             div { class: "dx-avatar-item",
@@ -70,10 +74,10 @@ pub fn Demo() -> Element {
                     aria_label: "Large avatar",
                     AvatarImage {
                         class: "dx-avatar-image",
-                        src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif()),
-                        alt: "Large avatar",
+                        src: "{large_profile.src}",
+                        alt: "{large_profile.name}",
                     }
-                    AvatarFallback { class: "dx-avatar-fallback", "DX" }
+                    AvatarFallback { class: "dx-avatar-fallback", "{large_profile.initials}" }
                 }
             }
         }

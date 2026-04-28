@@ -16,6 +16,12 @@ pub struct Tab {
     pub count: u32,
 }
 
+#[derive(Clone, Copy, PartialEq)]
+pub struct MessageProperties {
+    pub message_id: &'static str,
+    pub folder_id: &'static str,
+}
+
 #[derive(Clone, PartialEq)]
 pub struct Message {
     pub id: &'static str,
@@ -36,18 +42,141 @@ pub struct Message {
 }
 
 pub const FOLDERS: &[Folder] = &[
-    Folder { id: "inbox",   label: "Inbox",   icon: IconKind::Inbox,   count: Some(12) },
-    Folder { id: "starred", label: "Starred", icon: IconKind::StarOutline, count: None },
-    Folder { id: "sent",    label: "Sent",    icon: IconKind::Send,    count: None },
-    Folder { id: "drafts",  label: "Drafts",  icon: IconKind::Pen,     count: Some(3) },
-    Folder { id: "archive", label: "Archive", icon: IconKind::Archive, count: None },
-    Folder { id: "trash",   label: "Trash",   icon: IconKind::Trash,   count: None },
+    Folder {
+        id: "inbox",
+        label: "Inbox",
+        icon: IconKind::Inbox,
+        count: Some(12),
+    },
+    Folder {
+        id: "starred",
+        label: "Starred",
+        icon: IconKind::StarOutline,
+        count: None,
+    },
+    Folder {
+        id: "sent",
+        label: "Sent",
+        icon: IconKind::Send,
+        count: None,
+    },
+    Folder {
+        id: "drafts",
+        label: "Drafts",
+        icon: IconKind::Pen,
+        count: Some(3),
+    },
+    Folder {
+        id: "archive",
+        label: "Archive",
+        icon: IconKind::Archive,
+        count: None,
+    },
+    Folder {
+        id: "trash",
+        label: "Trash",
+        icon: IconKind::Trash,
+        count: None,
+    },
 ];
 
 pub const TABS: &[Tab] = &[
-    Tab { id: "all",     label: "All",     count: 42 },
-    Tab { id: "unread",  label: "Unread",  count: 12 },
-    Tab { id: "flagged", label: "Flagged", count: 5  },
+    Tab {
+        id: "all",
+        label: "All",
+        count: 42,
+    },
+    Tab {
+        id: "unread",
+        label: "Unread",
+        count: 12,
+    },
+    Tab {
+        id: "flagged",
+        label: "Flagged",
+        count: 5,
+    },
+];
+
+pub const DEFAULT_MESSAGE_FOLDER_ID: &str = "inbox";
+
+pub const MESSAGE_PROPERTIES: &[MessageProperties] = &[
+    MessageProperties {
+        message_id: "m6",
+        folder_id: "sent",
+    },
+    MessageProperties {
+        message_id: "m23",
+        folder_id: "sent",
+    },
+    MessageProperties {
+        message_id: "m29",
+        folder_id: "sent",
+    },
+    MessageProperties {
+        message_id: "m43",
+        folder_id: "sent",
+    },
+    MessageProperties {
+        message_id: "m51",
+        folder_id: "sent",
+    },
+    MessageProperties {
+        message_id: "m55",
+        folder_id: "sent",
+    },
+    MessageProperties {
+        message_id: "m58",
+        folder_id: "sent",
+    },
+    MessageProperties {
+        message_id: "m3",
+        folder_id: "drafts",
+    },
+    MessageProperties {
+        message_id: "m8",
+        folder_id: "drafts",
+    },
+    MessageProperties {
+        message_id: "m37",
+        folder_id: "drafts",
+    },
+    MessageProperties {
+        message_id: "m20",
+        folder_id: "archive",
+    },
+    MessageProperties {
+        message_id: "m21",
+        folder_id: "archive",
+    },
+    MessageProperties {
+        message_id: "m31",
+        folder_id: "archive",
+    },
+    MessageProperties {
+        message_id: "m39",
+        folder_id: "archive",
+    },
+    MessageProperties {
+        message_id: "m46",
+        folder_id: "archive",
+    },
+    MessageProperties {
+        message_id: "m52",
+        folder_id: "archive",
+    },
+    MessageProperties {
+        message_id: "m4",
+        folder_id: "trash",
+    },
+    MessageProperties {
+        message_id: "m22",
+        folder_id: "trash",
+    },
+    MessageProperties {
+        message_id: "m44",
+        folder_id: "trash",
+    },
 ];
 
 pub const MESSAGES: &[Message] = &[
@@ -96,17 +225,17 @@ pub const MESSAGES: &[Message] = &[
         from: "Calendar", from_addr: "calendar@workspace.app", initials: "CA",
         subject: "Daily agenda · Tue Apr 28",
         snippet: "4 events today. Next: Design review with Maya at 14:00. Travel time considered. No conflicts.",
-        body: "Tue Apr 28, 2026\n\n09:00–09:30  Standup (recurring)\n14:00–15:00  Design review · Maya Chen\n15:30–16:00  1:1 with Dan\n17:00–17:45  Architecture sync\n\nNo conflicts detected.",
+        body: "Tue Apr 28, 2026\n\n09:00–09:30  Standup (recurring)\n14:00–15:00  Design review · Maya Chen\n15:30–16:00  1:1\n17:00–17:45  Architecture sync\n\nNo conflicts detected.",
         time: "07:00", full_time: "Apr 28, 2026 · 7:00 AM",
         unread: false, starred: false, thread_count: 1,
         tags: &["calendar"], has_attachment: false,
     },
     Message {
         id: "m6", day: "Yesterday",
-        from: "Dan Kowalski", from_addr: "dan@yourcompany.com", initials: "DK",
+        from: "You", from_addr: "you@yourcompany.com", initials: "Y",
         subject: "Q2 roadmap — final draft for your eyes",
         snippet: "Attaching the Q2 roadmap doc with all the changes from Friday's offsite. Biggest swap: pushing Mobile to Q3 so we can land Search-v2 properly.",
-        body: "Attaching the Q2 roadmap doc with all the changes from Friday's offsite.\n\nBiggest swap: pushing Mobile to Q3 so we can land Search-v2 properly. Reasoning is in the doc on page 4. Marta and I are aligned but I want your read before sending it to leadership Wednesday.\n\nReview by EOD tomorrow if possible?\n\nDan",
+        body: "Attaching the Q2 roadmap doc with all the changes from Friday's offsite.\n\nBiggest swap: pushing Mobile to Q3 so we can land Search-v2 properly. Reasoning is in the doc on page 4. Marta and I are aligned but I want your read before sending it to leadership Wednesday.\n\nReview by EOD tomorrow if possible?",
         time: "Yesterday", full_time: "Apr 27, 2026 · 5:14 PM",
         unread: false, starred: true, thread_count: 3,
         tags: &["work", "urgent"], has_attachment: true,
@@ -126,7 +255,7 @@ pub const MESSAGES: &[Message] = &[
         from: "Marta Liu", from_addr: "marta.l@yourcompany.com", initials: "ML",
         subject: "Notes from the customer call (Acme)",
         snippet: "Quick recap from this morning's call with Sarah at Acme. They're expanding the seat count to 240 in May, and asked about SSO timing.",
-        body: "Quick recap from this morning's call with Sarah at Acme.\n\nThey're expanding the seat count to 240 in May, and asked about SSO timing. I committed to a Q3 ETA but said we'd confirm specifics by mid-May.\n\nAction items\n— Confirm SSO timeline with Dan\n— Send updated pricing for 240 seats\n— Schedule technical kickoff for first week of May",
+        body: "Quick recap from this morning's call with Sarah at Acme.\n\nThey're expanding the seat count to 240 in May, and asked about SSO timing. I committed to a Q3 ETA but said we'd confirm specifics by mid-May.\n\nAction items\n— Confirm SSO timeline\n— Send updated pricing for 240 seats\n— Schedule technical kickoff for first week of May",
         time: "Yesterday", full_time: "Apr 27, 2026 · 11:08 AM",
         unread: false, starred: false, thread_count: 2,
         tags: &["sales"], has_attachment: false,
@@ -245,8 +374,8 @@ pub const MESSAGES: &[Message] = &[
         id: "m20", day: "Last week",
         from: "LinkedIn", from_addr: "messages-noreply@linkedin.com", initials: "LI",
         subject: "Sarah Patel sent you a connection request",
-        snippet: "Hi Dan — we met briefly at the Anthropic dev meetup. Loved your talk on DX for AI tooling. Would love to stay in touch.",
-        body: "Sarah Patel · Staff Engineer at Vercel\n\nHi Dan — we met briefly at the Anthropic dev meetup. Loved your talk on DX for AI tooling. Would love to stay in touch.\n\nAccept · Ignore",
+        snippet: "We met briefly at the Anthropic dev meetup. Loved your talk on DX for AI tooling. Would love to stay in touch.",
+        body: "Sarah Patel · Staff Engineer at Vercel\n\nWe met briefly at the Anthropic dev meetup. Loved your talk on DX for AI tooling. Would love to stay in touch.\n\nAccept · Ignore",
         time: "Sun", full_time: "Apr 19, 2026 · 6:14 PM",
         unread: false, starred: false, thread_count: 1,
         tags: &[], has_attachment: false,
@@ -376,7 +505,7 @@ pub const MESSAGES: &[Message] = &[
         from: "Caroline Wu", from_addr: "caroline@yourcompany.com", initials: "CW",
         subject: "Engineering all-hands · Apr 30",
         snippet: "Reminder: eng all-hands on Apr 30 at 13:00 PT. Agenda: Q1 retrospective, Q2 roadmap, demo of Search v2, open Q&A.",
-        body: "Eng all-hands · Apr 30 · 13:00–14:30 PT\n\nAgenda:\n— Q1 retrospective (10 min)\n— Q2 roadmap walkthrough (25 min)\n— Search v2 demo (15 min · Pedro)\n— Demo: new mail client (10 min · Maya & Dan)\n— Open Q&A (30 min)\n\nZoom link in calendar invite.",
+        body: "Eng all-hands · Apr 30 · 13:00–14:30 PT\n\nAgenda:\n— Q1 retrospective (10 min)\n— Q2 roadmap walkthrough (25 min)\n— Search v2 demo (15 min · Pedro)\n— Demo: new mail client (10 min · Maya)\n— Open Q&A (30 min)\n\nZoom link in calendar invite.",
         time: "Apr 9", full_time: "Apr 9, 2026 · 11:00 AM",
         unread: false, starred: false, thread_count: 1,
         tags: &["work"], has_attachment: false,
@@ -678,78 +807,129 @@ pub enum IconKind {
 pub fn LucideIcon(kind: IconKind, #[props(default = 16)] size: u32) -> Element {
     let size_str = format!("{size}px");
     let (fill, paths) = match kind {
-        IconKind::Inbox => ("none", rsx! {
-            path { d: "M22 12h-6l-2 3h-4l-2-3H2" }
-            path { d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z" }
-        }),
-        IconKind::Send => ("none", rsx! {
-            path { d: "m22 2-7 20-4-9-9-4Z" }
-            path { d: "M22 2 11 13" }
-        }),
-        IconKind::Pen => ("none", rsx! {
-            path { d: "M12 20h9" }
-            path { d: "M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z" }
-        }),
-        IconKind::Archive => ("none", rsx! {
-            rect { x: "2", y: "4", width: "20", height: "5", rx: "2" }
-            path { d: "M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9" }
-            path { d: "M10 13h4" }
-        }),
-        IconKind::Trash => ("none", rsx! {
-            path { d: "M3 6h18" }
-            path { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" }
-            path { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" }
-        }),
-        IconKind::StarOutline => ("none", rsx! {
-            path { d: "m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" }
-        }),
-        IconKind::StarFilled => ("currentColor", rsx! {
-            path { d: "m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" }
-        }),
-        IconKind::Reply => ("none", rsx! {
-            polyline { points: "9 17 4 12 9 7" }
-            path { d: "M20 18v-2a4 4 0 0 0-4-4H4" }
-        }),
-        IconKind::ReplyAll => ("none", rsx! {
-            polyline { points: "7 17 2 12 7 7" }
-            polyline { points: "12 17 7 12 12 7" }
-            path { d: "M22 18v-2a4 4 0 0 0-4-4H7" }
-        }),
-        IconKind::Forward => ("none", rsx! {
-            polyline { points: "15 17 20 12 15 7" }
-            path { d: "M4 18v-2a4 4 0 0 1 4-4h12" }
-        }),
-        IconKind::Paperclip => ("none", rsx! {
-            path { d: "m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 17.99 8.83l-8.59 8.57a2 2 0 1 1-2.83-2.83l8.49-8.48" }
-        }),
-        IconKind::More => ("none", rsx! {
-            circle { cx: "12", cy: "12", r: "1" }
-            circle { cx: "12", cy: "5", r: "1" }
-            circle { cx: "12", cy: "19", r: "1" }
-        }),
-        IconKind::Filter => ("none", rsx! {
-            polygon { points: "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" }
-        }),
-        IconKind::Refresh => ("none", rsx! {
-            path { d: "M3 12a9 9 0 0 1 15-6.7L21 8" }
-            path { d: "M21 3v5h-5" }
-            path { d: "M21 12a9 9 0 0 1-15 6.7L3 16" }
-            path { d: "M3 21v-5h5" }
-        }),
-        IconKind::ArrowLeft => ("none", rsx! {
-            path { d: "m12 19-7-7 7-7" }
-            path { d: "M19 12H5" }
-        }),
-        IconKind::Flag => ("none", rsx! {
-            path { d: "M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" }
-            line { x1: "4", y1: "22", x2: "4", y2: "15" }
-        }),
-        IconKind::Snooze => ("none", rsx! {
-            circle { cx: "12", cy: "13", r: "8" }
-            path { d: "M5 3 2 6" }
-            path { d: "m22 6-3-3" }
-            path { d: "M12 9v4l2 2" }
-        }),
+        IconKind::Inbox => (
+            "none",
+            rsx! {
+                path { d: "M22 12h-6l-2 3h-4l-2-3H2" }
+                path { d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z" }
+            },
+        ),
+        IconKind::Send => (
+            "none",
+            rsx! {
+                path { d: "m22 2-7 20-4-9-9-4Z" }
+                path { d: "M22 2 11 13" }
+            },
+        ),
+        IconKind::Pen => (
+            "none",
+            rsx! {
+                path { d: "M12 20h9" }
+                path { d: "M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z" }
+            },
+        ),
+        IconKind::Archive => (
+            "none",
+            rsx! {
+                rect { x: "2", y: "4", width: "20", height: "5", rx: "2" }
+                path { d: "M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9" }
+                path { d: "M10 13h4" }
+            },
+        ),
+        IconKind::Trash => (
+            "none",
+            rsx! {
+                path { d: "M3 6h18" }
+                path { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" }
+                path { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" }
+            },
+        ),
+        IconKind::StarOutline => (
+            "none",
+            rsx! {
+                path { d: "m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" }
+            },
+        ),
+        IconKind::StarFilled => (
+            "currentColor",
+            rsx! {
+                path { d: "m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" }
+            },
+        ),
+        IconKind::Reply => (
+            "none",
+            rsx! {
+                polyline { points: "9 17 4 12 9 7" }
+                path { d: "M20 18v-2a4 4 0 0 0-4-4H4" }
+            },
+        ),
+        IconKind::ReplyAll => (
+            "none",
+            rsx! {
+                polyline { points: "7 17 2 12 7 7" }
+                polyline { points: "12 17 7 12 12 7" }
+                path { d: "M22 18v-2a4 4 0 0 0-4-4H7" }
+            },
+        ),
+        IconKind::Forward => (
+            "none",
+            rsx! {
+                polyline { points: "15 17 20 12 15 7" }
+                path { d: "M4 18v-2a4 4 0 0 1 4-4h12" }
+            },
+        ),
+        IconKind::Paperclip => (
+            "none",
+            rsx! {
+                path { d: "m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 17.99 8.83l-8.59 8.57a2 2 0 1 1-2.83-2.83l8.49-8.48" }
+            },
+        ),
+        IconKind::More => (
+            "none",
+            rsx! {
+                circle { cx: "12", cy: "12", r: "1" }
+                circle { cx: "12", cy: "5", r: "1" }
+                circle { cx: "12", cy: "19", r: "1" }
+            },
+        ),
+        IconKind::Filter => (
+            "none",
+            rsx! {
+                polygon { points: "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" }
+            },
+        ),
+        IconKind::Refresh => (
+            "none",
+            rsx! {
+                path { d: "M3 12a9 9 0 0 1 15-6.7L21 8" }
+                path { d: "M21 3v5h-5" }
+                path { d: "M21 12a9 9 0 0 1-15 6.7L3 16" }
+                path { d: "M3 21v-5h5" }
+            },
+        ),
+        IconKind::ArrowLeft => (
+            "none",
+            rsx! {
+                path { d: "m12 19-7-7 7-7" }
+                path { d: "M19 12H5" }
+            },
+        ),
+        IconKind::Flag => (
+            "none",
+            rsx! {
+                path { d: "M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" }
+                line { x1: "4", y1: "22", x2: "4", y2: "15" }
+            },
+        ),
+        IconKind::Snooze => (
+            "none",
+            rsx! {
+                circle { cx: "12", cy: "13", r: "8" }
+                path { d: "M5 3 2 6" }
+                path { d: "m22 6-3-3" }
+                path { d: "M12 9v4l2 2" }
+            },
+        ),
     };
 
     rsx! {
