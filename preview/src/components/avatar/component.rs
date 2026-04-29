@@ -1,31 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_primitives::avatar::{self, AvatarFallbackProps, AvatarImageProps, AvatarState};
 
-#[derive(Clone, Copy, PartialEq)]
-pub struct AvatarProfile {
-    pub name: &'static str,
-    pub initials: &'static str,
-    pub src: &'static str,
-}
-
-pub const AVATAR_PROFILE_OPTIONS: &[AvatarProfile] = &[
-    AvatarProfile {
-        name: "ealmloff",
-        initials: "EA",
-        src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
-    },
-    AvatarProfile {
-        name: "jkelleyrtp",
-        initials: "JK",
-        src: "https://github.com/jkelleyrtp.png",
-    },
-    AvatarProfile {
-        name: "DioxusLabs",
-        initials: "DX",
-        src: "https://github.com/DioxusLabs.png",
-    },
-];
-
 #[derive(Clone, Copy, PartialEq, Default)]
 pub enum AvatarImageSize {
     #[default]
