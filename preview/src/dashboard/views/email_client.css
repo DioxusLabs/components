@@ -110,10 +110,17 @@
     flex: 0 0 400px;
     border-right: 1px solid var(--primary-color-6);
 }
-.ec-list-pane > .dx-tabs {
+.ec-list-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     border-bottom: 1px solid var(--primary-color-6);
     padding: 0.5rem 0.75rem;
     flex-shrink: 0;
+}
+.ec-list-toolbar > .dx-tabs {
+    flex: 1;
+    min-width: 0;
 }
 .ec-list-pane .dx-tabs-list {
     border-radius: 0.5rem;
@@ -468,10 +475,6 @@
         height: 3rem;
         min-height: 3rem;
         padding: 0 0.75rem;
-    }
-
-    .ec-topbar .dx-input {
-        display: none;
     }
 
     .ec-topbar .dx-button {

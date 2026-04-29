@@ -270,10 +270,7 @@ pub fn EmailClient() -> Element {
                 header { class: "ec-topbar",
                     SidebarTrigger {}
                     Separator { horizontal: false, decorative: true }
-                    h1 { class: "ec-title",
-                        {folder_label}
-                        span { class: "ec-muted", " · {total_count}" }
-                    }
+                    h1 { class: "ec-title", {folder_label} }
                     Input {
                         r#type: "search",
                         "aria-label": "Search mail",
@@ -285,60 +282,59 @@ pub fn EmailClient() -> Element {
                         },
                         placeholder: "Search mail, people, attachments…",
                     }
-                    Button { variant: ButtonVariant::Ghost,
-                        LucideIcon { kind: IconKind::Refresh }
-                    }
-                    SelectMulti::<MessageTag> {
-                        default_values: vec![],
-                        on_values_change: move |values| {
-                            selected_tags.set(values);
-                            read_open.set(false);
-                        },
-                        SelectTrigger {
-                            class: "ec-filter-trigger",
-                            aria_label: "Filter by tag",
-                            LucideIcon { kind: IconKind::Filter }
-                            if !active_selected_tags.is_empty() {
-                                span { class: "ec-filter-count", "{active_selected_tags.len()}" }
-                            }
-                        }
-                        SelectList {
-                            class: "ec-filter-list",
-                            aria_label: "Filter by tag",
-                            SelectGroup {
-                                SelectGroupLabel { "Tags" }
-                                for (index, tag) in MessageTag::ALL.iter().enumerate() {
-                                    SelectOption::<MessageTag> {
-                                        key: "{tag.label()}",
-                                        index,
-                                        value: *tag,
-                                        text_value: "{tag.label()}",
-                                        {tag.label()}
-                                        SelectItemIndicator {}
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
 
                 div { class: if read_open() { "ec-main ec-reading" } else { "ec-main" },
                     section { class: "ec-list-pane",
-                        Tabs {
-                            default_value: "all".to_string(),
-                            horizontal: true,
-                            on_value_change: move |v: String| {
-                                active_tab.set(v);
-                                read_open.set(false);
-                            },
-                            TabList {
-                                for (idx, tab) in TABS.iter().enumerate() {
-                                    TabTrigger {
-                                        key: "{tab.id}",
-                                        value: tab.id.to_string(),
-                                        index: idx,
-                                        {tab.label}
-                                        span { class: "ec-muted", " {tab_count(&messages_snapshot, active_folder_id.as_str(), tab.id, active_search_query.as_str(), &active_selected_tags)}" }
+                        div { class: "ec-list-toolbar",
+                            Tabs {
+                                default_value: "all".to_string(),
+                                horizontal: true,
+                                on_value_change: move |v: String| {
+                                    active_tab.set(v);
+                                    read_open.set(false);
+                                },
+                                TabList {
+                                    for (idx, tab) in TABS.iter().enumerate() {
+                                        TabTrigger {
+                                            key: "{tab.id}",
+                                            value: tab.id.to_string(),
+                                            index: idx,
+                                            {tab.label}
+                                            span { class: "ec-muted", " {tab_count(&messages_snapshot, active_folder_id.as_str(), tab.id, active_search_query.as_str(), &active_selected_tags)}" }
+                                        }
+                                    }
+                                }
+                            }
+                            SelectMulti::<MessageTag> {
+                                default_values: vec![],
+                                on_values_change: move |values| {
+                                    selected_tags.set(values);
+                                    read_open.set(false);
+                                },
+                                SelectTrigger {
+                                    class: "ec-filter-trigger",
+                                    aria_label: "Filter by tag",
+                                    LucideIcon { kind: IconKind::Filter }
+                                    if !active_selected_tags.is_empty() {
+                                        span { class: "ec-filter-count", "{active_selected_tags.len()}" }
+                                    }
+                                }
+                                SelectList {
+                                    class: "ec-filter-list",
+                                    aria_label: "Filter by tag",
+                                    SelectGroup {
+                                        SelectGroupLabel { "Tags" }
+                                        for (index, tag) in MessageTag::ALL.iter().enumerate() {
+                                            SelectOption::<MessageTag> {
+                                                key: "{tag.label()}",
+                                                index,
+                                                value: *tag,
+                                                text_value: "{tag.label()}",
+                                                {tag.label()}
+                                                SelectItemIndicator {}
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -717,11 +713,9 @@ fn message_matches_search(state: &MessageState, query: &str) -> bool {
 }
 
 fn message_matches_selected_tags(state: &MessageState, selected_tags: &[MessageTag]) -> bool {
-    selected_tags.is_empty()
-        || state
-            .tags
-            .iter()
-            .any(|tag| selected_tags.iter().any(|s| s == tag))
+    selected_tags
+        .iter()
+        .all(|s| state.tags.iter().any(|tag| tag == s))
 }
 
 fn message_matches_filters(
