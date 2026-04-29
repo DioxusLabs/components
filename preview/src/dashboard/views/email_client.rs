@@ -37,8 +37,6 @@ use crate::dashboard::common::{
 };
 use crate::theme::DarkModeToggle;
 
-const STYLE: &str = include_str!("email_client.css");
-
 #[component]
 pub fn EmailClient() -> Element {
     let mut messages = use_signal(seed_message_states);
@@ -152,6 +150,8 @@ pub fn EmailClient() -> Element {
             entry.folder_id = "inbox".to_string();
             entry.snoozed = false;
         }
+        drop(msgs);
+        read_open.set(false);
     };
     let mut move_to_trash_selected = move |_| {
         let uid = selected_id.read().clone();
@@ -183,7 +183,7 @@ pub fn EmailClient() -> Element {
         .collect();
 
     rsx! {
-        document::Style { {STYLE} }
+        document::Link { rel: "stylesheet", href: asset!("./email_client.css") }
 
         SidebarProvider {
             Sidebar {
@@ -309,6 +309,7 @@ pub fn EmailClient() -> Element {
                                 }
                             }
                             SelectMulti::<MessageTag> {
+                                values: Some(active_selected_tags.clone()),
                                 default_values: vec![],
                                 on_values_change: move |values| {
                                     selected_tags.set(values);
@@ -471,7 +472,8 @@ pub fn EmailClient() -> Element {
                                                         )}
                                                     }
                                                     for tag in selected.tags.iter() {
-                                                        button {
+                                                        Button {
+                                                            variant: ButtonVariant::Ghost,
                                                             key: "{tag.label()}",
                                                             r#type: "button",
                                                             class: "ec-tag-remove",
@@ -489,6 +491,7 @@ pub fn EmailClient() -> Element {
                                                     }
                                                     SelectMulti::<MessageTag> {
                                                         key: "{selected.uid}-tagedit",
+                                                        values: Some(selected.tags.clone()),
                                                         default_values: selected.tags.clone(),
                                                         on_values_change: move |values: Vec<MessageTag>| {
                                                             let mut set_tags = set_selected_tags;
@@ -800,8 +803,10 @@ fn MessageRow(
 ) -> Element {
     let is_selected = selected_uid == state.uid;
     let uid_for_click = state.uid.clone();
+    let uid_for_key = state.uid.clone();
     let uid_for_star = state.uid.clone();
     let uid_for_trash = state.uid.clone();
+    let selected_uid_for_trash = selected_uid.clone();
     // Read live state from the messages signal — the cloned `state` prop is
     // re-cloned by VirtualList from a snapshot taken at row creation time and
     // does not refresh on in-place mutations like toggling starred.
@@ -831,9 +836,19 @@ fn MessageRow(
     rsx! {
         Item {
             class: classes,
+            role: "option",
+            tabindex: 0,
             onclick: move |_| {
                 selected_id.set(uid_for_click.clone());
                 read_open.set(true);
+            },
+            onkeydown: move |event: Event<KeyboardData>| {
+                let key = event.key();
+                if key == Key::Enter || key == Key::Character(" ".to_string()) {
+                    event.prevent_default();
+                    selected_id.set(uid_for_key.clone());
+                    read_open.set(true);
+                }
             },
             "aria-selected": if is_selected { "true" } else { "false" },
             "data-selected": if is_selected { "true" } else { "false" },
@@ -877,24 +892,32 @@ fn MessageRow(
             ItemActions {
                 span { class: "ec-muted ec-row-time", {m.time} }
                 div { class: "ec-row-action-group",
-                button {
+                Button {
+                    variant: ButtonVariant::Ghost,
                     r#type: "button",
                     class: "ec-row-action ec-row-action-trash",
                     aria_label: "Move to trash",
+                    onkeydown: move |e: Event<KeyboardData>| e.stop_propagation(),
                     onclick: move |e: Event<MouseData>| {
                         e.stop_propagation();
                         let mut msgs = messages.write();
                         if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid_for_trash) {
                             entry.folder_id = "trash".to_string();
                         }
+                        drop(msgs);
+                        if uid_for_trash == selected_uid_for_trash {
+                            read_open.set(false);
+                        }
                     },
                     LucideIcon { kind: IconKind::Trash, size: 16 }
                 }
-                button {
+                Button {
+                    variant: ButtonVariant::Ghost,
                     r#type: "button",
                     class: "ec-row-action ec-row-action-star",
                     "data-active": if starred { "true" } else { "false" },
                     aria_label: if starred { "Unstar message" } else { "Star message" },
+                    onkeydown: move |e: Event<KeyboardData>| e.stop_propagation(),
                     onclick: move |e: Event<MouseData>| {
                         e.stop_propagation();
                         let mut msgs = messages.write();
@@ -912,4 +935,3 @@ fn MessageRow(
         }
     }
 }
-

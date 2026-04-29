@@ -883,13 +883,9 @@ pub enum IconKind {
     Trash,
     StarOutline,
     StarFilled,
-    Reply,
-    ReplyAll,
-    Forward,
     Paperclip,
     More,
     Filter,
-    Refresh,
     ArrowLeft,
     Flag,
     Snooze,
@@ -948,28 +944,6 @@ pub fn LucideIcon(kind: IconKind, #[props(default = 16)] size: u32) -> Element {
                 path { d: "m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" }
             },
         ),
-        IconKind::Reply => (
-            "none",
-            rsx! {
-                polyline { points: "9 17 4 12 9 7" }
-                path { d: "M20 18v-2a4 4 0 0 0-4-4H4" }
-            },
-        ),
-        IconKind::ReplyAll => (
-            "none",
-            rsx! {
-                polyline { points: "7 17 2 12 7 7" }
-                polyline { points: "12 17 7 12 12 7" }
-                path { d: "M22 18v-2a4 4 0 0 0-4-4H7" }
-            },
-        ),
-        IconKind::Forward => (
-            "none",
-            rsx! {
-                polyline { points: "15 17 20 12 15 7" }
-                path { d: "M4 18v-2a4 4 0 0 1 4-4h12" }
-            },
-        ),
         IconKind::Paperclip => (
             "none",
             rsx! {
@@ -988,15 +962,6 @@ pub fn LucideIcon(kind: IconKind, #[props(default = 16)] size: u32) -> Element {
             "none",
             rsx! {
                 polygon { points: "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" }
-            },
-        ),
-        IconKind::Refresh => (
-            "none",
-            rsx! {
-                path { d: "M3 12a9 9 0 0 1 15-6.7L21 8" }
-                path { d: "M21 3v5h-5" }
-                path { d: "M21 12a9 9 0 0 1-15 6.7L3 16" }
-                path { d: "M3 21v-5h5" }
             },
         ),
         IconKind::ArrowLeft => (

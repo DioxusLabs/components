@@ -91,6 +91,7 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
         item_size_cache: HashMap::new(),
         scroll_adjustments: 0,
         stable_total_size: None,
+        stable_measurement_count: None,
         deferred_adjustments: 0,
     });
 
@@ -116,13 +117,23 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
 
             let scrollEndTimer = null;
             let lastOffset = null;
+            let lastViewport = null;
+            let lastIsScrolling = null;
 
             function publish(isScrolling) {
                 const scroll = Math.round(container.scrollTop);
-                // Deduplicate: don't send if offset hasn't changed
-                if (!isScrolling && scroll === lastOffset) return;
-                lastOffset = scroll;
                 const viewport = Math.min(container.clientHeight, window.innerHeight) || 600;
+                // Deduplicate only if the full scroll state is unchanged.
+                if (
+                    scroll === lastOffset &&
+                    viewport === lastViewport &&
+                    isScrolling === lastIsScrolling
+                ) {
+                    return;
+                }
+                lastOffset = scroll;
+                lastViewport = viewport;
+                lastIsScrolling = isScrolling;
                 dioxus.send({
                     offset: scroll,
                     viewport: viewport,

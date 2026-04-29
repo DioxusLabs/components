@@ -124,33 +124,44 @@
     font-weight: 600;
 }
 
-/* Message row — leans on Item, just adds hover/selected/unread.
- * Avatar and action stack are pulled out of flow so the preview content
- * (subject, snippet, tags) can wrap below the avatar at full width. */
-.ec-row {
-    display: block;
+/* Message row: keep the Item structure while using a grid to reserve
+ * stable space for avatar, content, and trailing actions at every width. */
+.dx-item.ec-row {
     position: relative;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    margin: 0.125rem 0.5rem;
-    padding: 0.875rem 0.875rem !important;
+    display: grid;
+    width: calc(100% - 1rem);
+    box-sizing: border-box;
+    align-items: flex-start;
+    padding: 0.875rem !important;
     border: 1px solid transparent;
+    border-radius: 0.5rem;
+    margin: 0.125rem 0.5rem;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    gap: 0 0.75rem;
+    grid-template-columns: 2rem minmax(0, 1fr) max-content;
+    text-align: left;
 }
 .ec-row > .dx-item-media {
-    position: absolute;
-    top: 0.875rem;
-    left: 0.875rem;
+    position: static;
+    grid-column: 1;
+    grid-row: 1;
+    transform: none;
+}
+.dx-item.ec-row:has([data-slot="item-description"]) > .dx-item-media {
+    align-self: flex-start;
+    transform: none;
 }
 .ec-row > .dx-item-content {
     min-width: 0;
+    grid-column: 2;
+    width: 100%;
 }
 .ec-row .dx-item-content > .dx-item-title {
-    padding-left: 2.75rem;
-    padding-right: 4.5rem;
+    min-width: 0;
     min-height: 1.5rem;
-}
-.ec-row .dx-item-content > .ec-row-sender {
-    padding-left: 2.75rem;
 }
 .ec-row:hover:not([data-selected="true"]) {
     background: var(--primary-color-3);
@@ -164,6 +175,7 @@
 .ec-row .dx-item-title {
     display: flex;
     width: 100%;
+    min-width: 0;
     align-items: baseline;
     gap: 0.5rem;
     font-size: 0.9375rem;
@@ -172,6 +184,7 @@
     line-height: 1.35;
 }
 .ec-row-subject {
+    display: block;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -205,6 +218,7 @@
 }
 .ec-row-tags {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
     font-size: 0.75rem;
@@ -212,12 +226,13 @@
 }
 
 .ec-row .dx-item-actions {
-    position: absolute;
-    top: 0.875rem;
-    right: 0.875rem;
+    position: static;
     display: flex;
+    grid-column: 3;
+    grid-row: 1 / span 2;
     flex-direction: column;
     align-items: flex-end;
+    min-width: 3.75rem;
     gap: 0.25rem;
     flex-shrink: 0;
 }
@@ -228,10 +243,12 @@
     gap: 0.125rem;
 }
 
-.ec-row-action {
+.dx-button.ec-row-action {
     display: inline-flex;
     width: 1.75rem;
+    min-width: 1.75rem;
     height: 1.75rem;
+    min-height: 1.75rem;
     align-items: center;
     justify-content: center;
     padding: 0;
@@ -240,23 +257,23 @@
     background: transparent;
     color: var(--secondary-color-4);
     cursor: pointer;
-    opacity: 0;
-    transition: opacity 120ms ease, background 120ms ease, color 120ms ease;
+    opacity: 0.72;
+    font-size: 0;
 }
 
-.ec-row:hover .ec-row-action,
-.ec-row:focus-within .ec-row-action,
-.ec-row-action:focus-visible,
-.ec-row-action[data-active="true"] {
+.ec-row:hover .dx-button.ec-row-action,
+.ec-row:focus-within .dx-button.ec-row-action,
+.dx-button.ec-row-action:focus-visible,
+.dx-button.ec-row-action[data-active="true"] {
     opacity: 1;
 }
 
-.ec-row-action:hover {
+.dx-button.ec-row-action[data-style="ghost"]:hover {
     background: var(--primary-color-4);
     color: var(--secondary-color-1);
 }
 
-.ec-row-action[data-active="true"] {
+.dx-button.ec-row-action[data-active="true"] {
     color: var(--secondary-color-1);
 }
 .ec-dot {
@@ -387,19 +404,20 @@
     align-items: center;
     gap: 0.5rem;
 }
-.ec-thread-hero-meta button.ec-tag-remove {
-    appearance: none;
-    background: transparent;
-    border: 0;
+.ec-thread-hero-meta .ec-tag-remove.dx-button {
+    display: inline-flex;
     padding: 0;
     margin: 0;
-    cursor: pointer;
-    font: inherit;
+    border-radius: 999px;
+    background: transparent;
     color: inherit;
-    display: inline-flex;
 }
-.ec-thread-hero-meta button.ec-tag-remove:hover .dx-badge,
-.ec-thread-hero-meta button.ec-tag-remove:focus-visible .dx-badge {
+.ec-thread-hero-meta .ec-tag-remove.dx-button[data-style="ghost"]:hover,
+.ec-thread-hero-meta .ec-tag-remove.dx-button[data-style="ghost"]:focus-visible {
+    background: transparent;
+}
+.ec-thread-hero-meta .ec-tag-remove.dx-button:hover .dx-badge,
+.ec-thread-hero-meta .ec-tag-remove.dx-button:focus-visible .dx-badge {
     background: color-mix(in oklab, var(--primary-color-6) 65%, transparent);
 }
 .ec-thread-hero-meta .ec-tag-edit-trigger {
