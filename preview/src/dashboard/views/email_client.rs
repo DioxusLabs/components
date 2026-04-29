@@ -12,7 +12,7 @@ use crate::components::dropdown_menu::component::{
 };
 use crate::components::input::Input;
 use crate::components::item::{
-    ItemActions, ItemContent, ItemDescription, ItemMedia, ItemMediaVariant, ItemTitle,
+    Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemMediaVariant, ItemTitle,
 };
 use crate::components::select::{
     SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectMulti, SelectOption,
@@ -605,16 +605,16 @@ pub fn EmailClient() -> Element {
                                             value: "{reply_draft}",
                                             oninput: move |event: FormEvent| reply_draft.set(event.value()),
                                         }
-                                    }
-                                    div { class: "ec-thread-compose-actions",
-                                        Button { variant: ButtonVariant::Secondary,
-                                            LucideIcon { kind: IconKind::Paperclip, size: 14 }
-                                        }
-                                        Button {
-                                            variant: ButtonVariant::Primary,
-                                            disabled: reply_draft.read().trim().is_empty(),
-                                            LucideIcon { kind: IconKind::Send, size: 14 }
-                                            "Send"
+                                        div { class: "ec-thread-compose-actions",
+                                            Button { variant: ButtonVariant::Secondary,
+                                                LucideIcon { kind: IconKind::Paperclip, size: 14 }
+                                            }
+                                            Button {
+                                                variant: ButtonVariant::Primary,
+                                                disabled: reply_draft.read().trim().is_empty(),
+                                                LucideIcon { kind: IconKind::Send, size: 14 }
+                                                "Send"
+                                            }
                                         }
                                     }
                                 }
@@ -829,8 +829,8 @@ fn MessageRow(
     }
 
     rsx! {
-        div {
-            class: "dx-item {classes}",
+        Item {
+            class: classes,
             onclick: move |_| {
                 selected_id.set(uid_for_click.clone());
                 read_open.set(true);
@@ -852,7 +852,6 @@ fn MessageRow(
             ItemContent {
                 ItemTitle {
                     span { {m.from} }
-                    span { class: "ec-muted ec-row-time", {m.time} }
                 }
                 div {
                     {m.subject}
@@ -879,6 +878,8 @@ fn MessageRow(
                 }
             }
             ItemActions {
+                span { class: "ec-muted ec-row-time", {m.time} }
+                div { class: "ec-row-action-group",
                 button {
                     r#type: "button",
                     class: "ec-row-action ec-row-action-star",
@@ -908,6 +909,7 @@ fn MessageRow(
                         }
                     },
                     LucideIcon { kind: IconKind::Trash, size: 16 }
+                }
                 }
             }
         }

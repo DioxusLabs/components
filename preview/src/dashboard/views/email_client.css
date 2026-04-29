@@ -124,13 +124,30 @@
     font-weight: 600;
 }
 
-/* Message row — leans on Item, just adds hover/selected/unread */
+/* Message row — leans on Item, just adds hover/selected/unread.
+ * Avatar and action stack are pulled out of flow so the preview content
+ * (subject, snippet, tags) can wrap below the avatar at full width. */
 .ec-row {
+    display: block;
+    position: relative;
     border-radius: 0.5rem;
     cursor: pointer;
     margin: 0.125rem 0.5rem;
     padding: 0.875rem 0.875rem !important;
     border: 1px solid transparent;
+}
+.ec-row > .dx-item-media {
+    position: absolute;
+    top: 0.875rem;
+    left: 0.875rem;
+}
+.ec-row > .dx-item-content {
+    min-width: 0;
+}
+.ec-row .dx-item-content > .dx-item-title {
+    padding-left: 2.75rem;
+    padding-right: 4.5rem;
+    min-height: 2rem;
 }
 .ec-row:hover:not([data-selected="true"]) {
     background: var(--primary-color-3);
@@ -149,8 +166,7 @@
 .ec-row .dx-item-title {
     display: flex;
     width: 100%;
-    justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     gap: 0.5rem;
 }
 .ec-row-time {
@@ -166,10 +182,20 @@
 }
 
 .ec-row .dx-item-actions {
+    position: absolute;
+    top: 0.875rem;
+    right: 0.875rem;
     display: flex;
-    align-self: center;
-    gap: 0.125rem;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
     flex-shrink: 0;
+}
+
+.ec-row-action-group {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
 }
 
 .ec-row-action {
@@ -263,6 +289,7 @@
         width: 2rem;
         height: 2rem;
         padding: 0;
+        gap: 0;
         font-size: 0;
         white-space: nowrap;
     }
@@ -438,14 +465,15 @@
     box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
 }
 .ec-thread-compose-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.875rem;
+    display: block;
 }
 .ec-thread-compose-row {
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 0.75rem;
+}
+.ec-thread-compose-row .dx-avatar {
+    align-self: flex-start;
 }
 .ec-thread-compose-row .dx-textarea {
     flex: 1;
@@ -458,10 +486,9 @@
 }
 .ec-thread-compose-actions {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    flex-direction: column;
+    align-self: flex-end;
     gap: 0.5rem;
-    padding-left: 2.75rem;
 }
 .ec-thread-compose-actions .dx-button {
     display: inline-flex;
@@ -586,8 +613,7 @@
         gap: 0.25rem;
     }
 
-    .ec-thread-msg-body,
-    .ec-thread-compose-actions {
+    .ec-thread-msg-body {
         padding-left: 0;
     }
 }
