@@ -21,13 +21,13 @@
     margin-left: auto;
     min-width: 12rem;
 }
-.ec-filter-trigger.dx-select-trigger {
-    min-height: 2.25rem;
-    padding: 0.5rem 0.625rem;
+.ec-list-toolbar .dx-select-trigger {
+    min-height: 2rem;
+    padding: 0.375rem 0.5rem;
     border-radius: 0.375rem;
     gap: 0.375rem;
 }
-.ec-filter-trigger .dx-select-expand-icon {
+.ec-list-toolbar .dx-select-expand-icon {
     display: none;
 }
 .ec-filter-count {
@@ -65,31 +65,6 @@
     color: var(--primary-color);
 }
 
-.dx-sidebar-info-block {
-    display: grid;
-    min-width: 0;
-    flex: 1;
-    font-size: 0.875rem;
-    line-height: 1.25;
-    text-align: left;
-}
-
-.dx-sidebar-info-title,
-.dx-sidebar-info-subtitle {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.dx-sidebar-info-title {
-    font-weight: 600;
-}
-
-.dx-sidebar-info-subtitle {
-    font-size: 0.75rem;
-    opacity: 0.7;
-}
-
 /* Split layout */
 .ec-main {
     display: flex;
@@ -119,7 +94,7 @@
     flex-shrink: 0;
 }
 .ec-list-toolbar > .dx-tabs {
-    flex: 1;
+    width: auto;
     min-width: 0;
 }
 .ec-list-pane .dx-tabs-list {
@@ -189,6 +164,45 @@
     font-size: 0.75rem;
     margin-top: 0.125rem;
 }
+
+.ec-row .dx-item-actions {
+    display: flex;
+    align-self: center;
+    gap: 0.125rem;
+    flex-shrink: 0;
+}
+
+.ec-row-action {
+    display: inline-flex;
+    width: 1.75rem;
+    height: 1.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--secondary-color-4);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.ec-row:hover .ec-row-action,
+.ec-row:focus-within .ec-row-action,
+.ec-row-action:focus-visible,
+.ec-row-action[data-active="true"] {
+    opacity: 1;
+}
+
+.ec-row-action:hover {
+    background: var(--primary-color-4);
+    color: var(--secondary-color-1);
+}
+
+.ec-row-action[data-active="true"] {
+    color: var(--secondary-color-1);
+}
 .ec-dot {
     width: 6px;
     height: 6px;
@@ -204,6 +218,7 @@
     min-width: 0;
     min-height: 0;
     background: var(--primary-color-3);
+    container-type: inline-size;
 }
 .ec-reading .ec-read-pane {
     display: flex;
@@ -213,8 +228,14 @@
     padding: 0.5rem 1rem;
     background: var(--primary-color);
     flex-shrink: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
     box-shadow: none;
     border-radius: 0;
+}
+.ec-read-pane > .dx-toolbar::-webkit-scrollbar {
+    display: none;
 }
 .ec-read-pane .dx-toolbar button,
 .ec-topbar .dx-button {
@@ -228,6 +249,35 @@
     justify-content: flex-end;
     gap: 0.5rem;
     font-size: 0.75rem;
+}
+
+/*
+ * When the read pane is too narrow to fit every action with its label,
+ * collapse the toolbar to icon-only. Container query (vs media query) means
+ * this fires whether the pane is narrow because the viewport is small or
+ * because the list pane is taking up most of the width.
+ */
+@container (max-width: 640px) {
+    .ec-read-pane .dx-toolbar button {
+        flex: 0 0 2rem;
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        font-size: 0;
+        white-space: nowrap;
+    }
+
+    .ec-read-pane .dx-toolbar button svg {
+        flex: 0 0 auto;
+    }
+
+    .ec-read-pane .dx-toolbar-separator {
+        display: none;
+    }
+
+    .ec-toolbar-end .ec-muted {
+        display: none;
+    }
 }
 
 .ec-read-body {

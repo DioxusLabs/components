@@ -12,7 +12,7 @@ use crate::components::dropdown_menu::component::{
 };
 use crate::components::input::Input;
 use crate::components::item::{
-    Item, ItemContent, ItemDescription, ItemMedia, ItemMediaVariant, ItemTitle,
+    ItemActions, ItemContent, ItemDescription, ItemMedia, ItemMediaVariant, ItemTitle,
 };
 use crate::components::select::{
     SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectMulti, SelectOption,
@@ -35,6 +35,7 @@ use crate::dashboard::common::{
     lookup_message, seed_message_states, IconKind, LucideIcon, MessageState, MessageTag, FOLDERS,
     TABS,
 };
+use crate::theme::DarkModeToggle;
 
 const STYLE: &str = include_str!("email_client.css");
 
@@ -282,6 +283,7 @@ pub fn EmailClient() -> Element {
                         },
                         placeholder: "Search mail, people, attachments…",
                     }
+                    DarkModeToggle {}
                 }
 
                 div { class: if read_open() { "ec-main ec-reading" } else { "ec-main" },
@@ -363,6 +365,7 @@ pub fn EmailClient() -> Element {
                                             selected_id,
                                             selected_uid: selected_uid.clone(),
                                             read_open,
+                                            messages,
                                         }
                                     }
                                 }
@@ -769,8 +772,7 @@ fn tab_count(
 fn estimate_message_row_height(state: &MessageState) -> u32 {
     let m = lookup_message(state.source_id);
     let snippet_lines = if m.snippet.len() > 78 { 2 } else { 1 };
-    let has_meta_row =
-        !state.tags.is_empty() || m.has_attachment || state.starred || state.flagged;
+    let has_meta_row = !state.tags.is_empty() || m.has_attachment || state.starred || state.flagged;
 
     32  // vertical padding + borders + margins
         + 19 // sender/title row
@@ -794,24 +796,41 @@ fn MessageRow(
     mut selected_id: Signal<String>,
     selected_uid: String,
     mut read_open: Signal<bool>,
+    mut messages: Signal<Vec<MessageState>>,
 ) -> Element {
-    let m = lookup_message(state.source_id);
     let is_selected = selected_uid == state.uid;
     let uid_for_click = state.uid.clone();
+    let uid_for_star = state.uid.clone();
+    let uid_for_trash = state.uid.clone();
+    // Read live state from the messages signal — the cloned `state` prop is
+    // re-cloned by VirtualList from a snapshot taken at row creation time and
+    // does not refresh on in-place mutations like toggling starred.
+    let live = {
+        let msgs = messages.read();
+        msgs.iter()
+            .find(|s| s.uid == state.uid)
+            .cloned()
+            .unwrap_or_else(|| state.clone())
+    };
+    let m = lookup_message(live.source_id);
+    let starred = live.starred;
+    let unread = live.unread;
+    let flagged = live.flagged;
+    let tags = live.tags.clone();
     let mut classes = String::from("ec-row");
-    if state.unread {
+    if unread {
         classes.push_str(" ec-unread");
     }
-    if state.starred {
+    if starred {
         classes.push_str(" ec-starred");
     }
-    if state.flagged {
+    if flagged {
         classes.push_str(" ec-flagged");
     }
 
     rsx! {
-        Item {
-            class: classes,
+        div {
+            class: "dx-item {classes}",
             onclick: move |_| {
                 selected_id.set(uid_for_click.clone());
                 read_open.set(true);
@@ -842,15 +861,12 @@ fn MessageRow(
                     }
                 }
                 ItemDescription { {m.snippet} }
-                if !state.tags.is_empty() || m.has_attachment || state.starred || state.flagged {
+                if !tags.is_empty() || m.has_attachment || flagged {
                     div { class: "ec-muted ec-row-tags",
-                        if state.starred {
-                            LucideIcon { kind: IconKind::StarFilled, size: 12 }
-                        }
-                        if state.flagged {
+                        if flagged {
                             LucideIcon { kind: IconKind::Flag, size: 12 }
                         }
-                        for (i, tag) in state.tags.iter().enumerate() {
+                        for (i, tag) in tags.iter().enumerate() {
                             span { key: "{tag.label()}",
                                 if i > 0 { " · " }
                                 {tag.label()}
@@ -862,6 +878,39 @@ fn MessageRow(
                     }
                 }
             }
+            ItemActions {
+                button {
+                    r#type: "button",
+                    class: "ec-row-action ec-row-action-star",
+                    "data-active": if starred { "true" } else { "false" },
+                    aria_label: if starred { "Unstar message" } else { "Star message" },
+                    onclick: move |e: Event<MouseData>| {
+                        e.stop_propagation();
+                        let mut msgs = messages.write();
+                        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid_for_star) {
+                            entry.starred = !entry.starred;
+                        }
+                    },
+                    LucideIcon {
+                        kind: if starred { IconKind::StarFilled } else { IconKind::StarOutline },
+                        size: 16,
+                    }
+                }
+                button {
+                    r#type: "button",
+                    class: "ec-row-action ec-row-action-trash",
+                    aria_label: "Move to trash",
+                    onclick: move |e: Event<MouseData>| {
+                        e.stop_propagation();
+                        let mut msgs = messages.write();
+                        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid_for_trash) {
+                            entry.folder_id = "trash".to_string();
+                        }
+                    },
+                    LucideIcon { kind: IconKind::Trash, size: 16 }
+                }
+            }
         }
     }
 }
+

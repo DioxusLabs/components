@@ -1,4 +1,6 @@
-use crate::components::avatar::{Avatar, AvatarFallback, AvatarImage, AvatarImageSize};
+use crate::components::avatar::{
+    Avatar, AvatarFallback, AvatarImage, AvatarImageSize, AvatarShape,
+};
 use crate::components::button::{Button, ButtonVariant};
 use crate::components::collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger};
 use crate::components::dropdown_menu::{
@@ -13,8 +15,8 @@ use crate::components::sidebar::{
     SidebarTrigger, SidebarVariant,
 };
 use crate::components::skeleton::Skeleton;
-use dioxus_primitives::icon;
 use dioxus::prelude::*;
+use dioxus_primitives::icon;
 
 #[derive(Clone, PartialEq)]
 struct Team {
@@ -43,18 +45,9 @@ struct Project {
 }
 
 const TEAMS: &[Team] = &[
-    Team {
-        name: "Acme Inc",
-        plan: "Enterprise",
-    },
-    Team {
-        name: "Acme Corp.",
-        plan: "Startup",
-    },
-    Team {
-        name: "Evil Corp.",
-        plan: "Free",
-    },
+    Team { name: "Acme Inc", plan: "Enterprise" },
+    Team { name: "Acme Corp.", plan: "Startup" },
+    Team { name: "Evil Corp.", plan: "Free" },
 ];
 
 const NAV_MAIN: &[NavMainItem] = &[
@@ -63,18 +56,9 @@ const NAV_MAIN: &[NavMainItem] = &[
         url: "#",
         is_active: true,
         items: &[
-            SubItem {
-                title: "History",
-                url: "#",
-            },
-            SubItem {
-                title: "Starred",
-                url: "#",
-            },
-            SubItem {
-                title: "Settings",
-                url: "#",
-            },
+            SubItem { title: "History", url: "#" },
+            SubItem { title: "Starred", url: "#" },
+            SubItem { title: "Settings", url: "#" },
         ],
     },
     NavMainItem {
@@ -82,18 +66,9 @@ const NAV_MAIN: &[NavMainItem] = &[
         url: "#",
         is_active: false,
         items: &[
-            SubItem {
-                title: "Genesis",
-                url: "#",
-            },
-            SubItem {
-                title: "Explorer",
-                url: "#",
-            },
-            SubItem {
-                title: "Quantum",
-                url: "#",
-            },
+            SubItem { title: "Genesis", url: "#" },
+            SubItem { title: "Explorer", url: "#" },
+            SubItem { title: "Quantum", url: "#" },
         ],
     },
     NavMainItem {
@@ -101,22 +76,10 @@ const NAV_MAIN: &[NavMainItem] = &[
         url: "#",
         is_active: false,
         items: &[
-            SubItem {
-                title: "Introduction",
-                url: "#",
-            },
-            SubItem {
-                title: "Get Started",
-                url: "#",
-            },
-            SubItem {
-                title: "Tutorials",
-                url: "#",
-            },
-            SubItem {
-                title: "Changelog",
-                url: "#",
-            },
+            SubItem { title: "Introduction", url: "#" },
+            SubItem { title: "Get Started", url: "#" },
+            SubItem { title: "Tutorials", url: "#" },
+            SubItem { title: "Changelog", url: "#" },
         ],
     },
     NavMainItem {
@@ -124,39 +87,18 @@ const NAV_MAIN: &[NavMainItem] = &[
         url: "#",
         is_active: false,
         items: &[
-            SubItem {
-                title: "General",
-                url: "#",
-            },
-            SubItem {
-                title: "Team",
-                url: "#",
-            },
-            SubItem {
-                title: "Billing",
-                url: "#",
-            },
-            SubItem {
-                title: "Limits",
-                url: "#",
-            },
+            SubItem { title: "General", url: "#" },
+            SubItem { title: "Team", url: "#" },
+            SubItem { title: "Billing", url: "#" },
+            SubItem { title: "Limits", url: "#" },
         ],
     },
 ];
 
 const PROJECTS: &[Project] = &[
-    Project {
-        name: "Design Engineering",
-        url: "#",
-    },
-    Project {
-        name: "Sales & Marketing",
-        url: "#",
-    },
-    Project {
-        name: "Travel",
-        url: "#",
-    },
+    Project { name: "Design Engineering", url: "#" },
+    Project { name: "Sales & Marketing", url: "#" },
+    Project { name: "Travel", url: "#" },
 ];
 
 #[component]
@@ -171,9 +113,7 @@ pub fn Demo() -> Element {
                 variant: SidebarVariant::Floating,
                 collapsible: collapsible(),
                 side: side(),
-                SidebarHeader {
-                    TeamSwitcher { teams: TEAMS }
-                }
+                SidebarHeader { TeamSwitcher { teams: TEAMS } }
                 SidebarContent {
                     NavMain { items: NAV_MAIN }
                     NavProjects { projects: PROJECTS }
@@ -182,17 +122,17 @@ pub fn Demo() -> Element {
                 SidebarRail {}
             }
             SidebarInset {
-                header { style: "display:flex; align-items:center; justify-content:space-between; height:3.5rem; flex-shrink:0; padding:0 1rem; border-bottom:1px solid var(--dx-sidebar-border); background:var(--primary-color-1);",
-                    div { style: "display: flex; align-items: center; gap: 0.75rem;",
+                header { class: "dx-sidebar-demo-header",
+                    div { class: "dx-sidebar-demo-header-inner",
                         SidebarTrigger {}
                         Separator { height: "1rem", horizontal: false }
                         span { "Sidebar Setting" }
                     }
                 }
-                div { style: "display:flex; flex:1; flex-direction:column; gap:1.5rem; padding:1.5rem; min-height:0; overflow-y:auto; overflow-x:hidden;",
+                div { class: "dx-sidebar-demo-content",
                     DemoSettingControls { side, collapsible }
-                    Skeleton { style: "height: 10rem; width: 100%; flex-shrink:0;" }
-                    Skeleton { style: "height: 20rem; width: 100%; flex-shrink:0;" }
+                    Skeleton { style: "height: 10rem; width: 100%; flex-shrink: 0;" }
+                    Skeleton { style: "height: 20rem; width: 100%; flex-shrink: 0;" }
                 }
             }
         }
@@ -210,9 +150,7 @@ fn TeamSwitcher(teams: &'static [Team]) -> Element {
                     DropdownMenuTrigger {
                         as: move |attributes: Vec<Attribute>| rsx! {
                             SidebarMenuButton { size: SidebarMenuButtonSize::Lg, attributes,
-                                div { style: "display:flex; flex-shrink:0; align-items:center; justify-content:center; width:2rem; height:2rem; aspect-ratio:1; border-radius:0.5rem; background:var(--dx-sidebar-accent); color:var(--dx-sidebar-accent-foreground);",
-                                    Icon {}
-                                }
+                                div { class: "dx-sidebar-team-icon", Icon {} }
                                 div { class: "dx-sidebar-info-block",
                                     span { class: "dx-sidebar-info-title", {teams[active_team()].name} }
                                     span { class: "dx-sidebar-info-subtitle", {teams[active_team()].plan} }
@@ -222,9 +160,7 @@ fn TeamSwitcher(teams: &'static [Team]) -> Element {
                         },
                     }
                     DropdownMenuContent {
-                        div { style: "padding:0.5rem; font-size:0.75rem; opacity:0.7;",
-                            "Teams"
-                        }
+                        div { class: "dx-sidebar-dropdown-label", "Teams" }
                         for (idx , team) in teams.iter().enumerate() {
                             DropdownMenuItem {
                                 index: idx,
@@ -232,9 +168,7 @@ fn TeamSwitcher(teams: &'static [Team]) -> Element {
                                 on_select: move |v: usize| active_team.set(v),
                                 Icon {}
                                 {team.name}
-                                span { style: "margin-left:auto; font-size:0.75rem; opacity:0.7;",
-                                    "⌘{idx + 1}"
-                                }
+                                span { class: "dx-sidebar-dropdown-shortcut", "⌘{idx + 1}" }
                             }
                         }
                         Separator { decorative: true }
@@ -243,7 +177,7 @@ fn TeamSwitcher(teams: &'static [Team]) -> Element {
                             value: 999usize,
                             on_select: move |_: usize| {},
                             Icon {}
-                            div { style: "opacity:0.7; font-weight:500;", "Add team" }
+                            span { class: "dx-sidebar-muted", "Add team" }
                         }
                     }
                 }
@@ -353,7 +287,7 @@ fn NavProjects(projects: &'static [Project]) -> Element {
                     }
                 }
                 SidebarMenuItem {
-                    SidebarMenuButton { style: "opacity:0.7; font-weight:500;",
+                    SidebarMenuButton { class: "dx-sidebar-muted",
                         Icon {}
                         span { "More" }
                     }
@@ -373,7 +307,9 @@ fn NavUser() -> Element {
                     DropdownMenuTrigger {
                         as: move |attributes: Vec<Attribute>| rsx! {
                             SidebarMenuButton { size: SidebarMenuButtonSize::Lg, attributes,
-                                Avatar { size: AvatarImageSize::Small, style: "border-radius:0.5rem;",
+                                Avatar {
+                                    size: AvatarImageSize::Small,
+                                    shape: AvatarShape::Rounded,
                                     AvatarImage {
                                         src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif()),
                                         alt: "dioxus avatar",
@@ -389,10 +325,10 @@ fn NavUser() -> Element {
                         },
                     }
                     DropdownMenuContent {
-                        div { style: "display:flex; align-items:center; gap:0.5rem; padding:0.375rem 0.25rem; text-align:left; font-size:0.875rem;",
+                        div { class: "dx-sidebar-user-card",
                             Avatar {
                                 size: AvatarImageSize::Small,
-                                style: "border-radius:0.5rem;",
+                                shape: AvatarShape::Rounded,
                                 AvatarImage {
                                     src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif()),
                                     alt: "dioxus avatar",
@@ -455,47 +391,43 @@ fn DemoSettingControls(
     collapsible: Signal<SidebarCollapsible>,
 ) -> Element {
     rsx! {
-        div { style: "display: flex; flex-direction: column; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--dx-sidebar-border); border-radius: 0.75rem; background: var(--primary-color-2);",
-            div { style: "display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;",
-                span { style: "font-size: 0.75rem; font-weight: 600; color: var(--secondary-color-4);",
-                    "Side"
-                }
-                div { style: "display: inline-flex; gap: 0.5rem;",
+        div { class: "dx-sidebar-controls",
+            div { class: "dx-sidebar-controls-row",
+                span { class: "dx-sidebar-controls-label", "Side" }
+                div { class: "dx-sidebar-controls-actions",
                     Button {
                         variant: if side() == SidebarSide::Left { ButtonVariant::Primary } else { ButtonVariant::Outline },
                         onclick: move |_| side.set(SidebarSide::Left),
-                        style: "padding: 0.4rem 0.6rem; font-size: 0.75rem;",
+                        class: "dx-sidebar-controls-button",
                         "Left"
                     }
                     Button {
                         variant: if side() == SidebarSide::Right { ButtonVariant::Primary } else { ButtonVariant::Outline },
                         onclick: move |_| side.set(SidebarSide::Right),
-                        style: "padding: 0.4rem 0.6rem; font-size: 0.75rem;",
+                        class: "dx-sidebar-controls-button",
                         "Right"
                     }
                 }
             }
-            div { style: "display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;",
-                span { style: "font-size: 0.75rem; font-weight: 600; color: var(--secondary-color-4);",
-                    "Collapse"
-                }
-                div { style: "display: inline-flex; gap: 0.5rem; flex-wrap: wrap;",
+            div { class: "dx-sidebar-controls-row",
+                span { class: "dx-sidebar-controls-label", "Collapse" }
+                div { class: "dx-sidebar-controls-actions",
                     Button {
                         variant: if collapsible() == SidebarCollapsible::Offcanvas { ButtonVariant::Primary } else { ButtonVariant::Outline },
                         onclick: move |_| collapsible.set(SidebarCollapsible::Offcanvas),
-                        style: "padding: 0.4rem 0.6rem; font-size: 0.75rem;",
+                        class: "dx-sidebar-controls-button",
                         "Offcanvas"
                     }
                     Button {
                         variant: if collapsible() == SidebarCollapsible::Icon { ButtonVariant::Primary } else { ButtonVariant::Outline },
                         onclick: move |_| collapsible.set(SidebarCollapsible::Icon),
-                        style: "padding: 0.4rem 0.6rem; font-size: 0.75rem;",
+                        class: "dx-sidebar-controls-button",
                         "Icon"
                     }
                     Button {
                         variant: if collapsible() == SidebarCollapsible::None { ButtonVariant::Primary } else { ButtonVariant::Outline },
                         onclick: move |_| collapsible.set(SidebarCollapsible::None),
-                        style: "padding: 0.4rem 0.6rem; font-size: 0.75rem;",
+                        class: "dx-sidebar-controls-button",
                         "None"
                     }
                 }
