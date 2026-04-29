@@ -32,12 +32,10 @@ Slider {
 For a two-thumb range selector, use `RangeSlider` with two `SliderThumb`s, one at `index: 0` and one at `index: 1`:
 
 ```rust
-use dioxus_primitives::slider::SliderRangeValue;
-
 RangeSlider {
-    default_value: SliderRangeValue::new(20.0, 80.0),
-    on_value_change: |value: SliderRangeValue| {
-        // value.start() and value.end() give the two endpoints
+    default_value: 20.0..80.0,
+    on_value_change: |value: std::ops::Range<f64>| {
+        // value.start and value.end give the two endpoints
     },
     SliderTrack {
         SliderRange {}

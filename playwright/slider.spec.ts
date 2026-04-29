@@ -181,3 +181,74 @@ test('range two thumbs', async ({ page }) => {
   await expect(t1).toHaveAttribute('aria-valuemin', '80');
 });
 
+test('range thumbs recover from collision', async ({ page }) => {
+  await page.goto('http://127.0.0.1:8080/component/block?name=slider&variant=range&', { timeout: 20 * 60 * 1000 });
+  const thumbs = page.locator('.dx-slider-thumb');
+  const t0 = thumbs.nth(0);
+  const t1 = thumbs.nth(1);
+
+  // Drive both thumbs to 80
+  await t0.focus();
+  for (let i = 0; i < 200; i++) await page.keyboard.press('ArrowRight');
+  await expect(t0).toHaveAttribute('aria-valuenow', '80');
+  await expect(t1).toHaveAttribute('aria-valuenow', '80');
+
+  // Thumb 1 must still be movable up; once it does, thumb 0's max should follow
+  await t1.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(t1).toHaveAttribute('aria-valuenow', '81');
+  await expect(t0).toHaveAttribute('aria-valuemax', '81');
+
+  // And thumb 0 must still be movable down
+  await t0.focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect(t0).toHaveAttribute('aria-valuenow', '79');
+  await expect(t1).toHaveAttribute('aria-valuemin', '79');
+});
+
+test('range track click activates closest thumb', async ({ page }) => {
+  await page.goto('http://127.0.0.1:8080/component/block?name=slider&variant=range&', { timeout: 20 * 60 * 1000 });
+  const thumbs = page.locator('.dx-slider-thumb');
+  const t0 = thumbs.nth(0);
+  const t1 = thumbs.nth(1);
+  const slider = page.locator('.dx-slider').first();
+
+  const box = await slider.boundingBox();
+  if (!box) throw new Error('slider has no bounding box');
+
+  // Click near the right edge — should activate thumb 1, jumping it close to 100
+  await page.mouse.click(box.x + box.width * 0.95, box.y + box.height / 2);
+  await expect(t0).toHaveAttribute('aria-valuenow', '20');
+  const t1After = await t1.getAttribute('aria-valuenow');
+  expect(Number(t1After)).toBeGreaterThan(80);
+
+  // Click near the left edge — should activate thumb 0, jumping it close to 0
+  await page.mouse.click(box.x + box.width * 0.05, box.y + box.height / 2);
+  const t0After = await t0.getAttribute('aria-valuenow');
+  expect(Number(t0After)).toBeLessThan(20);
+});
+
+test('range collided thumbs split by click direction', async ({ page }) => {
+  await page.goto('http://127.0.0.1:8080/component/block?name=slider&variant=range&', { timeout: 20 * 60 * 1000 });
+  const thumbs = page.locator('.dx-slider-thumb');
+  const t0 = thumbs.nth(0);
+  const t1 = thumbs.nth(1);
+  const slider = page.locator('.dx-slider').first();
+
+  // Collide both thumbs at 80
+  await t0.focus();
+  for (let i = 0; i < 200; i++) await page.keyboard.press('ArrowRight');
+  await expect(t0).toHaveAttribute('aria-valuenow', '80');
+  await expect(t1).toHaveAttribute('aria-valuenow', '80');
+
+  const box = await slider.boundingBox();
+  if (!box) throw new Error('slider has no bounding box');
+
+  // Clicking to the RIGHT of the collision must activate thumb 1 (not thumb 0,
+  // which would otherwise win the distance tie and leave thumb 1 stranded).
+  await page.mouse.click(box.x + box.width * 0.95, box.y + box.height / 2);
+  await expect(t0).toHaveAttribute('aria-valuenow', '80');
+  const t1After = await t1.getAttribute('aria-valuenow');
+  expect(Number(t1After)).toBeGreaterThan(80);
+});
+

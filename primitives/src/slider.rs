@@ -9,6 +9,7 @@ use dioxus::html::geometry::ClientPoint;
 use dioxus::html::geometry::Pixels;
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
+use std::ops::Range;
 use std::rc::Rc;
 
 #[derive(Debug)]
@@ -74,43 +75,16 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
     Vec::new()
 });
 
-/// The two values of a [`RangeSlider`]. The invariant `start <= end` is maintained by
-/// [`SliderRangeValue::new`], which swaps the inputs if necessary.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct SliderRangeValue {
-    start: f64,
-    end: f64,
-}
-
-impl SliderRangeValue {
-    /// Construct a new [`SliderRangeValue`]. Inputs are swapped if `start > end` so that
-    /// `start <= end` always holds.
-    pub fn new(start: f64, end: f64) -> Self {
-        if start <= end {
-            Self { start, end }
-        } else {
-            Self {
-                start: end,
-                end: start,
-            }
-        }
-    }
-
-    /// The lower (start) value.
-    pub fn start(&self) -> f64 {
-        self.start
-    }
-
-    /// The upper (end) value.
-    pub fn end(&self) -> f64 {
-        self.end
+fn ordered_range(start: f64, end: f64) -> Range<f64> {
+    if start <= end {
+        start..end
+    } else {
+        end..start
     }
 }
 
-impl std::fmt::Display for SliderRangeValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} - {}", self.start, self.end)
-    }
+fn normalize_range(range: Range<f64>) -> Range<f64> {
+    ordered_range(range.start, range.end)
 }
 
 /// The props for the [`Slider`] component
@@ -224,11 +198,11 @@ pub fn Slider(props: SliderProps) -> Element {
 #[derive(Props, Clone, PartialEq)]
 pub struct RangeSliderProps {
     /// The controlled value of the range slider
-    pub value: ReadSignal<Option<SliderRangeValue>>,
+    pub value: ReadSignal<Option<Range<f64>>>,
 
     /// The default value when uncontrolled
-    #[props(default = SliderRangeValue::new(0.0, 100.0))]
-    pub default_value: SliderRangeValue,
+    #[props(default = ordered_range(0.0, 100.0))]
+    pub default_value: Range<f64>,
 
     /// The minimum value
     #[props(default = 0.0)]
@@ -256,7 +230,7 @@ pub struct RangeSliderProps {
 
     /// Callback when value changes
     #[props(default)]
-    pub on_value_change: Callback<SliderRangeValue>,
+    pub on_value_change: Callback<Range<f64>>,
 
     /// The label for the range slider (for accessibility)
     pub label: ReadSignal<Option<String>>,
@@ -282,9 +256,7 @@ pub struct RangeSliderProps {
 ///
 /// ```rust
 /// use dioxus::prelude::*;
-/// use dioxus_primitives::slider::{
-///     RangeSlider, SliderRange, SliderRangeValue, SliderThumb, SliderTrack,
-/// };
+/// use dioxus_primitives::slider::{RangeSlider, SliderRange, SliderThumb, SliderTrack};
 ///
 /// #[component]
 /// fn Demo() -> Element {
@@ -292,7 +264,7 @@ pub struct RangeSliderProps {
 ///         RangeSlider {
 ///             label: "Range Slider",
 ///             horizontal: true,
-///             default_value: SliderRangeValue::new(20.0, 80.0),
+///             default_value: 20.0..80.0,
 ///             SliderTrack {
 ///                 SliderRange {}
 ///                 SliderThumb { index: 0 }
@@ -310,18 +282,22 @@ pub struct RangeSliderProps {
 /// - `data-orientation`: Indicates the orientation of the slider. Values are `horizontal` or `vertical`.
 #[component]
 pub fn RangeSlider(props: RangeSliderProps) -> Element {
-    let (value, set_value) =
-        use_controlled(props.value, props.default_value, props.on_value_change);
+    let (raw_value, set_value) = use_controlled(
+        props.value,
+        normalize_range(props.default_value),
+        props.on_value_change,
+    );
+    let value = use_memo(move || normalize_range(raw_value()));
 
     let thumbs = use_memo(move || {
         let v = value();
-        vec![v.start(), v.end()]
+        vec![v.start, v.end]
     });
     let set_thumb = use_callback(move |(idx, v): (usize, f64)| {
         let cur = value();
         let next = match idx {
-            0 => SliderRangeValue::new(v, cur.end()),
-            _ => SliderRangeValue::new(cur.start(), v),
+            0 => ordered_range(v, cur.end),
+            _ => ordered_range(cur.start, v),
         };
         set_value.call(next);
     });
@@ -368,6 +344,8 @@ fn SliderImpl(props: SliderImplProps) -> Element {
     };
 
     let mut dragging = use_signal(|| false);
+    // Index of the thumb currently being interacted with via pointer. Only meaningful while
+    // `dragging` is true; reads outside a drag may return a stale value from the prior interaction.
     let active_thumb = use_signal(|| 0usize);
 
     let ctx = use_context_provider(|| SliderContext {
@@ -660,6 +638,7 @@ pub fn SliderRange(props: SliderRangeProps) -> Element {
         let (start, end) = match t.as_slice() {
             [s, e, ..] => (*s, *e),
             [v] => ((ctx.min)(), *v),
+            // Defensive: thumbs is built by Slider/RangeSlider with len 1 or 2, never empty.
             [] => ((ctx.min)(), (ctx.min)()),
         };
 
@@ -886,14 +865,22 @@ impl SliderContext {
         (value / step).round() * step
     }
 
-    /// Pick the thumb index whose current value is closest to `raw`. For single-thumb sliders
-    /// this is always `0`.
+    /// Pick the thumb index whose current value is closest to `raw`. On a tie (most commonly
+    /// when the two thumbs have collided at the same value) pick by direction so neither thumb
+    /// gets stranded: clicks at or to the right of the tied position activate thumb 1, clicks
+    /// to the left activate thumb 0. For single-thumb sliders this is always `0`.
     fn closest_thumb(&self, raw: f64) -> usize {
         let t = (self.thumbs)();
         if t.len() < 2 {
             return 0;
         }
-        if (raw - t[0]).abs() <= (raw - t[1]).abs() {
+        let d0 = (raw - t[0]).abs();
+        let d1 = (raw - t[1]).abs();
+        if d0 < d1 {
+            0
+        } else if d1 < d0 {
+            1
+        } else if raw < t[0] {
             0
         } else {
             1
@@ -901,7 +888,10 @@ impl SliderContext {
     }
 
     /// Clamp `raw` to the bounds the given thumb is allowed to occupy (against the global
-    /// min/max and, in range mode, against its neighbor), then snap to step.
+    /// min/max and, in range mode, against its neighbor), then snap to a step boundary that
+    /// stays inside those bounds. If the snapped value would exceed a non-step-aligned bound
+    /// (e.g. a neighbor thumb was set to a fractional value), the result is rounded toward
+    /// the bound instead of past it.
     fn clamp_for(&self, index: usize, raw: f64) -> f64 {
         let t = (self.thumbs)();
         let (lo, hi) = ((self.min)(), (self.max)());
@@ -910,7 +900,15 @@ impl SliderContext {
             (2, _) => (t[0], hi),
             _ => (lo, hi),
         };
-        self.snap(raw.clamp(lo, hi))
+        let step = (self.step)();
+        let snapped = self.snap(raw.clamp(lo, hi));
+        if snapped > hi {
+            (hi / step).floor() * step
+        } else if snapped < lo {
+            (lo / step).ceil() * step
+        } else {
+            snapped
+        }
     }
 
     fn as_percent(&self, value: f64) -> f64 {
