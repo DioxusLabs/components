@@ -1,6 +1,5 @@
 use super::super::component::*;
 use dioxus::prelude::*;
-use dioxus_primitives::slider::SliderValue;
 
 #[component]
 pub fn Demo() -> Element {
@@ -16,11 +15,9 @@ pub fn Demo() -> Element {
             min: 0.0,
             max: 100.0,
             step: 1.0,
-            default_value: SliderValue::Single(50.0),
-            on_value_change: move |value: SliderValue| {
-                // Extract the f64 value from SliderValue::Single
-                let SliderValue::Single(v) = value;
-                current_value.set(v);
+            default_value: 50.0,
+            on_value_change: move |value: f64| {
+                current_value.set(value);
             },
             SliderTrack {
                 SliderRange {}
