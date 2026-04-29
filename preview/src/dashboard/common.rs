@@ -2,8 +2,82 @@ use dioxus::prelude::*;
 use dioxus_primitives::icon::Icon;
 
 #[derive(Clone, Copy, PartialEq)]
+pub struct AvatarProfile {
+    pub name: &'static str,
+    pub initials: &'static str,
+    pub src: &'static str,
+}
+
+pub const AVATAR_PROFILE_OPTIONS: &[AvatarProfile] = &[
+    AvatarProfile {
+        name: "ealmloff",
+        initials: "EA",
+        src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
+    },
+    AvatarProfile {
+        name: "jkelleyrtp",
+        initials: "JK",
+        src: "https://github.com/jkelleyrtp.png",
+    },
+    AvatarProfile {
+        name: "DioxusLabs",
+        initials: "DX",
+        src: "https://github.com/DioxusLabs.png",
+    },
+];
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum FolderId {
+    Inbox,
+    Starred,
+    Sent,
+    Drafts,
+    Archive,
+    Trash,
+}
+
+impl FolderId {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            FolderId::Inbox => "inbox",
+            FolderId::Starred => "starred",
+            FolderId::Sent => "sent",
+            FolderId::Drafts => "drafts",
+            FolderId::Archive => "archive",
+            FolderId::Trash => "trash",
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum TabId {
+    All,
+    Unread,
+    Flagged,
+}
+
+impl TabId {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            TabId::All => "all",
+            TabId::Unread => "unread",
+            TabId::Flagged => "flagged",
+        }
+    }
+
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "all" => Some(TabId::All),
+            "unread" => Some(TabId::Unread),
+            "flagged" => Some(TabId::Flagged),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Folder {
-    pub id: &'static str,
+    pub id: FolderId,
     pub label: &'static str,
     pub icon: IconKind,
     pub count: Option<u32>,
@@ -11,7 +85,7 @@ pub struct Folder {
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct Tab {
-    pub id: &'static str,
+    pub id: TabId,
     pub label: &'static str,
     pub count: u32,
 }
@@ -19,7 +93,7 @@ pub struct Tab {
 #[derive(Clone, Copy, PartialEq)]
 pub struct MessageProperties {
     pub message_id: &'static str,
-    pub folder_id: &'static str,
+    pub folder_id: FolderId,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -94,7 +168,7 @@ pub const EMAIL_REPEAT_COUNT: usize = 5;
 pub struct MessageState {
     pub uid: String,
     pub source_id: &'static str,
-    pub folder_id: String,
+    pub folder_id: FolderId,
     pub tags: Vec<MessageTag>,
     pub unread: bool,
     pub starred: bool,
@@ -109,8 +183,8 @@ pub fn seed_message_states() -> Vec<MessageState> {
             let folder_id = MESSAGE_PROPERTIES
                 .iter()
                 .find(|p| p.message_id == msg.id)
-                .map(|p| p.folder_id.to_string())
-                .unwrap_or_else(|| DEFAULT_MESSAGE_FOLDER_ID.to_string());
+                .map(|p| p.folder_id)
+                .unwrap_or(DEFAULT_MESSAGE_FOLDER_ID);
             out.push(MessageState {
                 uid: format!("{}#{}", msg.id, rep),
                 source_id: msg.id,
@@ -135,37 +209,37 @@ pub fn lookup_message(source_id: &str) -> &'static Message {
 
 pub const FOLDERS: &[Folder] = &[
     Folder {
-        id: "inbox",
+        id: FolderId::Inbox,
         label: "Inbox",
         icon: IconKind::Inbox,
         count: Some(12),
     },
     Folder {
-        id: "starred",
+        id: FolderId::Starred,
         label: "Starred",
         icon: IconKind::StarOutline,
         count: None,
     },
     Folder {
-        id: "sent",
+        id: FolderId::Sent,
         label: "Sent",
         icon: IconKind::Send,
         count: None,
     },
     Folder {
-        id: "drafts",
+        id: FolderId::Drafts,
         label: "Drafts",
         icon: IconKind::Pen,
         count: Some(3),
     },
     Folder {
-        id: "archive",
+        id: FolderId::Archive,
         label: "Archive",
         icon: IconKind::Archive,
         count: None,
     },
     Folder {
-        id: "trash",
+        id: FolderId::Trash,
         label: "Trash",
         icon: IconKind::Trash,
         count: None,
@@ -174,100 +248,100 @@ pub const FOLDERS: &[Folder] = &[
 
 pub const TABS: &[Tab] = &[
     Tab {
-        id: "all",
+        id: TabId::All,
         label: "All",
         count: 42,
     },
     Tab {
-        id: "unread",
+        id: TabId::Unread,
         label: "Unread",
         count: 12,
     },
     Tab {
-        id: "flagged",
+        id: TabId::Flagged,
         label: "Flagged",
         count: 5,
     },
 ];
 
-pub const DEFAULT_MESSAGE_FOLDER_ID: &str = "inbox";
+pub const DEFAULT_MESSAGE_FOLDER_ID: FolderId = FolderId::Inbox;
 
 pub const MESSAGE_PROPERTIES: &[MessageProperties] = &[
     MessageProperties {
         message_id: "m6",
-        folder_id: "sent",
+        folder_id: FolderId::Sent,
     },
     MessageProperties {
         message_id: "m23",
-        folder_id: "sent",
+        folder_id: FolderId::Sent,
     },
     MessageProperties {
         message_id: "m29",
-        folder_id: "sent",
+        folder_id: FolderId::Sent,
     },
     MessageProperties {
         message_id: "m43",
-        folder_id: "sent",
+        folder_id: FolderId::Sent,
     },
     MessageProperties {
         message_id: "m51",
-        folder_id: "sent",
+        folder_id: FolderId::Sent,
     },
     MessageProperties {
         message_id: "m55",
-        folder_id: "sent",
+        folder_id: FolderId::Sent,
     },
     MessageProperties {
         message_id: "m58",
-        folder_id: "sent",
+        folder_id: FolderId::Sent,
     },
     MessageProperties {
         message_id: "m3",
-        folder_id: "drafts",
+        folder_id: FolderId::Drafts,
     },
     MessageProperties {
         message_id: "m8",
-        folder_id: "drafts",
+        folder_id: FolderId::Drafts,
     },
     MessageProperties {
         message_id: "m37",
-        folder_id: "drafts",
+        folder_id: FolderId::Drafts,
     },
     MessageProperties {
         message_id: "m20",
-        folder_id: "archive",
+        folder_id: FolderId::Archive,
     },
     MessageProperties {
         message_id: "m21",
-        folder_id: "archive",
+        folder_id: FolderId::Archive,
     },
     MessageProperties {
         message_id: "m31",
-        folder_id: "archive",
+        folder_id: FolderId::Archive,
     },
     MessageProperties {
         message_id: "m39",
-        folder_id: "archive",
+        folder_id: FolderId::Archive,
     },
     MessageProperties {
         message_id: "m46",
-        folder_id: "archive",
+        folder_id: FolderId::Archive,
     },
     MessageProperties {
         message_id: "m52",
-        folder_id: "archive",
+        folder_id: FolderId::Archive,
     },
     MessageProperties {
         message_id: "m4",
-        folder_id: "trash",
+        folder_id: FolderId::Trash,
     },
     MessageProperties {
         message_id: "m22",
-        folder_id: "trash",
+        folder_id: FolderId::Trash,
     },
     MessageProperties {
         message_id: "m44",
-        folder_id: "trash",
+        folder_id: FolderId::Trash,
     },
 ];
 

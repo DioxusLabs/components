@@ -1,0 +1,90 @@
+use crate::dashboard::common::{lookup_message, FolderId, MessageState, MessageTag, TabId};
+
+pub(super) fn message_matches_folder(state: &MessageState, folder_id: FolderId) -> bool {
+    if state.snoozed {
+        return false;
+    }
+    match folder_id {
+        FolderId::Starred => state.starred,
+        id => state.folder_id == id,
+    }
+}
+
+pub(super) fn message_matches_tab(state: &MessageState, tab_id: TabId) -> bool {
+    match tab_id {
+        TabId::Unread => state.unread,
+        TabId::Flagged => state.flagged,
+        TabId::All => true,
+    }
+}
+
+pub(super) fn message_matches_search(state: &MessageState, query: &str) -> bool {
+    let query = query.trim().to_lowercase();
+    if query.is_empty() {
+        return true;
+    }
+    let m = lookup_message(state.source_id);
+    m.from.to_lowercase().contains(&query)
+        || m.from_addr.to_lowercase().contains(&query)
+        || m.subject.to_lowercase().contains(&query)
+        || m.snippet.to_lowercase().contains(&query)
+        || m.body.to_lowercase().contains(&query)
+        || state.tags.iter().any(|tag| tag.label().contains(&query))
+        || (m.has_attachment && "attachment".contains(&query))
+}
+
+pub(super) fn message_matches_selected_tags(
+    state: &MessageState,
+    selected_tags: &[MessageTag],
+) -> bool {
+    selected_tags
+        .iter()
+        .all(|s| state.tags.iter().any(|tag| tag == s))
+}
+
+pub(super) fn message_matches_filters(
+    state: &MessageState,
+    folder_id: FolderId,
+    tab_id: TabId,
+    query: &str,
+    selected_tags: &[MessageTag],
+) -> bool {
+    message_matches_folder(state, folder_id)
+        && message_matches_tab(state, tab_id)
+        && message_matches_search(state, query)
+        && message_matches_selected_tags(state, selected_tags)
+}
+
+pub(super) fn filtered_messages(
+    messages: &[MessageState],
+    folder_id: FolderId,
+    tab_id: TabId,
+    query: &str,
+    selected_tags: &[MessageTag],
+) -> Vec<MessageState> {
+    messages
+        .iter()
+        .filter(|s| message_matches_filters(s, folder_id, tab_id, query, selected_tags))
+        .cloned()
+        .collect()
+}
+
+pub(super) fn folder_count(messages: &[MessageState], folder_id: FolderId) -> u32 {
+    messages
+        .iter()
+        .filter(|s| message_matches_folder(s, folder_id))
+        .count() as u32
+}
+
+pub(super) fn tab_count(
+    messages: &[MessageState],
+    folder_id: FolderId,
+    tab_id: TabId,
+    query: &str,
+    selected_tags: &[MessageTag],
+) -> u32 {
+    messages
+        .iter()
+        .filter(|s| message_matches_filters(s, folder_id, tab_id, query, selected_tags))
+        .count() as u32
+}
