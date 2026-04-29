@@ -197,11 +197,8 @@ pub struct SliderProps {
 /// - `data-orientation`: Indicates the orientation of the slider. Values are `horizontal` or `vertical`.
 #[component]
 pub fn Slider(props: SliderProps) -> Element {
-    let (value, set_value) = use_controlled(
-        props.value,
-        props.default_value,
-        props.on_value_change,
-    );
+    let (value, set_value) =
+        use_controlled(props.value, props.default_value, props.on_value_change);
 
     let thumbs = use_memo(move || vec![value()]);
     let set_thumb = use_callback(move |(_idx, v): (usize, f64)| set_value.call(v));
@@ -313,11 +310,8 @@ pub struct RangeSliderProps {
 /// - `data-orientation`: Indicates the orientation of the slider. Values are `horizontal` or `vertical`.
 #[component]
 pub fn RangeSlider(props: RangeSliderProps) -> Element {
-    let (value, set_value) = use_controlled(
-        props.value,
-        props.default_value,
-        props.on_value_change,
-    );
+    let (value, set_value) =
+        use_controlled(props.value, props.default_value, props.on_value_change);
 
     let thumbs = use_memo(move || {
         let v = value();
@@ -392,8 +386,7 @@ fn SliderImpl(props: SliderImplProps) -> Element {
 
     let mut rect = use_signal(|| None);
     let mut div_element: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
-    let mut granular_thumbs =
-        use_hook(move || CopyValue::new(props.thumbs.peek().clone()));
+    let mut granular_thumbs = use_hook(move || CopyValue::new(props.thumbs.peek().clone()));
 
     let size = rect().map(|r: Rect<f64, Pixels>| {
         if props.horizontal {
