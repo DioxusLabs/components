@@ -18,6 +18,10 @@ pub(super) struct EmailClientState {
     pub(super) selected_tags: Vec<MessageTag>,
     pub(super) selected_id: String,
     pub(super) read_open: bool,
+    pub(super) compose_open: bool,
+    pub(super) compose_to: String,
+    pub(super) compose_subject: String,
+    pub(super) compose_body: String,
 }
 
 impl EmailClientState {
@@ -38,141 +42,236 @@ impl EmailClientState {
             selected_tags: Vec::new(),
             selected_id: String::from("m1#0"),
             read_open: false,
+            compose_open: false,
+            compose_to: String::new(),
+            compose_subject: String::new(),
+            compose_body: String::new(),
         }
     }
 }
 
-pub(super) fn active_folder_label(state: Store<EmailClientState>) -> &'static str {
-    let active_folder = state.active_folder().cloned();
-    FOLDERS
-        .iter()
-        .find(|folder| folder.id == active_folder)
-        .map(|folder| folder.label)
-        .unwrap_or("Inbox")
-}
+#[store(pub(crate))]
+impl<Lens> Store<EmailClientState, Lens> {
+    fn active_folder_label(&self) -> &'static str {
+        let active_folder = self.active_folder().cloned();
+        FOLDERS
+            .iter()
+            .find(|folder| folder.id == active_folder)
+            .map(|folder| folder.label)
+            .unwrap_or("Inbox")
+    }
 
-pub(super) fn visible_message_ids(state: Store<EmailClientState>) -> Vec<String> {
-    let active_folder = state.active_folder().cloned();
-    let active_tab = state.active_tab().cloned();
-    let search_query = state.search_query().cloned();
-    let selected_tags = state.selected_tags().cloned();
-    let messages_store = state.messages();
-    let order_store = state.message_order();
-    let messages = messages_store.read();
-    let order = order_store.read();
+    fn visible_message_ids(&self) -> Vec<String> {
+        let active_folder = self.active_folder().cloned();
+        let active_tab = self.active_tab().cloned();
+        let search_query = self.search_query().cloned();
+        let selected_tags = self.selected_tags().cloned();
+        let messages_store = self.messages();
+        let order_store = self.message_order();
+        let messages = messages_store.read();
+        let order = order_store.read();
 
-    order
-        .iter()
-        .filter(|uid| {
-            messages.get(uid.as_str()).is_some_and(|message| {
+        order
+            .iter()
+            .filter(|uid| {
+                messages.get(uid.as_str()).is_some_and(|message| {
+                    message_matches_filters(
+                        message,
+                        active_folder,
+                        active_tab,
+                        search_query.as_str(),
+                        &selected_tags,
+                    )
+                })
+            })
+            .cloned()
+            .collect()
+    }
+
+    fn selected_message_uid(&self, visible_ids: &[String]) -> String {
+        let selected_id = self.selected_id().cloned();
+        if visible_ids.iter().any(|uid| uid == &selected_id) {
+            return selected_id;
+        }
+
+        visible_ids
+            .first()
+            .cloned()
+            .or_else(|| self.message_order().read().first().cloned())
+            .expect("seed_message_states is non-empty")
+    }
+
+    fn selected_message_index(&self, selected_uid: &str, visible_ids: &[String]) -> usize {
+        visible_ids
+            .iter()
+            .position(|uid| uid == selected_uid)
+            .map(|index| index + 1)
+            .unwrap_or(1)
+    }
+
+    fn folder_count(&self, folder_id: FolderId) -> u32 {
+        let messages_store = self.messages();
+        let count = messages_store
+            .read()
+            .values()
+            .filter(|message| message_matches_folder(message, folder_id))
+            .count() as u32;
+        count
+    }
+
+    fn tab_count(&self, tab_id: TabId, visible_query: &str, selected_tags: &[MessageTag]) -> u32 {
+        let active_folder = self.active_folder().cloned();
+        let messages_store = self.messages();
+        let count = messages_store
+            .read()
+            .values()
+            .filter(|message| {
                 message_matches_filters(
                     message,
                     active_folder,
-                    active_tab,
-                    search_query.as_str(),
-                    &selected_tags,
+                    tab_id,
+                    visible_query,
+                    selected_tags,
                 )
             })
-        })
-        .cloned()
-        .collect()
-}
-
-pub(super) fn selected_message_uid(
-    state: Store<EmailClientState>,
-    visible_ids: &[String],
-) -> String {
-    let selected_id = state.selected_id().cloned();
-    if visible_ids.iter().any(|uid| uid == &selected_id) {
-        return selected_id;
+            .count() as u32;
+        count
     }
 
-    visible_ids
-        .first()
-        .cloned()
-        .or_else(|| state.message_order().read().first().cloned())
-        .expect("seed_message_states is non-empty")
-}
+    fn set_active_folder(&mut self, folder_id: FolderId) {
+        self.active_folder().set(folder_id);
+        self.close_read_pane();
+    }
 
-pub(super) fn selected_message_index(selected_uid: &str, visible_ids: &[String]) -> usize {
-    visible_ids
-        .iter()
-        .position(|uid| uid == selected_uid)
-        .map(|index| index + 1)
-        .unwrap_or(1)
-}
+    fn set_active_tab(&mut self, tab_id: TabId) {
+        self.active_tab().set(tab_id);
+        self.close_read_pane();
+    }
 
-pub(super) fn folder_count(state: Store<EmailClientState>, folder_id: FolderId) -> u32 {
-    let messages_store = state.messages();
-    let count = messages_store
-        .read()
-        .values()
-        .filter(|message| message_matches_folder(message, folder_id))
-        .count() as u32;
-    count
-}
+    fn set_search_query(&mut self, query: String) {
+        self.search_query().set(query);
+        self.close_read_pane();
+    }
 
-pub(super) fn tab_count(
-    state: Store<EmailClientState>,
-    tab_id: TabId,
-    visible_query: &str,
-    selected_tags: &[MessageTag],
-) -> u32 {
-    let active_folder = state.active_folder().cloned();
-    let messages_store = state.messages();
-    let count = messages_store
-        .read()
-        .values()
-        .filter(|message| {
-            message_matches_filters(message, active_folder, tab_id, visible_query, selected_tags)
-        })
-        .count() as u32;
-    count
-}
+    fn set_selected_tags(&mut self, tags: Vec<MessageTag>) {
+        self.selected_tags().set(tags);
+        self.close_read_pane();
+    }
 
-pub(super) fn message_snapshot(state: Store<EmailClientState>, uid: &str) -> Option<MessageState> {
-    state
-        .messages()
-        .get(uid.to_string())
-        .map(|message| message.read().clone())
-}
+    fn select_message(&mut self, uid: String) {
+        self.selected_id().set(uid);
+        self.read_open().set(true);
+    }
 
-pub(super) fn set_active_folder(state: Store<EmailClientState>, folder_id: FolderId) {
-    state.active_folder().set(folder_id);
-    close_read_pane(state);
-}
+    fn close_read_pane(&mut self) {
+        self.read_open().set(false);
+    }
 
-pub(super) fn set_active_tab(state: Store<EmailClientState>, tab_id: TabId) {
-    state.active_tab().set(tab_id);
-    close_read_pane(state);
-}
+    fn open_compose(&mut self) {
+        self.compose_open().set(true);
+    }
 
-pub(super) fn set_search_query(state: Store<EmailClientState>, query: String) {
-    state.search_query().set(query);
-    close_read_pane(state);
-}
+    fn set_compose_open(&mut self, open: bool) {
+        self.compose_open().set(open);
+    }
 
-pub(super) fn set_selected_tags(state: Store<EmailClientState>, tags: Vec<MessageTag>) {
-    state.selected_tags().set(tags);
-    close_read_pane(state);
-}
+    fn discard_compose(&mut self) {
+        self.compose_open().set(false);
+        self.compose_to().set(String::new());
+        self.compose_subject().set(String::new());
+        self.compose_body().set(String::new());
+    }
 
-pub(super) fn select_message(state: Store<EmailClientState>, uid: String) {
-    state.selected_id().set(uid);
-    state.read_open().set(true);
-}
+    fn set_compose_to(&mut self, value: String) {
+        self.compose_to().set(value);
+    }
 
-pub(super) fn close_read_pane(state: Store<EmailClientState>) {
-    state.read_open().set(false);
-}
+    fn set_compose_subject(&mut self, value: String) {
+        self.compose_subject().set(value);
+    }
 
-pub(super) fn update_message(
-    state: Store<EmailClientState>,
-    uid: String,
-    update: impl FnOnce(&mut MessageState),
-) {
-    if let Some(mut message) = state.messages().get(uid) {
-        let mut message = message.write();
-        update(&mut message);
+    fn set_compose_body(&mut self, value: String) {
+        self.compose_body().set(value);
+    }
+
+    fn archive_message(&mut self, uid: String) {
+        self.update_message(uid.clone(), |message| {
+            message.folder_id = FolderId::Archive;
+            message.unread = false;
+        });
+        self.close_if_selected(&uid);
+    }
+
+    fn snooze_message(&mut self, uid: String) {
+        self.update_message(uid.clone(), |message| {
+            message.snoozed = true;
+        });
+        self.close_if_selected(&uid);
+    }
+
+    fn delete_message(&mut self, uid: String) {
+        self.update_message(uid.clone(), |message| {
+            message.folder_id = FolderId::Trash;
+            message.unread = false;
+        });
+        self.close_if_selected(&uid);
+    }
+
+    fn toggle_message_flag(&mut self, uid: String) {
+        self.update_message(uid, |message| {
+            message.flagged = !message.flagged;
+        });
+    }
+
+    fn toggle_message_star(&mut self, uid: String) {
+        self.update_message(uid, |message| {
+            message.starred = !message.starred;
+        });
+    }
+
+    fn toggle_message_unread(&mut self, uid: String) {
+        self.update_message(uid, |message| {
+            message.unread = !message.unread;
+        });
+    }
+
+    fn move_message_to_inbox(&mut self, uid: String) {
+        self.update_message(uid.clone(), |message| {
+            message.folder_id = FolderId::Inbox;
+            message.snoozed = false;
+        });
+        self.close_if_selected(&uid);
+    }
+
+    fn move_message_to_trash(&mut self, uid: String) {
+        self.update_message(uid.clone(), |message| {
+            message.folder_id = FolderId::Trash;
+        });
+        self.close_if_selected(&uid);
+    }
+
+    fn remove_message_tag(&mut self, uid: String, tag: MessageTag) {
+        self.update_message(uid, |message| {
+            message.tags.retain(|current| *current != tag);
+        });
+    }
+
+    fn set_message_tags(&mut self, uid: String, tags: Vec<MessageTag>) {
+        self.update_message(uid, |message| {
+            message.tags = tags;
+        });
+    }
+
+    fn update_message(&mut self, uid: String, update: impl FnOnce(&mut MessageState)) {
+        if let Some(mut message) = self.messages().get(uid) {
+            let mut message = message.write();
+            update(&mut message);
+        }
+    }
+
+    fn close_if_selected(&mut self, uid: &str) {
+        if self.selected_id().cloned() == uid {
+            self.close_read_pane();
+        }
     }
 }

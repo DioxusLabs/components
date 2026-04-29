@@ -14,14 +14,12 @@ use crate::components::select::{
 use crate::components::tabs::component::{TabList, TabTrigger, Tabs};
 use crate::components::virtual_list::VirtualList;
 use crate::dashboard::common::{
-    lookup_message, FolderId, IconKind, LucideIcon, MessageState, MessageTag, TabId, TABS,
+    lookup_message, IconKind, LucideIcon, MessageState, MessageStateStoreExt, MessageTag, TabId,
+    TABS,
 };
 
 use super::avatars::avatar_profile_for_key;
-use super::state::{
-    close_read_pane, select_message, set_active_tab, set_selected_tags, tab_count, update_message,
-    EmailClientState, EmailClientStateStoreExt,
-};
+use super::state::{EmailClientState, EmailClientStateStoreExt, EmailClientStateStoreImplExt};
 
 #[derive(Clone, PartialEq)]
 pub(super) enum ListRow {
@@ -48,10 +46,15 @@ pub(super) fn flatten_rows(state: Store<EmailClientState>, message_ids: &[String
     out
 }
 
-fn estimate_message_row_height(state: &MessageState) -> u32 {
-    let m = lookup_message(state.source_id);
+fn estimate_message_row_height(
+    source_id: &str,
+    tags: &[MessageTag],
+    starred: bool,
+    flagged: bool,
+) -> u32 {
+    let m = lookup_message(source_id);
     let snippet_lines = if m.snippet.len() > 78 { 2 } else { 1 };
-    let has_meta_row = !state.tags.is_empty() || m.has_attachment || state.starred || state.flagged;
+    let has_meta_row = !tags.is_empty() || m.has_attachment || starred || flagged;
 
     32  // vertical padding + borders + margins
         + 21 // subject row (now the prominent line)
@@ -63,7 +66,7 @@ fn estimate_message_row_height(state: &MessageState) -> u32 {
 
 #[component]
 pub(super) fn ListPane(
-    state: Store<EmailClientState>,
+    mut state: Store<EmailClientState>,
     visible_ids: ReadSignal<Vec<String>>,
     selected_uid: ReadSignal<String>,
 ) -> Element {
@@ -82,7 +85,7 @@ pub(super) fn ListPane(
                     horizontal: true,
                     on_value_change: move |v: String| {
                         if let Some(tab) = TabId::from_str(&v) {
-                            set_active_tab(state, tab);
+                            state.set_active_tab(tab);
                         }
                     },
                     TabList {
@@ -92,7 +95,7 @@ pub(super) fn ListPane(
                                 value: tab.id.as_str().to_string(),
                                 index: idx,
                                 {tab.label}
-                                span { class: "ec-muted", " {tab_count(state, tab.id, query.as_str(), &tags)}" }
+                                span { class: "ec-muted", " {state.tab_count(tab.id, query.as_str(), &tags)}" }
                             }
                         }
                     }
@@ -101,7 +104,7 @@ pub(super) fn ListPane(
                     values: Some(tags.clone()),
                     default_values: vec![],
                     on_values_change: move |values| {
-                        set_selected_tags(state, values);
+                        state.set_selected_tags(values);
                     },
                     SelectTrigger {
                         class: "ec-filter-trigger",
@@ -137,12 +140,18 @@ pub(super) fn ListPane(
                 buffer: 6usize,
                 estimate_size: move |idx: usize| match &rows_for_estimate.read()[idx] {
                     ListRow::DayHeader(_) => 34,
-                    ListRow::Message(uid) => state
-                        .messages()
-                        .read()
-                        .get(uid.as_str())
-                        .map(estimate_message_row_height)
-                        .unwrap_or(80),
+                    ListRow::Message(uid) => match state.messages().get(uid.clone()) {
+                        Some(message) => {
+                            let message: Store<MessageState> = message.into();
+                            estimate_message_row_height(
+                                message.source_id().cloned(),
+                                &message.tags().cloned(),
+                                message.starred().cloned(),
+                                message.flagged().cloned(),
+                            )
+                        }
+                        None => 80,
+                    },
                 },
                 render_item: move |idx: usize| {
                     let row = rows_for_render.read()[idx].clone();
@@ -150,13 +159,16 @@ pub(super) fn ListPane(
                         ListRow::DayHeader(day) => rsx! {
                             div { class: "ec-day", {day} }
                         },
-                        ListRow::Message(uid) => rsx! {
-                            MessageRow {
-                                key: "{uid}",
-                                state,
-                                uid,
-                                selected_uid: selected_uid.read().clone(),
-                            }
+                        ListRow::Message(uid) => match state.messages().get(uid.clone()) {
+                            Some(message) => rsx! {
+                                MessageRow {
+                                    key: "{uid}",
+                                    state,
+                                    message,
+                                    selected_uid: selected_uid.read().clone(),
+                                }
+                            },
+                            None => rsx! {},
                         },
                     }
                 },
@@ -166,21 +178,21 @@ pub(super) fn ListPane(
 }
 
 #[component]
-fn MessageRow(state: Store<EmailClientState>, uid: String, selected_uid: String) -> Element {
-    let Some(message) = state.messages().get(uid.clone()) else {
-        return rsx! {};
-    };
-    let live = message.read().clone();
+fn MessageRow(
+    mut state: Store<EmailClientState>,
+    message: Store<MessageState>,
+    selected_uid: String,
+) -> Element {
+    let uid = message.uid().cloned();
     let is_selected = selected_uid == uid;
     let uid_for_click = uid.clone();
-    let uid_for_star = uid.clone();
     let uid_for_trash = uid.clone();
-    let selected_uid_for_trash = selected_uid.clone();
-    let m = lookup_message(live.source_id);
-    let starred = live.starred;
-    let unread = live.unread;
-    let flagged = live.flagged;
-    let tags = live.tags.clone();
+    let uid_for_star = uid.clone();
+    let m = lookup_message(message.source_id().cloned());
+    let starred = message.starred().cloned();
+    let unread = message.unread().cloned();
+    let flagged = message.flagged().cloned();
+    let tags = message.tags().cloned();
     let mut classes = String::from("ec-row");
     if unread {
         classes.push_str(" ec-unread");
@@ -198,7 +210,7 @@ fn MessageRow(state: Store<EmailClientState>, uid: String, selected_uid: String)
             role: "option",
             tabindex: 0,
             onclick: move |_| {
-                select_message(state, uid_for_click.clone());
+                state.select_message(uid_for_click.clone());
             },
             "aria-selected": is_selected,
             "data-selected": is_selected,
@@ -249,12 +261,7 @@ fn MessageRow(state: Store<EmailClientState>, uid: String, selected_uid: String)
                     aria_label: "Move to trash",
                     onclick: move |e: Event<MouseData>| {
                         e.stop_propagation();
-                        update_message(state, uid_for_trash.clone(), |entry| {
-                            entry.folder_id = FolderId::Trash;
-                        });
-                        if uid_for_trash == selected_uid_for_trash {
-                            close_read_pane(state);
-                        }
+                        state.move_message_to_trash(uid_for_trash.clone());
                     },
                     LucideIcon { kind: IconKind::Trash, size: 16 }
                 }
@@ -266,9 +273,7 @@ fn MessageRow(state: Store<EmailClientState>, uid: String, selected_uid: String)
                     aria_label: if starred { "Unstar message" } else { "Star message" },
                     onclick: move |e: Event<MouseData>| {
                         e.stop_propagation();
-                        update_message(state, uid_for_star.clone(), |entry| {
-                            entry.starred = !entry.starred;
-                        });
+                        state.toggle_message_star(uid_for_star.clone());
                     },
                     LucideIcon {
                         kind: if starred { IconKind::StarFilled } else { IconKind::StarOutline },

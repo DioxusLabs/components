@@ -18,88 +18,73 @@ use crate::components::toolbar::component::{
     Toolbar, ToolbarButton, ToolbarGroup, ToolbarSeparator,
 };
 use crate::dashboard::common::{
-    lookup_message, FolderId, IconKind, LucideIcon, MessageTag, AVATAR_PROFILE_OPTIONS,
+    lookup_message, FolderId, IconKind, LucideIcon, MessageState, MessageStateStoreExt, MessageTag,
+    AVATAR_PROFILE_OPTIONS,
 };
 
 use super::avatars::avatar_profile_for_key;
-use super::state::{close_read_pane, message_snapshot, update_message, EmailClientState};
+use super::state::{EmailClientState, EmailClientStateStoreExt, EmailClientStateStoreImplExt};
 
 #[component]
 pub(super) fn ReadPane(
-    state: Store<EmailClientState>,
+    mut state: Store<EmailClientState>,
     selected_uid: ReadSignal<String>,
     total_count: ReadSignal<usize>,
     selected_index: ReadSignal<usize>,
 ) -> Element {
     let mut reply_draft = use_signal(String::new);
     let selected_uid_value = selected_uid.read().clone();
-    let selected_value =
-        message_snapshot(state, &selected_uid_value).expect("selected message should exist");
-    let selected_static = lookup_message(selected_value.source_id);
+    let Some(selected) = state.messages().get(selected_uid_value.clone()) else {
+        return rsx! {};
+    };
+    let selected: Store<MessageState> = selected.into();
+    let selected_static = lookup_message(selected.source_id().cloned());
+    let selected_tags = selected.tags().cloned();
+    let selected_folder = selected.folder_id().cloned();
+    let selected_unread = selected.unread().cloned();
+    let selected_starred = selected.starred().cloned();
+    let selected_flagged = selected.flagged().cloned();
     let counter = format!("{} of {}", selected_index.read(), total_count.read());
 
     let archive_uid = selected_uid_value.clone();
     let archive_selected = move |_| {
-        update_message(state, archive_uid.clone(), |entry| {
-            entry.folder_id = FolderId::Archive;
-            entry.unread = false;
-        });
-        close_read_pane(state);
+        state.archive_message(archive_uid.clone());
     };
     let snooze_uid = selected_uid_value.clone();
     let snooze_selected = move |_| {
-        update_message(state, snooze_uid.clone(), |entry| {
-            entry.snoozed = true;
-        });
-        close_read_pane(state);
+        state.snooze_message(snooze_uid.clone());
     };
     let delete_uid = selected_uid_value.clone();
     let delete_selected = move |_| {
-        update_message(state, delete_uid.clone(), |entry| {
-            entry.folder_id = FolderId::Trash;
-            entry.unread = false;
-        });
-        close_read_pane(state);
+        state.delete_message(delete_uid.clone());
     };
     let flag_uid = selected_uid_value.clone();
     let toggle_flag_selected = move |_| {
-        update_message(state, flag_uid.clone(), |entry| {
-            entry.flagged = !entry.flagged;
-        });
+        state.toggle_message_flag(flag_uid.clone());
     };
     let star_uid = selected_uid_value.clone();
     let toggle_star_selected = move |_| {
-        update_message(state, star_uid.clone(), |entry| {
-            entry.starred = !entry.starred;
-        });
+        state.toggle_message_star(star_uid.clone());
     };
     let unread_uid = selected_uid_value.clone();
-    let toggle_unread_selected = move |_| {
-        update_message(state, unread_uid.clone(), |entry| {
-            entry.unread = !entry.unread;
-        });
+    let mut toggle_unread_selected = move |_| {
+        state.toggle_message_unread(unread_uid.clone());
     };
     let inbox_uid = selected_uid_value.clone();
-    let move_to_inbox_selected = move |_| {
-        update_message(state, inbox_uid.clone(), |entry| {
-            entry.folder_id = FolderId::Inbox;
-            entry.snoozed = false;
-        });
-        close_read_pane(state);
+    let mut move_to_inbox_selected = move |_| {
+        state.move_message_to_inbox(inbox_uid.clone());
     };
     let trash_uid = selected_uid_value.clone();
-    let move_to_trash_selected = move |_| {
-        update_message(state, trash_uid.clone(), |entry| {
-            entry.folder_id = FolderId::Trash;
-        });
-        close_read_pane(state);
+    let mut move_to_trash_selected = move |_| {
+        state.move_message_to_trash(trash_uid.clone());
     };
+    let tag_edit_uid = selected_uid_value.clone();
 
     rsx! {
         section { class: "ec-read-pane",
             Toolbar { aria_label: "Message actions",
                 ToolbarGroup {
-                    ToolbarButton { index: 0usize, on_click: move |_| close_read_pane(state),
+                    ToolbarButton { index: 0usize, on_click: move |_| state.close_read_pane(),
                         LucideIcon { kind: IconKind::ArrowLeft }
                     }
                 }
@@ -121,7 +106,7 @@ pub(super) fn ReadPane(
                 ToolbarSeparator {}
                 ToolbarGroup {
                     ToolbarButton { index: 4usize, on_click: toggle_flag_selected,
-                        if selected_value.flagged {
+                        if selected_flagged {
                             LucideIcon { kind: IconKind::Flag }
                             " Flagged"
                         } else {
@@ -130,7 +115,7 @@ pub(super) fn ReadPane(
                         }
                     }
                     ToolbarButton { index: 5usize, on_click: toggle_star_selected,
-                        if selected_value.starred {
+                        if selected_starred {
                             LucideIcon { kind: IconKind::StarFilled }
                             " Starred"
                         } else {
@@ -157,19 +142,19 @@ pub(super) fn ReadPane(
                                 value: "toggle-unread",
                                 index: 0usize,
                                 on_select: move |_| toggle_unread_selected(()),
-                                if selected_value.unread { "Mark as read" } else { "Mark as unread" }
+                                if selected_unread { "Mark as read" } else { "Mark as unread" }
                             }
                             DropdownMenuItem::<&'static str> {
                                 value: "move-to-inbox",
                                 index: 1usize,
-                                disabled: selected_value.folder_id == FolderId::Inbox,
+                                disabled: selected_folder == FolderId::Inbox,
                                 on_select: move |_| move_to_inbox_selected(()),
                                 "Move to Inbox"
                             }
                             DropdownMenuItem::<&'static str> {
                                 value: "move-to-trash",
                                 index: 2usize,
-                                disabled: selected_value.folder_id == FolderId::Trash,
+                                disabled: selected_folder == FolderId::Trash,
                                 on_select: move |_| move_to_trash_selected(()),
                                 "Move to Trash"
                             }
@@ -193,7 +178,7 @@ pub(super) fn ReadPane(
                                                 if selected_static.thread_count > 1 { "s" } else { "" },
                                             )}
                                         }
-                                        for tag in selected_value.tags.iter() {
+                                        for tag in selected_tags.iter() {
                                             Button {
                                                 variant: ButtonVariant::Ghost,
                                                 key: "{tag.label()}",
@@ -204,9 +189,7 @@ pub(super) fn ReadPane(
                                                     let tag = *tag;
                                                     let uid = selected_uid_value.clone();
                                                     move |_| {
-                                                        update_message(state, uid.clone(), |entry| {
-                                                            entry.tags.retain(|t| *t != tag);
-                                                        });
+                                                        state.remove_message_tag(uid.clone(), tag);
                                                     }
                                                 },
                                                 Badge {
@@ -216,13 +199,11 @@ pub(super) fn ReadPane(
                                             }
                                         }
                                         SelectMulti::<MessageTag> {
-                                            key: "{selected_value.uid}-tagedit",
-                                            values: Some(selected_value.tags.clone()),
-                                            default_values: selected_value.tags.clone(),
+                                            key: "{selected_uid_value}-tagedit",
+                                            values: Some(selected_tags.clone()),
+                                            default_values: selected_tags.clone(),
                                             on_values_change: move |values: Vec<MessageTag>| {
-                                                update_message(state, selected_uid_value.clone(), |entry| {
-                                                    entry.tags = values;
-                                                });
+                                                state.set_message_tags(tag_edit_uid.clone(), values);
                                             },
                                             SelectTrigger {
                                                 class: "ec-tag-edit-trigger",

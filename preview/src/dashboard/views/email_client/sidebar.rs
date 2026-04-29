@@ -10,10 +10,10 @@ use crate::components::sidebar::{
 };
 use crate::dashboard::common::{FolderId, IconKind, LucideIcon, AVATAR_PROFILE_OPTIONS, FOLDERS};
 
-use super::state::{folder_count, set_active_folder, EmailClientState, EmailClientStateStoreExt};
+use super::state::{EmailClientState, EmailClientStateStoreExt, EmailClientStateStoreImplExt};
 
 #[component]
-pub(super) fn EmailSidebar(state: Store<EmailClientState>) -> Element {
+pub(super) fn EmailSidebar(mut state: Store<EmailClientState>) -> Element {
     rsx! {
         Sidebar {
             variant: SidebarVariant::Sidebar,
@@ -47,8 +47,15 @@ pub(super) fn EmailSidebar(state: Store<EmailClientState>) -> Element {
                         SidebarMenuButton {
                             class: "ec-compose",
                             tooltip: rsx! { "Compose (C)" },
-                            LucideIcon { kind: IconKind::Pen }
-                            span { "Compose" }
+                            as: move |attrs: Vec<Attribute>| rsx! {
+                                button {
+                                    r#type: "button",
+                                    onclick: move |_| state.open_compose(),
+                                    ..attrs,
+                                    LucideIcon { kind: IconKind::Pen }
+                                    span { "Compose" }
+                                }
+                            },
                         }
                     } }
                 }
@@ -62,7 +69,7 @@ pub(super) fn EmailSidebar(state: Store<EmailClientState>) -> Element {
                                 folder_id: f.id,
                                 label: f.label,
                                 icon: f.icon,
-                                count: Some(folder_count(state, f.id)),
+                                count: Some(state.folder_count(f.id)),
                                 state,
                             }
                         }
@@ -103,7 +110,7 @@ fn FolderItem(
     label: &'static str,
     icon: IconKind,
     count: Option<u32>,
-    state: Store<EmailClientState>,
+    mut state: Store<EmailClientState>,
 ) -> Element {
     let is_active = state.active_folder().cloned() == folder_id;
 
@@ -116,7 +123,7 @@ fn FolderItem(
                     button {
                         r#type: "button",
                         onclick: move |_| {
-                            set_active_folder(state, folder_id);
+                            state.set_active_folder(folder_id);
                         },
                         ..attrs,
                         LucideIcon { kind: icon }
