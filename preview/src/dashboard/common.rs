@@ -164,7 +164,7 @@ pub struct Message {
 
 pub const EMAIL_REPEAT_COUNT: usize = 5;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Store)]
 pub struct MessageState {
     pub uid: String,
     pub source_id: &'static str,

@@ -336,9 +336,6 @@ pub(super) fn ReadPane(
                                 oninput: move |event: FormEvent| reply_draft.set(event.value()),
                             }
                             div { class: "ec-thread-compose-actions",
-                                Button { variant: ButtonVariant::Secondary,
-                                    LucideIcon { kind: IconKind::Paperclip, size: 14 }
-                                }
                                 Button {
                                     variant: ButtonVariant::Primary,
                                     disabled: reply_draft.read().trim().is_empty(),
