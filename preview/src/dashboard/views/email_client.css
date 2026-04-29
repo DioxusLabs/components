@@ -147,7 +147,10 @@
 .ec-row .dx-item-content > .dx-item-title {
     padding-left: 2.75rem;
     padding-right: 4.5rem;
-    min-height: 2rem;
+    min-height: 1.5rem;
+}
+.ec-row .dx-item-content > .ec-row-sender {
+    padding-left: 2.75rem;
 }
 .ec-row:hover:not([data-selected="true"]) {
     background: var(--primary-color-3);
@@ -158,16 +161,43 @@
     border-color: var(--primary-color-6);
     box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
 }
-.ec-unread .dx-item-title,
-.ec-unread .ec-row > .dx-item-content > div {
-    color: var(--secondary-color-1);
-    font-weight: 600;
-}
 .ec-row .dx-item-title {
     display: flex;
     width: 100%;
-    align-items: center;
+    align-items: baseline;
     gap: 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--secondary-color-1);
+    line-height: 1.35;
+}
+.ec-row-subject {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1 1 auto;
+}
+.ec-row-sender {
+    margin-top: 0.125rem;
+    font-size: 0.75rem;
+    color: var(--secondary-color-5);
+    font-weight: 400;
+    line-height: 1.3;
+}
+.ec-row-from {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ec-row .dx-item-description {
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--secondary-color-5);
+    line-height: 1.4;
+}
+.ec-unread .dx-item-title {
+    font-weight: 700;
 }
 .ec-row-time {
     font-size: 0.75rem;

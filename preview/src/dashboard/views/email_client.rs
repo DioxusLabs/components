@@ -775,9 +775,9 @@ fn estimate_message_row_height(state: &MessageState) -> u32 {
     let has_meta_row = !state.tags.is_empty() || m.has_attachment || state.starred || state.flagged;
 
     32  // vertical padding + borders + margins
-        + 19 // sender/title row
-        + 18 // subject row
-        + 21 * snippet_lines
+        + 21 // subject row (now the prominent line)
+        + 16 // sender row
+        + 19 * snippet_lines
         + if has_meta_row { 22 } else { 0 }
         + if has_meta_row { 12 } else { 8 } // content row gaps
 }
@@ -851,15 +851,12 @@ fn MessageRow(
             }
             ItemContent {
                 ItemTitle {
-                    span { {m.from} }
+                    span { class: "ec-row-subject", {m.subject} }
                 }
-                div {
-                    {m.subject}
-                    if m.thread_count > 1 {
-                        span { class: "ec-muted", {format!(" ·{}", m.thread_count)} }
-                    }
+                div { class: "ec-row-sender",
+                    span { class: "ec-row-from", {m.from} }
                 }
-                ItemDescription { {m.snippet} }
+                ItemDescription { class: "ec-row-snippet", {m.snippet} }
                 if !tags.is_empty() || m.has_attachment || flagged {
                     div { class: "ec-muted ec-row-tags",
                         if flagged {
@@ -882,6 +879,19 @@ fn MessageRow(
                 div { class: "ec-row-action-group",
                 button {
                     r#type: "button",
+                    class: "ec-row-action ec-row-action-trash",
+                    aria_label: "Move to trash",
+                    onclick: move |e: Event<MouseData>| {
+                        e.stop_propagation();
+                        let mut msgs = messages.write();
+                        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid_for_trash) {
+                            entry.folder_id = "trash".to_string();
+                        }
+                    },
+                    LucideIcon { kind: IconKind::Trash, size: 16 }
+                }
+                button {
+                    r#type: "button",
                     class: "ec-row-action ec-row-action-star",
                     "data-active": if starred { "true" } else { "false" },
                     aria_label: if starred { "Unstar message" } else { "Star message" },
@@ -896,19 +906,6 @@ fn MessageRow(
                         kind: if starred { IconKind::StarFilled } else { IconKind::StarOutline },
                         size: 16,
                     }
-                }
-                button {
-                    r#type: "button",
-                    class: "ec-row-action ec-row-action-trash",
-                    aria_label: "Move to trash",
-                    onclick: move |e: Event<MouseData>| {
-                        e.stop_propagation();
-                        let mut msgs = messages.write();
-                        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid_for_trash) {
-                            entry.folder_id = "trash".to_string();
-                        }
-                    },
-                    LucideIcon { kind: IconKind::Trash, size: 16 }
                 }
                 }
             }
