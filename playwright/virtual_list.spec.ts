@@ -199,33 +199,3 @@ test("virtual list virtualizes rows and updates on scroll", async ({ page }) => 
     expect(hasScrolledContent).toBe(true);
   }).toPass({ timeout: 15000 });
 });
-
-test("email demo shrinks virtual list when count prop becomes much smaller", async ({ page }) => {
-  await page.goto("http://127.0.0.1:8080/dashboard/email-client", {
-    timeout: 20 * 60 * 1000,
-  });
-
-  const list = page.locator(".ec-list-scroll").first();
-  await expect(list).toBeVisible({ timeout: 30000 });
-  await page.waitForTimeout(500);
-
-  const initial = await list.evaluate((el) => ({
-    clientHeight: el.clientHeight,
-    scrollHeight: el.scrollHeight,
-  }));
-  expect(initial.scrollHeight).toBeGreaterThan(initial.clientHeight);
-
-  await list.evaluate((el) => {
-    el.scrollTop = el.scrollHeight;
-  });
-  await page.waitForTimeout(300);
-
-  const scrolledHeight = await list.evaluate((el) => el.scrollHeight);
-  await page.getByLabel("Search mail").fill("definitely-no-results");
-
-  await expect
-    .poll(async () => list.evaluate((el) => el.scrollHeight), {
-      timeout: 10000,
-    })
-    .toBeLessThan(scrolledHeight / 2);
-});

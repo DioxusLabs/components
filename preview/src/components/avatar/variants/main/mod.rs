@@ -4,10 +4,6 @@ use dioxus::prelude::*;
 #[component]
 pub fn Demo() -> Element {
     let mut avatar_state = use_signal(|| "No state yet".to_string());
-    let basic_profile = AVATAR_PROFILE_OPTIONS[0];
-    let rounded_profile = AVATAR_PROFILE_OPTIONS[1];
-    let large_profile = AVATAR_PROFILE_OPTIONS[2];
-
     rsx! {
         div {
             display: "flex",
@@ -25,10 +21,10 @@ pub fn Demo() -> Element {
                     aria_label: "Basic avatar",
                     AvatarImage {
                         class: "dx-avatar-image",
-                        src: "{basic_profile.src}",
-                        alt: "{basic_profile.name}",
+                        src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
+                        alt: "User avatar",
                     }
-                    AvatarFallback { class: "dx-avatar-fallback", "{basic_profile.initials}" }
+                    AvatarFallback { class: "dx-avatar-fallback", "EA" }
                 }
             }
             div { class: "dx-avatar-item",
@@ -42,10 +38,10 @@ pub fn Demo() -> Element {
                     aria_label: "Basic avatar",
                     AvatarImage {
                         class: "dx-avatar-image",
-                        src: "{rounded_profile.src}",
-                        alt: "{rounded_profile.name}",
+                        src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
+                        alt: "User avatar",
                     }
-                    AvatarFallback { class: "dx-avatar-fallback", "{rounded_profile.initials}" }
+                    AvatarFallback { class: "dx-avatar-fallback", "EA" }
                 }
             }
             div { class: "dx-avatar-item",
@@ -74,10 +70,10 @@ pub fn Demo() -> Element {
                     aria_label: "Large avatar",
                     AvatarImage {
                         class: "dx-avatar-image",
-                        src: "{large_profile.src}",
-                        alt: "{large_profile.name}",
+                        src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif()),
+                        alt: "Large avatar",
                     }
-                    AvatarFallback { class: "dx-avatar-fallback", "{large_profile.initials}" }
+                    AvatarFallback { class: "dx-avatar-fallback", "DX" }
                 }
             }
         }
