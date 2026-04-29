@@ -96,7 +96,10 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
     });
 
     // Measurements as a memo — recomputes when count or item_size_cache change.
-    // Peeked (not read) by the component, so recomputation doesn't trigger re-renders.
+    // Read (not peeked) by the render body so the component re-renders when the
+    // memo invalidates; peeking a dirty memo returns stale data (Memo::peek does
+    // not check the dirty flag), which can yield out-of-bounds indices when
+    // `count` shrinks between renders.
     let measurements: Memo<Vec<crate::r#virtual::types::VirtualItem>> = use_memo(move || {
         let count = count();
         let isc = state.item_size_cache();
@@ -209,7 +212,7 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
         }
     };
 
-    let m = measurements.peek();
+    let m = measurements.read();
     let virtual_items = get_virtual_items(&state, &m, buffer());
     let total_height = get_total_size(&state, &m);
 

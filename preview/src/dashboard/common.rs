@@ -12,7 +12,12 @@ pub const AVATAR_PROFILE_OPTIONS: &[AvatarProfile] = &[
     AvatarProfile {
         name: "ealmloff",
         initials: "EA",
-        src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
+        src: "https://github.com/ealmloff.png",
+    },
+    AvatarProfile {
+        name: "nicoburns",
+        initials: "NB",
+        src: "https://github.com/nicoburns.png",
     },
     AvatarProfile {
         name: "jkelleyrtp",
