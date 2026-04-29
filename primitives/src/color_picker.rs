@@ -6,7 +6,7 @@ use crate::dioxus_elements::input_data::MouseButton;
 use dioxus::html::geometry::euclid::{Rect, Size2D, Vector2D};
 use dioxus::html::geometry::PixelsSize;
 use dioxus::prelude::*;
-use palette::{encoding, Hsv, IntoColor, RgbHue, Srgb};
+use palette::{encoding, Hsv, IntoColor, Oklch, RgbHue, Srgb};
 
 use std::{rc::Rc, str::FromStr};
 
@@ -38,6 +38,31 @@ impl Color {
     /// Small epsilon used to classify achromatic colors in sRGB (1 channel step).
     const ACHROMATIC_EPSILON: f64 = 1.0 / 255.0;
 
+    /// Lightness threshold between orange and brown.
+    const ORANGE_LIGHTNESS_THRESHOLD: f64 = 0.68;
+
+    /// Lightness threshold between pure yellow and "yellow green".
+    const YELLOW_GREEN_LIGHTNESS_THRESHOLD: f64 = 0.85;
+
+    /// The maximum lightness considered to be "dark".
+    const MAX_DARK_LIGHTNESS: f64 = 0.55;
+
+    /// The chroma threshold between gray and color.
+    const GRAY_THRESHOLD: f64 = 0.001;
+
+    const OKLCH_HUES: [(f64, &str); 10] = [
+        (0.0, "pink"),
+        (15.0, "red"),
+        (48.0, "orange"),
+        (94.0, "yellow"),
+        (135.0, "green"),
+        (175.0, "cyan"),
+        (264.0, "blue"),
+        (284.0, "purple"),
+        (320.0, "magenta"),
+        (349.0, "pink"),
+    ];
+
     /// Create an RGB color.
     pub fn new(red: u8, green: u8, blue: u8) -> Self {
         Self(Srgb::new(red, green, blue))
@@ -65,6 +90,14 @@ impl Color {
         // Convert u8 [0-255] to f64 [0.0-1.0] and then to HSV
         let hsv: Hsv<encoding::Srgb, f64> = self.0.into_format::<f64>().into_color();
         (hsv.hue.into_positive_degrees(), hsv.saturation, hsv.value)
+    }
+
+    /// Converts the RGB color to a (L, C, h) tuple.
+    fn to_oklch(self) -> (f64, f64, f64) {
+        // Convert u8 [0-255] to f64 [0.0-1.0] and then to Oklch
+        let oklch: Oklch<f64> = self.0.into_format::<f64>().into_color();
+        let (l, c, h) = oklch.into_components();
+        (l, c, h.into_degrees())
     }
 
     /// Converts RGB to HSV and marks hue as undefined for achromatic colors.
@@ -111,6 +144,110 @@ impl Color {
     pub fn with_sv(self, s: f64, v: f64) -> Self {
         let h = self.hue();
         Self::from_hsv(h, s, v)
+    }
+
+    /// Returns name for the color, for use in visual or accessibility labels.
+    pub fn color_name(&self) -> String {
+        let (l, c, h) = self.to_oklch();
+
+        if l > 0.999 {
+            return String::from("white");
+        }
+
+        if l < 0.001 {
+            return String::from("black");
+        }
+
+        let (hue, l) = Self::oklch_hue(l, c, h);
+
+        let lightness = if l < 0.3 {
+            "very dark"
+        } else if l < Self::MAX_DARK_LIGHTNESS {
+            "dark"
+        } else if l < 0.7 {
+            // none
+            ""
+        } else if l < 0.85 {
+            "light"
+        } else {
+            "very light"
+        };
+
+        let chroma = if (Self::GRAY_THRESHOLD..=0.1).contains(&c) {
+            if l >= 0.7 {
+                "pale"
+            } else {
+                "grayish"
+            }
+        } else if c >= 0.15 {
+            "vibrant"
+        } else {
+            ""
+        };
+
+        let mut parts = Vec::new();
+        if !lightness.is_empty() {
+            parts.push(lightness);
+        }
+        if !chroma.is_empty() {
+            parts.push(chroma);
+        }
+        if !hue.is_empty() {
+            parts.push(&hue);
+        }
+
+        parts.join(" ")
+    }
+
+    /// Returns name for the hue, for use in visual or accessibility labels.
+    pub fn hue_name(&self) -> String {
+        let (l, c, h) = self.to_oklch();
+        let (hue, _) = Self::oklch_hue(l, c, h);
+        hue
+    }
+
+    fn oklch_hue(l: f64, c: f64, h: f64) -> (String, f64) {
+        if c < Self::GRAY_THRESHOLD {
+            return ("gray".to_string(), l);
+        }
+
+        let h = h.rem_euclid(360.0);
+
+        for (index, &(hue, hue_name)) in Self::OKLCH_HUES.iter().enumerate() {
+            let mut new_l = l;
+            let mut new_hue_name = hue_name.to_string();
+
+            let (next_hue, next_hue_name) = if index + 1 < Self::OKLCH_HUES.len() {
+                Self::OKLCH_HUES[index + 1]
+            } else {
+                (360.0, "pink")
+            };
+
+            if h >= hue && h < next_hue {
+                // Split orange hue into brown/orange depending on lightness.
+                if hue_name == "orange" {
+                    if l < Self::ORANGE_LIGHTNESS_THRESHOLD {
+                        new_hue_name = "brown".to_string();
+                    } else {
+                        // Adjust lightness.
+                        new_l = (l - Self::ORANGE_LIGHTNESS_THRESHOLD) + Self::MAX_DARK_LIGHTNESS;
+                    }
+                }
+
+                // If the hue is at least halfway to the next hue, add the next hue name as well.
+                if h > hue + (next_hue - hue) / 2.0 && new_hue_name != next_hue_name {
+                    new_hue_name = format!("{new_hue_name} {next_hue_name}");
+                } else if new_hue_name == "yellow" && new_l < Self::YELLOW_GREEN_LIGHTNESS_THRESHOLD
+                {
+                    // Yellow shifts toward green at lower lightnesses.
+                    new_hue_name = "yellow green".to_string();
+                }
+
+                return (new_hue_name, new_l);
+            }
+        }
+
+        unreachable!("Unexpected hue")
     }
 }
 
@@ -569,6 +706,7 @@ struct AreaThumbProps {
 
 #[component]
 fn AreaThumb(props: AreaThumbProps) -> Element {
+    let picker_ctx = use_context::<ColorPickerContext>();
     let ctx = use_context::<ColorAreaContext>();
 
     let mut button_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
@@ -621,7 +759,7 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
                 r#type: "range",
                 aria_label: "Saturation",
                 aria_roledescription: "2D Slider",
-                aria_valuetext: format!("Saturation {:.0}%", (current.x / max * 100.0).clamp(0.0, 100.0)),
+                aria_valuetext: format!("Saturation {:.0}%, {}", (current.x / max * 100.0).clamp(0.0, 100.0), (picker_ctx.color)().color_name()),
                 aria_orientation: "horizontal",
                 min: "{min}",
                 max: "{max}",
@@ -633,7 +771,7 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
                 r#type: "range",
                 aria_label: "Value",
                 aria_roledescription: "2D Slider",
-                aria_valuetext: format!("Value {:.0}%", (current.y / max * 100.0).clamp(0.0, 100.0)),
+                aria_valuetext: format!("Value {:.0}%, {}", (current.y / max * 100.0).clamp(0.0, 100.0), (picker_ctx.color)().color_name()),
                 aria_orientation: "vertical",
                 min: "{min}",
                 max: "{max}",

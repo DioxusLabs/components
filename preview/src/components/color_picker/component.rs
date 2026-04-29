@@ -27,6 +27,8 @@ pub fn ColorPicker(props: ColorPickerProps) -> Element {
             button {
                 class: "dx-color-picker-button",
                 disabled: if (props.disabled)() { true },
+                aria_label: (props.color)().color_name(),
+                aria_expanded: open(),
                 onclick: move |_| open.set(true),
                 ColorSwatch { color: props.color }
                 if let Some(label) = props.label { span { {label} } }
@@ -240,7 +242,7 @@ fn ColorSwatch(props: ColorSwatchProps) -> Element {
     rsx! {
         div {
             role: "img",
-            aria_label: (props.color)().to_css_rgb(),
+            aria_label: (props.color)().color_name(),
             class: "dx-color-swatch {props.size.to_class()} {props.shape.to_class()}",
             style: "--swatch-color: {hex_color}",
             ..props.attributes,
@@ -328,6 +330,8 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
                     class: "dx-color-slider-track",
                     SliderThumb {
                         class: "dx-color-slider-thumb",
+                        aria_label: "Hue",
+                        aria_valuetext: format!("{:.0}° {}", current_hue(), thumb_color().hue_name()),
                         background_color: thumb_color().to_css_rgb(),
                     }
                 }
