@@ -732,6 +732,7 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
     let min = (ctx.min)();
     let max = (ctx.max)();
     let step = (ctx.step)();
+    let color_name = (picker_ctx.color)().color_name();
 
     rsx! {
         div {
@@ -753,13 +754,42 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
                 // Don't focus the button. The dragging state will handle focus
                 evt.prevent_default();
             },
+            onkeydown: move |evt| async move {
+                let key = evt.data().key();
+                let mut step = (ctx.step)();
+                if evt.data().modifiers().shift() {
+                    // If shift is pressed, increase the step size
+                    step *= 10.0;
+                }
+
+                // Handle keyboard navigation
+                let new_value = (ctx.value)() + match key {
+                    Key::ArrowUp => {
+                        Vector2D::new(0.0, step)
+                    }
+                    Key::ArrowDown => {
+                        Vector2D::new(0.0, -step)
+                    }
+                    Key::ArrowRight => {
+                        Vector2D::new(step, 0.0)
+                    }
+                    Key::ArrowLeft => {
+                        Vector2D::new(-step, 0.0)
+                    }
+                    _ => return,
+                };
+
+                evt.prevent_default();
+                // Clamp and snap the new value
+                ctx.set_value.call(ctx.clamp_and_snap(new_value));
+            },
             ..props.attributes,
             input {
                 class: "dx-color-area-input",
                 r#type: "range",
                 aria_label: "Saturation",
                 aria_roledescription: "2D Slider",
-                aria_valuetext: format!("Saturation {:.0}%, {}", (current.x / max * 100.0).clamp(0.0, 100.0), (picker_ctx.color)().color_name()),
+                aria_valuetext: format!("Saturation {:.0}%, {color_name}", percent.width),
                 aria_orientation: "horizontal",
                 min: "{min}",
                 max: "{max}",
@@ -771,7 +801,7 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
                 r#type: "range",
                 aria_label: "Value",
                 aria_roledescription: "2D Slider",
-                aria_valuetext: format!("Value {:.0}%, {}", (current.y / max * 100.0).clamp(0.0, 100.0), (picker_ctx.color)().color_name()),
+                aria_valuetext: format!("Value {:.0}%, {color_name}", percent.height),
                 aria_orientation: "vertical",
                 min: "{min}",
                 max: "{max}",

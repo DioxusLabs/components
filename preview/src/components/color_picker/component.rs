@@ -162,8 +162,10 @@ fn ColorField(props: ColorFieldProps) -> Element {
                 },
                 onwheel: move |e: WheelEvent| {
                     e.prevent_default();
-                    let delta_y = e.data.delta().strip_units().y;
-                    offset_color(-delta_y);
+                    let delta_y = e.data.delta().strip_units().y.signum();
+                    if !delta_y.is_nan() {
+                        offset_color(-delta_y);
+                    }
                 },
                 onkeydown
             }
