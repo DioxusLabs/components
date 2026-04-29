@@ -402,13 +402,16 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
         runtime.spawn(ScopeId::ROOT, async move {
             let mut pointer_updates = dioxus::document::eval(
                 "window.addEventListener('pointerdown', (e) => {
-                    dioxus.send(['down', [e.pointerId, e.pageX, e.pageY]]);
+                    dioxus.send(['down', [e.pointerId, e.clientX, e.clientY]]);
                 });
                 window.addEventListener('pointermove', (e) => {
-                    dioxus.send(['move', [e.pointerId, e.pageX, e.pageY]]);
+                    dioxus.send(['move', [e.pointerId, e.clientX, e.clientY]]);
                 });
                 window.addEventListener('pointerup', (e) => {
-                    dioxus.send(['up', [e.pointerId, e.pageX, e.pageY]]);
+                    dioxus.send(['up', [e.pointerId, e.clientX, e.clientY]]);
+                });
+                window.addEventListener('pointercancel', (e) => {
+                    dioxus.send(['up', [e.pointerId, e.clientX, e.clientY]]);
                 });",
             );
 
@@ -576,6 +579,7 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
         let Some(pointer) = pointers.iter().find(|p| p.id == active_pointer_id) else {
             current_pointer_id.take();
             last_processed_pos.set(None);
+            dragging.set(false);
             return;
         };
 

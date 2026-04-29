@@ -317,10 +317,8 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
                 label: "Color Slider",
                 horizontal: true,
                 max: 360.0,
-                value: SliderValue::Single(current_hue()),
-                on_value_change: move |value: SliderValue| {
-                    let SliderValue::Single(h) = value;
-
+                value: current_hue(),
+                on_value_change: move |h: f64| {
                     // Allow the value to be exactly 360.0
                     // The palette will understand that 360.0 == 0.0, but the signal will remain 360.0 for the UI.
                     current_hue.set(h);
