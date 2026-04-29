@@ -1,11 +1,8 @@
 use dioxus::prelude::*;
 
 use crate::components::input::Input;
-use crate::components::sidebar::{SidebarInset, SidebarProvider, SidebarTrigger};
 use crate::components::separator::Separator;
-use crate::dashboard::common::{
-    seed_message_states, FolderId, MessageState, MessageTag, TabId, FOLDERS,
-};
+use crate::components::sidebar::{SidebarInset, SidebarProvider, SidebarTrigger};
 use crate::theme::DarkModeToggle;
 
 mod avatars;
@@ -13,75 +10,34 @@ mod filters;
 mod list_pane;
 mod read_pane;
 mod sidebar;
+mod state;
 
-use filters::filtered_messages;
-use list_pane::{flatten_rows, ListPane};
+use list_pane::ListPane;
 use read_pane::ReadPane;
 use sidebar::EmailSidebar;
+use state::{
+    active_folder_label, selected_message_index, selected_message_uid, set_search_query,
+    visible_message_ids, EmailClientState, EmailClientStateStoreExt,
+};
 
 #[component]
 pub fn EmailClient() -> Element {
-    let messages = use_signal(seed_message_states);
-    let active_folder = use_signal(|| FolderId::Inbox);
-    let active_tab = use_signal(|| TabId::All);
-    let mut search_query = use_signal(String::new);
-    let selected_tags = use_signal(Vec::<MessageTag>::new);
-    let selected_id = use_signal(|| String::from("m1#0"));
-    let mut read_open = use_signal(|| false);
+    let state = use_store(EmailClientState::new);
 
-    let active_folder_id = *active_folder.read();
-    let active_tab_id = *active_tab.read();
-    let active_search_query = search_query.read().clone();
-    let active_selected_tags = selected_tags.read().clone();
+    let visible_ids = use_memo(move || visible_message_ids(state));
+    let selected_uid = use_memo(move || selected_message_uid(state, &visible_ids.read()));
+    let total_count = use_memo(move || visible_ids.read().len());
+    let selected_index =
+        use_memo(move || selected_message_index(selected_uid.read().as_str(), &visible_ids.read()));
 
-    let folder_label: String = FOLDERS
-        .iter()
-        .find(|f| f.id == active_folder_id)
-        .map(|f| f.label.to_string())
-        .unwrap_or_else(|| "Inbox".to_string());
-
-    let messages_snapshot = messages.read().clone();
-
-    let visible_messages = filtered_messages(
-        &messages_snapshot,
-        active_folder_id,
-        active_tab_id,
-        active_search_query.as_str(),
-        &active_selected_tags,
-    );
-
-    let selected_uid_read = selected_id.read().clone();
-    let selected: MessageState = visible_messages
-        .iter()
-        .find(|s| s.uid == selected_uid_read)
-        .or_else(|| visible_messages.first())
-        .cloned()
-        .unwrap_or_else(|| {
-            messages_snapshot
-                .first()
-                .cloned()
-                .expect("seed_message_states is non-empty")
-        });
-
-    let rows = flatten_rows(&visible_messages);
-    let total_count = visible_messages.len();
-    let selected_index = visible_messages
-        .iter()
-        .position(|s| s.uid == selected.uid)
-        .map(|i| i + 1)
-        .unwrap_or(1);
-
-    let selected_uid = selected.uid.clone();
+    let folder_label = active_folder_label(state);
+    let read_open = state.read_open().cloned();
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./email_client.css") }
 
         SidebarProvider {
-            EmailSidebar {
-                messages_snapshot: messages_snapshot.clone(),
-                active_folder,
-                read_open,
-            }
+            EmailSidebar { state }
 
             SidebarInset {
                 header { class: "ec-topbar",
@@ -92,38 +48,23 @@ pub fn EmailClient() -> Element {
                         r#type: "search",
                         "aria-label": "Search mail",
                         name: "mail-search",
-                        value: search_query,
+                        value: state.search_query(),
                         oninput: move |event: FormEvent| {
-                            search_query.set(event.value());
-                            read_open.set(false);
+                            set_search_query(state, event.value());
                         },
                         placeholder: "Search mail, people, attachments…",
                     }
                     DarkModeToggle {}
                 }
 
-                div { class: if read_open() { "ec-main ec-reading" } else { "ec-main" },
-                    ListPane {
-                        rows,
-                        messages_snapshot: messages_snapshot.clone(),
-                        active_folder_id,
-                        active_search_query: active_search_query.clone(),
-                        active_selected_tags: active_selected_tags.clone(),
-                        messages,
-                        selected_id,
-                        selected_uid,
-                        active_tab,
-                        selected_tags,
-                        read_open,
-                    }
+                div { class: if read_open { "ec-main ec-reading" } else { "ec-main" },
+                    ListPane { state, visible_ids, selected_uid }
 
                     ReadPane {
-                        selected,
+                        state,
+                        selected_uid,
                         total_count,
                         selected_index,
-                        messages,
-                        selected_id,
-                        read_open,
                     }
                 }
             }

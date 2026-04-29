@@ -18,115 +18,88 @@ use crate::components::toolbar::component::{
     Toolbar, ToolbarButton, ToolbarGroup, ToolbarSeparator,
 };
 use crate::dashboard::common::{
-    lookup_message, FolderId, IconKind, LucideIcon, MessageState, MessageTag,
-    AVATAR_PROFILE_OPTIONS,
+    lookup_message, FolderId, IconKind, LucideIcon, MessageTag, AVATAR_PROFILE_OPTIONS,
 };
 
 use super::avatars::avatar_profile_for_key;
+use super::state::{close_read_pane, message_snapshot, update_message, EmailClientState};
 
 #[component]
 pub(super) fn ReadPane(
-    selected: ReadSignal<MessageState>,
+    state: Store<EmailClientState>,
+    selected_uid: ReadSignal<String>,
     total_count: ReadSignal<usize>,
     selected_index: ReadSignal<usize>,
-    mut messages: Signal<Vec<MessageState>>,
-    selected_id: Signal<String>,
-    mut read_open: Signal<bool>,
 ) -> Element {
     let mut reply_draft = use_signal(String::new);
-    let selected_value = selected.read().clone();
+    let selected_uid_value = selected_uid.read().clone();
+    let selected_value =
+        message_snapshot(state, &selected_uid_value).expect("selected message should exist");
     let selected_static = lookup_message(selected_value.source_id);
     let counter = format!("{} of {}", selected_index.read(), total_count.read());
 
+    let archive_uid = selected_uid_value.clone();
     let archive_selected = move |_| {
-        let uid = selected_id.read().clone();
-        let mut msgs = messages.write();
-        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid) {
+        update_message(state, archive_uid.clone(), |entry| {
             entry.folder_id = FolderId::Archive;
             entry.unread = false;
-        }
-        drop(msgs);
-        read_open.set(false);
+        });
+        close_read_pane(state);
     };
+    let snooze_uid = selected_uid_value.clone();
     let snooze_selected = move |_| {
-        let uid = selected_id.read().clone();
-        let mut msgs = messages.write();
-        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid) {
+        update_message(state, snooze_uid.clone(), |entry| {
             entry.snoozed = true;
-        }
-        drop(msgs);
-        read_open.set(false);
+        });
+        close_read_pane(state);
     };
+    let delete_uid = selected_uid_value.clone();
     let delete_selected = move |_| {
-        let uid = selected_id.read().clone();
-        let mut msgs = messages.write();
-        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid) {
+        update_message(state, delete_uid.clone(), |entry| {
             entry.folder_id = FolderId::Trash;
             entry.unread = false;
-        }
-        drop(msgs);
-        read_open.set(false);
+        });
+        close_read_pane(state);
     };
+    let flag_uid = selected_uid_value.clone();
     let toggle_flag_selected = move |_| {
-        let uid = selected_id.read().clone();
-        let mut msgs = messages.write();
-        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid) {
+        update_message(state, flag_uid.clone(), |entry| {
             entry.flagged = !entry.flagged;
-        }
+        });
     };
+    let star_uid = selected_uid_value.clone();
     let toggle_star_selected = move |_| {
-        let uid = selected_id.read().clone();
-        let mut msgs = messages.write();
-        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid) {
+        update_message(state, star_uid.clone(), |entry| {
             entry.starred = !entry.starred;
-        }
+        });
     };
-    let mut toggle_unread_selected = move |_| {
-        let uid = selected_id.read().clone();
-        let mut msgs = messages.write();
-        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid) {
+    let unread_uid = selected_uid_value.clone();
+    let toggle_unread_selected = move |_| {
+        update_message(state, unread_uid.clone(), |entry| {
             entry.unread = !entry.unread;
-        }
+        });
     };
-    let mut move_to_inbox_selected = move |_| {
-        let uid = selected_id.read().clone();
-        let mut msgs = messages.write();
-        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid) {
+    let inbox_uid = selected_uid_value.clone();
+    let move_to_inbox_selected = move |_| {
+        update_message(state, inbox_uid.clone(), |entry| {
             entry.folder_id = FolderId::Inbox;
             entry.snoozed = false;
-        }
-        drop(msgs);
-        read_open.set(false);
+        });
+        close_read_pane(state);
     };
-    let mut move_to_trash_selected = move |_| {
-        let uid = selected_id.read().clone();
-        let mut msgs = messages.write();
-        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid) {
+    let trash_uid = selected_uid_value.clone();
+    let move_to_trash_selected = move |_| {
+        update_message(state, trash_uid.clone(), |entry| {
             entry.folder_id = FolderId::Trash;
-        }
-        drop(msgs);
-        read_open.set(false);
-    };
-    let remove_tag_from_selected = move |tag: MessageTag| {
-        let uid = selected_id.read().clone();
-        let mut msgs = messages.write();
-        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid) {
-            entry.tags.retain(|t| *t != tag);
-        }
-    };
-    let set_selected_tags = move |new_tags: Vec<MessageTag>| {
-        let uid = selected_id.read().clone();
-        let mut msgs = messages.write();
-        if let Some(entry) = msgs.iter_mut().find(|s| s.uid == uid) {
-            entry.tags = new_tags;
-        }
+        });
+        close_read_pane(state);
     };
 
     rsx! {
         section { class: "ec-read-pane",
             Toolbar { aria_label: "Message actions",
                 ToolbarGroup {
-                    ToolbarButton { index: 0usize, on_click: move |_| read_open.set(false),
+                    ToolbarButton { index: 0usize, on_click: move |_| close_read_pane(state),
                         LucideIcon { kind: IconKind::ArrowLeft }
                     }
                 }
@@ -229,8 +202,12 @@ pub(super) fn ReadPane(
                                                 "aria-label": "Remove tag {tag.label()}",
                                                 onclick: {
                                                     let tag = *tag;
-                                                    let mut remove_tag = remove_tag_from_selected;
-                                                    move |_| remove_tag(tag)
+                                                    let uid = selected_uid_value.clone();
+                                                    move |_| {
+                                                        update_message(state, uid.clone(), |entry| {
+                                                            entry.tags.retain(|t| *t != tag);
+                                                        });
+                                                    }
                                                 },
                                                 Badge {
                                                     variant: BadgeVariant::Secondary,
@@ -243,8 +220,9 @@ pub(super) fn ReadPane(
                                             values: Some(selected_value.tags.clone()),
                                             default_values: selected_value.tags.clone(),
                                             on_values_change: move |values: Vec<MessageTag>| {
-                                                let mut set_tags = set_selected_tags;
-                                                set_tags(values);
+                                                update_message(state, selected_uid_value.clone(), |entry| {
+                                                    entry.tags = values;
+                                                });
                                             },
                                             SelectTrigger {
                                                 class: "ec-tag-edit-trigger",

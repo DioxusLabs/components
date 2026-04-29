@@ -8,26 +8,12 @@ use crate::components::sidebar::{
     SidebarHeader, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuButtonSize,
     SidebarMenuItem, SidebarRail, SidebarVariant,
 };
-use crate::dashboard::common::{
-    FolderId, IconKind, LucideIcon, MessageState, AVATAR_PROFILE_OPTIONS, FOLDERS,
-};
+use crate::dashboard::common::{FolderId, IconKind, LucideIcon, AVATAR_PROFILE_OPTIONS, FOLDERS};
 
-use super::filters::folder_count;
+use super::state::{folder_count, set_active_folder, EmailClientState, EmailClientStateStoreExt};
 
 #[component]
-pub(super) fn EmailSidebar(
-    messages_snapshot: ReadSignal<Vec<MessageState>>,
-    active_folder: Signal<FolderId>,
-    read_open: Signal<bool>,
-) -> Element {
-    let folder_counts: Vec<Option<u32>> = {
-        let snapshot = messages_snapshot.read();
-        FOLDERS
-            .iter()
-            .map(|f| Some(folder_count(&snapshot, f.id)))
-            .collect()
-    };
-
+pub(super) fn EmailSidebar(state: Store<EmailClientState>) -> Element {
     rsx! {
         Sidebar {
             variant: SidebarVariant::Sidebar,
@@ -70,15 +56,14 @@ pub(super) fn EmailSidebar(
                 SidebarGroup {
                     SidebarGroupLabel { "Folders" }
                     SidebarMenu {
-                        for (idx, f) in FOLDERS.iter().enumerate() {
+                        for f in FOLDERS.iter() {
                             FolderItem {
                                 key: "{f.id.as_str()}",
                                 folder_id: f.id,
                                 label: f.label,
                                 icon: f.icon,
-                                count: folder_counts.get(idx).copied().flatten(),
-                                active_folder,
-                                read_open,
+                                count: Some(folder_count(state, f.id)),
+                                state,
                             }
                         }
                     }
@@ -118,10 +103,9 @@ fn FolderItem(
     label: &'static str,
     icon: IconKind,
     count: Option<u32>,
-    mut active_folder: Signal<FolderId>,
-    mut read_open: Signal<bool>,
+    state: Store<EmailClientState>,
 ) -> Element {
-    let is_active = *active_folder.read() == folder_id;
+    let is_active = state.active_folder().cloned() == folder_id;
 
     rsx! {
         SidebarMenuItem {
@@ -132,8 +116,7 @@ fn FolderItem(
                     button {
                         r#type: "button",
                         onclick: move |_| {
-                            active_folder.set(folder_id);
-                            read_open.set(false);
+                            set_active_folder(state, folder_id);
                         },
                         ..attrs,
                         LucideIcon { kind: icon }

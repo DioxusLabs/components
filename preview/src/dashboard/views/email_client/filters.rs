@@ -54,37 +54,3 @@ pub(super) fn message_matches_filters(
         && message_matches_search(state, query)
         && message_matches_selected_tags(state, selected_tags)
 }
-
-pub(super) fn filtered_messages(
-    messages: &[MessageState],
-    folder_id: FolderId,
-    tab_id: TabId,
-    query: &str,
-    selected_tags: &[MessageTag],
-) -> Vec<MessageState> {
-    messages
-        .iter()
-        .filter(|s| message_matches_filters(s, folder_id, tab_id, query, selected_tags))
-        .cloned()
-        .collect()
-}
-
-pub(super) fn folder_count(messages: &[MessageState], folder_id: FolderId) -> u32 {
-    messages
-        .iter()
-        .filter(|s| message_matches_folder(s, folder_id))
-        .count() as u32
-}
-
-pub(super) fn tab_count(
-    messages: &[MessageState],
-    folder_id: FolderId,
-    tab_id: TabId,
-    query: &str,
-    selected_tags: &[MessageTag],
-) -> u32 {
-    messages
-        .iter()
-        .filter(|s| message_matches_filters(s, folder_id, tab_id, query, selected_tags))
-        .count() as u32
-}
