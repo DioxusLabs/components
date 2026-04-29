@@ -87,6 +87,39 @@ fn normalize_range(range: Range<f64>) -> Range<f64> {
     ordered_range(range.start, range.end)
 }
 
+fn snap_value(value: f64, step: f64) -> f64 {
+    (value / step).round() * step
+}
+
+fn closest_thumb_for(raw: f64, thumbs: &[f64]) -> usize {
+    if thumbs.len() < 2 {
+        return 0;
+    }
+
+    let d0 = (raw - thumbs[0]).abs();
+    let d1 = (raw - thumbs[1]).abs();
+    if d0 < d1 {
+        0
+    } else if d1 < d0 {
+        1
+    } else if raw < thumbs[0] {
+        0
+    } else {
+        1
+    }
+}
+
+fn clamp_to_step_bounds(raw: f64, lo: f64, hi: f64, step: f64) -> f64 {
+    let snapped = snap_value(raw.clamp(lo, hi), step);
+    if snapped > hi {
+        ((hi / step).floor() * step).clamp(lo, hi)
+    } else if snapped < lo {
+        ((lo / step).ceil() * step).clamp(lo, hi)
+    } else {
+        snapped
+    }
+}
+
 /// The props for the [`Slider`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct SliderProps {
@@ -488,7 +521,7 @@ fn SliderImpl(props: SliderImplProps) -> Element {
                         };
                         let raw = (offset / size) * ctx.range_size() + (ctx.min)();
 
-                        let idx = ctx.closest_thumb(ctx.snap(raw));
+                        let idx = ctx.closest_thumb(raw);
                         let mut active = ctx.active_thumb;
                         active.set(idx);
 
@@ -860,31 +893,13 @@ impl SliderContext {
         range_max - range_min
     }
 
-    fn snap(&self, value: f64) -> f64 {
-        let step = (self.step)();
-        (value / step).round() * step
-    }
-
     /// Pick the thumb index whose current value is closest to `raw`. On a tie (most commonly
     /// when the two thumbs have collided at the same value) pick by direction so neither thumb
     /// gets stranded: clicks at or to the right of the tied position activate thumb 1, clicks
     /// to the left activate thumb 0. For single-thumb sliders this is always `0`.
     fn closest_thumb(&self, raw: f64) -> usize {
         let t = (self.thumbs)();
-        if t.len() < 2 {
-            return 0;
-        }
-        let d0 = (raw - t[0]).abs();
-        let d1 = (raw - t[1]).abs();
-        if d0 < d1 {
-            0
-        } else if d1 < d0 {
-            1
-        } else if raw < t[0] {
-            0
-        } else {
-            1
-        }
+        closest_thumb_for(raw, &t)
     }
 
     /// Clamp `raw` to the bounds the given thumb is allowed to occupy (against the global
@@ -900,20 +915,39 @@ impl SliderContext {
             (2, _) => (t[0], hi),
             _ => (lo, hi),
         };
-        let step = (self.step)();
-        let snapped = self.snap(raw.clamp(lo, hi));
-        if snapped > hi {
-            (hi / step).floor() * step
-        } else if snapped < lo {
-            (lo / step).ceil() * step
-        } else {
-            snapped
-        }
+        clamp_to_step_bounds(raw, lo, hi, (self.step)())
     }
 
     fn as_percent(&self, value: f64) -> f64 {
         let min = (self.min)();
         let max = (self.max)();
         ((value - min) / (max - min) * 100.0).clamp(0.0, 100.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn closest_thumb_uses_raw_collision_position() {
+        let collided = [80.0, 80.0];
+
+        assert_eq!(closest_thumb_for(79.6, &collided), 0);
+        assert_eq!(closest_thumb_for(80.0, &collided), 1);
+        assert_eq!(closest_thumb_for(80.4, &collided), 1);
+    }
+
+    #[test]
+    fn clamp_to_step_bounds_keeps_fallbacks_in_range() {
+        assert_eq!(clamp_to_step_bounds(8.0, 5.0, 8.0, 10.0), 5.0);
+        assert_eq!(clamp_to_step_bounds(5.0, 5.0, 8.0, 10.0), 5.0);
+        assert_eq!(clamp_to_step_bounds(93.0, 93.0, 95.0, 10.0), 95.0);
+    }
+
+    #[test]
+    fn clamp_to_step_bounds_preserves_available_step_ticks() {
+        assert_eq!(clamp_to_step_bounds(85.0, 72.0, 85.0, 10.0), 80.0);
+        assert_eq!(clamp_to_step_bounds(84.0, 78.0, 89.0, 10.0), 80.0);
     }
 }

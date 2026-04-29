@@ -1,4 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
+
+async function sliderTrackPoint(track: Locator, frac: number) {
+  const box = await track.boundingBox();
+  if (!box) throw new Error('slider track has no bounding box');
+  return { x: box.x + box.width * frac, y: box.y + box.height / 2 };
+}
+
+async function clickSliderTrack(page: Page, track: Locator, frac: number) {
+  const point = await sliderTrackPoint(track, frac);
+  await page.mouse.click(point.x, point.y);
+}
 
 test('test', async ({ page }) => {
   await page.goto('http://127.0.0.1:8080/component/?name=slider&', { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
@@ -212,20 +223,19 @@ test('range track click activates closest thumb', async ({ page }) => {
   const t0 = thumbs.nth(0);
   const t1 = thumbs.nth(1);
   const slider = page.locator('.dx-slider').first();
+  const track = slider.locator('.dx-slider-track');
 
-  const box = await slider.boundingBox();
-  if (!box) throw new Error('slider has no bounding box');
+  await expect(t0).toHaveAttribute('aria-valuenow', '20');
+  await expect(t1).toHaveAttribute('aria-valuenow', '80');
 
   // Click near the right edge — should activate thumb 1, jumping it close to 100
-  await page.mouse.click(box.x + box.width * 0.95, box.y + box.height / 2);
+  await clickSliderTrack(page, track, 0.95);
   await expect(t0).toHaveAttribute('aria-valuenow', '20');
-  const t1After = await t1.getAttribute('aria-valuenow');
-  expect(Number(t1After)).toBeGreaterThan(80);
+  await expect.poll(async () => Number(await t1.getAttribute('aria-valuenow'))).toBeGreaterThan(80);
 
   // Click near the left edge — should activate thumb 0, jumping it close to 0
-  await page.mouse.click(box.x + box.width * 0.05, box.y + box.height / 2);
-  const t0After = await t0.getAttribute('aria-valuenow');
-  expect(Number(t0After)).toBeLessThan(20);
+  await clickSliderTrack(page, track, 0.05);
+  await expect.poll(async () => Number(await t0.getAttribute('aria-valuenow'))).toBeLessThan(20);
 });
 
 test('range collided thumbs split by click direction', async ({ page }) => {
@@ -234,6 +244,7 @@ test('range collided thumbs split by click direction', async ({ page }) => {
   const t0 = thumbs.nth(0);
   const t1 = thumbs.nth(1);
   const slider = page.locator('.dx-slider').first();
+  const track = slider.locator('.dx-slider-track');
 
   // Collide both thumbs at 80
   await t0.focus();
@@ -241,14 +252,36 @@ test('range collided thumbs split by click direction', async ({ page }) => {
   await expect(t0).toHaveAttribute('aria-valuenow', '80');
   await expect(t1).toHaveAttribute('aria-valuenow', '80');
 
-  const box = await slider.boundingBox();
-  if (!box) throw new Error('slider has no bounding box');
-
   // Clicking to the RIGHT of the collision must activate thumb 1 (not thumb 0,
   // which would otherwise win the distance tie and leave thumb 1 stranded).
-  await page.mouse.click(box.x + box.width * 0.95, box.y + box.height / 2);
+  await clickSliderTrack(page, track, 0.95);
   await expect(t0).toHaveAttribute('aria-valuenow', '80');
-  const t1After = await t1.getAttribute('aria-valuenow');
-  expect(Number(t1After)).toBeGreaterThan(80);
+  await expect.poll(async () => Number(await t1.getAttribute('aria-valuenow'))).toBeGreaterThan(80);
 });
 
+test('range collided thumbs drag left from just below collision', async ({ page }) => {
+  await page.goto('http://127.0.0.1:8080/component/block?name=slider&variant=range&', { timeout: 20 * 60 * 1000 });
+  const thumbs = page.locator('.dx-slider-thumb');
+  const t0 = thumbs.nth(0);
+  const t1 = thumbs.nth(1);
+  const slider = page.locator('.dx-slider').first();
+  const track = slider.locator('.dx-slider-track');
+
+  // Collide both thumbs at 80
+  await t0.focus();
+  for (let i = 0; i < 200; i++) await page.keyboard.press('ArrowRight');
+  await expect(t0).toHaveAttribute('aria-valuenow', '80');
+  await expect(t1).toHaveAttribute('aria-valuenow', '80');
+
+  // 79.6 snaps to 80. Thumb selection must still see the raw 79.6 position,
+  // otherwise thumb 1 wins the tie and leftward dragging is clamped at 80.
+  const start = await sliderTrackPoint(track, 0.796);
+  const end = await sliderTrackPoint(track, 0.7);
+  await page.mouse.move(start.x, start.y);
+  await page.mouse.down();
+  await page.mouse.move(end.x, end.y, { steps: 5 });
+  await page.mouse.up();
+
+  await expect(t0).toHaveAttribute('aria-valuenow', '70');
+  await expect(t1).toHaveAttribute('aria-valuenow', '80');
+});
