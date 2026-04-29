@@ -244,19 +244,15 @@
 }
 
 /* Threaded conversation */
-.ec-thread > .dx-card {
+.ec-thread-hero,
+.ec-thread-msg,
+.ec-thread-compose {
     border: 0;
     border-radius: 0;
     background: transparent;
     box-shadow: none;
 }
-.ec-thread .dx-card-header {
-    padding: 0;
-}
-.ec-thread .dx-card-content {
-    padding: 0;
-}
-.ec-thread-hero.dx-card {
+.ec-thread-hero {
     margin-bottom: 1.5rem;
     padding: 0 0 1.5rem;
     border-bottom: 1px solid var(--primary-color-6);
@@ -316,11 +312,14 @@
 .ec-row .ec-row-tags svg {
     flex-shrink: 0;
 }
-.ec-thread-msg.dx-card {
+.ec-thread-msg {
     position: relative;
-    margin-bottom: 1.5rem;
-    padding: 1.5rem 0 2.25rem;
-    border-bottom: 1px solid color-mix(in oklab, var(--primary-color-6) 82%, transparent);
+    margin: 0 0 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid var(--primary-color-6);
+    border-radius: 0.75rem;
+    background: var(--primary-color);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
 }
 .ec-thread-msg-content {
     display: flex;
@@ -380,16 +379,8 @@
 .ec-thread-msg-body p:last-child {
     margin: 0;
 }
-.ec-thread-msg-current.dx-card {
-    margin: 0 0 1.5rem;
-    padding: 1.5rem 1.5rem 2rem;
-    border: 1px solid var(--primary-color-6);
-    border-radius: 0.75rem;
-    background: var(--primary-color);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
-}
-.ec-thread-compose.dx-card {
-    margin-top: 0.25rem;
+.ec-thread-compose {
+    margin-top: 0;
     padding: 1rem;
     border: 1px solid var(--primary-color-6);
     border-radius: 0.75rem;

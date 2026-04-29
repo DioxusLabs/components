@@ -521,8 +521,39 @@ pub fn EmailClient() -> Element {
                                 }
                             }
 
+                            Card {
+                                class: if selected_static.thread_count > 1 { "ec-thread-msg" } else { "ec-thread-msg ec-thread-msg-current" },
+                                CardContent { class: "ec-thread-msg-content",
+                                    div { class: "ec-thread-msg-head",
+                                        Avatar {
+                                            size: AvatarImageSize::Small,
+                                            shape: AvatarShape::Circle,
+                                            AvatarImage {
+                                                src: "{avatar_profile_for_key(selected_static.from_addr).src}",
+                                                alt: "{selected_static.from}",
+                                            }
+                                            AvatarFallback { {selected_static.initials} }
+                                        }
+                                        div { class: "ec-thread-msg-meta",
+                                            div { class: "ec-thread-msg-sender",
+                                                span { class: "ec-thread-msg-name", {selected_static.from} }
+                                                span { class: "ec-thread-msg-addr",
+                                                    {selected_static.from_addr}
+                                                }
+                                            }
+                                            span { class: "ec-thread-msg-time", {selected_static.full_time} }
+                                        }
+                                    }
+                                    div { class: "ec-thread-msg-body",
+                                        for (i, para) in selected_static.body.split("\n\n").enumerate() {
+                                            p { key: "{i}", {para.to_string()} }
+                                        }
+                                    }
+                                }
+                            }
+
                             if selected_static.thread_count > 1 {
-                                Card { class: "ec-thread-msg",
+                                Card { class: "ec-thread-msg ec-thread-msg-current",
                                     CardContent { class: "ec-thread-msg-content",
                                         div { class: "ec-thread-msg-head",
                                             Avatar {
@@ -548,36 +579,6 @@ pub fn EmailClient() -> Element {
                                             p {
                                                 "Thanks for sending this over — taking a look now and will circle back shortly."
                                             }
-                                        }
-                                    }
-                                }
-                            }
-
-                            Card { class: "ec-thread-msg ec-thread-msg-current",
-                                CardContent { class: "ec-thread-msg-content",
-                                    div { class: "ec-thread-msg-head",
-                                        Avatar {
-                                            size: AvatarImageSize::Small,
-                                            shape: AvatarShape::Circle,
-                                            AvatarImage {
-                                                src: "{avatar_profile_for_key(selected_static.from_addr).src}",
-                                                alt: "{selected_static.from}",
-                                            }
-                                            AvatarFallback { {selected_static.initials} }
-                                        }
-                                        div { class: "ec-thread-msg-meta",
-                                            div { class: "ec-thread-msg-sender",
-                                                span { class: "ec-thread-msg-name", {selected_static.from} }
-                                                span { class: "ec-thread-msg-addr",
-                                                    {selected_static.from_addr}
-                                                }
-                                            }
-                                            span { class: "ec-thread-msg-time", {selected_static.full_time} }
-                                        }
-                                    }
-                                    div { class: "ec-thread-msg-body",
-                                        for (i, para) in selected_static.body.split("\n\n").enumerate() {
-                                            p { key: "{i}", {para.to_string()} }
                                         }
                                     }
                                 }
