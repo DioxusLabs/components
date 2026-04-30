@@ -109,8 +109,8 @@
 }
 
 .dx-color-slider-thumb[data-dragging="true"] {
+    box-shadow: black 0 0 0 1px, black 0 0 0 1px inset, rgb(0 0 0 / 30%) 0 2px 6px;
     transform: translate(-50%, -50%) scale(1.25);
-    box-shadow: black 0 0 0 1px, black 0 0 0 1px inset, rgb(0 0 0 / 0.3) 0 2px 6px;
 }
 
 .dx-color-area-container {
@@ -151,8 +151,8 @@
 }
 
 .dx-color-area-thumb[data-dragging="true"] {
+    box-shadow: black 0 0 0 1px, black 0 0 0 1px inset, rgb(0 0 0 / 30%) 0 2px 6px;
     transform: translate(-50%, -50%) scale(1.25);
-    box-shadow: black 0 0 0 1px, black 0 0 0 1px inset, rgb(0 0 0 / 0.3) 0 2px 6px;
 }
 
 .dx-color-area-input {
