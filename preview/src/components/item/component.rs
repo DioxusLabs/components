@@ -104,6 +104,7 @@ pub fn Item(
     #[props(extends=div)]
     attributes: Vec<Attribute>,
     onclick: Option<EventHandler<MouseEvent>>,
+    onkeydown: Option<EventHandler<KeyboardEvent>>,
     r#as: Option<Callback<Vec<Attribute>, Element>>,
     children: Element,
 ) -> Element {
@@ -123,6 +124,11 @@ pub fn Item(
             div {
                 onclick: move |event| {
                     if let Some(f) = &onclick {
+                        f.call(event);
+                    }
+                },
+                onkeydown: move |event| {
+                    if let Some(f) = &onkeydown {
                         f.call(event);
                     }
                 },

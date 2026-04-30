@@ -842,7 +842,7 @@ fn DateSeparator(#[props(default = '-')] symbol: char) -> Element {
             tabindex: "-1",
             "is-separator": true,
             "no-date": true,
-            {format!("{symbol}")}
+            "{symbol}"
         }
     }
 }

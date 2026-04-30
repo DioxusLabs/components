@@ -11,12 +11,16 @@
 }
 
 .dx-toolbar button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 8px 12px;
     border: none;
     border-radius: calc(.5rem - .25rem);
     background: none;
     color: var(--secondary-color-4);
     cursor: pointer;
+    gap: .25rem;
 }
 
 .dx-toolbar button:hover:not([disabled]),
