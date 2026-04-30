@@ -33,6 +33,7 @@ pub mod label;
 pub mod menubar;
 #[cfg(feature = "router")]
 pub mod navbar;
+mod pointer;
 pub mod popover;
 mod portal;
 pub mod progress;

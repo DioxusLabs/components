@@ -1,8 +1,8 @@
 //! Defines the [`ColorPicker`] component and its sub-components.
 
-use crate::dioxus_core::{queue_effect, Runtime};
 use crate::dioxus_elements::geometry::{ClientPoint, Pixels};
 use crate::dioxus_elements::input_data::MouseButton;
+use crate::pointer;
 use dioxus::html::geometry::euclid::{Rect, Size2D, Vector2D};
 use dioxus::html::geometry::PixelsSize;
 use dioxus::prelude::*;
@@ -257,65 +257,6 @@ pub fn ColorPicker(props: ColorPickerProps) -> Element {
     }
 }
 
-#[derive(Debug)]
-struct Pointer {
-    id: i32,
-    position: ClientPoint,
-}
-
-static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
-    let runtime = Runtime::current();
-    queue_effect(move || {
-        runtime.spawn(ScopeId::ROOT, async move {
-            let mut pointer_updates = dioxus::document::eval(
-                "window.addEventListener('pointerdown', (e) => {
-                    dioxus.send(['down', [e.pointerId, e.clientX, e.clientY]]);
-                });
-                window.addEventListener('pointermove', (e) => {
-                    dioxus.send(['move', [e.pointerId, e.clientX, e.clientY]]);
-                });
-                window.addEventListener('pointerup', (e) => {
-                    dioxus.send(['up', [e.pointerId, e.clientX, e.clientY]]);
-                });
-                window.addEventListener('pointercancel', (e) => {
-                    dioxus.send(['up', [e.pointerId, e.clientX, e.clientY]]);
-                });",
-            );
-
-            while let Ok((event_type, (pointer_id, x, y))) =
-                pointer_updates.recv::<(String, (i32, f64, f64))>().await
-            {
-                let position = ClientPoint::new(x, y);
-
-                match event_type.as_str() {
-                    "down" => {
-                        // Add a new pointer
-                        POINTERS.write().push(Pointer {
-                            id: pointer_id,
-                            position,
-                        });
-                    }
-                    "move" => {
-                        // Update the position of an existing pointer
-                        if let Some(pointer) =
-                            POINTERS.write().iter_mut().find(|p| p.id == pointer_id)
-                        {
-                            pointer.position = position;
-                        }
-                    }
-                    "up" => {
-                        // Remove the pointer
-                        POINTERS.write().retain(|p| p.id != pointer_id);
-                    }
-                    _ => {}
-                }
-            }
-        });
-    });
-
-    Vec::new()
-});
-
 /// The props for the [`ColorArea`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ColorAreaProps {
@@ -392,8 +333,6 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
     let mut last_processed_pos = use_hook(|| CopyValue::new(None));
 
     use_effect(move || {
-        let pointers = POINTERS.read();
-
         if !dragging() {
             return;
         }
@@ -406,15 +345,15 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
             return;
         };
 
-        let Some(pointer) = pointers.iter().find(|p| p.id == active_pointer_id) else {
+        let Some(pointer_position) = pointer::pointer_position(active_pointer_id) else {
             current_pointer_id.take();
             last_processed_pos.set(None);
             dragging.set(false);
             return;
         };
 
-        let delta = if let Some(last_pos) = last_processed_pos.replace(Some(pointer.position)) {
-            pointer.position - last_pos
+        let delta = if let Some(last_pos) = last_processed_pos.replace(Some(pointer_position)) {
+            pointer_position - last_pos
         } else {
             Vector2D::zero()
         };
@@ -457,10 +396,7 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
                 }
 
                 current_pointer_id.set(Some(e.data().pointer_id()));
-                POINTERS.write().push(Pointer {
-                    id: e.data().pointer_id(),
-                    position: e.client_coordinates(),
-                });
+                pointer::track_pointer_down(e.data().pointer_id(), e.client_coordinates());
 
                 // Handle pointer interaction
                 spawn(async move {

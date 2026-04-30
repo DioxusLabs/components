@@ -1,79 +1,15 @@
 //! Defines the [`Slider`] and [`RangeSlider`] components and their sub-components, which provide
 //! a range input control for selecting a single value or a value range within a specified range.
 
-use crate::dioxus_core::{queue_effect, Runtime};
+use crate::pointer;
 use crate::use_controlled;
 use dioxus::html::geometry::euclid::Rect;
 use dioxus::html::geometry::euclid::Vector2D;
-use dioxus::html::geometry::ClientPoint;
 use dioxus::html::geometry::Pixels;
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 use std::ops::Range;
 use std::rc::Rc;
-
-#[derive(Debug)]
-struct Pointer {
-    id: i32,
-    position: ClientPoint,
-}
-
-static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
-    let runtime = Runtime::current();
-    queue_effect(move || {
-        runtime.spawn(ScopeId::ROOT, async move {
-            let mut pointer_updates = dioxus::document::eval(
-                // clientX/clientY (not pageX/pageY) — must match the slider's
-                // onpointerdown which stores `evt.client_coordinates()` and the
-                // viewport-relative rect from getBoundingClientRect. On iPad
-                // with the page pinch-zoomed they diverge, jamming the slider.
-                "window.addEventListener('pointerdown', (e) => {
-                    dioxus.send(['down', [e.pointerId, e.clientX, e.clientY]]);
-                });
-                window.addEventListener('pointermove', (e) => {
-                    dioxus.send(['move', [e.pointerId, e.clientX, e.clientY]]);
-                });
-                window.addEventListener('pointerup', (e) => {
-                    dioxus.send(['up', [e.pointerId, e.clientX, e.clientY]]);
-                });
-                window.addEventListener('pointercancel', (e) => {
-                    dioxus.send(['up', [e.pointerId, e.clientX, e.clientY]]);
-                });",
-            );
-
-            while let Ok((event_type, (pointer_id, x, y))) =
-                pointer_updates.recv::<(String, (i32, f64, f64))>().await
-            {
-                let position = ClientPoint::new(x, y);
-
-                match event_type.as_str() {
-                    "down" => {
-                        // Add a new pointer
-                        POINTERS.write().push(Pointer {
-                            id: pointer_id,
-                            position,
-                        });
-                    }
-                    "move" => {
-                        // Update the position of an existing pointer
-                        if let Some(pointer) =
-                            POINTERS.write().iter_mut().find(|p| p.id == pointer_id)
-                        {
-                            pointer.position = position;
-                        }
-                    }
-                    "up" => {
-                        // Remove the pointer
-                        POINTERS.write().retain(|p| p.id != pointer_id);
-                    }
-                    _ => {}
-                }
-            }
-        });
-    });
-
-    Vec::new()
-});
 
 fn ordered_range(start: f64, end: f64) -> Range<f64> {
     if start <= end {
@@ -411,8 +347,6 @@ fn SliderImpl(props: SliderImplProps) -> Element {
     let mut last_processed_pos = use_hook(|| CopyValue::new(None));
 
     use_effect(move || {
-        let pointers = POINTERS.read();
-
         if !dragging() {
             return;
         }
@@ -425,15 +359,15 @@ fn SliderImpl(props: SliderImplProps) -> Element {
             return;
         };
 
-        let Some(pointer) = pointers.iter().find(|p| p.id == active_pointer_id) else {
+        let Some(pointer_position) = pointer::pointer_position(active_pointer_id) else {
             current_pointer_id.take();
             last_processed_pos.set(None);
             dragging.set(false);
             return;
         };
 
-        let delta = if let Some(last_pos) = last_processed_pos.replace(Some(pointer.position)) {
-            pointer.position - last_pos
+        let delta = if let Some(last_pos) = last_processed_pos.replace(Some(pointer_position)) {
+            pointer_position - last_pos
         } else {
             Vector2D::zero()
         };
@@ -489,10 +423,7 @@ fn SliderImpl(props: SliderImplProps) -> Element {
                 }
 
                 current_pointer_id.set(Some(evt.data().pointer_id()));
-                POINTERS.write().push(Pointer {
-                    id: evt.data().pointer_id(),
-                    position: evt.client_coordinates(),
-                });
+                pointer::track_pointer_down(evt.data().pointer_id(), evt.client_coordinates());
 
                 // Handle pointer interaction
                 spawn(async move {
