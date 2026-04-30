@@ -31,6 +31,8 @@ pub struct VirtualizerState {
     pub scroll_adjustments: i32,
     /// Frozen total size during active scrolling to prevent scrollbar drift.
     pub stable_total_size: Option<u32>,
+    /// Item count the frozen total size was calculated for.
+    pub stable_measurement_count: Option<usize>,
     /// Deferred scroll adjustments accumulated while scrolling.
     pub deferred_adjustments: i32,
 }
@@ -99,11 +101,15 @@ pub fn set_scroll_offset(
         // Freeze total size when scrolling starts to prevent scrollbar drift
         let total = calculate_total_size(measurements);
         state.stable_total_size().set(Some(total));
+        state
+            .stable_measurement_count()
+            .set(Some(measurements.len()));
     }
 
     // When scrolling stops, apply accumulated deferred adjustments
     if !is_scrolling && was_scrolling {
         state.stable_total_size().set(None);
+        state.stable_measurement_count().set(None);
 
         let deferred = *state.deferred_adjustments().peek();
         if deferred != 0 {
@@ -218,10 +224,22 @@ pub fn get_virtual_items(
 ///
 /// During active scrolling returns a frozen value to prevent scrollbar drift.
 pub fn get_total_size(state: &Store<VirtualizerState>, measurements: &[VirtualItem]) -> u32 {
-    if let Some(stable) = *state.stable_total_size().peek() {
-        return stable;
+    let stable_measurement_count = *state.stable_measurement_count().peek();
+    if stable_measurement_count == Some(measurements.len()) {
+        if let Some(stable) = *state.stable_total_size().peek() {
+            return stable;
+        }
     }
     calculate_total_size(measurements)
+}
+
+fn get_scroll_offset_for_measurements(
+    scroll_offset: u32,
+    viewport_size: u32,
+    measurements: &[VirtualItem],
+) -> u32 {
+    let max_scroll_offset = calculate_total_size(measurements).saturating_sub(viewport_size);
+    scroll_offset.min(max_scroll_offset)
 }
 
 // ---------------------------------------------------------------------------
@@ -247,6 +265,8 @@ fn calculate_range(
         return Some(0..measurements.len());
     }
 
+    let scroll_offset =
+        get_scroll_offset_for_measurements(scroll_offset, viewport_size, measurements);
     let start_index = find_nearest_binary_search(measurements, scroll_offset);
     let mut end_index = start_index;
     let last_index = measurements.len() - 1;
@@ -271,6 +291,7 @@ fn calculate_total_size(measurements: &[VirtualItem]) -> u32 {
 mod tests {
     use super::*;
     use std::cell::Cell;
+    use std::collections::HashMap;
     use std::rc::Rc;
 
     /// Run a closure inside a Dioxus runtime context so that Store/CopyValue
@@ -314,6 +335,7 @@ mod tests {
             item_size_cache: HashMap::new(),
             scroll_adjustments: 0,
             stable_total_size: None,
+            stable_measurement_count: None,
             deferred_adjustments: 0,
         })
     }
@@ -322,6 +344,35 @@ mod tests {
         let isc = state.item_size_cache();
         let cache = isc.peek();
         compute_measurements(100, &cache, Some(&|_| 50))
+    }
+
+    #[test]
+    fn test_stable_total_size_ignored_when_count_changes() {
+        with_runtime(|| {
+            let state = create_test_state();
+            let m = make_measurements(&state);
+            set_scroll_offset(&state, &m, 1000, true);
+
+            assert_eq!(get_total_size(&state, &m), 5000);
+
+            let smaller = compute_measurements(4, &HashMap::new(), Some(&|_| 50));
+            assert_eq!(get_total_size(&state, &smaller), 200);
+        });
+    }
+
+    #[test]
+    fn test_range_clamps_stale_scroll_offset_after_count_shrinks() {
+        with_runtime(|| {
+            let state = create_test_state();
+            let smaller = compute_measurements(4, &HashMap::new(), Some(&|_| 50));
+            state.scroll_offset().set(10_000);
+            state.viewport_size().set(600);
+
+            let virtual_items = get_virtual_items(&state, &smaller, 0);
+            let indexes: Vec<_> = virtual_items.iter().map(VirtualItem::index).collect();
+
+            assert_eq!(indexes, vec![0, 1, 2, 3]);
+        });
     }
 
     #[test]

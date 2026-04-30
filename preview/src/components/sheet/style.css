@@ -9,12 +9,12 @@
 }
 
 .dx-sheet-root[data-state="closed"] {
-  animation: dx-sheet-root-out 300ms ease-in forwards;
+  animation: dx-sheet-root-out 150ms ease-in forwards;
   pointer-events: none;
 }
 
 .dx-sheet-root[data-state="open"] {
-  animation: dx-sheet-root-in 300ms ease-out forwards;
+  animation: dx-sheet-root-in 200ms ease-out forwards;
 }
 
 @keyframes dx-sheet-root-in {
@@ -91,35 +91,35 @@
 }
 
 .dx-sheet-root[data-state="open"] .dx-sheet[data-side="right"] {
-  animation: dx-slide-in-right 500ms ease-out forwards;
+  animation: dx-slide-in-right 200ms ease-out forwards;
 }
 
 .dx-sheet-root[data-state="open"] .dx-sheet[data-side="left"] {
-  animation: dx-slide-in-left 500ms ease-out forwards;
+  animation: dx-slide-in-left 200ms ease-out forwards;
 }
 
 .dx-sheet-root[data-state="open"] .dx-sheet[data-side="top"] {
-  animation: dx-slide-in-top 500ms ease-out forwards;
+  animation: dx-slide-in-top 200ms ease-out forwards;
 }
 
 .dx-sheet-root[data-state="open"] .dx-sheet[data-side="bottom"] {
-  animation: dx-slide-in-bottom 500ms ease-out forwards;
+  animation: dx-slide-in-bottom 200ms ease-out forwards;
 }
 
 .dx-sheet-root[data-state="closed"] .dx-sheet[data-side="right"] {
-  animation: dx-slide-out-right 300ms ease-in forwards;
+  animation: dx-slide-out-right 150ms ease-in forwards;
 }
 
 .dx-sheet-root[data-state="closed"] .dx-sheet[data-side="left"] {
-  animation: dx-slide-out-left 300ms ease-in forwards;
+  animation: dx-slide-out-left 150ms ease-in forwards;
 }
 
 .dx-sheet-root[data-state="closed"] .dx-sheet[data-side="top"] {
-  animation: dx-slide-out-top 300ms ease-in forwards;
+  animation: dx-slide-out-top 150ms ease-in forwards;
 }
 
 .dx-sheet-root[data-state="closed"] .dx-sheet[data-side="bottom"] {
-  animation: dx-slide-out-bottom 300ms ease-in forwards;
+  animation: dx-slide-out-bottom 150ms ease-in forwards;
 }
 
 @keyframes dx-slide-in-right {

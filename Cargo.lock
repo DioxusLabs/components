@@ -1561,7 +1561,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e3d747f100290a1ca24b752186f61f6637e1deffe3bf6320de6fcb29510a307"
 dependencies = [
  "bitflags 2.10.0",
- "libloading 0.8.9",
+ "libloading 0.7.4",
  "winapi",
 ]
 
@@ -1822,9 +1822,9 @@ checksum = "10c41b47b55a433b61f7c12327c85ba650572bacbcc42c342ba2e87a57975264"
 
 [[package]]
 name = "dioxus-core"
-version = "0.7.3"
+version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b389b0e3cc01c7da292ad9b884b088835fdd1671d45fbd2f737506152b22eef0"
+checksum = "247ed8d679a13232641f1c84ba22246623fae01320b4c22db225c0b4f2fa7398"
 dependencies = [
  "anyhow",
  "const_format",
@@ -1857,9 +1857,9 @@ dependencies = [
 
 [[package]]
 name = "dioxus-core-types"
-version = "0.7.3"
+version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfc4b8cdc440a55c17355542fc2089d97949bba674255d84cac77805e1db8c9f"
+checksum = "cbfea5c8946e0745b254b5c33c515d81b3ba638f33c2a532ed06730392394d4d"
 
 [[package]]
 name = "dioxus-desktop"
@@ -2405,9 +2405,9 @@ dependencies = [
 
 [[package]]
 name = "dioxus-signals"
-version = "0.7.3"
+version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f48020bc23bc9766e7cce986c0fd6de9af0b8cbfd432652ec6b1094439c1ec6"
+checksum = "5393fd579f42c6547bf47ec0a2dedf2a366cd541d31deedc1059a096e6c35798"
 dependencies = [
  "dioxus-core",
  "futures-channel",
@@ -2433,9 +2433,9 @@ dependencies = [
 
 [[package]]
 name = "dioxus-stores"
-version = "0.7.3"
+version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77aaa9ac56d781bb506cf3c0d23bea96b768064b89fe50d3b4d4659cc6bd8058"
+checksum = "f1c59f52e8194439604dd35f8c540456c22b4a4b076930e424d0289f98ea3cb4"
 dependencies = [
  "dioxus-core",
  "dioxus-signals",
@@ -2445,9 +2445,9 @@ dependencies = [
 
 [[package]]
 name = "dioxus-stores-macro"
-version = "0.7.3"
+version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b1a728622e7b63db45774f75e71504335dd4e6115b235bbcff272980499493a"
+checksum = "737600865572cecf60ff934f88252bd4144f4ca189e0e570b7a780e8f0e01a1f"
 dependencies = [
  "convert_case 0.8.0",
  "proc-macro2",
@@ -2507,7 +2507,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -2545,7 +2545,7 @@ version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "330c60081dcc4c72131f8eb70510f1ac07223e5d4163db481a04a0befcffa412"
 dependencies = [
- "libloading 0.8.9",
+ "libloading 0.7.4",
 ]
 
 [[package]]
@@ -2689,7 +2689,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2990,9 +2990,9 @@ dependencies = [
 
 [[package]]
 name = "futures-channel"
-version = "0.3.31"
+version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2dff15bf788c671c1934e366d07e30c1814a8ef514e1af724a602e8a2fbe1b10"
+checksum = "07bbe89c50d7a535e539b8c17bc0b49bdb77747034daa8087407d655f3f7cc1d"
 dependencies = [
  "futures-core",
  "futures-sink",
@@ -3000,9 +3000,9 @@ dependencies = [
 
 [[package]]
 name = "futures-core"
-version = "0.3.31"
+version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05f29059c0c2090612e8d742178b0580d2dc940c837851ad723096f87af6663e"
+checksum = "7e3450815272ef58cec6d564423f6e755e25379b217b0bc688e295ba24df6b1d"
 
 [[package]]
 name = "futures-executor"
@@ -3028,9 +3028,9 @@ dependencies = [
 
 [[package]]
 name = "futures-io"
-version = "0.3.31"
+version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e5c1b78ca4aae1ac06c48a526a655760685149f0d465d21f37abfe57ce075c6"
+checksum = "cecba35d7ad927e23624b22ad55235f2239cfa44fd10428eecbeba6d6a717718"
 
 [[package]]
 name = "futures-lite"
@@ -3047,9 +3047,9 @@ dependencies = [
 
 [[package]]
 name = "futures-macro"
-version = "0.3.31"
+version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "162ee34ebcb7c64a8abebc059ce0fee27c2262618d7b60ed8faf72fef13c3650"
+checksum = "e835b70203e41293343137df5c0664546da5745f82ec9b84d40be8336958447b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3058,21 +3058,21 @@ dependencies = [
 
 [[package]]
 name = "futures-sink"
-version = "0.3.31"
+version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e575fab7d1e0dcb8d0c7bcf9a63ee213816ab51902e6d244a95819acacf1d4f7"
+checksum = "c39754e157331b013978ec91992bde1ac089843443c49cbc7f46150b0fad0893"
 
 [[package]]
 name = "futures-task"
-version = "0.3.31"
+version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f90f7dce0722e95104fcb095585910c0977252f286e354b5e3bd38902cd99988"
+checksum = "037711b3d59c33004d3856fbdc83b99d4ff37a24768fa1be9ce3538a1cde4393"
 
 [[package]]
 name = "futures-util"
-version = "0.3.31"
+version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fa08315bb612088cc391249efdc3bc77536f16c91f6cf495e6fbe85b20a4a81"
+checksum = "389ca41296e6190b48053de0321d02a77f32f8a5d2461dd38762c0593805c6d6"
 dependencies = [
  "futures-channel",
  "futures-core",
@@ -3082,7 +3082,6 @@ dependencies = [
  "futures-task",
  "memchr",
  "pin-project-lite",
- "pin-utils",
  "slab",
 ]
 
@@ -3182,9 +3181,9 @@ dependencies = [
 
 [[package]]
 name = "generational-box"
-version = "0.7.3"
+version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc4ed190b9de8e734d47a70be59b1e7588b9e8e0d0036e332f4c014e8aed1bc5"
+checksum = "c68d74be1fbe3bba37604bdfd61403f26af9f6324cf325053abd89d60c22e799"
 dependencies = [
  "parking_lot",
  "tracing",
@@ -3710,7 +3709,7 @@ dependencies = [
  "bitflags 2.10.0",
  "com",
  "libc",
- "libloading 0.8.9",
+ "libloading 0.7.4",
  "thiserror 1.0.69",
  "widestring",
  "winapi",
@@ -6518,7 +6517,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.11.0",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -7318,9 +7317,9 @@ dependencies = [
 
 [[package]]
 name = "subsecond"
-version = "0.7.3"
+version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8438668e545834d795d04c4335aafc332ce046106521a29f0a5c6501de34187c"
+checksum = "feae81a4a7ca6d0bcf70c385a43b7dbacbff527f0805cb0a4043ce2c2c559a2c"
 dependencies = [
  "js-sys",
  "libc",
@@ -7337,9 +7336,9 @@ dependencies = [
 
 [[package]]
 name = "subsecond-types"
-version = "0.7.3"
+version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e72f747606fc19fe81d6c59e491af93ed7dcbcb6aad9d1d18b05129914ec298"
+checksum = "85256ee192cbdf00473e48e6133863b125dd4f772fddfbc97287ec7a61458c25"
 dependencies = [
  "serde",
 ]
@@ -7554,7 +7553,7 @@ dependencies = [
  "getrandom 0.3.4",
  "once_cell",
  "rustix 1.1.3",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -9009,7 +9008,7 @@ dependencies = [
  "js-sys",
  "khronos-egl",
  "libc",
- "libloading 0.8.9",
+ "libloading 0.7.4",
  "log",
  "metal 0.27.0",
  "naga 0.19.2",
@@ -9151,7 +9150,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]

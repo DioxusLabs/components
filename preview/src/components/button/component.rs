@@ -34,6 +34,7 @@ pub fn Button(
     onclick: Option<EventHandler<MouseEvent>>,
     onmousedown: Option<EventHandler<MouseEvent>>,
     onmouseup: Option<EventHandler<MouseEvent>>,
+    onkeydown: Option<EventHandler<KeyboardEvent>>,
     children: Element,
 ) -> Element {
     let base = attributes!(button {
@@ -58,6 +59,11 @@ pub fn Button(
             },
             onmouseup: move |event| {
                 if let Some(f) = &onmouseup {
+                    f.call(event);
+                }
+            },
+            onkeydown: move |event| {
+                if let Some(f) = &onkeydown {
                     f.call(event);
                 }
             },
