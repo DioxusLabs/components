@@ -249,7 +249,7 @@ fn Navbar() -> Element {
             div { class: "dx-navbar-links",
                 Link {
                     to: Route::EmailClientDashboard { dark_mode: Route::in_dark_mode() },
-                    class: "dx-navbar-link",
+                    class: "dx-demos-link",
                     "Demos"
                 }
                 // TODO: restore once the primitives crate is published

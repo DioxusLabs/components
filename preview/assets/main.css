@@ -92,6 +92,26 @@ body {
   text-decoration: none;
 }
 
+.dx-demos-link {
+  display: inline-flex;
+  align-items: center;
+  margin: 0.425rem 0.75rem;
+  padding: 0.05em 0.6em;
+  border: 1px solid var(--primary-color-6);
+  border-radius: 0.5rem;
+  background-color: var(--primary-color-1);
+  color: var(--secondary-color-4);
+  font-size: 1em;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dx-demos-link:hover {
+  background-color: var(--primary-color-3);
+  color: var(--secondary-color-3);
+}
+
 /* Code block styles */
 .dx-code-block {
   overflow: scroll;
