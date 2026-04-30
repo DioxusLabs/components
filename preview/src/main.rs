@@ -11,6 +11,7 @@ use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
 use unic_langid::{langid, LanguageIdentifier};
 
 mod components;
+mod dashboard;
 mod theme;
 
 #[derive(Copy, Clone, PartialEq)]
@@ -102,6 +103,8 @@ pub(crate) enum Route {
         variant: Option<String>,
         dark_mode: Option<bool>,
     },
+    #[route("/dashboard/email-client?:dark_mode")]
+    EmailClientDashboard { dark_mode: Option<bool> },
 }
 
 impl Route {
@@ -110,6 +113,7 @@ impl Route {
             Route::Home { iframe, .. } => *iframe,
             Route::ComponentDemo { iframe, .. } => *iframe,
             Route::ComponentBlockDemo { .. } => None,
+            Route::EmailClientDashboard { .. } => None,
         }
     }
 
@@ -123,6 +127,7 @@ impl Route {
             Route::Home { dark_mode, .. } => *dark_mode,
             Route::ComponentDemo { dark_mode, .. } => *dark_mode,
             Route::ComponentBlockDemo { dark_mode, .. } => *dark_mode,
+            Route::EmailClientDashboard { dark_mode, .. } => *dark_mode,
         }
     }
 
@@ -242,6 +247,11 @@ fn Navbar() -> Element {
                 }
             }
             div { class: "dx-navbar-links",
+                Link {
+                    to: Route::EmailClientDashboard { dark_mode: Route::in_dark_mode() },
+                    class: "dx-navbar-link",
+                    "Demos"
+                }
                 // TODO: restore once the primitives crate is published
                 // Link {
                 //     to: "https://crates.io/crates/dioxus-components",
@@ -276,7 +286,7 @@ fn Navbar() -> Element {
                         height: "24",
                     }
                 }
-                DarkModeToggle {}
+                theme::DarkModeToggle {}
                 LanguageSelect {}
             }
         }
@@ -353,100 +363,6 @@ fn CheckIcon() -> Element {
             width: "24px",
             height: "25px",
             path { d: "M5 13l4 4L19 7" }
-        }
-    }
-}
-
-#[component]
-fn DarkModeToggle() -> Element {
-    rsx! {
-        button {
-            class: "dx-dark-mode-toggle dx-dark-mode-only",
-            onclick: move |_| {
-                theme::set_theme(false);
-            },
-            r#type: "button",
-            aria_label: "Enable light mode",
-            DarkModeIcon {}
-        }
-        button {
-            class: "dx-dark-mode-toggle dx-light-mode-only",
-            onclick: move |_| {
-                theme::set_theme(true);
-            },
-            r#type: "button",
-            aria_label: "Enable dark mode",
-            LightModeIcon {}
-        }
-    }
-}
-
-#[component]
-fn DarkModeIcon() -> Element {
-    rsx! {
-        Icon {
-            width: "24px",
-            height: "24px",
-            path { d: "M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" }
-        }
-    }
-}
-
-#[component]
-fn LightModeIcon() -> Element {
-    rsx! {
-        Icon {
-            width: "24px",
-            height: "24px",
-            circle { cx: "12", cy: "12", r: "4" }
-            line {
-                x1: "12",
-                y1: "1",
-                x2: "12",
-                y2: "3",
-            }
-            line {
-                x1: "12",
-                y1: "21",
-                x2: "12",
-                y2: "23",
-            }
-            line {
-                x1: "4.22",
-                y1: "4.22",
-                x2: "5.64",
-                y2: "5.64",
-            }
-            line {
-                x1: "18.36",
-                y1: "18.36",
-                x2: "19.78",
-                y2: "19.78",
-            }
-            line {
-                x1: "1",
-                y1: "12",
-                x2: "3",
-                y2: "12",
-            }
-            line {
-                x1: "21",
-                y1: "12",
-                x2: "23",
-                y2: "12",
-            }
-            line {
-                x1: "4.22",
-                y1: "19.78",
-                x2: "5.64",
-                y2: "18.36",
-            }
-            line {
-                x1: "18.36",
-                y1: "5.64",
-                x2: "19.78",
-                y2: "4.22",
-            }
         }
     }
 }
@@ -1012,6 +928,15 @@ fn BlockComponentVariantHighlight(
                 }
             }
         }
+    }
+}
+
+#[component]
+fn EmailClientDashboard(dark_mode: Option<bool>) -> Element {
+    rsx! {
+        document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
+        document::Link { rel: "stylesheet", href: asset!("/assets/dx-components-theme.css") }
+        dashboard::views::email_client::EmailClient {}
     }
 }
 

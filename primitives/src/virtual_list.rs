@@ -91,11 +91,15 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
         item_size_cache: HashMap::new(),
         scroll_adjustments: 0,
         stable_total_size: None,
+        stable_measurement_count: None,
         deferred_adjustments: 0,
     });
 
     // Measurements as a memo — recomputes when count or item_size_cache change.
-    // Peeked (not read) by the component, so recomputation doesn't trigger re-renders.
+    // Read (not peeked) by the render body so the component re-renders when the
+    // memo invalidates; peeking a dirty memo returns stale data (Memo::peek does
+    // not check the dirty flag), which can yield out-of-bounds indices when
+    // `count` shrinks between renders.
     let measurements: Memo<Vec<crate::r#virtual::types::VirtualItem>> = use_memo(move || {
         let count = count();
         let isc = state.item_size_cache();
@@ -116,13 +120,23 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
 
             let scrollEndTimer = null;
             let lastOffset = null;
+            let lastViewport = null;
+            let lastIsScrolling = null;
 
             function publish(isScrolling) {
                 const scroll = Math.round(container.scrollTop);
-                // Deduplicate: don't send if offset hasn't changed
-                if (!isScrolling && scroll === lastOffset) return;
-                lastOffset = scroll;
                 const viewport = Math.min(container.clientHeight, window.innerHeight) || 600;
+                // Deduplicate only if the full scroll state is unchanged.
+                if (
+                    scroll === lastOffset &&
+                    viewport === lastViewport &&
+                    isScrolling === lastIsScrolling
+                ) {
+                    return;
+                }
+                lastOffset = scroll;
+                lastViewport = viewport;
+                lastIsScrolling = isScrolling;
                 dioxus.send({
                     offset: scroll,
                     viewport: viewport,
@@ -198,7 +212,7 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
         }
     };
 
-    let m = measurements.peek();
+    let m = measurements.read();
     let virtual_items = get_virtual_items(&state, &m, buffer());
     let total_height = get_total_size(&state, &m);
 
