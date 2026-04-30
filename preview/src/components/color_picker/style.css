@@ -99,8 +99,18 @@
     box-shadow: black 0 0 0 1px, black 0 0 0 1px inset;
     cursor: pointer;
     forced-color-adjust: none;
-    transform: translate(-50%, -50%);
-    transition: border-color .15s;
+    transform: translate(-50%, -50%) scale(1);
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out, border-color 150ms;
+}
+
+.dx-color-slider-thumb:hover,
+.dx-color-slider-thumb:focus-visible {
+    transform: translate(-50%, -50%) scale(1.15);
+}
+
+.dx-color-slider-thumb[data-dragging="true"] {
+    transform: translate(-50%, -50%) scale(1.25);
+    box-shadow: black 0 0 0 1px, black 0 0 0 1px inset, rgb(0 0 0 / 0.3) 0 2px 6px;
 }
 
 .dx-color-area-container {
@@ -131,8 +141,18 @@
     border-radius: 50%;
     box-shadow: black 0 0 0 1px, black 0 0 0 1px inset;
     cursor: pointer;
-    transform: translate(-50%, -50%);
-    transition: border-color 150ms;
+    transform: translate(-50%, -50%) scale(1);
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out, border-color 150ms;
+}
+
+.dx-color-area-thumb:hover,
+.dx-color-area-thumb:focus-visible {
+    transform: translate(-50%, -50%) scale(1.15);
+}
+
+.dx-color-area-thumb[data-dragging="true"] {
+    transform: translate(-50%, -50%) scale(1.25);
+    box-shadow: black 0 0 0 1px, black 0 0 0 1px inset, rgb(0 0 0 / 0.3) 0 2px 6px;
 }
 
 .dx-color-area-input {
