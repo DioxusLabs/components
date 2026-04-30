@@ -5,8 +5,8 @@ use crate::components::avatar::{
 };
 use crate::components::sidebar::{
     Sidebar, SidebarCollapsible, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel,
-    SidebarHeader, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuButtonSize,
-    SidebarMenuItem, SidebarRail, SidebarVariant,
+    SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuButtonSize, SidebarMenuItem,
+    SidebarRail, SidebarVariant,
 };
 use crate::dashboard::common::{FolderId, IconKind, LucideIcon, AVATAR_PROFILE_OPTIONS, FOLDERS};
 
@@ -18,28 +18,6 @@ pub(super) fn EmailSidebar(mut state: Store<EmailClientState>) -> Element {
         Sidebar {
             variant: SidebarVariant::Sidebar,
             collapsible: SidebarCollapsible::Icon,
-
-            SidebarHeader {
-                SidebarMenu { SidebarMenuItem {
-                    SidebarMenuButton {
-                        size: SidebarMenuButtonSize::Lg,
-                        tooltip: rsx! { "Mail · you@yourcompany.com" },
-                        Avatar {
-                            size: AvatarImageSize::Small,
-                            shape: AvatarShape::Rounded,
-                            AvatarImage {
-                                src: "{AVATAR_PROFILE_OPTIONS[2].src}",
-                                alt: "Mail",
-                            }
-                            AvatarFallback { "M" }
-                        }
-                        div { class: "dx-sidebar-info-block",
-                            span { class: "dx-sidebar-info-title", "Mail" }
-                            span { class: "dx-sidebar-info-subtitle", "you@yourcompany.com" }
-                        }
-                    }
-                } }
-            }
 
             SidebarContent {
                 SidebarGroup {

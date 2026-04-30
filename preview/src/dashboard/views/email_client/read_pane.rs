@@ -6,9 +6,6 @@ use crate::components::avatar::{
 use crate::components::badge::{Badge, BadgeVariant};
 use crate::components::button::{Button, ButtonVariant};
 use crate::components::card::{Card, CardContent, CardDescription, CardHeader, CardTitle};
-use crate::components::dropdown_menu::component::{
-    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-};
 use crate::components::select::{
     SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectMulti, SelectOption,
     SelectTrigger,
@@ -18,7 +15,7 @@ use crate::components::toolbar::component::{
     Toolbar, ToolbarButton, ToolbarGroup, ToolbarSeparator,
 };
 use crate::dashboard::common::{
-    lookup_message, FolderId, IconKind, LucideIcon, MessageState, MessageStateStoreExt, MessageTag,
+    lookup_message, IconKind, LucideIcon, MessageState, MessageStateStoreExt, MessageTag,
     AVATAR_PROFILE_OPTIONS,
 };
 
@@ -40,8 +37,6 @@ pub(super) fn ReadPane(
     let selected: Store<MessageState> = selected.into();
     let selected_static = lookup_message(selected.source_id().cloned());
     let selected_tags = selected.tags().cloned();
-    let selected_folder = selected.folder_id().cloned();
-    let selected_unread = selected.unread().cloned();
     let selected_starred = selected.starred().cloned();
     let selected_flagged = selected.flagged().cloned();
     let counter = format!("{} of {}", selected_index.read(), total_count.read());
@@ -65,18 +60,6 @@ pub(super) fn ReadPane(
     let star_uid = selected_uid_value.clone();
     let toggle_star_selected = move |_| {
         state.toggle_message_star(star_uid.clone());
-    };
-    let unread_uid = selected_uid_value.clone();
-    let mut toggle_unread_selected = move |_| {
-        state.toggle_message_unread(unread_uid.clone());
-    };
-    let inbox_uid = selected_uid_value.clone();
-    let mut move_to_inbox_selected = move |_| {
-        state.move_message_to_inbox(inbox_uid.clone());
-    };
-    let trash_uid = selected_uid_value.clone();
-    let mut move_to_trash_selected = move |_| {
-        state.move_message_to_trash(trash_uid.clone());
     };
     let tag_edit_uid = selected_uid_value.clone();
 
@@ -126,40 +109,6 @@ pub(super) fn ReadPane(
                 }
                 div { class: "ec-toolbar-end",
                     span { class: "ec-muted", {counter} }
-                    DropdownMenu { default_open: false,
-                        DropdownMenuTrigger {
-                            r#as: move |attrs: Vec<Attribute>| rsx! {
-                                ToolbarButton {
-                                    index: 6usize,
-                                    attributes: attrs,
-                                    on_click: move |_| {},
-                                    LucideIcon { kind: IconKind::More }
-                                }
-                            },
-                        }
-                        DropdownMenuContent {
-                            DropdownMenuItem::<&'static str> {
-                                value: "toggle-unread",
-                                index: 0usize,
-                                on_select: move |_| toggle_unread_selected(()),
-                                if selected_unread { "Mark as read" } else { "Mark as unread" }
-                            }
-                            DropdownMenuItem::<&'static str> {
-                                value: "move-to-inbox",
-                                index: 1usize,
-                                disabled: selected_folder == FolderId::Inbox,
-                                on_select: move |_| move_to_inbox_selected(()),
-                                "Move to Inbox"
-                            }
-                            DropdownMenuItem::<&'static str> {
-                                value: "move-to-trash",
-                                index: 2usize,
-                                disabled: selected_folder == FolderId::Trash,
-                                on_select: move |_| move_to_trash_selected(()),
-                                "Move to Trash"
-                            }
-                        }
-                    }
                 }
             }
 
