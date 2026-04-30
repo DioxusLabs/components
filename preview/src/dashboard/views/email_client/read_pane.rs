@@ -92,7 +92,7 @@ pub(super) fn ReadPane(
         state.close_read_pane();
         toasts.info(
             "Reply sent".to_string(),
-            ToastOptions::new().description(format!("Added to {}.", reply_recipient)),
+            ToastOptions::new().description(format!("Added to {reply_recipient}.")),
         );
     };
 
