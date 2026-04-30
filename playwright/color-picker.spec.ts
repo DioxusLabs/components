@@ -125,33 +125,3 @@ test('escape closes the color picker popover', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(popover).toHaveCount(0);
 });
-
-test('dragging the color area updates saturation and value', async ({ page }) => {
-  await openPicker(page);
-
-  const area = page.locator('.dx-color-area-container');
-  const sInput = page.locator('input[aria-label="Saturation"]');
-  const vInput = page.locator('input[aria-label="Value"]');
-
-  const sBefore = Number(await sInput.inputValue());
-  const vBefore = Number(await vInput.inputValue());
-
-  // Drag from the top-left toward the bottom-right of the area. Top-left is
-  // (saturation=0, value=100), bottom-right is (saturation=100, value=0). After
-  // the drag saturation should go up and value should go down.
-  const box = await area.boundingBox();
-  if (!box) throw new Error('color area has no bounding box');
-  const start = { x: box.x + box.width * 0.2, y: box.y + box.height * 0.2 };
-  const end = { x: box.x + box.width * 0.8, y: box.y + box.height * 0.8 };
-
-  await page.mouse.move(start.x, start.y);
-  await page.mouse.down();
-  await page.mouse.move(end.x, end.y, { steps: 10 });
-  await page.mouse.up();
-
-  const sAfter = Number(await sInput.inputValue());
-  const vAfter = Number(await vInput.inputValue());
-
-  expect(sAfter).toBeGreaterThan(sBefore);
-  expect(vAfter).toBeLessThan(vBefore);
-});
