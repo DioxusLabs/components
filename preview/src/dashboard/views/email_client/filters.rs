@@ -23,9 +23,9 @@ pub(super) fn message_matches_search(state: &MessageState, query: &str) -> bool 
     if query.is_empty() {
         return true;
     }
-    let m = lookup_message(state.source_id);
-    m.from.to_lowercase().contains(&query)
-        || m.from_addr.to_lowercase().contains(&query)
+    let m = lookup_message(state.source_index);
+    m.sender.name.to_lowercase().contains(&query)
+        || m.sender.addr.to_lowercase().contains(&query)
         || m.subject.to_lowercase().contains(&query)
         || state.tags.iter().any(|tag| tag.label().contains(&query))
         || (m.has_attachment && "attachment".contains(&query))

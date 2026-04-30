@@ -40,7 +40,7 @@ impl EmailClientState {
             active_tab: TabId::All,
             search_query: String::new(),
             selected_tags: Vec::new(),
-            selected_id: String::from("m1#0"),
+            selected_id: String::from("0#0"),
             read_open: false,
             compose_open: false,
             compose_to: String::new(),
@@ -88,25 +88,24 @@ impl<Lens> Store<EmailClientState, Lens> {
             .collect()
     }
 
-    fn selected_message_uid(&self, visible_ids: &[String]) -> String {
+    fn selected_message_uid(&self, visible_ids: &[String]) -> Option<String> {
         let selected_id = self.selected_id().cloned();
         if visible_ids.iter().any(|uid| uid == &selected_id) {
-            return selected_id;
+            return Some(selected_id);
         }
 
-        visible_ids
-            .first()
-            .cloned()
-            .or_else(|| self.message_order().read().first().cloned())
-            .expect("seed_message_states is non-empty")
+        visible_ids.first().cloned()
     }
 
-    fn selected_message_index(&self, selected_uid: &str, visible_ids: &[String]) -> usize {
-        visible_ids
-            .iter()
-            .position(|uid| uid == selected_uid)
-            .map(|index| index + 1)
-            .unwrap_or(1)
+    fn selected_message_index(&self, selected_uid: Option<&str>, visible_ids: &[String]) -> usize {
+        selected_uid
+            .and_then(|selected_uid| {
+                visible_ids
+                    .iter()
+                    .position(|uid| uid == selected_uid)
+                    .map(|index| index + 1)
+            })
+            .unwrap_or(0)
     }
 
     fn folder_count(&self, folder_id: FolderId) -> u32 {
@@ -227,20 +226,6 @@ impl<Lens> Store<EmailClientState, Lens> {
         self.update_message(uid, |message| {
             message.starred = !message.starred;
         });
-    }
-
-    fn toggle_message_unread(&mut self, uid: String) {
-        self.update_message(uid, |message| {
-            message.unread = !message.unread;
-        });
-    }
-
-    fn move_message_to_inbox(&mut self, uid: String) {
-        self.update_message(uid.clone(), |message| {
-            message.folder_id = FolderId::Inbox;
-            message.snoozed = false;
-        });
-        self.close_if_selected(&uid);
     }
 
     fn move_message_to_trash(&mut self, uid: String) {

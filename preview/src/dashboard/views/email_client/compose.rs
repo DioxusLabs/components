@@ -22,21 +22,16 @@ pub(super) fn ComposeModal(mut state: Store<EmailClientState>) -> Element {
 
     let send = move |evt: FormEvent| {
         evt.prevent_default();
-        let recipient = recipient.clone();
+        let description = if recipient.trim().is_empty() {
+            "Your message is on its way.".to_string()
+        } else {
+            format!("Delivered to {}.", recipient.trim())
+        };
         state.discard_compose();
-        spawn(async move {
-            let mut delay = document::eval("setTimeout(() => dioxus.send(true), 1000);");
-            let _ = delay.recv::<bool>().await;
-            let description = if recipient.trim().is_empty() {
-                "Your message is on its way.".to_string()
-            } else {
-                format!("Delivered to {}.", recipient.trim())
-            };
-            toasts.info(
-                "Email sent".to_string(),
-                ToastOptions::new().description(description),
-            );
-        });
+        toasts.info(
+            "Email sent".to_string(),
+            ToastOptions::new().description(description),
+        );
     };
 
     rsx! {
@@ -58,7 +53,7 @@ pub(super) fn ComposeModal(mut state: Store<EmailClientState>) -> Element {
                             class: "ec-compose-close",
                             aria_label: "Close",
                             onclick: move |_| state.discard_compose(),
-                            "×"
+                            LucideIcon { kind: IconKind::X, size: 16 }
                         }
                     }
 
@@ -94,7 +89,7 @@ pub(super) fn ComposeModal(mut state: Store<EmailClientState>) -> Element {
                             variant: TextareaVariant::Default,
                             required: true,
                             rows: "10",
-                            value: "{body}",
+                            value: body.clone(),
                             placeholder: "Write your message…",
                             oninput: move |e: FormEvent| state.set_compose_body(e.value()),
                         }

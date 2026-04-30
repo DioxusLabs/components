@@ -1,4 +1,6 @@
 use dioxus::prelude::*;
+use dioxus_primitives::toast::{use_toast, ToastOptions};
+use std::rc::Rc;
 
 use crate::components::avatar::{
     Avatar, AvatarFallback, AvatarImage, AvatarImageSize, AvatarShape,
@@ -25,21 +27,39 @@ use super::state::{EmailClientState, EmailClientStateStoreExt, EmailClientStateS
 #[component]
 pub(super) fn ReadPane(
     mut state: Store<EmailClientState>,
-    selected_uid: ReadSignal<String>,
+    selected_uid: ReadSignal<Option<String>>,
     total_count: ReadSignal<usize>,
     selected_index: ReadSignal<usize>,
 ) -> Element {
+    let toasts = use_toast();
     let mut reply_draft = use_signal(String::new);
-    let selected_uid_value = selected_uid.read().clone();
+    let mut reply_box_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    let Some(selected_uid_value) = selected_uid.read().clone() else {
+        return rsx! {};
+    };
     let Some(selected) = state.messages().get(selected_uid_value.clone()) else {
         return rsx! {};
     };
     let selected: Store<MessageState> = selected.into();
-    let selected_static = lookup_message(selected.source_id().cloned());
+    let selected_static = lookup_message(selected.source_index().cloned());
     let selected_tags = selected.tags().cloned();
     let selected_starred = selected.starred().cloned();
     let selected_flagged = selected.flagged().cloned();
     let counter = format!("{} of {}", selected_index.read(), total_count.read());
+
+    use_effect(move || {
+        let is_open = state.read_open().cloned();
+        let selected_uid = selected_uid.read().clone();
+        if !is_open || selected_uid.is_none() {
+            return;
+        }
+
+        if let Some(reply_box) = reply_box_ref() {
+            spawn(async move {
+                let _ = reply_box.set_focus(true).await;
+            });
+        }
+    });
 
     let archive_uid = selected_uid_value.clone();
     let archive_selected = move |_| {
@@ -62,6 +82,19 @@ pub(super) fn ReadPane(
         state.toggle_message_star(star_uid.clone());
     };
     let tag_edit_uid = selected_uid_value.clone();
+    let reply_recipient = selected_static.sender.name.to_string();
+    let send_reply = move |_| {
+        if reply_draft.read().trim().is_empty() {
+            return;
+        }
+
+        reply_draft.set(String::new());
+        state.close_read_pane();
+        toasts.info(
+            "Reply sent".to_string(),
+            ToastOptions::new().description(format!("Added to {}.", reply_recipient)),
+        );
+    };
 
     rsx! {
         section { class: "ec-read-pane",
@@ -124,7 +157,6 @@ pub(super) fn ReadPane(
                                             "{selected_static.thread_count} message{(selected_static.thread_count > 1).then(|| \"s\").unwrap_or(\"\")} in this thread"
                                         }
                                         SelectMulti::<MessageTag> {
-                                            key: "{selected_uid_value}-tagedit",
                                             values: Some(selected_tags.clone()),
                                             default_values: selected_tags.clone(),
                                             on_values_change: move |values: Vec<MessageTag>| {
@@ -188,16 +220,16 @@ pub(super) fn ReadPane(
                                 size: AvatarImageSize::Small,
                                 shape: AvatarShape::Circle,
                                 AvatarImage {
-                                    src: "{avatar_profile_for_key(selected_static.from_addr).src}",
-                                    alt: "{selected_static.from}",
+                                    src: "{avatar_profile_for_key(selected_static.sender.addr).src}",
+                                    alt: "{selected_static.sender.name}",
                                 }
-                                AvatarFallback { {selected_static.initials} }
+                                AvatarFallback { {selected_static.sender.initials} }
                             }
                             div { class: "ec-thread-msg-meta",
                                 div { class: "ec-thread-msg-sender",
-                                    span { class: "ec-thread-msg-name", {selected_static.from} }
+                                    span { class: "ec-thread-msg-name", {selected_static.sender.name} }
                                     span { class: "ec-thread-msg-addr",
-                                        {selected_static.from_addr}
+                                        {selected_static.sender.addr}
                                     }
                                 }
                                 span { class: "ec-thread-msg-time", {selected_static.full_time} }
@@ -225,7 +257,7 @@ pub(super) fn ReadPane(
                                 div { class: "ec-thread-msg-meta",
                                     div { class: "ec-thread-msg-sender",
                                         span { class: "ec-thread-msg-name", "You" }
-                                        span { class: "ec-thread-msg-addr", "to {selected_static.from}" }
+                                        span { class: "ec-thread-msg-addr", "to {selected_static.sender.name}" }
                                     }
                                     span { class: "ec-thread-msg-time",
                                         "earlier today"
@@ -252,15 +284,19 @@ pub(super) fn ReadPane(
                                 AvatarFallback { "Y" }
                             }
                             Textarea {
-                                placeholder: format!("Reply to {}…", selected_static.from),
+                                key: "{selected_uid_value}-reply",
+                                placeholder: format!("Reply to {}…", selected_static.sender.name),
                                 rows: "2",
                                 value: "{reply_draft}",
+                                onmounted: move |event: MountedEvent| reply_box_ref.set(Some(event.data())),
                                 oninput: move |event: FormEvent| reply_draft.set(event.value()),
                             }
                             div { class: "ec-thread-compose-actions",
                                 Button {
                                     variant: ButtonVariant::Primary,
+                                    r#type: "button",
                                     disabled: reply_draft.read().trim().is_empty(),
+                                    onclick: send_reply,
                                     LucideIcon { kind: IconKind::Send, size: 14 }
                                     "Send"
                                 }

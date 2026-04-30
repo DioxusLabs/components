@@ -28,11 +28,11 @@ pub fn EmailClient() -> Element {
     let selected_uid = use_memo(move || state.selected_message_uid(&visible_ids.read()));
     let total_count = use_memo(move || visible_ids.read().len());
     let selected_index = use_memo(move || {
-        state.selected_message_index(selected_uid.read().as_str(), &visible_ids.read())
+        state.selected_message_index(selected_uid.read().as_deref(), &visible_ids.read())
     });
 
     let folder_label = state.active_folder_label();
-    let read_open = state.read_open().cloned();
+    let read_open = state.read_open().cloned() && selected_uid.read().is_some();
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./email_client.css") }
@@ -59,7 +59,7 @@ pub fn EmailClient() -> Element {
                     DarkModeToggle {}
                 }
 
-                div { class: if read_open { "ec-main ec-reading" } else { "ec-main" },
+                main { class: if read_open { "ec-main ec-reading" } else { "ec-main" },
                     ListPane { state, visible_ids, selected_uid }
 
                     ReadPane {

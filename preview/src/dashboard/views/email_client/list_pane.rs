@@ -36,7 +36,7 @@ pub(super) fn flatten_rows(state: Store<EmailClientState>, message_ids: &[String
         let Some(message) = messages.get(uid.as_str()) else {
             continue;
         };
-        let day = lookup_message(message.source_id).day;
+        let day = lookup_message(message.source_index).day;
         if last_day != Some(day) {
             out.push(ListRow::DayHeader(day));
             last_day = Some(day);
@@ -50,12 +50,10 @@ pub(super) fn flatten_rows(state: Store<EmailClientState>, message_ids: &[String
 pub(super) fn ListPane(
     mut state: Store<EmailClientState>,
     visible_ids: ReadSignal<Vec<String>>,
-    selected_uid: ReadSignal<String>,
+    selected_uid: ReadSignal<Option<String>>,
 ) -> Element {
     let rows = use_memo(move || flatten_rows(state, &visible_ids.read()));
     let row_count = rows.read().len();
-    let rows_for_estimate = rows;
-    let rows_for_render = rows;
     let query = state.search_query().cloned();
     let tags = state.selected_tags().cloned();
 
@@ -120,12 +118,12 @@ pub(super) fn ListPane(
                 class: "ec-list-scroll",
                 count: row_count,
                 buffer: 6usize,
-                estimate_size: move |idx: usize| match &rows_for_estimate.read()[idx] {
+                estimate_size: move |idx: usize| match &rows.read()[idx] {
                     ListRow::DayHeader(_) => 34,
                     ListRow::Message(_) => 130,
                 },
                 render_item: move |idx: usize| {
-                    let row = rows_for_render.read()[idx].clone();
+                    let row = rows.read()[idx].clone();
                     match row {
                         ListRow::DayHeader(day) => rsx! {
                             div { class: "ec-day", {day} }
@@ -152,14 +150,15 @@ pub(super) fn ListPane(
 fn MessageRow(
     mut state: Store<EmailClientState>,
     message: Store<MessageState>,
-    selected_uid: String,
+    selected_uid: Option<String>,
 ) -> Element {
     let uid = message.uid().cloned();
-    let is_selected = selected_uid == uid;
+    let is_selected = selected_uid.as_deref() == Some(uid.as_str());
     let uid_for_click = uid.clone();
+    let uid_for_key = uid.clone();
     let uid_for_trash = uid.clone();
     let uid_for_star = uid.clone();
-    let m = lookup_message(message.source_id().cloned());
+    let m = lookup_message(message.source_index().cloned());
     let starred = message.starred().cloned();
     let unread = message.unread().cloned();
     let flagged = message.flagged().cloned();
@@ -178,12 +177,18 @@ fn MessageRow(
     rsx! {
         Item {
             class: classes,
-            role: "option",
+            role: "button",
             tabindex: 0,
             onclick: move |_| {
                 state.select_message(uid_for_click.clone());
             },
-            "aria-selected": is_selected,
+            onkeydown: move |event: KeyboardEvent| {
+                let key = event.key().to_string();
+                if key == "Enter" || key == " " {
+                    event.prevent_default();
+                    state.select_message(uid_for_key.clone());
+                }
+            },
             "data-selected": is_selected,
 
             ItemMedia { variant: ItemMediaVariant::Icon,
@@ -191,10 +196,10 @@ fn MessageRow(
                     size: AvatarImageSize::Small,
                     shape: AvatarShape::Circle,
                     AvatarImage {
-                        src: "{avatar_profile_for_key(m.from_addr).src}",
-                        alt: "{m.from}",
+                        src: "{avatar_profile_for_key(m.sender.addr).src}",
+                        alt: "{m.sender.name}",
                     }
-                    AvatarFallback { {m.initials} }
+                    AvatarFallback { {m.sender.initials} }
                 }
             }
             ItemContent {
@@ -202,7 +207,7 @@ fn MessageRow(
                     span { class: "ec-row-subject", {m.subject} }
                 }
                 div { class: "ec-row-sender",
-                    span { class: "ec-row-from", {m.from} }
+                    span { class: "ec-row-from", {m.sender.name} }
                 }
                 ItemDescription { class: "ec-row-snippet", {LOREM_IPSUM} }
                 if !tags.is_empty() || m.has_attachment || flagged {
@@ -230,6 +235,7 @@ fn MessageRow(
                     r#type: "button",
                     class: "ec-row-action ec-row-action-trash",
                     aria_label: "Move to trash",
+                    onkeydown: move |e: KeyboardEvent| e.stop_propagation(),
                     onclick: move |e: Event<MouseData>| {
                         e.stop_propagation();
                         state.move_message_to_trash(uid_for_trash.clone());
@@ -242,6 +248,7 @@ fn MessageRow(
                     class: "ec-row-action ec-row-action-star",
                     "data-active": starred,
                     aria_label: if starred { "Unstar message" } else { "Star message" },
+                    onkeydown: move |e: KeyboardEvent| e.stop_propagation(),
                     onclick: move |e: Event<MouseData>| {
                         e.stop_propagation();
                         state.toggle_message_star(uid_for_star.clone());

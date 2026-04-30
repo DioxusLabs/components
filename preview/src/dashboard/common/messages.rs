@@ -1,160 +1,52 @@
-use dioxus::prelude::*;
-use dioxus_primitives::icon::Icon;
+use super::{FolderId, MessageTag};
 
 #[derive(Clone, Copy, PartialEq)]
-pub struct AvatarProfile {
+pub struct Sender {
     pub name: &'static str,
+    pub addr: &'static str,
     pub initials: &'static str,
-    pub src: &'static str,
 }
 
-pub const AVATAR_PROFILE_OPTIONS: &[AvatarProfile] = &[
-    AvatarProfile {
-        name: "ealmloff",
-        initials: "EA",
-        src: "https://github.com/ealmloff.png",
-    },
-    AvatarProfile {
-        name: "nicoburns",
-        initials: "NB",
-        src: "https://github.com/nicoburns.png",
-    },
-    AvatarProfile {
-        name: "jkelleyrtp",
-        initials: "JK",
-        src: "https://github.com/jkelleyrtp.png",
-    },
-    AvatarProfile {
-        name: "DioxusLabs",
-        initials: "DX",
-        src: "https://github.com/DioxusLabs.png",
-    },
-];
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum FolderId {
-    Inbox,
-    Starred,
-    Sent,
-    Drafts,
-    Archive,
-    Trash,
-}
-
-impl FolderId {
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            FolderId::Inbox => "inbox",
-            FolderId::Starred => "starred",
-            FolderId::Sent => "sent",
-            FolderId::Drafts => "drafts",
-            FolderId::Archive => "archive",
-            FolderId::Trash => "trash",
-        }
+const fn sender(name: &'static str, addr: &'static str, initials: &'static str) -> Sender {
+    Sender {
+        name,
+        addr,
+        initials,
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum TabId {
-    All,
-    Unread,
-    Flagged,
-}
-
-impl TabId {
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            TabId::All => "all",
-            TabId::Unread => "unread",
-            TabId::Flagged => "flagged",
-        }
-    }
-
-    pub fn from_str(s: &str) -> Option<Self> {
-        match s {
-            "all" => Some(TabId::All),
-            "unread" => Some(TabId::Unread),
-            "flagged" => Some(TabId::Flagged),
-            _ => None,
-        }
-    }
-}
-
-#[derive(Clone, Copy, PartialEq)]
-pub struct Folder {
-    pub id: FolderId,
-    pub label: &'static str,
-    pub icon: IconKind,
-    pub count: Option<u32>,
-}
-
-#[derive(Clone, Copy, PartialEq)]
-pub struct Tab {
-    pub id: TabId,
-    pub label: &'static str,
-    pub count: u32,
-}
-
-#[derive(Clone, Copy, PartialEq)]
-pub struct MessageProperties {
-    pub message_id: &'static str,
-    pub folder_id: FolderId,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum MessageTag {
-    Alerts,
-    Calendar,
-    Deploys,
-    Design,
-    Github,
-    Newsletter,
-    Receipts,
-    Sales,
-    Security,
-    Urgent,
-    Work,
-}
-
-impl MessageTag {
-    pub const ALL: &[MessageTag] = &[
-        MessageTag::Alerts,
-        MessageTag::Calendar,
-        MessageTag::Deploys,
-        MessageTag::Design,
-        MessageTag::Github,
-        MessageTag::Newsletter,
-        MessageTag::Receipts,
-        MessageTag::Sales,
-        MessageTag::Security,
-        MessageTag::Urgent,
-        MessageTag::Work,
-    ];
-
-    pub const fn label(self) -> &'static str {
-        match self {
-            MessageTag::Alerts => "alerts",
-            MessageTag::Calendar => "calendar",
-            MessageTag::Deploys => "deploys",
-            MessageTag::Design => "design",
-            MessageTag::Github => "github",
-            MessageTag::Newsletter => "newsletter",
-            MessageTag::Receipts => "receipts",
-            MessageTag::Sales => "sales",
-            MessageTag::Security => "security",
-            MessageTag::Urgent => "urgent",
-            MessageTag::Work => "work",
-        }
-    }
-}
+pub const LINEAR: Sender = sender("Linear", "notifications@linear.app", "LN");
+pub const GITHUB: Sender = sender("GitHub", "noreply@github.com", "GH");
+pub const MAYA: Sender = sender("Maya Chen", "maya@figma-internal.com", "MC");
+pub const STRIPE: Sender = sender("Stripe", "receipts@stripe.com", "ST");
+pub const CALENDAR: Sender = sender("Calendar", "calendar@workspace.app", "CA");
+pub const YOU: Sender = sender("You", "you@yourcompany.com", "Y");
+pub const VERCEL: Sender = sender("Vercel", "deploys@vercel.com", "VC");
+pub const MARTA: Sender = sender("Marta Liu", "marta.l@yourcompany.com", "ML");
+pub const ONEPASSWORD: Sender = sender("1Password", "security@1password.com", "1P");
+pub const AWS_BILLING: Sender = sender("AWS Billing", "no-reply@aws.amazon.com", "AW");
+pub const NOTION: Sender = sender("Notion", "team@notion.so", "NO");
+pub const SENTRY: Sender = sender("Sentry", "alerts@sentry.io", "SE");
+pub const CAROLINE: Sender = sender("Caroline Wu", "caroline@yourcompany.com", "CW");
+pub const DATADOG: Sender = sender("Datadog", "alerts@datadog.com", "DD");
+pub const SLACK: Sender = sender("Slack", "feedback@slack.com", "SL");
+pub const FIGMA: Sender = sender("Figma", "no-reply@figma.com", "FG");
+pub const PEDRO: Sender = sender("Pedro Carvalho", "pedro@yourcompany.com", "PC");
+pub const LINKEDIN: Sender = sender("LinkedIn", "messages-noreply@linkedin.com", "LI");
+pub const SUBSTACK: Sender = sender("Substack", "no-reply@substack.com", "SU");
+pub const ELI: Sender = sender("Eli Rosen", "eli.r@yourcompany.com", "ER");
+pub const AWS_COST: Sender = sender("AWS Cost Explorer", "no-reply@aws.amazon.com", "AW");
+pub const SAMIR: Sender = sender("Samir Kapoor", "samir@yourcompany.com", "SK");
+pub const APPLE: Sender = sender("Apple", "no-reply@email.apple.com", "AP");
+pub const HEX: Sender = sender("Hex", "no-reply@hex.tech", "HX");
+pub const CRUNCHBASE: Sender = sender("Crunchbase Daily", "newsletter@crunchbase.com", "CB");
+pub const HACKER_NEWS: Sender = sender("Hacker News Daily", "digest@hnrss.com", "HN");
+pub const CLOUDFLARE: Sender = sender("Cloudflare", "noreply@cloudflare.com", "CF");
 
 #[derive(Clone, PartialEq)]
 pub struct Message {
-    pub id: &'static str,
     pub day: &'static str,
-    pub from: &'static str,
-    pub from_addr: &'static str,
-    pub initials: &'static str,
+    pub sender: Sender,
     pub subject: &'static str,
     pub time: &'static str,
     pub full_time: &'static str,
@@ -167,196 +59,40 @@ pub struct Message {
 
 pub const EMAIL_REPEAT_COUNT: usize = 5;
 
-#[derive(Clone, PartialEq, Store)]
-pub struct MessageState {
-    pub uid: String,
-    pub source_id: &'static str,
-    pub folder_id: FolderId,
-    pub tags: Vec<MessageTag>,
-    pub unread: bool,
-    pub starred: bool,
-    pub flagged: bool,
-    pub snoozed: bool,
-}
-
-pub fn seed_message_states() -> Vec<MessageState> {
-    let mut out = Vec::with_capacity(MESSAGES.len() * EMAIL_REPEAT_COUNT);
-    for rep in 0..EMAIL_REPEAT_COUNT {
-        for msg in MESSAGES.iter() {
-            let folder_id = MESSAGE_PROPERTIES
-                .iter()
-                .find(|p| p.message_id == msg.id)
-                .map(|p| p.folder_id)
-                .unwrap_or(DEFAULT_MESSAGE_FOLDER_ID);
-            out.push(MessageState {
-                uid: format!("{}#{}", msg.id, rep),
-                source_id: msg.id,
-                folder_id,
-                tags: msg.tags.to_vec(),
-                unread: msg.unread,
-                starred: msg.starred,
-                flagged: msg.starred,
-                snoozed: false,
-            });
-        }
-    }
-    out
-}
-
-pub fn lookup_message(source_id: &str) -> &'static Message {
-    MESSAGES
-        .iter()
-        .find(|m| m.id == source_id)
-        .unwrap_or(&MESSAGES[0])
+pub fn lookup_message(source_index: usize) -> &'static Message {
+    MESSAGES.get(source_index).unwrap_or(&MESSAGES[0])
 }
 
 pub const LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
 
-pub const FOLDERS: &[Folder] = &[
-    Folder {
-        id: FolderId::Inbox,
-        label: "Inbox",
-        icon: IconKind::Inbox,
-        count: Some(12),
-    },
-    Folder {
-        id: FolderId::Starred,
-        label: "Starred",
-        icon: IconKind::StarOutline,
-        count: None,
-    },
-    Folder {
-        id: FolderId::Sent,
-        label: "Sent",
-        icon: IconKind::Send,
-        count: None,
-    },
-    Folder {
-        id: FolderId::Drafts,
-        label: "Drafts",
-        icon: IconKind::Pen,
-        count: Some(3),
-    },
-    Folder {
-        id: FolderId::Archive,
-        label: "Archive",
-        icon: IconKind::Archive,
-        count: None,
-    },
-    Folder {
-        id: FolderId::Trash,
-        label: "Trash",
-        icon: IconKind::Trash,
-        count: None,
-    },
-];
-
-pub const TABS: &[Tab] = &[
-    Tab {
-        id: TabId::All,
-        label: "All",
-        count: 42,
-    },
-    Tab {
-        id: TabId::Unread,
-        label: "Unread",
-        count: 12,
-    },
-    Tab {
-        id: TabId::Flagged,
-        label: "Flagged",
-        count: 5,
-    },
-];
-
 pub const DEFAULT_MESSAGE_FOLDER_ID: FolderId = FolderId::Inbox;
 
-pub const MESSAGE_PROPERTIES: &[MessageProperties] = &[
-    MessageProperties {
-        message_id: "m6",
-        folder_id: FolderId::Sent,
-    },
-    MessageProperties {
-        message_id: "m23",
-        folder_id: FolderId::Sent,
-    },
-    MessageProperties {
-        message_id: "m29",
-        folder_id: FolderId::Sent,
-    },
-    MessageProperties {
-        message_id: "m43",
-        folder_id: FolderId::Sent,
-    },
-    MessageProperties {
-        message_id: "m51",
-        folder_id: FolderId::Sent,
-    },
-    MessageProperties {
-        message_id: "m55",
-        folder_id: FolderId::Sent,
-    },
-    MessageProperties {
-        message_id: "m58",
-        folder_id: FolderId::Sent,
-    },
-    MessageProperties {
-        message_id: "m3",
-        folder_id: FolderId::Drafts,
-    },
-    MessageProperties {
-        message_id: "m8",
-        folder_id: FolderId::Drafts,
-    },
-    MessageProperties {
-        message_id: "m37",
-        folder_id: FolderId::Drafts,
-    },
-    MessageProperties {
-        message_id: "m20",
-        folder_id: FolderId::Archive,
-    },
-    MessageProperties {
-        message_id: "m21",
-        folder_id: FolderId::Archive,
-    },
-    MessageProperties {
-        message_id: "m31",
-        folder_id: FolderId::Archive,
-    },
-    MessageProperties {
-        message_id: "m39",
-        folder_id: FolderId::Archive,
-    },
-    MessageProperties {
-        message_id: "m46",
-        folder_id: FolderId::Archive,
-    },
-    MessageProperties {
-        message_id: "m52",
-        folder_id: FolderId::Archive,
-    },
-    MessageProperties {
-        message_id: "m4",
-        folder_id: FolderId::Trash,
-    },
-    MessageProperties {
-        message_id: "m22",
-        folder_id: FolderId::Trash,
-    },
-    MessageProperties {
-        message_id: "m44",
-        folder_id: FolderId::Trash,
-    },
+pub const MESSAGE_FOLDER_OVERRIDES: &[(usize, FolderId)] = &[
+    (5, FolderId::Sent),
+    (22, FolderId::Sent),
+    (28, FolderId::Sent),
+    (42, FolderId::Sent),
+    (50, FolderId::Sent),
+    (54, FolderId::Sent),
+    (57, FolderId::Sent),
+    (2, FolderId::Drafts),
+    (7, FolderId::Drafts),
+    (36, FolderId::Drafts),
+    (19, FolderId::Archive),
+    (20, FolderId::Archive),
+    (30, FolderId::Archive),
+    (38, FolderId::Archive),
+    (45, FolderId::Archive),
+    (51, FolderId::Archive),
+    (3, FolderId::Trash),
+    (21, FolderId::Trash),
+    (43, FolderId::Trash),
 ];
 
 pub const MESSAGES: &[Message] = &[
     Message {
-        id: "m1",
         day: "Today",
-        from: "Linear",
-        from_addr: "notifications@linear.app",
-        initials: "LN",
+        sender: LINEAR,
         subject: "ENG-1247 · Reading-pane scroll restoration",
         time: "11:42",
         full_time: "Apr 28, 2026 · 11:42 AM",
@@ -367,11 +103,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m2",
         day: "Today",
-        from: "GitHub",
-        from_addr: "noreply@github.com",
-        initials: "GH",
+        sender: GITHUB,
         subject: "[anthropics/claude-cookbook] PR #482 ready for review",
         time: "10:18",
         full_time: "Apr 28, 2026 · 10:18 AM",
@@ -382,11 +115,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m3",
         day: "Today",
-        from: "Maya Chen",
-        from_addr: "maya@figma-internal.com",
-        initials: "MC",
+        sender: MAYA,
         subject: "Re: Two-pane mail client — first pass",
         time: "09:51",
         full_time: "Apr 28, 2026 · 9:51 AM",
@@ -397,11 +127,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: true,
     },
     Message {
-        id: "m4",
         day: "Today",
-        from: "Stripe",
-        from_addr: "receipts@stripe.com",
-        initials: "ST",
+        sender: STRIPE,
         subject: "Your April invoice is ready — $2,847.00",
         time: "08:30",
         full_time: "Apr 28, 2026 · 8:30 AM",
@@ -412,11 +139,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: true,
     },
     Message {
-        id: "m5",
         day: "Today",
-        from: "Calendar",
-        from_addr: "calendar@workspace.app",
-        initials: "CA",
+        sender: CALENDAR,
         subject: "Daily agenda · Tue Apr 28",
         time: "07:00",
         full_time: "Apr 28, 2026 · 7:00 AM",
@@ -427,11 +151,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m6",
         day: "Yesterday",
-        from: "You",
-        from_addr: "you@yourcompany.com",
-        initials: "Y",
+        sender: YOU,
         subject: "Q2 roadmap — final draft for your eyes",
         time: "Yesterday",
         full_time: "Apr 27, 2026 · 5:14 PM",
@@ -442,11 +163,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: true,
     },
     Message {
-        id: "m7",
         day: "Yesterday",
-        from: "Vercel",
-        from_addr: "deploys@vercel.com",
-        initials: "VC",
+        sender: VERCEL,
         subject: "Production deploy succeeded · web@4f8a2c1",
         time: "Yesterday",
         full_time: "Apr 27, 2026 · 3:42 PM",
@@ -457,11 +175,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m8",
         day: "Yesterday",
-        from: "Marta Liu",
-        from_addr: "marta.l@yourcompany.com",
-        initials: "ML",
+        sender: MARTA,
         subject: "Notes from the customer call (Acme)",
         time: "Yesterday",
         full_time: "Apr 27, 2026 · 11:08 AM",
@@ -472,11 +187,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m9",
         day: "This week",
-        from: "1Password",
-        from_addr: "security@1password.com",
-        initials: "1P",
+        sender: ONEPASSWORD,
         subject: "New sign-in from MacBook Pro · San Francisco",
         time: "Mon",
         full_time: "Apr 26, 2026 · 8:17 AM",
@@ -487,11 +199,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m10",
         day: "This week",
-        from: "AWS Billing",
-        from_addr: "no-reply@aws.amazon.com",
-        initials: "AW",
+        sender: AWS_BILLING,
         subject: "Your AWS bill for April is now available",
         time: "Sun",
         full_time: "Apr 25, 2026 · 11:00 PM",
@@ -502,11 +211,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m11",
         day: "This week",
-        from: "Notion",
-        from_addr: "team@notion.so",
-        initials: "NO",
+        sender: NOTION,
         subject: "Caroline shared 'Cycle 47 — Eng planning' with you",
         time: "Sat",
         full_time: "Apr 24, 2026 · 4:33 PM",
@@ -517,11 +223,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m12",
         day: "This week",
-        from: "Sentry",
-        from_addr: "alerts@sentry.io",
-        initials: "SE",
+        sender: SENTRY,
         subject: "[web-prod] Spike resolved · TypeError in MailList",
         time: "Fri",
         full_time: "Apr 23, 2026 · 2:11 PM",
@@ -532,11 +235,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m13",
         day: "This week",
-        from: "Caroline Wu",
-        from_addr: "caroline@yourcompany.com",
-        initials: "CW",
+        sender: CAROLINE,
         subject: "Re: Cycle 47 capacity",
         time: "Fri",
         full_time: "Apr 23, 2026 · 11:02 AM",
@@ -547,11 +247,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m14",
         day: "This week",
-        from: "Datadog",
-        from_addr: "alerts@datadog.com",
-        initials: "DD",
+        sender: DATADOG,
         subject: "[Triggered] high p95 latency · api.search",
         time: "Thu",
         full_time: "Apr 22, 2026 · 6:48 PM",
@@ -562,11 +259,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m15",
         day: "This week",
-        from: "Slack",
-        from_addr: "feedback@slack.com",
-        initials: "SL",
+        sender: SLACK,
         subject: "5 new mentions in #eng-search",
         time: "Thu",
         full_time: "Apr 22, 2026 · 5:00 PM",
@@ -577,11 +271,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m16",
         day: "This week",
-        from: "Figma",
-        from_addr: "no-reply@figma.com",
-        initials: "FG",
+        sender: FIGMA,
         subject: "Maya Chen invited you to 'Mail v2 — exploration'",
         time: "Wed",
         full_time: "Apr 21, 2026 · 3:18 PM",
@@ -592,11 +283,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m17",
         day: "This week",
-        from: "GitHub",
-        from_addr: "noreply@github.com",
-        initials: "GH",
+        sender: GITHUB,
         subject: "[anthropics/claude-cookbook] CI failed on main",
         time: "Wed",
         full_time: "Apr 21, 2026 · 1:42 PM",
@@ -612,11 +300,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m18",
         day: "This week",
-        from: "Pedro Carvalho",
-        from_addr: "pedro@yourcompany.com",
-        initials: "PC",
+        sender: PEDRO,
         subject: "Loom: walking through the indexer refactor",
         time: "Tue",
         full_time: "Apr 20, 2026 · 11:25 AM",
@@ -627,11 +312,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m19",
         day: "This week",
-        from: "1Password",
-        from_addr: "security@1password.com",
-        initials: "1P",
+        sender: ONEPASSWORD,
         subject: "Weekly security report",
         time: "Mon",
         full_time: "Apr 20, 2026 · 8:00 AM",
@@ -642,11 +324,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m20",
         day: "Last week",
-        from: "LinkedIn",
-        from_addr: "messages-noreply@linkedin.com",
-        initials: "LI",
+        sender: LINKEDIN,
         subject: "Sarah Patel sent you a connection request",
         time: "Sun",
         full_time: "Apr 19, 2026 · 6:14 PM",
@@ -657,11 +336,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m21",
         day: "Last week",
-        from: "Substack",
-        from_addr: "no-reply@substack.com",
-        initials: "SU",
+        sender: SUBSTACK,
         subject: "Stratechery · The end of the unbundled inbox",
         time: "Sun",
         full_time: "Apr 19, 2026 · 9:00 AM",
@@ -672,11 +348,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m22",
         day: "Last week",
-        from: "Stripe",
-        from_addr: "receipts@stripe.com",
-        initials: "ST",
+        sender: STRIPE,
         subject: "Dispute opened on payment INV-2026-04-184",
         time: "Sat",
         full_time: "Apr 18, 2026 · 4:22 PM",
@@ -692,11 +365,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m23",
         day: "Last week",
-        from: "Eli Rosen",
-        from_addr: "eli.r@yourcompany.com",
-        initials: "ER",
+        sender: ELI,
         subject: "Postmortem draft · Apr 11 search outage",
         time: "Sat",
         full_time: "Apr 18, 2026 · 10:08 AM",
@@ -707,11 +377,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: true,
     },
     Message {
-        id: "m24",
         day: "Last week",
-        from: "AWS Cost Explorer",
-        from_addr: "no-reply@aws.amazon.com",
-        initials: "AW",
+        sender: AWS_COST,
         subject: "Anomaly detected: EC2 in us-west-2 spend up 217%",
         time: "Fri",
         full_time: "Apr 17, 2026 · 7:45 AM",
@@ -727,11 +394,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m25",
         day: "Last week",
-        from: "Notion",
-        from_addr: "team@notion.so",
-        initials: "NO",
+        sender: NOTION,
         subject: "Marta Liu commented on '240-seat Acme expansion'",
         time: "Thu",
         full_time: "Apr 16, 2026 · 5:50 PM",
@@ -742,11 +406,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m26",
         day: "Last week",
-        from: "Linear",
-        from_addr: "notifications@linear.app",
-        initials: "LN",
+        sender: LINEAR,
         subject: "ENG-1198 · Highlight overlap on selected row",
         time: "Thu",
         full_time: "Apr 16, 2026 · 2:14 PM",
@@ -757,11 +418,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: true,
     },
     Message {
-        id: "m27",
         day: "Last week",
-        from: "Vercel",
-        from_addr: "deploys@vercel.com",
-        initials: "VC",
+        sender: VERCEL,
         subject: "Production deploy failed · web@a14b9c2",
         time: "Wed",
         full_time: "Apr 15, 2026 · 11:32 AM",
@@ -777,11 +435,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m28",
         day: "Last week",
-        from: "Calendar",
-        from_addr: "calendar@workspace.app",
-        initials: "CA",
+        sender: CALENDAR,
         subject: "Declined: 'Quick sync re: budget'",
         time: "Tue",
         full_time: "Apr 14, 2026 · 9:14 AM",
@@ -792,11 +447,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m29",
         day: "Last week",
-        from: "Samir Kapoor",
-        from_addr: "samir@yourcompany.com",
-        initials: "SK",
+        sender: SAMIR,
         subject: "Quick q on the streaming examples PR",
         time: "Tue",
         full_time: "Apr 14, 2026 · 8:01 AM",
@@ -807,11 +459,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m30",
         day: "Last week",
-        from: "GitHub",
-        from_addr: "noreply@github.com",
-        initials: "GH",
+        sender: GITHUB,
         subject: "[anthropics/claude-cookbook] dependabot · 4 PRs ready",
         time: "Mon",
         full_time: "Apr 13, 2026 · 7:15 AM",
@@ -822,11 +471,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m31",
         day: "Earlier in April",
-        from: "Apple",
-        from_addr: "no-reply@email.apple.com",
-        initials: "AP",
+        sender: APPLE,
         subject: "Your receipt from Apple · Apr 11",
         time: "Apr 11",
         full_time: "Apr 11, 2026 · 4:48 PM",
@@ -837,11 +483,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m32",
         day: "Earlier in April",
-        from: "Sentry",
-        from_addr: "alerts@sentry.io",
-        initials: "SE",
+        sender: SENTRY,
         subject: "[web-prod] New issue · UnhandledPromiseRejection",
         time: "Apr 10",
         full_time: "Apr 10, 2026 · 2:24 PM",
@@ -852,11 +495,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m33",
         day: "Earlier in April",
-        from: "Caroline Wu",
-        from_addr: "caroline@yourcompany.com",
-        initials: "CW",
+        sender: CAROLINE,
         subject: "Engineering all-hands · Apr 30",
         time: "Apr 9",
         full_time: "Apr 9, 2026 · 11:00 AM",
@@ -867,11 +507,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m34",
         day: "Earlier in April",
-        from: "Hex",
-        from_addr: "no-reply@hex.tech",
-        initials: "HX",
+        sender: HEX,
         subject: "Your scheduled report 'Daily DAU' is ready",
         time: "Apr 8",
         full_time: "Apr 8, 2026 · 8:00 AM",
@@ -882,11 +519,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m35",
         day: "Earlier in April",
-        from: "Marta Liu",
-        from_addr: "marta.l@yourcompany.com",
-        initials: "ML",
+        sender: MARTA,
         subject: "Mossberg lead · they want a demo Wed",
         time: "Apr 7",
         full_time: "Apr 7, 2026 · 4:32 PM",
@@ -902,11 +536,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m36",
         day: "Earlier in April",
-        from: "Crunchbase Daily",
-        from_addr: "newsletter@crunchbase.com",
-        initials: "CB",
+        sender: CRUNCHBASE,
         subject: "AI infra raises $4.2B in Q1 · 47 deals tracked",
         time: "Apr 7",
         full_time: "Apr 7, 2026 · 7:00 AM",
@@ -917,11 +548,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m37",
         day: "Earlier in April",
-        from: "GitHub",
-        from_addr: "noreply@github.com",
-        initials: "GH",
+        sender: GITHUB,
         subject: "[anthropics/claude-cookbook] You were assigned PR #471",
         time: "Apr 6",
         full_time: "Apr 6, 2026 · 3:21 PM",
@@ -937,11 +565,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m38",
         day: "Earlier in April",
-        from: "Eli Rosen",
-        from_addr: "eli.r@yourcompany.com",
-        initials: "ER",
+        sender: ELI,
         subject: "Re: index rebuild ETA",
         time: "Apr 5",
         full_time: "Apr 5, 2026 · 8:42 AM",
@@ -952,11 +577,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m39",
         day: "Earlier in April",
-        from: "Cloudflare",
-        from_addr: "noreply@cloudflare.com",
-        initials: "CF",
+        sender: CLOUDFLARE,
         subject: "Certificate renewed · *.yourcompany.com",
         time: "Apr 4",
         full_time: "Apr 4, 2026 · 6:00 AM",
@@ -967,11 +589,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m40",
         day: "Earlier in April",
-        from: "Stripe",
-        from_addr: "receipts@stripe.com",
-        initials: "ST",
+        sender: STRIPE,
         subject: "March MRR report · $284,210 (+4.2% MoM)",
         time: "Apr 3",
         full_time: "Apr 3, 2026 · 9:00 AM",
@@ -982,11 +601,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: true,
     },
     Message {
-        id: "m41",
         day: "Earlier in April",
-        from: "Calendar",
-        from_addr: "calendar@workspace.app",
-        initials: "CA",
+        sender: CALENDAR,
         subject: "Weekly summary · Mar 30 – Apr 5",
         time: "Apr 2",
         full_time: "Apr 2, 2026 · 8:00 AM",
@@ -1001,11 +617,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m42",
         day: "Earlier in April",
-        from: "Hacker News Daily",
-        from_addr: "digest@hnrss.com",
-        initials: "HN",
+        sender: HACKER_NEWS,
         subject: "Top 10 from HN · Apr 1",
         time: "Apr 1",
         full_time: "Apr 1, 2026 · 7:00 AM",
@@ -1016,11 +629,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m43",
         day: "March",
-        from: "Caroline Wu",
-        from_addr: "caroline@yourcompany.com",
-        initials: "CW",
+        sender: CAROLINE,
         subject: "Q1 perf review · self-eval prompt",
         time: "Mar 30",
         full_time: "Mar 30, 2026 · 4:14 PM",
@@ -1031,11 +641,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m44",
         day: "March",
-        from: "Vercel",
-        from_addr: "deploys@vercel.com",
-        initials: "VC",
+        sender: VERCEL,
         subject: "Production deploy succeeded · web@b73d1f4",
         time: "Mar 28",
         full_time: "Mar 28, 2026 · 11:48 AM",
@@ -1046,11 +653,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m45",
         day: "March",
-        from: "Maya Chen",
-        from_addr: "maya@figma-internal.com",
-        initials: "MC",
+        sender: MAYA,
         subject: "Initial mood board for mail v2",
         time: "Mar 26",
         full_time: "Mar 26, 2026 · 2:18 PM",
@@ -1061,11 +665,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: true,
     },
     Message {
-        id: "m46",
         day: "March",
-        from: "GitHub",
-        from_addr: "noreply@github.com",
-        initials: "GH",
+        sender: GITHUB,
         subject: "[anthropics/claude-cookbook] PR #463 merged",
         time: "Mar 25",
         full_time: "Mar 25, 2026 · 5:12 PM",
@@ -1076,11 +677,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m47",
         day: "March",
-        from: "Pedro Carvalho",
-        from_addr: "pedro@yourcompany.com",
-        initials: "PC",
+        sender: PEDRO,
         subject: "Friday team lunch · Mediterranean?",
         time: "Mar 24",
         full_time: "Mar 24, 2026 · 10:45 AM",
@@ -1091,11 +689,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m48",
         day: "March",
-        from: "1Password",
-        from_addr: "security@1password.com",
-        initials: "1P",
+        sender: ONEPASSWORD,
         subject: "Password compromised · airbnb.com",
         time: "Mar 22",
         full_time: "Mar 22, 2026 · 8:14 AM",
@@ -1106,11 +701,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m49",
         day: "March",
-        from: "Linear",
-        from_addr: "notifications@linear.app",
-        initials: "LN",
+        sender: LINEAR,
         subject: "Cycle 46 closed · 14 of 16 issues completed (88%)",
         time: "Mar 20",
         full_time: "Mar 20, 2026 · 6:00 PM",
@@ -1125,11 +717,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m50",
         day: "March",
-        from: "Notion",
-        from_addr: "team@notion.so",
-        initials: "NO",
+        sender: NOTION,
         subject: "Eli shared 'Search v2 cutover plan' with you",
         time: "Mar 18",
         full_time: "Mar 18, 2026 · 3:42 PM",
@@ -1140,11 +729,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m51",
         day: "March",
-        from: "AWS Billing",
-        from_addr: "no-reply@aws.amazon.com",
-        initials: "AW",
+        sender: AWS_BILLING,
         subject: "March bill is now available · $4,824.18",
         time: "Mar 15",
         full_time: "Mar 15, 2026 · 11:00 PM",
@@ -1155,11 +741,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m52",
         day: "March",
-        from: "Marta Liu",
-        from_addr: "marta.l@yourcompany.com",
-        initials: "ML",
+        sender: MARTA,
         subject: "Thanks for the demo prep!",
         time: "Mar 12",
         full_time: "Mar 12, 2026 · 5:48 PM",
@@ -1170,11 +753,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m53",
         day: "March",
-        from: "Calendar",
-        from_addr: "calendar@workspace.app",
-        initials: "CA",
+        sender: CALENDAR,
         subject: "Out of office: Pedro Carvalho · Mar 20 – Apr 4",
         time: "Mar 10",
         full_time: "Mar 10, 2026 · 9:30 AM",
@@ -1185,11 +765,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m54",
         day: "March",
-        from: "Sentry",
-        from_addr: "alerts@sentry.io",
-        initials: "SE",
+        sender: SENTRY,
         subject: "[web-prod] Issue resolved · UnhandledPromiseRejection",
         time: "Mar 9",
         full_time: "Mar 9, 2026 · 2:14 PM",
@@ -1200,11 +777,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m55",
         day: "March",
-        from: "GitHub",
-        from_addr: "noreply@github.com",
-        initials: "GH",
+        sender: GITHUB,
         subject: "[anthropics/claude-cookbook] You triaged 12 issues",
         time: "Mar 7",
         full_time: "Mar 7, 2026 · 8:00 AM",
@@ -1215,11 +789,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m56",
         day: "March",
-        from: "Substack",
-        from_addr: "no-reply@substack.com",
-        initials: "SU",
+        sender: SUBSTACK,
         subject: "Read Max · Why every app wants to be email",
         time: "Mar 4",
         full_time: "Mar 4, 2026 · 9:00 AM",
@@ -1230,11 +801,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m57",
         day: "March",
-        from: "Cloudflare",
-        from_addr: "noreply@cloudflare.com",
-        initials: "CF",
+        sender: CLOUDFLARE,
         subject: "DDoS attack mitigated · 14M req/s peak",
         time: "Mar 2",
         full_time: "Mar 2, 2026 · 4:01 AM",
@@ -1245,11 +813,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m58",
         day: "February",
-        from: "Caroline Wu",
-        from_addr: "caroline@yourcompany.com",
-        initials: "CW",
+        sender: CAROLINE,
         subject: "1:1 notes · Feb 26",
         time: "Feb 26",
         full_time: "Feb 26, 2026 · 11:30 AM",
@@ -1260,11 +825,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m59",
         day: "February",
-        from: "Stripe",
-        from_addr: "receipts@stripe.com",
-        initials: "ST",
+        sender: STRIPE,
         subject: "Subscription renewed · Anthropic Pro · $20.00",
         time: "Feb 25",
         full_time: "Feb 25, 2026 · 8:14 AM",
@@ -1275,11 +837,8 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
     Message {
-        id: "m60",
         day: "February",
-        from: "Calendar",
-        from_addr: "calendar@workspace.app",
-        initials: "CA",
+        sender: CALENDAR,
         subject: "Birthday reminder · Marta Liu (Mar 8)",
         time: "Feb 25",
         full_time: "Feb 25, 2026 · 7:00 AM",
@@ -1290,121 +849,3 @@ pub const MESSAGES: &[Message] = &[
         has_attachment: false,
     },
 ];
-
-#[derive(Clone, Copy, PartialEq)]
-pub enum IconKind {
-    Inbox,
-    Send,
-    Pen,
-    Archive,
-    Trash,
-    StarOutline,
-    StarFilled,
-    Paperclip,
-    Filter,
-    ArrowLeft,
-    Flag,
-    Snooze,
-}
-
-#[component]
-pub fn LucideIcon(kind: IconKind, #[props(default = 16)] size: u32) -> Element {
-    let size_str = format!("{size}px");
-    let (fill, paths) = match kind {
-        IconKind::Inbox => (
-            "none",
-            rsx! {
-                path { d: "M22 12h-6l-2 3h-4l-2-3H2" }
-                path { d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z" }
-            },
-        ),
-        IconKind::Send => (
-            "none",
-            rsx! {
-                path { d: "m22 2-7 20-4-9-9-4Z" }
-                path { d: "M22 2 11 13" }
-            },
-        ),
-        IconKind::Pen => (
-            "none",
-            rsx! {
-                path { d: "M12 20h9" }
-                path { d: "M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z" }
-            },
-        ),
-        IconKind::Archive => (
-            "none",
-            rsx! {
-                rect { x: "2", y: "4", width: "20", height: "5", rx: "2" }
-                path { d: "M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9" }
-                path { d: "M10 13h4" }
-            },
-        ),
-        IconKind::Trash => (
-            "none",
-            rsx! {
-                path { d: "M3 6h18" }
-                path { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" }
-                path { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" }
-            },
-        ),
-        IconKind::StarOutline => (
-            "none",
-            rsx! {
-                path { d: "m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" }
-            },
-        ),
-        IconKind::StarFilled => (
-            "currentColor",
-            rsx! {
-                path { d: "m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" }
-            },
-        ),
-        IconKind::Paperclip => (
-            "none",
-            rsx! {
-                path { d: "m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 17.99 8.83l-8.59 8.57a2 2 0 1 1-2.83-2.83l8.49-8.48" }
-            },
-        ),
-        IconKind::Filter => (
-            "none",
-            rsx! {
-                polygon { points: "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" }
-            },
-        ),
-        IconKind::ArrowLeft => (
-            "none",
-            rsx! {
-                path { d: "m12 19-7-7 7-7" }
-                path { d: "M19 12H5" }
-            },
-        ),
-        IconKind::Flag => (
-            "none",
-            rsx! {
-                path { d: "M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" }
-                line { x1: "4", y1: "22", x2: "4", y2: "15" }
-            },
-        ),
-        IconKind::Snooze => (
-            "none",
-            rsx! {
-                circle { cx: "12", cy: "13", r: "8" }
-                path { d: "M5 3 2 6" }
-                path { d: "m22 6-3-3" }
-                path { d: "M12 9v4l2 2" }
-            },
-        ),
-    };
-
-    rsx! {
-        Icon {
-            width: "{size_str}",
-            height: "{size_str}",
-            fill,
-            stroke_width: 1.75,
-            "aria-hidden": "true",
-            {paths}
-        }
-    }
-}
