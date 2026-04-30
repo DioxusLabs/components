@@ -7,7 +7,7 @@ ColorPicker {
     // The currently selected color in the color picker.
     color,
     on_color_change: move |c: Color| {
-        // This callback is triggered when a color is selected in the popover dialog.
+        // This callback is triggered when a color is selected in the popover.
         // The color parameter contains the selected color.
     },
 
@@ -16,11 +16,11 @@ ColorPicker {
 }
 ```
 
-### Custom Dialog
+### Custom Popover
 
-`ColorPicker` renders the default trigger and `ColorPickerSelect` dialog. If you
-want to fully replace the default dialog UI, compose the picker from
-`ColorPickerRoot`, `ColorPickerTrigger`, and `ColorPickerDialog`:
+`ColorPicker` renders the default trigger and `ColorPickerSelect` content. If you
+want to fully replace the default popover UI, compose the picker from
+`ColorPickerRoot`, `ColorPickerTrigger`, and `ColorPickerPopover`:
 
 ```rust
 ColorPickerRoot {
@@ -31,7 +31,7 @@ ColorPickerRoot {
         label: "Pick",
     }
 
-    ColorPickerDialog {
+    ColorPickerPopover {
         div {
             "Custom color picker content"
         }
@@ -40,4 +40,4 @@ ColorPickerRoot {
 ```
 
 If you only need to add content after the default controls, pass children to
-`ColorPicker`; they will be appended inside the default dialog.
+`ColorPicker`; they will be appended inside the default popover.

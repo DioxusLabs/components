@@ -9,22 +9,22 @@ async function openPicker(page: Page) {
   const button = page.locator('.dx-color-picker-button').first();
   await expect(button).toBeVisible();
   await button.click();
-  const dialog = page.locator('.dx-dialog-backdrop');
-  await expect(dialog).toHaveAttribute('data-state', 'open');
-  return { button, dialog };
+  const popover = page.locator('.dx-color-picker-popover');
+  await expect(popover).toHaveAttribute('data-state', 'open');
+  return { button, popover };
 }
 
-test('opens dialog and shows initial color', async ({ page }) => {
+test('opens popover and shows initial color', async ({ page }) => {
   const { button } = await openPicker(page);
 
   // Initial color is rgb(155, 128, 255) → #9B80FF
   await expect(button).toHaveAttribute('aria-label', /Color picker #9B80FF/i);
 
-  // The hex field inside the dialog mirrors the same hex.
+  // The hex field inside the popover mirrors the same hex.
   const hexField = page.locator('#color_field');
   await expect(hexField).toHaveValue('#9B80FF');
 
-  // Both the trigger swatch and the dialog swatch render the same color.
+  // Both the trigger swatch and the popover swatch render the same color.
   const swatches = page.locator('.dx-color-swatch');
   await expect(swatches.first()).toHaveAttribute(
     'style',
@@ -73,7 +73,7 @@ test('hex field strips invalid characters and caps at 7 chars', async ({ page })
 
 test('hue slider keyboard navigation updates color', async ({ page }) => {
   await openPicker(page);
-  // The hue slider lives inside the dialog. Use the thumb directly.
+  // The hue slider lives inside the popover. Use the thumb directly.
   const hueThumb = page.locator('.dx-color-slider-thumb').first();
   await hueThumb.focus();
 
@@ -115,8 +115,38 @@ test('color area thumb keyboard navigation updates saturation/value', async ({ p
   expect(vAfter).toBeLessThan(vBefore);
 });
 
-test('escape closes the color picker dialog', async ({ page }) => {
-  const { dialog } = await openPicker(page);
+test('escape closes the color picker popover', async ({ page }) => {
+  const { popover } = await openPicker(page);
   await page.keyboard.press('Escape');
-  await expect(dialog).toHaveCount(0);
+  await expect(popover).toHaveCount(0);
+});
+
+test('dragging the color area updates saturation and value', async ({ page }) => {
+  await openPicker(page);
+
+  const area = page.locator('.dx-color-area-container');
+  const sInput = page.locator('input[aria-label="Saturation"]');
+  const vInput = page.locator('input[aria-label="Value"]');
+
+  const sBefore = Number(await sInput.inputValue());
+  const vBefore = Number(await vInput.inputValue());
+
+  // Drag from the top-left toward the bottom-right of the area. Top-left is
+  // (saturation=0, value=100), bottom-right is (saturation=100, value=0). After
+  // the drag saturation should go up and value should go down.
+  const box = await area.boundingBox();
+  if (!box) throw new Error('color area has no bounding box');
+  const start = { x: box.x + box.width * 0.2, y: box.y + box.height * 0.2 };
+  const end = { x: box.x + box.width * 0.8, y: box.y + box.height * 0.8 };
+
+  await page.mouse.move(start.x, start.y);
+  await page.mouse.down();
+  await page.mouse.move(end.x, end.y, { steps: 10 });
+  await page.mouse.up();
+
+  const sAfter = Number(await sInput.inputValue());
+  const vAfter = Number(await vInput.inputValue());
+
+  expect(sAfter).toBeGreaterThan(sBefore);
+  expect(vAfter).toBeLessThan(vBefore);
 });

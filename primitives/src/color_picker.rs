@@ -354,6 +354,8 @@ pub fn AreaThumb(props: AreaThumbProps) -> Element {
     let area_ctx = use_context::<ColorAreaContext>();
 
     let mut button_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    let mut saturation_input_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    let mut value_input_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
 
     use_effect(move || {
         if let Some(button) = button_ref() {
@@ -382,8 +384,7 @@ pub fn AreaThumb(props: AreaThumbProps) -> Element {
     rsx! {
         div {
             class: "dx-color-area-thumb",
-            role: "presentation",
-            aria_label: "Color area thumb",
+            aria_label: "Color area",
             "data-dragging": area_ctx.dragging,
             style,
             background_color: thumb_color,
@@ -400,16 +401,26 @@ pub fn AreaThumb(props: AreaThumbProps) -> Element {
                 // Don't focus the button. The dragging state will handle focus
                 evt.prevent_default();
             },
-            onkeydown: move |evt| async move {
+            // First arrow press from the wrapper applies the step and hands
+            // focus to the matching axis input so AT announces the channel.
+            onkeydown: move |evt: Event<KeyboardData>| async move {
                 let Some(move_event) = MoveEvent::from_keyboard(&evt, (area_ctx.step)()) else {
                     return;
                 };
-
                 evt.prevent_default();
-                // Clamp and snap the new value
+
                 let new_value =
                     (area_ctx.value)() + Size2D::new(move_event.delta_x, move_event.delta_y);
                 set_area_value(picker_ctx, clamp_area_value(new_value, (area_ctx.step)()));
+
+                let target = if move_event.delta_x != 0.0 {
+                    saturation_input_ref()
+                } else {
+                    value_input_ref()
+                };
+                if let Some(target) = target {
+                    _ = target.set_focus(true).await;
+                }
             },
             ..props.attributes,
             input {
@@ -419,10 +430,41 @@ pub fn AreaThumb(props: AreaThumbProps) -> Element {
                 aria_roledescription: "2D Slider",
                 aria_valuetext: format!("Saturation {:.0}%, {color_label}", percent.width),
                 aria_orientation: "horizontal",
+                tabindex: "-1",
                 min: "{min}",
                 max: "{max}",
                 step: "{step}",
                 value: format!("{}", current.x),
+                onmounted: move |evt| {
+                    saturation_input_ref.set(Some(evt.data()));
+                },
+                // Cross-axis arrows hand focus to the value input so AT
+                // announces the new channel.
+                onkeydown: move |evt: Event<KeyboardData>| async move {
+                    let Some(move_event) = MoveEvent::from_keyboard(&evt, (area_ctx.step)()) else {
+                        return;
+                    };
+                    evt.prevent_default();
+
+                    let new_value =
+                        (area_ctx.value)() + Size2D::new(move_event.delta_x, move_event.delta_y);
+                    set_area_value(picker_ctx, clamp_area_value(new_value, (area_ctx.step)()));
+
+                    if move_event.delta_y != 0.0 {
+                        if let Some(target) = value_input_ref() {
+                            _ = target.set_focus(true).await;
+                        }
+                    }
+                },
+                // Voice-control / direct-manipulation: a programmatic value
+                // change on the input feeds the new saturation through.
+                oninput: move |evt: Event<FormData>| {
+                    if let Ok(s) = evt.value().parse::<f64>() {
+                        let v = picker_ctx.color().value;
+                        let scaled = s.clamp(COLOR_AREA_MIN, COLOR_AREA_MAX) / COLOR_AREA_RANGE;
+                        picker_ctx.set_sv(scaled, v);
+                    }
+                },
             }
             input {
                 class: "dx-color-area-input",
@@ -431,10 +473,37 @@ pub fn AreaThumb(props: AreaThumbProps) -> Element {
                 aria_roledescription: "2D Slider",
                 aria_valuetext: format!("Value {:.0}%, {color_label}", percent.height),
                 aria_orientation: "vertical",
+                tabindex: "-1",
                 min: "{min}",
                 max: "{max}",
                 step: "{step}",
                 value: format!("{}", current.y),
+                onmounted: move |evt| {
+                    value_input_ref.set(Some(evt.data()));
+                },
+                onkeydown: move |evt: Event<KeyboardData>| async move {
+                    let Some(move_event) = MoveEvent::from_keyboard(&evt, (area_ctx.step)()) else {
+                        return;
+                    };
+                    evt.prevent_default();
+
+                    let new_value =
+                        (area_ctx.value)() + Size2D::new(move_event.delta_x, move_event.delta_y);
+                    set_area_value(picker_ctx, clamp_area_value(new_value, (area_ctx.step)()));
+
+                    if move_event.delta_x != 0.0 {
+                        if let Some(target) = saturation_input_ref() {
+                            _ = target.set_focus(true).await;
+                        }
+                    }
+                },
+                oninput: move |evt: Event<FormData>| {
+                    if let Ok(v) = evt.value().parse::<f64>() {
+                        let s = picker_ctx.color().saturation;
+                        let scaled = v.clamp(COLOR_AREA_MIN, COLOR_AREA_MAX) / COLOR_AREA_RANGE;
+                        picker_ctx.set_sv(s, scaled);
+                    }
+                },
             }
             {props.children}
         }

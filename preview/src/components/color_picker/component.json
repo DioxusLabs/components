@@ -13,6 +13,6 @@
       "version": "0.7.6"
     }
   ],
-  "componentDependencies": ["dialog", "input"],
+  "componentDependencies": ["popover", "input"],
   "globalAssets": ["../../../assets/dx-components-theme.css"]
 }

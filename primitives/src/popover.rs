@@ -296,6 +296,7 @@ pub fn PopoverContentRendered(
 pub struct PopoverTriggerProps {
     /// Additional attributes to apply to the trigger element.
     #[props(extends = GlobalAttributes)]
+    #[props(extends = button)]
     pub attributes: Vec<Attribute>,
 
     /// The children of the trigger component.

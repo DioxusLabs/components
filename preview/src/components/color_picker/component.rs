@@ -2,12 +2,12 @@ use dioxus::prelude::*;
 use dioxus_primitives::color_picker::{
     self, Color, ColorAreaProps, ColorPickerContext,
 };
+use dioxus_primitives::popover;
 use dioxus_primitives::use_controlled;
 use dioxus_primitives::label::Label;
 use dioxus_primitives::slider::*;
 use palette::{encoding, FromColor, Hsv, IntoColor, RgbHue, Srgb};
 
-use crate::components::dialog::*;
 use crate::components::input::Input;
 
 fn format_color_hex(color: Color) -> String {
@@ -17,7 +17,6 @@ fn format_color_hex(color: Color) -> String {
 #[derive(Clone, Copy)]
 struct ColorPickerRootContext {
     open: Memo<bool>,
-    set_open: Callback<bool>,
     disabled: ReadSignal<bool>,
     color: ReadSignal<Hsv<encoding::Srgb, f64>>,
 }
@@ -37,7 +36,7 @@ pub struct ColorPickerRootProps {
     #[props(default)]
     pub disabled: ReadSignal<bool>,
 
-    /// The controlled open state of the dialog.
+    /// The controlled open state of the popover.
     pub open: ReadSignal<Option<bool>>,
 
     /// The default open state when uncontrolled.
@@ -62,7 +61,6 @@ pub fn ColorPickerRoot(props: ColorPickerRootProps) -> Element {
 
     use_context_provider(|| ColorPickerRootContext {
         open,
-        set_open,
         disabled: props.disabled,
         color: props.color,
     });
@@ -76,7 +74,12 @@ pub fn ColorPickerRoot(props: ColorPickerRootProps) -> Element {
             on_color_change: props.on_color_change,
             disabled: props.disabled,
             attributes: props.attributes,
-            {props.children}
+            popover::PopoverRoot {
+                is_modal: false,
+                open: Some(open()),
+                on_open_change: move |v| set_open.call(v),
+                {props.children}
+            }
         }
     }
 }
@@ -100,7 +103,7 @@ pub struct ColorPickerProps {
     #[props(default)]
     pub label: Option<String>,
 
-    /// The controlled open state of the dialog.
+    /// The controlled open state of the popover.
     pub open: ReadSignal<Option<bool>>,
 
     /// The default open state when uncontrolled.
@@ -115,7 +118,7 @@ pub struct ColorPickerProps {
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 
-    /// Additional content to append to the default color picker dialog
+    /// Additional content to append to the default color picker popover
     pub children: Element,
 }
 
@@ -133,7 +136,7 @@ pub fn ColorPicker(props: ColorPickerProps) -> Element {
             ColorPickerTrigger {
                 label: props.label,
             }
-            ColorPickerDialog {
+            ColorPickerPopover {
                 ColorPickerSelect {}
                 {props.children}
             }
@@ -165,13 +168,12 @@ pub fn ColorPickerTrigger(props: ColorPickerTriggerProps) -> Element {
     });
 
     rsx! {
-        button {
+        popover::PopoverTrigger {
             class: "dx-color-picker-button",
             disabled: if (ctx.disabled)() { true },
             aria_label: format!("Color picker {aria_hex}"),
             aria_expanded: (ctx.open)(),
-            onclick: move |_| ctx.set_open.call(true),
-            ..props.attributes,
+            attributes: props.attributes,
             ColorSwatch { color: ctx.color }
             if let Some(label) = props.label { span { {label} } }
             {props.children}
@@ -179,30 +181,24 @@ pub fn ColorPickerTrigger(props: ColorPickerTriggerProps) -> Element {
     }
 }
 
-/// The props for the [`ColorPickerDialog`] component.
+/// The props for the [`ColorPickerPopover`] component.
 #[derive(Props, Clone, PartialEq)]
-pub struct ColorPickerDialogProps {
-    /// Additional attributes to extend the dialog content
+pub struct ColorPickerPopoverProps {
+    /// Additional attributes to extend the popover content
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 
-    /// The children of the color picker dialog
+    /// The children of the color picker popover
     pub children: Element,
 }
 
 #[component]
-pub fn ColorPickerDialog(props: ColorPickerDialogProps) -> Element {
-    let ctx = use_context::<ColorPickerRootContext>();
-
+pub fn ColorPickerPopover(props: ColorPickerPopoverProps) -> Element {
     rsx! {
-        DialogRoot {
-            open: (ctx.open)(),
-            on_open_change: move |v| ctx.set_open.call(v),
-            DialogContent {
-                width: "auto",
-                attributes: props.attributes,
-                {props.children}
-            }
+        popover::PopoverContent {
+            class: "dx-color-picker-popover".to_string(),
+            attributes: props.attributes,
+            {props.children}
         }
     }
 }
@@ -302,54 +298,12 @@ fn ColorField(props: ColorFieldProps) -> Element {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Default)]
-#[allow(dead_code)]
-pub enum SwatchSize {
-    Small,
-    #[default]
-    Medium,
-    Large,
-}
-
-impl SwatchSize {
-    fn to_class(self) -> &'static str {
-        match self {
-            SwatchSize::Small => "dx-swatch-sm",
-            SwatchSize::Medium => "dx-swatch-md",
-            SwatchSize::Large => "dx-swatch-lg",
-        }
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Default)]
-#[allow(dead_code)]
-pub enum SwatchShape {
-    Circle,
-    #[default]
-    Rounded,
-}
-
-impl SwatchShape {
-    fn to_class(self) -> &'static str {
-        match self {
-            SwatchShape::Circle => "dx-swatch-circle",
-            SwatchShape::Rounded => "dx-swatch-rounded",
-        }
-    }
-}
-
 /// The props for the [`ColorSwatch`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ColorSwatchProps {
     /// The selected color
     #[props(default)]
     pub color: ReadSignal<Hsv<encoding::Srgb, f64>>,
-
-    #[props(default)]
-    pub size: SwatchSize,
-
-    #[props(default)]
-    pub shape: SwatchShape,
 
     /// Additional attributes to extend the color swatch element
     #[props(extends = GlobalAttributes)]
@@ -373,7 +327,7 @@ fn ColorSwatch(props: ColorSwatchProps) -> Element {
         div {
             role: "img",
             aria_label: format!("Selected color {hex_color}"),
-            class: "dx-color-swatch {props.size.to_class()} {props.shape.to_class()}",
+            class: "dx-color-swatch",
             style: "--swatch-color: {hex_color}",
             ..props.attributes,
             {props.children}
