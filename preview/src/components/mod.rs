@@ -127,6 +127,7 @@ examples!(
     calendar[simple, internationalized, range, multi_month, unavailable_dates],
     checkbox,
     collapsible,
+    color_picker,
     context_menu,
     card,
     date_picker[internationalized, range, multi_month, unavailable_dates],

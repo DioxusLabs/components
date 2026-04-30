@@ -139,7 +139,10 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
                 id,
                 class: "dx-dialog-overlay",
                 aria_hidden: (!open()).then_some("true"),
-                onclick: move |_| {
+                onpointerdown: move |_| {
+                    // Use pointerdown rather than click so a drag that starts
+                    // inside the dialog content and releases on the overlay
+                    // does not close the dialog.
                     set_open.call(false);
                 },
                 "data-state": if open() { "open" } else { "closed" },
@@ -261,8 +264,9 @@ pub fn DialogContent(props: DialogContentProps) -> Element {
             aria_labelledby: ctx.dialog_labelledby,
             aria_describedby: ctx.dialog_describedby,
             class: props.class.clone().unwrap_or_else(|| "dx-dialog".to_string()),
-            onclick: move |e| {
-                // Prevent the click event from propagating to the overlay.
+            onpointerdown: move |e| {
+                // Prevent pointerdown from propagating to the overlay so it
+                // does not dismiss the dialog.
                 e.stop_propagation();
             },
             ..props.attributes,

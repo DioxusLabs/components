@@ -269,8 +269,8 @@ pub fn PopoverContentRendered(
     let is_open = open();
     let set_open = ctx.set_open;
 
-    // Add a escape key listener to the document when the dialog is open. We can't
-    // just add this to the dialog itself because it might not be focused if the user
+    // Add a escape key listener to the document when the popover is open. We can't
+    // just add this to the popover itself because it might not be focused if the user
     // is highlighting text or interacting with another element.
     use_global_escape_listener(move || set_open.call(false));
 
@@ -278,7 +278,7 @@ pub fn PopoverContentRendered(
         div {
             id,
             role: "dialog",
-            aria_modal: "true",
+            aria_modal: (ctx.is_modal)().then_some("true"),
             aria_labelledby: ctx.labelledby,
             aria_hidden: (!is_open).then_some("true"),
             class: class.unwrap_or_else(|| "dx-popover-content".to_string()),
@@ -296,6 +296,7 @@ pub fn PopoverContentRendered(
 pub struct PopoverTriggerProps {
     /// Additional attributes to apply to the trigger element.
     #[props(extends = GlobalAttributes)]
+    #[props(extends = button)]
     pub attributes: Vec<Attribute>,
 
     /// The children of the trigger component.

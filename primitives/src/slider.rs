@@ -1,79 +1,11 @@
 //! Defines the [`Slider`] and [`RangeSlider`] components and their sub-components, which provide
 //! a range input control for selecting a single value or a value range within a specified range.
 
-use crate::dioxus_core::{queue_effect, Runtime};
+use crate::move_interaction::{use_move_interaction, MoveEvent};
 use crate::use_controlled;
-use dioxus::html::geometry::euclid::Rect;
-use dioxus::html::geometry::euclid::Vector2D;
-use dioxus::html::geometry::ClientPoint;
-use dioxus::html::geometry::Pixels;
-use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 use std::ops::Range;
 use std::rc::Rc;
-
-#[derive(Debug)]
-struct Pointer {
-    id: i32,
-    position: ClientPoint,
-}
-
-static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
-    let runtime = Runtime::current();
-    queue_effect(move || {
-        runtime.spawn(ScopeId::ROOT, async move {
-            let mut pointer_updates = dioxus::document::eval(
-                // clientX/clientY (not pageX/pageY) — must match the slider's
-                // onpointerdown which stores `evt.client_coordinates()` and the
-                // viewport-relative rect from getBoundingClientRect. On iPad
-                // with the page pinch-zoomed they diverge, jamming the slider.
-                "window.addEventListener('pointerdown', (e) => {
-                    dioxus.send(['down', [e.pointerId, e.clientX, e.clientY]]);
-                });
-                window.addEventListener('pointermove', (e) => {
-                    dioxus.send(['move', [e.pointerId, e.clientX, e.clientY]]);
-                });
-                window.addEventListener('pointerup', (e) => {
-                    dioxus.send(['up', [e.pointerId, e.clientX, e.clientY]]);
-                });
-                window.addEventListener('pointercancel', (e) => {
-                    dioxus.send(['up', [e.pointerId, e.clientX, e.clientY]]);
-                });",
-            );
-
-            while let Ok((event_type, (pointer_id, x, y))) =
-                pointer_updates.recv::<(String, (i32, f64, f64))>().await
-            {
-                let position = ClientPoint::new(x, y);
-
-                match event_type.as_str() {
-                    "down" => {
-                        // Add a new pointer
-                        POINTERS.write().push(Pointer {
-                            id: pointer_id,
-                            position,
-                        });
-                    }
-                    "move" => {
-                        // Update the position of an existing pointer
-                        if let Some(pointer) =
-                            POINTERS.write().iter_mut().find(|p| p.id == pointer_id)
-                        {
-                            pointer.position = position;
-                        }
-                    }
-                    "up" => {
-                        // Remove the pointer
-                        POINTERS.write().retain(|p| p.id != pointer_id);
-                    }
-                    _ => {}
-                }
-            }
-        });
-    });
-
-    Vec::new()
-});
 
 fn ordered_range(start: f64, end: f64) -> Range<f64> {
     if start <= end {
@@ -395,11 +327,10 @@ fn SliderImpl(props: SliderImplProps) -> Element {
         label: props.label,
     });
 
-    let mut rect = use_signal(|| None);
-    let mut div_element: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    let mut movement = use_move_interaction(dragging);
     let mut granular_thumbs = use_hook(move || CopyValue::new(props.thumbs.peek().clone()));
 
-    let size = rect().map(|r: Rect<f64, Pixels>| {
+    let size = movement.rect().map(|r| {
         if props.horizontal {
             r.width()
         } else {
@@ -407,12 +338,7 @@ fn SliderImpl(props: SliderImplProps) -> Element {
         }
     });
 
-    let mut current_pointer_id: Signal<Option<i32>> = use_signal(|| None);
-    let mut last_processed_pos = use_hook(|| CopyValue::new(None));
-
     use_effect(move || {
-        let pointers = POINTERS.read();
-
         if !dragging() {
             return;
         }
@@ -421,24 +347,15 @@ fn SliderImpl(props: SliderImplProps) -> Element {
             return;
         };
 
-        let Some(active_pointer_id) = current_pointer_id() else {
+        let Some(move_event) = movement.pointer_move() else {
             return;
         };
 
-        let Some(pointer) = pointers.iter().find(|p| p.id == active_pointer_id) else {
-            current_pointer_id.take();
-            last_processed_pos.set(None);
-            dragging.set(false);
-            return;
-        };
-
-        let delta = if let Some(last_pos) = last_processed_pos.replace(Some(pointer.position)) {
-            pointer.position - last_pos
+        let delta_pos = if ctx.horizontal {
+            move_event.delta_x
         } else {
-            Vector2D::zero()
+            move_event.delta_y
         };
-
-        let delta_pos = if ctx.horizontal { delta.x } else { delta.y } as f64;
 
         let value_delta = delta_pos / size * ctx.range_size();
 
@@ -460,50 +377,28 @@ fn SliderImpl(props: SliderImplProps) -> Element {
             "data-orientation": orientation,
 
             onmounted: move |evt| async move {
-                // Get the bounding rect of the slider
-                if let Ok(r) = evt.data().get_client_rect().await {
-                    rect.set(Some(r));
-                }
-                div_element.set(Some(evt.data()));
+                let mut movement = movement;
+                movement.set_mounted(evt.data()).await;
             },
             onresize: move |_| async move {
-                // Update the rect on resize
-                let Some(div_element) = div_element() else {
-                    return;
-                };
-                if let Ok(r) = div_element.get_client_rect().await {
-                    rect.set(Some(r));
-                }
+                let mut movement = movement;
+                movement.refresh_rect().await;
             },
             onpointerdown: move |evt| {
                 if (ctx.disabled)() {
                     return;
                 }
 
-                // Prevent default to avoid loosing focus on the range
-                evt.prevent_default();
-                evt.stop_propagation();
-
-                if current_pointer_id.read().is_some() || evt.trigger_button() != Some(MouseButton::Primary) {
+                if !movement.start_pointer(&evt) {
                     return;
                 }
 
-                current_pointer_id.set(Some(evt.data().pointer_id()));
-                POINTERS.write().push(Pointer {
-                    id: evt.data().pointer_id(),
-                    position: evt.client_coordinates(),
-                });
-
                 // Handle pointer interaction
                 spawn(async move {
-                    let Some(div_element) = div_element() else {
-                        return;
-                    };
+                    let mut movement = movement;
 
                     // Update the bounding rect of the slider in case it moved
-                    if let Ok(r) = div_element.get_client_rect().await {
-                        rect.set(Some(r));
-
+                    if let Some(r) = movement.refresh_rect().await {
                         let size = if props.horizontal {
                             r.width()
                         } else {
@@ -836,23 +731,12 @@ pub fn SliderThumb(props: SliderThumbProps) -> Element {
                     return;
                 }
 
-                let key = evt.data().key();
-                let mut step = (ctx.step)();
-                if evt.data().modifiers().shift() {
-                    // If shift is pressed, increase the step size
-                    step *= 10.0;
-                }
-
-                // Handle keyboard navigation
-                let new_value = match key {
-                    Key::ArrowUp | Key::ArrowRight => {
-                        value() + step
-                    }
-                    Key::ArrowDown | Key::ArrowLeft => {
-                        value() - step
-                    }
-                    _ => return,
+                let Some(move_event) = MoveEvent::from_keyboard(&evt, (ctx.step)()) else {
+                    return;
                 };
+
+                evt.prevent_default();
+                let new_value = value() + move_event.delta_x + move_event.delta_y;
 
                 // Clamp (against neighbor in range mode) and snap, then commit.
                 ctx.set_thumb.call((index, ctx.clamp_for(index, new_value)));
