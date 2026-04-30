@@ -67,9 +67,33 @@ pub const LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscin
 pub const DEFAULT_MESSAGE_FOLDER_ID: FolderId = FolderId::Inbox;
 
 const SENDERS_CYCLE: &[Sender] = &[
-    LINEAR, GITHUB, MAYA, STRIPE, CALENDAR, YOU, VERCEL, MARTA, ONEPASSWORD, AWS_BILLING, NOTION,
-    SENTRY, CAROLINE, DATADOG, SLACK, FIGMA, PEDRO, LINKEDIN, SUBSTACK, ELI, AWS_COST, SAMIR,
-    APPLE, HEX, CRUNCHBASE, HACKER_NEWS, CLOUDFLARE,
+    LINEAR,
+    GITHUB,
+    MAYA,
+    STRIPE,
+    CALENDAR,
+    YOU,
+    VERCEL,
+    MARTA,
+    ONEPASSWORD,
+    AWS_BILLING,
+    NOTION,
+    SENTRY,
+    CAROLINE,
+    DATADOG,
+    SLACK,
+    FIGMA,
+    PEDRO,
+    LINKEDIN,
+    SUBSTACK,
+    ELI,
+    AWS_COST,
+    SAMIR,
+    APPLE,
+    HEX,
+    CRUNCHBASE,
+    HACKER_NEWS,
+    CLOUDFLARE,
 ];
 
 const SUBJECT_TEMPLATES: &[&str] = &[

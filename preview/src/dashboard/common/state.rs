@@ -19,16 +19,19 @@ pub struct MessageState {
 pub fn seed_message_states() -> Vec<MessageState> {
     (0..EMAIL_REPEAT_COUNT)
         .flat_map(|rep| {
-            MESSAGES.iter().enumerate().map(move |(idx, msg)| MessageState {
-                uid: format!("{idx}#{rep}"),
-                source_index: idx,
-                folder_id: folder_override(idx).unwrap_or(DEFAULT_MESSAGE_FOLDER_ID),
-                tags: msg.tags.to_vec(),
-                unread: msg.unread,
-                starred: msg.starred,
-                flagged: msg.starred,
-                snoozed: false,
-            })
+            MESSAGES
+                .iter()
+                .enumerate()
+                .map(move |(idx, msg)| MessageState {
+                    uid: format!("{idx}#{rep}"),
+                    source_index: idx,
+                    folder_id: folder_override(idx).unwrap_or(DEFAULT_MESSAGE_FOLDER_ID),
+                    tags: msg.tags.to_vec(),
+                    unread: msg.unread,
+                    starred: msg.starred,
+                    flagged: msg.starred,
+                    snoozed: false,
+                })
         })
         .collect()
 }
