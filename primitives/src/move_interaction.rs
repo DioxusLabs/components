@@ -7,15 +7,6 @@ use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 use std::rc::Rc;
 
-/// The source that generated a move event.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub(crate) enum MoveSource {
-    /// A pointer drag generated the move.
-    Pointer,
-    /// A keyboard arrow key generated the move.
-    Keyboard,
-}
-
 /// Keyboard modifier state attached to a move event.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub(crate) struct MoveModifiers {
@@ -31,7 +22,6 @@ pub(crate) struct MoveModifiers {
 /// provided step value.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct MoveEvent {
-    pub(crate) source: MoveSource,
     pub(crate) delta_x: f64,
     pub(crate) delta_y: f64,
     pub(crate) modifiers: MoveModifiers,
@@ -61,7 +51,6 @@ impl MoveEvent {
         };
 
         Some(Self {
-            source: MoveSource::Keyboard,
             delta_x,
             delta_y,
             modifiers,
@@ -153,7 +142,6 @@ impl MoveInteraction {
         };
 
         Some(MoveEvent {
-            source: MoveSource::Pointer,
             delta_x: delta.x,
             delta_y: delta.y,
             modifiers: MoveModifiers::default(),
@@ -222,7 +210,6 @@ mod tests {
         assert_eq!(
             MoveEvent::from_keyboard(&keyboard_event(Key::ArrowUp, Modifiers::empty()), 2.0),
             Some(MoveEvent {
-                source: MoveSource::Keyboard,
                 delta_x: 0.0,
                 delta_y: 2.0,
                 modifiers: MoveModifiers::default(),

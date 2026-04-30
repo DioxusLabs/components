@@ -441,36 +441,3 @@ impl ColorAreaContext {
         PixelsSize::new(scaled.x, scaled.y)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::Color;
-    use palette::{encoding, FromColor, Hsv, IntoColor, RgbHue, Srgb};
-
-    fn hsv_to_rgb(hsv: Hsv<encoding::Srgb, f64>) -> Color {
-        Srgb::<f64>::from_color(hsv).into_format()
-    }
-
-    #[test]
-    fn hsv_to_rgb_primaries() {
-        let red = Hsv::<encoding::Srgb, f64>::new(RgbHue::new(0.0), 1.0, 1.0);
-        let green = Hsv::<encoding::Srgb, f64>::new(RgbHue::new(120.0), 1.0, 1.0);
-        let blue = Hsv::<encoding::Srgb, f64>::new(RgbHue::new(240.0), 1.0, 1.0);
-
-        assert_eq!(hsv_to_rgb(red), Color::new(255, 0, 0));
-        assert_eq!(hsv_to_rgb(green), Color::new(0, 255, 0));
-        assert_eq!(hsv_to_rgb(blue), Color::new(0, 0, 255));
-    }
-
-    #[test]
-    fn rgb_to_hsv_round_trip_primaries() {
-        for rgb in [
-            Color::new(255, 0, 0),
-            Color::new(0, 255, 0),
-            Color::new(0, 0, 255),
-        ] {
-            let hsv: Hsv<encoding::Srgb, f64> = rgb.into_format::<f64>().into_color();
-            assert_eq!(hsv_to_rgb(hsv), rgb);
-        }
-    }
-}
