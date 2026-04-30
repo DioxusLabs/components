@@ -107,9 +107,7 @@ impl MoveInteraction {
     }
 
     pub(crate) async fn refresh_rect(&mut self) -> Option<Rect<f64, Pixels>> {
-        let Some(element) = (self.element)() else {
-            return None;
-        };
+        let element = (self.element)()?;
 
         if let Ok(rect) = element.get_client_rect().await {
             self.rect.set(Some(rect));
