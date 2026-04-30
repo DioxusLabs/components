@@ -138,18 +138,21 @@ fn oklch_hue(lightness: f64, chroma: f64, hue: f64) -> (String, f64) {
 
 /// Context provided by [`ColorPicker`] to its descendants.
 ///
-/// The picker is controlled in HSV — `color` echoes the controlled prop,
-/// and the setter methods emit `on_color_change` after applying the
+/// The picker is controlled in HSV — [`Self::color`] echoes the controlled
+/// prop, and the setter methods emit `on_color_change` after applying the
 /// requested edit on top of the current value.
 #[derive(Clone, Copy)]
 pub struct ColorPickerContext {
-    /// The controlled HSV color.
-    pub color: ReadSignal<Hsv<encoding::Srgb, f64>>,
-    /// Callback invoked with the next HSV color whenever the picker emits a change.
-    pub on_color_change: Callback<Hsv<encoding::Srgb, f64>>,
+    color: ReadSignal<Hsv<encoding::Srgb, f64>>,
+    on_color_change: Callback<Hsv<encoding::Srgb, f64>>,
 }
 
 impl ColorPickerContext {
+    /// Read the current HSV color.
+    pub fn color(&self) -> Hsv<encoding::Srgb, f64> {
+        (self.color)()
+    }
+
     /// Replace the entire HSV color.
     pub fn set_color(&self, c: Hsv<encoding::Srgb, f64>) {
         self.on_color_change.call(c);
@@ -360,7 +363,7 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
     // Thumb position is read straight from HSV state — no RGB round-trip
     // means saturation is preserved at brightness=0.
     let value = use_memo(move || {
-        let hsv = (picker_ctx.color)();
+        let hsv = picker_ctx.color();
         ClientPoint::new(hsv.saturation, hsv.value) * COLOR_AREA_RANGE
     });
 
@@ -490,7 +493,7 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
                     "--area-color: {}",
                     color_hex(
                         Srgb::<f64>::from_color(Hsv::<encoding::Srgb, f64>::new(
-                            (picker_ctx.color)().hue,
+                            picker_ctx.color().hue,
                             1.0,
                             1.0,
                         ))
@@ -499,7 +502,7 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
                 ),
                 AreaThumb {
                     background_color: color_hex(
-                        Srgb::<f64>::from_color((picker_ctx.color)()).into_format(),
+                        Srgb::<f64>::from_color(picker_ctx.color()).into_format(),
                     ),
                 }
             }
@@ -567,7 +570,7 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
     let min = COLOR_AREA_MIN;
     let max = COLOR_AREA_MAX;
     let step = (ctx.step)();
-    let color_label = color_name(Srgb::<f64>::from_color((picker_ctx.color)()).into_format());
+    let color_label = color_name(Srgb::<f64>::from_color(picker_ctx.color()).into_format());
 
     rsx! {
         div {

@@ -57,14 +57,6 @@ pub fn ColorPicker(props: ColorPickerProps) -> Element {
 /// The props for the [`ColorField`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ColorFieldProps {
-    /// The selected color
-    #[props(default)]
-    pub color: ReadSignal<Option<Hsv<encoding::Srgb, f64>>>,
-
-    /// Callback when color changes
-    #[props(default)]
-    pub on_color_change: Callback<Option<Hsv<encoding::Srgb, f64>>>,
-
     /// Optional label above the input field
     #[props(default)]
     pub label: Option<String>,
@@ -83,34 +75,35 @@ pub struct ColorFieldProps {
 
 /// # ColorField
 ///
-/// The [`ColorField`] allows users to edit a hex color.
+/// The [`ColorField`] allows users to edit a hex color. Reads and writes the
+/// current color through the surrounding [`ColorPickerContext`].
 #[component]
 fn ColorField(props: ColorFieldProps) -> Element {
+    let ctx = use_context::<ColorPickerContext>();
     let hex_from_hsv = |hsv: Hsv<encoding::Srgb, f64>| {
         let rgb: Color = Srgb::<f64>::from_color(hsv).into_format();
         format_color_hex(rgb)
     };
     let emit_rgb = move |rgb: Color| {
         let hsv: Hsv<encoding::Srgb, f64> = rgb.into_format::<f64>().into_color();
-        props.on_color_change.call(Some(hsv));
+        ctx.set_color(hsv);
     };
 
-    let mut value = use_signal(|| (props.color)().map(hex_from_hsv).unwrap_or_default());
+    let mut value = use_signal(|| hex_from_hsv(ctx.color()));
 
     // Synchronize local text with external color changes. Only overwrite
     // when the field already holds a parseable hex — otherwise the user is
     // mid-edit and replacing their text would clobber the input.
     use_effect(move || {
-        if let Some(external) = (props.color)() {
-            let current = value();
-            if let Ok(parsed) = current.parse::<Color>() {
-                let external_rgb: Color = Srgb::<f64>::from_color(external).into_format();
-                if parsed != external_rgb {
-                    value.set(hex_from_hsv(external));
-                }
-            } else if current.is_empty() {
+        let external = ctx.color();
+        let current = value();
+        if let Ok(parsed) = current.parse::<Color>() {
+            let external_rgb: Color = Srgb::<f64>::from_color(external).into_format();
+            if parsed != external_rgb {
                 value.set(hex_from_hsv(external));
             }
+        } else if current.is_empty() {
+            value.set(hex_from_hsv(external));
         }
     });
 
@@ -276,13 +269,6 @@ fn ColorSwatch(props: ColorSwatchProps) -> Element {
 /// The props for the [`ColorSlider`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ColorSliderProps {
-    /// The controlled value of the slider
-    pub value: ReadSignal<f64>,
-
-    /// Callback when value changes
-    #[props(default)]
-    pub on_value_change: Callback<f64>,
-
     pub title: ReadSignal<String>,
 
     /// Additional attributes to extend the color slider element
@@ -295,10 +281,12 @@ pub struct ColorSliderProps {
 
 /// # ColorSlider
 ///
-/// The [`ColorSlider`] allows users to adjust a hue of a color value.
+/// The [`ColorSlider`] allows users to adjust the hue of the color held by
+/// the surrounding [`ColorPickerContext`].
 #[component]
 fn ColorSlider(props: ColorSliderProps) -> Element {
-    let mut current_hue = use_signal(|| (props.value)());
+    let ctx = use_context::<ColorPickerContext>();
+    let mut current_hue = use_signal(|| ctx.color().hue.into_positive_degrees());
 
     let thumb_color = use_memo(move || {
         Srgb::<f64>::from_color(Hsv::<encoding::Srgb, f64>::new(
@@ -310,7 +298,7 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
     });
 
     use_effect(move || {
-        let value = (props.value)();
+        let value = ctx.color().hue.into_positive_degrees();
         let current = current_hue();
 
         let is_wrap_around = (value - current).abs() > 350.0;
@@ -348,7 +336,7 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
                     // Allow the value to be exactly 360.0
                     // The palette will understand that 360.0 == 0.0, but the signal will remain 360.0 for the UI.
                     current_hue.set(h);
-                    props.on_value_change.call(h);
+                    ctx.set_hue(h);
                 },
                 SliderTrack {
                     class: "dx-color-slider-track",
@@ -392,30 +380,16 @@ pub struct ColorPickerSelectProps {
 pub fn ColorPickerSelect(props: ColorPickerSelectProps) -> Element {
     let ctx = use_context::<ColorPickerContext>();
 
-    let hue = use_memo(move || (ctx.color)().hue.into_positive_degrees());
-
     rsx! {
         div {
             class: "dx-color-picker-dialog",
             ..props.attributes,
             ColorArea {}
-            ColorSlider {
-                title: "Hue",
-                value: hue,
-                on_value_change: move |h: f64| ctx.set_hue(h),
-            }
+            ColorSlider { title: "Hue" }
             div {
                 class: "dx-color-picker-input",
-                ColorField {
-                    label: "Hex",
-                    color: Some((ctx.color)()),
-                    on_color_change: move |c: Option<Hsv<encoding::Srgb, f64>>| {
-                        if let Some(hsv) = c {
-                            ctx.set_color(hsv);
-                        }
-                    }
-                }
-                ColorSwatch { color: ctx.color }
+                ColorField { label: "Hex" }
+                ColorSwatch { color: ctx.color() }
             }
         }
     }
