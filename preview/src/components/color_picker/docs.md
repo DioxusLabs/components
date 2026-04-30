@@ -6,9 +6,9 @@ Color picker used when the user needs to make a customized color selection.
 ColorPicker {
     // The currently selected color in the color picker.
     color,
-    on_color_change: move |c: Color| {
+    on_color_change: move |c: Hsv<encoding::Srgb, f64>| {
         // This callback is triggered when a color is selected in the popover.
-        // The color parameter contains the selected color.
+        // The HSV parameter contains the selected color.
     },
 
     // Optional label on the trigger button.
@@ -25,7 +25,7 @@ want to fully replace the default popover UI, compose the picker from
 ```rust
 ColorPickerRoot {
     color,
-    on_color_change: move |c: Color| { /* ... */ },
+    on_color_change: move |c: Hsv<encoding::Srgb, f64>| { /* ... */ },
 
     ColorPickerTrigger {
         label: "Pick",

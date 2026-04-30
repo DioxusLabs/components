@@ -113,7 +113,7 @@ jobs:
             elif [ "$file" = "item" ]; then
               dx components add separator --path ..
             elif [ "$file" = "color_picker" ]; then
-              dx components add dialog,input --path ..
+              dx components add popover,input --path ..
             fi
             # Add the component
             dx components add "$file" --path ..
