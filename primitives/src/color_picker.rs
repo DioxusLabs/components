@@ -6,19 +6,16 @@ use crate::dioxus_elements::input_data::MouseButton;
 use dioxus::html::geometry::euclid::{Rect, Size2D, Vector2D};
 use dioxus::html::geometry::PixelsSize;
 use dioxus::prelude::*;
-use palette::{encoding, Hsv, IntoColor, Oklch, RgbHue, Srgb};
+use palette::{encoding, FromColor, Hsv, IntoColor, Oklch, RgbHue, Srgb};
 
 use std::rc::Rc;
 
-/// Represents RGB color
+/// Represents an sRGB color.
 pub type Color = Srgb<u8>;
 
 const COLOR_AREA_MIN: f64 = 0.0;
 const COLOR_AREA_MAX: f64 = 100.0;
 const COLOR_AREA_RANGE: f64 = COLOR_AREA_MAX - COLOR_AREA_MIN;
-
-/// Small epsilon used to classify achromatic colors in sRGB (1 channel step).
-const ACHROMATIC_EPSILON: f64 = 1.0 / 255.0;
 
 /// Lightness threshold between orange and brown.
 const ORANGE_LIGHTNESS_THRESHOLD: f64 = 0.68;
@@ -91,28 +88,6 @@ fn color_hex(color: Color) -> String {
     format!("#{color:X}")
 }
 
-fn color_from_hsv(h: f64, s: f64, v: f64) -> Color {
-    let hue = h.rem_euclid(360.0);
-    let hsv = Hsv::new(RgbHue::new(hue), s.clamp(0.0, 1.0), v.clamp(0.0, 1.0));
-    let rgb: Srgb<f64> = hsv.into_color();
-    rgb.into_format()
-}
-
-fn to_hsv(color: Color) -> (f64, f64, f64) {
-    let hsv: Hsv<encoding::Srgb, f64> = color.into_format::<f64>().into_color();
-    (hsv.hue.into_positive_degrees(), hsv.saturation, hsv.value)
-}
-
-fn to_hsv_achromatic(color: Color) -> (Option<f64>, f64, f64) {
-    let (h, s, v) = to_hsv(color);
-    let hue = if s <= ACHROMATIC_EPSILON || v <= ACHROMATIC_EPSILON {
-        None
-    } else {
-        Some(h)
-    };
-    (hue, s, v)
-}
-
 /// Converts the RGB color to a (L, C, h) tuple.
 fn to_oklch(color: Color) -> (f64, f64, f64) {
     let oklch: Oklch<f64> = color.into_format::<f64>().into_color();
@@ -162,12 +137,37 @@ fn oklch_hue(lightness: f64, chroma: f64, hue: f64) -> (String, f64) {
 }
 
 /// Context provided by [`ColorPicker`] to its descendants.
+///
+/// The picker is controlled in HSV — `color` echoes the controlled prop,
+/// and the setter methods emit `on_color_change` after applying the
+/// requested edit on top of the current value.
 #[derive(Clone, Copy)]
 pub struct ColorPickerContext {
-    /// The current selected color
-    pub color: ReadSignal<Color>,
-    /// Callback when color changes
-    pub on_color_change: Callback<Color>,
+    /// The controlled HSV color.
+    pub color: ReadSignal<Hsv<encoding::Srgb, f64>>,
+    /// Callback invoked with the next HSV color whenever the picker emits a change.
+    pub on_color_change: Callback<Hsv<encoding::Srgb, f64>>,
+}
+
+impl ColorPickerContext {
+    /// Replace the entire HSV color.
+    pub fn set_color(&self, c: Hsv<encoding::Srgb, f64>) {
+        self.on_color_change.call(c);
+    }
+
+    /// Set hue, keeping saturation and value.
+    pub fn set_hue(&self, h: f64) {
+        let current = (self.color)();
+        self.on_color_change
+            .call(Hsv::<encoding::Srgb, f64>::new(RgbHue::new(h), current.saturation, current.value));
+    }
+
+    /// Set saturation and value as a pair, keeping hue.
+    pub fn set_sv(&self, s: f64, v: f64) {
+        let current = (self.color)();
+        self.on_color_change
+            .call(Hsv::<encoding::Srgb, f64>::new(current.hue, s, v));
+    }
 }
 
 /// The props for the [`ColorPicker`] component.
@@ -175,11 +175,11 @@ pub struct ColorPickerContext {
 pub struct ColorPickerProps {
     /// The selected color
     #[props(default)]
-    pub color: ReadSignal<Color>,
+    pub color: ReadSignal<Hsv<encoding::Srgb, f64>>,
 
     /// Callback when color changes
     #[props(default)]
-    pub on_color_change: Callback<Color>,
+    pub on_color_change: Callback<Hsv<encoding::Srgb, f64>>,
 
     /// Whether the color picker is disabled
     #[props(default)]
@@ -212,8 +212,10 @@ pub struct ColorPickerProps {
 /// use dioxus_primitives::color_picker::*;
 /// #[component]
 /// fn Demo() -> Element {
-///    let rgb = Color::new(155, 128, 255);
-///    let mut color = use_signal(|| rgb);
+///    use palette::{IntoColor, encoding};
+///    let mut color = use_signal(|| -> palette::Hsv<encoding::Srgb, f64> {
+///        Color::new(155, 128, 255).into_format::<f64>().into_color()
+///    });
 ///    rsx! {
 ///            ColorPicker {
 ///                label: "Pick",
@@ -311,20 +313,9 @@ static POINTERS: GlobalSignal<Vec<Pointer>> = Global::new(|| {
 /// The props for the [`ColorArea`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct ColorAreaProps {
-    /// The controlled value of the slider
-    pub color: ReadSignal<Color>,
-
     /// The step value
     #[props(default = 1.0)]
     pub step: ReadSignal<f64>,
-
-    /// Optional hue to use for the area background when the current color is achromatic.
-    #[props(default)]
-    pub display_hue: Option<ReadSignal<f64>>,
-
-    /// Callback when value changes
-    #[props(default)]
-    pub on_value_change: Callback<ClientPoint>,
 
     /// Additional attributes to extend the color area element
     #[props(extends = GlobalAttributes)]
@@ -345,8 +336,10 @@ pub struct ColorAreaProps {
 /// use dioxus_primitives::color_picker::*;
 /// #[component]
 /// fn Demo() -> Element {
-///    let rgb = Color::new(155, 128, 255);
-///    let mut color = use_signal(|| rgb);
+///    use palette::{IntoColor, encoding};
+///    let mut color = use_signal(|| -> palette::Hsv<encoding::Srgb, f64> {
+///        Color::new(155, 128, 255).into_format::<f64>().into_color()
+///    });
 ///    rsx! {
 ///            ColorPicker {
 ///                label: "Pick",
@@ -361,60 +354,19 @@ pub struct ColorAreaProps {
 /// ```
 #[component]
 pub fn ColorArea(props: ColorAreaProps) -> Element {
+    let picker_ctx = use_context::<ColorPickerContext>();
     let mut dragging = use_signal(|| false);
-    let mut stable_hue = use_signal(|| {
-        props
-            .display_hue
-            .map(|hue| hue())
-            .or_else(|| to_hsv_achromatic((props.color)()).0)
-            .unwrap_or_else(|| to_hsv((props.color)()).0)
+
+    // Thumb position is read straight from HSV state — no RGB round-trip
+    // means saturation is preserved at brightness=0.
+    let value = use_memo(move || {
+        let hsv = (picker_ctx.color)();
+        ClientPoint::new(hsv.saturation, hsv.value) * COLOR_AREA_RANGE
     });
 
-    let initial_value = {
-        let (_, saturation, brightness) = to_hsv((props.color)());
-        ClientPoint::new(saturation, brightness) * COLOR_AREA_RANGE
-    };
-    let mut value = use_memo(move || initial_value);
-
-    // Keep local pointer position stable during drag.
-    use_effect(move || {
-        if dragging() {
-            return;
-        }
-
-        let (_, saturation, brightness) = to_hsv((props.color)());
-        let current = value();
-        // Saturation cannot be recovered from a near-black RGB round-trip,
-        // so preserve the local x to avoid snapping the thumb to the corner
-        // when brightness reaches 0.
-        let next_x = if brightness <= ACHROMATIC_EPSILON {
-            current.x
-        } else {
-            saturation * COLOR_AREA_RANGE
-        };
-        let next = ClientPoint::new(next_x, brightness * COLOR_AREA_RANGE);
-        if next != current {
-            value.set(next);
-        }
-    });
-
-    // Preserve the selected hue while current color is achromatic.
-    use_effect(move || {
-        let next_hue = props
-            .display_hue
-            .map(|hue| hue())
-            .or_else(|| to_hsv_achromatic((props.color)()).0);
-        if let Some(h) = next_hue {
-            if h != stable_hue() {
-                stable_hue.set(h);
-            }
-        }
-    });
-
-    let update_xy = Callback::new(move |point: ClientPoint| {
-        value.set(point);
-        let new_value = point / COLOR_AREA_RANGE;
-        props.on_value_change.call(new_value);
+    let update_xy = use_callback(move |point: ClientPoint| {
+        let scaled = point / COLOR_AREA_RANGE;
+        picker_ctx.set_sv(scaled.x, scaled.y);
     });
 
     let ctx = use_context_provider(|| ColorAreaContext {
@@ -536,10 +488,19 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
             AreaTrack {
                 style: format!(
                     "--area-color: {}",
-                    color_hex(color_from_hsv(stable_hue(), 1.0, 1.0))
+                    color_hex(
+                        Srgb::<f64>::from_color(Hsv::<encoding::Srgb, f64>::new(
+                            (picker_ctx.color)().hue,
+                            1.0,
+                            1.0,
+                        ))
+                        .into_format()
+                    )
                 ),
                 AreaThumb {
-                    background_color: color_hex((props.color)()),
+                    background_color: color_hex(
+                        Srgb::<f64>::from_color((picker_ctx.color)()).into_format(),
+                    ),
                 }
             }
             {props.children}
@@ -606,7 +567,7 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
     let min = COLOR_AREA_MIN;
     let max = COLOR_AREA_MAX;
     let step = (ctx.step)();
-    let color_label = color_name((picker_ctx.color)());
+    let color_label = color_name(Srgb::<f64>::from_color((picker_ctx.color)()).into_format());
 
     rsx! {
         div {
@@ -719,23 +680,29 @@ impl ColorAreaContext {
 
 #[cfg(test)]
 mod tests {
-    use super::{color_from_hsv, to_hsv_achromatic, Color};
+    use super::Color;
+    use palette::{encoding, FromColor, Hsv, IntoColor, RgbHue, Srgb};
 
-    #[test]
-    fn creates_basic_hsv_colors() {
-        assert_eq!(color_from_hsv(0.0, 1.0, 1.0), Color::new(255, 0, 0));
-        assert_eq!(color_from_hsv(120.0, 1.0, 1.0), Color::new(0, 255, 0));
-        assert_eq!(color_from_hsv(240.0, 1.0, 1.0), Color::new(0, 0, 255));
+    fn hsv_to_rgb(hsv: Hsv<encoding::Srgb, f64>) -> Color {
+        Srgb::<f64>::from_color(hsv).into_format()
     }
 
     #[test]
-    fn detects_achromatic_hue() {
-        let gray = to_hsv_achromatic(Color::new(128, 128, 128));
-        assert_eq!(gray.0, None);
-        assert_eq!(gray.1, 0.0);
+    fn hsv_to_rgb_primaries() {
+        let red = Hsv::<encoding::Srgb, f64>::new(RgbHue::new(0.0), 1.0, 1.0);
+        let green = Hsv::<encoding::Srgb, f64>::new(RgbHue::new(120.0), 1.0, 1.0);
+        let blue = Hsv::<encoding::Srgb, f64>::new(RgbHue::new(240.0), 1.0, 1.0);
 
-        let red = to_hsv_achromatic(Color::new(255, 0, 0));
-        assert_eq!(red.0, Some(0.0));
-        assert_eq!(red.1, 1.0);
+        assert_eq!(hsv_to_rgb(red), Color::new(255, 0, 0));
+        assert_eq!(hsv_to_rgb(green), Color::new(0, 255, 0));
+        assert_eq!(hsv_to_rgb(blue), Color::new(0, 0, 255));
+    }
+
+    #[test]
+    fn rgb_to_hsv_round_trip_primaries() {
+        for rgb in [Color::new(255, 0, 0), Color::new(0, 255, 0), Color::new(0, 0, 255)] {
+            let hsv: Hsv<encoding::Srgb, f64> = rgb.into_format::<f64>().into_color();
+            assert_eq!(hsv_to_rgb(hsv), rgb);
+        }
     }
 }
