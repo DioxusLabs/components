@@ -11,30 +11,33 @@ ColorPicker {
         // The color parameter contains the selected color.
     },
 
-    // Enable built-in dialog content (ColorPickerSelect).
-    // This is the default.
-    use_default_dialog: true,
+    // Optional label on the trigger button.
+    label: "Pick",
 }
 ```
 
 ### Custom Dialog
 
-If you want to fully replace the default dialog UI, disable the built-in content
-and pass your custom UI via `children` to `ColorPicker`:
+`ColorPicker` renders the default trigger and `ColorPickerSelect` dialog. If you
+want to fully replace the default dialog UI, compose the picker from
+`ColorPickerRoot`, `ColorPickerTrigger`, and `ColorPickerDialog`:
 
 ```rust
-ColorPicker {
+ColorPickerRoot {
     color,
     on_color_change: move |c: Color| { /* ... */ },
 
-    use_default_dialog: false,
+    ColorPickerTrigger {
+        label: "Pick",
+    }
 
-    // Your custom dialog UI:
-    div {
-        "Custom color picker content"
+    ColorPickerDialog {
+        div {
+            "Custom color picker content"
+        }
     }
 }
 ```
 
-Note: if `use_default_dialog: true`, do not add `ColorPickerSelect` to `children`,
-otherwise it will render twice.
+If you only need to add content after the default controls, pass children to
+`ColorPicker`; they will be appended inside the default dialog.

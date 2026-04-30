@@ -7,6 +7,10 @@
     {
       "name": "dioxus-primitives",
       "git": "https://github.com/DioxusLabs/components"
+    },
+    {
+      "name": "palette",
+      "version": "0.7.6"
     }
   ],
   "componentDependencies": ["dialog", "input"],

@@ -78,14 +78,6 @@ pub struct ColorPickerProps {
     #[props(default)]
     pub disabled: ReadSignal<bool>,
 
-    /// Optional label on the button
-    #[props(default)]
-    pub label: Option<String>,
-
-    /// Render built-in dialog content (`ColorPickerSelect`) before `children`.
-    #[props(default = true)]
-    pub use_default_dialog: bool,
-
     /// Additional attributes to extend the color picker element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -96,8 +88,8 @@ pub struct ColorPickerProps {
 
 /// # ColorPicker
 ///
-/// The [`ColorPicker`] component provides an accessible color input interface
-/// and synchronizes a color value between multiple color components.
+/// The [`ColorPicker`] component provides the color picker context and
+/// synchronizes a color value between multiple color components.
 ///
 /// ## Example
 /// ```rust
@@ -111,7 +103,6 @@ pub struct ColorPickerProps {
 ///    });
 ///    rsx! {
 ///            ColorPicker {
-///                label: "Pick",
 ///                color: color(),
 ///                on_color_change: move |c| {
 ///                    tracing::info!("Color changed: {:?}", c);
@@ -176,7 +167,6 @@ pub struct ColorAreaProps {
 ///    });
 ///    rsx! {
 ///            ColorPicker {
-///                label: "Pick",
 ///                color: color(),
 ///                on_color_change: move |c| {
 ///                    tracing::info!("Color changed: {:?}", c);

@@ -1,7 +1,8 @@
 use dioxus::prelude::*;
 use dioxus_primitives::color_picker::{
-    self, Color, ColorAreaProps, ColorPickerContext, ColorPickerProps,
+    self, Color, ColorAreaProps, ColorPickerContext,
 };
+use dioxus_primitives::use_controlled;
 use dioxus_primitives::label::Label;
 use dioxus_primitives::slider::*;
 use palette::{encoding, FromColor, Hsv, IntoColor, RgbHue, Srgb};
@@ -13,12 +14,57 @@ fn format_color_hex(color: Color) -> String {
     format!("#{color:X}")
 }
 
+#[derive(Clone, Copy)]
+struct ColorPickerRootContext {
+    open: Memo<bool>,
+    set_open: Callback<bool>,
+    disabled: ReadSignal<bool>,
+    color: ReadSignal<Hsv<encoding::Srgb, f64>>,
+}
+
+/// The props for the [`ColorPickerRoot`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct ColorPickerRootProps {
+    /// The selected color
+    #[props(default)]
+    pub color: ReadSignal<Hsv<encoding::Srgb, f64>>,
+
+    /// Callback when color changes
+    #[props(default)]
+    pub on_color_change: Callback<Hsv<encoding::Srgb, f64>>,
+
+    /// Whether the color picker is disabled
+    #[props(default)]
+    pub disabled: ReadSignal<bool>,
+
+    /// The controlled open state of the dialog.
+    pub open: ReadSignal<Option<bool>>,
+
+    /// The default open state when uncontrolled.
+    #[props(default)]
+    pub default_open: bool,
+
+    /// Callback fired when the open state changes.
+    #[props(default)]
+    pub on_open_change: Callback<bool>,
+
+    /// Additional attributes to extend the color picker element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the color picker element
+    pub children: Element,
+}
+
 #[component]
-pub fn ColorPicker(props: ColorPickerProps) -> Element {
-    let mut open = use_signal(|| false);
-    let aria_hex = use_memo(move || {
-        let rgb: Color = Srgb::<f64>::from_color((props.color)()).into_format();
-        format_color_hex(rgb)
+pub fn ColorPickerRoot(props: ColorPickerRootProps) -> Element {
+    let (open, set_open) = use_controlled(props.open, props.default_open, props.on_open_change);
+
+    use_context_provider(|| ColorPickerRootContext {
+        open,
+        set_open,
+        disabled: props.disabled,
+        color: props.color,
     });
 
     rsx! {
@@ -30,25 +76,132 @@ pub fn ColorPicker(props: ColorPickerProps) -> Element {
             on_color_change: props.on_color_change,
             disabled: props.disabled,
             attributes: props.attributes,
-            button {
-                class: "dx-color-picker-button",
-                disabled: if (props.disabled)() { true },
-                aria_label: format!("Color picker {aria_hex}"),
-                aria_expanded: open(),
-                onclick: move |_| open.set(true),
-                ColorSwatch { color: props.color }
-                if let Some(label) = props.label { span { {label} } }
+            {props.children}
+        }
+    }
+}
+
+/// The props for the [`ColorPicker`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct ColorPickerProps {
+    /// The selected color
+    #[props(default)]
+    pub color: ReadSignal<Hsv<encoding::Srgb, f64>>,
+
+    /// Callback when color changes
+    #[props(default)]
+    pub on_color_change: Callback<Hsv<encoding::Srgb, f64>>,
+
+    /// Whether the color picker is disabled
+    #[props(default)]
+    pub disabled: ReadSignal<bool>,
+
+    /// Optional label on the trigger button
+    #[props(default)]
+    pub label: Option<String>,
+
+    /// The controlled open state of the dialog.
+    pub open: ReadSignal<Option<bool>>,
+
+    /// The default open state when uncontrolled.
+    #[props(default)]
+    pub default_open: bool,
+
+    /// Callback fired when the open state changes.
+    #[props(default)]
+    pub on_open_change: Callback<bool>,
+
+    /// Additional attributes to extend the color picker element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// Additional content to append to the default color picker dialog
+    pub children: Element,
+}
+
+#[component]
+pub fn ColorPicker(props: ColorPickerProps) -> Element {
+    rsx! {
+        ColorPickerRoot {
+            color: props.color,
+            on_color_change: props.on_color_change,
+            disabled: props.disabled,
+            open: props.open,
+            default_open: props.default_open,
+            on_open_change: props.on_open_change,
+            attributes: props.attributes,
+            ColorPickerTrigger {
+                label: props.label,
             }
-            DialogRoot {
-                open: open(),
-                on_open_change: move |v| open.set(v),
-                DialogContent {
-                    width: "auto",
-                    if props.use_default_dialog {
-                        ColorPickerSelect { }
-                    }
-                    {props.children}
-                }
+            ColorPickerDialog {
+                ColorPickerSelect {}
+                {props.children}
+            }
+        }
+    }
+}
+
+/// The props for the [`ColorPickerTrigger`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct ColorPickerTriggerProps {
+    /// Optional label on the trigger button
+    #[props(default)]
+    pub label: Option<String>,
+
+    /// Additional attributes to extend the trigger button
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// Additional content to render inside the trigger button
+    pub children: Element,
+}
+
+#[component]
+pub fn ColorPickerTrigger(props: ColorPickerTriggerProps) -> Element {
+    let ctx = use_context::<ColorPickerRootContext>();
+    let aria_hex = use_memo(move || {
+        let rgb: Color = Srgb::<f64>::from_color((ctx.color)()).into_format();
+        format_color_hex(rgb)
+    });
+
+    rsx! {
+        button {
+            class: "dx-color-picker-button",
+            disabled: if (ctx.disabled)() { true },
+            aria_label: format!("Color picker {aria_hex}"),
+            aria_expanded: (ctx.open)(),
+            onclick: move |_| ctx.set_open.call(true),
+            ..props.attributes,
+            ColorSwatch { color: ctx.color }
+            if let Some(label) = props.label { span { {label} } }
+            {props.children}
+        }
+    }
+}
+
+/// The props for the [`ColorPickerDialog`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct ColorPickerDialogProps {
+    /// Additional attributes to extend the dialog content
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the color picker dialog
+    pub children: Element,
+}
+
+#[component]
+pub fn ColorPickerDialog(props: ColorPickerDialogProps) -> Element {
+    let ctx = use_context::<ColorPickerRootContext>();
+
+    rsx! {
+        DialogRoot {
+            open: (ctx.open)(),
+            on_open_change: move |v| ctx.set_open.call(v),
+            DialogContent {
+                width: "auto",
+                attributes: props.attributes,
+                {props.children}
             }
         }
     }
