@@ -107,36 +107,6 @@ fn ColorField(props: ColorFieldProps) -> Element {
         }
     });
 
-    // Helper to increment or decrement the color value.
-    // It treats the RGB color as a u32 integer for simple channel-based stepping.
-    let offset_color = move |v: f64| {
-        let delta = v.signum();
-        if delta == 0.0 || delta.is_nan() {
-            return;
-        }
-
-        if let Ok(color) = value().parse::<Color>() {
-            let val = u32::from(color) & 0x00FF_FFFF;
-            // Saturating add/sub prevents overflow/underflow at #FFFFFF or #000000.
-            let new_color = if delta < 0.0 {
-                val.saturating_sub(1)
-            } else {
-                val.saturating_add(1).min(0x00FF_FFFF)
-            };
-
-            emit_rgb(Color::from(new_color));
-        }
-    };
-
-    let onkeydown = move |event: Event<KeyboardData>| {
-        match event.key() {
-            Key::ArrowDown => offset_color(-1.0),
-            Key::ArrowUp => offset_color(1.0),
-            _ => return,
-        }
-        event.prevent_default();
-    };
-
     rsx! {
         div {
             class: "dx-color-field-container",
@@ -170,14 +140,6 @@ fn ColorField(props: ColorFieldProps) -> Element {
                         emit_rgb(parsed);
                     }
                 },
-                onwheel: move |e: WheelEvent| {
-                    e.prevent_default();
-                    let delta_y = e.data.delta().strip_units().y.signum();
-                    if !delta_y.is_nan() {
-                        offset_color(-delta_y);
-                    }
-                },
-                onkeydown
             }
             if let Some(text) = props.description {
                 span { class: "dx-color-field-description", {text} }
