@@ -383,8 +383,17 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
         }
 
         let (_, saturation, brightness) = to_hsv((props.color)());
-        let next = ClientPoint::new(saturation, brightness) * COLOR_AREA_RANGE;
-        if next != value() {
+        let current = value();
+        // Saturation cannot be recovered from a near-black RGB round-trip,
+        // so preserve the local x to avoid snapping the thumb to the corner
+        // when brightness reaches 0.
+        let next_x = if brightness <= ACHROMATIC_EPSILON {
+            current.x
+        } else {
+            saturation * COLOR_AREA_RANGE
+        };
+        let next = ClientPoint::new(next_x, brightness * COLOR_AREA_RANGE);
+        if next != current {
             value.set(next);
         }
     });
