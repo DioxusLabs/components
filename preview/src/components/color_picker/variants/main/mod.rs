@@ -5,8 +5,7 @@ use dioxus_primitives::color_picker::Color;
 
 #[component]
 pub fn Demo() -> Element {
-    let rgb = Color::random_rgb();
-    let mut color = use_signal(|| rgb);
+    let mut color = use_signal(|| Color::new(155, 128, 255));
 
     rsx! {
         ColorPicker {

@@ -8,297 +8,156 @@ use dioxus::html::geometry::PixelsSize;
 use dioxus::prelude::*;
 use palette::{encoding, Hsv, IntoColor, Oklch, RgbHue, Srgb};
 
-use std::{rc::Rc, str::FromStr};
+use std::rc::Rc;
 
 /// Represents RGB color
-#[derive(Clone, Copy, PartialEq, Debug, Default)]
-pub struct Color(pub Srgb<u8>);
+pub type Color = Srgb<u8>;
 
-/// HSV components with explicit achromatic handling.
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub struct HsvColor {
-    /// Hue in degrees [0-360). `None` means hue is undefined for achromatic colors.
-    pub hue: Option<f64>,
-    /// Saturation in [0-1].
-    pub saturation: f64,
-    /// Value in [0-1].
-    pub value: f64,
+const COLOR_AREA_MIN: f64 = 0.0;
+const COLOR_AREA_MAX: f64 = 100.0;
+const COLOR_AREA_RANGE: f64 = COLOR_AREA_MAX - COLOR_AREA_MIN;
+
+/// Small epsilon used to classify achromatic colors in sRGB (1 channel step).
+const ACHROMATIC_EPSILON: f64 = 1.0 / 255.0;
+
+/// Lightness threshold between orange and brown.
+const ORANGE_LIGHTNESS_THRESHOLD: f64 = 0.68;
+
+/// Lightness threshold between pure yellow and "yellow green".
+const YELLOW_GREEN_LIGHTNESS_THRESHOLD: f64 = 0.85;
+
+/// The maximum lightness considered to be "dark".
+const MAX_DARK_LIGHTNESS: f64 = 0.55;
+
+/// The chroma threshold between gray and color.
+const GRAY_THRESHOLD: f64 = 0.001;
+
+fn color_name(color: Color) -> String {
+    let (l, c, h) = to_oklch(color);
+
+    match l {
+        ..0.001 => return String::from("black"),
+        0.999.. => return String::from("white"),
+        _ => {}
+    }
+
+    let (hue, l) = oklch_hue(l, c, h);
+
+    let (lightness, chroma) = color_modifiers(l, c);
+
+    let mut parts = Vec::new();
+    if !lightness.is_empty() {
+        parts.push(lightness);
+    }
+    if !chroma.is_empty() {
+        parts.push(chroma);
+    }
+    if !hue.is_empty() {
+        parts.push(&hue);
+    }
+
+    parts.join(" ")
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-/// Error returned when parsing a [`Color`] from a string.
-pub enum ParseColorError {
-    /// The input doesn't match a supported HEX length (`#RGB` or `#RRGGBB`).
-    InvalidLength,
-    /// The input contains non-hexadecimal digits.
-    InvalidHex,
-}
+fn color_modifiers(lightness: f64, chroma: f64) -> (&'static str, &'static str) {
+    match (lightness, chroma) {
+        (..0.3, GRAY_THRESHOLD..=0.1) => ("very dark", "grayish"),
+        (..0.3, 0.15..) => ("very dark", "vibrant"),
+        (..0.3, _) => ("very dark", ""),
 
-impl Color {
-    /// Small epsilon used to classify achromatic colors in sRGB (1 channel step).
-    const ACHROMATIC_EPSILON: f64 = 1.0 / 255.0;
+        (0.3..MAX_DARK_LIGHTNESS, GRAY_THRESHOLD..=0.1) => ("dark", "grayish"),
+        (0.3..MAX_DARK_LIGHTNESS, 0.15..) => ("dark", "vibrant"),
+        (0.3..MAX_DARK_LIGHTNESS, _) => ("dark", ""),
 
-    /// Lightness threshold between orange and brown.
-    const ORANGE_LIGHTNESS_THRESHOLD: f64 = 0.68;
+        (MAX_DARK_LIGHTNESS..0.7, GRAY_THRESHOLD..=0.1) => ("", "grayish"),
+        (MAX_DARK_LIGHTNESS..0.7, 0.15..) => ("", "vibrant"),
+        (MAX_DARK_LIGHTNESS..0.7, _) => ("", ""),
 
-    /// Lightness threshold between pure yellow and "yellow green".
-    const YELLOW_GREEN_LIGHTNESS_THRESHOLD: f64 = 0.85;
+        (0.7..0.85, GRAY_THRESHOLD..=0.1) => ("light", "pale"),
+        (0.7..0.85, 0.15..) => ("light", "vibrant"),
+        (0.7..0.85, _) => ("light", ""),
 
-    /// The maximum lightness considered to be "dark".
-    const MAX_DARK_LIGHTNESS: f64 = 0.55;
+        (0.85.., GRAY_THRESHOLD..=0.1) => ("very light", "pale"),
+        (0.85.., 0.15..) => ("very light", "vibrant"),
+        (0.85.., _) => ("very light", ""),
 
-    /// The chroma threshold between gray and color.
-    const GRAY_THRESHOLD: f64 = 0.001;
-
-    const OKLCH_HUES: [(f64, &str); 10] = [
-        (0.0, "pink"),
-        (15.0, "red"),
-        (48.0, "orange"),
-        (94.0, "yellow"),
-        (135.0, "green"),
-        (175.0, "cyan"),
-        (264.0, "blue"),
-        (284.0, "purple"),
-        (320.0, "magenta"),
-        (349.0, "pink"),
-    ];
-
-    /// Create an RGB color.
-    pub fn new(red: u8, green: u8, blue: u8) -> Self {
-        Self(Srgb::new(red, green, blue))
-    }
-
-    /// Generates a random RGB color using the 'rand' crate.
-    pub fn random_rgb() -> Self {
-        let [r, g, b] = rand::random::<[u8; 3]>();
-        Self::new(r, g, b)
-    }
-
-    /// Converts the color to a CSS-compatible HEX string (e.g., "#FF00AA").
-    pub fn to_hex(self) -> String {
-        format!("#{:02X}{:02X}{:02X}", self.0.red, self.0.green, self.0.blue)
-    }
-
-    /// Converts the color to a CSS-compatible RGB string (e.g., "rgb(255 0 170)").
-    pub fn to_css_rgb(&self) -> String {
-        format!("rgb({} {} {})", self.0.red, self.0.green, self.0.blue)
-    }
-
-    /// Converts the RGB color to HSV (Hue, Saturation, Value).
-    /// Returns a tuple: (Hue in degrees [0-360], Saturation [0-1], Value [0-1]).
-    pub fn to_hsv(self) -> (f64, f64, f64) {
-        // Convert u8 [0-255] to f64 [0.0-1.0] and then to HSV
-        let hsv: Hsv<encoding::Srgb, f64> = self.0.into_format::<f64>().into_color();
-        (hsv.hue.into_positive_degrees(), hsv.saturation, hsv.value)
-    }
-
-    /// Converts the RGB color to a (L, C, h) tuple.
-    fn to_oklch(self) -> (f64, f64, f64) {
-        // Convert u8 [0-255] to f64 [0.0-1.0] and then to Oklch
-        let oklch: Oklch<f64> = self.0.into_format::<f64>().into_color();
-        let (l, c, h) = oklch.into_components();
-        (l, c, h.into_degrees())
-    }
-
-    /// Converts RGB to HSV and marks hue as undefined for achromatic colors.
-    pub fn to_hsv_achromatic(self) -> HsvColor {
-        let (h, s, v) = self.to_hsv();
-        let hue = if s <= Self::ACHROMATIC_EPSILON || v <= Self::ACHROMATIC_EPSILON {
-            None
-        } else {
-            Some(h)
-        };
-        HsvColor {
-            hue,
-            saturation: s,
-            value: v,
-        }
-    }
-
-    /// Creates a Color instance from HSV components
-    pub fn from_hsv(h: f64, s: f64, v: f64) -> Self {
-        let hue = h.rem_euclid(360.0);
-        let hsv = Hsv::new(RgbHue::new(hue), s.clamp(0.0, 1.0), v.clamp(0.0, 1.0));
-        // Convert HSV back to f64 RGB and then to u8 RGB
-        let rgb: Srgb<f64> = hsv.into_color();
-        Self(rgb.into_format())
-    }
-
-    /// Extracts the Hue component from the current color.
-    pub fn hue(&self) -> f64 {
-        self.to_hsv().0
-    }
-
-    /// Returns hue if chromatic, otherwise provided fallback hue.
-    pub fn hue_or(&self, fallback: f64) -> f64 {
-        self.to_hsv_achromatic().hue.unwrap_or(fallback)
-    }
-
-    /// Update only Hue while keeping current Saturation and Value.
-    pub fn with_hue(self, h: f64) -> Self {
-        let (_, s, v) = self.to_hsv();
-        Self::from_hsv(h, s, v)
-    }
-
-    /// Update Saturation and Value while keeping the current Hue.
-    pub fn with_sv(self, s: f64, v: f64) -> Self {
-        let h = self.hue();
-        Self::from_hsv(h, s, v)
-    }
-
-    /// Returns name for the color, for use in visual or accessibility labels.
-    pub fn color_name(&self) -> String {
-        let (l, c, h) = self.to_oklch();
-
-        if l > 0.999 {
-            return String::from("white");
-        }
-
-        if l < 0.001 {
-            return String::from("black");
-        }
-
-        let (hue, l) = Self::oklch_hue(l, c, h);
-
-        let lightness = if l < 0.3 {
-            "very dark"
-        } else if l < Self::MAX_DARK_LIGHTNESS {
-            "dark"
-        } else if l < 0.7 {
-            // none
-            ""
-        } else if l < 0.85 {
-            "light"
-        } else {
-            "very light"
-        };
-
-        let chroma = if (Self::GRAY_THRESHOLD..=0.1).contains(&c) {
-            if l >= 0.7 {
-                "pale"
-            } else {
-                "grayish"
-            }
-        } else if c >= 0.15 {
-            "vibrant"
-        } else {
-            ""
-        };
-
-        let mut parts = Vec::new();
-        if !lightness.is_empty() {
-            parts.push(lightness);
-        }
-        if !chroma.is_empty() {
-            parts.push(chroma);
-        }
-        if !hue.is_empty() {
-            parts.push(&hue);
-        }
-
-        parts.join(" ")
-    }
-
-    /// Returns name for the hue, for use in visual or accessibility labels.
-    pub fn hue_name(&self) -> String {
-        let (l, c, h) = self.to_oklch();
-        let (hue, _) = Self::oklch_hue(l, c, h);
-        hue
-    }
-
-    fn oklch_hue(l: f64, c: f64, h: f64) -> (String, f64) {
-        if c < Self::GRAY_THRESHOLD {
-            return ("gray".to_string(), l);
-        }
-
-        let h = h.rem_euclid(360.0);
-
-        for (index, &(hue, hue_name)) in Self::OKLCH_HUES.iter().enumerate() {
-            let mut new_l = l;
-            let mut new_hue_name = hue_name.to_string();
-
-            let (next_hue, next_hue_name) = if index + 1 < Self::OKLCH_HUES.len() {
-                Self::OKLCH_HUES[index + 1]
-            } else {
-                (360.0, "pink")
-            };
-
-            if h >= hue && h < next_hue {
-                // Split orange hue into brown/orange depending on lightness.
-                if hue_name == "orange" {
-                    if l < Self::ORANGE_LIGHTNESS_THRESHOLD {
-                        new_hue_name = "brown".to_string();
-                    } else {
-                        // Adjust lightness.
-                        new_l = (l - Self::ORANGE_LIGHTNESS_THRESHOLD) + Self::MAX_DARK_LIGHTNESS;
-                    }
-                }
-
-                // If the hue is at least halfway to the next hue, add the next hue name as well.
-                if h > hue + (next_hue - hue) / 2.0 && new_hue_name != next_hue_name {
-                    new_hue_name = format!("{new_hue_name} {next_hue_name}");
-                } else if new_hue_name == "yellow" && new_l < Self::YELLOW_GREEN_LIGHTNESS_THRESHOLD
-                {
-                    // Yellow shifts toward green at lower lightnesses.
-                    new_hue_name = "yellow green".to_string();
-                }
-
-                return (new_hue_name, new_l);
-            }
-        }
-
-        unreachable!("Unexpected hue")
+        (_, GRAY_THRESHOLD..=0.1) => ("very light", "grayish"),
+        (_, 0.15..) => ("very light", "vibrant"),
+        _ => ("very light", ""),
     }
 }
 
-impl FromStr for Color {
-    type Err = ParseColorError;
+fn color_hex(color: Color) -> String {
+    format!("#{color:X}")
+}
 
-    /// Parses a HEX string into a Color.
-    /// Supports shorthand (e.g., "#ABC" -> "#AABBCC") and standard formats (e.g., "#FF0000").
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = s.trim_start_matches('#');
-        let radix = 16;
-        match s.len() {
-            // Shorthand format: "ABC"
-            3 => {
-                let r =
-                    u8::from_str_radix(&s[0..1], radix).map_err(|_| ParseColorError::InvalidHex)?;
-                let g =
-                    u8::from_str_radix(&s[1..2], radix).map_err(|_| ParseColorError::InvalidHex)?;
-                let b =
-                    u8::from_str_radix(&s[2..3], radix).map_err(|_| ParseColorError::InvalidHex)?;
-                // Expand 4-bit to 8-bit (e.g., 0xf -> 0xff)
-                Ok(Color::new(r << 4 | r, g << 4 | g, b << 4 | b))
-            }
-            // Standard format: "AABBCC"
-            6 => {
-                let r =
-                    u8::from_str_radix(&s[0..2], radix).map_err(|_| ParseColorError::InvalidHex)?;
-                let g =
-                    u8::from_str_radix(&s[2..4], radix).map_err(|_| ParseColorError::InvalidHex)?;
-                let b =
-                    u8::from_str_radix(&s[4..6], radix).map_err(|_| ParseColorError::InvalidHex)?;
-                Ok(Color::new(r, g, b))
-            }
-            _ => Err(ParseColorError::InvalidLength),
+fn color_from_hsv(h: f64, s: f64, v: f64) -> Color {
+    let hue = h.rem_euclid(360.0);
+    let hsv = Hsv::new(RgbHue::new(hue), s.clamp(0.0, 1.0), v.clamp(0.0, 1.0));
+    let rgb: Srgb<f64> = hsv.into_color();
+    rgb.into_format()
+}
+
+fn to_hsv(color: Color) -> (f64, f64, f64) {
+    let hsv: Hsv<encoding::Srgb, f64> = color.into_format::<f64>().into_color();
+    (hsv.hue.into_positive_degrees(), hsv.saturation, hsv.value)
+}
+
+fn to_hsv_achromatic(color: Color) -> (Option<f64>, f64, f64) {
+    let (h, s, v) = to_hsv(color);
+    let hue = if s <= ACHROMATIC_EPSILON || v <= ACHROMATIC_EPSILON {
+        None
+    } else {
+        Some(h)
+    };
+    (hue, s, v)
+}
+
+/// Converts the RGB color to a (L, C, h) tuple.
+fn to_oklch(color: Color) -> (f64, f64, f64) {
+    let oklch: Oklch<f64> = color.into_format::<f64>().into_color();
+    let (l, c, h) = oklch.into_components();
+    (l, c, h.into_degrees())
+}
+
+fn oklch_hue(lightness: f64, chroma: f64, hue: f64) -> (String, f64) {
+    if let ..GRAY_THRESHOLD = chroma {
+        return ("gray".to_string(), lightness);
+    }
+
+    let hue = hue.rem_euclid(360.0);
+
+    match (hue, lightness) {
+        (0.0..=7.5, _) | (349.0..360.0, _) => ("pink".to_string(), lightness),
+        (7.5..15.0, _) => ("pink red".to_string(), lightness),
+        (15.0..=31.5, _) => ("red".to_string(), lightness),
+        (31.5..48.0, _) => ("red orange".to_string(), lightness),
+        (48.0..=71.0, ..ORANGE_LIGHTNESS_THRESHOLD) => ("brown".to_string(), lightness),
+        (71.0..94.0, ..ORANGE_LIGHTNESS_THRESHOLD) => ("brown yellow".to_string(), lightness),
+        (48.0..=71.0, _) => (
+            "orange".to_string(),
+            (lightness - ORANGE_LIGHTNESS_THRESHOLD) + MAX_DARK_LIGHTNESS,
+        ),
+        (71.0..94.0, _) => (
+            "orange yellow".to_string(),
+            (lightness - ORANGE_LIGHTNESS_THRESHOLD) + MAX_DARK_LIGHTNESS,
+        ),
+        (94.0..135.0, ..YELLOW_GREEN_LIGHTNESS_THRESHOLD) => {
+            ("yellow green".to_string(), lightness)
         }
-    }
-}
-
-impl From<Color> for u32 {
-    /// Packs the RGB color into a single u32 integer (Big Endian: 0x00RRGGBB).
-    fn from(c: Color) -> u32 {
-        u32::from_be_bytes([0, c.0.red, c.0.green, c.0.blue])
-    }
-}
-
-impl From<u32> for Color {
-    /// Unpacks a u32 integer (0x...RRGGBB) into a Color instance.
-    /// discarding any possibly significant alpha value.
-    fn from(v: u32) -> Self {
-        let [_, r, g, b] = v.to_be_bytes();
-        Self::new(r, g, b)
+        (94.0..=114.5, _) => ("yellow".to_string(), lightness),
+        (114.5..135.0, _) => ("yellow green".to_string(), lightness),
+        (135.0..=155.0, _) => ("green".to_string(), lightness),
+        (155.0..175.0, _) => ("green cyan".to_string(), lightness),
+        (175.0..=219.5, _) => ("cyan".to_string(), lightness),
+        (219.5..264.0, _) => ("cyan blue".to_string(), lightness),
+        (264.0..=274.0, _) => ("blue".to_string(), lightness),
+        (274.0..284.0, _) => ("blue purple".to_string(), lightness),
+        (284.0..=302.0, _) => ("purple".to_string(), lightness),
+        (302.0..320.0, _) => ("purple magenta".to_string(), lightness),
+        (320.0..=334.5, _) => ("magenta".to_string(), lightness),
+        (334.5..349.0, _) => ("magenta pink".to_string(), lightness),
+        _ => unreachable!("Unexpected hue"),
     }
 }
 
@@ -353,7 +212,7 @@ pub struct ColorPickerProps {
 /// use dioxus_primitives::color_picker::*;
 /// #[component]
 /// fn Demo() -> Element {
-///    let rgb = Color::random_rgb();
+///    let rgb = Color::new(155, 128, 255);
 ///    let mut color = use_signal(|| rgb);
 ///    rsx! {
 ///            ColorPicker {
@@ -455,17 +314,13 @@ pub struct ColorAreaProps {
     /// The controlled value of the slider
     pub color: ReadSignal<Color>,
 
-    /// The minimum value
-    #[props(default = 0.0)]
-    pub min: ReadSignal<f64>,
-
-    /// The maximum value
-    #[props(default = 100.0)]
-    pub max: ReadSignal<f64>,
-
     /// The step value
     #[props(default = 1.0)]
     pub step: ReadSignal<f64>,
+
+    /// Optional hue to use for the area background when the current color is achromatic.
+    #[props(default)]
+    pub display_hue: Option<ReadSignal<f64>>,
 
     /// Callback when value changes
     #[props(default)]
@@ -490,7 +345,7 @@ pub struct ColorAreaProps {
 /// use dioxus_primitives::color_picker::*;
 /// #[component]
 /// fn Demo() -> Element {
-///    let rgb = Color::random_rgb();
+///    let rgb = Color::new(155, 128, 255);
 ///    let mut color = use_signal(|| rgb);
 ///    rsx! {
 ///            ColorPicker {
@@ -507,11 +362,17 @@ pub struct ColorAreaProps {
 #[component]
 pub fn ColorArea(props: ColorAreaProps) -> Element {
     let mut dragging = use_signal(|| false);
-    let mut stable_hue = use_signal(|| (props.color)().hue());
+    let mut stable_hue = use_signal(|| {
+        props
+            .display_hue
+            .map(|hue| hue())
+            .or_else(|| to_hsv_achromatic((props.color)()).0)
+            .unwrap_or_else(|| to_hsv((props.color)()).0)
+    });
 
     let initial_value = {
-        let hsv = (props.color)().to_hsv();
-        ClientPoint::new(hsv.1, hsv.2) * (props.max)()
+        let (_, saturation, brightness) = to_hsv((props.color)());
+        ClientPoint::new(saturation, brightness) * COLOR_AREA_RANGE
     };
     let mut value = use_memo(move || initial_value);
 
@@ -521,16 +382,20 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
             return;
         }
 
-        let hsv = (props.color)().to_hsv();
-        let next = ClientPoint::new(hsv.1, hsv.2) * (props.max)();
+        let (_, saturation, brightness) = to_hsv((props.color)());
+        let next = ClientPoint::new(saturation, brightness) * COLOR_AREA_RANGE;
         if next != value() {
             value.set(next);
         }
     });
 
-    // Preserve the last chromatic hue while current color is achromatic.
+    // Preserve the selected hue while current color is achromatic.
     use_effect(move || {
-        if let Some(h) = (props.color)().to_hsv_achromatic().hue {
+        let next_hue = props
+            .display_hue
+            .map(|hue| hue())
+            .or_else(|| to_hsv_achromatic((props.color)()).0);
+        if let Some(h) = next_hue {
             if h != stable_hue() {
                 stable_hue.set(h);
             }
@@ -539,15 +404,13 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
 
     let update_xy = Callback::new(move |point: ClientPoint| {
         value.set(point);
-        let new_value = point / (props.max)();
+        let new_value = point / COLOR_AREA_RANGE;
         props.on_value_change.call(new_value);
     });
 
     let ctx = use_context_provider(|| ColorAreaContext {
         value,
         set_value: update_xy,
-        min: props.min,
-        max: props.max,
         step: props.step,
         dragging: dragging.into(),
     });
@@ -589,10 +452,9 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
             Vector2D::zero()
         };
 
-        let min = (props.min)();
         let range = ctx.range_size();
-        let d_s = delta.x / size.width * range + min;
-        let d_h = delta.y / size.height * range + min;
+        let d_s = delta.x / size.width * range;
+        let d_h = delta.y / size.height * range;
 
         let new_value = granular_value() + Size2D::new(d_s, -d_h);
         granular_value.set(new_value);
@@ -649,14 +511,13 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
                         let top_left = r.origin;
                         let relative_pos = e.client_coordinates() - top_left.cast_unit();
 
-                        let min = (props.min)();
                         let range = ctx.range_size();
 
-                        let x = (relative_pos.x / size.width) * range + min;
-                        let y = (props.max)() - ((relative_pos.y / size.height) * range + min);
+                        let x = (relative_pos.x / size.width) * range;
+                        let y = COLOR_AREA_MAX - ((relative_pos.y / size.height) * range);
                         let pt = ClientPoint::new(x, y);
                         granular_value.set(pt);
-                        ctx.set_value.call(ctx.snap(pt));
+                        ctx.set_value.call(ctx.clamp_and_snap(pt));
                     }
 
                     dragging.set(true);
@@ -666,10 +527,10 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
             AreaTrack {
                 style: format!(
                     "--area-color: {}",
-                    Color::from_hsv((props.color)().hue_or(stable_hue()), 1.0, 1.0).to_css_rgb()
+                    color_hex(color_from_hsv(stable_hue(), 1.0, 1.0))
                 ),
                 AreaThumb {
-                    background_color: (props.color)().to_css_rgb(),
+                    background_color: color_hex((props.color)()),
                 }
             }
             {props.children}
@@ -733,10 +594,10 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
         100. - percent.height
     );
     let current = (ctx.value)();
-    let min = (ctx.min)();
-    let max = (ctx.max)();
+    let min = COLOR_AREA_MIN;
+    let max = COLOR_AREA_MAX;
     let step = (ctx.step)();
-    let color_name = (picker_ctx.color)().color_name();
+    let color_label = color_name((picker_ctx.color)());
 
     rsx! {
         div {
@@ -793,7 +654,7 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
                 r#type: "range",
                 aria_label: "Saturation",
                 aria_roledescription: "2D Slider",
-                aria_valuetext: format!("Saturation {:.0}%, {color_name}", percent.width),
+                aria_valuetext: format!("Saturation {:.0}%, {color_label}", percent.width),
                 aria_orientation: "horizontal",
                 min: "{min}",
                 max: "{max}",
@@ -805,7 +666,7 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
                 r#type: "range",
                 aria_label: "Value",
                 aria_roledescription: "2D Slider",
-                aria_valuetext: format!("Value {:.0}%, {color_name}", percent.height),
+                aria_valuetext: format!("Value {:.0}%, {color_label}", percent.height),
                 aria_orientation: "vertical",
                 min: "{min}",
                 max: "{max}",
@@ -821,20 +682,13 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
 struct ColorAreaContext {
     value: Memo<ClientPoint>,
     set_value: Callback<ClientPoint>,
-    min: ReadSignal<f64>,
-    max: ReadSignal<f64>,
     step: ReadSignal<f64>,
     dragging: ReadSignal<bool>,
 }
 
 impl ColorAreaContext {
-    fn range(&self) -> [f64; 2] {
-        [(self.min)(), (self.max)()]
-    }
-
     fn range_size(&self) -> f64 {
-        let [range_min, range_max] = self.range();
-        range_max - range_min
+        COLOR_AREA_RANGE
     }
 
     fn snap(&self, value: ClientPoint) -> ClientPoint {
@@ -843,14 +697,36 @@ impl ColorAreaContext {
     }
 
     fn clamp_and_snap(&self, value: ClientPoint) -> ClientPoint {
-        let clamped = value.map(|v| v.clamp((self.min)(), (self.max)()));
+        let clamped = value.map(|v| v.clamp(COLOR_AREA_MIN, COLOR_AREA_MAX));
         self.snap(clamped)
     }
 
     fn as_percent(&self, value: ClientPoint) -> PixelsSize {
-        let min = (self.min)();
         let size = self.range_size();
-        let scaled = value.map(|v| ((v - min) / size * 100.0).clamp(0.0, 100.0));
+        let scaled = value.map(|v| ((v - COLOR_AREA_MIN) / size * 100.0).clamp(0.0, 100.0));
         PixelsSize::new(scaled.x, scaled.y)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{color_from_hsv, to_hsv_achromatic, Color};
+
+    #[test]
+    fn creates_basic_hsv_colors() {
+        assert_eq!(color_from_hsv(0.0, 1.0, 1.0), Color::new(255, 0, 0));
+        assert_eq!(color_from_hsv(120.0, 1.0, 1.0), Color::new(0, 255, 0));
+        assert_eq!(color_from_hsv(240.0, 1.0, 1.0), Color::new(0, 0, 255));
+    }
+
+    #[test]
+    fn detects_achromatic_hue() {
+        let gray = to_hsv_achromatic(Color::new(128, 128, 128));
+        assert_eq!(gray.0, None);
+        assert_eq!(gray.1, 0.0);
+
+        let red = to_hsv_achromatic(Color::new(255, 0, 0));
+        assert_eq!(red.0, Some(0.0));
+        assert_eq!(red.1, 1.0);
     }
 }
