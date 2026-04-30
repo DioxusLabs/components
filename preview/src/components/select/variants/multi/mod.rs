@@ -28,7 +28,7 @@ pub fn Demo() -> Element {
     let toppings = Topping::iter().enumerate().map(|(i, t)| {
         rsx! {
             SelectOption::<Topping> { index: i, value: t, text_value: "{t}",
-                {format!("{} {t}", t.emoji())}
+                "{t.emoji()} {t}"
                 SelectItemIndicator {}
             }
         }

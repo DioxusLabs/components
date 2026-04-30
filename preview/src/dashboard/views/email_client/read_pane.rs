@@ -121,11 +121,7 @@ pub(super) fn ReadPane(
                                 CardDescription {
                                     div { class: "ec-thread-hero-meta",
                                         span {
-                                            {format!(
-                                                "{} message{} in this thread",
-                                                selected_static.thread_count,
-                                                if selected_static.thread_count > 1 { "s" } else { "" },
-                                            )}
+                                            "{selected_static.thread_count} message{(selected_static.thread_count > 1).then(|| \"s\").unwrap_or(\"\")} in this thread"
                                         }
                                         SelectMulti::<MessageTag> {
                                             key: "{selected_uid_value}-tagedit",

@@ -110,7 +110,7 @@ fn FolderItem(
                 },
             }
             if let Some(c) = count {
-                SidebarMenuBadge { {format!("{}", c)} }
+                SidebarMenuBadge { "{c}" }
             }
         }
     }
