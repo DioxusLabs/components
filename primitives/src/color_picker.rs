@@ -161,8 +161,11 @@ impl ColorPickerContext {
     /// Set hue, keeping saturation and value.
     pub fn set_hue(&self, h: f64) {
         let current = (self.color)();
-        self.on_color_change
-            .call(Hsv::<encoding::Srgb, f64>::new(RgbHue::new(h), current.saturation, current.value));
+        self.on_color_change.call(Hsv::<encoding::Srgb, f64>::new(
+            RgbHue::new(h),
+            current.saturation,
+            current.value,
+        ));
     }
 
     /// Set saturation and value as a pair, keeping hue.
@@ -703,7 +706,11 @@ mod tests {
 
     #[test]
     fn rgb_to_hsv_round_trip_primaries() {
-        for rgb in [Color::new(255, 0, 0), Color::new(0, 255, 0), Color::new(0, 0, 255)] {
+        for rgb in [
+            Color::new(255, 0, 0),
+            Color::new(0, 255, 0),
+            Color::new(0, 0, 255),
+        ] {
             let hsv: Hsv<encoding::Srgb, f64> = rgb.into_format::<f64>().into_color();
             assert_eq!(hsv_to_rgb(hsv), rgb);
         }
