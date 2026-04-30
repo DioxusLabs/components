@@ -154,11 +154,13 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
                 // This ensures Rust receives the event before the next render
                 publish(true);
 
-                // Debounce scroll-end detection (150ms after last scroll event)
+                // Debounce scroll-end detection. Firefox in CI can take long
+                // enough between scroll events and measurement reads that a
+                // 150ms timeout unfreezes the scroll canvas mid-scroll.
                 scrollEndTimer = setTimeout(() => {
                     scrollEndTimer = null;
                     publish(false);
-                }, 150);
+                }, 300);
             }
 
             // Initial publish
