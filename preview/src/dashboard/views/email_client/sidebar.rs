@@ -21,21 +21,20 @@ pub(super) fn EmailSidebar(mut state: Store<EmailClientState>) -> Element {
 
             SidebarContent {
                 SidebarGroup {
-                    SidebarMenu { SidebarMenuItem {
-                        SidebarMenuButton {
-                            class: "ec-compose",
-                            tooltip: rsx! { "Compose (C)" },
-                            as: move |attrs: Vec<Attribute>| rsx! {
-                                button {
-                                    r#type: "button",
-                                    onclick: move |_| state.open_compose(),
-                                    ..attrs,
-                                    LucideIcon { kind: IconKind::Pen }
-                                    span { "Compose" }
-                                }
-                            },
+                    SidebarMenu {
+                        SidebarMenuItem {
+                            SidebarMenuButton {
+                                class: "ec-compose",
+                                tooltip: rsx! { "Compose (C)" },
+                                r#as: move |attrs: Vec<Attribute>| rsx! {
+                                    button { r#type: "button", onclick: move |_| state.open_compose(), ..attrs,
+                                        LucideIcon { kind: IconKind::Pen }
+                                        span { "Compose" }
+                                    }
+                                },
+                            }
                         }
-                    } }
+                    }
                 }
 
                 SidebarGroup {
@@ -56,25 +55,27 @@ pub(super) fn EmailSidebar(mut state: Store<EmailClientState>) -> Element {
             }
 
             SidebarFooter {
-                SidebarMenu { SidebarMenuItem {
-                    SidebarMenuButton {
-                        size: SidebarMenuButtonSize::Lg,
-                        tooltip: rsx! { "You" },
-                        Avatar {
-                            size: AvatarImageSize::Small,
-                            shape: AvatarShape::Rounded,
-                            AvatarImage {
-                                src: "{AVATAR_PROFILE_OPTIONS[0].src}",
-                                alt: "You",
+                SidebarMenu {
+                    SidebarMenuItem {
+                        SidebarMenuButton {
+                            size: SidebarMenuButtonSize::Lg,
+                            tooltip: rsx! { "You" },
+                            Avatar {
+                                size: AvatarImageSize::Small,
+                                shape: AvatarShape::Rounded,
+                                AvatarImage {
+                                    src: "{AVATAR_PROFILE_OPTIONS[0].src}",
+                                    alt: "You",
+                                }
+                                AvatarFallback { "Y" }
                             }
-                            AvatarFallback { "Y" }
-                        }
-                        div { class: "dx-sidebar-info-block",
-                            span { class: "dx-sidebar-info-title", "You" }
-                            span { class: "dx-sidebar-info-subtitle", "you@yourcompany.com" }
+                            div { class: "dx-sidebar-info-block",
+                                span { class: "dx-sidebar-info-title", "You" }
+                                span { class: "dx-sidebar-info-subtitle", "you@yourcompany.com" }
+                            }
                         }
                     }
-                } }
+                }
             }
 
             SidebarRail {}
@@ -96,8 +97,10 @@ fn FolderItem(
         SidebarMenuItem {
             SidebarMenuButton {
                 is_active,
-                tooltip: rsx! { {label} },
-                as: move |attrs: Vec<Attribute>| rsx! {
+                tooltip: rsx! {
+                    {label}
+                },
+                r#as: move |attrs: Vec<Attribute>| rsx! {
                     button {
                         r#type: "button",
                         onclick: move |_| {

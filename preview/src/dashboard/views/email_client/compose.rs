@@ -43,9 +43,7 @@ pub(super) fn ComposeModal(mut state: Store<EmailClientState>) -> Element {
                     div { class: "ec-compose-head",
                         div { class: "ec-compose-head-text",
                             DialogTitle { class: "ec-compose-title", "New message" }
-                            DialogDescription { class: "ec-compose-desc",
-                                "Send a message to your team or contacts."
-                            }
+                            DialogDescription { class: "ec-compose-desc", "Send a message to your team or contacts." }
                         }
                         Button {
                             variant: ButtonVariant::Ghost,
@@ -57,7 +55,11 @@ pub(super) fn ComposeModal(mut state: Store<EmailClientState>) -> Element {
                         }
                     }
 
-                    Separator { horizontal: true, decorative: true, class: "ec-compose-sep" }
+                    Separator {
+                        horizontal: true,
+                        decorative: true,
+                        class: "ec-compose-sep",
+                    }
 
                     div { class: "ec-compose-field",
                         Label { html_for: "ec-compose-to", "To" }
@@ -102,9 +104,7 @@ pub(super) fn ComposeModal(mut state: Store<EmailClientState>) -> Element {
                             onclick: move |_| state.discard_compose(),
                             "Discard"
                         }
-                        Button {
-                            variant: ButtonVariant::Primary,
-                            r#type: "submit",
+                        Button { variant: ButtonVariant::Primary, r#type: "submit",
                             LucideIcon { kind: IconKind::Send, size: 14 }
                             "Send"
                         }

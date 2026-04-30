@@ -75,7 +75,9 @@ pub(super) fn ListPane(
                                 value: tab.id.as_str().to_string(),
                                 index: idx,
                                 {tab.label}
-                                span { class: "ec-muted", " {state.tab_count(tab.id, query.as_str(), &tags)}" }
+                                span { class: "ec-muted",
+                                    " {state.tab_count(tab.id, query.as_str(), &tags)}"
+                                }
                             }
                         }
                     }
@@ -94,9 +96,7 @@ pub(super) fn ListPane(
                             span { class: "ec-filter-count", "{tags.len()}" }
                         }
                     }
-                    SelectList {
-                        class: "ec-filter-list",
-                        aria_label: "Filter by tag",
+                    SelectList { class: "ec-filter-list", aria_label: "Filter by tag",
                         SelectGroup {
                             SelectGroupLabel { "Tags" }
                             for (index, tag) in MessageTag::ALL.iter().enumerate() {
@@ -128,17 +128,19 @@ pub(super) fn ListPane(
                         ListRow::DayHeader(day) => rsx! {
                             div { class: "ec-day", {day} }
                         },
-                        ListRow::Message(uid) => match state.messages().get(uid.clone()) {
-                            Some(message) => rsx! {
-                                MessageRow {
-                                    key: "{uid}",
-                                    state,
-                                    message,
-                                    selected_uid: selected_uid.read().clone(),
-                                }
-                            },
-                            None => rsx! {},
-                        },
+                        ListRow::Message(uid) => {
+                            match state.messages().get(uid.clone()) {
+                                Some(message) => rsx! {
+                                    MessageRow {
+                                        key: "{uid}",
+                                        state,
+                                        message,
+                                        selected_uid: selected_uid.read().clone(),
+                                    }
+                                },
+                                None => rsx! {},
+                            }
+                        }
                     }
                 },
             }
@@ -192,9 +194,7 @@ fn MessageRow(
             "data-selected": is_selected,
 
             ItemMedia { variant: ItemMediaVariant::Icon,
-                Avatar {
-                    size: AvatarImageSize::Small,
-                    shape: AvatarShape::Circle,
+                Avatar { size: AvatarImageSize::Small, shape: AvatarShape::Circle,
                     AvatarImage {
                         src: "{avatar_profile_for_key(m.sender.addr).src}",
                         alt: "{m.sender.name}",
@@ -217,7 +217,9 @@ fn MessageRow(
                         }
                         for (i, tag) in tags.iter().enumerate() {
                             span { key: "{tag.label()}",
-                                if i > 0 { " · " }
+                                if i > 0 {
+                                    " · "
+                                }
                                 {tag.label()}
                             }
                         }
@@ -230,34 +232,34 @@ fn MessageRow(
             ItemActions {
                 span { class: "ec-muted ec-row-time", "{m.time}" }
                 div { class: "ec-row-action-group",
-                Button {
-                    variant: ButtonVariant::Ghost,
-                    r#type: "button",
-                    class: "ec-row-action ec-row-action-trash",
-                    aria_label: "Move to trash",
-                    onkeydown: move |e: KeyboardEvent| e.stop_propagation(),
-                    onclick: move |e: Event<MouseData>| {
-                        e.stop_propagation();
-                        state.move_message_to_trash(uid_for_trash.clone());
-                    },
-                    LucideIcon { kind: IconKind::Trash, size: 16 }
-                }
-                Button {
-                    variant: ButtonVariant::Ghost,
-                    r#type: "button",
-                    class: "ec-row-action ec-row-action-star",
-                    "data-active": starred,
-                    aria_label: if starred { "Unstar message" } else { "Star message" },
-                    onkeydown: move |e: KeyboardEvent| e.stop_propagation(),
-                    onclick: move |e: Event<MouseData>| {
-                        e.stop_propagation();
-                        state.toggle_message_star(uid_for_star.clone());
-                    },
-                    LucideIcon {
-                        kind: if starred { IconKind::StarFilled } else { IconKind::StarOutline },
-                        size: 16,
+                    Button {
+                        variant: ButtonVariant::Ghost,
+                        r#type: "button",
+                        class: "ec-row-action ec-row-action-trash",
+                        aria_label: "Move to trash",
+                        onkeydown: move |e: KeyboardEvent| e.stop_propagation(),
+                        onclick: move |e: Event<MouseData>| {
+                            e.stop_propagation();
+                            state.move_message_to_trash(uid_for_trash.clone());
+                        },
+                        LucideIcon { kind: IconKind::Trash, size: 16 }
                     }
-                }
+                    Button {
+                        variant: ButtonVariant::Ghost,
+                        r#type: "button",
+                        class: "ec-row-action ec-row-action-star",
+                        "data-active": starred,
+                        aria_label: if starred { "Unstar message" } else { "Star message" },
+                        onkeydown: move |e: KeyboardEvent| e.stop_propagation(),
+                        onclick: move |e: Event<MouseData>| {
+                            e.stop_propagation();
+                            state.toggle_message_star(uid_for_star.clone());
+                        },
+                        LucideIcon {
+                            kind: if starred { IconKind::StarFilled } else { IconKind::StarOutline },
+                            size: 16,
+                        }
+                    }
                 }
             }
         }

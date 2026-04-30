@@ -38,41 +38,41 @@ pub fn EmailClient() -> Element {
         document::Link { rel: "stylesheet", href: asset!("./email_client.css") }
 
         ToastProvider {
-        SidebarProvider {
-            EmailSidebar { state }
+            SidebarProvider {
+                EmailSidebar { state }
 
-            SidebarInset {
-                header { class: "ec-topbar",
-                    SidebarTrigger {}
-                    Separator { horizontal: false, decorative: true }
-                    h1 { class: "ec-title", {folder_label} }
-                    Input {
-                        r#type: "search",
-                        "aria-label": "Search mail",
-                        name: "mail-search",
-                        value: state.search_query(),
-                        oninput: move |event: FormEvent| {
-                            state.set_search_query(event.value());
-                        },
-                        placeholder: "Search mail, people, attachments…",
+                SidebarInset {
+                    header { class: "ec-topbar",
+                        SidebarTrigger {}
+                        Separator { horizontal: false, decorative: true }
+                        h1 { class: "ec-title", {folder_label} }
+                        Input {
+                            r#type: "search",
+                            "aria-label": "Search mail",
+                            name: "mail-search",
+                            value: state.search_query(),
+                            oninput: move |event: FormEvent| {
+                                state.set_search_query(event.value());
+                            },
+                            placeholder: "Search mail, people, attachments…",
+                        }
+                        DarkModeToggle {}
                     }
-                    DarkModeToggle {}
-                }
 
-                main { class: if read_open { "ec-main ec-reading" } else { "ec-main" },
-                    ListPane { state, visible_ids, selected_uid }
+                    main { class: if read_open { "ec-main ec-reading" } else { "ec-main" },
+                        ListPane { state, visible_ids, selected_uid }
 
-                    ReadPane {
-                        state,
-                        selected_uid,
-                        total_count,
-                        selected_index,
+                        ReadPane {
+                            state,
+                            selected_uid,
+                            total_count,
+                            selected_index,
+                        }
                     }
-                }
 
-                ComposeModal { state }
+                    ComposeModal { state }
+                }
             }
-        }
         }
     }
 }

@@ -100,7 +100,9 @@ pub(super) fn ReadPane(
         section { class: "ec-read-pane",
             Toolbar { aria_label: "Message actions",
                 ToolbarGroup {
-                    ToolbarButton { index: 0usize, on_click: move |_| state.close_read_pane(),
+                    ToolbarButton {
+                        index: 0usize,
+                        on_click: move |_| state.close_read_pane(),
                         LucideIcon { kind: IconKind::ArrowLeft }
                     }
                 }
@@ -199,8 +201,7 @@ pub(super) fn ReadPane(
                                                         state.remove_message_tag(uid.clone(), tag);
                                                     }
                                                 },
-                                                Badge {
-                                                    variant: BadgeVariant::Secondary,
+                                                Badge { variant: BadgeVariant::Secondary,
                                                     "{tag.label()} ×"
                                                 }
                                             }
@@ -212,8 +213,7 @@ pub(super) fn ReadPane(
                     }
                 }
 
-                Card {
-                    class: if selected_static.thread_count > 1 { "ec-thread-msg" } else { "ec-thread-msg ec-thread-msg-current" },
+                Card { class: if selected_static.thread_count > 1 { "ec-thread-msg" } else { "ec-thread-msg ec-thread-msg-current" },
                     CardContent { class: "ec-thread-msg-content",
                         div { class: "ec-thread-msg-head",
                             Avatar {
@@ -228,9 +228,7 @@ pub(super) fn ReadPane(
                             div { class: "ec-thread-msg-meta",
                                 div { class: "ec-thread-msg-sender",
                                     span { class: "ec-thread-msg-name", {selected_static.sender.name} }
-                                    span { class: "ec-thread-msg-addr",
-                                        {selected_static.sender.addr}
-                                    }
+                                    span { class: "ec-thread-msg-addr", {selected_static.sender.addr} }
                                 }
                                 span { class: "ec-thread-msg-time", "{selected_static.full_time}" }
                             }
@@ -257,11 +255,11 @@ pub(super) fn ReadPane(
                                 div { class: "ec-thread-msg-meta",
                                     div { class: "ec-thread-msg-sender",
                                         span { class: "ec-thread-msg-name", "You" }
-                                        span { class: "ec-thread-msg-addr", "to {selected_static.sender.name}" }
+                                        span { class: "ec-thread-msg-addr",
+                                            "to {selected_static.sender.name}"
+                                        }
                                     }
-                                    span { class: "ec-thread-msg-time",
-                                        "earlier today"
-                                    }
+                                    span { class: "ec-thread-msg-time", "earlier today" }
                                 }
                             }
                             div { class: "ec-thread-msg-body",
