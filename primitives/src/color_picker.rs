@@ -1,9 +1,8 @@
 //! Defines the [`ColorPicker`] component and its sub-components.
 
-use crate::dioxus_elements::geometry::{ClientPoint, Pixels};
-use crate::dioxus_elements::input_data::MouseButton;
-use crate::pointer;
-use dioxus::html::geometry::euclid::{Rect, Size2D, Vector2D};
+use crate::dioxus_elements::geometry::ClientPoint;
+use crate::move_interaction::{use_move_interaction, MoveEvent};
+use dioxus::html::geometry::euclid::Size2D;
 use dioxus::html::geometry::PixelsSize;
 use dioxus::prelude::*;
 use palette::{encoding, FromColor, Hsv, RgbHue, Srgb};
@@ -211,14 +210,10 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
         dragging: dragging.into(),
     });
 
-    let mut rect = use_signal(|| None);
-    let mut div_element: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    let mut movement = use_move_interaction(dragging);
     let mut granular_value = use_hook(|| CopyValue::new(value()));
 
-    let size = rect().map(|r: Rect<f64, Pixels>| r.size);
-
-    let mut current_pointer_id: Signal<Option<i32>> = use_signal(|| None);
-    let mut last_processed_pos = use_hook(|| CopyValue::new(None));
+    let size = movement.rect().map(|r| r.size);
 
     use_effect(move || {
         if !dragging() {
@@ -229,26 +224,13 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
             return;
         };
 
-        let Some(active_pointer_id) = current_pointer_id() else {
+        let Some(move_event) = movement.pointer_move() else {
             return;
-        };
-
-        let Some(pointer_position) = pointer::pointer_position(active_pointer_id) else {
-            current_pointer_id.take();
-            last_processed_pos.set(None);
-            dragging.set(false);
-            return;
-        };
-
-        let delta = if let Some(last_pos) = last_processed_pos.replace(Some(pointer_position)) {
-            pointer_position - last_pos
-        } else {
-            Vector2D::zero()
         };
 
         let range = ctx.range_size();
-        let d_s = delta.x / size.width * range;
-        let d_h = delta.y / size.height * range;
+        let d_s = move_event.delta_x / size.width * range;
+        let d_h = move_event.delta_y / size.height * range;
 
         let new_value = granular_value() + Size2D::new(d_s, -d_h);
         granular_value.set(new_value);
@@ -259,43 +241,24 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
         div {
             role: "group",
             onmounted: move |e| async move {
-                // Get the bounding rect of the area
-                if let Ok(r) = e.data().get_client_rect().await {
-                    rect.set(Some(r));
-                }
-                div_element.set(Some(e.data()));
+                let mut movement = movement;
+                movement.set_mounted(e.data()).await;
             },
             onresize: move |_| async move {
-                // Update the rect on resize
-                let Some(div_element) = div_element() else {
-                    return;
-                };
-                if let Ok(r) = div_element.get_client_rect().await {
-                    rect.set(Some(r));
-                }
+                let mut movement = movement;
+                movement.refresh_rect().await;
             },
             onpointerdown: move |e| {
-                // Prevent default to avoid loosing focus on the range
-                e.prevent_default();
-                e.stop_propagation();
-
-                if current_pointer_id.read().is_some() || e.trigger_button() != Some(MouseButton::Primary) {
+                if !movement.start_pointer(&e) {
                     return;
                 }
-
-                current_pointer_id.set(Some(e.data().pointer_id()));
-                pointer::track_pointer_down(e.data().pointer_id(), e.client_coordinates());
 
                 // Handle pointer interaction
                 spawn(async move {
-                    let Some(div_element) = div_element() else {
-                        return;
-                    };
+                    let mut movement = movement;
 
                     // Update the bounding rect of the slider in case it moved
-                    if let Ok(r) = div_element.get_client_rect().await {
-                        rect.set(Some(r));
-
+                    if let Some(r) = movement.refresh_rect().await {
                         let size = r.size;
 
                         // Get the mouse position relative to the slider
@@ -420,32 +383,13 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
                 evt.prevent_default();
             },
             onkeydown: move |evt| async move {
-                let key = evt.data().key();
-                let mut step = (ctx.step)();
-                if evt.data().modifiers().shift() {
-                    // If shift is pressed, increase the step size
-                    step *= 10.0;
-                }
-
-                // Handle keyboard navigation
-                let new_value = (ctx.value)() + match key {
-                    Key::ArrowUp => {
-                        Vector2D::new(0.0, step)
-                    }
-                    Key::ArrowDown => {
-                        Vector2D::new(0.0, -step)
-                    }
-                    Key::ArrowRight => {
-                        Vector2D::new(step, 0.0)
-                    }
-                    Key::ArrowLeft => {
-                        Vector2D::new(-step, 0.0)
-                    }
-                    _ => return,
+                let Some(move_event) = MoveEvent::from_keyboard(&evt, (ctx.step)()) else {
+                    return;
                 };
 
                 evt.prevent_default();
                 // Clamp and snap the new value
+                let new_value = (ctx.value)() + Size2D::new(move_event.delta_x, move_event.delta_y);
                 ctx.set_value.call(ctx.clamp_and_snap(new_value));
             },
             ..props.attributes,

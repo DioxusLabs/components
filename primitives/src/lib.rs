@@ -31,6 +31,7 @@ pub mod hover_card;
 pub mod icon;
 pub mod label;
 pub mod menubar;
+mod move_interaction;
 #[cfg(feature = "router")]
 pub mod navbar;
 mod pointer;
