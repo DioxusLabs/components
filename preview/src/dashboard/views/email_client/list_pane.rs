@@ -204,7 +204,7 @@ fn MessageRow(
             }
             ItemContent {
                 ItemTitle {
-                    span { class: "ec-row-subject", {m.subject} }
+                    span { class: "ec-row-subject", "{m.subject}" }
                 }
                 div { class: "ec-row-sender",
                     span { class: "ec-row-from", {m.sender.name} }
@@ -228,7 +228,7 @@ fn MessageRow(
                 }
             }
             ItemActions {
-                span { class: "ec-muted ec-row-time", {m.time} }
+                span { class: "ec-muted ec-row-time", "{m.time}" }
                 div { class: "ec-row-action-group",
                 Button {
                     variant: ButtonVariant::Ghost,

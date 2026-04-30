@@ -150,7 +150,7 @@ pub(super) fn ReadPane(
                     CardHeader {
                         div { class: "ec-thread-hero-main",
                             div {
-                                CardTitle { {selected_static.subject} }
+                                CardTitle { "{selected_static.subject}" }
                                 CardDescription {
                                     div { class: "ec-thread-hero-meta",
                                         span {
@@ -232,7 +232,7 @@ pub(super) fn ReadPane(
                                         {selected_static.sender.addr}
                                     }
                                 }
-                                span { class: "ec-thread-msg-time", {selected_static.full_time} }
+                                span { class: "ec-thread-msg-time", "{selected_static.full_time}" }
                             }
                         }
                         div { class: "ec-thread-msg-body",
