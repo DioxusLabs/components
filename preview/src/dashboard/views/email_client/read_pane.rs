@@ -208,9 +208,7 @@ pub(super) fn ReadPane(
                             }
                         }
                         div { class: "ec-thread-msg-body",
-                            for (i, para) in LOREM_IPSUM.split("\n\n").enumerate() {
-                                p { key: "{i}", {para.to_string()} }
-                            }
+                            p { {LOREM_IPSUM} }
                         }
                     }
                 }
@@ -239,9 +237,7 @@ pub(super) fn ReadPane(
                                 }
                             }
                             div { class: "ec-thread-msg-body",
-                                p {
-                                    {LOREM_IPSUM.split("\n\n").next().unwrap_or(LOREM_IPSUM)}
-                                }
+                                p { {LOREM_IPSUM} }
                             }
                         }
                     }

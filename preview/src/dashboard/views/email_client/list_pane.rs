@@ -14,8 +14,8 @@ use crate::components::select::{
 use crate::components::tabs::component::{TabList, TabTrigger, Tabs};
 use crate::components::virtual_list::VirtualList;
 use crate::dashboard::common::{
-    lookup_message, lorem_snippet, IconKind, LucideIcon, MessageState, MessageStateStoreExt,
-    MessageTag, TabId, TABS,
+    lookup_message, IconKind, LucideIcon, MessageState, MessageStateStoreExt, MessageTag, TabId,
+    LOREM_IPSUM, TABS,
 };
 
 use super::avatars::avatar_profile_for_key;
@@ -44,24 +44,6 @@ pub(super) fn flatten_rows(state: Store<EmailClientState>, message_ids: &[String
         out.push(ListRow::Message(uid.clone()));
     }
     out
-}
-
-fn estimate_message_row_height(
-    source_id: &str,
-    tags: &[MessageTag],
-    starred: bool,
-    flagged: bool,
-) -> u32 {
-    let m = lookup_message(source_id);
-    let snippet_lines = if lorem_snippet().len() > 78 { 2 } else { 1 };
-    let has_meta_row = !tags.is_empty() || m.has_attachment || starred || flagged;
-
-    32  // vertical padding + borders + margins
-        + 21 // subject row (now the prominent line)
-        + 16 // sender row
-        + 19 * snippet_lines
-        + if has_meta_row { 22 } else { 0 }
-        + if has_meta_row { 12 } else { 8 } // content row gaps
 }
 
 #[component]
@@ -140,18 +122,7 @@ pub(super) fn ListPane(
                 buffer: 6usize,
                 estimate_size: move |idx: usize| match &rows_for_estimate.read()[idx] {
                     ListRow::DayHeader(_) => 34,
-                    ListRow::Message(uid) => match state.messages().get(uid.clone()) {
-                        Some(message) => {
-                            let message: Store<MessageState> = message.into();
-                            estimate_message_row_height(
-                                message.source_id().cloned(),
-                                &message.tags().cloned(),
-                                message.starred().cloned(),
-                                message.flagged().cloned(),
-                            )
-                        }
-                        None => 80,
-                    },
+                    ListRow::Message(_) => 130,
                 },
                 render_item: move |idx: usize| {
                     let row = rows_for_render.read()[idx].clone();
@@ -233,7 +204,7 @@ fn MessageRow(
                 div { class: "ec-row-sender",
                     span { class: "ec-row-from", {m.from} }
                 }
-                ItemDescription { class: "ec-row-snippet", {lorem_snippet()} }
+                ItemDescription { class: "ec-row-snippet", {LOREM_IPSUM} }
                 if !tags.is_empty() || m.has_attachment || flagged {
                     div { class: "ec-muted ec-row-tags",
                         if flagged {

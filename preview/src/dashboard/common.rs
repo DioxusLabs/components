@@ -210,19 +210,7 @@ pub fn lookup_message(source_id: &str) -> &'static Message {
         .unwrap_or(&MESSAGES[0])
 }
 
-pub const LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n\nSed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.";
-
-pub fn lorem_snippet() -> &'static str {
-    const LIMIT: usize = 140;
-    let first_para = LOREM_IPSUM.split("\n\n").next().unwrap_or(LOREM_IPSUM);
-    if first_para.len() <= LIMIT {
-        return first_para;
-    }
-    match first_para[..LIMIT].rfind(' ') {
-        Some(i) => &first_para[..i],
-        None => &first_para[..LIMIT],
-    }
-}
+pub const LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
 
 pub const FOLDERS: &[Folder] = &[
     Folder {
