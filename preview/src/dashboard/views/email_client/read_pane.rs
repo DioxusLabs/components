@@ -127,26 +127,6 @@ pub(super) fn ReadPane(
                                                 if selected_static.thread_count > 1 { "s" } else { "" },
                                             )}
                                         }
-                                        for tag in selected_tags.iter() {
-                                            Button {
-                                                variant: ButtonVariant::Ghost,
-                                                key: "{tag.label()}",
-                                                r#type: "button",
-                                                class: "ec-tag-remove",
-                                                "aria-label": "Remove tag {tag.label()}",
-                                                onclick: {
-                                                    let tag = *tag;
-                                                    let uid = selected_uid_value.clone();
-                                                    move |_| {
-                                                        state.remove_message_tag(uid.clone(), tag);
-                                                    }
-                                                },
-                                                Badge {
-                                                    variant: BadgeVariant::Secondary,
-                                                    "{tag.label()} ×"
-                                                }
-                                            }
-                                        }
                                         SelectMulti::<MessageTag> {
                                             key: "{selected_uid_value}-tagedit",
                                             values: Some(selected_tags.clone()),
@@ -174,6 +154,26 @@ pub(super) fn ReadPane(
                                                             SelectItemIndicator {}
                                                         }
                                                     }
+                                                }
+                                            }
+                                        }
+                                        for tag in selected_tags.iter() {
+                                            Button {
+                                                variant: ButtonVariant::Ghost,
+                                                key: "{tag.label()}",
+                                                r#type: "button",
+                                                class: "ec-tag-remove",
+                                                "aria-label": "Remove tag {tag.label()}",
+                                                onclick: {
+                                                    let tag = *tag;
+                                                    let uid = selected_uid_value.clone();
+                                                    move |_| {
+                                                        state.remove_message_tag(uid.clone(), tag);
+                                                    }
+                                                },
+                                                Badge {
+                                                    variant: BadgeVariant::Secondary,
+                                                    "{tag.label()} ×"
                                                 }
                                             }
                                         }
