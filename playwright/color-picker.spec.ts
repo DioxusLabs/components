@@ -104,9 +104,14 @@ test('color area thumb keyboard navigation updates saturation/value', async ({ p
   const sBefore = Number(await sInput.inputValue());
   const vBefore = Number(await vInput.inputValue());
 
-  // ArrowRight increases saturation; ArrowDown decreases value.
+  // ArrowRight increases saturation, and focus hands off to the saturation
+  // input so AT can announce the channel.
   await page.keyboard.press('ArrowRight');
+  await expect(sInput).toBeFocused();
+
+  // ArrowDown decreases value, and focus hands off to the value input.
   await page.keyboard.press('ArrowDown');
+  await expect(vInput).toBeFocused();
 
   const sAfter = Number(await sInput.inputValue());
   const vAfter = Number(await vInput.inputValue());
