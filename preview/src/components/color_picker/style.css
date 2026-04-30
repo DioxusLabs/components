@@ -171,8 +171,8 @@
     z-index: 1000;
     top: 100%;
     left: 0;
-    margin-top: 4px;
     border-radius: 0.5rem;
+    margin-top: 4px;
     background: var(--light, var(--primary-color))
         var(--dark, var(--primary-color-5));
     box-shadow:
@@ -190,8 +190,15 @@
 }
 
 @keyframes dx-color-picker-popover-fade-in {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dx-color-picker-dialog {
