@@ -16,7 +16,7 @@ use crate::components::toolbar::component::{
 };
 use crate::dashboard::common::{
     lookup_message, IconKind, LucideIcon, MessageState, MessageStateStoreExt, MessageTag,
-    AVATAR_PROFILE_OPTIONS,
+    AVATAR_PROFILE_OPTIONS, LOREM_IPSUM,
 };
 
 use super::avatars::avatar_profile_for_key;
@@ -208,7 +208,7 @@ pub(super) fn ReadPane(
                             }
                         }
                         div { class: "ec-thread-msg-body",
-                            for (i, para) in selected_static.body.split("\n\n").enumerate() {
+                            for (i, para) in LOREM_IPSUM.split("\n\n").enumerate() {
                                 p { key: "{i}", {para.to_string()} }
                             }
                         }
@@ -240,7 +240,7 @@ pub(super) fn ReadPane(
                             }
                             div { class: "ec-thread-msg-body",
                                 p {
-                                    "Thanks for sending this over — taking a look now and will circle back shortly."
+                                    {LOREM_IPSUM.split("\n\n").next().unwrap_or(LOREM_IPSUM)}
                                 }
                             }
                         }

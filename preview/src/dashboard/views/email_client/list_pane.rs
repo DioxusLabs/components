@@ -14,8 +14,8 @@ use crate::components::select::{
 use crate::components::tabs::component::{TabList, TabTrigger, Tabs};
 use crate::components::virtual_list::VirtualList;
 use crate::dashboard::common::{
-    lookup_message, IconKind, LucideIcon, MessageState, MessageStateStoreExt, MessageTag, TabId,
-    TABS,
+    lookup_message, lorem_snippet, IconKind, LucideIcon, MessageState, MessageStateStoreExt,
+    MessageTag, TabId, TABS,
 };
 
 use super::avatars::avatar_profile_for_key;
@@ -53,7 +53,7 @@ fn estimate_message_row_height(
     flagged: bool,
 ) -> u32 {
     let m = lookup_message(source_id);
-    let snippet_lines = if m.snippet.len() > 78 { 2 } else { 1 };
+    let snippet_lines = if lorem_snippet().len() > 78 { 2 } else { 1 };
     let has_meta_row = !tags.is_empty() || m.has_attachment || starred || flagged;
 
     32  // vertical padding + borders + margins
@@ -233,7 +233,7 @@ fn MessageRow(
                 div { class: "ec-row-sender",
                     span { class: "ec-row-from", {m.from} }
                 }
-                ItemDescription { class: "ec-row-snippet", {m.snippet} }
+                ItemDescription { class: "ec-row-snippet", {lorem_snippet()} }
                 if !tags.is_empty() || m.has_attachment || flagged {
                     div { class: "ec-muted ec-row-tags",
                         if flagged {
