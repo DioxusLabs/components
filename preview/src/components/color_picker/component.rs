@@ -475,6 +475,9 @@ fn ColorArea(props: ColorAreaProps) -> Element {
             class: "dx-color-area-container",
             step: props.step,
             attributes: props.attributes,
+            color_picker::AreaTrack {
+                color_picker::AreaThumb {}
+            }
             {props.children}
         }
     }

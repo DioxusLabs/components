@@ -23,6 +23,29 @@ fn color_hex(color: Color) -> String {
     format!("#{color:X}")
 }
 
+fn area_value_from_hsv(hsv: Hsv<encoding::Srgb, f64>) -> ClientPoint {
+    ClientPoint::new(hsv.saturation, hsv.value) * COLOR_AREA_RANGE
+}
+
+fn set_area_value(ctx: ColorPickerContext, value: ClientPoint) {
+    let scaled = value / COLOR_AREA_RANGE;
+    ctx.set_sv(scaled.x, scaled.y);
+}
+
+fn snap_area_value(value: ClientPoint, step: f64) -> ClientPoint {
+    value.map(|v| (v / step).round() * step)
+}
+
+fn clamp_area_value(value: ClientPoint, step: f64) -> ClientPoint {
+    let clamped = value.map(|v| v.clamp(COLOR_AREA_MIN, COLOR_AREA_MAX));
+    snap_area_value(clamped, step)
+}
+
+fn area_percent(value: ClientPoint) -> PixelsSize {
+    let scaled = value.map(|v| ((v - COLOR_AREA_MIN) / COLOR_AREA_RANGE * 100.0).clamp(0.0, 100.0));
+    PixelsSize::new(scaled.x, scaled.y)
+}
+
 /// Context provided by [`ColorPicker`] to its descendants.
 ///
 /// The picker is controlled in HSV — [`Self::color`] echoes the controlled
@@ -108,6 +131,11 @@ pub struct ColorPickerProps {
 ///                    tracing::info!("Color changed: {:?}", c);
 ///                    color.set(c);
 ///                },
+///                ColorArea {
+///                    AreaTrack {
+///                        AreaThumb {}
+///                    }
+///                }
 ///            }
 ///    }
 ///}
@@ -153,7 +181,7 @@ pub struct ColorAreaProps {
 /// # ColorArea
 ///
 /// The [`ColorArea`] allows users to adjust two channels of color value against a two-dimensional gradient background.
-/// It is part of `ColorPickerSelect`
+/// Compose it with [`AreaTrack`] and [`AreaThumb`] inside a [`ColorPicker`].
 ///
 /// ## Example
 /// ```rust
@@ -172,6 +200,11 @@ pub struct ColorAreaProps {
 ///                    tracing::info!("Color changed: {:?}", c);
 ///                    color.set(c);
 ///                },
+///                ColorArea {
+///                    AreaTrack {
+///                        AreaThumb {}
+///                    }
+///                }
 ///            }
 ///    }
 ///}
@@ -181,21 +214,12 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
     let picker_ctx = use_context::<ColorPickerContext>();
     let mut dragging = use_signal(|| false);
 
-    // Thumb position is read straight from HSV state — no RGB round-trip
-    // means saturation is preserved at brightness=0.
-    let value = use_memo(move || {
-        let hsv = picker_ctx.color();
-        ClientPoint::new(hsv.saturation, hsv.value) * COLOR_AREA_RANGE
-    });
+    // Thumb position is read straight from HSV state so saturation is preserved
+    // at brightness=0.
+    let value = use_memo(move || area_value_from_hsv(picker_ctx.color()));
 
-    let update_xy = use_callback(move |point: ClientPoint| {
-        let scaled = point / COLOR_AREA_RANGE;
-        picker_ctx.set_sv(scaled.x, scaled.y);
-    });
-
-    let ctx = use_context_provider(|| ColorAreaContext {
+    let area_ctx = use_context_provider(|| ColorAreaContext {
         value,
-        set_value: update_xy,
         step: props.step,
         dragging: dragging.into(),
     });
@@ -218,13 +242,12 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
             return;
         };
 
-        let range = ctx.range_size();
-        let d_s = move_event.delta_x / size.width * range;
-        let d_h = move_event.delta_y / size.height * range;
+        let d_s = move_event.delta_x / size.width * COLOR_AREA_RANGE;
+        let d_h = move_event.delta_y / size.height * COLOR_AREA_RANGE;
 
         let new_value = granular_value() + Size2D::new(d_s, -d_h);
         granular_value.set(new_value);
-        ctx.set_value.call(ctx.clamp_and_snap(new_value));
+        set_area_value(picker_ctx, clamp_area_value(new_value, (area_ctx.step)()));
     });
 
     rsx! {
@@ -255,37 +278,17 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
                         let top_left = r.origin;
                         let relative_pos = e.client_coordinates() - top_left.cast_unit();
 
-                        let range = ctx.range_size();
-
-                        let x = (relative_pos.x / size.width) * range;
-                        let y = COLOR_AREA_MAX - ((relative_pos.y / size.height) * range);
+                        let x = (relative_pos.x / size.width) * COLOR_AREA_RANGE;
+                        let y = COLOR_AREA_MAX - ((relative_pos.y / size.height) * COLOR_AREA_RANGE);
                         let pt = ClientPoint::new(x, y);
                         granular_value.set(pt);
-                        ctx.set_value.call(ctx.clamp_and_snap(pt));
+                        set_area_value(picker_ctx, clamp_area_value(pt, (area_ctx.step)()));
                     }
 
                     dragging.set(true);
                 });
             },
             ..props.attributes,
-            AreaTrack {
-                style: format!(
-                    "--area-color: {}",
-                    color_hex(
-                        Srgb::<f64>::from_color(Hsv::<encoding::Srgb, f64>::new(
-                            picker_ctx.color().hue,
-                            1.0,
-                            1.0,
-                        ))
-                        .into_format()
-                    )
-                ),
-                AreaThumb {
-                    background_color: color_hex(
-                        Srgb::<f64>::from_color(picker_ctx.color()).into_format(),
-                    ),
-                }
-            }
             {props.children}
         }
     }
@@ -293,7 +296,7 @@ pub fn ColorArea(props: ColorAreaProps) -> Element {
 
 /// The props for the [`AreaTrack`] component
 #[derive(Props, Clone, PartialEq)]
-struct AreaTrackProps {
+pub struct AreaTrackProps {
     /// Additional attributes to apply to the track element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -301,11 +304,28 @@ struct AreaTrackProps {
     pub children: Element,
 }
 
+/// # AreaTrack
+///
+/// The track component for [`ColorArea`]. It renders the color plane background
+/// and should contain an [`AreaThumb`].
+///
+/// This must be used inside a [`ColorArea`] component.
 #[component]
-fn AreaTrack(props: AreaTrackProps) -> Element {
+pub fn AreaTrack(props: AreaTrackProps) -> Element {
+    let picker_ctx = use_context::<ColorPickerContext>();
+    let area_color = color_hex(
+        Srgb::<f64>::from_color(Hsv::<encoding::Srgb, f64>::new(
+            picker_ctx.color().hue,
+            1.0,
+            1.0,
+        ))
+        .into_format(),
+    );
+
     rsx! {
         div {
             class: "dx-color-area-track",
+            style: "--area-color: {area_color}",
             ..props.attributes,
             {props.children}
         }
@@ -314,7 +334,7 @@ fn AreaTrack(props: AreaTrackProps) -> Element {
 
 /// The props for the [`AreaThumb`] component
 #[derive(Props, Clone, PartialEq)]
-struct AreaThumbProps {
+pub struct AreaThumbProps {
     /// Additional attributes to apply to the thumb element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -322,16 +342,22 @@ struct AreaThumbProps {
     pub children: Element,
 }
 
+/// # AreaThumb
+///
+/// The thumb component for [`ColorArea`]. It supports mouse/touch interaction
+/// through [`ColorArea`] and keyboard navigation with arrow keys.
+///
+/// This must be used inside a [`ColorArea`] component.
 #[component]
-fn AreaThumb(props: AreaThumbProps) -> Element {
+pub fn AreaThumb(props: AreaThumbProps) -> Element {
     let picker_ctx = use_context::<ColorPickerContext>();
-    let ctx = use_context::<ColorAreaContext>();
+    let area_ctx = use_context::<ColorAreaContext>();
 
     let mut button_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
 
     use_effect(move || {
         if let Some(button) = button_ref() {
-            let dragging = ctx.dragging.cloned();
+            let dragging = area_ctx.dragging.cloned();
             if dragging {
                 spawn(async move {
                     _ = button.set_focus(true).await;
@@ -340,25 +366,27 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
         }
     });
 
-    let percent = ctx.as_percent((ctx.value)());
+    let percent = area_percent((area_ctx.value)());
     let style = format!(
         "left: {:.2}%; top: {:.2}%;",
         percent.width,
         100. - percent.height
     );
-    let current = (ctx.value)();
+    let current = (area_ctx.value)();
     let min = COLOR_AREA_MIN;
     let max = COLOR_AREA_MAX;
-    let step = (ctx.step)();
+    let step = (area_ctx.step)();
     let color_label = color_name(Srgb::<f64>::from_color(picker_ctx.color()).into_format());
+    let thumb_color = color_hex(Srgb::<f64>::from_color(picker_ctx.color()).into_format());
 
     rsx! {
         div {
             class: "dx-color-area-thumb",
             role: "presentation",
             aria_label: "Color area thumb",
-            "data-dragging": ctx.dragging,
+            "data-dragging": area_ctx.dragging,
             style,
+            background_color: thumb_color,
             tabindex: 0,
             onmounted: move |evt| {
                 // Store the mounted data for focus management
@@ -373,14 +401,15 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
                 evt.prevent_default();
             },
             onkeydown: move |evt| async move {
-                let Some(move_event) = MoveEvent::from_keyboard(&evt, (ctx.step)()) else {
+                let Some(move_event) = MoveEvent::from_keyboard(&evt, (area_ctx.step)()) else {
                     return;
                 };
 
                 evt.prevent_default();
                 // Clamp and snap the new value
-                let new_value = (ctx.value)() + Size2D::new(move_event.delta_x, move_event.delta_y);
-                ctx.set_value.call(ctx.clamp_and_snap(new_value));
+                let new_value =
+                    (area_ctx.value)() + Size2D::new(move_event.delta_x, move_event.delta_y);
+                set_area_value(picker_ctx, clamp_area_value(new_value, (area_ctx.step)()));
             },
             ..props.attributes,
             input {
@@ -415,29 +444,6 @@ fn AreaThumb(props: AreaThumbProps) -> Element {
 #[derive(Copy, Clone)]
 struct ColorAreaContext {
     value: Memo<ClientPoint>,
-    set_value: Callback<ClientPoint>,
     step: ReadSignal<f64>,
     dragging: ReadSignal<bool>,
-}
-
-impl ColorAreaContext {
-    fn range_size(&self) -> f64 {
-        COLOR_AREA_RANGE
-    }
-
-    fn snap(&self, value: ClientPoint) -> ClientPoint {
-        let step = (self.step)();
-        value.map(|v| (v / step).round() * step)
-    }
-
-    fn clamp_and_snap(&self, value: ClientPoint) -> ClientPoint {
-        let clamped = value.map(|v| v.clamp(COLOR_AREA_MIN, COLOR_AREA_MAX));
-        self.snap(clamped)
-    }
-
-    fn as_percent(&self, value: ClientPoint) -> PixelsSize {
-        let size = self.range_size();
-        let scaled = value.map(|v| ((v - COLOR_AREA_MIN) / size * 100.0).clamp(0.0, 100.0));
-        PixelsSize::new(scaled.x, scaled.y)
-    }
 }
