@@ -191,7 +191,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                     if disabled || event.trigger_button() != Some(MouseButton::Primary) {
                         return;
                     }
-                    let Some((x0, y0)) = down_pos.replace(None) else {
+                    let Some((x0, y0)) = down_pos.take() else {
                         return;
                     };
                     // Drag-cancel only matters for touch; mouse clicks shouldn't be
