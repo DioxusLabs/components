@@ -156,11 +156,11 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
 
                 // Debounce scroll-end detection. Firefox in CI can take long
                 // enough between scroll events and measurement reads that a
-                // 150ms timeout unfreezes the scroll canvas mid-scroll.
+                // shorter timeout unfreezes the scroll canvas mid-scroll.
                 scrollEndTimer = setTimeout(() => {
                     scrollEndTimer = null;
                     publish(false);
-                }, 300);
+                }, 600);
             }
 
             // Initial publish
