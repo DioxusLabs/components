@@ -190,13 +190,18 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                     down_pos.set(Some((p.x, p.y)));
                 },
                 onpointermove: move |event| {
+                    // Drag-cancel only matters for touch; mouse clicks shouldn't be
+                    // suppressed by tiny cursor drift between down and up.
+                    if event.pointer_type() != "touch" {
+                        return;
+                    }
                     let Some((x0, y0)) = down_pos.cloned() else {
                         return;
                     };
                     let p = event.client_coordinates();
                     let dx = p.x - x0;
                     let dy = p.y - y0;
-                    // ~5px threshold tolerates trackpad jitter and small touch wobble.
+                    // ~5px threshold tolerates small touch wobble.
                     if dx * dx + dy * dy > 25.0 {
                         did_drag.set(true);
                     }
