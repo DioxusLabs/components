@@ -121,6 +121,31 @@ test("multi-select toggles options and stays open", async ({ page }) => {
     await expect(selectTrigger).not.toContainText("Pepperoni");
 });
 
+test("mobile: multi-select tapping options keeps the dropdown open", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&variant=multi&", {
+        timeout: 20 * 60 * 1000,
+    });
+    const selectTrigger = multiSelectTrigger(page);
+    await selectTrigger.tap();
+
+    const selectMenu = page.locator(".dx-select-list");
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+
+    const onion = selectMenu.getByRole("option", { name: "Onion" });
+    await expect(onion).toHaveAttribute("aria-selected", "false");
+
+    // Tapping the first option on mobile should toggle it without closing the menu
+    await onion.tap();
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    await expect(onion).toHaveAttribute("aria-selected", "true");
+
+    // Tapping a second option should also leave the dropdown open
+    const pepperoni = selectMenu.getByRole("option", { name: "Pepperoni" });
+    await pepperoni.tap();
+    await expect(selectMenu).toHaveAttribute("data-state", "open");
+    await expect(pepperoni).toHaveAttribute("aria-selected", "false");
+});
+
 test("multi-select keyboard toggles and exposes aria-multiselectable", async ({ page }) => {
     await page.goto("http://127.0.0.1:8080/component/?name=select&variant=multi&", {
         timeout: 20 * 60 * 1000,
