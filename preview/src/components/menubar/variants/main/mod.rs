@@ -20,6 +20,7 @@ pub fn Demo() -> Element {
                         MenubarItem {
                             index: 1usize,
                             value: "open".to_string(),
+                            disabled: true,
                             on_select: move |value| {
                                 tracing::info!("Selected value: {}", value);
                             },

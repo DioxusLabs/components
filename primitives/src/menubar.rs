@@ -4,8 +4,8 @@ use dioxus::prelude::*;
 
 use crate::{
     focus::{
-        use_focus_control, use_focus_controlled_item, use_focus_entry, use_focus_provider,
-        FocusState,
+        use_focus_control, use_focus_controlled_item_disabled, use_focus_entry_disabled,
+        use_focus_provider, FocusState,
     },
     use_animated_open, use_id_or, use_unique_id,
 };
@@ -266,9 +266,8 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
         }
     });
 
-    use_focus_entry(ctx.focus, menu_ctx.index);
-
     let disabled = move || (ctx.disabled)() || (props.disabled)();
+    use_focus_entry_disabled(ctx.focus, menu_ctx.index, disabled);
 
     rsx! {
         div {
@@ -627,7 +626,7 @@ pub fn MenubarItem(props: MenubarItemProps) -> Element {
     let disabled = move || (ctx.disabled)() || (props.disabled)();
     let focused = move || menu_ctx.focus.is_focused(props.index.cloned()) && (menu_ctx.is_open)();
 
-    let onmounted = use_focus_controlled_item(props.index);
+    let onmounted = use_focus_controlled_item_disabled(props.index, disabled);
 
     rsx! {
         div {

@@ -85,7 +85,10 @@ impl SelectContext {
         if self.open.cloned() {
             if let Some(focused_index) = self.focus_state.current_focus() {
                 let options = self.options.read();
-                if let Some(option) = options.iter().find(|opt| opt.tab_index == focused_index) {
+                if let Some(option) = options
+                    .iter()
+                    .find(|opt| opt.tab_index == focused_index && !opt.disabled)
+                {
                     self.set_value.call(Some(option.value.clone()));
                     if !self.multi {
                         self.open.set(false);
@@ -157,6 +160,8 @@ pub(super) struct OptionState {
     pub text_value: String,
     /// Unique ID for the option
     pub id: String,
+    /// Whether the option is disabled
+    pub disabled: bool,
 }
 
 /// Context for select option components to know if they're selected

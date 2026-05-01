@@ -234,3 +234,37 @@ test("up arrow selects last element", async ({ page }) => {
     const firstOption = selectMenu.getByRole("option", { name: "other" });
     await expect(firstOption).toBeFocused();
 });
+
+test("keyboard navigation skips disabled options", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&");
+    const selectTrigger = singleSelectTrigger(page);
+    await selectTrigger.click();
+
+    const selectMenu = page.locator(".dx-select-list");
+    const orange = selectMenu.getByRole("option").filter({ hasText: "Orange" }).first();
+    const orangeade = selectMenu.getByRole("option").filter({ hasText: "Orangeade" });
+    await expect(orange).toHaveAttribute("aria-disabled", "true");
+
+    await page.keyboard.press("ArrowDown");
+    await expect(selectMenu.getByRole("option", { name: "apple" })).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(selectMenu.getByRole("option", { name: "banana" })).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(orangeade).toBeFocused();
+    await expect(orange).not.toBeFocused();
+});
+
+test("typeahead skips disabled options", async ({ page }) => {
+    await page.goto("http://127.0.0.1:8080/component/?name=select&");
+    const selectTrigger = singleSelectTrigger(page);
+    await selectTrigger.click();
+
+    const selectMenu = page.locator(".dx-select-list");
+    const orange = selectMenu.getByRole("option").filter({ hasText: "Orange" }).first();
+    const orangeade = selectMenu.getByRole("option").filter({ hasText: "Orangeade" });
+    await expect(orange).toHaveAttribute("aria-disabled", "true");
+
+    await page.keyboard.type("Ora");
+    await expect(orangeade).toBeFocused();
+    await expect(orange).not.toBeFocused();
+});

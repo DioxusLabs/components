@@ -2,8 +2,8 @@
 
 use crate::{
     focus::{
-        use_focus_control, use_focus_controlled_item, use_focus_entry, use_focus_provider,
-        FocusState,
+        use_focus_control, use_focus_controlled_item_disabled, use_focus_entry_disabled,
+        use_focus_provider, FocusState,
     },
     use_animated_open, use_id_or, use_unique_id,
 };
@@ -287,9 +287,8 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
         }
     });
 
-    use_focus_entry(ctx.focus, nav_ctx.index);
-
     let disabled = move || (ctx.disabled)() || (props.disabled)();
+    use_focus_entry_disabled(ctx.focus, nav_ctx.index, disabled);
 
     rsx! {
         div {
@@ -702,7 +701,13 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
     let mut ctx: NavbarContext = use_context();
     let mut nav_ctx: Option<NavbarNavContext> = try_use_context();
 
-    let disabled = move || (ctx.disabled)() || (props.disabled)();
+    let disabled = move || {
+        (ctx.disabled)()
+            || nav_ctx
+                .map(|nav_ctx| (nav_ctx.disabled)())
+                .unwrap_or_default()
+            || (props.disabled)()
+    };
     let focused = move || {
         nav_ctx.map_or_else(
             || ctx.focus.is_focused(props.index.cloned()),
@@ -710,7 +715,7 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
         )
     };
 
-    let mut onmounted = use_focus_controlled_item(props.index);
+    let mut onmounted = use_focus_controlled_item_disabled(props.index, disabled);
 
     props.attributes.push(onkeydown({
         let value = props.value.clone();
@@ -730,8 +735,10 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
     }));
 
     props.attributes.push(onpointerdown(move |_| {
-        if let Some(mut nav_ctx) = nav_ctx {
-            nav_ctx.focus.set_focus(Some(props.index.cloned()));
+        if !disabled() {
+            if let Some(mut nav_ctx) = nav_ctx {
+                nav_ctx.focus.set_focus(Some(props.index.cloned()));
+            }
         }
     }));
 

@@ -3,11 +3,11 @@
 use crate::dioxus_elements::Key;
 use crate::{use_animated_open, use_effect_cleanup, use_id_or, use_unique_id};
 use dioxus::prelude::*;
+use std::collections::BTreeMap;
 use std::rc::Rc;
 
 // TODO: controlled version
 // TODO: rewrite this to use collapsible
-// TODO: keyboard should skip disabled items when focusing.
 
 /// Internal accordion context.
 #[derive(Clone, Copy, Default)]
@@ -30,11 +30,11 @@ struct AccordionContext {
     /// Whether the accordion is horizontal.
     horizontal: ReadSignal<bool>,
 
-    /// Number of current accordion items.
-    num_items: Signal<usize>,
-
     /// The focused accordion item by index, if any.
     focused_index: Signal<Option<usize>>,
+
+    /// Registered item indexes and disabled state.
+    items: Signal<BTreeMap<usize, bool>>,
 }
 
 impl AccordionContext {
@@ -46,13 +46,13 @@ impl AccordionContext {
     ) -> Self {
         Self {
             next_id: Signal::new(0),
-            num_items: Signal::new(0),
             open_items: Signal::new(Vec::new()),
             allow_multiple_open,
             disabled,
             collapsible,
             horizontal,
             focused_index: Signal::new(None),
+            items: Signal::new(BTreeMap::new()),
         }
     }
 
@@ -61,13 +61,23 @@ impl AccordionContext {
         let id = *next_id;
         *next_id += 1;
 
-        self.num_items += 1;
+        self.items.write().insert(id, false);
 
         id
     }
 
-    pub fn unregister_item(&mut self) {
-        self.num_items -= 1;
+    pub fn unregister_item(&mut self, id: usize) {
+        self.items.write().remove(&id);
+        if self.is_focused(id) {
+            self.set_focus(None);
+        }
+    }
+
+    pub fn set_item_disabled(&mut self, id: usize, disabled: bool) {
+        self.items.write().insert(id, disabled);
+        if disabled && self.is_focused(id) {
+            self.set_focus(None);
+        }
     }
 
     pub fn set_open(&mut self, id: usize) {
@@ -121,14 +131,15 @@ impl AccordionContext {
             return;
         };
 
-        let mut next_focused = id.saturating_add(1);
-
-        let count = (self.num_items)() - 1;
-        if id == count {
-            next_focused = 0;
+        let items = self.items.read();
+        let next = items
+            .range(id.saturating_add(1)..)
+            .chain(items.range(..id))
+            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx));
+        drop(items);
+        if let Some(next) = next {
+            self.focused_index.set(Some(next));
         }
-
-        self.focused_index.set(Some(next_focused));
     }
 
     /// Focus the previous accordion item.
@@ -137,22 +148,35 @@ impl AccordionContext {
             return;
         };
 
-        let mut next_focused = id.saturating_sub(1);
-
-        let count = (self.num_items)() - 1;
-        if id == 0 {
-            next_focused = count;
+        let items = self.items.read();
+        let next = items
+            .range(..id)
+            .rev()
+            .chain(items.range(id.saturating_add(1)..).rev())
+            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx));
+        drop(items);
+        if let Some(next) = next {
+            self.focused_index.set(Some(next));
         }
-
-        self.focused_index.set(Some(next_focused));
     }
 
     pub fn focus_start(&mut self) {
-        self.focused_index.set(Some(0));
+        let next = self
+            .items
+            .read()
+            .iter()
+            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx));
+        self.focused_index.set(next);
     }
 
     pub fn focus_end(&mut self) {
-        self.focused_index.set(Some((self.num_items)() - 1));
+        let next = self
+            .items
+            .read()
+            .iter()
+            .rev()
+            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx));
+        self.focused_index.set(next);
     }
 
     pub fn is_horizontal(&self) -> bool {
@@ -356,7 +380,11 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
         on_trigger_click: props.on_trigger_click,
     });
 
-    use_effect_cleanup(move || ctx.unregister_item());
+    use_effect(move || {
+        ctx.set_item_disabled(item.id, ctx.is_disabled() || item.is_disabled());
+    });
+
+    use_effect_cleanup(move || ctx.unregister_item(item.id));
 
     // Open this item if we're set as default.
     use_hook(move || {
@@ -504,7 +532,7 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
 
     let mut btn_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
     use_effect(move || {
-        let is_focused = ctx.is_focused(item.index);
+        let is_focused = ctx.is_focused(item.id);
         if is_focused {
             if let Some(md) = btn_ref() {
                 spawn(async move {
