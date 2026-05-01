@@ -42,7 +42,12 @@
   background: var(--secondary-color-4);
 }
 
-.dx-radio-item[data-disabled="true"]::before {
+.dx-radio-item[data-disabled="true"] {
+  color: var(--secondary-color-5);
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.dx-radio-item[data-disabled="true"]::before {
+  cursor: not-allowed;
 }

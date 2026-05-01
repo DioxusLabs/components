@@ -187,6 +187,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 aria_disabled: disabled(),
                 aria_label: props.aria_label.clone(),
                 aria_roledescription: props.aria_roledescription.clone(),
+                "data-disabled": disabled(),
 
                 onpointerdown: move |event| {
                     if disabled() || event.trigger_button() != Some(MouseButton::Primary) {
