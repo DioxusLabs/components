@@ -154,7 +154,6 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
             .iter()
             .any(|v| v.as_ref::<T>() == Some(&*value))
     });
-    let mut did_drag = use_signal(|| false);
     let mut down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);
 
     use_context_provider(|| SelectOptionContext {
@@ -185,37 +184,26 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                     // keeps DOM focus (its onblur would otherwise close us mid-tap). We
                     // commit the selection ourselves on pointerup.
                     event.prevent_default();
-                    did_drag.set(false);
                     let p = event.client_coordinates();
                     down_pos.set(Some((p.x, p.y)));
                 },
-                onpointermove: move |event| {
-                    // Drag-cancel only matters for touch; mouse clicks shouldn't be
-                    // suppressed by tiny cursor drift between down and up.
-                    if event.pointer_type() != "touch" {
+                onpointerup: move |event| {
+                    if disabled || event.trigger_button() != Some(MouseButton::Primary) {
                         return;
                     }
-                    let Some((x0, y0)) = down_pos.cloned() else {
+                    let Some((x0, y0)) = down_pos.replace(None) else {
                         return;
                     };
-                    let p = event.client_coordinates();
-                    let dx = p.x - x0;
-                    let dy = p.y - y0;
-                    // ~5px threshold tolerates small touch wobble.
-                    if dx * dx + dy * dy > 25.0 {
-                        did_drag.set(true);
-                    }
-                },
-                onpointerup: move |event| {
-                    if disabled
-                        || event.trigger_button() != Some(MouseButton::Primary)
-                        || down_pos.cloned().is_none()
-                    {
-                        return;
-                    }
-                    down_pos.set(None);
-                    if did_drag() {
-                        return;
+                    // Drag-cancel only matters for touch; mouse clicks shouldn't be
+                    // suppressed by tiny cursor drift between down and up. ~5px
+                    // threshold tolerates small touch wobble.
+                    if event.pointer_type() == "touch" {
+                        let p = event.client_coordinates();
+                        let dx = p.x - x0;
+                        let dy = p.y - y0;
+                        if dx * dx + dy * dy > 25.0 {
+                            return;
+                        }
                     }
                     ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
                     if !ctx.multi {
@@ -224,7 +212,6 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 },
                 onpointercancel: move |_| {
                     down_pos.set(None);
-                    did_drag.set(true);
                 },
                 onblur: move |_| {
                     if focused() {
