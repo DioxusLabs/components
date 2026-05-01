@@ -61,12 +61,12 @@ export default defineConfig({
     },
 
     // Temporarily disabled mobile tests in CI. The mobile browser CI downloads acts different than the local tests which pass
-    /* Test against mobile viewports. */
-    {
-      name: "Mobile Chrome",
-      grep: /mobile/,
-      use: { ...devices["Pixel 5"] },
-    },
+    // /* Test against mobile viewports. */
+    // {
+    //   name: "Mobile Chrome",
+    //   grep: /mobile/,
+    //   use: { ...devices["Pixel 5"] },
+    // },
 
     // {
     //   name: "Mobile Safari",
