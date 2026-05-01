@@ -428,8 +428,13 @@ pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
     rsx! {
         button {
             onmounted,
-            onpointerdown: move |_| {
+            onpointerdown: move |event| {
                 if !disabled() {
+                    // Suppress the synthesized focus shift so that tapping a child
+                    // menuitem on mobile doesn't blur the trigger and trip onblur,
+                    // which would close the nav mid-tap and detach the menuitem
+                    // before Playwright (or a real user) can complete the tap.
+                    event.prevent_default();
                     let new_open = if is_open() { None } else { Some(nav_ctx.index.cloned()) };
                     ctx.set_open_nav.call(new_open);
                 }
