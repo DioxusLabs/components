@@ -121,9 +121,7 @@ impl FocusState {
             }),
             None => self.first_enabled_index(),
         };
-        if let Some(index) = index {
-            self.set_focus(Some(index));
-        }
+        self.set_focus_or_pending(index);
     }
 
     pub(crate) fn focus_prev(&mut self) {
@@ -136,20 +134,22 @@ impl FocusState {
             None if (self.roving_loop)() => self.last_enabled_index(),
             None => self.first_enabled_index(),
         };
-        if let Some(index) = index {
-            self.set_focus(Some(index));
-        }
+        self.set_focus_or_pending(index);
     }
 
     pub(crate) fn focus_first(&mut self) {
-        if let Some(index) = self.first_enabled_index() {
-            self.set_focus(Some(index));
-        }
+        self.set_focus_or_pending(self.first_enabled_index());
     }
 
     pub(crate) fn focus_last(&mut self) {
-        if let Some(index) = self.last_enabled_index() {
-            self.set_focus(Some(index));
+        self.set_focus_or_pending(self.last_enabled_index());
+    }
+
+    fn set_focus_or_pending(&mut self, index: Option<usize>) {
+        match index {
+            Some(index) => self.set_focus(Some(index)),
+            None if self.items.peek().is_empty() => self.set_focus(Some(0)),
+            None => {}
         }
     }
 
@@ -181,12 +181,35 @@ impl FocusState {
     }
 
     pub(crate) fn add_update_item(&mut self, index: usize, disabled: bool) {
+        let existed = self.items.peek().contains_key(&index);
         if self.items.peek().get(&index) == Some(&disabled) {
             return;
         }
         self.items.write().insert(index, disabled);
-        if disabled && self.current_focus() == Some(index) {
+        let current_focus = *self.current_focus.peek();
+        if disabled && existed && current_focus == Some(index) {
             self.blur();
+        } else if !disabled {
+            let next_focus = {
+                let items = self.items.peek();
+                current_focus
+                    .filter(|index| items.get(index) == Some(&true))
+                    .and_then(|index| {
+                        items
+                            .range(index.saturating_add(1)..)
+                            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx))
+                            .or_else(|| {
+                                self.roving_loop.peek().then(|| {
+                                    items
+                                        .iter()
+                                        .find_map(|(&idx, &disabled)| (!disabled).then_some(idx))
+                                })?
+                            })
+                    })
+            };
+            if let Some(next_focus) = next_focus {
+                self.set_focus(Some(next_focus));
+            }
         }
     }
 
