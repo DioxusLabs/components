@@ -1,53 +1,51 @@
 use super::super::component::*;
 use dioxus::prelude::*;
 
-const INLINE_STYLE: &str = r#".dx-virtual-list-container {
-  position: relative;
-  max-height: 36rem;
-  contain: layout paint;
-  overflow-y: auto;
-}
-
-.dx-virtual-list-demo {
-  display: flex;
-  flex-direction: column;
-  margin: 0 auto;
-  gap: 0.75rem;
-}
-
-.dx-virtual-list-demo .dx-virtual-list-subtitle {
-  margin: 0;
-  margin-bottom: 0.75rem;
-  color: var(--primary-color-9);
-  font-size: 0.9rem;
-}
-
-.dx-virtual-list-card {
-  padding: 0.75rem 0.9rem;
-  border: 1px solid var(--primary-color-6);
-  border-radius: 0.625rem;
-  background: var(--primary-color-2);
-}
-
-.dx-virtual-list-card h3 {
-  margin: 0 0 0.3rem;
-  color: var(--primary-color-12);
-  font-size: 0.95rem;
-}
-
-.dx-virtual-list-card p {
-  margin: 0;
-  color: var(--primary-color-11);
-  font-size: 0.875rem;
-  line-height: 1.4;
-}"#;
-
 #[component]
 pub fn Demo() -> Element {
     rsx! {
         div { class: "dx-virtual-list-demo",
             p { class: "dx-virtual-list-subtitle", "Scroll this page to verify virtualized rendering with dynamic row heights." }
-            style { {INLINE_STYLE} }
+            style { r#".dx-virtual-list-container {{
+  position: relative;
+  max-height: 36rem;
+  contain: layout paint;
+  overflow-y: auto;
+}}
+
+.dx-virtual-list-demo {{
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  gap: 0.75rem;
+}}
+
+.dx-virtual-list-demo .dx-virtual-list-subtitle {{
+  margin: 0;
+  margin-bottom: 0.75rem;
+  color: var(--primary-color-9);
+  font-size: 0.9rem;
+}}
+
+.dx-virtual-list-card {{
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--primary-color-6);
+  border-radius: 0.625rem;
+  background: var(--primary-color-2);
+}}
+
+.dx-virtual-list-card h3 {{
+  margin: 0 0 0.3rem;
+  color: var(--primary-color-12);
+  font-size: 0.95rem;
+}}
+
+.dx-virtual-list-card p {{
+  margin: 0;
+  color: var(--primary-color-11);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}}"# }
             VirtualList {
                 count: 2000usize,
                 buffer: 12usize,

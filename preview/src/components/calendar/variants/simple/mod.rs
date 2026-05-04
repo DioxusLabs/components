@@ -1,11 +1,11 @@
 use super::super::component::*;
 use dioxus::prelude::*;
-use time::{Date, UtcDateTime};
+use time::{macros::date, Date};
 
 #[component]
 pub fn Demo() -> Element {
     let mut selected_date = use_signal(|| None::<Date>);
-    let mut view_date = use_signal(|| UtcDateTime::now().date());
+    let mut view_date = use_signal(|| date!(2026 - 05 - 15));
     rsx! {
         div { class: "dx-calendar-example", style: "padding: 20px;",
             Calendar {

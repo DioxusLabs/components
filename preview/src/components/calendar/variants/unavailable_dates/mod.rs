@@ -1,6 +1,6 @@
 use super::super::component::*;
 use dioxus::prelude::*;
-use time::{ext::NumericalDuration, macros::date, Date, UtcDateTime};
+use time::{ext::NumericalDuration, macros::date, Date};
 
 use dioxus_primitives::calendar::DateRange;
 
@@ -8,14 +8,14 @@ use dioxus_primitives::calendar::DateRange;
 pub fn Demo() -> Element {
     let mut selected_range = use_signal(|| None::<DateRange>);
 
-    let now = UtcDateTime::now().date();
-    let mut view_date = use_signal(|| now);
+    let start = date!(2026 - 05 - 15);
+    let mut view_date = use_signal(|| start);
 
     let disabled_ranges = use_signal(|| {
         vec![
-            DateRange::new(now, now.saturating_add(3.days())),
-            DateRange::new(now.saturating_add(15.days()), now.saturating_add(18.days())),
-            DateRange::new(now.saturating_add(22.days()), now.saturating_add(23.days())),
+            DateRange::new(start, start.saturating_add(3.days())),
+            DateRange::new(start.saturating_add(15.days()), start.saturating_add(18.days())),
+            DateRange::new(start.saturating_add(22.days()), start.saturating_add(23.days())),
         ]
     });
 
