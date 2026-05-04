@@ -140,6 +140,7 @@ examples!(
     label,
     menubar,
     navbar,
+    otp,
     pagination,
     popover,
     progress,
