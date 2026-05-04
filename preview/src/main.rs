@@ -153,9 +153,9 @@ impl Route {
     }
 }
 
-#[cfg(feature = "server")]
-#[server(endpoint = "static_routes")]
-async fn static_routes() -> ServerFnResult<Vec<String>> {
+#[cfg(feature = "fullstack")]
+#[server(endpoint = "static_routes", output = server_fn::codec::Json)]
+async fn static_routes() -> Result<Vec<String>, ServerFnError> {
     // The `Routable` trait has a `static_routes` method that returns all static routes in the enum
     Ok(Route::static_routes()
         .iter()
