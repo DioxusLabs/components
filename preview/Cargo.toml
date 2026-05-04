@@ -22,5 +22,5 @@ pulldown-cmark = "0.13.0"
 web = ["dioxus/web", "dioxus-primitives/web"]
 desktop = ["dioxus/desktop"]
 fullstack = ["dioxus/fullstack"]
-server = ["dioxus/server"]
+server = ["dioxus/server", "dioxus/fullstack"]
 native = ["dioxus/native"]
