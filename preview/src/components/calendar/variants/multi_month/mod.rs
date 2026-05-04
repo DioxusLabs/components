@@ -1,13 +1,13 @@
 use super::super::component::*;
 use dioxus::prelude::*;
-use time::{macros::date, Date, UtcDateTime};
+use time::{macros::date, Date};
 
 use dioxus_primitives::calendar::DateRange;
 
 #[component]
 pub fn Demo() -> Element {
     let mut selected_range = use_signal(|| None::<DateRange>);
-    let mut view_date = use_signal(|| UtcDateTime::now().date());
+    let mut view_date = use_signal(|| date!(2026 - 05 - 15));
     rsx! {
         div { class: "dx-calendar-example", style: "padding: 20px;",
             RangeCalendar {
