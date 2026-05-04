@@ -2,8 +2,8 @@
 
 use crate::{
     focus::{
-        use_focus_control, use_focus_controlled_item_disabled, use_focus_entry_disabled,
-        use_focus_provider, FocusState,
+        use_deferred_focus, use_focus_control, use_focus_controlled_item_disabled,
+        use_focus_entry_disabled, use_focus_provider, FocusPlacement, FocusState,
     },
     use_animated_open, use_id_or, use_unique_id,
 };
@@ -169,6 +169,7 @@ struct NavbarNavContext {
     focus: FocusState,
     is_open: Memo<bool>,
     disabled: ReadSignal<bool>,
+    initial_focus: Signal<Option<FocusPlacement>>,
 }
 
 impl NavbarNavContext {
@@ -274,16 +275,19 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
     let mut ctx: NavbarContext = use_context();
     let is_open = use_memo(move || (ctx.open_nav)() == Some(props.index.cloned()));
     let focus = use_focus_provider(ctx.focus.roving_loop);
+    let initial_focus = use_signal(|| None);
     let mut nav_ctx = use_context_provider(|| NavbarNavContext {
         index: props.index,
         focus,
         is_open,
         disabled: props.disabled,
+        initial_focus,
     });
 
     use_effect(move || {
         if !is_open() {
             nav_ctx.focus.blur();
+            nav_ctx.initial_focus.set(None);
         }
     });
 
@@ -318,13 +322,18 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
                     }
                     Key::ArrowDown if !disabled() => {
                         if !is_open() {
+                            nav_ctx.initial_focus.set(Some(FocusPlacement::First));
                             ctx.set_open_nav.call(Some(props.index.cloned()));
+                        } else {
+                            nav_ctx.focus_next();
                         }
-                        nav_ctx.focus_next();
                     },
                     Key::ArrowUp if !disabled() => {
                         if is_open() {
                             nav_ctx.focus_prev();
+                        } else {
+                            nav_ctx.initial_focus.set(Some(FocusPlacement::Last));
+                            ctx.set_open_nav.call(Some(props.index.cloned()));
                         }
                     },
                     _ => return,
@@ -553,6 +562,7 @@ pub fn NavbarContent(props: NavbarContentProps) -> Element {
     let id = use_id_or(unique_id, props.id);
 
     let render = use_animated_open(id, nav_ctx.is_open);
+    use_deferred_focus(nav_ctx.focus, nav_ctx.initial_focus, render);
 
     rsx! {
         if render() {

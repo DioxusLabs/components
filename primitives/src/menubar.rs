@@ -4,8 +4,8 @@ use dioxus::prelude::*;
 
 use crate::{
     focus::{
-        use_focus_control, use_focus_controlled_item_disabled, use_focus_entry_disabled,
-        use_focus_provider, FocusState,
+        use_deferred_focus, use_focus_control, use_focus_controlled_item_disabled,
+        use_focus_entry_disabled, use_focus_provider, FocusPlacement, FocusState,
     },
     use_animated_open, use_id_or, use_unique_id,
 };
@@ -148,6 +148,7 @@ struct MenubarMenuContext {
     focus: FocusState,
     is_open: Memo<bool>,
     disabled: ReadSignal<bool>,
+    initial_focus: Signal<Option<FocusPlacement>>,
 }
 
 impl MenubarMenuContext {
@@ -253,16 +254,19 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
     let mut ctx: MenubarContext = use_context();
     let is_open = use_memo(move || (ctx.open_menu)() == Some(props.index.cloned()));
     let focus = use_focus_provider(ctx.focus.roving_loop);
+    let initial_focus = use_signal(|| None);
     let mut menu_ctx = use_context_provider(|| MenubarMenuContext {
         index: props.index,
         focus,
         is_open,
         disabled: props.disabled,
+        initial_focus,
     });
 
     use_effect(move || {
         if !is_open() {
             menu_ctx.focus.blur();
+            menu_ctx.initial_focus.set(None);
         }
     });
 
@@ -285,13 +289,18 @@ pub fn MenubarMenu(props: MenubarMenuProps) -> Element {
                     Key::ArrowRight => ctx.focus.focus_next(),
                     Key::ArrowDown if !disabled() => {
                         if !is_open() {
+                            menu_ctx.initial_focus.set(Some(FocusPlacement::First));
                             ctx.set_open_menu.call(Some(props.index.cloned()));
+                        } else {
+                            menu_ctx.focus_next();
                         }
-                        menu_ctx.focus_next();
                     },
                     Key::ArrowUp if !disabled() => {
                         if is_open() {
                             menu_ctx.focus_prev();
+                        } else {
+                            menu_ctx.initial_focus.set(Some(FocusPlacement::Last));
+                            ctx.set_open_menu.call(Some(props.index.cloned()));
                         }
                     },
                     Key::Home => ctx.focus.focus_first(),
@@ -510,6 +519,7 @@ pub fn MenubarContent(props: MenubarContentProps) -> Element {
     let id = use_id_or(unique_id, props.id);
 
     let render = use_animated_open(id, menu_ctx.is_open);
+    use_deferred_focus(menu_ctx.focus, menu_ctx.initial_focus, render);
 
     rsx! {
         if render() {

@@ -55,6 +55,31 @@ pub(crate) fn use_focus_controlled_item_disabled(
     use_focus_control_disabled(ctx, index, disabled)
 }
 
+#[derive(Clone, Copy)]
+pub(crate) enum FocusPlacement {
+    First,
+    Last,
+}
+
+pub(crate) fn use_deferred_focus(
+    mut ctx: FocusState,
+    mut placement: Signal<Option<FocusPlacement>>,
+    active: impl Fn() -> bool + Copy + 'static,
+) {
+    use_effect(move || {
+        if !active() {
+            placement.set(None);
+            return;
+        }
+        let Some(placement_value) = placement() else {
+            return;
+        };
+        if ctx.try_focus_placement(placement_value) {
+            placement.set(None);
+        }
+    });
+}
+
 fn first_enabled<'a>(iter: impl IntoIterator<Item = (&'a usize, &'a bool)>) -> Option<usize> {
     iter.into_iter()
         .find_map(|(&idx, &disabled)| (!disabled).then_some(idx))
@@ -132,6 +157,17 @@ impl FocusState {
 
     pub(crate) fn focus_last(&mut self) {
         self.set_focus(self.last_enabled_index());
+    }
+
+    pub(crate) fn try_focus_placement(&mut self, placement: FocusPlacement) -> bool {
+        let Some(index) = (match placement {
+            FocusPlacement::First => self.first_enabled_index(),
+            FocusPlacement::Last => self.last_enabled_index(),
+        }) else {
+            return false;
+        };
+        self.set_focus(Some(index));
+        true
     }
 
     pub(crate) fn blur(&mut self) {
