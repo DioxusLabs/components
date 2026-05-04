@@ -1,16 +1,15 @@
 //! Defines the [`Accordion`] component and its sub-components.
 
 use crate::dioxus_elements::Key;
-use crate::{use_animated_open, use_effect_cleanup, use_id_or, use_unique_id};
+use crate::focus::{use_focus_control_disabled, use_focus_entry_disabled, FocusState};
+use crate::{use_animated_open, use_id_or, use_unique_id};
 use dioxus::prelude::*;
-use std::collections::BTreeMap;
-use std::rc::Rc;
 
 // TODO: controlled version
 // TODO: rewrite this to use collapsible
 
 /// Internal accordion context.
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy)]
 struct AccordionContext {
     /// Used to track the next runtime-generated id.
     next_id: Signal<usize>,
@@ -30,11 +29,8 @@ struct AccordionContext {
     /// Whether the accordion is horizontal.
     horizontal: ReadSignal<bool>,
 
-    /// The focused accordion item by index, if any.
-    focused_index: Signal<Option<usize>>,
-
-    /// Registered item indexes and disabled state.
-    items: Signal<BTreeMap<usize, bool>>,
+    /// Roving focus state, keyed by the per-item runtime id.
+    focus: FocusState,
 }
 
 impl AccordionContext {
@@ -51,8 +47,7 @@ impl AccordionContext {
             disabled,
             collapsible,
             horizontal,
-            focused_index: Signal::new(None),
-            items: Signal::new(BTreeMap::new()),
+            focus: FocusState::new(ReadSignal::new(Signal::new(true))),
         }
     }
 
@@ -60,24 +55,7 @@ impl AccordionContext {
         let mut next_id = self.next_id.write();
         let id = *next_id;
         *next_id += 1;
-
-        self.items.write().insert(id, false);
-
         id
-    }
-
-    pub fn unregister_item(&mut self, id: usize) {
-        self.items.write().remove(&id);
-        if self.is_focused(id) {
-            self.set_focus(None);
-        }
-    }
-
-    pub fn set_item_disabled(&mut self, id: usize, disabled: bool) {
-        self.items.write().insert(id, disabled);
-        if disabled && self.is_focused(id) {
-            self.set_focus(None);
-        }
     }
 
     pub fn set_open(&mut self, id: usize) {
@@ -108,75 +86,6 @@ impl AccordionContext {
 
     pub fn is_disabled(&self) -> bool {
         (self.disabled)()
-    }
-
-    pub fn is_focused(&self, index: usize) -> bool {
-        if let Some(current_index) = *self.focused_index.read() {
-            return current_index == index;
-        }
-
-        false
-    }
-
-    /// Set the currently focused accordion item.
-    ///
-    /// This should be used by `focus`/`focusout` event only to start tracking focus.
-    pub fn set_focus(&mut self, id: Option<usize>) {
-        self.focused_index.set(id);
-    }
-
-    /// Focus the next accordion item.
-    pub fn focus_next(&mut self) {
-        let Some(id) = *self.focused_index.read() else {
-            return;
-        };
-
-        let items = self.items.read();
-        let next = items
-            .range(id.saturating_add(1)..)
-            .chain(items.range(..id))
-            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx));
-        drop(items);
-        if let Some(next) = next {
-            self.focused_index.set(Some(next));
-        }
-    }
-
-    /// Focus the previous accordion item.
-    pub fn focus_prev(&mut self) {
-        let Some(id) = *self.focused_index.read() else {
-            return;
-        };
-
-        let items = self.items.read();
-        let next = items
-            .range(..id)
-            .rev()
-            .chain(items.range(id.saturating_add(1)..).rev())
-            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx));
-        drop(items);
-        if let Some(next) = next {
-            self.focused_index.set(Some(next));
-        }
-    }
-
-    pub fn focus_start(&mut self) {
-        let next = self
-            .items
-            .read()
-            .iter()
-            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx));
-        self.focused_index.set(next);
-    }
-
-    pub fn focus_end(&mut self) {
-        let next = self
-            .items
-            .read()
-            .iter()
-            .rev()
-            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx));
-        self.focused_index.set(next);
     }
 
     pub fn is_horizontal(&self) -> bool {
@@ -286,7 +195,7 @@ pub fn Accordion(props: AccordionProps) -> Element {
             "data-disabled": (props.disabled)(),
 
             onfocusout: move |_| {
-                ctx.set_focus(None);
+                ctx.focus.blur();
             },
 
             ..props.attributes,
@@ -374,17 +283,14 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
 
     let item = use_context_provider(|| Item {
         id: ctx.register_item(),
-        index: props.index,
         aria_id,
         disabled: props.disabled,
         on_trigger_click: props.on_trigger_click,
     });
 
-    use_effect(move || {
-        ctx.set_item_disabled(item.id, ctx.is_disabled() || item.is_disabled());
-    });
-
-    use_effect_cleanup(move || ctx.unregister_item(item.id));
+    let disabled = move || ctx.is_disabled() || item.is_disabled();
+    let id_signal = use_signal(|| item.id);
+    use_focus_entry_disabled(ctx.focus, id_signal, disabled);
 
     // Open this item if we're set as default.
     use_hook(move || {
@@ -528,33 +434,24 @@ pub struct AccordionTriggerProps {
 pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
     let mut ctx: AccordionContext = use_context();
     let item: Item = use_context();
-    let is_disabled = ctx.is_disabled() || item.is_disabled();
 
-    let mut btn_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
-    use_effect(move || {
-        let is_focused = ctx.is_focused(item.id);
-        if is_focused {
-            if let Some(md) = btn_ref() {
-                spawn(async move {
-                    let _ = md.set_focus(true).await;
-                });
-            }
-        }
-    });
+    let disabled = move || ctx.is_disabled() || item.is_disabled();
+    let id_signal = use_signal(|| item.id);
+    let onmounted = use_focus_control_disabled(ctx.focus, id_signal, disabled);
 
     rsx! {
         button {
             id: props.id,
-            disabled: is_disabled,
+            disabled: disabled(),
             tabindex: "0",
             type: "button",
 
             aria_controls: item.aria_id(),
             aria_expanded: ctx.is_open(item.id),
 
-            onmounted: move |data| btn_ref.set(Some(data.data())),
+            onmounted,
             onfocus: move |_| {
-                ctx.set_focus(Some(item.id));
+                ctx.focus.set_focus(Some(item.id));
             },
             onkeydown: move |event| {
                 let key = event.key();
@@ -562,12 +459,12 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
                 let mut prevent_default = true;
 
                 match key {
-                    Key::ArrowUp if !horizontal => ctx.focus_prev(),
-                    Key::ArrowDown if !horizontal => ctx.focus_next(),
-                    Key::ArrowLeft if horizontal => ctx.focus_prev(),
-                    Key::ArrowRight if horizontal => ctx.focus_next(),
-                    Key::Home => ctx.focus_start(),
-                    Key::End => ctx.focus_end(),
+                    Key::ArrowUp if !horizontal => ctx.focus.focus_prev(),
+                    Key::ArrowDown if !horizontal => ctx.focus.focus_next(),
+                    Key::ArrowLeft if horizontal => ctx.focus.focus_prev(),
+                    Key::ArrowRight if horizontal => ctx.focus.focus_next(),
+                    Key::Home => ctx.focus.focus_first(),
+                    Key::End => ctx.focus.focus_last(),
                     _ => prevent_default = false,
                 };
 
@@ -577,7 +474,7 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
             },
 
             onclick: move |_| {
-                if is_disabled {
+                if disabled() {
                     return;
                 }
                 item.on_trigger_click.call(());
@@ -600,7 +497,6 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
 #[derive(Clone, Copy, PartialEq)]
 struct Item {
     id: usize,
-    index: usize,
     aria_id: Signal<String>,
     disabled: ReadSignal<bool>,
     on_trigger_click: Callback,

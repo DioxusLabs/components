@@ -151,6 +151,7 @@ impl SelectContext {
 }
 
 /// State for individual select options
+#[derive(PartialEq)]
 pub(super) struct OptionState {
     /// Tab index for focus management
     pub tab_index: usize,

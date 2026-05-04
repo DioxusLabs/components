@@ -5,18 +5,7 @@ use dioxus::prelude::*;
 use crate::use_effect_with_cleanup;
 
 pub(crate) fn use_focus_provider(roving_loop: ReadSignal<bool>) -> FocusState {
-    use_context_provider(|| {
-        let recent_focus = Signal::new(None);
-        let current_focus = Signal::new(None);
-        let items = Signal::new(BTreeMap::new());
-
-        FocusState {
-            recent_focus,
-            current_focus,
-            roving_loop,
-            items,
-        }
-    })
+    use_context_provider(|| FocusState::new(roving_loop))
 }
 
 pub(crate) fn use_focus_entry_disabled(
@@ -66,6 +55,11 @@ pub(crate) fn use_focus_controlled_item_disabled(
     use_focus_control_disabled(ctx, index, disabled)
 }
 
+fn first_enabled<'a>(iter: impl IntoIterator<Item = (&'a usize, &'a bool)>) -> Option<usize> {
+    iter.into_iter()
+        .find_map(|(&idx, &disabled)| (!disabled).then_some(idx))
+}
+
 #[derive(Clone, Copy)]
 pub(crate) struct FocusState {
     pub(crate) roving_loop: ReadSignal<bool>,
@@ -75,6 +69,15 @@ pub(crate) struct FocusState {
 }
 
 impl FocusState {
+    pub(crate) fn new(roving_loop: ReadSignal<bool>) -> Self {
+        Self {
+            roving_loop,
+            recent_focus: Signal::new(None),
+            current_focus: Signal::new(None),
+            items: Signal::new(BTreeMap::new()),
+        }
+    }
+
     pub(crate) fn set_focus(&mut self, index: Option<usize>) {
         if let Some(idx) = index {
             self.recent_focus.set(Some(idx));
@@ -83,33 +86,19 @@ impl FocusState {
     }
 
     fn enabled_index_after(&self, index: usize) -> Option<usize> {
-        self.items
-            .read()
-            .range(index.saturating_add(1)..)
-            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx))
+        first_enabled(self.items.read().range(index.saturating_add(1)..))
     }
 
     fn enabled_index_before(&self, index: usize) -> Option<usize> {
-        self.items
-            .read()
-            .range(..index)
-            .rev()
-            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx))
+        first_enabled(self.items.read().range(..index).rev())
     }
 
     pub(crate) fn first_enabled_index(&self) -> Option<usize> {
-        self.items
-            .read()
-            .iter()
-            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx))
+        first_enabled(self.items.read().iter())
     }
 
     pub(crate) fn last_enabled_index(&self) -> Option<usize> {
-        self.items
-            .read()
-            .iter()
-            .rev()
-            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx))
+        first_enabled(self.items.read().iter().rev())
     }
 
     pub(crate) fn focus_next(&mut self) {
@@ -148,6 +137,9 @@ impl FocusState {
     fn set_focus_or_pending(&mut self, index: Option<usize>) {
         match index {
             Some(index) => self.set_focus(Some(index)),
+            // Empty items map likely means children haven't mounted yet (e.g. arrow
+            // key on a closed select trigger). Park focus on 0 so the first item
+            // self-focuses on mount via control_mount_focus.
             None if self.items.peek().is_empty() => self.set_focus(Some(0)),
             None => {}
         }
@@ -175,40 +167,44 @@ impl FocusState {
 
     pub(crate) fn recent_focus_or_default(&self) -> usize {
         self.recent_focus()
-            .filter(|index| self.items.peek().get(index) == Some(&false))
+            .filter(|&index| self.is_enabled(index))
             .or_else(|| self.first_enabled_index())
             .unwrap_or_default()
     }
 
+    fn is_enabled(&self, index: usize) -> bool {
+        self.items.peek().get(&index) == Some(&false)
+    }
+
+    /// Pick the next enabled item after `from`, wrapping when roving_loop is on.
+    /// Used to redirect focus that's parked on a known-disabled item.
+    fn next_focus_skipping(&self, from: usize) -> Option<usize> {
+        let items = self.items.peek();
+        first_enabled(items.range(from.saturating_add(1)..)).or_else(|| {
+            self.roving_loop
+                .peek()
+                .then(|| first_enabled(items.iter()))
+                .flatten()
+        })
+    }
+
     pub(crate) fn add_update_item(&mut self, index: usize, disabled: bool) {
-        let existed = self.items.peek().contains_key(&index);
         if self.items.peek().get(&index) == Some(&disabled) {
             return;
         }
+        let existed = self.items.peek().contains_key(&index);
         self.items.write().insert(index, disabled);
-        let current_focus = *self.current_focus.peek();
-        if disabled && existed && current_focus == Some(index) {
+
+        let Some(focused) = *self.current_focus.peek() else {
+            return;
+        };
+        if disabled && existed && focused == index {
+            // Focus was on this item and it just became disabled — release it.
             self.blur();
-        } else if !disabled {
-            let next_focus = {
-                let items = self.items.peek();
-                current_focus
-                    .filter(|index| items.get(index) == Some(&true))
-                    .and_then(|index| {
-                        items
-                            .range(index.saturating_add(1)..)
-                            .find_map(|(&idx, &disabled)| (!disabled).then_some(idx))
-                            .or_else(|| {
-                                self.roving_loop.peek().then(|| {
-                                    items
-                                        .iter()
-                                        .find_map(|(&idx, &disabled)| (!disabled).then_some(idx))
-                                })?
-                            })
-                    })
-            };
-            if let Some(next_focus) = next_focus {
-                self.set_focus(Some(next_focus));
+        } else if !disabled && self.items.peek().get(&focused) == Some(&true) {
+            // Focus is parked on a known-disabled item; advance to the nearest enabled one.
+            if let Some(next) = self.next_focus_skipping(focused) {
+                self.set_focus(Some(next));
             }
         }
     }
@@ -225,9 +221,7 @@ impl FocusState {
         index: usize,
         controlled_ref: Signal<Option<Rc<MountedData>>>,
     ) {
-        let is_focused = self.is_focused(index);
-        let is_enabled = self.items.peek().get(&index) == Some(&false);
-        if is_focused && is_enabled {
+        if self.is_focused(index) && self.is_enabled(index) {
             if let Some(md) = controlled_ref() {
                 spawn(async move {
                     let _ = md.set_focus(true).await;

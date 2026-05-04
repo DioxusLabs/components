@@ -133,7 +133,6 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
         move || select_disabled.cloned() || option_disabled.cloned()
     };
 
-    // Push this option to the context
     use_effect(move || {
         let option_id = id();
         let option_state = OptionState {
@@ -143,8 +142,9 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
             id: option_id.clone(),
             disabled: disabled(),
         };
-
-        // Add the option to the context's options
+        if ctx.options.peek().iter().any(|opt| opt == &option_state) {
+            return;
+        }
         let mut options = ctx.options.write();
         if let Some(option) = options.iter_mut().find(|opt| opt.id == option_id) {
             *option = option_state;
@@ -182,7 +182,6 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 tabindex: if focused() { "0" } else { "-1" },
                 onmounted,
 
-                // ARIA attributes
                 aria_selected: selected(),
                 aria_disabled: disabled(),
                 aria_label: props.aria_label.clone(),
