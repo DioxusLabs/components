@@ -50,7 +50,10 @@ test("keyboard navigation", async ({ page }) => {
   // assert the new item is focused
   const newItem = fileMenuContent.getByRole("menuitem", { name: "New" });
   await expect(newItem).toBeFocused();
-  // Click the focused New menu item
+  await expect(fileMenuContent.getByRole("menuitem", { name: "Open" })).toHaveAttribute("data-disabled", "true");
+  await page.keyboard.press("ArrowDown");
+  await expect(fileMenuContent.getByRole("menuitem", { name: "Save" })).toBeFocused();
+  // Click the focused Save menu item
   await page.keyboard.press("Enter");
   // Assert the menu is closed after clicking a menu item
   await expect(fileMenuContent).toHaveCount(0);

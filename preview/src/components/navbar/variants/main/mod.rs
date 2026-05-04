@@ -20,6 +20,7 @@ pub fn Demo() -> Element {
                             index: 1usize,
                             value: "slider".to_string(),
                             to: Route::component("slider"),
+                            disabled: true,
                             "Slider"
                         }
                         NavbarItem {

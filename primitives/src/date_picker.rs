@@ -5,7 +5,7 @@ use crate::{
         weekday_abbreviation, AvailableRanges, CalendarProps, DateRange, RangeCalendarProps,
     },
     dioxus_core::Properties,
-    focus::{use_focus_controlled_item, use_focus_provider, FocusState},
+    focus::{use_focus_controlled_item_disabled, use_focus_provider, FocusState},
     popover::*,
     use_unique_id, LocalDateExt as _,
 };
@@ -796,7 +796,8 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
         }
     };
 
-    let onmounted = use_focus_controlled_item(props.index);
+    let disabled = move || (ctx.disabled)();
+    let onmounted = use_focus_controlled_item_disabled(props.index, disabled);
 
     let span_id = use_unique_id();
     let id = use_memo(move || format!("span-{span_id}"));

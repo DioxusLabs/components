@@ -18,3 +18,19 @@ test("test", async ({ page }) => {
   // Verify the first .dx-accordion-item is collapsed (data-open="false")
   await expect(firstAccordionItem).toHaveAttribute("data-open", "false");
 });
+
+test("keyboard navigation skips disabled items", async ({ page }) => {
+  await page.goto("http://127.0.0.1:8080/component/?name=accordion&", { timeout: 20 * 60 * 1000 });
+  const accordionItems = page.locator(".dx-accordion-item");
+  const buttons = accordionItems.locator("button");
+
+  await expect(accordionItems.nth(2)).toHaveAttribute("data-disabled", "true");
+  await expect(buttons.nth(2)).toBeDisabled();
+
+  await buttons.nth(1).focus();
+  await page.keyboard.press("ArrowDown");
+  await expect(buttons.nth(3)).toBeFocused();
+
+  await page.keyboard.press("ArrowUp");
+  await expect(buttons.nth(1)).toBeFocused();
+});

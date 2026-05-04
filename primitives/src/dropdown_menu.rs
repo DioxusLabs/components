@@ -3,7 +3,7 @@
 use std::rc::Rc;
 
 use crate::{
-    focus::{use_focus_controlled_item, use_focus_provider, FocusState},
+    focus::{use_focus_controlled_item_disabled, use_focus_provider, FocusState},
     merge_attributes, use_animated_open, use_controlled, use_id_or, use_unique_id,
 };
 use dioxus::prelude::*;
@@ -437,7 +437,7 @@ pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
     let disabled = move || (ctx.disabled)() || (props.disabled)();
     let focused = move || ctx.focus.is_focused((props.index)());
 
-    let onmounted = use_focus_controlled_item(props.index);
+    let onmounted = use_focus_controlled_item_disabled(props.index, disabled);
 
     rsx! {
         div {
