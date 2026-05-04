@@ -5,6 +5,29 @@
     align-items: center;
     justify-content: center;
     margin: 0;
+    gap: 1rem;
+}
+
+.dx-hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border: 1px solid var(--primary-color-6);
+    border-radius: 999px;
+    background-color: var(--primary-color-1);
+    color: var(--secondary-color-5);
+    font-size: 0.75rem;
+    font-weight: 500;
+    gap: 0.5rem;
+    letter-spacing: 0.02em;
+}
+
+.dx-hero-eyebrow-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--highlight-color-main);
 }
 
 #hero > h1,
