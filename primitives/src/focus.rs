@@ -110,7 +110,7 @@ impl FocusState {
             }),
             None => self.first_enabled_index(),
         };
-        self.set_focus_or_pending(index);
+        self.set_focus(index);
     }
 
     pub(crate) fn focus_prev(&mut self) {
@@ -123,26 +123,15 @@ impl FocusState {
             None if (self.roving_loop)() => self.last_enabled_index(),
             None => self.first_enabled_index(),
         };
-        self.set_focus_or_pending(index);
+        self.set_focus(index);
     }
 
     pub(crate) fn focus_first(&mut self) {
-        self.set_focus_or_pending(self.first_enabled_index());
+        self.set_focus(self.first_enabled_index());
     }
 
     pub(crate) fn focus_last(&mut self) {
-        self.set_focus_or_pending(self.last_enabled_index());
-    }
-
-    fn set_focus_or_pending(&mut self, index: Option<usize>) {
-        match index {
-            Some(index) => self.set_focus(Some(index)),
-            // Empty items map likely means children haven't mounted yet (e.g. arrow
-            // key on a closed select trigger). Park focus on 0 so the first item
-            // self-focuses on mount via control_mount_focus.
-            None if self.items.peek().is_empty() => self.set_focus(Some(0)),
-            None => {}
-        }
+        self.set_focus(self.last_enabled_index());
     }
 
     pub(crate) fn blur(&mut self) {
