@@ -1,7 +1,7 @@
 //! Defines the [`ContextMenu`] component and its subcomponents, which provide a context menu interface.
 
 use crate::{
-    focus::{use_focus_controlled_item, use_focus_provider, FocusState},
+    focus::{use_focus_controlled_item_disabled, use_focus_provider, FocusState},
     use_animated_open, use_controlled, use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::prelude::*;
@@ -459,13 +459,11 @@ pub struct ContextMenuItemProps {
 pub fn ContextMenuItem(props: ContextMenuItemProps) -> Element {
     let mut ctx: ContextMenuCtx = use_context();
 
-    let disabled = use_memo(move || (props.disabled)() || (ctx.disabled)());
+    let disabled = move || (props.disabled)() || (ctx.disabled)();
     let focused = move || ctx.focus.is_focused(props.index.cloned());
 
-    // Handle settings focus
-    let onmounted = use_focus_controlled_item(props.index);
+    let onmounted = use_focus_controlled_item_disabled(props.index, disabled);
 
-    // Determine if this item is currently focused
     let tab_index = use_memo(move || if focused() { "0" } else { "-1" });
 
     let handle_click = {

@@ -1,7 +1,7 @@
 //! SelectOption and SelectItemIndicator component implementations.
 
 use crate::{
-    focus::use_focus_controlled_item,
+    focus::use_focus_controlled_item_disabled,
     select::context::{RcPartialEqValue, SelectListContext},
     use_effect, use_effect_cleanup, use_id_or, use_unique_id,
 };
@@ -126,27 +126,39 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
         }
     });
 
-    // Push this option to the context
     let mut ctx: SelectContext = use_context();
+    let disabled = {
+        let select_disabled = ctx.disabled;
+        let option_disabled = props.disabled;
+        move || select_disabled.cloned() || option_disabled.cloned()
+    };
+
     use_effect(move || {
+        let option_id = id();
         let option_state = OptionState {
             tab_index: index(),
             value: RcPartialEqValue::new(value.cloned()),
             text_value: text_value.cloned(),
-            id: id(),
+            id: option_id.clone(),
+            disabled: disabled(),
         };
-
-        // Add the option to the context's options
-        ctx.options.write().push(option_state);
+        if ctx.options.peek().iter().any(|opt| opt == &option_state) {
+            return;
+        }
+        let mut options = ctx.options.write();
+        if let Some(option) = options.iter_mut().find(|opt| opt.id == option_id) {
+            *option = option_state;
+        } else {
+            options.push(option_state);
+        }
     });
 
     use_effect_cleanup(move || {
         ctx.options.write().retain(|opt| opt.id != *id.read());
     });
 
-    let onmounted = use_focus_controlled_item(props.index);
+    let onmounted = use_focus_controlled_item_disabled(props.index, disabled);
     let focused = move || ctx.focus_state.is_focused(index());
-    let disabled = ctx.disabled.cloned() || props.disabled.cloned();
     let selected = use_memo(move || {
         let value = props.value.read();
         ctx.values
@@ -170,14 +182,14 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 tabindex: if focused() { "0" } else { "-1" },
                 onmounted,
 
-                // ARIA attributes
                 aria_selected: selected(),
-                aria_disabled: disabled,
+                aria_disabled: disabled(),
                 aria_label: props.aria_label.clone(),
                 aria_roledescription: props.aria_roledescription.clone(),
+                "data-disabled": disabled(),
 
                 onpointerdown: move |event| {
-                    if disabled || event.trigger_button() != Some(MouseButton::Primary) {
+                    if disabled() || event.trigger_button() != Some(MouseButton::Primary) {
                         return;
                     }
                     // Suppress the synthesized focus shift and click event so the listbox
@@ -188,7 +200,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                     down_pos.set(Some((p.x, p.y)));
                 },
                 onpointerup: move |event| {
-                    if disabled || event.trigger_button() != Some(MouseButton::Primary) {
+                    if disabled() || event.trigger_button() != Some(MouseButton::Primary) {
                         return;
                     }
                     let Some((x0, y0)) = down_pos.take() else {
