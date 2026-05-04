@@ -11,7 +11,8 @@
   position: relative;
 }
 
-.dx-navbar-trigger {
+.dx-navbar-trigger,
+.dx-navbar > .dx-navbar-item {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -22,6 +23,7 @@
   background: none;
   color: var(--secondary-color-4);
   cursor: pointer;
+  font: inherit;
   transition: background-color 100ms ease-out;
 }
 
