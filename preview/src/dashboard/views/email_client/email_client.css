@@ -757,13 +757,6 @@
     opacity: 0.7;
 }
 
-/* SidebarMenuButton wraps tooltip triggers in an inline-block; force the
- * wrapper to fill the row so the whole item is hoverable/clickable. */
-.dx-sidebar-menu :is(.dx-dropdown-menu, .dx-tooltip) {
-    display: block;
-    width: 100%;
-}
-
 /* Compose modal — sized + spaced to match the rest of the dashboard.
    Inherits dialog typography/colors; only adds layout. */
 .ec-compose-dialog {

@@ -1376,35 +1376,202 @@ pub struct CalendarGridProps {
     #[props(default)]
     pub show_week_numbers: bool,
 
-    /// The callback that will be used to render each day in the grid
-    #[props(default = Callback::new(|date: Date| {
-        rsx! { CalendarDay { date } }
-    }))]
-    pub render_day: Callback<Date, Element>,
+    /// Additional attributes to apply to the grid element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
 
-    /// Class for the inner `<thead>` row element.
+/// The props for the [`CalendarGridRoot`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarGridRootProps {
+    /// Optional ID for the grid
     #[props(default)]
-    pub header_class: Option<String>,
-
-    /// Class for inner `<th>` day-header elements.
-    #[props(default)]
-    pub day_header_class: Option<String>,
-
-    /// Class for the inner `<tbody>` element.
-    #[props(default)]
-    pub body_class: Option<String>,
-
-    /// Class for inner `<tr>` week-row elements inside tbody.
-    #[props(default)]
-    pub week_class: Option<String>,
-
-    /// Class for `<th>`/`<td>` weeknum elements.
-    #[props(default)]
-    pub weeknum_class: Option<String>,
+    pub id: Option<String>,
 
     /// Additional attributes to apply to the grid element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
+
+    /// The children of the grid element
+    pub children: Element,
+}
+
+/// The props for the [`CalendarGridHead`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarGridHeadProps {
+    /// Additional attributes to apply to the grid head element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the grid head element
+    pub children: Element,
+}
+
+/// The props for the [`CalendarGridHeaderRow`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarGridHeaderRowProps {
+    /// Additional attributes to apply to the grid header row element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the grid header row element
+    pub children: Element,
+}
+
+/// The props for the [`CalendarGridDayHeader`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarGridDayHeaderProps {
+    /// The weekday represented by this header
+    pub weekday: Weekday,
+
+    /// Additional attributes to apply to the weekday header element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the weekday header element
+    #[props(default)]
+    pub children: Option<Element>,
+}
+
+/// The props for the [`CalendarGridBody`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarGridBodyProps {
+    /// Additional attributes to apply to the grid body element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the grid body element
+    pub children: Element,
+}
+
+/// The props for the [`CalendarGridWeek`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarGridWeekProps {
+    /// Additional attributes to apply to the week row element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the week row element
+    pub children: Element,
+}
+
+/// The props for the [`CalendarGridCell`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarGridCellProps {
+    /// The date represented by this cell
+    pub date: Date,
+
+    /// Additional attributes to apply to the day cell element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the day cell element
+    pub children: Element,
+}
+
+/// Data for a weekday header in a calendar grid.
+#[derive(Clone, PartialEq)]
+pub struct CalendarGridWeekday {
+    weekday: Weekday,
+    label: String,
+}
+
+impl CalendarGridWeekday {
+    /// The weekday represented by this header.
+    pub fn weekday(&self) -> Weekday {
+        self.weekday
+    }
+
+    /// The formatted weekday label.
+    pub fn label(&self) -> &str {
+        &self.label
+    }
+}
+
+/// Data returned by [`use_calendar_grid`].
+#[derive(Clone, PartialEq)]
+pub struct CalendarGridData {
+    view_date: Date,
+    weekdays: Vec<CalendarGridWeekday>,
+    weeks: Vec<Vec<Date>>,
+}
+
+impl CalendarGridData {
+    /// The first date in the month currently displayed by the grid.
+    pub fn view_date(&self) -> Date {
+        self.view_date
+    }
+
+    /// Weekday headers in display order.
+    pub fn weekdays(&self) -> &[CalendarGridWeekday] {
+        &self.weekdays
+    }
+
+    /// Weeks in the displayed month, each containing seven dates.
+    pub fn weeks(&self) -> &[Vec<Date>] {
+        &self.weeks
+    }
+}
+
+/// Return the weekday headers and week rows for the current calendar grid view.
+pub fn use_calendar_grid() -> CalendarGridData {
+    let ctx: BaseCalendarContext = use_context();
+    let view_ctx: CalendarViewContext = use_context();
+
+    use_memo(move || {
+        let view_date = view_ctx.offset_view_date();
+        CalendarGridData {
+            view_date,
+            weekdays: calendar_grid_weekdays(ctx.first_day_of_week, ctx.format_weekday),
+            weeks: calendar_grid_weeks(view_date, ctx.first_day_of_week),
+        }
+    })()
+}
+
+fn calendar_grid_weekdays(
+    first_day_of_week: Weekday,
+    format_weekday: Callback<Weekday, String>,
+) -> Vec<CalendarGridWeekday> {
+    WeekdaySet(0b111_1111)
+        .iter(first_day_of_week)
+        .map(|weekday| CalendarGridWeekday {
+            weekday,
+            label: format_weekday.call(weekday),
+        })
+        .collect()
+}
+
+fn calendar_grid_weeks(view_date: Date, first_day_of_week: Weekday) -> Vec<Vec<Date>> {
+    let mut grid = Vec::new();
+
+    let previous_month = view_date
+        .replace_day(1)
+        .expect("invalid or out-of-range date");
+    let num_days = days_since(view_date, first_day_of_week);
+    let mut date = previous_month.saturating_sub(num_days.days());
+    for _ in 1..=num_days {
+        grid.push(date);
+        date = date.next_day().expect("invalid or out-of-range date");
+    }
+
+    let mut date = view_date;
+    let num_days_in_month = view_date.month().length(view_date.year());
+    for day in 1..=num_days_in_month {
+        date = view_date
+            .replace_day(day)
+            .expect("invalid or out-of-range date");
+        grid.push(date);
+    }
+
+    let remainder = grid.len() % 7;
+    if remainder > 0 {
+        for _ in 1..=(7 - remainder) {
+            date = date.next_day().expect("invalid or out-of-range date");
+            grid.push(date);
+        }
+    }
+
+    grid.chunks(7).map(|chunk| chunk.to_vec()).collect()
 }
 
 /// # CalendarGrid
@@ -1461,98 +1628,126 @@ pub struct CalendarGridProps {
 /// - `data-month`: The relative month of the date. Possible values are `last`, `current`, or `next`
 #[component]
 pub fn CalendarGrid(props: CalendarGridProps) -> Element {
-    let ctx: BaseCalendarContext = use_context();
-    let view_ctx: CalendarViewContext = use_context();
-
-    // We'll use the view_date from context in the memo below
-
-    // Generate a grid of days with proper layout
-    // Use the view_date as a dependency to ensure the grid updates when the view changes
-    let days_grid = use_memo(move || {
-        // Get the current view date from context
-        let view_date = view_ctx.offset_view_date();
-        // Create a grid with empty cells for padding and actual days
-        let mut grid = Vec::new();
-
-        // Add empty cells for days before the first day of the month
-        let previous_month = view_date
-            .replace_day(1)
-            .expect("invalid or out-of-range date");
-        let num_days = days_since(view_date, ctx.first_day_of_week);
-        let mut date = previous_month.saturating_sub(num_days.days());
-        for _ in 1..=num_days {
-            grid.push(date);
-            date = date.next_day().expect("invalid or out-of-range date");
-        }
-
-        let mut date = view_date;
-        // Add days of the month
-        let num_days_in_month = view_date.month().length(view_date.year());
-        for day in 1..=num_days_in_month {
-            date = view_date
-                .replace_day(day)
-                .expect("invalid or out-of-range date");
-            grid.push(date);
-        }
-
-        // Add empty cells to complete the grid (for a clean layout)
-        let remainder = grid.len() % 7;
-        if remainder > 0 {
-            for _ in 1..=(7 - remainder) {
-                date = date.next_day().expect("invalid or out-of-range date");
-                grid.push(date);
-            }
-        }
-
-        // Turn the flat grid into a 2D grid (7 columns)
-        grid.chunks(7)
-            .map(|chunk| chunk.to_vec())
-            .collect::<Vec<_>>()
-    });
-
-    let weekday_headers = use_memo(move || {
-        WeekdaySet(0b111_1111) // `WeekdaySet` containing all seven `Weekday`s
-            .iter(ctx.first_day_of_week)
-            .map(|weekday| (weekday, ctx.format_weekday.call(weekday)))
-            .collect::<Vec<_>>()
-    });
+    let _ = props.show_week_numbers;
+    let grid = use_calendar_grid();
 
     rsx! {
-        table {
-            role: "grid",
+        CalendarGridRoot {
             id: props.id,
-            ..props.attributes,
-
-            // Day headers
-            thead { aria_hidden: "true",
-                tr {
-                    class: props.header_class,
-                    // Day name headers
-                    for (weekday, label) in weekday_headers() {
-                        th {
-                            key: "{weekday:?}", // Add key for efficient diffing
-                            class: props.day_header_class.clone(),
-                            {label}
+            attributes: props.attributes,
+            CalendarGridHead {
+                CalendarGridHeaderRow {
+                    for weekday in grid.weekdays().iter().cloned() {
+                        CalendarGridDayHeader {
+                            key: "{weekday.weekday():?}",
+                            weekday: weekday.weekday(),
+                            {weekday.label().to_string()}
                         }
                     }
                 }
             }
-
-            // Calendar days grid
-            tbody { class: props.body_class,
-                // Display all days in a grid
-                for row in &*days_grid.read() {
-                    tr {
-                        role: "row",
-                        class: props.week_class.clone(),
-                        for date in row.iter().copied() {
-                            td {
-                                {props.render_day.call(date)}
+            CalendarGridBody {
+                for week in grid.weeks() {
+                    CalendarGridWeek {
+                        for date in week.iter().copied() {
+                            CalendarGridCell {
+                                key: "{date}",
+                                date,
+                                CalendarDay { date }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+/// The root table element for a calendar grid.
+#[component]
+pub fn CalendarGridRoot(props: CalendarGridRootProps) -> Element {
+    rsx! {
+        table {
+            role: "grid",
+            id: props.id,
+            ..props.attributes,
+            {props.children}
+        }
+    }
+}
+
+/// The header section of a calendar grid.
+#[component]
+pub fn CalendarGridHead(props: CalendarGridHeadProps) -> Element {
+    rsx! {
+        thead {
+            aria_hidden: "true",
+            ..props.attributes,
+            {props.children}
+        }
+    }
+}
+
+/// The row that contains weekday header cells.
+#[component]
+pub fn CalendarGridHeaderRow(props: CalendarGridHeaderRowProps) -> Element {
+    rsx! {
+        tr {
+            ..props.attributes,
+            {props.children}
+        }
+    }
+}
+
+/// A weekday header cell in a calendar grid.
+#[component]
+pub fn CalendarGridDayHeader(props: CalendarGridDayHeaderProps) -> Element {
+    let ctx: BaseCalendarContext = use_context();
+    let children = props.children.unwrap_or_else(|| {
+        let label = ctx.format_weekday.call(props.weekday);
+        rsx! { {label} }
+    });
+
+    rsx! {
+        th {
+            ..props.attributes,
+            {children}
+        }
+    }
+}
+
+/// The body section of a calendar grid.
+#[component]
+pub fn CalendarGridBody(props: CalendarGridBodyProps) -> Element {
+    rsx! {
+        tbody {
+            ..props.attributes,
+            {props.children}
+        }
+    }
+}
+
+/// A week row in a calendar grid.
+#[component]
+pub fn CalendarGridWeek(props: CalendarGridWeekProps) -> Element {
+    rsx! {
+        tr {
+            role: "row",
+            ..props.attributes,
+            {props.children}
+        }
+    }
+}
+
+/// A day cell in a calendar grid.
+#[component]
+pub fn CalendarGridCell(props: CalendarGridCellProps) -> Element {
+    let _ = props.date;
+
+    rsx! {
+        td {
+            ..props.attributes,
+            {props.children}
         }
     }
 }
@@ -1835,13 +2030,16 @@ fn aria_label(date: &Date) -> String {
 }
 
 /// The props for the [`CalendarDay`] component.
-#[derive(Props, Clone, Debug, PartialEq)]
+#[derive(Props, Clone, PartialEq)]
 pub struct CalendarDayProps {
     /// The date for this day cell.
     pub date: Date,
     /// Additional attributes to extend the calendar day element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
+    /// The children of the calendar day element
+    #[props(default)]
+    pub children: Option<Element>,
 }
 
 /// # CalendarDay
@@ -1962,10 +2160,15 @@ fn use_day_mounted_ref(
 
 #[component]
 fn SingleCalendarDay(props: CalendarDayProps) -> Element {
-    let CalendarDayProps { date, attributes } = props;
+    let CalendarDayProps {
+        date,
+        attributes,
+        children,
+    } = props;
     let mut base_ctx: BaseCalendarContext = use_context();
     let view_ctx: CalendarViewContext = use_context();
     let day = date.day();
+    let content = children.unwrap_or_else(|| rsx! { {day.to_string()} });
     let view_date = view_ctx.offset_view_date();
     let month = relative_calendar_month(date, &base_ctx, view_date.month());
     let in_current_month = month.current_month();
@@ -2017,7 +2220,7 @@ fn SingleCalendarDay(props: CalendarDayProps) -> Element {
             } else {
                 "-1"
             },
-            aria_label: aria_label(&props.date),
+            aria_label: aria_label(&date),
             "data-today": if is_today { true },
             "data-selected": is_selected(),
             "data-unavailable": if is_unavailable { true },
@@ -2036,16 +2239,21 @@ fn SingleCalendarDay(props: CalendarDayProps) -> Element {
             },
             onmounted,
             ..attributes,
-            {day.to_string()}
+            {content}
         }
     }
 }
 
 #[component]
 fn RangeCalendarDay(props: CalendarDayProps) -> Element {
-    let CalendarDayProps { date, attributes } = props;
+    let CalendarDayProps {
+        date,
+        attributes,
+        children,
+    } = props;
     let mut base_ctx: BaseCalendarContext = use_context();
     let day = date.day();
+    let content = children.unwrap_or_else(|| rsx! { {day.to_string()} });
     let view_ctx: CalendarViewContext = use_context();
     let view_date = view_ctx.offset_view_date();
     let month = relative_calendar_month(date, &base_ctx, view_date.month());
@@ -2110,7 +2318,7 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             } else {
                 "-1"
             },
-            aria_label: aria_label(&props.date),
+            aria_label: aria_label(&date),
             "data-disabled": is_disabled(),
             "data-today": if is_today { true },
             "data-selected": is_selected(),
@@ -2137,7 +2345,7 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
             },
             onmounted,
             ..attributes,
-            {day.to_string()}
+            {content}
         }
     }
 }

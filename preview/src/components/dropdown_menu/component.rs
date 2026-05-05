@@ -11,7 +11,9 @@ struct Styles;
 
 #[component]
 pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
-    let base = attributes!(div { class: Styles::dx_dropdown_menu });
+    let base = attributes!(div {
+        class: Styles::dx_dropdown_menu,
+    });
     let merged = merge_attributes(vec![base, props.attributes.clone()]);
 
     rsx! {
@@ -29,7 +31,9 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 
 #[component]
 pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
-    let base = attributes!(button { class: Styles::dx_dropdown_menu_trigger });
+    let base = attributes!(button {
+        class: Styles::dx_dropdown_menu_trigger,
+    });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
@@ -39,7 +43,9 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
 
 #[component]
 pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
-    let base = attributes!(div { class: Styles::dx_dropdown_menu_content });
+    let base = attributes!(div {
+        class: Styles::dx_dropdown_menu_content,
+    });
     let merged = merge_attributes(vec![base, props.attributes.clone()]);
 
     rsx! {
@@ -51,7 +57,9 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
 pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
     props: DropdownMenuItemProps<T>,
 ) -> Element {
-    let base = attributes!(div { class: Styles::dx_dropdown_menu_item });
+    let base = attributes!(div {
+        class: Styles::dx_dropdown_menu_item,
+    });
     let merged = merge_attributes(vec![base, props.attributes.clone()]);
 
     rsx! {

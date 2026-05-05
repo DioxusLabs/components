@@ -834,7 +834,10 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
 }
 
 #[component]
-fn DateSeparator(#[props(default = '-')] symbol: char, #[props(default)] class: Option<String>) -> Element {
+fn DateSeparator(
+    #[props(default = '-')] symbol: char,
+    #[props(default)] class: Option<String>,
+) -> Element {
     rsx! {
         span {
             class,

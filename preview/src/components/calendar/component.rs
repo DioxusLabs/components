@@ -1,6 +1,8 @@
 use dioxus::prelude::*;
 use dioxus_primitives::calendar::{
-    self, CalendarDayProps, CalendarGridProps, CalendarHeaderProps, CalendarMonthTitleProps,
+    self, CalendarDayProps, CalendarGridBodyProps, CalendarGridCellProps,
+    CalendarGridDayHeaderProps, CalendarGridHeadProps, CalendarGridHeaderRowProps,
+    CalendarGridRootProps, CalendarGridWeekProps, CalendarHeaderProps, CalendarMonthTitleProps,
     CalendarNavigationProps, CalendarProps, CalendarSelectMonthProps, CalendarSelectYearProps,
     RangeCalendarProps,
 };
@@ -142,19 +144,118 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
 }
 
 #[component]
-pub fn CalendarGrid(props: CalendarGridProps) -> Element {
+pub fn CalendarGrid(
+    #[props(default)] id: Option<String>,
+    #[props(default)] show_week_numbers: bool,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+) -> Element {
+    let _ = show_week_numbers;
+    let grid = calendar::use_calendar_grid();
+
     rsx! {
-        calendar::CalendarGrid {
+        CalendarGridRoot { id, attributes,
+            CalendarGridHead {
+                CalendarGridHeaderRow {
+                    for weekday in grid.weekdays().iter().cloned() {
+                        CalendarGridDayHeader {
+                            key: "{weekday.weekday():?}",
+                            weekday: weekday.weekday(),
+                            {weekday.label().to_string()}
+                        }
+                    }
+                }
+            }
+            CalendarGridBody {
+                for week in grid.weeks() {
+                    CalendarGridWeek {
+                        for date in week.iter().copied() {
+                            CalendarGridCell {
+                                key: "{date}",
+                                date,
+                                CalendarDay { date }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn CalendarGridRoot(props: CalendarGridRootProps) -> Element {
+    rsx! {
+        calendar::CalendarGridRoot {
             class: Styles::dx_calendar_grid,
-            header_class: Some(Styles::dx_calendar_grid_header.to_string()),
-            day_header_class: Some(Styles::dx_calendar_grid_day_header.to_string()),
-            body_class: Some(Styles::dx_calendar_grid_body.to_string()),
-            week_class: Some(Styles::dx_calendar_grid_week.to_string()),
-            weeknum_class: Some(Styles::dx_calendar_grid_weeknum.to_string()),
             id: props.id,
-            show_week_numbers: props.show_week_numbers,
-            render_day: Callback::new(|date| rsx! { CalendarDay { date } }),
             attributes: props.attributes,
+            {props.children}
+        }
+    }
+}
+
+#[component]
+pub fn CalendarGridHead(props: CalendarGridHeadProps) -> Element {
+    rsx! {
+        calendar::CalendarGridHead {
+            attributes: props.attributes,
+            {props.children}
+        }
+    }
+}
+
+#[component]
+pub fn CalendarGridHeaderRow(props: CalendarGridHeaderRowProps) -> Element {
+    rsx! {
+        calendar::CalendarGridHeaderRow {
+            class: Styles::dx_calendar_grid_header,
+            attributes: props.attributes,
+            {props.children}
+        }
+    }
+}
+
+#[component]
+pub fn CalendarGridDayHeader(props: CalendarGridDayHeaderProps) -> Element {
+    rsx! {
+        calendar::CalendarGridDayHeader {
+            class: Styles::dx_calendar_grid_day_header,
+            weekday: props.weekday,
+            attributes: props.attributes,
+            {props.children}
+        }
+    }
+}
+
+#[component]
+pub fn CalendarGridBody(props: CalendarGridBodyProps) -> Element {
+    rsx! {
+        calendar::CalendarGridBody {
+            class: Styles::dx_calendar_grid_body,
+            attributes: props.attributes,
+            {props.children}
+        }
+    }
+}
+
+#[component]
+pub fn CalendarGridWeek(props: CalendarGridWeekProps) -> Element {
+    rsx! {
+        calendar::CalendarGridWeek {
+            class: Styles::dx_calendar_grid_week,
+            attributes: props.attributes,
+            {props.children}
+        }
+    }
+}
+
+#[component]
+pub fn CalendarGridCell(props: CalendarGridCellProps) -> Element {
+    rsx! {
+        calendar::CalendarGridCell {
+            date: props.date,
+            attributes: props.attributes,
+            {props.children}
         }
     }
 }
@@ -176,6 +277,7 @@ pub fn CalendarDay(props: CalendarDayProps) -> Element {
             class: Styles::dx_calendar_grid_cell,
             date: props.date,
             attributes: props.attributes,
+            {props.children}
         }
     }
 }

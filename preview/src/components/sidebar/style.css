@@ -163,7 +163,7 @@
   background: var(--dx-sidebar-background);
 }
 
-.dx-sidebar-sheet>.dx-sheet-close {
+.dx-sidebar-sheet-close {
   display: none;
 }
 
@@ -422,8 +422,75 @@
   list-style: none;
 }
 
+.dx-sidebar-menu .dx-sidebar-dropdown-menu,
+.dx-sidebar-menu .dx-sidebar-tooltip {
+  display: block;
+  width: 100%;
+}
+
+.dx-sidebar-dropdown-menu-content .dx-sidebar-dropdown-separator[data-orientation="horizontal"] {
+  margin: 0.25rem 0;
+}
+
 .dx-sidebar-menu-item {
   position: relative;
+}
+
+.dx-sidebar-menu-item > .dx-sidebar-dropdown-menu:has(.dx-sidebar-menu-action) {
+  position: static;
+}
+
+.dx-sidebar-header .dx-sidebar-menu-button.dx-sidebar-dropdown-menu-trigger:not(:focus-visible),
+.dx-sidebar-footer .dx-sidebar-menu-button.dx-sidebar-dropdown-menu-trigger:not(:focus-visible) {
+  box-shadow: none;
+}
+
+.dx-sidebar-sheet .dx-sidebar-header .dx-sidebar-dropdown-menu-content {
+  margin-top: 4px;
+  margin-bottom: 0;
+  inset: 100% auto auto 0;
+}
+
+.dx-sidebar-sheet .dx-sidebar-footer .dx-sidebar-dropdown-menu-content {
+  margin-top: 0;
+  margin-bottom: 4px;
+  inset: auto auto 100% 0;
+}
+
+.dx-sidebar-menu-button.dx-sidebar-collapsible-trigger:hover {
+  text-decoration: none;
+  text-decoration-line: none;
+}
+
+@media (width >= 768px) {
+  .dx-sidebar-desktop[data-side="left"] :is(.dx-sidebar-header, .dx-sidebar-menu-item:has(.dx-sidebar-menu-action)) .dx-sidebar-dropdown-menu-content {
+    top: 0;
+    left: 100%;
+    margin-top: 0;
+    margin-left: 0.5rem;
+  }
+
+  .dx-sidebar-desktop[data-side="left"] .dx-sidebar-footer .dx-sidebar-dropdown-menu-content {
+    top: auto;
+    bottom: 0;
+    left: 100%;
+    margin-bottom: 0;
+    margin-left: 0.5rem;
+  }
+
+  .dx-sidebar-desktop[data-side="right"] :is(.dx-sidebar-header, .dx-sidebar-menu-item:has(.dx-sidebar-menu-action)) .dx-sidebar-dropdown-menu-content {
+    top: 0;
+    right: 100%;
+    left: auto;
+    margin-top: 0;
+    margin-right: 0.5rem;
+  }
+
+  .dx-sidebar-desktop[data-side="right"] .dx-sidebar-footer .dx-sidebar-dropdown-menu-content {
+    margin-right: 0.5rem;
+    margin-bottom: 0;
+    inset: auto 100% 0 auto;
+  }
 }
 
 .dx-sidebar-menu-button[data-sidebar="menu-button"] {

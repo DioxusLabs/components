@@ -299,6 +299,7 @@ pub fn Sidebar(
                 SheetContent {
                     side: sheet_side,
                     class: Styles::dx_sidebar_sheet.to_string(),
+                    close_class: Styles::dx_sidebar_sheet_close.to_string(),
                     "data-sidebar": "sidebar",
                     "data-slot": "sidebar",
                     "data-mobile": "true",
@@ -682,6 +683,7 @@ pub fn SidebarMenuButton(
 
     rsx! {
         Tooltip {
+            class: Styles::dx_sidebar_tooltip,
             disabled: hidden,
             TooltipTrigger {
                 as: move |tooltip_attrs: Vec<Attribute>| {

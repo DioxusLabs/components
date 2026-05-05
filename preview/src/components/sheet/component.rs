@@ -4,6 +4,7 @@ use dioxus_primitives::dialog::{
     self, DialogCtx, DialogDescriptionProps, DialogRootProps, DialogTitleProps,
 };
 use dioxus_primitives::icon;
+use dioxus_primitives::merge_attributes;
 
 #[css_module("/src/components/sheet/style.css")]
 struct Styles;
@@ -65,12 +66,16 @@ pub fn SheetContent(
     #[props(default = ReadSignal::new(Signal::new(None)))] id: ReadSignal<Option<String>>,
     #[props(default)] side: SheetSide,
     #[props(default)] class: Option<String>,
+    #[props(default)] close_class: Option<String>,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
     children: Element,
 ) -> Element {
     let class = class
         .map(|c| format!("{} {c}", Styles::dx_sheet))
         .unwrap_or(Styles::dx_sheet.to_string());
+    let close_class = close_class
+        .map(|c| format!("{} {c}", Styles::dx_sheet_close))
+        .unwrap_or(Styles::dx_sheet_close.to_string());
 
     rsx! {
         dialog::DialogContent {
@@ -80,7 +85,7 @@ pub fn SheetContent(
             "data-side": side.as_str(),
             attributes,
             {children}
-            SheetClose { class: Styles::dx_sheet_close,
+            SheetClose { class: close_class,
                 icon::Icon {
                     width: "20px",
                     height: "20px",
@@ -146,14 +151,14 @@ pub fn SheetClose(
 ) -> Element {
     let ctx: DialogCtx = use_context();
 
-    let mut merged: Vec<Attribute> = attributes! {
+    let base = attributes! {
         button {
             onclick: move |_| {
                 ctx.set_open(false);
             }
         }
     };
-    merged.extend(attributes);
+    let merged = merge_attributes(vec![base, attributes]);
 
     if let Some(dynamic) = r#as {
         dynamic.call(merged)
