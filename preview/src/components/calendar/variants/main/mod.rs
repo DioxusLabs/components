@@ -1,6 +1,6 @@
 use super::super::component::*;
 use dioxus::prelude::*;
-use time::{macros::date, Date, UtcDateTime};
+use time::{macros::date, Date};
 
 const COMPACT_STYLE: &str = r#"
 .dx-calendar-example .dx-calendar-grid-cell { width: 1.6rem; font-size: 12px; }
@@ -17,7 +17,7 @@ const COMPACT_STYLE: &str = r#"
 #[component]
 pub fn Demo() -> Element {
     let mut selected_date = use_signal(|| None::<Date>);
-    let mut view_date = use_signal(|| UtcDateTime::now().date());
+    let mut view_date = use_signal(|| date!(2026 - 05 - 15));
     rsx! {
         style { {COMPACT_STYLE} }
         div { class: "dx-calendar-example",
