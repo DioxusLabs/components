@@ -394,4 +394,5 @@ pub(super) struct ComboboxGroupContext {
     pub id: Memo<String>,
     pub labeled_by: Signal<Option<String>>,
     pub visible: Memo<bool>,
+    pub disabled: Memo<bool>,
 }

@@ -124,7 +124,19 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
                 }
             },
             oninput: move |event| {
-                query.set(event.value());
+                let value = event.value();
+                let next_query = if open() {
+                    value
+                } else {
+                    ctx.selected_text()
+                        .and_then(|selected| {
+                            value
+                                .strip_prefix(&selected)
+                                .map(ToString::to_string)
+                        })
+                        .unwrap_or(value)
+                };
+                query.set(next_query);
                 if !open() {
                     open.set(true);
                 }

@@ -31,7 +31,7 @@ pub struct ComboboxGroupProps {
 #[component]
 pub fn ComboboxGroup(props: ComboboxGroupProps) -> Element {
     let ctx = use_context::<ComboboxContext>();
-    let disabled = ctx.disabled.cloned() || props.disabled.cloned();
+    let disabled = use_memo(move || ctx.disabled.cloned() || props.disabled.cloned());
 
     let id = use_unique_id();
     let id = use_id_or(id, props.id);
@@ -42,6 +42,7 @@ pub fn ComboboxGroup(props: ComboboxGroupProps) -> Element {
         id,
         labeled_by,
         visible,
+        disabled,
     });
 
     let render = use_context::<ComboboxContentContext>().render;
@@ -52,7 +53,7 @@ pub fn ComboboxGroup(props: ComboboxGroupProps) -> Element {
             div {
                 id,
                 role: "group",
-                aria_disabled: disabled,
+                aria_disabled: disabled(),
                 aria_labelledby: labeled_by,
                 ..props.attributes,
                 {props.children}

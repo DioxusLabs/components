@@ -84,9 +84,14 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
 
     let mut ctx: ComboboxContext = use_context();
     let group_ctx: Option<super::super::context::ComboboxGroupContext> = try_use_context();
+    let group_disabled = group_ctx.map(|group| group.disabled);
 
     let focused = move || ctx.focus_state.is_focused(index());
-    let disabled = move || ctx.disabled.cloned() || props.disabled.cloned();
+    let disabled = move || {
+        ctx.disabled.cloned()
+            || props.disabled.cloned()
+            || group_disabled.map(|disabled| disabled()).unwrap_or(false)
+    };
     let selected = use_memo(move || ctx.is_selected(&RcPartialEqValue::new(props.value.cloned())));
 
     let mut did_drag = use_signal(|| false);
@@ -161,7 +166,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
             value: RcPartialEqValue::new(value.cloned()),
             text_value: text_value.cloned(),
             id: option_id.clone(),
-            disabled: props.disabled.cloned(),
+            disabled: disabled(),
             group_id: group_ctx.map(|group| (group.id)()),
             render,
         };
