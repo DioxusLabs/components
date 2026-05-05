@@ -28,56 +28,58 @@ pub fn Demo() -> Element {
     let mut text_align = use_signal(|| "left".to_string());
 
     rsx! {
-        Toolbar { aria_label: "Text formatting",
-            ToolbarGroup {
-                ToggleToolbarButton {
-                    index: 0usize,
-                    is_on: is_bold(),
-                    on_click: move |_| is_bold.toggle(),
-                    "Bold"
+        div { class: "dx-toolbar-demo",
+            Toolbar { aria_label: "Text formatting",
+                ToolbarGroup {
+                    ToggleToolbarButton {
+                        index: 0usize,
+                        is_on: is_bold(),
+                        on_click: move |_| is_bold.toggle(),
+                        "Bold"
+                    }
+                    ToggleToolbarButton {
+                        index: 1usize,
+                        is_on: is_italic(),
+                        on_click: move |_| is_italic.toggle(),
+                        "Italic"
+                    }
+                    ToggleToolbarButton {
+                        index: 2usize,
+                        is_on: is_underline(),
+                        on_click: move |_| is_underline.toggle(),
+                        "Underline"
+                    }
                 }
-                ToggleToolbarButton {
-                    index: 1usize,
-                    is_on: is_italic(),
-                    on_click: move |_| is_italic.toggle(),
-                    "Italic"
-                }
-                ToggleToolbarButton {
-                    index: 2usize,
-                    is_on: is_underline(),
-                    on_click: move |_| is_underline.toggle(),
-                    "Underline"
+                ToolbarSeparator {}
+                ToolbarGroup {
+                    ToggleToolbarButton {
+                        index: 3usize,
+                        is_on: text_align() == "left",
+                        on_click: move |_| text_align.set("left".to_string()),
+                        "Align Left"
+                    }
+                    ToggleToolbarButton {
+                        index: 4usize,
+                        is_on: text_align() == "center",
+                        on_click: move |_| text_align.set("center".to_string()),
+                        "Align Center"
+                    }
+                    ToggleToolbarButton {
+                        index: 5usize,
+                        is_on: text_align() == "right",
+                        on_click: move |_| text_align.set("right".to_string()),
+                        "Align Right"
+                    }
                 }
             }
-            ToolbarSeparator {}
-            ToolbarGroup {
-                ToggleToolbarButton {
-                    index: 3usize,
-                    is_on: text_align() == "left",
-                    on_click: move |_| text_align.set("left".to_string()),
-                    "Align Left"
-                }
-                ToggleToolbarButton {
-                    index: 4usize,
-                    is_on: text_align() == "center",
-                    on_click: move |_| text_align.set("center".to_string()),
-                    "Align Center"
-                }
-                ToggleToolbarButton {
-                    index: 5usize,
-                    is_on: text_align() == "right",
-                    on_click: move |_| text_align.set("right".to_string()),
-                    "Align Right"
-                }
+            p {
+                max_width: "30rem",
+                text_align: "{text_align}",
+                font_weight: if is_bold() { "bold" } else { "normal" },
+                font_style: if is_italic() { "italic" } else { "normal" },
+                text_decoration: if is_underline() { "underline" } else { "none" },
+                "This is a sample text that will be formatted according to the toolbar buttons you click. Try clicking the buttons above to see how the text formatting changes."
             }
-        }
-        p {
-            max_width: "30rem",
-            text_align: "{text_align}",
-            font_weight: if is_bold() { "bold" } else { "normal" },
-            font_style: if is_italic() { "italic" } else { "normal" },
-            text_decoration: if is_underline() { "underline" } else { "none" },
-            "This is a sample text that will be formatted according to the toolbar buttons you click. Try clicking the buttons above to see how the text formatting changes."
         }
     }
 }

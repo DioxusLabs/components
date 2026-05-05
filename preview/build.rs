@@ -41,6 +41,11 @@ fn walk_highlight_dir(dir: &std::path::Path, out_dir: &std::path::Path) -> std::
             std::fs::write(out_file_path, markdown).unwrap();
             continue;
         }
+        if file.file_name() == "component.json" {
+            let description = read_component_description(&file.path());
+            let out_file_path = out_folder.join("description.txt");
+            std::fs::write(out_file_path, description).unwrap();
+        }
         let file_name = file.file_name();
         let file_name = file_name.to_string_lossy();
         for theme in ["base16-ocean.dark", "base16-ocean.light"] {
@@ -92,4 +97,17 @@ fn process_markdown_to_html(markdown_path: &std::path::Path) -> String {
     let mut html_output = String::new();
     pulldown_cmark::html::push_html(&mut html_output, parser);
     html_output
+}
+
+fn read_component_description(component_json_path: &std::path::Path) -> String {
+    println!("cargo:rerun-if-changed={}", component_json_path.display());
+    let input =
+        std::fs::read_to_string(component_json_path).expect("Failed to read component metadata");
+    let json: serde_json::Value =
+        serde_json::from_str(&input).expect("Failed to parse component metadata");
+    json.get("description")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or("A Dioxus component.")
+        .trim()
+        .to_string()
 }

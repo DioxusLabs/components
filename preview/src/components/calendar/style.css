@@ -1,6 +1,9 @@
 /* Calendar Container */
 .dx-calendar {
     display: flex;
+    width: 300px;
+    max-width: 100%;
+    box-sizing: border-box;
     flex-direction: row;
     border: 1px solid var(--primary-color-6);
     border-radius: 8px;
@@ -84,6 +87,7 @@
 /* Calendar Grid */
 .dx-calendar-view {
     display: flex;
+    width: 100%;
     flex-direction: column;
 }
 

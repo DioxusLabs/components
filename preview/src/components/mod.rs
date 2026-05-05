@@ -33,6 +33,12 @@ macro_rules! examples {
         ComponentDemoData {
             name: stringify!($name),
             r#type: ComponentType::Normal,
+            description: include_str!(concat!(
+                env!("OUT_DIR"),
+                "/",
+                stringify!($name),
+                "/description.txt"
+            )),
             docs: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/docs.html")),
             component: HighlightedCode {
                 light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.light.html")),
@@ -74,6 +80,12 @@ macro_rules! examples {
         ComponentDemoData {
             name: stringify!($name),
             r#type: ComponentType::Block,
+            description: include_str!(concat!(
+                env!("OUT_DIR"),
+                "/",
+                stringify!($name),
+                "/description.txt"
+            )),
             docs: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/docs.html")),
             component: HighlightedCode {
                 light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.light.html")),
@@ -125,11 +137,11 @@ examples!(
     badge,
     button,
     calendar[simple, internationalized, range, multi_month, unavailable_dates],
+    card,
     checkbox,
     collapsible,
     color_picker,
     context_menu,
-    card,
     date_picker[internationalized, range, multi_month, unavailable_dates],
     dialog,
     drag_and_drop_list[removable],
@@ -144,7 +156,6 @@ examples!(
     popover,
     progress,
     radio_group,
-    virtual_list[random_heights],
     scroll_area,
     select[multi],
     separator,
@@ -156,8 +167,9 @@ examples!(
     tabs,
     textarea[outline, fade, ghost],
     toast,
-    toggle_group,
     toggle,
+    toggle_group,
     toolbar,
     tooltip,
+    virtual_list[random_heights],
 );
