@@ -28,12 +28,8 @@ pub struct DragAndDropListProps {
 #[component]
 pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     let is_removable = props.is_removable;
-    // Wrap each item in a `display: contents` div carrying the caller's key.
-    // rsx! fragments can't hold a key, and without a stable key per item
-    // Dioxus falls back to an index key — which makes reorders swap
-    // *content* between <li>s instead of moving the elements themselves.
-    // Stable keys keep element state (focus, transitions mid-flight)
-    // attached to the content as it moves.
+    // Keep a stable key per item so Dioxus moves keyed siblings instead of
+    // swapping content between list items during reorder.
     let items: Vec<Element> = props
         .items
         .iter()
@@ -45,9 +41,8 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
                 .and_then(|v| v.key.clone())
                 .unwrap_or_else(|| idx.to_string());
             rsx! {
-                div {
+                Fragment {
                     key: "{key}",
-                    style: "display: contents",
                     DragIcon {}
                     div { class: "dx-item-body-div", {item} }
                     if is_removable {
