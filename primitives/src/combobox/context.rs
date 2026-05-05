@@ -133,23 +133,19 @@ pub(super) struct ComboboxContext {
     pub set_value: Callback<Option<RcPartialEqValue>>,
     /// All registered options.
     pub options: Signal<Vec<OptionState>>,
-    /// Filter callback used to decide which options match the query.
-    pub filter: Callback<(String, String), bool>,
     /// The id of the listbox for ARIA wiring.
     pub list_id: Signal<Option<String>>,
     /// Roving focus state for option keyboard navigation.
     pub focus_state: FocusState,
     /// Whether the combobox is disabled.
     pub disabled: ReadSignal<bool>,
+    /// Visible options in relevance-ranked order. The root `Combobox`
+    /// component computes this once per `(options, query)` change so the
+    /// list, empty placeholder, and keyboard navigation share a single scan.
+    pub visible: Memo<Vec<(usize, Callback<(), Element>)>>,
 }
 
 impl ComboboxContext {
-    /// Returns whether the option matches the current query.
-    pub fn option_matches(&self, opt: &OptionState) -> bool {
-        let query = self.query.read().clone();
-        self.filter.call((query, opt.text_value.clone()))
-    }
-
     /// `text_value` of the currently selected option, if any.
     pub fn selected_text(&self) -> Option<String> {
         let value = self.value.read();
@@ -161,86 +157,51 @@ impl ComboboxContext {
             .map(|opt| opt.text_value.clone())
     }
 
-    /// Visible options (filter passing, not disabled), sorted by relevance:
-    /// best match first when there's a query, otherwise declared order. Ties
-    /// fall back to declared order so the result is stable.
-    fn visible_sorted(&self) -> Vec<(usize, Callback<(), Element>)> {
-        let options = self.options.read();
-        let query = self.query.read().clone();
-        let q_trim = query.trim().to_string();
-
-        let mut visible: Vec<(Option<u32>, usize, Callback<(), Element>)> = options
-            .iter()
-            .filter(|o| !o.disabled && self.option_matches(o))
-            .map(|o| {
-                let score = if q_trim.is_empty() {
-                    None
-                } else {
-                    match_score(&q_trim, &o.text_value)
-                };
-                (score, o.tab_index, o.render)
-            })
-            .collect();
-
-        visible.sort_by(|(s1, t1, _), (s2, t2, _)| match (s1, s2) {
-            (Some(a), Some(b)) => a.cmp(b).then_with(|| t1.cmp(t2)),
-            (Some(_), None) => std::cmp::Ordering::Less,
-            (None, Some(_)) => std::cmp::Ordering::Greater,
-            (None, None) => t1.cmp(t2),
-        });
-
-        visible.into_iter().map(|(_, ti, r)| (ti, r)).collect()
-    }
-
     /// Tab indices of visible options in ranked order.
     pub fn visible_indices(&self) -> Vec<usize> {
-        self.visible_sorted().into_iter().map(|(ti, _)| ti).collect()
+        self.visible.read().iter().map(|(t, _)| *t).collect()
     }
 
     /// Render callbacks of visible options in ranked order. `ComboboxList`
-    /// calls these directly to emit `<div role="option">` markup — avoiding a
-    /// per-option lookup against `options`.
+    /// calls these directly to emit `<div role="option">` markup.
     pub fn visible_renders(&self) -> Vec<Callback<(), Element>> {
-        self.visible_sorted().into_iter().map(|(_, r)| r).collect()
+        self.visible.read().iter().map(|(_, r)| *r).collect()
     }
 
     /// Whether at least one option is visible.
     pub fn has_visible_options(&self) -> bool {
-        let options = self.options.read();
-        options
-            .iter()
-            .any(|o| !o.disabled && self.option_matches(o))
+        !self.visible.read().is_empty()
     }
 
     /// Move focus to the next visible option (in ranked order), wrapping.
     pub fn focus_next_visible(&mut self) {
-        let visible = self.visible_indices();
-        if visible.is_empty() {
+        let indices = self.visible_indices();
+        if indices.is_empty() {
             self.focus_state.set_focus(None);
             return;
         }
         let next = match self.focus_state.recent_focus() {
-            Some(curr) => match visible.iter().position(|&i| i == curr) {
-                Some(pos) => visible.get(pos + 1).copied().unwrap_or(visible[0]),
-                None => visible[0],
+            Some(curr) => match indices.iter().position(|&i| i == curr) {
+                Some(pos) => indices.get(pos + 1).copied().unwrap_or(indices[0]),
+                None => indices[0],
             },
-            None => visible[0],
+            None => indices[0],
         };
         self.focus_state.set_focus(Some(next));
     }
 
     /// Move focus to the previous visible option (in ranked order), wrapping.
     pub fn focus_prev_visible(&mut self) {
-        let visible = self.visible_indices();
-        if visible.is_empty() {
+        let indices = self.visible_indices();
+        if indices.is_empty() {
             self.focus_state.set_focus(None);
             return;
         }
-        let last = *visible.last().unwrap();
+        let last = *indices.last().unwrap();
         let prev = match self.focus_state.recent_focus() {
-            Some(curr) => match visible.iter().position(|&i| i == curr) {
+            Some(curr) => match indices.iter().position(|&i| i == curr) {
                 Some(0) => last,
-                Some(pos) => visible[pos - 1],
+                Some(pos) => indices[pos - 1],
                 None => last,
             },
             None => last,
@@ -250,17 +211,15 @@ impl ComboboxContext {
 
     /// Move focus to the first visible option.
     pub fn focus_first_visible(&mut self) {
-        let visible = self.visible_indices();
-        if let Some(first) = visible.first() {
-            self.focus_state.set_focus(Some(*first));
+        if let Some(first) = self.visible.read().first().map(|(t, _)| *t) {
+            self.focus_state.set_focus(Some(first));
         }
     }
 
     /// Move focus to the last visible option.
     pub fn focus_last_visible(&mut self) {
-        let visible = self.visible_indices();
-        if let Some(last) = visible.last() {
-            self.focus_state.set_focus(Some(*last));
+        if let Some(last) = self.visible.read().last().map(|(t, _)| *t) {
+            self.focus_state.set_focus(Some(last));
         }
     }
 

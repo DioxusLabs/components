@@ -83,7 +83,6 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
     });
 
     let mut ctx: ComboboxContext = use_context();
-    let disabled_signal = props.disabled;
 
     let focused = move || ctx.focus_state.is_focused(index());
     let disabled = move || ctx.disabled.cloned() || props.disabled.cloned();
@@ -96,15 +95,14 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
     let aria_label = props.aria_label.clone();
     let aria_roledescription = props.aria_roledescription.clone();
     let attrs = props.attributes;
-    let children_element = props.children;
-    let value_signal = props.value;
+    let children = props.children;
 
     // `ComboboxList` calls this in relevance-ranked order so DOM order
     // matches visual order; `use_callback` keeps the handle stable while
     // the inner closure re-captures fresh props each render.
     let render = use_callback(move |_: ()| -> Element {
         let attrs = attrs.clone();
-        let children = children_element.clone();
+        let children = children.clone();
         let aria_label = aria_label.clone();
         let aria_roledescription = aria_roledescription.clone();
 
@@ -134,7 +132,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
                             && &event.pointer_type() == "mouse"
                             && event.trigger_button() == Some(MouseButton::Primary)
                         {
-                            ctx.commit_value(RcPartialEqValue::new(value_signal.cloned()));
+                            ctx.commit_value(RcPartialEqValue::new(value.cloned()));
                             event.prevent_default();
                         }
                     },
@@ -143,7 +141,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
                     },
                     ontouchend: move |_| {
                         if !disabled() && !did_drag() {
-                            ctx.commit_value(RcPartialEqValue::new(value_signal.cloned()));
+                            ctx.commit_value(RcPartialEqValue::new(value.cloned()));
                         }
                     },
                     ontouchmove: move |_| {
@@ -164,7 +162,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
             value: RcPartialEqValue::new(value.cloned()),
             text_value: text_value.cloned(),
             id: option_id.clone(),
-            disabled: disabled_signal.cloned(),
+            disabled: props.disabled.cloned(),
             render,
         };
         if ctx.options.peek().iter().any(|opt| opt == &option_state) {
