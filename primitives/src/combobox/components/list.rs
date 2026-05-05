@@ -16,8 +16,9 @@ pub struct ComboboxListProps {
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 
-    /// Children — typically [`ComboboxOption`]s, [`ComboboxGroup`]s, and an
-    /// optional [`ComboboxEmpty`].
+    /// Children — typically [`ComboboxOption`](super::option::ComboboxOption)s,
+    /// [`ComboboxGroup`](super::group::ComboboxGroup)s, and an optional
+    /// [`ComboboxEmpty`](super::empty::ComboboxEmpty).
     pub children: Element,
 }
 

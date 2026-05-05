@@ -47,10 +47,11 @@ pub struct ComboboxOptionProps<T: Clone + PartialEq + 'static> {
 
 /// # ComboboxOption
 ///
-/// An individual selectable option inside a [`ComboboxList`]. Registers itself
-/// with the parent combobox; the actual `<div role="option">` is emitted by
-/// [`ComboboxList`](super::list::ComboboxList) in relevance-ranked order so
-/// DOM order matches what sighted users see.
+/// An individual selectable option inside a
+/// [`ComboboxList`](super::list::ComboboxList). Registers itself with the
+/// parent combobox; the actual `<div role="option">` is emitted by
+/// [`ComboboxList`](super::list::ComboboxList) in relevance-ranked order so DOM
+/// order matches what sighted users see.
 ///
 /// ## Value vs text_value
 ///

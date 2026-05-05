@@ -20,14 +20,16 @@ pub struct ComboboxGroupProps {
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 
-    /// Children — typically a [`ComboboxGroupLabel`] and [`ComboboxOption`]s.
+    /// Children — typically a [`ComboboxGroupLabel`] and
+    /// [`ComboboxOption`](super::option::ComboboxOption)s.
     pub children: Element,
 }
 
 /// # ComboboxGroup
 ///
-/// A semantic grouping of related options inside a [`ComboboxList`]. The
-/// group is hidden when none of its options match the current query.
+/// A semantic grouping of related options inside a
+/// [`ComboboxList`](super::list::ComboboxList). The group is hidden when none
+/// of its options match the current query.
 #[component]
 pub fn ComboboxGroup(props: ComboboxGroupProps) -> Element {
     let ctx = use_context::<ComboboxContext>();

@@ -22,10 +22,10 @@ pub struct ComboboxContentProps {
 
 /// # ComboboxContent
 ///
-/// The popup container that wraps the [`ComboboxList`]. Renders only when the
-/// combobox is open and animates open/closed via the `data-state` attribute.
-/// `ComboboxInput` lives outside this — it's the persistent trigger that owns
-/// keyboard focus.
+/// The popup container that wraps the [`ComboboxList`](super::list::ComboboxList).
+/// Renders only when the combobox is open and animates open/closed via the
+/// `data-state` attribute. `ComboboxInput` lives outside this — it's the
+/// persistent trigger that owns keyboard focus.
 ///
 /// Must be used inside a [`Combobox`](super::combobox::Combobox).
 #[component]

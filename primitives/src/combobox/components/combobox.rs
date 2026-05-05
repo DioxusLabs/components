@@ -119,13 +119,7 @@ fn use_combobox_root(
         let query_str = query.read().clone();
         let q_trim = query_str.trim().to_string();
 
-        let mut v: Vec<(
-            Option<u32>,
-            usize,
-            bool,
-            Option<String>,
-            Callback<(), Element>,
-        )> = options
+        let mut v: Vec<_> = options
             .iter()
             .filter(|o| filter.call((query_str.clone(), o.text_value.clone())))
             .map(|o| {

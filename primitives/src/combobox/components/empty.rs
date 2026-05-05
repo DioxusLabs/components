@@ -18,7 +18,7 @@ pub struct ComboboxEmptyProps {
 /// # ComboboxEmpty
 ///
 /// Renders its children only when the current query produces no visible
-/// options. Place it inside a [`ComboboxList`].
+/// options. Place it inside a [`ComboboxList`](super::list::ComboboxList).
 #[component]
 pub fn ComboboxEmpty(props: ComboboxEmptyProps) -> Element {
     let ctx = use_context::<ComboboxContext>();
