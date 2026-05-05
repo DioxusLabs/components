@@ -42,13 +42,13 @@ fn resolve_drop_position(from: usize, to: usize) -> DropPosition {
 /// Use `use_context::<DragAndDropItemContext>()` to access the current item's index.
 #[derive(Clone, Copy)]
 pub struct DragAndDropItemContext {
-    index: usize,
+    index: Signal<usize>,
 }
 
 impl DragAndDropItemContext {
     /// Returns the index of the current item in the list.
     pub fn index(&self) -> usize {
-        self.index
+        (self.index)()
     }
 }
 
@@ -301,15 +301,13 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     let list_items = use_signal(|| props.items.clone());
     let announcement = use_signal(String::new);
 
-    let ctx = DragAndDropContext {
+    let ctx = use_context_provider(move || DragAndDropContext {
         drag,
         list_items,
         focused_index: Signal::new(None),
         announcement,
-    };
+    });
     let mut list_drop_ctx = ctx;
-
-    use_context_provider(move || ctx);
 
     let label = props
         .aria_label
@@ -422,7 +420,12 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
     let mut ctx: DragAndDropContext = use_context();
 
     let index = props.index;
-    use_context_provider(|| DragAndDropItemContext { index });
+    let mut item_ctx = use_context_provider(move || DragAndDropItemContext {
+        index: Signal::new(index),
+    });
+    if *item_ctx.index.peek() != index {
+        item_ctx.index.set(index);
+    }
 
     let mut item_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
     use_effect(move || {

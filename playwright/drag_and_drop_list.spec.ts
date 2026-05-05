@@ -1,8 +1,9 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const BASE = "http://127.0.0.1:8080";
+const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:8080";
 const URL = `${BASE}/component/?name=drag_and_drop_list&`;
+const REMOVABLE_URL = `${BASE}/component/block/?name=drag_and_drop_list&variant=removable&`;
 const LOAD_TIMEOUT = 20 * 60 * 1000;
 
 /** Navigate to the DnD page and return the first (main) variant list. */
@@ -15,8 +16,8 @@ async function loadMainList(page: import("@playwright/test").Page) {
 
 /** Navigate to the DnD page and return the second (removable) variant list. */
 async function loadRemovableList(page: import("@playwright/test").Page) {
-  await page.goto(URL, { timeout: LOAD_TIMEOUT });
-  const list = page.locator(".dx-dnd-list").nth(1);
+  await page.goto(REMOVABLE_URL, { timeout: LOAD_TIMEOUT });
+  const list = page.locator(".dx-dnd-list").first();
   await expect(list).toBeVisible({ timeout: 30000 });
   return list;
 }
@@ -334,6 +335,32 @@ test.describe("Remove behavior", () => {
     await removeButtons.nth(initialCount - 1).click();
     await expect(items).toHaveCount(initialCount - 1);
     await expect(items.nth(initialCount - 2)).toBeFocused();
+  });
+
+  test("remove button tracks a keyed item after reordering", async ({
+    page,
+  }) => {
+    const list = await loadRemovableList(page);
+    const items = getItems(list);
+    const initialCount = await items.count();
+    const movedText = await itemText(items.nth(1));
+
+    await items.nth(1).click();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+
+    await expect.poll(() => itemText(items.nth(2))).toBe(movedText);
+    await items.nth(2).locator(".dx-remove-button").click();
+
+    await expect(items).toHaveCount(initialCount - 1);
+    await expect.poll(async () => {
+      const count = await items.count();
+      const texts = await Promise.all(
+        Array.from({ length: count }, (_, index) => itemText(items.nth(index))),
+      );
+      return texts;
+    }).not.toContain(movedText);
   });
 });
 
