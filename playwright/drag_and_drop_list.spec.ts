@@ -293,6 +293,33 @@ test.describe("Drag and drop lifecycle", () => {
     );
     expect(runtimeErrors).toEqual([]);
   });
+
+  test("cancelled mouse drag does not reorder the list", async ({ page }) => {
+    const list = await loadMainList(page);
+    const items = getItems(list);
+    const sourceText = await items.nth(2).innerText();
+    const targetText = await items.nth(3).innerText();
+    const sourceBox = await items.nth(2).boundingBox();
+    const targetBox = await items.nth(3).boundingBox();
+    expect(sourceBox).not.toBeNull();
+    expect(targetBox).not.toBeNull();
+
+    await page.mouse.move(
+      sourceBox!.x + sourceBox!.width / 2,
+      sourceBox!.y + sourceBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      targetBox!.x + targetBox!.width / 2,
+      targetBox!.y + targetBox!.height * 0.8,
+      { steps: 20 },
+    );
+    await page.keyboard.press("Escape");
+    await page.mouse.up();
+
+    await expect(items.nth(2)).toContainText(sourceText);
+    await expect(items.nth(3)).toContainText(targetText);
+  });
 });
 
 test.describe("Remove behavior", () => {

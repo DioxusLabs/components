@@ -112,9 +112,6 @@ impl DragAndDropContext {
     }
 
     fn end_drag(&mut self) {
-        if matches!((self.drag)(), DragState::Dragging { .. }) {
-            self.drop();
-        }
         let focus_target = self.drop_to().or(self.drag_from());
         self.set_focus(focus_target);
         self.drag.set(DragState::Idle);
