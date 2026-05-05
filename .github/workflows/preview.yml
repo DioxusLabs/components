@@ -58,8 +58,8 @@ jobs:
           clean: false
           single-commit: true
       - name: Comment PR
-        # Only run if the pr just opened
-        if: github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'ready_for_review'
+        # Post or update the preview link after a successful deploy.
+        if: github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'ready_for_review' || github.event.action == 'synchronize'
         uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
