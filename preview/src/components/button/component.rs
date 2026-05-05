@@ -11,6 +11,7 @@ pub enum ButtonVariant {
     Destructive,
     Outline,
     Ghost,
+    Link,
 }
 
 impl ButtonVariant {
@@ -21,6 +22,36 @@ impl ButtonVariant {
             ButtonVariant::Destructive => "destructive",
             ButtonVariant::Outline => "outline",
             ButtonVariant::Ghost => "ghost",
+            ButtonVariant::Link => "link",
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Default)]
+#[non_exhaustive]
+pub enum ButtonSize {
+    Xs,
+    Sm,
+    #[default]
+    Default,
+    Lg,
+    Icon,
+    IconXs,
+    IconSm,
+    IconLg,
+}
+
+impl ButtonSize {
+    pub fn class(&self) -> &'static str {
+        match self {
+            ButtonSize::Xs => "xs",
+            ButtonSize::Sm => "sm",
+            ButtonSize::Default => "default",
+            ButtonSize::Lg => "lg",
+            ButtonSize::Icon => "icon",
+            ButtonSize::IconXs => "icon-xs",
+            ButtonSize::IconSm => "icon-sm",
+            ButtonSize::IconLg => "icon-lg",
         }
     }
 }
@@ -28,6 +59,7 @@ impl ButtonVariant {
 #[component]
 pub fn Button(
     #[props(default)] variant: ButtonVariant,
+    #[props(default)] size: ButtonSize,
     #[props(extends=GlobalAttributes)]
     #[props(extends=button)]
     attributes: Vec<Attribute>,
@@ -40,6 +72,7 @@ pub fn Button(
     let base = attributes!(button {
         class: "dx-button",
         "data-style": variant.class(),
+        "data-size": size.class(),
     });
     let merged = merge_attributes(vec![base, attributes]);
 

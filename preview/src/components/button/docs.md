@@ -7,6 +7,7 @@ button {
     // Global html attributes
     class: "dx-button",
     "data-style": "outline",
+    "data-size": "default",
     // Children
     {children}
 }
