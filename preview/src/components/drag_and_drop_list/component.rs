@@ -4,6 +4,9 @@ use dioxus_primitives::drag_and_drop_list::{
 };
 use dioxus_primitives::icon::Icon;
 
+#[css_module("/src/components/drag_and_drop_list/style.css")]
+struct Styles;
+
 #[derive(Props, Clone, PartialEq)]
 pub struct DragAndDropListProps {
     /// Items (labels) to be rendered.
@@ -34,7 +37,7 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
         .map(|item| {
             rsx! {
                 DragIcon {}
-                div { class: "dx-item-body-div", {item} }
+                div { class: Styles::dx_item_body_div, {item} }
                 if is_removable {
                     RemoveButton {}
                 }
@@ -43,8 +46,11 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
         .collect();
 
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         drag_and_drop_list::DragAndDropList {
+            class: Styles::dx_dnd_list,
+            ul_class: Some(Styles::dx_dnd_list_ul.to_string()),
+            item_class: Some(Styles::dx_dnd_list_item.to_string()),
+            indicator_class: Some(Styles::dx_drop_indicator.to_string()),
             items,
             aria_label: props.aria_label,
             attributes: props.attributes,
@@ -57,6 +63,8 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
 pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
     rsx! {
         drag_and_drop_list::DragAndDropListItem {
+            class: Styles::dx_dnd_list_item,
+            indicator_class: Some(Styles::dx_drop_indicator.to_string()),
             index: props.index,
             attributes: props.attributes,
             {props.children}
@@ -67,7 +75,7 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
 #[component]
 fn DragIcon() -> Element {
     rsx! {
-        div { class: "dx-item-icon-div", aria_hidden: "true",
+        div { class: Styles::dx_item_icon_div, aria_hidden: "true",
             Icon {
                 // equal icon from lucide https://lucide.dev/icons/equal
                 stroke: "var(--secondary-color-4)",
@@ -91,7 +99,7 @@ pub fn RemoveButton(
     let label = format!("Remove item {}", index + 1);
     rsx! {
         button {
-            class: "dx-remove-button",
+            class: Styles::dx_remove_button,
             aria_label: "{label}",
             onclick: move |_| ctx.remove(index),
             ..attributes,

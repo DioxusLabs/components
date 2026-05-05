@@ -805,7 +805,6 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
 
     rsx! {
         span {
-            class: "dx-date-segment",
             id,
             role: "spinbutton",
             aria_valuemin: props.min.to_string(),
@@ -835,10 +834,10 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
 }
 
 #[component]
-fn DateSeparator(#[props(default = '-')] symbol: char) -> Element {
+fn DateSeparator(#[props(default = '-')] symbol: char, #[props(default)] class: Option<String>) -> Element {
     rsx! {
         span {
-            class: "dx-date-segment",
+            class,
             aria_hidden: "true",
             tabindex: "-1",
             "is-separator": true,
@@ -872,6 +871,10 @@ struct DateElementProps {
     /// Callback when display year placeholder
     #[props(default = Callback::new(|_| "Y".to_string()))]
     pub on_format_year_placeholder: Callback<(), String>,
+
+    /// Class for each date segment and separator span.
+    #[props(default)]
+    pub segment_class: Option<String>,
 }
 
 #[component]
@@ -950,8 +953,9 @@ fn DateElement(props: DateElementProps) -> Element {
             max: max_year,
             max_length: 4,
             on_format_placeholder: props.on_format_year_placeholder,
+            class: props.segment_class.clone(),
         }
-        DateSeparator {}
+        DateSeparator { class: props.segment_class.clone() }
         DateSegment {
             aria_label: "month",
             index: props.start_index + 1usize,
@@ -962,8 +966,9 @@ fn DateElement(props: DateElementProps) -> Element {
             max: max_month as u8,
             max_length: 2,
             on_format_placeholder: props.on_format_month_placeholder,
+            class: props.segment_class.clone(),
         }
-        DateSeparator {}
+        DateSeparator { class: props.segment_class.clone() }
         DateSegment {
             aria_label: "day",
             index: props.start_index + 2usize,
@@ -974,6 +979,7 @@ fn DateElement(props: DateElementProps) -> Element {
             max: max_day,
             max_length: 2,
             on_format_placeholder: props.on_format_day_placeholder,
+            class: props.segment_class,
         }
     }
 }
@@ -992,6 +998,10 @@ pub struct DatePickerInputProps {
     /// Callback when display year placeholder
     #[props(default = Callback::new(|_| "Y".to_string()))]
     pub on_format_year_placeholder: Callback<(), String>,
+
+    /// Class for each date segment and separator span.
+    #[props(default)]
+    pub segment_class: Option<String>,
 
     /// Additional attributes for the value element
     #[props(extends = GlobalAttributes)]
@@ -1045,7 +1055,7 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
     let mut ctx = use_context::<DatePickerContext>();
 
     rsx! {
-        div { class: "dx-date-picker-group", ..props.attributes,
+        div { ..props.attributes,
             DateElement {
                 selected_date: ctx.selected_date,
                 on_date_change: move |date| {
@@ -1055,6 +1065,7 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
                 on_format_day_placeholder: props.on_format_day_placeholder,
                 on_format_month_placeholder: props.on_format_month_placeholder,
                 on_format_year_placeholder: props.on_format_year_placeholder,
+                segment_class: props.segment_class,
             }
             {props.children}
         }
@@ -1133,15 +1144,16 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
     });
 
     rsx! {
-        div { class: "dx-date-picker-group", ..props.attributes,
+        div { ..props.attributes,
             DateElement {
                 selected_date: start_date(),
                 on_date_change: move |date| start_date.set(date),
                 on_format_day_placeholder: props.on_format_day_placeholder,
                 on_format_month_placeholder: props.on_format_month_placeholder,
                 on_format_year_placeholder: props.on_format_year_placeholder,
+                segment_class: props.segment_class.clone(),
             }
-            DateSeparator { symbol: '—' }
+            DateSeparator { symbol: '—', class: props.segment_class.clone() }
             DateElement {
                 start_index: 3,
                 selected_date: end_date(),
@@ -1149,6 +1161,7 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
                 on_format_day_placeholder: props.on_format_day_placeholder,
                 on_format_month_placeholder: props.on_format_month_placeholder,
                 on_format_year_placeholder: props.on_format_year_placeholder,
+                segment_class: props.segment_class,
             }
             {props.children}
         }

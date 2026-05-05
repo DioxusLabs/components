@@ -632,7 +632,6 @@ fn CollapsibleCodeBlock(highlighted: HighlightedCode) -> Element {
 
     rsx! {
         div {
-            class: "dx-tabs-content-extra",
             width: "100%",
             height: "100%",
             display: "flex",

@@ -9,7 +9,7 @@ pub fn Demo() -> Element {
     let mut selected_range = use_signal(|| None::<DateRange>);
     let mut view_date = use_signal(|| date!(2026 - 05 - 15));
     rsx! {
-        div { class: "dx-calendar-example", style: "padding: 20px;",
+        div { style: "padding: 20px;",
             RangeCalendar {
                 selected_range: selected_range(),
                 on_range_change: move |range| {

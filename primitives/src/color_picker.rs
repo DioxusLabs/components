@@ -324,7 +324,6 @@ pub fn AreaTrack(props: AreaTrackProps) -> Element {
 
     rsx! {
         div {
-            class: "dx-color-area-track",
             style: "--area-color: {area_color}",
             ..props.attributes,
             {props.children}
@@ -335,6 +334,9 @@ pub fn AreaTrack(props: AreaTrackProps) -> Element {
 /// The props for the [`AreaThumb`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct AreaThumbProps {
+    /// Class applied to the inner range input elements.
+    #[props(default)]
+    pub input_class: Option<String>,
     /// Additional attributes to apply to the thumb element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -383,7 +385,6 @@ pub fn AreaThumb(props: AreaThumbProps) -> Element {
 
     rsx! {
         div {
-            class: "dx-color-area-thumb",
             aria_label: "Color area",
             "data-dragging": area_ctx.dragging,
             style,
@@ -424,7 +425,7 @@ pub fn AreaThumb(props: AreaThumbProps) -> Element {
             },
             ..props.attributes,
             input {
-                class: "dx-color-area-input",
+                class: props.input_class.clone(),
                 r#type: "range",
                 aria_label: "Saturation",
                 aria_roledescription: "2D Slider",
@@ -467,7 +468,7 @@ pub fn AreaThumb(props: AreaThumbProps) -> Element {
                 },
             }
             input {
-                class: "dx-color-area-input",
+                class: props.input_class.clone(),
                 r#type: "range",
                 aria_label: "Value",
                 aria_roledescription: "2D Slider",

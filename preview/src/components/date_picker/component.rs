@@ -1,22 +1,30 @@
 use dioxus::prelude::*;
 
+use dioxus_primitives::icon;
 use dioxus_primitives::{
     date_picker::{self, DatePickerInputProps, DatePickerProps, DateRangePickerProps},
+    dioxus_attributes::attributes,
+    merge_attributes,
     popover::{PopoverContentProps, PopoverTriggerProps},
     ContentAlign,
 };
-use dioxus_primitives::icon;
 
 use super::super::calendar::*;
 use super::super::popover::*;
 
+#[css_module("/src/components/date_picker/style.css")]
+struct Styles;
+
 #[component]
 pub fn DatePicker(props: DatePickerProps) -> Element {
+    let base = attributes!(div {
+        class: Styles::dx_date_picker
+    });
+    let merged = merge_attributes(vec![base, props.attributes]);
+
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         div {
             date_picker::DatePicker {
-                class: "dx-date-picker",
                 on_value_change: props.on_value_change,
                 selected_date: props.selected_date,
                 disabled: props.disabled,
@@ -26,7 +34,7 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
                 month_count: props.month_count,
                 disabled_ranges: props.disabled_ranges,
                 roving_loop: props.roving_loop,
-                attributes: props.attributes,
+                attributes: merged,
                 date_picker::DatePickerPopover {
                     popover_root: PopoverRoot,
                     {props.children}
@@ -38,11 +46,14 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
 
 #[component]
 pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
+    let base = attributes!(div {
+        class: Styles::dx_date_picker
+    });
+    let merged = merge_attributes(vec![base, props.attributes]);
+
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         div {
             date_picker::DateRangePicker {
-                class: "dx-date-picker",
                 on_range_change: props.on_range_change,
                 selected_range: props.selected_range,
                 disabled: props.disabled,
@@ -52,7 +63,7 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
                 month_count: props.month_count,
                 disabled_ranges: props.disabled_ranges,
                 roving_loop: props.roving_loop,
-                attributes: props.attributes,
+                attributes: merged,
                 date_picker::DatePickerPopover { popover_root: PopoverRoot, {props.children} }
             }
         }
@@ -61,12 +72,18 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
 
 #[component]
 pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
+    let base = attributes!(div {
+        class: Styles::dx_date_picker_group
+    });
+    let merged = merge_attributes(vec![base, props.attributes]);
+
     rsx! {
         date_picker::DatePickerInput {
+            segment_class: Some(Styles::dx_date_segment.to_string()),
             on_format_day_placeholder: props.on_format_day_placeholder,
             on_format_month_placeholder: props.on_format_month_placeholder,
             on_format_year_placeholder: props.on_format_year_placeholder,
-            attributes: props.attributes,
+            attributes: merged,
             {props.children}
             DatePickerPopoverTrigger {}
             DatePickerPopoverContent { align: ContentAlign::Center,
@@ -90,12 +107,18 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
 
 #[component]
 pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
+    let base = attributes!(div {
+        class: Styles::dx_date_picker_group
+    });
+    let merged = merge_attributes(vec![base, props.attributes]);
+
     rsx! {
         date_picker::DateRangePickerInput {
+            segment_class: Some(Styles::dx_date_segment.to_string()),
             on_format_day_placeholder: props.on_format_day_placeholder,
             on_format_month_placeholder: props.on_format_month_placeholder,
             on_format_year_placeholder: props.on_format_year_placeholder,
-            attributes: props.attributes,
+            attributes: merged,
             {props.children}
             DatePickerPopoverTrigger {}
             DatePickerPopoverContent {
@@ -122,9 +145,12 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
 #[component]
 pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
-        PopoverTrigger { aria_label: "Show Calendar", attributes: props.attributes,
+        PopoverTrigger {
+            class: Styles::dx_date_picker_popover_trigger.to_string(),
+            aria_label: "Show Calendar",
+            attributes: props.attributes,
             icon::Icon {
-                class: "dx-date-picker-expand-icon",
+                class: Styles::dx_date_picker_trigger,
                 width: "20px",
                 height: "20px",
                 stroke: "var(--primary-color-7)",
@@ -138,7 +164,7 @@ pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
 pub fn DatePickerPopoverContent(props: PopoverContentProps) -> Element {
     rsx! {
         PopoverContent {
-            class: "dx-popover-content",
+            class: Styles::dx_date_picker_popover_content.to_string(),
             id: props.id,
             side: props.side,
             align: props.align,

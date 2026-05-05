@@ -1,12 +1,14 @@
 use dioxus::prelude::*;
 use dioxus_primitives::tooltip::{self, TooltipContentProps, TooltipProps, TooltipTriggerProps};
 
+#[css_module("/src/components/tooltip/style.css")]
+struct Styles;
+
 #[component]
 pub fn Tooltip(props: TooltipProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         tooltip::Tooltip {
-            class: "dx-tooltip",
+            class: Styles::dx_tooltip,
             disabled: props.disabled,
             open: props.open,
             default_open: props.default_open,
@@ -21,7 +23,7 @@ pub fn Tooltip(props: TooltipProps) -> Element {
 pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
     rsx! {
         tooltip::TooltipTrigger {
-            class: "dx-tooltip-trigger",
+            class: Styles::dx_tooltip_trigger,
             id: props.id,
             as: props.r#as,
             attributes: props.attributes,
@@ -34,7 +36,7 @@ pub fn TooltipTrigger(props: TooltipTriggerProps) -> Element {
 pub fn TooltipContent(props: TooltipContentProps) -> Element {
     rsx! {
         tooltip::TooltipContent {
-            class: "dx-tooltip-content",
+            class: Styles::dx_tooltip_content,
             id: props.id,
             side: props.side,
             align: props.align,

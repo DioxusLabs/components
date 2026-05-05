@@ -3,12 +3,14 @@ use dioxus_primitives::slider::{
     self, RangeSliderProps, SliderProps, SliderRangeProps, SliderThumbProps, SliderTrackProps,
 };
 
+#[css_module("/src/components/slider/style.css")]
+struct Styles;
+
 #[component]
 pub fn Slider(props: SliderProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         slider::Slider {
-            class: "dx-slider",
+            class: Styles::dx_slider,
             value: props.value,
             default_value: props.default_value,
             min: props.min,
@@ -28,9 +30,8 @@ pub fn Slider(props: SliderProps) -> Element {
 #[component]
 pub fn RangeSlider(props: RangeSliderProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         slider::RangeSlider {
-            class: "dx-slider",
+            class: Styles::dx_slider,
             value: props.value,
             default_value: props.default_value,
             min: props.min,
@@ -50,14 +51,14 @@ pub fn RangeSlider(props: RangeSliderProps) -> Element {
 #[component]
 pub fn SliderTrack(props: SliderTrackProps) -> Element {
     rsx! {
-        slider::SliderTrack { class: "dx-slider-track", attributes: props.attributes, {props.children} }
+        slider::SliderTrack { class: Styles::dx_slider_track, attributes: props.attributes, {props.children} }
     }
 }
 
 #[component]
 pub fn SliderRange(props: SliderRangeProps) -> Element {
     rsx! {
-        slider::SliderRange { class: "dx-slider-range", attributes: props.attributes, {props.children} }
+        slider::SliderRange { class: Styles::dx_slider_range, attributes: props.attributes, {props.children} }
     }
 }
 
@@ -65,7 +66,7 @@ pub fn SliderRange(props: SliderRangeProps) -> Element {
 pub fn SliderThumb(props: SliderThumbProps) -> Element {
     rsx! {
         slider::SliderThumb {
-            class: "dx-slider-thumb",
+            class: Styles::dx_slider_thumb,
             index: props.index,
             attributes: props.attributes,
             {props.children}

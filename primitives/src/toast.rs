@@ -74,6 +74,18 @@ pub struct ToastProviderProps {
     #[props(default = Callback::new(|props: ToastPropsWithOwner| rsx! { {DynamicNode::Component(props.into_vcomponent(Toast))} }))]
     pub render_toast: Callback<ToastPropsWithOwner, Element>,
 
+    /// Class applied to the inner toast list element.
+    #[props(default)]
+    pub list_class: Option<String>,
+
+    /// Class applied to each toast item element.
+    #[props(default)]
+    pub item_class: Option<String>,
+
+    /// Additional attributes to apply to the toast container element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
     /// The children of the toast provider component.
     pub children: Element,
 }
@@ -230,19 +242,19 @@ pub fn ToastProvider(props: ToastProviderProps) -> Element {
                 role: "region",
                 aria_label: "{length} notifications",
                 tabindex: "-1",
-                class: "dx-toast-container",
                 style: "--toast-count: {length}",
                 onmounted: move |e| {
                     region_ref.set(Some(e.data()));
                 },
+                ..props.attributes,
 
                 ol {
-                    class: "dx-toast-list",
+                    class: props.list_class.clone(),
                     // Render all toasts
                     for (index, toast) in toast_list.read().iter().rev().enumerate() {
                         li {
                             key: "{toast.id}",
-                            class: "dx-toast-item",
+                            class: props.item_class.clone(),
                             {
                                 props.render_toast.call(ToastProps::builder().id(toast.id)
                                     .index(index)
@@ -295,6 +307,22 @@ pub struct ToastProps {
 
     /// The duration for which the toast is displayed.
     pub duration: Option<Duration>,
+
+    /// Class applied to the inner content wrapper.
+    #[props(default)]
+    pub content_class: Option<String>,
+
+    /// Class applied to the title element.
+    #[props(default)]
+    pub title_class: Option<String>,
+
+    /// Class applied to the description element.
+    #[props(default)]
+    pub description_class: Option<String>,
+
+    /// Class applied to the close button element.
+    #[props(default)]
+    pub close_class: Option<String>,
 
     /// Additional attributes to apply to the toast element.
     #[props(extends = GlobalAttributes)]
@@ -395,7 +423,6 @@ pub fn Toast(props: ToastProps) -> Element {
             aria_modal: "false",
             tabindex: "0",
 
-            class: "dx-toast",
             "data-type": props.toast_type.as_str(),
             "data-permanent": props.permanent,
             "data-toast-even": (props.index % 2 == 0).then_some("true"),
@@ -404,27 +431,28 @@ pub fn Toast(props: ToastProps) -> Element {
             style: "--toast-index: {props.index}",
             ..props.attributes,
 
-            div { class: "dx-toast-content",
+            div {
+                class: props.content_class.clone(),
                 role: "alert",
                 aria_atomic: "true",
 
                 div {
                     id: label_id,
-                    class: "dx-toast-title",
+                    class: props.title_class.clone(),
                     {props.title.clone()}
                 }
 
                 if let Some(description) = &props.description {
                     div {
                         id: description_id.clone(),
-                        class: "dx-toast-description",
+                        class: props.description_class.clone(),
                         {description.clone()}
                     }
                 }
             }
 
             button {
-                class: "dx-toast-close",
+                class: props.close_class.clone(),
                 aria_label: "close",
                 type: "button",
                 onclick: move |e| {

@@ -545,7 +545,6 @@ pub fn Calendar(props: CalendarProps) -> Element {
 
     rsx! {
         div {
-            class: "dx-calendar",
             role: "application",
             aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
@@ -813,7 +812,6 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
 
     rsx! {
         div {
-            class: "dx-calendar",
             role: "application",
             aria_label: "Calendar",
             "data-disabled": (props.disabled)(),
@@ -1077,7 +1075,7 @@ pub struct CalendarNavigationProps {
 #[component]
 pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
     rsx! {
-        div { class: "dx-calendar-navigation", ..props.attributes,
+        div { ..props.attributes,
             {props.children}
         }
     }
@@ -1176,7 +1174,6 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
 
     rsx! {
         button {
-            class: "dx-calendar-nav-prev",
             aria_label: "Previous month",
             type: "button",
             onclick: handle_prev_month,
@@ -1285,7 +1282,6 @@ pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
 
     rsx! {
         button {
-            class: "dx-calendar-nav-next",
             aria_label: "Next month",
             type: "button",
             onclick: handle_next_month,
@@ -1362,7 +1358,6 @@ pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
 
     rsx! {
         div {
-            class: "dx-calendar-month-title",
             ..props.attributes,
 
             {month_year}
@@ -1386,6 +1381,26 @@ pub struct CalendarGridProps {
         rsx! { CalendarDay { date } }
     }))]
     pub render_day: Callback<Date, Element>,
+
+    /// Class for the inner `<thead>` row element.
+    #[props(default)]
+    pub header_class: Option<String>,
+
+    /// Class for inner `<th>` day-header elements.
+    #[props(default)]
+    pub day_header_class: Option<String>,
+
+    /// Class for the inner `<tbody>` element.
+    #[props(default)]
+    pub body_class: Option<String>,
+
+    /// Class for inner `<tr>` week-row elements inside tbody.
+    #[props(default)]
+    pub week_class: Option<String>,
+
+    /// Class for `<th>`/`<td>` weeknum elements.
+    #[props(default)]
+    pub weeknum_class: Option<String>,
 
     /// Additional attributes to apply to the grid element
     #[props(extends = GlobalAttributes)]
@@ -1506,18 +1521,17 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
         table {
             role: "grid",
             id: props.id,
-            class: "dx-calendar-grid",
             ..props.attributes,
 
             // Day headers
             thead { aria_hidden: "true",
                 tr {
-                    class: "dx-calendar-grid-header",
+                    class: props.header_class,
                     // Day name headers
                     for (weekday, label) in weekday_headers() {
                         th {
                             key: "{weekday:?}", // Add key for efficient diffing
-                            class: "dx-calendar-grid-day-header",
+                            class: props.day_header_class.clone(),
                             {label}
                         }
                     }
@@ -1525,12 +1539,12 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
             }
 
             // Calendar days grid
-            tbody { class: "dx-calendar-grid-body",
+            tbody { class: props.body_class,
                 // Display all days in a grid
                 for row in &*days_grid.read() {
                     tr {
                         role: "row",
-                        class: "dx-calendar-grid-week",
+                        class: props.week_class.clone(),
                         for date in row.iter().copied() {
                             td {
                                 {props.render_day.call(date)}
@@ -1546,6 +1560,14 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
 /// The props for the [`CalendarSelectMonth`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarSelectMonthProps {
+    /// Class for the outer `<span>` container element.
+    #[props(default)]
+    pub container_class: Option<String>,
+
+    /// Class for the inner `<span>` value element.
+    #[props(default)]
+    pub value_class: Option<String>,
+
     /// Additional attributes to extend the select month element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -1634,7 +1656,7 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     });
 
     rsx! {
-        span { class: "dx-calendar-month-select-container",
+        span { class: props.container_class,
             select {
                 aria_label: "Month",
                 onchange: move |e| {
@@ -1653,7 +1675,7 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
                     }
                 }
             }
-            span { class: "dx-calendar-month-select-value",
+            span { class: props.value_class,
                 {base_ctx.format_month.call(month)}
                 {props.children}
             }
@@ -1664,6 +1686,14 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
 /// The props for the [`CalendarSelectYear`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarSelectYearProps {
+    /// Class for the outer `<span>` container element.
+    #[props(default)]
+    pub container_class: Option<String>,
+
+    /// Class for the inner `<span>` value element.
+    #[props(default)]
+    pub value_class: Option<String>,
+
     /// Additional attributes to extend the select year element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -1744,7 +1774,7 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
     });
 
     rsx! {
-        span { class: "dx-calendar-year-select-container",
+        span { class: props.container_class,
             select {
                 aria_label: "Year",
                 onchange: move |e| {
@@ -1762,7 +1792,7 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
                     }
                 }
             }
-            span { class: "dx-calendar-year-select-value",
+            span { class: props.value_class,
                 "{year}"
                 {props.children}
             }
@@ -1807,7 +1837,8 @@ fn aria_label(date: &Date) -> String {
 /// The props for the [`CalendarDay`] component.
 #[derive(Props, Clone, Debug, PartialEq)]
 pub struct CalendarDayProps {
-    date: Date,
+    /// The date for this day cell.
+    pub date: Date,
     /// Additional attributes to extend the calendar day element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -1980,7 +2011,6 @@ fn SingleCalendarDay(props: CalendarDayProps) -> Element {
 
     rsx! {
         button {
-            class: "dx-calendar-grid-cell",
             type: "button",
             tabindex: if date == focusable_date {
                 "0"
@@ -2074,7 +2104,6 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
 
     rsx! {
         button {
-            class: "dx-calendar-grid-cell",
             type: "button",
             tabindex: if date == focusable_date {
                 "0"

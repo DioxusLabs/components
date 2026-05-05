@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 use dioxus_primitives::avatar::{self, AvatarFallbackProps, AvatarImageProps, AvatarState};
 
+#[css_module("/src/components/avatar/style.css")]
+struct Styles;
+
 #[derive(Clone, Copy, PartialEq, Default)]
 pub enum AvatarImageSize {
     #[default]
@@ -10,11 +13,11 @@ pub enum AvatarImageSize {
 }
 
 impl AvatarImageSize {
-    fn to_class(self) -> &'static str {
+    fn to_class(self) -> String {
         match self {
-            AvatarImageSize::Small => "dx-avatar-sm",
-            AvatarImageSize::Medium => "dx-avatar-md",
-            AvatarImageSize::Large => "dx-avatar-lg",
+            AvatarImageSize::Small => Styles::dx_avatar_sm.to_string(),
+            AvatarImageSize::Medium => Styles::dx_avatar_md.to_string(),
+            AvatarImageSize::Large => Styles::dx_avatar_lg.to_string(),
         }
     }
 }
@@ -27,10 +30,10 @@ pub enum AvatarShape {
 }
 
 impl AvatarShape {
-    fn to_class(self) -> &'static str {
+    fn to_class(self) -> String {
         match self {
-            AvatarShape::Circle => "dx-avatar-circle",
-            AvatarShape::Rounded => "dx-avatar-rounded",
+            AvatarShape::Circle => Styles::dx_avatar_circle.to_string(),
+            AvatarShape::Rounded => Styles::dx_avatar_rounded.to_string(),
         }
     }
 }
@@ -67,10 +70,8 @@ pub struct AvatarProps {
 #[component]
 pub fn Avatar(props: AvatarProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
-
         avatar::Avatar {
-            class: "dx-avatar {props.size.to_class()} {props.shape.to_class()}",
+            class: format!("{} {} {}", Styles::dx_avatar, props.size.to_class(), props.shape.to_class()),
             on_load: props.on_load,
             on_error: props.on_error,
             on_state_change: props.on_state_change,
@@ -84,7 +85,7 @@ pub fn Avatar(props: AvatarProps) -> Element {
 pub fn AvatarImage(props: AvatarImageProps) -> Element {
     rsx! {
         avatar::AvatarImage {
-            class: "dx-avatar-image",
+            class: Styles::dx_avatar_image,
             src: props.src,
             alt: props.alt,
             attributes: props.attributes,
@@ -95,6 +96,6 @@ pub fn AvatarImage(props: AvatarImageProps) -> Element {
 #[component]
 pub fn AvatarFallback(props: AvatarFallbackProps) -> Element {
     rsx! {
-        avatar::AvatarFallback { class: "dx-avatar-fallback", attributes: props.attributes, {props.children} }
+        avatar::AvatarFallback { class: Styles::dx_avatar_fallback, attributes: props.attributes, {props.children} }
     }
 }

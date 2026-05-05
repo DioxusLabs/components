@@ -61,6 +61,7 @@ pub(super) fn ListPane(
         section { class: "ec-list-pane",
             div { class: "ec-list-toolbar",
                 Tabs {
+                    class: "ec-mail-tabs",
                     default_value: TabId::All.as_str().to_string(),
                     horizontal: true,
                     on_value_change: move |v: String| {
@@ -68,9 +69,10 @@ pub(super) fn ListPane(
                             state.set_active_tab(tab);
                         }
                     },
-                    TabList {
+                    TabList { class: "ec-mail-tabs-list",
                         for (idx, tab) in TABS.iter().enumerate() {
                             TabTrigger {
+                                class: "ec-mail-tab",
                                 key: "{tab.id.as_str()}",
                                 value: tab.id.as_str().to_string(),
                                 index: idx,

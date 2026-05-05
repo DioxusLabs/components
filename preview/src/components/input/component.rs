@@ -1,4 +1,6 @@
 use dioxus::prelude::*;
+#[css_module("/src/components/input/style.css")]
+struct Styles;
 
 #[component]
 pub fn Input(
@@ -27,9 +29,8 @@ pub fn Input(
     children: Element,
 ) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         input {
-            class: "dx-input",
+            class: Styles::dx_input,
             oninput: move |e| _ = oninput.map(|callback| callback(e)),
             onchange: move |e| _ = onchange.map(|callback| callback(e)),
             oninvalid: move |e| _ = oninvalid.map(|callback| callback(e)),

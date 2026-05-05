@@ -6,10 +6,12 @@ use dioxus_primitives::dioxus_attributes::attributes;
 use dioxus_primitives::icon;
 use dioxus_primitives::merge_attributes;
 
+#[css_module("/src/components/collapsible/style.css")]
+struct Styles;
+
 #[component]
 pub fn Collapsible(props: CollapsibleProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         collapsible::Collapsible {
             keep_mounted: props.keep_mounted,
             default_open: props.default_open,
@@ -18,7 +20,6 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
             on_open_change: props.on_open_change,
             as: props.r#as,
             attributes: props.attributes,
-            class: "dx-collapsible",
             {props.children}
         }
     }
@@ -26,7 +27,7 @@ pub fn Collapsible(props: CollapsibleProps) -> Element {
 
 #[component]
 pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
-    let base = attributes!(button { class: "dx-collapsible-trigger" });
+    let base = attributes!(button { class: Styles::dx_collapsible_trigger });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     let show_icon = props.r#as.is_none();
@@ -36,7 +37,6 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
             {props.children}
             if show_icon {
                 icon::Icon {
-                    class: "dx-collapsible-expand-icon",
                     width: "1rem",
                     height: "1rem",
                     stroke: "var(--secondary-color-3)",
@@ -54,7 +54,7 @@ pub fn CollapsibleTrigger(props: CollapsibleTriggerProps) -> Element {
 pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
     rsx! {
         collapsible::CollapsibleContent {
-            class: "dx-collapsible-content",
+            class: Styles::dx_collapsible_content,
             id: props.id,
             attributes: props.attributes,
             {props.children}

@@ -19,14 +19,14 @@
     font-weight: 600;
 }
 
-.ec-topbar .dx-input {
+.ec-topbar input {
     min-width: 12rem;
     max-width: 480px;
     flex: 1;
     margin-left: auto;
 }
 
-.ec-list-toolbar .dx-select-trigger {
+.ec-list-toolbar .ec-filter-trigger {
     min-height: 2rem;
     padding: 0.375rem 0.5rem;
     border-radius: 0.375rem;
@@ -51,7 +51,7 @@
     line-height: 1;
 }
 
-.ec-filter-list.dx-select-list {
+.ec-filter-list {
     right: 0;
     left: auto;
     width: 12rem;
@@ -106,18 +106,18 @@
     gap: 0.5rem;
 }
 
-.ec-list-toolbar > .dx-tabs {
+.ec-list-toolbar > .ec-mail-tabs {
     width: auto;
     min-width: 0;
 }
 
-.ec-list-pane .dx-tabs-list {
+.ec-list-pane .ec-mail-tabs-list {
     padding: 0.25rem;
     border-radius: 0.5rem;
     background: var(--primary-color-5);
 }
 
-.ec-list-pane .dx-tabs-trigger {
+.ec-list-pane .ec-mail-tab {
     border-radius: 0.375rem;
     font-size: 0.875rem;
 }
@@ -142,7 +142,7 @@
 
 /* Message row: keep the Item structure while using a grid to reserve
  * stable space for avatar, content, and trailing actions at every width. */
-.dx-item.ec-row {
+.ec-row {
     position: relative;
     display: grid;
     width: calc(100% - 1rem);
@@ -161,25 +161,25 @@
     text-align: left;
 }
 
-.ec-row > .dx-item-media {
+.ec-row > [data-slot="item-media"] {
     position: static;
     grid-column: 1;
     grid-row: 1;
     transform: none;
 }
 
-.dx-item.ec-row:has([data-slot="item-description"]) > .dx-item-media {
+.ec-row:has([data-slot="item-description"]) > [data-slot="item-media"] {
     align-self: flex-start;
     transform: none;
 }
 
-.ec-row > .dx-item-content {
+.ec-row > [data-slot="item-content"] {
     width: 100%;
     min-width: 0;
     grid-column: 2;
 }
 
-.ec-row .dx-item-content > .dx-item-title {
+.ec-row [data-slot="item-content"] > [data-slot="item-title"] {
     min-width: 0;
     min-height: 1.5rem;
 }
@@ -195,7 +195,7 @@
     box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
 }
 
-.ec-row .dx-item-title {
+.ec-row [data-slot="item-title"] {
     display: flex;
     width: 100%;
     min-width: 0;
@@ -230,14 +230,14 @@
     white-space: nowrap;
 }
 
-.ec-row .dx-item-description {
+.ec-row [data-slot="item-description"] {
     margin-top: 0.25rem;
     color: var(--secondary-color-5);
     font-size: 0.8125rem;
     line-height: 1.4;
 }
 
-.ec-unread .dx-item-title {
+.ec-unread [data-slot="item-title"] {
     font-weight: 700;
 }
 
@@ -255,7 +255,7 @@
     gap: 0.5rem;
 }
 
-.ec-row .dx-item-actions {
+.ec-row [data-slot="item-actions"] {
     position: static;
     display: flex;
     min-width: 3.75rem;
@@ -273,7 +273,7 @@
     gap: 0.125rem;
 }
 
-.dx-button.ec-row-action {
+.ec-row .ec-row-action {
     display: inline-flex;
     width: 1.75rem;
     min-width: 1.75rem;
@@ -291,19 +291,19 @@
     opacity: 0.72;
 }
 
-.ec-row:hover .dx-button.ec-row-action,
-.ec-row:focus-within .dx-button.ec-row-action,
-.dx-button.ec-row-action:focus-visible,
-.dx-button.ec-row-action[data-active="true"] {
+.ec-row:hover .ec-row-action,
+.ec-row:focus-within .ec-row-action,
+.ec-row .ec-row-action:focus-visible,
+.ec-row .ec-row-action[data-active="true"] {
     opacity: 1;
 }
 
-.dx-button.ec-row-action[data-style="ghost"]:hover {
+.ec-row .ec-row-action[data-style="ghost"]:hover {
     background: var(--primary-color-4);
     color: var(--secondary-color-1);
 }
 
-.dx-button.ec-row-action[data-active="true"] {
+.ec-row .ec-row-action[data-active="true"] {
     color: var(--secondary-color-1);
 }
 
@@ -329,7 +329,7 @@
     display: flex;
 }
 
-.ec-read-pane > .dx-toolbar {
+.ec-read-pane > .ec-read-toolbar {
     flex-shrink: 0;
     flex-wrap: nowrap;
     padding: 0.5rem 1rem;
@@ -341,12 +341,12 @@
     scrollbar-width: none;
 }
 
-.ec-read-pane > .dx-toolbar::-webkit-scrollbar {
+.ec-read-pane > .ec-read-toolbar::-webkit-scrollbar {
     display: none;
 }
 
-.ec-read-pane .dx-toolbar button,
-.ec-topbar .dx-button {
+.ec-read-pane .ec-read-toolbar button,
+.ec-topbar button {
     border-radius: 0.375rem;
     font-size: 0.875rem;
 }
@@ -367,7 +367,7 @@
  * because the list pane is taking up most of the width.
  */
 @container (max-width: 640px) {
-    .ec-read-pane .dx-toolbar button {
+    .ec-read-pane .ec-read-toolbar button {
         width: 2rem;
         height: 2rem;
         flex: 0 0 2rem;
@@ -377,11 +377,11 @@
         white-space: nowrap;
     }
 
-    .ec-read-pane .dx-toolbar button svg {
+    .ec-read-pane .ec-read-toolbar button svg {
         flex: 0 0 auto;
     }
 
-    .ec-read-pane .dx-toolbar-separator {
+    .ec-read-pane .ec-read-toolbar-separator {
         display: none;
     }
 
@@ -427,14 +427,14 @@
     gap: 1.5rem;
 }
 
-.ec-thread-hero .dx-card-title {
+.ec-thread-hero [data-slot="card-title"] {
     max-width: 52rem;
     color: var(--secondary-color-1);
     font-size: 1.5rem;
     font-weight: 600;
 }
 
-.ec-thread-hero .dx-card-description {
+.ec-thread-hero [data-slot="card-description"] {
     margin-top: 0.75rem;
     font-size: 0.875rem;
 }
@@ -446,7 +446,7 @@
     gap: 0.5rem;
 }
 
-.ec-thread-hero-meta .ec-tag-remove.dx-button {
+.ec-thread-hero-meta .ec-tag-remove {
     display: inline-flex;
     padding: 0;
     border-radius: 999px;
@@ -455,13 +455,13 @@
     color: inherit;
 }
 
-.ec-thread-hero-meta .ec-tag-remove.dx-button[data-style="ghost"]:hover,
-.ec-thread-hero-meta .ec-tag-remove.dx-button[data-style="ghost"]:focus-visible {
+.ec-thread-hero-meta .ec-tag-remove[data-style="ghost"]:hover,
+.ec-thread-hero-meta .ec-tag-remove[data-style="ghost"]:focus-visible {
     background: transparent;
 }
 
-.ec-thread-hero-meta .ec-tag-remove.dx-button:hover .dx-badge,
-.ec-thread-hero-meta .ec-tag-remove.dx-button:focus-visible .dx-badge {
+.ec-thread-hero-meta .ec-tag-remove:hover > span,
+.ec-thread-hero-meta .ec-tag-remove:focus-visible > span {
     background: color-mix(in oklab, var(--primary-color-6) 65%, transparent);
 }
 
@@ -582,11 +582,11 @@
     gap: 0.75rem;
 }
 
-.ec-thread-compose-row .dx-avatar {
+.ec-thread-compose-row > :first-child {
     align-self: flex-start;
 }
 
-.ec-thread-compose-row .dx-textarea {
+.ec-thread-compose-row [data-slot="textarea"] {
     min-height: 5.75rem;
     flex: 1;
     border-radius: 0.625rem;
@@ -603,7 +603,7 @@
     gap: 0.5rem;
 }
 
-.ec-thread-compose-actions .dx-button {
+.ec-thread-compose-actions button {
     display: inline-flex;
     min-height: 2rem;
     align-items: center;
@@ -658,14 +658,14 @@
         gap: 0.625rem;
     }
 
-    .ec-topbar .dx-button {
+    .ec-topbar button {
         width: 2rem;
         min-width: 2rem;
         height: 2rem;
         padding: 0;
     }
 
-    .ec-read-pane > .dx-toolbar {
+    .ec-read-pane > .ec-read-toolbar {
         height: 2.75rem;
         min-height: 2.75rem;
         flex-wrap: nowrap;
@@ -676,11 +676,11 @@
         scrollbar-width: none;
     }
 
-    .ec-read-pane > .dx-toolbar::-webkit-scrollbar {
+    .ec-read-pane > .ec-read-toolbar::-webkit-scrollbar {
         display: none;
     }
 
-    .ec-read-pane .dx-toolbar button {
+    .ec-read-pane .ec-read-toolbar button {
         display: inline-flex;
         width: 2rem;
         min-width: 2rem;
@@ -694,11 +694,11 @@
         white-space: nowrap;
     }
 
-    .ec-read-pane .dx-toolbar button svg {
+    .ec-read-pane .ec-read-toolbar button svg {
         flex: 0 0 auto;
     }
 
-    .ec-read-pane .dx-toolbar-separator {
+    .ec-read-pane .ec-read-toolbar-separator {
         display: none;
     }
 
@@ -711,8 +711,8 @@
         font-size: 0.75rem;
     }
 
-    .ec-thread .dx-card-header,
-    .ec-thread .dx-card-content {
+    .ec-thread [data-slot="card-header"],
+    .ec-thread [data-slot="card-content"] {
         padding: 0;
     }
 
@@ -765,8 +765,8 @@
 }
 
 /* Compose modal — sized + spaced to match the rest of the dashboard.
-   Inherits dx-dialog typography/colors; only adds layout. */
-.dx-dialog.ec-compose-dialog {
+   Inherits dialog typography/colors; only adds layout. */
+.ec-compose-dialog {
     max-width: 36rem;
     padding: 1.25rem 1.25rem 1rem;
     gap: 0.875rem;
@@ -787,17 +787,17 @@
     gap: 0.25rem;
 }
 
-.ec-compose-dialog .dx-dialog-title.ec-compose-title {
+.ec-compose-dialog .ec-compose-title {
     font-size: 1rem;
     font-weight: 600;
 }
 
-.ec-compose-dialog .dx-dialog-description.ec-compose-desc {
+.ec-compose-dialog .ec-compose-desc {
     color: var(--secondary-color-5);
     font-size: 0.8125rem;
 }
 
-.ec-compose-dialog .dx-button.ec-compose-close {
+.ec-compose-dialog .ec-compose-close {
     width: 1.75rem;
     min-width: 0;
     height: 1.75rem;
@@ -808,7 +808,7 @@
     line-height: 1;
 }
 
-.ec-compose-dialog .dx-separator.ec-compose-sep {
+.ec-compose-dialog .ec-compose-sep {
     margin: 0;
     background: var(--primary-color-6);
 }
@@ -819,13 +819,13 @@
     gap: 0.375rem;
 }
 
-.ec-compose-field .dx-label {
+.ec-compose-field label {
     color: var(--secondary-color-5);
     font-size: 0.75rem;
     font-weight: 500;
 }
 
-.ec-compose-field .dx-input:user-invalid {
+.ec-compose-field input:user-invalid {
     box-shadow: inset 0 0 0 1px var(--primary-error-color);
 }
 
@@ -835,7 +835,7 @@
     font-size: 0.75rem;
 }
 
-.ec-compose-field:has(.dx-input:user-invalid) .ec-compose-error {
+.ec-compose-field:has(input:user-invalid) .ec-compose-error {
     display: block;
 }
 
@@ -847,7 +847,7 @@
     gap: 0.5rem;
 }
 
-.ec-compose-foot .dx-button {
+.ec-compose-foot button {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;

@@ -5,13 +5,15 @@ use dioxus_primitives::select::{
 };
 use dioxus_primitives::{dioxus_attributes::attributes, icon, merge_attributes};
 
+#[css_module("/src/components/select/style.css")]
+struct Styles;
+
 #[component]
 pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element {
-    let base = attributes!(div { class: "dx-select" });
+    let base = attributes!(div { class: Styles::dx_select });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         select::Select {
             value: props.value,
             default_value: props.default_value,
@@ -28,11 +30,10 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
 
 #[component]
 pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -> Element {
-    let base = attributes!(div { class: "dx-select" });
+    let base = attributes!(div { class: Styles::dx_select });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         select::SelectMulti {
             values: props.values,
             default_values: props.default_values,
@@ -49,7 +50,7 @@ pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -
 
 #[component]
 pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
-    let base = attributes!(button { class: "dx-select-trigger" });
+    let base = attributes!(button { class: Styles::dx_select_trigger });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
@@ -78,7 +79,7 @@ pub fn SelectValue(props: SelectValueProps) -> Element {
 
 #[component]
 pub fn SelectList(props: SelectListProps) -> Element {
-    let base = attributes!(div { class: "dx-select-list" });
+    let base = attributes!(div { class: Styles::dx_select_list });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
@@ -92,14 +93,11 @@ pub fn SelectList(props: SelectListProps) -> Element {
 
 #[component]
 pub fn SelectGroup(props: SelectGroupProps) -> Element {
-    let base = attributes!(div { class: "dx-select-group" });
-    let merged = merge_attributes(vec![base, props.attributes]);
-
     rsx! {
         select::SelectGroup {
             disabled: props.disabled,
             id: props.id,
-            attributes: merged,
+            attributes: props.attributes,
             {props.children}
         }
     }
@@ -107,7 +105,7 @@ pub fn SelectGroup(props: SelectGroupProps) -> Element {
 
 #[component]
 pub fn SelectGroupLabel(props: SelectGroupLabelProps) -> Element {
-    let base = attributes!(div { class: "dx-select-group-label" });
+    let base = attributes!(div { class: Styles::dx_select_group_label });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
@@ -121,7 +119,7 @@ pub fn SelectGroupLabel(props: SelectGroupLabelProps) -> Element {
 
 #[component]
 pub fn SelectOption<T: Clone + PartialEq + 'static>(props: SelectOptionProps<T>) -> Element {
-    let base = attributes!(div { class: "dx-select-option" });
+    let base = attributes!(div { class: Styles::dx_select_option });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
@@ -144,7 +142,6 @@ pub fn SelectItemIndicator() -> Element {
     rsx! {
         select::SelectItemIndicator {
             icon::Icon {
-                class: "dx-select-check-icon",
                 width: "1rem",
                 height: "1rem",
                 stroke: "var(--secondary-color-5)",

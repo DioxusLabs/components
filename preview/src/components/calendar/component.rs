@@ -6,12 +6,14 @@ use dioxus_primitives::calendar::{
 };
 use dioxus_primitives::icon::Icon;
 
+#[css_module("/src/components/calendar/style.css")]
+struct Styles;
+
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         calendar::Calendar {
-            class: "dx-calendar",
+            class: Styles::dx_calendar,
             selected_date: props.selected_date,
             on_date_change: props.on_date_change,
             on_format_weekday: props.on_format_weekday,
@@ -34,9 +36,8 @@ pub fn Calendar(props: CalendarProps) -> Element {
 #[component]
 pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         calendar::RangeCalendar {
-            class: "dx-calendar",
+            class: Styles::dx_calendar,
             selected_range: props.selected_range,
             on_range_change: props.on_range_change,
             on_format_weekday: props.on_format_weekday,
@@ -63,7 +64,7 @@ pub fn CalendarView(
 ) -> Element {
     rsx! {
         div {
-            class: "dx-calendar-view",
+            class: Styles::dx_calendar_view,
             ..attributes,
             {children}
         }
@@ -80,7 +81,7 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
 #[component]
 pub fn CalendarNavigation(props: CalendarNavigationProps) -> Element {
     rsx! {
-        calendar::CalendarNavigation { attributes: props.attributes, {props.children} }
+        calendar::CalendarNavigation { class: Styles::dx_calendar_navigation, attributes: props.attributes, {props.children} }
     }
 }
 
@@ -89,9 +90,8 @@ pub fn CalendarPreviousMonthButton(
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
     rsx! {
-        calendar::CalendarPreviousMonthButton { attributes,
+        calendar::CalendarPreviousMonthButton { class: Styles::dx_calendar_nav_prev, attributes,
             Icon {
-                class: "dx-calendar-previous-month-icon",
                 width: "20px",
                 height: "20px",
                 path { d: "m15 18-6-6 6-6" }
@@ -105,9 +105,8 @@ pub fn CalendarNextMonthButton(
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
     rsx! {
-        calendar::CalendarNextMonthButton { attributes,
+        calendar::CalendarNextMonthButton { class: Styles::dx_calendar_nav_next, attributes,
             Icon {
-                class: "dx-calendar-next-month-icon",
                 width: "20px",
                 height: "20px",
                 path { d: "m9 18 6-6-6-6" }
@@ -120,7 +119,9 @@ pub fn CalendarNextMonthButton(
 pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     rsx! {
         calendar::CalendarSelectMonth {
-            class: "dx-calendar-month-select",
+            container_class: Some(Styles::dx_calendar_month_select_container.to_string()),
+            value_class: Some(Styles::dx_calendar_month_select_value.to_string()),
+            class: Styles::dx_calendar_month_select,
             attributes: props.attributes,
             DropDownIcon { }
         }
@@ -131,7 +132,9 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
 pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
     rsx! {
         calendar::CalendarSelectYear {
-            class: "dx-calendar-year-select",
+            container_class: Some(Styles::dx_calendar_year_select_container.to_string()),
+            value_class: Some(Styles::dx_calendar_year_select_value.to_string()),
+            class: Styles::dx_calendar_year_select,
             attributes: props.attributes,
             DropDownIcon { }
         }
@@ -142,9 +145,15 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
 pub fn CalendarGrid(props: CalendarGridProps) -> Element {
     rsx! {
         calendar::CalendarGrid {
+            class: Styles::dx_calendar_grid,
+            header_class: Some(Styles::dx_calendar_grid_header.to_string()),
+            day_header_class: Some(Styles::dx_calendar_grid_day_header.to_string()),
+            body_class: Some(Styles::dx_calendar_grid_body.to_string()),
+            week_class: Some(Styles::dx_calendar_grid_week.to_string()),
+            weeknum_class: Some(Styles::dx_calendar_grid_weeknum.to_string()),
             id: props.id,
             show_week_numbers: props.show_week_numbers,
-            render_day: props.render_day,
+            render_day: Callback::new(|date| rsx! { CalendarDay { date } }),
             attributes: props.attributes,
         }
     }
@@ -152,12 +161,23 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
 
 #[component]
 pub fn CalendarMonthTitle(props: CalendarMonthTitleProps) -> Element {
-    calendar::CalendarMonthTitle(props)
+    rsx! {
+        calendar::CalendarMonthTitle {
+            class: Styles::dx_calendar_month_title,
+            attributes: props.attributes,
+        }
+    }
 }
 
 #[component]
 pub fn CalendarDay(props: CalendarDayProps) -> Element {
-    calendar::CalendarDay(props)
+    rsx! {
+        calendar::CalendarDay {
+            class: Styles::dx_calendar_grid_cell,
+            date: props.date,
+            attributes: props.attributes,
+        }
+    }
 }
 
 #[component]

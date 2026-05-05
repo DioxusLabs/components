@@ -222,6 +222,18 @@ pub struct DragAndDropListProps {
     #[props(default)]
     pub aria_label: Option<String>,
 
+    /// Class to apply to the inner `ul` element.
+    #[props(default)]
+    pub ul_class: Option<String>,
+
+    /// Class to apply to the rendered list `li` items.
+    #[props(default)]
+    pub item_class: Option<String>,
+
+    /// Class to apply to the drop indicator div rendered next to the items.
+    #[props(default)]
+    pub indicator_class: Option<String>,
+
     /// Additional attributes to apply to the list element.
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -278,14 +290,20 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
         .unwrap_or("Sortable list")
         .to_string();
 
+    let item_class = props.item_class.clone();
+    let indicator_class = props.indicator_class.clone();
     let display_list = move |elements: Vec<Element>| {
         elements
             .iter()
             .enumerate()
             .map(|(index, children)| {
+                let item_class = item_class.clone();
+                let indicator_class = indicator_class.clone();
                 rsx! {
                     DragAndDropListItem {
                         index,
+                        class: item_class.unwrap_or_default(),
+                        indicator_class,
                         {children}
                     }
                 }
@@ -295,7 +313,6 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
 
     rsx! {
         div {
-            class: "dx-dnd-list",
             ..props.attributes,
             div {
                 id: "dnd-instructions",
@@ -303,7 +320,7 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
                 "Press Enter to start reordering. Use Arrow keys to change position. Press Enter to confirm or Escape to cancel."
             }
             ul {
-                class: "dx-dnd-list-ul",
+                class: props.ul_class,
                 aria_label: "{label}",
                 aria_roledescription: "sortable list",
                 aria_describedby: "dnd-instructions",
@@ -326,6 +343,10 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
 pub struct DragAndDropListItemProps {
     /// The index of the item in the list
     pub index: usize,
+
+    /// Class to apply to the drop indicator element rendered next to the item.
+    #[props(default)]
+    pub indicator_class: Option<String>,
 
     /// Additional attributes to apply to the list item element.
     #[props(extends = GlobalAttributes)]
@@ -446,10 +467,9 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
 
     rsx! {
         if (ctx.drop_position)() == DropPosition::Before && render_drop_indicator((ctx.drop_to)()) {
-            DropIndicator {  }
+            DropIndicator { class: props.indicator_class.clone() }
         }
         li {
-            class: "dx-dnd-list-item",
             aria_roledescription: "sortable item",
             draggable: "true",
             tabindex: if is_tab_reachable { "0" } else { "-1" },
@@ -492,16 +512,16 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             {props.children}
         }
         if (ctx.drop_position)() == DropPosition::After && render_drop_indicator((ctx.drop_to)()) {
-            DropIndicator {  }
+            DropIndicator { class: props.indicator_class.clone() }
         }
     }
 }
 
 #[component]
-fn DropIndicator() -> Element {
+fn DropIndicator(class: Option<String>) -> Element {
     rsx! {
         div {
-            class: "dx-drop-indicator",
+            class,
         }
     }
 }
