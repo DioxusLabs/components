@@ -12,7 +12,7 @@ pub fn Demo() -> Element {
 
     rsx! {
         ColorPicker {
-            label: "Pick",
+            label: "Pick a color",
             color: color(),
             on_color_change: move |c| {
                 tracing::info!("Color changed: {:?}", c);

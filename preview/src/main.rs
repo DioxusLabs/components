@@ -1,6 +1,6 @@
 use core::panic;
 
-use crate::components::{separator::Separator, tabs::component::*};
+use crate::components::tabs::component::*;
 use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
 use dioxus_i18n::prelude::*;
@@ -26,6 +26,7 @@ enum ComponentType {
 struct ComponentDemoData {
     name: &'static str,
     r#type: ComponentType,
+    description: &'static str,
     docs: &'static str,
     component: HighlightedCode,
     style: HighlightedCode,
@@ -254,56 +255,58 @@ fn Navbar() -> Element {
     }
     rsx! {
         nav { class: "dx-preview-navbar",
-            Link { to: Route::home(), class: "dx-navbar-brand",
-                img {
-                    src: asset!("/assets/dioxus_color.svg"),
-                    alt: "Dioxus Logo",
-                    width: "32",
-                    height: "32",
-                }
-            }
-            div { class: "dx-navbar-links",
-                Link {
-                    to: Route::EmailClientDashboard { dark_mode: Route::in_dark_mode() },
-                    class: "dx-demos-link",
-                    "Demos"
-                }
-                // TODO: restore once the primitives crate is published
-                // Link {
-                //     to: "https://crates.io/crates/dioxus-components",
-                //     class: "dx-navbar-link",
-                //     aria_label: "Dioxus components crates.io",
-                //     Icon {
-                //         width: "24px",
-                //         height: "24px",
-                //         viewBox: ViewBox::new(0, 0, 576, 512),
-                //         path {
-                //             d: "M290.8 48.6l78.4 29.7L288 109.5 206.8 78.3l78.4-29.7c1.8-.7 3.8-.7 5.7 0zM136 92.5l0 112.2c-1.3 .4-2.6 .8-3.9 1.3l-96 36.4C14.4 250.6 0 271.5 0 294.7L0 413.9c0 22.2 13.1 42.3 33.5 51.3l96 42.2c14.4 6.3 30.7 6.3 45.1 0L288 457.5l113.5 49.9c14.4 6.3 30.7 6.3 45.1 0l96-42.2c20.3-8.9 33.5-29.1 33.5-51.3l0-119.1c0-23.3-14.4-44.1-36.1-52.4l-96-36.4c-1.3-.5-2.6-.9-3.9-1.3l0-112.2c0-23.3-14.4-44.1-36.1-52.4l-96-36.4c-12.8-4.8-26.9-4.8-39.7 0l-96 36.4C150.4 48.4 136 69.3 136 92.5zM392 210.6l-82.4 31.2 0-89.2L392 121l0 89.6zM154.8 250.9l78.4 29.7L152 311.7 70.8 280.6l78.4-29.7c1.8-.7 3.8-.7 5.7 0zm18.8 204.4l0-100.5L256 323.2l0 95.9-82.4 36.2zM421.2 250.9c1.8-.7 3.8-.7 5.7 0l78.4 29.7L424 311.7l-81.2-31.1 78.4-29.7zM523.2 421.2l-77.6 34.1 0-100.5L528 323.2l0 90.7c0 3.2-1.9 6-4.8 7.3z",
-                //             fill: "currentColor",
-                //             fill_rule: "nonzero",
-                //         }
-                //     }
-                // }
-                Link {
-                    to: "https://github.com/DioxusLabs/components",
-                    class: "dx-navbar-link",
+            div { class: "dx-navbar-inner",
+                Link { to: Route::home(), class: "dx-navbar-brand",
                     img {
-                        class: "dx-light-mode-only",
-                        src: asset!("/assets/github-mark/github-mark.svg"),
-                        alt: "GitHub",
-                        width: "24",
-                        height: "24",
-                    }
-                    img {
-                        class: "dx-dark-mode-only",
-                        src: asset!("/assets/github-mark/github-mark-white.svg"),
-                        alt: "GitHub",
-                        width: "24",
-                        height: "24",
+                        src: asset!("/assets/dioxus_color.svg"),
+                        alt: "Dioxus Logo",
+                        width: "32",
+                        height: "32",
                     }
                 }
-                theme::DarkModeToggle {}
-                LanguageSelect {}
+                div { class: "dx-navbar-links",
+                    Link {
+                        to: Route::EmailClientDashboard { dark_mode: Route::in_dark_mode() },
+                        class: "dx-demos-link",
+                        "Demos"
+                    }
+                    // TODO: restore once the primitives crate is published
+                    // Link {
+                    //     to: "https://crates.io/crates/dioxus-components",
+                    //     class: "dx-navbar-link",
+                    //     aria_label: "Dioxus components crates.io",
+                    //     Icon {
+                    //         width: "24px",
+                    //         height: "24px",
+                    //         viewBox: ViewBox::new(0, 0, 576, 512),
+                    //         path {
+                    //             d: "M290.8 48.6l78.4 29.7L288 109.5 206.8 78.3l78.4-29.7c1.8-.7 3.8-.7 5.7 0zM136 92.5l0 112.2c-1.3 .4-2.6 .8-3.9 1.3l-96 36.4C14.4 250.6 0 271.5 0 294.7L0 413.9c0 22.2 13.1 42.3 33.5 51.3l96 42.2c14.4 6.3 30.7 6.3 45.1 0L288 457.5l113.5 49.9c14.4 6.3 30.7 6.3 45.1 0l96-42.2c20.3-8.9 33.5-29.1 33.5-51.3l0-119.1c0-23.3-14.4-44.1-36.1-52.4l-96-36.4c-1.3-.5-2.6-.9-3.9-1.3l0-112.2c0-23.3-14.4-44.1-36.1-52.4l-96-36.4c-12.8-4.8-26.9-4.8-39.7 0l-96 36.4C150.4 48.4 136 69.3 136 92.5zM392 210.6l-82.4 31.2 0-89.2L392 121l0 89.6zM154.8 250.9l78.4 29.7L152 311.7 70.8 280.6l78.4-29.7c1.8-.7 3.8-.7 5.7 0zm18.8 204.4l0-100.5L256 323.2l0 95.9-82.4 36.2zM421.2 250.9c1.8-.7 3.8-.7 5.7 0l78.4 29.7L424 311.7l-81.2-31.1 78.4-29.7zM523.2 421.2l-77.6 34.1 0-100.5L528 323.2l0 90.7c0 3.2-1.9 6-4.8 7.3z",
+                    //             fill: "currentColor",
+                    //             fill_rule: "nonzero",
+                    //         }
+                    //     }
+                    // }
+                    Link {
+                        to: "https://github.com/DioxusLabs/components",
+                        class: "dx-navbar-link",
+                        img {
+                            class: "dx-light-mode-only",
+                            src: asset!("/assets/github-mark/github-mark.svg"),
+                            alt: "GitHub",
+                            width: "24",
+                            height: "24",
+                        }
+                        img {
+                            class: "dx-dark-mode-only",
+                            src: asset!("/assets/github-mark/github-mark-white.svg"),
+                            alt: "GitHub",
+                            width: "24",
+                            height: "24",
+                        }
+                    }
+                    theme::DarkModeToggle {}
+                    LanguageSelect {}
+                }
             }
         }
     }
@@ -379,51 +382,6 @@ fn CheckIcon() -> Element {
             width: "24px",
             height: "25px",
             path { d: "M5 13l4 4L19 7" }
-        }
-    }
-}
-
-/// lucide plus icon
-#[component]
-fn PlusIcon() -> Element {
-    rsx! {
-        Icon {
-            width: "2rem",
-            height: "2rem",
-            "aria-label": "Add",
-            path { d: "M5 12h14m-7-7v14", }
-        }
-    }
-}
-
-/// lucide search icon
-#[component]
-fn SearchIcon() -> Element {
-    rsx! {
-        Icon {
-            width: "2rem",
-            height: "2rem",
-            "aria-label": "Search",
-            g {
-                path { d: "m21 21l-4.34-4.34" }
-                circle { cx: "11", cy: "11", r: "8" }
-            }
-        }
-    }
-}
-
-/// lucide edit icon
-#[component]
-fn EditIcon() -> Element {
-    rsx! {
-        Icon {
-            width: "2rem",
-            height: "2rem",
-            "aria-label": "Edit",
-            g {
-                path { d: "M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" }
-                path { d: "M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" }
-            }
         }
     }
 }
@@ -676,6 +634,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
         name: raw_name,
         r#type,
         docs,
+        description: _,
         variants,
         component,
         style,
@@ -993,81 +952,41 @@ fn ComponentBlockDemo(name: String, variant: Option<String>, dark_mode: Option<b
 
 #[component]
 fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
-    let mut search = use_signal(String::new);
-
     rsx! {
-        main { role: "main",
+        main { class: "dx-home-page", role: "main",
             div { id: "hero",
-                h1 { "Dioxus Components" }
-                h2 {
-                    b { "Accessible" }
-                    ", "
-                    i { "customizable" }
-                    " components for Dioxus."
-                }
-                Explanation {}
-                Icon {
-                    id: "scroll-down-icon",
-                    width: "20px",
-                    height: "20px",
-                    stroke: "var(--secondary-color-4)",
-                    polyline { points: "6 9 12 15 18 9" }
-                }
-            }
-            Separator {
-                style: "margin: 15px 20vw; width: 60vw;",
-                horizontal: true,
-                decorative: true,
-            }
-            div { id: "hero-search-container",
-                input {
-                    id: "hero-search-input",
-                    r#type: "search",
-                    placeholder: "Search components...",
-                    value: search,
-                    oninput: move |e| {
-                        search.set(e.value());
-                    },
+                div { class: "dx-hero-shell",
+                    h1 { "Dioxus Components" }
+                    p { class: "dx-hero-summary",
+                        "Accessible, themeable interface pieces for Dioxus apps. Browse the catalog, copy the CLI command, and pull only what you need into your project."
+                    }
+                    div { class: "dx-hero-command",
+                        span { class: "dx-hero-prompt", "$" }
+                        code { "dx components list" }
+                        CopyCommandButton { command: "dx components list".to_string() }
+                    }
+                    nav { class: "dx-hero-cloud", aria_label: "Component links",
+                        for component in components::DEMOS {
+                            Link {
+                                to: Route::component(component.name),
+                                class: "dx-hero-cloud-link",
+                                {component.name.replace("_", " ")}
+                            }
+                        }
+                    }
                 }
             }
-            ComponentGallery { search }
+            ComponentGallery {}
         }
     }
 }
 
 #[component]
-fn Explanation() -> Element {
+fn ComponentGallery() -> Element {
     rsx! {
-        div { class: "dx-explaination",
-            p {
-                "Dioxus components is a shadcn-inspired library of components built on top of Dioxus primitives"
-            }
-            div { display: "flex", justify_content: "space-between",
-                div { class: "dx-explaination-box",
-                    h3 { SearchIcon {} }
-                    p { "Find a component" }
-                }
-                div { class: "dx-explaination-box",
-                    h3 { PlusIcon {} }
-                    p { "Add it with dx" }
-                }
-                div { class: "dx-explaination-box",
-                    h3 { EditIcon {} }
-                    p { "Customize it for your project" }
-                }
-            }
-        }
-    }
-}
-
-#[component]
-fn ComponentGallery(search: String) -> Element {
-    rsx! {
-        div { class: "dx-masonry-with-columns",
+        div { class: "dx-component-gallery",
             for component in components::DEMOS.iter().cloned() {
-                if search.is_empty() || component.name.to_lowercase().contains(&search.to_lowercase()) {
-                    ComponentGalleryPreview { component }
-                }
+                ComponentGalleryPreview { component }
             }
         }
     }
@@ -1078,37 +997,84 @@ fn ComponentGalleryPreview(component: ComponentDemoData) -> Element {
     let ComponentDemoData {
         name,
         r#type,
+        description,
         variants,
         ..
     } = component;
 
     let first_variant = &variants[0];
     let Comp = first_variant.component;
+    let display_name = name.replace("_", " ");
+    let install_command = format!("dx components add {name}");
 
     let preview = match r#type {
         ComponentType::Normal => rsx! {
             Comp {}
         },
         ComponentType::Block => rsx! {
-            div { style: "display: flex; align-items: center; justify-content: center; height: 150px; color: var(--secondary-color-4);",
-                "Click to view full preview"
+            Link {
+                to: Route::component(name),
+                class: "dx-component-card-block-link",
+                "Open full preview"
+                Icon {
+                    width: "18px",
+                    height: "18px",
+                    stroke: "currentColor",
+                    path { d: "M7 7h10v10" }
+                    path { d: "M7 17 17 7" }
+                }
             }
         },
     };
 
     rsx! {
-        div { class: "dx-masonry-preview-frame", position: "relative",
-            h3 { class: "dx-component-title", {name.replace("_", " ")} }
-            GotoIcon {
-                class: "dx-goto-icon",
-                position: "absolute",
-                margin: "0.5rem",
-                top: "0",
-                right: "0",
-                aria_label: "{name} details",
-                to: Route::component(name),
+        article { class: "dx-component-card",
+            div { class: "dx-component-card-meta",
+                h3 { class: "dx-component-card-title",
+                    Link {
+                        to: Route::component(name),
+                        class: "dx-component-card-title-link",
+                        "{display_name}"
+                        Icon {
+                            width: "18px",
+                            height: "18px",
+                            stroke: "currentColor",
+                            path { d: "M7 7h10v10" }
+                            path { d: "M7 17 17 7" }
+                        }
+                    }
+                }
+                p { class: "dx-component-card-description", "{description}" }
+                div { class: "dx-component-card-actions",
+                    div { class: "dx-component-card-command",
+                        code { "{install_command}" }
+                        CopyCommandButton { command: install_command.clone() }
+                    }
+                }
             }
-            div { class: "dx-masonry-component-frame", {preview} }
+            div { class: "dx-component-card-preview", {preview} }
+        }
+    }
+}
+
+#[component]
+fn CopyCommandButton(command: String) -> Element {
+    let mut copied = use_signal(|| false);
+
+    rsx! {
+        button {
+            class: "dx-copy-button dx-component-card-copy",
+            r#type: "button",
+            aria_label: "Copy install command",
+            "data-command": "{command}",
+            "data-copied": copied,
+            "onclick": "navigator.clipboard.writeText(this.dataset.command);",
+            onclick: move |_| copied.set(true),
+            if copied() {
+                CheckIcon {}
+            } else {
+                CopyIcon {}
+            }
         }
     }
 }

@@ -10,6 +10,14 @@
     gap: .25rem;
 }
 
+.dx-toolbar-demo {
+    display: flex;
+    max-width: 30rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
 .dx-toolbar button {
     display: inline-flex;
     align-items: center;
@@ -49,6 +57,11 @@
 }
 
 .dx-toolbar-content p {
+    padding: 0;
+    margin: 0;
+}
+
+.dx-toolbar-demo p {
     padding: 0;
     margin: 0;
 }

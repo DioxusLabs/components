@@ -33,6 +33,12 @@ macro_rules! examples {
         ComponentDemoData {
             name: stringify!($name),
             r#type: ComponentType::Normal,
+            description: include_str!(concat!(
+                env!("OUT_DIR"),
+                "/",
+                stringify!($name),
+                "/description.txt"
+            )),
             docs: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/docs.html")),
             component: HighlightedCode {
                 light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.light.html")),
@@ -74,6 +80,12 @@ macro_rules! examples {
         ComponentDemoData {
             name: stringify!($name),
             r#type: ComponentType::Block,
+            description: include_str!(concat!(
+                env!("OUT_DIR"),
+                "/",
+                stringify!($name),
+                "/description.txt"
+            )),
             docs: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/docs.html")),
             component: HighlightedCode {
                 light: include_str!(concat!(env!("OUT_DIR"), "/", stringify!($name), "/component.rs.base16-ocean.light.html")),
