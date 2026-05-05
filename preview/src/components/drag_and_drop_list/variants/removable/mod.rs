@@ -3,13 +3,19 @@ use dioxus::prelude::*;
 
 #[component]
 pub fn Demo() -> Element {
-    let items = vec![
-        rsx! {"Cat 🐱"},
-        rsx! {"Cow 🐮"},
-        rsx! {"Dog 🐶"},
-        rsx! {"Fox 🦊"},
-        rsx! {"Pig 🐷"},
-    ];
+    let items = [
+        ("cat", "Cat 🐱"),
+        ("cow", "Cow 🐮"),
+        ("dog", "Dog 🐶"),
+        ("fox", "Fox 🦊"),
+        ("pig", "Pig 🐷"),
+    ]
+    .map(|(key, label)| {
+        rsx! {
+            span { key: "{key}", "{label}" }
+        }
+    })
+    .to_vec();
 
     rsx! {
         DragAndDropList {
