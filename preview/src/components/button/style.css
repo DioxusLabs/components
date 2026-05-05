@@ -1,12 +1,12 @@
 .dx-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 8px 18px;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
   font-size: 1rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   gap: 0.4rem;
   transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }
@@ -14,15 +14,15 @@
 .dx-button[data-size="xs"] {
   height: 1.75rem;
   padding: 0 0.75rem;
-  gap: 0.25rem;
   font-size: 0.75rem;
+  gap: 0.25rem;
 }
 
 .dx-button[data-size="sm"] {
   height: 2.25rem;
   padding: 0 1rem;
-  gap: 0.25rem;
   font-size: 0.875rem;
+  gap: 0.25rem;
 }
 
 .dx-button[data-size="default"] {
@@ -67,8 +67,8 @@
 
 .dx-button:disabled {
   cursor: not-allowed;
-  pointer-events: none;
   opacity: 0.5;
+  pointer-events: none;
 }
 
 .dx-button[data-style="primary"] {
