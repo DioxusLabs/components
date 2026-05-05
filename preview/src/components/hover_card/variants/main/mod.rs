@@ -5,16 +5,33 @@ use dioxus_primitives::ContentSide;
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        div { style: "padding: 50px; display: flex; flex-direction: row; flex-wrap: wrap; gap: 40px; justify-content: center; align-items: center;",
+        div {
+            display: "flex",
+            flex_direction: "column",
+            align_items: "center",
+            gap: "0.5rem",
+            div {
+                color: "var(--secondary-color-5)",
+                font_size: "0.85rem",
+                "Hover the link"
+            }
             HoverCard {
                 HoverCardTrigger {
-                    i { "Dioxus" }
+                    a {
+                        href: "#",
+                        color: "var(--highlight-color-tertiary)",
+                        text_decoration: "underline",
+                        font_weight: "500",
+                        "@dioxuslabs"
+                    }
                 }
                 HoverCardContent { side: ContentSide::Bottom,
-                    div { padding: "1rem",
-                        "Dioxus is"
-                        i { " the " }
-                        "Rust framework for building fullstack web, desktop, and mobile apps. Iterate with live hotreloading, add server functions, and deploy in record time."
+                    div {
+                        padding: "0.75rem",
+                        max_width: "16rem",
+                        font_size: "0.85rem",
+                        b { "Dioxus" }
+                        " · The Rust framework for building fullstack web, desktop, and mobile apps."
                     }
                 }
             }

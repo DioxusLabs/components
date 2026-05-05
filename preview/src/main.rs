@@ -1,5 +1,11 @@
 use core::panic;
 
+use crate::components::input::component::Input;
+use crate::components::sidebar::{
+    Sidebar, SidebarCollapsible, SidebarContent, SidebarGroup, SidebarGroupContent,
+    SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+    SidebarProvider, SidebarTrigger,
+};
 use crate::components::{separator::Separator, tabs::component::*};
 use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
@@ -111,14 +117,14 @@ fn App() -> Element {
 pub(crate) enum Route {
     #[layout(AppLayout)]
     #[layout(NavigationLayout)]
-    #[route("/?:iframe&:dark_mode")]
-    Home {
-        iframe: Option<bool>,
-        dark_mode: Option<bool>,
-    },
     #[route("/component/?:name&:iframe&:dark_mode")]
     ComponentDemo {
         name: String,
+        iframe: Option<bool>,
+        dark_mode: Option<bool>,
+    },
+    #[route("/?:iframe&:dark_mode")]
+    Home {
         iframe: Option<bool>,
         dark_mode: Option<bool>,
     },
@@ -213,24 +219,19 @@ fn NavigationLayout() -> Element {
         let _ = eval.send(route.to_string());
     });
 
-    rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
-        document::Link {
-            rel: "stylesheet",
-            href: asset!("/assets/dx-components-theme.css"),
-        }
-        document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
-        Navbar {}
-        Outlet::<Route> {}
-    }
-}
-
-#[component]
-fn Navbar() -> Element {
+    let search = use_signal(String::new);
     let in_iframe = Route::in_iframe().unwrap_or_default();
-    let in_component = matches!(router().current(), Route::ComponentDemo { .. });
+
+    let stylesheets = rsx! {
+        document::Link { rel: "stylesheet", href: asset!("/assets/main.css") }
+        document::Link { rel: "stylesheet", href: asset!("/assets/dx-components-theme.css") }
+        document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
+    };
+
     if in_iframe {
+        let in_component = matches!(router().current(), Route::ComponentDemo { .. });
         return rsx! {
+            {stylesheets}
             nav {
                 class: "dx-preview-navbar",
                 border: "none",
@@ -250,60 +251,59 @@ fn Navbar() -> Element {
                     }
                 }
             }
+            Outlet::<Route> {}
         };
     }
+
     rsx! {
-        nav { class: "dx-preview-navbar",
-            Link { to: Route::home(), class: "dx-navbar-brand",
-                img {
-                    src: asset!("/assets/dioxus_color.svg"),
-                    alt: "Dioxus Logo",
-                    width: "32",
-                    height: "32",
-                }
+        {stylesheets}
+        SidebarProvider {
+            Sidebar { collapsible: SidebarCollapsible::Offcanvas,
+                AppSidebarBody { search }
             }
-            div { class: "dx-navbar-links",
-                Link {
-                    to: Route::EmailClientDashboard { dark_mode: Route::in_dark_mode() },
-                    class: "dx-demos-link",
-                    "Demos"
-                }
-                // TODO: restore once the primitives crate is published
-                // Link {
-                //     to: "https://crates.io/crates/dioxus-components",
-                //     class: "dx-navbar-link",
-                //     aria_label: "Dioxus components crates.io",
-                //     Icon {
-                //         width: "24px",
-                //         height: "24px",
-                //         viewBox: ViewBox::new(0, 0, 576, 512),
-                //         path {
-                //             d: "M290.8 48.6l78.4 29.7L288 109.5 206.8 78.3l78.4-29.7c1.8-.7 3.8-.7 5.7 0zM136 92.5l0 112.2c-1.3 .4-2.6 .8-3.9 1.3l-96 36.4C14.4 250.6 0 271.5 0 294.7L0 413.9c0 22.2 13.1 42.3 33.5 51.3l96 42.2c14.4 6.3 30.7 6.3 45.1 0L288 457.5l113.5 49.9c14.4 6.3 30.7 6.3 45.1 0l96-42.2c20.3-8.9 33.5-29.1 33.5-51.3l0-119.1c0-23.3-14.4-44.1-36.1-52.4l-96-36.4c-1.3-.5-2.6-.9-3.9-1.3l0-112.2c0-23.3-14.4-44.1-36.1-52.4l-96-36.4c-12.8-4.8-26.9-4.8-39.7 0l-96 36.4C150.4 48.4 136 69.3 136 92.5zM392 210.6l-82.4 31.2 0-89.2L392 121l0 89.6zM154.8 250.9l78.4 29.7L152 311.7 70.8 280.6l78.4-29.7c1.8-.7 3.8-.7 5.7 0zm18.8 204.4l0-100.5L256 323.2l0 95.9-82.4 36.2zM421.2 250.9c1.8-.7 3.8-.7 5.7 0l78.4 29.7L424 311.7l-81.2-31.1 78.4-29.7zM523.2 421.2l-77.6 34.1 0-100.5L528 323.2l0 90.7c0 3.2-1.9 6-4.8 7.3z",
-                //             fill: "currentColor",
-                //             fill_rule: "nonzero",
-                //         }
-                //     }
-                // }
-                Link {
-                    to: "https://github.com/DioxusLabs/components",
-                    class: "dx-navbar-link",
-                    img {
-                        class: "dx-light-mode-only",
-                        src: asset!("/assets/github-mark/github-mark.svg"),
-                        alt: "GitHub",
-                        width: "24",
-                        height: "24",
+            SidebarInset {
+                header { class: "dx-home-topbar",
+                    SidebarTrigger {}
+                    Separator { horizontal: false, decorative: true }
+                    Link { to: Route::home(), class: "dx-navbar-brand",
+                        img {
+                            src: asset!("/assets/dioxus_color.svg"),
+                            alt: "Dioxus Logo",
+                            width: "32",
+                            height: "32",
+                        }
                     }
-                    img {
-                        class: "dx-dark-mode-only",
-                        src: asset!("/assets/github-mark/github-mark-white.svg"),
-                        alt: "GitHub",
-                        width: "24",
-                        height: "24",
+                    div { style: "margin-left: auto; display: flex; align-items: center; gap: 1rem;",
+                        Link {
+                            to: Route::EmailClientDashboard { dark_mode: Route::in_dark_mode() },
+                            class: "dx-demos-link",
+                            "Demos"
+                        }
+                        Link {
+                            to: "https://github.com/DioxusLabs/components",
+                            class: "dx-navbar-link",
+                            img {
+                                class: "dx-light-mode-only",
+                                src: asset!("/assets/github-mark/github-mark.svg"),
+                                alt: "GitHub",
+                                width: "24",
+                                height: "24",
+                            }
+                            img {
+                                class: "dx-dark-mode-only",
+                                src: asset!("/assets/github-mark/github-mark-white.svg"),
+                                alt: "GitHub",
+                                width: "24",
+                                height: "24",
+                            }
+                        }
+                        theme::DarkModeToggle {}
+                        LanguageSelect {}
                     }
                 }
-                theme::DarkModeToggle {}
-                LanguageSelect {}
+                div { class: "dx-app-main",
+                    Outlet::<Route> {}
+                }
             }
         }
     }
@@ -379,51 +379,6 @@ fn CheckIcon() -> Element {
             width: "24px",
             height: "25px",
             path { d: "M5 13l4 4L19 7" }
-        }
-    }
-}
-
-/// lucide plus icon
-#[component]
-fn PlusIcon() -> Element {
-    rsx! {
-        Icon {
-            width: "2rem",
-            height: "2rem",
-            "aria-label": "Add",
-            path { d: "M5 12h14m-7-7v14", }
-        }
-    }
-}
-
-/// lucide search icon
-#[component]
-fn SearchIcon() -> Element {
-    rsx! {
-        Icon {
-            width: "2rem",
-            height: "2rem",
-            "aria-label": "Search",
-            g {
-                path { d: "m21 21l-4.34-4.34" }
-                circle { cx: "11", cy: "11", r: "8" }
-            }
-        }
-    }
-}
-
-/// lucide edit icon
-#[component]
-fn EditIcon() -> Element {
-    rsx! {
-        Icon {
-            width: "2rem",
-            height: "2rem",
-            "aria-label": "Edit",
-            g {
-                path { d: "M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" }
-                path { d: "M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" }
-            }
         }
     }
 }
@@ -993,81 +948,164 @@ fn ComponentBlockDemo(name: String, variant: Option<String>, dark_mode: Option<b
 
 #[component]
 fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
-    let mut search = use_signal(String::new);
-
     rsx! {
-        main { role: "main",
-            div { id: "hero",
-                h1 { "Dioxus Components" }
-                h2 {
-                    b { "Accessible" }
-                    ", "
-                    i { "customizable" }
-                    " components for Dioxus."
-                }
-                Explanation {}
-                Icon {
-                    id: "scroll-down-icon",
-                    width: "20px",
-                    height: "20px",
-                    stroke: "var(--secondary-color-4)",
-                    polyline { points: "6 9 12 15 18 9" }
-                }
+        Hero {}
+        section { class: "dx-gallery-section",
+            div { class: "dx-gallery-header",
+                h2 { class: "dx-gallery-title", "All components" }
             }
-            Separator {
-                style: "margin: 15px 20vw; width: 60vw;",
-                horizontal: true,
-                decorative: true,
-            }
-            div { id: "hero-search-container",
-                input {
-                    id: "hero-search-input",
-                    r#type: "search",
-                    placeholder: "Search components...",
-                    value: search,
-                    oninput: move |e| {
-                        search.set(e.value());
-                    },
-                }
-            }
-            ComponentGallery { search }
+            ComponentGallery {}
         }
+        CtaStrip {}
     }
 }
 
 #[component]
-fn Explanation() -> Element {
+fn Hero() -> Element {
     rsx! {
-        div { class: "dx-explaination",
-            p {
-                "Dioxus components is a shadcn-inspired library of components built on top of Dioxus primitives"
+        div { class: "hero-snippet",
+            div { class: "hero-snippet-text",
+                h1 { class: "hero-snippet-title", "Dioxus Components" }
+                p { class: "hero-snippet-tagline",
+                    "Accessible components that just feel nice."
+                }
+                div { class: "hero-snippet-actions",
+                    a { href: "#components", class: "hero-snippet-cta",
+                        "Browse components"
+                        span { aria_hidden: true, " →" }
+                    }
+                    a {
+                        href: "https://github.com/DioxusLabs/components",
+                        class: "hero-snippet-cta hero-snippet-cta-ghost",
+                        "GitHub"
+                    }
+                }
             }
-            div { display: "flex", justify_content: "space-between",
-                div { class: "dx-explaination-box",
-                    h3 { SearchIcon {} }
-                    p { "Find a component" }
-                }
-                div { class: "dx-explaination-box",
-                    h3 { PlusIcon {} }
-                    p { "Add it with dx" }
-                }
-                div { class: "dx-explaination-box",
-                    h3 { EditIcon {} }
-                    p { "Customize it for your project" }
+            div { class: "hero-snippet-code",
+                div { class: "hero-snippet-code-tab", "src/main.rs" }
+                pre { class: "hero-snippet-code-block",
+                    span { class: "hero-snippet-tok-kw", "use " }
+                    "dioxus::prelude::*;\n"
+                    span { class: "hero-snippet-tok-kw", "use " }
+                    "components::"
+                    span { class: "hero-snippet-tok-type", "{{Button, ButtonVariant}}" }
+                    ";\n\n"
+                    span { class: "hero-snippet-tok-kw", "rsx! " }
+                    "{{\n    "
+                    span { class: "hero-snippet-tok-type", "Button" }
+                    " {{\n        variant: ButtonVariant::"
+                    span { class: "hero-snippet-tok-prop", "Primary" }
+                    ",\n        "
+                    span { class: "hero-snippet-tok-str", "\"Get started\"" }
+                    "\n    }}\n}}"
                 }
             }
         }
     }
 }
 
+
 #[component]
-fn ComponentGallery(search: String) -> Element {
+fn AppSidebarBody(search: Signal<String>) -> Element {
+    let needle = search.read().to_lowercase();
+    let matches: Vec<&ComponentDemoData> = components::DEMOS
+        .iter()
+        .filter(|c| needle.is_empty() || c.name.to_lowercase().contains(&needle))
+        .collect();
+    let count = matches.len();
+
     rsx! {
-        div { class: "dx-masonry-with-columns",
+        SidebarHeader {
+            Input {
+                r#type: "search",
+                placeholder: "Search components…",
+                aria_label: "Search components",
+                value: search,
+                oninput: move |e: FormEvent| {
+                    search.set(e.value());
+                },
+            }
+        }
+        SidebarContent {
+            SidebarGroup {
+                SidebarGroupLabel { "Components ({count})" }
+                SidebarGroupContent {
+                    if matches.is_empty() {
+                        div { "No matches" }
+                    } else {
+                        SidebarMenu {
+                            for component in matches.iter() {
+                                SidebarMenuItem { key: "{component.name}",
+                                    SidebarMenuButton {
+                                        as: {
+                                            let name = component.name;
+                                            move |attrs: Vec<Attribute>| rsx! {
+                                                Link {
+                                                    to: Route::component(name),
+                                                    attributes: attrs,
+                                                    {name.replace("_", " ")}
+                                                }
+                                            }
+                                        },
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn CtaStrip() -> Element {
+    rsx! {
+        section { class: "dx-cta",
+            div { class: "dx-cta-text",
+                span { class: "dx-cta-eyebrow", "Open source · MIT" }
+                h3 { class: "dx-cta-title",
+                    "Built on Dioxus primitives. Yours to customize."
+                }
+                p { class: "dx-cta-body",
+                    "Copy the source straight into your project — every component, every theme variable, every animation."
+                }
+            }
+            div { display: "flex", flex_direction: "column", align_items: "flex-end",
+                div { class: "dx-cta-snippet",
+                    span { color: "var(--highlight-color-main)", "›" }
+                    "dx components add button"
+                }
+                div { class: "dx-cta-actions",
+                    Link {
+                        to: Route::EmailClientDashboard { dark_mode: Route::in_dark_mode() },
+                        class: "dx-cta-button",
+                        "View demos"
+                        Icon {
+                            width: "14px",
+                            height: "14px",
+                            stroke: "currentColor",
+                            stroke_width: 2.2,
+                            path { d: "M5 12h14M13 5l7 7-7 7" }
+                        }
+                    }
+                    Link {
+                        to: "https://github.com/DioxusLabs/components",
+                        class: "dx-cta-button dx-cta-button-secondary",
+                        "Star on GitHub"
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn ComponentGallery() -> Element {
+    rsx! {
+        div { class: "dx-component-gallery",
             for component in components::DEMOS.iter().cloned() {
-                if search.is_empty() || component.name.to_lowercase().contains(&search.to_lowercase()) {
-                    ComponentGalleryPreview { component }
-                }
+                ComponentGalleryPreview { component }
             }
         }
     }
@@ -1090,25 +1128,94 @@ fn ComponentGalleryPreview(component: ComponentDemoData) -> Element {
             Comp {}
         },
         ComponentType::Block => rsx! {
-            div { style: "display: flex; align-items: center; justify-content: center; height: 150px; color: var(--secondary-color-4);",
-                "Click to view full preview"
-            }
+            BlockMockup {}
         },
     };
 
     rsx! {
-        div { class: "dx-masonry-preview-frame", position: "relative",
-            h3 { class: "dx-component-title", {name.replace("_", " ")} }
-            GotoIcon {
-                class: "dx-goto-icon",
-                position: "absolute",
-                margin: "0.5rem",
-                top: "0",
-                right: "0",
-                aria_label: "{name} details",
-                to: Route::component(name),
+        div { class: "dx-gallery-card",
+            div {
+                class: "dx-gallery-card-preview",
+                "data-name": name,
+                div { class: "dx-gallery-card-preview-stage", {preview} }
             }
-            div { class: "dx-masonry-component-frame", {preview} }
+            Link {
+                to: Route::component(name),
+                class: "dx-gallery-card-footer",
+                aria_label: "{name} details",
+                h3 { class: "dx-gallery-card-title", {name.replace("_", " ")} }
+                Icon {
+                    class: "dx-gallery-card-goto",
+                    width: "16px",
+                    height: "16px",
+                    stroke: "currentColor",
+                    stroke_width: 2.0,
+                    path { d: "M5 12h14M13 5l7 7-7 7" }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn BlockMockup() -> Element {
+    rsx! {
+        div {
+            display: "flex",
+            width: "16rem",
+            height: "10rem",
+            border: "1px solid var(--primary-color-6)",
+            border_radius: "0.5rem",
+            background: "var(--primary-color-2)",
+            overflow: "hidden",
+            div {
+                width: "5rem",
+                background: "var(--primary-color-3)",
+                border_right: "1px solid var(--primary-color-6)",
+                display: "flex",
+                flex_direction: "column",
+                gap: "0.4rem",
+                padding: "0.6rem 0.5rem",
+                for w in [60, 80, 50, 70, 65] {
+                    div {
+                        height: "0.5rem",
+                        width: "{w}%",
+                        border_radius: "0.25rem",
+                        background: "var(--primary-color-5)",
+                    }
+                }
+            }
+            div {
+                flex: "1",
+                padding: "0.75rem",
+                display: "flex",
+                flex_direction: "column",
+                gap: "0.45rem",
+                div {
+                    height: "0.65rem",
+                    width: "65%",
+                    border_radius: "0.25rem",
+                    background: "var(--primary-color-5)",
+                }
+                div {
+                    height: "0.45rem",
+                    width: "100%",
+                    border_radius: "0.25rem",
+                    background: "var(--primary-color-4)",
+                }
+                div {
+                    height: "0.45rem",
+                    width: "85%",
+                    border_radius: "0.25rem",
+                    background: "var(--primary-color-4)",
+                }
+                div {
+                    height: "0.45rem",
+                    width: "70%",
+                    border_radius: "0.25rem",
+                    background: "var(--primary-color-4)",
+                }
+            }
         }
     }
 }
