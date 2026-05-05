@@ -1,6 +1,7 @@
 .dx-dnd-list {
-  width: 100%;
   --dx-item-gap: 6px;
+
+  width: 100%;
 }
 
 .dx-dnd-list-ul {
@@ -42,16 +43,18 @@
 }
 
 .dx-dnd-list-item:hover {
+  --gap-shift: -1px;
+
   border-color: var(--primary-color-7);
   background-color: var(--light, #fff) var(--dark, var(--primary-color-6));
   box-shadow:
     0 1px 2px rgb(0 0 0 / 4%),
     0 3px 8px rgb(0 0 0 / 4%);
-  --gap-shift: -1px;
 }
 
 .dx-dnd-list-item:active {
   --gap-shift: 0px;
+
   transition-duration: 80ms;
 }
 
@@ -62,14 +65,15 @@
 }
 
 .dx-dnd-list-item[data-is-grabbing="true"] {
+  --gap-shift: 0px;
+  --tilt: 0deg;
+
   border-style: dashed;
   border-color: var(--primary-color-7);
   background-color: transparent;
   box-shadow: none;
   cursor: grabbing;
   opacity: 0.5;
-  --gap-shift: 0px;
-  --tilt: 0deg;
 }
 
 .dx-dnd-list-item[data-is-grabbing="true"][data-drop-at-origin="true"] {
@@ -150,6 +154,10 @@
   content: "";
   opacity: 0;
   pointer-events: none;
+  transform:
+    rotateX(calc(-1 * var(--tilt)))
+    translateY(calc(-1 * var(--gap-shift)))
+    scaleX(0.7);
   transition:
     opacity 140ms ease-out,
     transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -157,25 +165,11 @@
 
 .dx-dnd-list-item::before {
   top: calc(-1 * (var(--dx-item-gap) / 2 + 2.5px));
-}
-
-.dx-dnd-list-item::after {
-  bottom: calc(-1 * (var(--dx-item-gap) / 2 + 2.5px));
-}
-
-.dx-dnd-list-item::before,
-.dx-dnd-list-item::after {
-  transform:
-    rotateX(calc(-1 * var(--tilt)))
-    translateY(calc(-1 * var(--gap-shift)))
-    scaleX(0.7);
-}
-
-.dx-dnd-list-item::before {
   transform-origin: center bottom;
 }
 
 .dx-dnd-list-item::after {
+  bottom: calc(-1 * (var(--dx-item-gap) / 2 + 2.5px));
   transform-origin: center top;
 }
 
@@ -191,11 +185,13 @@
 .dx-dnd-list-item:has(+ .dx-drop-indicator) {
   --gap-shift: -1px;
   --tilt: -3deg;
+
   transform-origin: center bottom;
 }
 
 .dx-drop-indicator + .dx-dnd-list-item {
   --gap-shift: 1px;
   --tilt: 3deg;
+
   transform-origin: center top;
 }

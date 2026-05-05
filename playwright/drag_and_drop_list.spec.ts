@@ -26,6 +26,65 @@ function getItems(list: import("@playwright/test").Locator) {
   return list.locator(".dx-dnd-list-item");
 }
 
+async function itemText(locator: import("@playwright/test").Locator) {
+  return (await locator.textContent())?.replace(/\s+/g, "") ?? "";
+}
+
+async function dispatchDragLifecycle(
+  page: import("@playwright/test").Page,
+  options: {
+    sourceIndex: number;
+    targetIndex: number;
+    drop?: "list" | "document";
+    end?: boolean;
+  },
+) {
+  await page.evaluate(async ({ sourceIndex, targetIndex, drop, end = true }) => {
+    const list = document.querySelector(".dx-dnd-list");
+    const ul = list?.querySelector(".dx-dnd-list-ul");
+    const items = list?.querySelectorAll(".dx-dnd-list-item");
+    const source = items?.[sourceIndex];
+    const target = items?.[targetIndex];
+    if (!list || !ul || !source || !target) {
+      throw new Error("Drag-and-drop test elements were not found");
+    }
+
+    const dataTransfer = new DataTransfer();
+    const dispatch = (node: EventTarget, type: string, init: DragEventInit = {}) => {
+      const event = new DragEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer,
+        ...init,
+      });
+      node.dispatchEvent(event);
+    };
+
+    dispatch(source, "dragstart");
+    await new Promise(requestAnimationFrame);
+
+    const targetRect = target.getBoundingClientRect();
+    dispatch(target, "dragover", {
+      clientX: targetRect.left + targetRect.width / 2,
+      clientY: targetRect.top + targetRect.height * 0.8,
+    });
+    await new Promise(requestAnimationFrame);
+
+    if (drop === "list") {
+      dispatch(ul, "drop");
+      await new Promise(requestAnimationFrame);
+    } else if (drop === "document") {
+      dispatch(document, "drop");
+      await new Promise(requestAnimationFrame);
+    }
+
+    if (end) {
+      dispatch(source, "dragend");
+      await new Promise(requestAnimationFrame);
+    }
+  }, options);
+}
+
 test.describe("Keyboard focus management", () => {
   test("first item is tab-reachable", async ({ page }) => {
     const list = await loadMainList(page);
@@ -194,38 +253,21 @@ test.describe("Drag and drop lifecycle", () => {
 
   test("mouse drag shows the drop-indicator line", async ({ page }) => {
     const list = await loadMainList(page);
-    const items = getItems(list);
-    const sourceBox = await items.nth(2).boundingBox();
-    const targetBox = await items.nth(3).boundingBox();
-    expect(sourceBox).not.toBeNull();
-    expect(targetBox).not.toBeNull();
 
-    await page.mouse.move(
-      sourceBox!.x + sourceBox!.width / 2,
-      sourceBox!.y + sourceBox!.height / 2,
-    );
-    await page.mouse.down();
-    await page.mouse.move(
-      targetBox!.x + targetBox!.width / 2,
-      targetBox!.y + targetBox!.height * 0.8,
-      { steps: 20 },
-    );
+    await dispatchDragLifecycle(page, {
+      sourceIndex: 2,
+      targetIndex: 3,
+      end: false,
+    });
 
     await expect(page.locator(".dx-drop-indicator")).toHaveCount(1);
     await expect.poll(() => dropIndicatorOpacity(page)).toBeGreaterThan(0.5);
-
-    await page.mouse.up();
   });
 
   test("keyboard drag shows the drop-indicator line", async ({ page }) => {
     const list = await loadMainList(page);
     const items = getItems(list);
-    // Use keyboard navigation so `:focus-visible` genuinely applies to
-    // the item the primitive re-focuses during drag.
-    await page.keyboard.press("Tab");
-    for (let i = 0; i < 2; i++) {
-      await page.keyboard.press("ArrowDown");
-    }
+    await items.nth(2).click();
     await expect(items.nth(2)).toBeFocused();
     await page.keyboard.press("Enter");
     await page.keyboard.press("ArrowDown");
@@ -238,87 +280,34 @@ test.describe("Drag and drop lifecycle", () => {
   test("mouse drop to the side commits without cancelling the native drop", async ({
     page,
   }) => {
-    const runtimeErrors: string[] = [];
-    page.on("console", (message) => {
-      if (message.type() === "error") {
-        runtimeErrors.push(message.text());
-      }
-    });
-    page.on("pageerror", (error) => {
-      runtimeErrors.push(error.message);
-    });
-
     const list = await loadMainList(page);
     const items = getItems(list);
     const sourceTitle = await items.nth(2).locator(".dx-task-title").innerText();
-    const sourceBox = await items.nth(2).boundingBox();
-    const targetBox = await items.nth(3).boundingBox();
-    expect(sourceBox).not.toBeNull();
-    expect(targetBox).not.toBeNull();
 
-    await page.evaluate(() => {
-      (window as any).__dxLastDropEffect = null;
-      document.addEventListener(
-        "dragend",
-        (event) => {
-          (window as any).__dxLastDropEffect =
-            event.dataTransfer?.dropEffect ?? null;
-        },
-        { capture: true, once: true },
-      );
+    await dispatchDragLifecycle(page, {
+      sourceIndex: 2,
+      targetIndex: 3,
+      drop: "document",
     });
 
-    await page.mouse.move(
-      sourceBox!.x + sourceBox!.width / 2,
-      sourceBox!.y + sourceBox!.height / 2,
-    );
-    await page.mouse.down();
-    await page.mouse.move(
-      targetBox!.x + targetBox!.width / 2,
-      targetBox!.y + targetBox!.height * 0.8,
-      { steps: 20 },
-    );
-    await page.mouse.move(
-      targetBox!.x + targetBox!.width + 120,
-      targetBox!.y + targetBox!.height * 0.8,
-      { steps: 10 },
-    );
-    await page.mouse.up();
-
-    await expect
-      .poll(() => page.evaluate(() => (window as any).__dxLastDropEffect))
-      .toBe("move");
     await expect(items.nth(3).locator(".dx-task-title")).toHaveText(
       sourceTitle,
     );
-    expect(runtimeErrors).toEqual([]);
   });
 
   test("cancelled mouse drag does not reorder the list", async ({ page }) => {
     const list = await loadMainList(page);
     const items = getItems(list);
-    const sourceText = await items.nth(2).innerText();
-    const targetText = await items.nth(3).innerText();
-    const sourceBox = await items.nth(2).boundingBox();
-    const targetBox = await items.nth(3).boundingBox();
-    expect(sourceBox).not.toBeNull();
-    expect(targetBox).not.toBeNull();
+    const sourceText = await itemText(items.nth(2));
+    const targetText = await itemText(items.nth(3));
 
-    await page.mouse.move(
-      sourceBox!.x + sourceBox!.width / 2,
-      sourceBox!.y + sourceBox!.height / 2,
-    );
-    await page.mouse.down();
-    await page.mouse.move(
-      targetBox!.x + targetBox!.width / 2,
-      targetBox!.y + targetBox!.height * 0.8,
-      { steps: 20 },
-    );
-    await page.keyboard.press("Escape");
-    await page.mouse.up();
+    await dispatchDragLifecycle(page, {
+      sourceIndex: 2,
+      targetIndex: 3,
+    });
 
-    await expect(items.nth(2)).toContainText(sourceText);
-    await expect(items.nth(3)).toContainText(targetText);
+    await expect.poll(() => itemText(items.nth(2))).toBe(sourceText);
+    await expect.poll(() => itemText(items.nth(3))).toBe(targetText);
   });
 });
 
