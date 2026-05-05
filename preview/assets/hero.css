@@ -117,22 +117,6 @@
     outline-offset: 3px;
 }
 
-#hero-installation {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5em 1em;
-    border: 1px solid var(--primary-color-6);
-    border-radius: 0.25rem;
-    margin: 1em auto;
-    gap: 1em;
-}
-
-#hero-installation:hover {
-    background-color: var(--primary-color-3);
-}
-
 @media (max-width: 760px) {
     #hero {
         padding: 2rem 1rem 1.5rem;

@@ -117,6 +117,8 @@ pub(crate) enum Route {
         iframe: Option<bool>,
         dark_mode: Option<bool>,
     },
+    #[route("/docs?:dark_mode")]
+    Docs { dark_mode: Option<bool> },
     #[route("/component/?:name&:iframe&:dark_mode")]
     ComponentDemo {
         name: String,
@@ -138,6 +140,7 @@ impl Route {
     fn iframe(&self) -> Option<bool> {
         match self {
             Route::Home { iframe, .. } => *iframe,
+            Route::Docs { .. } => None,
             Route::ComponentDemo { iframe, .. } => *iframe,
             Route::ComponentBlockDemo { .. } => None,
             Route::EmailClientDashboard { .. } => None,
@@ -152,6 +155,7 @@ impl Route {
     fn dark_mode(&self) -> Option<bool> {
         match self {
             Route::Home { dark_mode, .. } => *dark_mode,
+            Route::Docs { dark_mode, .. } => *dark_mode,
             Route::ComponentDemo { dark_mode, .. } => *dark_mode,
             Route::ComponentBlockDemo { dark_mode, .. } => *dark_mode,
             Route::EmailClientDashboard { dark_mode, .. } => *dark_mode,
@@ -167,6 +171,11 @@ impl Route {
         let iframe = Self::in_iframe();
         let dark_mode = Self::in_dark_mode();
         Self::Home { iframe, dark_mode }
+    }
+
+    fn docs() -> Self {
+        let dark_mode = Self::in_dark_mode();
+        Self::Docs { dark_mode }
     }
 
     fn component(name: impl ToString) -> Self {
@@ -256,25 +265,29 @@ fn Navbar() -> Element {
     rsx! {
         nav { class: "dx-preview-navbar",
             div { class: "dx-navbar-inner",
-                Link { to: Route::home(), class: "dx-navbar-brand",
-                    img {
-                        src: asset!("/assets/dioxus_color.svg"),
-                        alt: "Dioxus Logo",
-                        width: "32",
-                        height: "32",
+                div { class: "dx-navbar-primary",
+                    Link { to: Route::home(), class: "dx-navbar-brand",
+                        img {
+                            src: asset!("/assets/dioxus_color.svg"),
+                            alt: "Dioxus Logo",
+                            width: "28",
+                            height: "28",
+                        }
+                        span { "DioxusUI" }
                     }
-                }
-                div { class: "dx-navbar-links",
+                    Link { to: Route::docs(), class: "dx-navbar-link", "Docs" }
                     Link {
                         to: Route::EmailClientDashboard { dark_mode: Route::in_dark_mode() },
-                        class: "dx-demos-link",
+                        class: "dx-navbar-link",
                         "Demos"
                     }
+                }
+                div { class: "dx-navbar-utilities",
                     // TODO: restore once the primitives crate is published
                     // Link {
                     //     to: "https://crates.io/crates/dioxus-components",
                     //     class: "dx-navbar-link",
-                    //     aria_label: "Dioxus components crates.io",
+                    //     aria_label: "DioxusUI crates.io",
                     //     Icon {
                     //         width: "24px",
                     //         height: "24px",
@@ -606,6 +619,89 @@ fn CollapsibleCodeBlock(highlighted: HighlightedCode) -> Element {
 }
 
 #[component]
+fn Docs(dark_mode: Option<bool>) -> Element {
+    rsx! {
+        main { class: "dx-docs-layout",
+            DocsSidebar { active_component: None }
+            article { class: "dx-docs-page dx-docs-prose",
+                header { class: "dx-docs-page-header",
+                    p { class: "dx-docs-eyebrow", "Docs" }
+                    h1 { "Build with DioxusUI" }
+                    p {
+                        "DioxusUI is a collection of styled, accessible Dioxus components designed to be copied into your app. Use the CLI when you want the fastest path, or copy the source when you want complete ownership."
+                    }
+                }
+                section { class: "dx-docs-section",
+                    h2 { "How it works" }
+                    div { class: "dx-docs-feature-grid",
+                        div {
+                            h3 { "Copy-first components" }
+                            p { "Each component ships as source code and CSS you can keep, edit, and theme inside your own project." }
+                        }
+                        div {
+                            h3 { "Shared theme tokens" }
+                            p { "Import the theme CSS once, then component styles use the same color, focus, and state variables." }
+                        }
+                        div {
+                            h3 { "Dioxus primitives underneath" }
+                            p { "The styled components are built on reusable primitives for accessibility, keyboard interaction, and state." }
+                        }
+                    }
+                }
+                section { class: "dx-docs-section",
+                    h2 { "Add a component" }
+                    p { "Run the add command from your Dioxus app. Swap the final name for any component in the sidebar." }
+                    div { class: "dx-docs-command",
+                        code { "dx components add button" }
+                        CopyCommandButton { command: "dx components add button".to_string() }
+                    }
+                    p { class: "dx-docs-muted",
+                        "If you do not have the Dioxus CLI yet, install it once with cargo install dioxus-cli."
+                    }
+                }
+                section { class: "dx-docs-section",
+                    h2 { "Recommended workflow" }
+                    ol {
+                        li { "Pick a component from the sidebar or catalog." }
+                        li { "Preview the default example and variants." }
+                        li { "Run the CLI command shown on the component page." }
+                        li { "Customize the generated Rust and CSS to fit your app." }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn DocsSidebar(active_component: Option<&'static str>) -> Element {
+    rsx! {
+        aside { class: "dx-docs-sidebar", aria_label: "Docs navigation",
+            nav {
+                div { class: "dx-docs-sidebar-section",
+                    p { class: "dx-docs-sidebar-heading", "Start" }
+                    Link {
+                        to: Route::docs(),
+                        class: if active_component.is_none() { "dx-docs-sidebar-link dx-docs-sidebar-link-active" } else { "dx-docs-sidebar-link" },
+                        "Overview"
+                    }
+                }
+                div { class: "dx-docs-sidebar-section",
+                    p { class: "dx-docs-sidebar-heading", "Components" }
+                    for component in components::DEMOS {
+                        Link {
+                            to: Route::component(component.name),
+                            class: if active_component == Some(component.name) { "dx-docs-sidebar-link dx-docs-sidebar-link-active" } else { "dx-docs-sidebar-link" },
+                            {component.name.replace("_", " ")}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
 fn ComponentDemo(iframe: Option<bool>, dark_mode: Option<bool>, name: String) -> Element {
     let route = router().current::<Route>();
     tracing::info!("route: {route}");
@@ -634,7 +730,7 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
         name: raw_name,
         r#type,
         docs,
-        description: _,
+        description,
         variants,
         component,
         style,
@@ -645,68 +741,58 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     };
 
     rsx! {
-        main { class: "dx-component-demo",
-            h1 { class: "dx-component-title", "{name}" }
-            div { class: "dx-component-preview",
-                div { class: "dx-component-preview-contents",
+        main { class: "dx-docs-layout",
+            DocsSidebar { active_component: Some(raw_name) }
+            article { class: "dx-component-page",
+                header { class: "dx-component-page-header",
+                    p { class: "dx-docs-eyebrow", "Component" }
+                    h1 { "{name}" }
+                    p { "{description}" }
+                }
+                section { class: "dx-component-section",
                     match r#type {
                         ComponentType::Normal => rsx! {
-                            ComponentVariantHighlight { variant: main.clone(), main_variant: true }
+                            ComponentVariantHighlight { variant: main.clone(), main_variant: true, component_name: Some(raw_name) }
                         },
                         ComponentType::Block => rsx! {
-                            BlockComponentVariantHighlight { variant: main.clone(), main_variant: true, component_name: raw_name }
+                            BlockComponentVariantHighlight { variant: main.clone(), main_variant: true, component_name: raw_name, show_install: true }
                         },
                     }
-                    div { class: "dx-component-installation",
+                }
+                section { class: "dx-component-section",
+                    div { class: "dx-component-section-heading",
                         h2 { "Installation" }
-                        Tabs {
-                            default_value: "Automatic",
-                            border_bottom_left_radius: "0.5rem",
-                            border_bottom_right_radius: "0.5rem",
-                            horizontal: true,
-                            width: "100%",
-                            variant: TabsVariant::Ghost,
-                            TabList {
-                                TabTrigger { value: "Automatic", index: 0usize, "Automatic" }
-                                TabTrigger { value: "Manual", index: 1usize, "Manual" }
-                            }
-                            div {
-                                width: "100%",
-                                height: "100%",
-                                display: "flex",
-                                flex_direction: "column",
-                                justify_content: "center",
-                                align_items: "center",
-                                TabContent {
-                                    index: 0usize,
-                                    value: "Automatic",
-                                    width: "100%",
-                                    position: "relative",
-                                    CliComponentInstallation { name: raw_name }
-                                }
-                                TabContent {
-                                    index: 1usize,
-                                    value: "Manual",
-                                    width: "100%",
-                                    position: "relative",
-                                    ManualComponentInstallation { component, style }
-                                }
-                            }
-                        }
+                        p { "Use the CLI command for the common path, or copy the component files manually." }
+                    }
+                    details { class: "dx-component-manual-install",
+                        summary { "Manual installation files" }
+                        ManualComponentInstallation { component, style }
+                    }
+                }
+                section { class: "dx-component-section dx-docs-prose",
+                    div { class: "dx-component-section-heading",
+                        h2 { "Usage notes" }
                     }
                     div { class: "dx-component-description",
                         div { dangerous_inner_html: docs }
                     }
-                    if !variants.is_empty() {
-                        h2 { class: "dx-component-variants-title", "Variants" }
+                }
+                if !variants.is_empty() {
+                    section { class: "dx-component-section",
+                        div { class: "dx-component-section-heading",
+                            h2 { "Variants" }
+                            p { "Alternative examples for common configurations." }
+                        }
                         for variant in variants {
-                            match r#type {
-                                ComponentType::Normal => rsx! {
-                                    ComponentVariantHighlight { variant: variant.clone(), main_variant: false }
-                                },
-                                ComponentType::Block => rsx! {
-                                    BlockComponentVariantHighlight { variant: variant.clone(), main_variant: false, component_name: raw_name }
-                                },
+                            div { class: "dx-component-variant",
+                                match r#type {
+                                    ComponentType::Normal => rsx! {
+                                        ComponentVariantHighlight { variant: variant.clone(), main_variant: false, component_name: None }
+                                    },
+                                    ComponentType::Block => rsx! {
+                                        BlockComponentVariantHighlight { variant: variant.clone(), main_variant: false, component_name: raw_name, show_install: false }
+                                    },
+                                }
                             }
                         }
                     }
@@ -717,15 +803,22 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
 }
 
 #[component]
+fn ComponentInstallCommand(name: &'static str) -> Element {
+    let command = format!("dx components add {name}");
+
+    rsx! {
+        div { class: "dx-component-inline-command",
+            code { "{command}" }
+            CopyCommandButton { command: command.clone() }
+        }
+    }
+}
+
+#[component]
 fn ManualComponentInstallation(component: HighlightedCode, style: HighlightedCode) -> Element {
     rsx! {
-        ol { class: "dx-component-installation-list",
-            li {
-                "If you haven't already, add the dx-components-theme.css file to your project and import it in the root of your app."
-            }
-            li { "Add the style.css file to your project." }
-            li { "Create a component based on the main.rs below." }
-            li { "Modify your components and styles as needed." }
+        p { class: "dx-docs-muted",
+            "Copy the component source and CSS into your app. Import the shared theme CSS once near your app root."
         }
         ComponentCode {
             rs_highlighted: component,
@@ -736,45 +829,11 @@ fn ManualComponentInstallation(component: HighlightedCode, style: HighlightedCod
 }
 
 #[component]
-fn CliComponentInstallation(name: String) -> Element {
-    rsx! {
-        ol { class: "dx-component-installation-list",
-            li {
-                "Install the 0.7.0 version of the CLI"
-                div { id: "hero-installation",
-                    "> "
-                    div {
-                        width: "100%",
-                        display: "flex",
-                        flex_direction: "row",
-                        justify_content: "space-between",
-                        align_items: "center",
-                        "cargo install dioxus-cli"
-                        CopyButton {}
-                    }
-                }
-            }
-            li {
-                "Add the component to your project using the dx components add command:"
-                div { id: "hero-installation",
-                    "> "
-                    div {
-                        width: "100%",
-                        display: "flex",
-                        flex_direction: "row",
-                        justify_content: "space-between",
-                        align_items: "center",
-                        "dx components add {name}"
-                        CopyButton {}
-                    }
-                }
-            }
-        }
-    }
-}
-
-#[component]
-fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bool) -> Element {
+fn ComponentVariantHighlight(
+    variant: ComponentVariantDemoData,
+    main_variant: bool,
+    component_name: Option<&'static str>,
+) -> Element {
     let ComponentVariantDemoData {
         name,
         rs_highlighted: highlighted,
@@ -783,7 +842,7 @@ fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bo
     } = variant;
     rsx! {
         if !main_variant {
-            h3 { "{name}" }
+            h3 { class: "dx-component-variant-title", "{name}" }
         }
         Tabs {
             default_value: "Demo",
@@ -792,9 +851,14 @@ fn ComponentVariantHighlight(variant: ComponentVariantDemoData, main_variant: bo
             horizontal: true,
             width: "100%",
             variant: TabsVariant::Ghost,
-            TabList {
-                TabTrigger { value: "Demo", index: 0usize, "DEMO" }
-                TabTrigger { value: "Code", index: 1usize, "CODE" }
+            div { class: "dx-component-tabs-header",
+                TabList {
+                    TabTrigger { value: "Demo", index: 0usize, "DEMO" }
+                    TabTrigger { value: "Code", index: 1usize, "CODE" }
+                }
+                if let Some(component_name) = component_name {
+                    ComponentInstallCommand { name: component_name }
+                }
             }
             div {
                 width: "100%",
@@ -830,6 +894,7 @@ fn BlockComponentVariantHighlight(
     component_name: &'static str,
     variant: ComponentVariantDemoData,
     main_variant: bool,
+    show_install: bool,
 ) -> Element {
     let ComponentVariantDemoData {
         name,
@@ -852,7 +917,7 @@ fn BlockComponentVariantHighlight(
 
     rsx! {
         if !main_variant {
-            h3 { "{name}" }
+            h3 { class: "dx-component-variant-title", "{name}" }
         }
         Tabs {
             default_value: "Preview",
@@ -861,9 +926,14 @@ fn BlockComponentVariantHighlight(
             horizontal: true,
             width: "100%",
             variant: TabsVariant::Ghost,
-            TabList {
-                TabTrigger { value: "Preview", index: 0usize, "PREVIEW" }
-                TabTrigger { value: "Code", index: 1usize, "CODE" }
+            div { class: "dx-component-tabs-header",
+                TabList {
+                    TabTrigger { value: "Preview", index: 0usize, "PREVIEW" }
+                    TabTrigger { value: "Code", index: 1usize, "CODE" }
+                }
+                if show_install {
+                    ComponentInstallCommand { name: component_name }
+                }
             }
             div {
                 width: "100%",
@@ -956,7 +1026,7 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
         main { class: "dx-home-page", role: "main",
             div { id: "hero",
                 div { class: "dx-hero-shell",
-                    h1 { "Dioxus Components" }
+                    h1 { "DioxusUI" }
                     p { class: "dx-hero-summary",
                         "Accessible, themeable interface pieces for Dioxus apps. Browse the catalog, copy the CLI command, and pull only what you need into your project."
                     }
