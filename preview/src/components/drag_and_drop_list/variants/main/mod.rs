@@ -7,8 +7,6 @@ pub fn Demo() -> Element {
         rsx! {"Cat 🐱"},
         rsx! {"Cow 🐮"},
         rsx! {"Dog 🐶"},
-        rsx! {"Fox 🦊"},
-        rsx! {"Pig 🐷"},
     ];
 
     rsx! {

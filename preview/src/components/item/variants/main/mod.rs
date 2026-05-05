@@ -9,14 +9,14 @@ pub fn Demo() -> Element {
         div {
             display: "flex",
             flex_direction: "column",
-            gap: "1.5rem",
+            gap: "0.75rem",
             width: "100%",
-            max_width: "28rem",
+            max_width: "22rem",
 
             Item { variant: ItemVariant::Outline,
                 ItemContent {
-                    ItemTitle { "Basic Item" }
-                    ItemDescription { "A simple item with title and description." }
+                    ItemTitle { "Basic item" }
+                    ItemDescription { "Title and description." }
                 }
                 ItemActions {
                     Button { variant: ButtonVariant::Outline, "Action" }
@@ -32,7 +32,7 @@ pub fn Demo() -> Element {
                             BadgeCheckIcon {}
                         }
                         ItemContent {
-                            ItemTitle { "Your profile has been verified." }
+                            ItemTitle { "Profile verified" }
                         }
                         ItemActions {
                             ChevronRightIcon {}

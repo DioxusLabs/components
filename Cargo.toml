@@ -15,3 +15,60 @@ lto = true
 codegen-units = 1
 strip = true
 incremental = false
+
+[patch.crates-io]
+dioxus = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-core = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-core-types = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-core-macro = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-config-macro = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-config-macros = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-router = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-router-macro = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-document = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-history = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-html = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-html-internal-macro = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-hooks = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-web = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-ssr = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-desktop = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-interpreter-js = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-liveview = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-autofmt = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-check = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-rsx = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-rsx-hotreload = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-rsx-rosetta = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-signals = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-stores = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-stores-macro = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-devtools = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-devtools-types = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-fullstack = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-fullstack-core = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-fullstack-macro = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-server = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-dx-wire-format = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-logger = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-native = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-native-dom = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-asset-resolver = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-component-manifest = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-cli-opt = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-cli-telemetry = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+dioxus-cli-config = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+generational-box = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+lazy-js-bundle = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+depinfo = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+subsecond = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+subsecond-types = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+wasm-splitter = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+wasm-split-macro = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+wasm-split-cli = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+wasm-used = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+manganis = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+manganis-core = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+manganis-macro = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+const-serialize = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
+const-serialize-macro = { git = "https://github.com/ealmloff/dioxus", branch = "codex/suspense-errors" }
