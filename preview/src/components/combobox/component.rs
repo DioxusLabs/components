@@ -1,8 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_primitives::combobox::{
     self, ComboboxContentProps, ComboboxEmptyProps, ComboboxGroupLabelProps, ComboboxGroupProps,
-    ComboboxInputProps, ComboboxListProps, ComboboxOptionProps, ComboboxProps, ComboboxTriggerProps,
-    ComboboxValueProps,
+    ComboboxInputProps, ComboboxListProps, ComboboxOptionProps, ComboboxProps,
 };
 use dioxus_primitives::icon;
 
@@ -17,7 +16,6 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
             on_value_change: props.on_value_change,
             disabled: props.disabled,
             name: props.name,
-            placeholder: props.placeholder,
             roving_loop: props.roving_loop,
             filter: props.filter,
             attributes: props.attributes,
@@ -27,10 +25,15 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
 }
 
 #[component]
-pub fn ComboboxTrigger(props: ComboboxTriggerProps) -> Element {
+pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
     rsx! {
-        combobox::ComboboxTrigger { class: "dx-combobox-trigger", attributes: props.attributes,
-            {props.children}
+        div { class: "dx-combobox-input-wrapper",
+            combobox::ComboboxInput {
+                class: "dx-combobox-input",
+                placeholder: props.placeholder,
+                id: props.id,
+                attributes: props.attributes,
+            }
             icon::Icon {
                 class: "dx-combobox-expand-icon",
                 width: "16px",
@@ -43,13 +46,6 @@ pub fn ComboboxTrigger(props: ComboboxTriggerProps) -> Element {
 }
 
 #[component]
-pub fn ComboboxValue(props: ComboboxValueProps) -> Element {
-    rsx! {
-        combobox::ComboboxValue { class: "dx-combobox-value", attributes: props.attributes }
-    }
-}
-
-#[component]
 pub fn ComboboxContent(props: ComboboxContentProps) -> Element {
     rsx! {
         combobox::ComboboxContent {
@@ -57,43 +53,6 @@ pub fn ComboboxContent(props: ComboboxContentProps) -> Element {
             id: props.id,
             attributes: props.attributes,
             {props.children}
-        }
-    }
-}
-
-#[component]
-pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
-    // The primitive ComboboxContent mounts its children when the popup is
-    // closed (so options can register themselves with the context) but only
-    // emits markup when open. Our wrapper div + search icon live outside the
-    // primitive `<input>` so we have to gate them on the same render state,
-    // otherwise they leak into the page below the trigger when closed.
-    let visible = combobox::use_combobox_content_visible();
-    if !visible() {
-        return rsx! {
-            combobox::ComboboxInput {
-                class: "dx-combobox-input",
-                placeholder: props.placeholder,
-                id: props.id,
-                attributes: props.attributes,
-            }
-        };
-    }
-    rsx! {
-        div { class: "dx-combobox-input-wrapper",
-            icon::Icon {
-                class: "dx-combobox-search-icon",
-                width: "16px",
-                height: "16px",
-                circle { cx: 11, cy: 11, r: 8 }
-                path { d: "m21 21-4.3-4.3" }
-            }
-            combobox::ComboboxInput {
-                class: "dx-combobox-input",
-                placeholder: props.placeholder,
-                id: props.id,
-                attributes: props.attributes,
-            }
         }
     }
 }

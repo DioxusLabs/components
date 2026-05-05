@@ -1,10 +1,12 @@
-/* Mirrors shadcn-ui (new-york-v4) Combobox: outline Button + Popover + Command.
+/* Mirrors shadcn-ui (new-york-v4) Combobox visual language, adapted for an
+ * ARIA 1.2 single-input combobox: the input itself is the trigger, no
+ * separate Button + Popover trigger like shadcn's reference.
  *
  * shadcn's --radius is 0.625rem, so rounded-md = 0.5rem, rounded-sm = 0.375rem.
  *
  * Light/dark token mapping (light / dark):
  *   bg-popover (#fff / oklch(0.205) ≈ #353535)  -> --primary-color / --primary-color-5
- *   bg-trigger (#fff / bg-input/30)             -> --primary-color / --primary-color-3
+ *   bg-input   (#fff / bg-input/30)             -> --primary-color / --primary-color-3
  *   bg-accent  (oklch(0.97) / oklch(0.371))     -> --primary-color-5 / --primary-color-7
  *   border     (oklch(0.922) / white@10%)        -> --primary-color-6 / --primary-color-7
  *   ring       (oklch(0.708) / oklch(0.556))     -> --primary-color-7 (used both modes)
@@ -17,17 +19,19 @@
   display: inline-block;
 }
 
-/* ---------- Trigger (Button outline + size default + w-[200px] justify-between) ---------- */
+/* ---------- Input (the trigger AND the search field) ---------- */
 
-.dx-combobox-trigger {
-  display: inline-flex;
+.dx-combobox-input-wrapper {
+  position: relative;
+  display: inline-block;
   width: 200px;
+}
+
+.dx-combobox-input {
+  width: 100%;
   height: 2.25rem; /* h-9 */
   box-sizing: border-box;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 0.75rem; /* px-3 (has-svg) */
-  gap: 0.5rem; /* gap-2 */
+  padding: 0 2rem 0 0.75rem; /* px-3 plus room for chevron on the right */
   border: none;
   border-radius: 0.5rem; /* rounded-md (--radius * 0.8 = 0.5rem) */
   background: var(--light, var(--primary-color)) var(--dark, var(--primary-color-3));
@@ -36,9 +40,8 @@
   font-size: 0.875rem; /* text-sm */
   font-weight: 500; /* font-medium */
   line-height: 1.25rem;
-  white-space: nowrap;
   text-align: left;
-  cursor: pointer;
+  cursor: text;
   outline: none;
   /* 1px border via inset shadow + shadow-xs */
   box-shadow:
@@ -50,12 +53,12 @@
     box-shadow 120ms ease-out;
 }
 
-.dx-combobox-trigger:hover:not([disabled]) {
+.dx-combobox-input:hover:not([disabled]) {
   background: var(--light, var(--primary-color-5)) var(--dark, var(--primary-color-5));
-  color: var(--secondary-color-1); /* text-accent-foreground */
 }
 
-.dx-combobox-trigger:focus-visible {
+.dx-combobox-input:focus-visible,
+.dx-combobox-input[data-state="open"] {
   /* shadcn: border-ring + ring/50 (3px). --primary-color-7 ≈ shadcn's --ring
    * (#b0b0b0 light / #3e3e3e dark). */
   box-shadow:
@@ -63,29 +66,26 @@
     0 0 0 3px color-mix(in srgb, var(--primary-color-7) 50%, transparent);
 }
 
-.dx-combobox-trigger[disabled] {
+.dx-combobox-input[disabled] {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Selected value (or placeholder) inside the trigger. */
-.dx-combobox-value {
-  flex: 1 1 auto;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-/* shadcn keeps placeholder text at the same color as a real value. */
-.dx-combobox-value[data-placeholder="true"] {
-  color: var(--secondary-color-1);
+.dx-combobox-input::placeholder {
+  color: var(--secondary-color-5);
 }
 
 .dx-combobox-expand-icon {
-  flex: 0 0 auto;
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
   width: 1rem;
   height: 1rem;
   opacity: 0.5;
+  /* Clicks on the chevron pass through to the input behind it so focus
+   * lands on the input rather than blurring it. */
+  pointer-events: none;
 }
 
 /* ---------- Popover content ---------- */
@@ -145,50 +145,13 @@
   }
 }
 
-/* ---------- Search input wrapper (CommandInput) ---------- */
-
-.dx-combobox-input-wrapper {
-  display: flex;
-  height: 2.25rem; /* h-9 */
-  box-sizing: border-box;
-  align-items: center;
-  gap: 0.5rem; /* gap-2 */
-  padding: 0 0.75rem; /* px-3 */
-  /* 1px bottom divider via inset shadow (border shorthand can't take the
-   * --light/--dark var trick because it doesn't accept space-separated
-   * color values). */
-  box-shadow: inset 0 -1px 0 0 var(--light, var(--primary-color-6)) var(--dark, var(--primary-color-7));
-}
-
-.dx-combobox-search-icon {
-  flex: 0 0 auto;
-  width: 1rem;
-  height: 1rem;
-  opacity: 0.5;
-}
-
-.dx-combobox-input {
-  flex: 1 1 auto;
-  height: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: var(--secondary-color-1);
-  font-family: inherit;
-  font-size: 0.875rem;
-  padding: 0;
-}
-
-.dx-combobox-input::placeholder {
-  color: var(--secondary-color-5);
-}
-
 /* ---------- Command list ---------- */
 
 .dx-combobox-list {
   max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 0.25rem; /* p-1 */
   scroll-padding-block: 0.25rem; /* scroll-py-1 */
   scrollbar-width: thin;
   scrollbar-color:
@@ -220,7 +183,6 @@
 
 .dx-combobox-group {
   overflow: hidden;
-  padding: 0.25rem; /* p-1 */
   color: var(--secondary-color-1);
 }
 

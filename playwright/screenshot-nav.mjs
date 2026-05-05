@@ -5,10 +5,10 @@ const URL = "http://127.0.0.1:56476/component/?name=combobox&dark_mode=false";
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 720, height: 700 } });
 await page.goto(URL, { timeout: 120_000, waitUntil: "networkidle" });
-await page.waitForSelector(".dx-combobox-trigger", { timeout: 60_000 });
+await page.waitForSelector(".dx-combobox-input", { timeout: 60_000 });
 await page.waitForTimeout(500);
 
-const trigger = page.locator(".dx-combobox-trigger").first();
+const trigger = page.locator(".dx-combobox-input").first();
 await trigger.click();
 await page.waitForSelector(".dx-combobox-content[data-state='open']", { timeout: 5000 });
 await page.waitForTimeout(300);

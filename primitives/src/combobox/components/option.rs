@@ -99,9 +99,9 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
     let children_element = props.children;
     let value_signal = props.value;
 
-    // Stable Callback handle; `use_callback` swaps the inner closure on every
-    // render so it always captures the freshest props. `ComboboxList` calls
-    // this in relevance-ranked order to render the option in the DOM.
+    // `ComboboxList` calls this in relevance-ranked order so DOM order
+    // matches visual order; `use_callback` keeps the handle stable while
+    // the inner closure re-captures fresh props each render.
     let render = use_callback(move |_: ()| -> Element {
         let attrs = attrs.clone();
         let children = children_element.clone();
@@ -134,9 +134,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
                             && &event.pointer_type() == "mouse"
                             && event.trigger_button() == Some(MouseButton::Primary)
                         {
-                            ctx.set_value.call(Some(RcPartialEqValue::new(value_signal.cloned())));
-                            ctx.open.set(false);
-                            ctx.query.set(String::new());
+                            ctx.commit_value(RcPartialEqValue::new(value_signal.cloned()));
                             event.prevent_default();
                         }
                     },
@@ -145,9 +143,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
                     },
                     ontouchend: move |_| {
                         if !disabled() && !did_drag() {
-                            ctx.set_value.call(Some(RcPartialEqValue::new(value_signal.cloned())));
-                            ctx.open.set(false);
-                            ctx.query.set(String::new());
+                            ctx.commit_value(RcPartialEqValue::new(value_signal.cloned()));
                         }
                     },
                     ontouchmove: move |_| {
@@ -162,22 +158,30 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
     });
 
     use_effect(move || {
+        let option_id = id();
         let option_state = OptionState {
             tab_index: index(),
             value: RcPartialEqValue::new(value.cloned()),
             text_value: text_value.cloned(),
-            id: id(),
+            id: option_id.clone(),
             disabled: disabled_signal.cloned(),
             render,
         };
-        ctx.options.write().push(option_state);
+        if ctx.options.peek().iter().any(|opt| opt == &option_state) {
+            return;
+        }
+        let mut options = ctx.options.write();
+        if let Some(option) = options.iter_mut().find(|opt| opt.id == option_id) {
+            *option = option_state;
+        } else {
+            options.push(option_state);
+        }
     });
 
     use_effect_cleanup(move || {
         ctx.options.write().retain(|opt| opt.id != *id.read());
     });
 
-    // No visible markup — the list emits us via `render` in ranked order.
     rsx! {}
 }
 

@@ -1,5 +1,7 @@
 The Combobox component is an autocomplete input with a popover list. It lets users select a value from a filterable list of options — like a [Select](../select), but with a search input baked in.
 
+Following WAI-ARIA 1.2's combobox pattern, the input itself is the trigger: typing, clicking, or pressing arrow keys opens the popup, and DOM focus stays on the input the whole time.
+
 ## Component Structure
 
 ```rust
@@ -10,12 +12,11 @@ Combobox::<String> {
     on_value_change: |value: Option<String>| {
         // Handle the change.
     },
-    // The trigger button shows the selected value (or placeholder).
-    ComboboxTrigger { ComboboxValue {} }
-    // The popover wraps the search input and the option list.
+    // The input doubles as the trigger and the search field. When closed it
+    // shows the selected option's text; when open it shows the typed query.
+    ComboboxInput { placeholder: "Select a framework..." }
+    // The popover wraps just the option list.
     ComboboxContent {
-        // The search input filters the list as the user types.
-        ComboboxInput { placeholder: "Search frameworks..." }
         ComboboxList {
             // Shown only when nothing matches the current query.
             ComboboxEmpty { "No framework found." }

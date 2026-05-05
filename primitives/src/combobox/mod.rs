@@ -1,15 +1,16 @@
-//! Defines the [`Combobox`] component and its sub-components — a button +
-//! popover combination that lets the user pick a value from a filterable list
-//! of options. It's the keyboard-and-typeahead cousin of
-//! [`Select`](crate::select::Select).
+//! Defines the [`Combobox`] component and its sub-components — an
+//! autocomplete input with a popover list of filterable options. The
+//! keyboard-and-typeahead cousin of [`Select`](crate::select::Select).
+//!
+//! Following WAI-ARIA 1.2's combobox pattern: a single text [`ComboboxInput`]
+//! is the trigger and the search field — `role="combobox"` lives there, the
+//! listbox sits in a separate popup, and DOM focus never leaves the input.
 //!
 //! ## Parts
 //!
 //! - [`Combobox`] — root container, state owner.
-//! - [`ComboboxTrigger`] — button that opens the popup.
-//! - [`ComboboxValue`] — displays the selected option's text in the trigger.
+//! - [`ComboboxInput`] — the input that opens the popup and filters options.
 //! - [`ComboboxContent`] — the popup container.
-//! - [`ComboboxInput`] — the search input.
 //! - [`ComboboxList`] — `role="listbox"` container for options.
 //! - [`ComboboxOption`] — a single selectable option.
 //! - [`ComboboxItemIndicator`] — visible only when its option is selected.
@@ -22,17 +23,15 @@
 //! use dioxus::prelude::*;
 //! use dioxus_primitives::combobox::{
 //!     Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItemIndicator,
-//!     ComboboxList, ComboboxOption, ComboboxTrigger, ComboboxValue,
+//!     ComboboxList, ComboboxOption,
 //! };
 //!
 //! #[component]
 //! fn Demo() -> Element {
 //!     rsx! {
 //!         Combobox::<String> {
-//!             placeholder: "Select a framework...",
-//!             ComboboxTrigger { ComboboxValue {} }
+//!             ComboboxInput { placeholder: "Select a framework..." }
 //!             ComboboxContent {
-//!                 ComboboxInput { placeholder: "Search frameworks..." }
 //!                 ComboboxList {
 //!                     ComboboxEmpty { "No framework found." }
 //!                     ComboboxOption::<String> {
@@ -52,12 +51,10 @@ mod components;
 mod context;
 
 pub use components::{
-    use_combobox_content_visible, Combobox, ComboboxContent, ComboboxContentProps,
-    ComboboxEmpty, ComboboxEmptyProps, ComboboxGroup, ComboboxGroupLabel,
-    ComboboxGroupLabelProps, ComboboxGroupProps, ComboboxInput, ComboboxInputProps,
-    ComboboxItemIndicator, ComboboxItemIndicatorProps, ComboboxList, ComboboxListProps,
-    ComboboxOption, ComboboxOptionProps, ComboboxProps, ComboboxTrigger, ComboboxTriggerProps,
-    ComboboxValue, ComboboxValueProps,
+    Combobox, ComboboxContent, ComboboxContentProps, ComboboxEmpty, ComboboxEmptyProps,
+    ComboboxGroup, ComboboxGroupLabel, ComboboxGroupLabelProps, ComboboxGroupProps, ComboboxInput,
+    ComboboxInputProps, ComboboxItemIndicator, ComboboxItemIndicatorProps, ComboboxList,
+    ComboboxListProps, ComboboxOption, ComboboxOptionProps, ComboboxProps,
 };
 
 pub use context::default_combobox_filter;

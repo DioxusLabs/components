@@ -61,6 +61,19 @@ pub(super) struct OptionState {
     pub render: Callback<(), Element>,
 }
 
+impl PartialEq for OptionState {
+    // `render` is a stable Callback handle whose inner closure swaps every
+    // render — comparing it would never report equality. The other fields
+    // fully describe registration identity.
+    fn eq(&self, other: &Self) -> bool {
+        self.tab_index == other.tab_index
+            && self.value == other.value
+            && self.text_value == other.text_value
+            && self.id == other.id
+            && self.disabled == other.disabled
+    }
+}
+
 /// Default fuzzy filter: empty query matches everything; otherwise an option
 /// is visible if its `text_value` contains the query as a case-insensitive
 /// substring **or** as an in-order subsequence of characters.
@@ -124,14 +137,10 @@ pub(super) struct ComboboxContext {
     pub filter: Callback<(String, String), bool>,
     /// The id of the listbox for ARIA wiring.
     pub list_id: Signal<Option<String>>,
-    /// The id of the search input for ARIA wiring.
-    pub input_id: Signal<Option<String>>,
     /// Roving focus state for option keyboard navigation.
     pub focus_state: FocusState,
     /// Whether the combobox is disabled.
     pub disabled: ReadSignal<bool>,
-    /// Placeholder text for an empty value.
-    pub placeholder: ReadSignal<String>,
 }
 
 impl ComboboxContext {
@@ -141,15 +150,26 @@ impl ComboboxContext {
         self.filter.call((query, opt.text_value.clone()))
     }
 
-    /// Tab indices of options that pass the filter and aren't disabled, ordered
-    /// by relevance: best match first when there's a query, otherwise declared
-    /// order. Ties fall back to declared order so the result is stable.
-    pub fn visible_indices(&self) -> Vec<usize> {
+    /// `text_value` of the currently selected option, if any.
+    pub fn selected_text(&self) -> Option<String> {
+        let value = self.value.read();
+        let v = value.as_ref()?;
+        self.options
+            .read()
+            .iter()
+            .find(|opt| &opt.value == v)
+            .map(|opt| opt.text_value.clone())
+    }
+
+    /// Visible options (filter passing, not disabled), sorted by relevance:
+    /// best match first when there's a query, otherwise declared order. Ties
+    /// fall back to declared order so the result is stable.
+    fn visible_sorted(&self) -> Vec<(usize, Callback<(), Element>)> {
         let options = self.options.read();
         let query = self.query.read().clone();
         let q_trim = query.trim().to_string();
 
-        let mut visible: Vec<(Option<u32>, usize)> = options
+        let mut visible: Vec<(Option<u32>, usize, Callback<(), Element>)> = options
             .iter()
             .filter(|o| !o.disabled && self.option_matches(o))
             .map(|o| {
@@ -158,18 +178,30 @@ impl ComboboxContext {
                 } else {
                     match_score(&q_trim, &o.text_value)
                 };
-                (score, o.tab_index)
+                (score, o.tab_index, o.render)
             })
             .collect();
 
-        visible.sort_by(|(s1, t1), (s2, t2)| match (s1, s2) {
+        visible.sort_by(|(s1, t1, _), (s2, t2, _)| match (s1, s2) {
             (Some(a), Some(b)) => a.cmp(b).then_with(|| t1.cmp(t2)),
             (Some(_), None) => std::cmp::Ordering::Less,
             (None, Some(_)) => std::cmp::Ordering::Greater,
             (None, None) => t1.cmp(t2),
         });
 
-        visible.into_iter().map(|(_, ti)| ti).collect()
+        visible.into_iter().map(|(_, ti, r)| (ti, r)).collect()
+    }
+
+    /// Tab indices of visible options in ranked order.
+    pub fn visible_indices(&self) -> Vec<usize> {
+        self.visible_sorted().into_iter().map(|(ti, _)| ti).collect()
+    }
+
+    /// Render callbacks of visible options in ranked order. `ComboboxList`
+    /// calls these directly to emit `<div role="option">` markup — avoiding a
+    /// per-option lookup against `options`.
+    pub fn visible_renders(&self) -> Vec<Callback<(), Element>> {
+        self.visible_sorted().into_iter().map(|(_, r)| r).collect()
     }
 
     /// Whether at least one option is visible.
@@ -240,15 +272,24 @@ impl ComboboxContext {
         let Some(idx) = self.focus_state.current_focus() else {
             return;
         };
-        let options = self.options.read();
-        if let Some(opt) = options.iter().find(|o| o.tab_index == idx) {
-            if !opt.disabled {
-                self.set_value.call(Some(opt.value.clone()));
-                drop(options);
-                self.open.set(false);
-                self.query.set(String::new());
-            }
+        let value = {
+            let options = self.options.read();
+            options
+                .iter()
+                .find(|o| o.tab_index == idx && !o.disabled)
+                .map(|o| o.value.clone())
+        };
+        if let Some(value) = value {
+            self.commit_value(value);
         }
+    }
+
+    /// Commit a value: fire the change callback, close the popup, and reset
+    /// the query so reopening shows everything.
+    pub fn commit_value(&mut self, value: RcPartialEqValue) {
+        self.set_value.call(Some(value));
+        self.open.set(false);
+        self.query.set(String::new());
     }
 }
 

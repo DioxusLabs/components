@@ -48,21 +48,7 @@ pub fn ComboboxList(props: ComboboxListProps) -> Element {
         return rsx! { {props.children} };
     }
 
-    // Resolve each visible option's render callback. Cloning Callbacks is
-    // cheap (they wrap a CopyValue).
-    let visible_renders: Vec<Callback<(), Element>> = {
-        let visible = ctx.visible_indices();
-        let options = ctx.options.read();
-        visible
-            .into_iter()
-            .filter_map(|tab_index| {
-                options
-                    .iter()
-                    .find(|opt| opt.tab_index == tab_index)
-                    .map(|opt| opt.render)
-            })
-            .collect()
-    };
+    let visible_renders = ctx.visible_renders();
 
     rsx! {
         div {
@@ -70,10 +56,6 @@ pub fn ComboboxList(props: ComboboxListProps) -> Element {
             role: "listbox",
             tabindex: "-1",
             ..props.attributes,
-            // ComboboxEmpty (and any other non-option children, e.g. group
-            // labels) live in the children tree and self-gate visibility.
-            // ComboboxOption itself emits no markup, so the children tree
-            // contributes only ancillary content.
             {props.children}
             for render in visible_renders {
                 {render.call(())}

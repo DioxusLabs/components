@@ -12,10 +12,10 @@ const page = await browser.newPage({
 });
 
 await page.goto(URL, { timeout: 120_000, waitUntil: "networkidle" });
-await page.waitForSelector(".dx-combobox-trigger", { timeout: 60_000 });
+await page.waitForSelector(".dx-combobox-input", { timeout: 60_000 });
 await page.waitForTimeout(500);
 
-const trigger = page.locator(".dx-combobox-trigger").first();
+const trigger = page.locator(".dx-combobox-input").first();
 await trigger.scrollIntoViewIfNeeded();
 const box = await trigger.boundingBox();
 const clip = {

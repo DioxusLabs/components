@@ -5,17 +5,6 @@ use dioxus::prelude::*;
 use super::super::context::{ComboboxContentContext, ComboboxContext};
 use crate::{use_animated_open, use_id_or, use_unique_id};
 
-/// Hook for styled wrappers placed inside a [`ComboboxContent`] that should
-/// only render while the popup is visible. Returns `true` while the popup is
-/// open or animating closed, `false` while the popup is dismissed.
-///
-/// Useful when wrapping [`ComboboxInput`](super::input::ComboboxInput) with
-/// extra layout (an icon, a label, etc.) — the primitive `<input>` gates
-/// itself on open state, but any sibling markup added by the caller does not.
-pub fn use_combobox_content_visible() -> ReadSignal<bool> {
-    use_context::<ComboboxContentContext>().render
-}
-
 /// Props for [`ComboboxContent`].
 #[derive(Props, Clone, PartialEq)]
 pub struct ComboboxContentProps {
@@ -33,9 +22,10 @@ pub struct ComboboxContentProps {
 
 /// # ComboboxContent
 ///
-/// The popup container that wraps the search [`ComboboxInput`] and the
-/// [`ComboboxList`]. Renders only when the combobox is open and animates
-/// open/closed via the `data-state` attribute.
+/// The popup container that wraps the [`ComboboxList`]. Renders only when the
+/// combobox is open and animates open/closed via the `data-state` attribute.
+/// `ComboboxInput` lives outside this — it's the persistent trigger that owns
+/// keyboard focus.
 ///
 /// Must be used inside a [`Combobox`](super::combobox::Combobox).
 #[component]

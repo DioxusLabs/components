@@ -14,10 +14,12 @@ pub fn Demo() -> Element {
     ];
 
     rsx! {
-        Combobox::<String> { placeholder: "Select framework...",
-            ComboboxTrigger { aria_label: "Select framework", ComboboxValue {} }
+        Combobox::<String> {
+            ComboboxInput {
+                placeholder: "Select framework...",
+                aria_label: "Select framework",
+            }
             ComboboxContent {
-                ComboboxInput { placeholder: "Search framework..." }
                 ComboboxList { aria_label: "Frameworks",
                     ComboboxEmpty { "No framework found." }
                     {

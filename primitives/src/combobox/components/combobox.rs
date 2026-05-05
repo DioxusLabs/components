@@ -33,10 +33,6 @@ pub struct ComboboxProps<T: Clone + PartialEq + 'static = String> {
     #[props(default)]
     pub name: ReadSignal<String>,
 
-    /// Placeholder text used by [`ComboboxValue`](super::value::ComboboxValue).
-    #[props(default = ReadSignal::new(Signal::new(String::from("Select an option"))))]
-    pub placeholder: ReadSignal<String>,
-
     /// Whether arrow-key navigation should wrap.
     #[props(default = ReadSignal::new(Signal::new(true)))]
     pub roving_loop: ReadSignal<bool>,
@@ -65,18 +61,15 @@ pub struct ComboboxProps<T: Clone + PartialEq + 'static = String> {
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::combobox::{
 ///     Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput,
-///     ComboboxItemIndicator, ComboboxList, ComboboxOption, ComboboxTrigger,
-///     ComboboxValue,
+///     ComboboxItemIndicator, ComboboxList, ComboboxOption,
 /// };
 ///
 /// #[component]
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         Combobox::<String> {
-///             placeholder: "Select a framework...",
-///             ComboboxTrigger { ComboboxValue {} }
+///             ComboboxInput { placeholder: "Select a framework..." }
 ///             ComboboxContent {
-///                 ComboboxInput { placeholder: "Search frameworks..." }
 ///                 ComboboxList {
 ///                     ComboboxEmpty { "No framework found." }
 ///                     ComboboxOption::<String> { index: 0usize, value: "next",
@@ -104,7 +97,6 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
     let query = use_signal(String::new);
     let options = use_signal(Vec::default);
     let list_id = use_signal(|| None);
-    let input_id = use_signal(|| None);
 
     let value = use_memo(move || value().map(RcPartialEqValue::new));
     let set_value = use_callback(move |cursor_opt: Option<RcPartialEqValue>| {
@@ -124,11 +116,10 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
 
     let focus_state = use_focus_provider(props.roving_loop);
 
-    // Reset query whenever the popup closes so re-opening shows everything.
-    let mut query_signal = query;
+    let mut query = query;
     use_effect(move || {
         if !open() {
-            query_signal.set(String::new());
+            query.set(String::new());
         }
     });
 
@@ -140,10 +131,8 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
         options,
         filter: props.filter,
         list_id,
-        input_id,
         focus_state,
         disabled: props.disabled,
-        placeholder: props.placeholder,
     });
 
     rsx! {

@@ -15,10 +15,10 @@ async function shot(name) {
 
 // LIGHT MODE
 await page.goto(`${URL_BASE}&dark_mode=false`, { timeout: 120_000, waitUntil: "networkidle" });
-await page.waitForSelector(".dx-combobox-trigger", { timeout: 60_000 });
+await page.waitForSelector(".dx-combobox-input", { timeout: 60_000 });
 await page.waitForTimeout(500);
 
-const trigger = page.locator(".dx-combobox-trigger").first();
+const trigger = page.locator(".dx-combobox-input").first();
 await trigger.scrollIntoViewIfNeeded();
 const box = await trigger.boundingBox();
 
@@ -65,9 +65,9 @@ console.log("saved light-open-highlighted.png");
 
 // DARK MODE
 await page.goto(`${URL_BASE}&dark_mode=true`, { timeout: 120_000, waitUntil: "networkidle" });
-await page.waitForSelector(".dx-combobox-trigger", { timeout: 60_000 });
+await page.waitForSelector(".dx-combobox-input", { timeout: 60_000 });
 await page.waitForTimeout(500);
-const trigger2 = page.locator(".dx-combobox-trigger").first();
+const trigger2 = page.locator(".dx-combobox-input").first();
 await trigger2.scrollIntoViewIfNeeded();
 const box2 = await trigger2.boundingBox();
 
