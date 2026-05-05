@@ -41,13 +41,10 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
                 .and_then(|v| v.key.clone())
                 .unwrap_or_else(|| idx.to_string());
             rsx! {
-                Fragment {
-                    key: "{key}",
-                    DragIcon {}
-                    div { class: "dx-item-body-div", {item} }
-                    if is_removable {
-                        RemoveButton {}
-                    }
+                DragIcon { key: "{key}" }
+                div { class: "dx-item-body-div", {item} }
+                if is_removable {
+                    RemoveButton {}
                 }
             }
         })
