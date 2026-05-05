@@ -31,11 +31,10 @@ pub struct SelectTriggerProps {
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         Select::<String> {
-///             placeholder: "Select a fruit...",
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue {}
+///                 SelectValue { placeholder: "Select a fruit..." }
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",
@@ -82,13 +81,13 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
                 match event.key() {
                     Key::ArrowUp => {
                         open.set(true);
-                        ctx.initial_focus.set(ctx.focus_state.item_count().checked_sub(1));
+                        ctx.initial_focus.set(ctx.focus_state.last_enabled_index());
                         event.prevent_default();
                         event.stop_propagation();
                     }
                     Key::ArrowDown => {
                         open.set(true);
-                        ctx.initial_focus.set((ctx.focus_state.item_count() > 0).then_some(0));
+                        ctx.initial_focus.set(ctx.focus_state.first_enabled_index());
                         event.prevent_default();
                         event.stop_propagation();
                     }

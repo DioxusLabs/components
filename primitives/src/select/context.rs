@@ -53,10 +53,13 @@ pub(super) struct SelectContext {
     pub typeahead_buffer: Signal<String>,
     /// If the select is open
     pub open: Signal<bool>,
-    /// Current value
-    pub value: Memo<Option<RcPartialEqValue>>,
-    /// Set the value callback
+    /// Currently selected values. In single-select mode this contains at most one entry.
+    pub values: Memo<Vec<RcPartialEqValue>>,
+    /// Set the value callback. In single mode this replaces the selection;
+    /// in multi mode it toggles the given value in/out of the selection.
     pub set_value: Callback<Option<RcPartialEqValue>>,
+    /// Whether the select allows multiple values to be selected
+    pub multi: bool,
     /// A list of options with their states
     pub options: Signal<Vec<OptionState>>,
     /// Adaptive keyboard system for multi-language support
@@ -67,8 +70,6 @@ pub(super) struct SelectContext {
     pub focus_state: FocusState,
     /// Whether the select is disabled
     pub disabled: ReadSignal<bool>,
-    /// The placeholder text
-    pub placeholder: ReadSignal<String>,
     /// Task handle for clearing typeahead buffer
     pub typeahead_clear_task: Signal<Option<Task>>,
     /// Timeout before clearing typeahead buffer
@@ -84,9 +85,14 @@ impl SelectContext {
         if self.open.cloned() {
             if let Some(focused_index) = self.focus_state.current_focus() {
                 let options = self.options.read();
-                if let Some(option) = options.iter().find(|opt| opt.tab_index == focused_index) {
+                if let Some(option) = options
+                    .iter()
+                    .find(|opt| opt.tab_index == focused_index && !opt.disabled)
+                {
                     self.set_value.call(Some(option.value.clone()));
-                    self.open.set(false);
+                    if !self.multi {
+                        self.open.set(false);
+                    }
                 }
             }
         }
@@ -145,6 +151,7 @@ impl SelectContext {
 }
 
 /// State for individual select options
+#[derive(PartialEq)]
 pub(super) struct OptionState {
     /// Tab index for focus management
     pub tab_index: usize,
@@ -154,6 +161,8 @@ pub(super) struct OptionState {
     pub text_value: String,
     /// Unique ID for the option
     pub id: String,
+    /// Whether the option is disabled
+    pub disabled: bool,
 }
 
 /// Context for select option components to know if they're selected

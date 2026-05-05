@@ -45,7 +45,7 @@ jobs:
       - name: Install CLI
         run: cargo binstall dioxus-cli -y --force --version 0.7.6
       - name: Build
-        run: cd preview && dx build --web --release --base-path "components/pr-preview/pr-${{ github.event.pull_request.number }}/"
+        run: cd preview && dx build --web --release --fullstack --ssg --features fullstack --base-path "components/pr-preview/pr-${{ github.event.pull_request.number }}/"
       - name: Copy output
         run: cp -r target/dx/preview/release/web/public docs
       - name: Deploy 🚀
@@ -58,8 +58,8 @@ jobs:
           clean: false
           single-commit: true
       - name: Comment PR
-        # Only run if the pr just opened
-        if: github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'ready_for_review'
+        # Post or update the preview link after a successful deploy.
+        if: github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'ready_for_review' || github.event.action == 'synchronize'
         uses: thollander/actions-comment-pull-request@v3
         with:
           message: |

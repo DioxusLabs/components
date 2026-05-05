@@ -7,6 +7,7 @@ enum Fruit {
     Apple,
     Banana,
     Orange,
+    Orangeade,
     Strawberry,
     Watermelon,
 }
@@ -17,6 +18,7 @@ impl Fruit {
             Fruit::Apple => "🍎",
             Fruit::Banana => "🍌",
             Fruit::Orange => "🍊",
+            Fruit::Orangeade => "🧃",
             Fruit::Strawberry => "🍓",
             Fruit::Watermelon => "🍉",
         }
@@ -28,7 +30,8 @@ pub fn Demo() -> Element {
     let fruits = Fruit::iter().enumerate().map(|(i, f)| {
         rsx! {
             SelectOption::<Option<Fruit>> { index: i, value: f, text_value: "{f}",
-                {format!("{} {f}", f.emoji())}
+                disabled: matches!(f, Fruit::Orange),
+                "{f.emoji()} {f}"
                 SelectItemIndicator {}
             }
         }
@@ -36,8 +39,10 @@ pub fn Demo() -> Element {
 
     rsx! {
 
-        Select::<Option<Fruit>> { placeholder: "Select a fruit...",
-            SelectTrigger { aria_label: "Select Trigger", width: "12rem", SelectValue {} }
+        Select::<Option<Fruit>> {
+            SelectTrigger { aria_label: "Select Trigger", width: "12rem",
+                SelectValue { placeholder: "Select a fruit..." }
+            }
             SelectList { aria_label: "Select Demo",
                 SelectGroup {
                     SelectGroupLabel { "Fruits" }

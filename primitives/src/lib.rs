@@ -20,6 +20,7 @@ pub mod avatar;
 pub mod calendar;
 pub mod checkbox;
 pub mod collapsible;
+pub mod color_picker;
 pub mod context_menu;
 pub mod date_picker;
 pub mod dialog;
@@ -30,8 +31,10 @@ pub mod hover_card;
 pub mod icon;
 pub mod label;
 pub mod menubar;
+mod move_interaction;
 #[cfg(feature = "router")]
 pub mod navbar;
+mod pointer;
 pub mod popover;
 mod portal;
 pub mod progress;

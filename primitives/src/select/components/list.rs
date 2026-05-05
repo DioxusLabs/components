@@ -41,11 +41,10 @@ pub struct SelectListProps {
 /// fn Demo() -> Element {
 ///     rsx! {
 ///         Select::<String> {
-///             placeholder: "Select a fruit...",
 ///             SelectTrigger {
 ///                 aria_label: "Select Trigger",
 ///                 width: "12rem",
-///                 SelectValue {}
+///                 SelectValue { placeholder: "Select a fruit..." }
 ///             }
 ///             SelectList {
 ///                 aria_label: "Select Demo",
@@ -141,7 +140,9 @@ pub fn SelectList(props: SelectListProps) -> Element {
             }
             Key::Enter => {
                 ctx.select_current_item();
-                open.set(false);
+                if !ctx.multi {
+                    open.set(false);
+                }
                 event.prevent_default();
                 event.stop_propagation();
             }
@@ -175,6 +176,7 @@ pub fn SelectList(props: SelectListProps) -> Element {
                 id,
                 role: "listbox",
                 tabindex: if focused() { "0" } else { "-1" },
+                aria_multiselectable: ctx.multi,
 
                 // Data attributes
                 "data-state": if open() { "open" } else { "closed" },

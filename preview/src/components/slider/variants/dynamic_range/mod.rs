@@ -2,18 +2,17 @@ use super::super::component::*;
 use crate::components::label::Label;
 use crate::components::switch::{Switch, SwitchThumb};
 use dioxus::prelude::*;
-use dioxus_primitives::slider::SliderValue;
 
 #[component]
 pub fn Demo() -> Element {
     let mut percentage_mode = use_signal(|| true);
-    let mut current_value = use_signal(|| Some(SliderValue::Single(50.0)));
+    let mut current_value = use_signal(|| Some(50.0_f64));
 
     let max = use_memo(move || if percentage_mode() { 100.0 } else { 1000.0 });
     let step = use_memo(move || if percentage_mode() { 1.0 } else { 10.0 });
     let formatted_value = use_memo(move || {
         current_value()
-            .map(|SliderValue::Single(v)| {
+            .map(|v| {
                 if percentage_mode() {
                     format!("{v:.0}%")
                 } else {
@@ -32,8 +31,8 @@ pub fn Demo() -> Element {
                 on_checked_change: move |new_checked| {
                     percentage_mode.set(new_checked);
                     if new_checked {
-                        if let Some(SliderValue::Single(v)) = current_value() {
-                            current_value.set(Some(SliderValue::Single(v.min(100.0))));
+                        if let Some(v) = current_value() {
+                            current_value.set(Some(v.min(100.0)));
                         }
                     }
                 },
@@ -57,7 +56,7 @@ pub fn Demo() -> Element {
             max,
             step,
             value: current_value,
-            on_value_change: move |new_value: SliderValue| {
+            on_value_change: move |new_value: f64| {
                 current_value.set(Some(new_value));
             },
             SliderTrack {

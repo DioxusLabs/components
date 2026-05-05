@@ -62,6 +62,7 @@ jobs:
           # Add dependencies manually; TODO: remove this once dx components supports local dependencies
           dx components add calendar,popover --path ..
           dx components add button,separator,sheet,tooltip --path ..
+          dx components add dialog,input --path ..
           # Add all components
           dx components add --all --path .. --force
           # Switch to the local version of dioxus-primitives
@@ -109,6 +110,10 @@ jobs:
               dx components add calendar,popover --path ..
             elif [ "$file" = "sidebar" ]; then
               dx components add button,separator,sheet,tooltip --path ..
+            elif [ "$file" = "item" ]; then
+              dx components add separator --path ..
+            elif [ "$file" = "color_picker" ]; then
+              dx components add popover,input --path ..
             fi
             # Add the component
             dx components add "$file" --path ..

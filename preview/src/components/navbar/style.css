@@ -11,7 +11,8 @@
   position: relative;
 }
 
-.dx-navbar-trigger {
+.dx-navbar-trigger,
+.dx-navbar > .dx-navbar-item {
   display: flex;
   flex-direction: row;
   align-items: center;
