@@ -54,18 +54,57 @@ pub(super) struct OptionState {
     pub id: String,
     /// Whether the option is disabled.
     pub disabled: bool,
+    /// Stable callback that returns the option's rendered `<div role="option">`.
+    /// `ComboboxList` calls this in relevance-ranked order so that DOM order
+    /// matches visual order — keeping screen-reader exploration consistent
+    /// with what sighted users see.
+    pub render: Callback<(), Element>,
 }
 
-/// Default case-insensitive substring filter.
+/// Default fuzzy filter: empty query matches everything; otherwise an option
+/// is visible if its `text_value` contains the query as a case-insensitive
+/// substring **or** as an in-order subsequence of characters.
+///
+/// The subsequence pass is what makes "svk" match "SvelteKit" and "nxt"
+/// match "Next.js" — close to cmdk's default scoring behavior.
 pub fn default_combobox_filter(query: &str, text: &str) -> bool {
-    if query.is_empty() {
-        return true;
+    match_score(query, text).is_some()
+}
+
+/// Score how well `text` matches `query`. Lower is better; `None` means no
+/// match. Matches are tiered: prefix (best) < substring < subsequence (worst).
+/// Within a tier, shorter text and earlier match position are preferred.
+pub(super) fn match_score(query: &str, text: &str) -> Option<u32> {
+    let q = query.trim().to_lowercase();
+    if q.is_empty() {
+        return Some(0);
     }
-    let query = query.trim().to_lowercase();
-    if query.is_empty() {
-        return true;
+    let t = text.to_lowercase();
+
+    // Tier 1: prefix match. Score by text length so shorter prefixes win.
+    if t.starts_with(&q) {
+        return Some(t.chars().count() as u32);
     }
-    text.to_lowercase().contains(&query)
+    // Tier 2: contiguous substring. Earlier match position is better, then
+    // shorter text. Score is offset above tier 1.
+    if let Some(byte_pos) = t.find(&q) {
+        let char_pos = t[..byte_pos].chars().count() as u32;
+        return Some(1_000 + char_pos * 10 + t.chars().count() as u32);
+    }
+    // Tier 3: subsequence match. Score by total characters skipped between
+    // matched positions.
+    let mut t_chars = t.chars();
+    let mut skipped: u32 = 0;
+    'q: for c in q.chars() {
+        for tc in t_chars.by_ref() {
+            if tc == c {
+                continue 'q;
+            }
+            skipped += 1;
+        }
+        return None;
+    }
+    Some(10_000 + skipped + t.chars().count() as u32)
 }
 
 /// Main context for the combobox component.
@@ -102,16 +141,35 @@ impl ComboboxContext {
         self.filter.call((query, opt.text_value.clone()))
     }
 
-    /// Sorted tab indices of options that pass the filter and aren't disabled.
+    /// Tab indices of options that pass the filter and aren't disabled, ordered
+    /// by relevance: best match first when there's a query, otherwise declared
+    /// order. Ties fall back to declared order so the result is stable.
     pub fn visible_indices(&self) -> Vec<usize> {
         let options = self.options.read();
-        let mut visible: Vec<(usize, usize)> = options
+        let query = self.query.read().clone();
+        let q_trim = query.trim().to_string();
+
+        let mut visible: Vec<(Option<u32>, usize)> = options
             .iter()
             .filter(|o| !o.disabled && self.option_matches(o))
-            .map(|o| (o.tab_index, o.tab_index))
+            .map(|o| {
+                let score = if q_trim.is_empty() {
+                    None
+                } else {
+                    match_score(&q_trim, &o.text_value)
+                };
+                (score, o.tab_index)
+            })
             .collect();
-        visible.sort_by_key(|(_, ti)| *ti);
-        visible.into_iter().map(|(ti, _)| ti).collect()
+
+        visible.sort_by(|(s1, t1), (s2, t2)| match (s1, s2) {
+            (Some(a), Some(b)) => a.cmp(b).then_with(|| t1.cmp(t2)),
+            (Some(_), None) => std::cmp::Ordering::Less,
+            (None, Some(_)) => std::cmp::Ordering::Greater,
+            (None, None) => t1.cmp(t2),
+        });
+
+        visible.into_iter().map(|(_, ti)| ti).collect()
     }
 
     /// Whether at least one option is visible.
@@ -122,41 +180,38 @@ impl ComboboxContext {
             .any(|o| !o.disabled && self.option_matches(o))
     }
 
-    /// Move focus to the next visible option, wrapping if needed.
+    /// Move focus to the next visible option (in ranked order), wrapping.
     pub fn focus_next_visible(&mut self) {
         let visible = self.visible_indices();
         if visible.is_empty() {
             self.focus_state.set_focus(None);
             return;
         }
-        let current = self.focus_state.recent_focus();
-        let next = match current {
-            Some(curr) => visible
-                .iter()
-                .copied()
-                .find(|&i| i > curr)
-                .unwrap_or_else(|| visible[0]),
+        let next = match self.focus_state.recent_focus() {
+            Some(curr) => match visible.iter().position(|&i| i == curr) {
+                Some(pos) => visible.get(pos + 1).copied().unwrap_or(visible[0]),
+                None => visible[0],
+            },
             None => visible[0],
         };
         self.focus_state.set_focus(Some(next));
     }
 
-    /// Move focus to the previous visible option, wrapping if needed.
+    /// Move focus to the previous visible option (in ranked order), wrapping.
     pub fn focus_prev_visible(&mut self) {
         let visible = self.visible_indices();
         if visible.is_empty() {
             self.focus_state.set_focus(None);
             return;
         }
-        let current = self.focus_state.recent_focus();
-        let prev = match current {
-            Some(curr) => visible
-                .iter()
-                .copied()
-                .rev()
-                .find(|&i| i < curr)
-                .unwrap_or_else(|| *visible.last().unwrap()),
-            None => *visible.last().unwrap(),
+        let last = *visible.last().unwrap();
+        let prev = match self.focus_state.recent_focus() {
+            Some(curr) => match visible.iter().position(|&i| i == curr) {
+                Some(0) => last,
+                Some(pos) => visible[pos - 1],
+                None => last,
+            },
+            None => last,
         };
         self.focus_state.set_focus(Some(prev));
     }

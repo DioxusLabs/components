@@ -4,7 +4,7 @@ use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 
 use super::super::context::{
-    ComboboxContentContext, ComboboxContext, ComboboxOptionContext, OptionState, RcPartialEqValue,
+    ComboboxContext, ComboboxOptionContext, OptionState, RcPartialEqValue,
 };
 use crate::{use_effect, use_effect_cleanup, use_id_or, use_unique_id};
 
@@ -47,7 +47,10 @@ pub struct ComboboxOptionProps<T: Clone + PartialEq + 'static> {
 
 /// # ComboboxOption
 ///
-/// An individual selectable option inside a [`ComboboxList`].
+/// An individual selectable option inside a [`ComboboxList`]. Registers itself
+/// with the parent combobox; the actual `<div role="option">` is emitted by
+/// [`ComboboxList`](super::list::ComboboxList) in relevance-ranked order so
+/// DOM order matches what sighted users see.
 ///
 /// ## Value vs text_value
 ///
@@ -82,6 +85,82 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
     let mut ctx: ComboboxContext = use_context();
     let disabled_signal = props.disabled;
 
+    let focused = move || ctx.focus_state.is_focused(index());
+    let disabled = move || ctx.disabled.cloned() || props.disabled.cloned();
+    let selected = use_memo(move || {
+        ctx.value.read().as_ref().and_then(|v| v.as_ref::<T>()) == Some(&*props.value.read())
+    });
+
+    let mut did_drag = use_signal(|| false);
+
+    let aria_label = props.aria_label.clone();
+    let aria_roledescription = props.aria_roledescription.clone();
+    let attrs = props.attributes;
+    let children_element = props.children;
+    let value_signal = props.value;
+
+    // Stable Callback handle; `use_callback` swaps the inner closure on every
+    // render so it always captures the freshest props. `ComboboxList` calls
+    // this in relevance-ranked order to render the option in the DOM.
+    let render = use_callback(move |_: ()| -> Element {
+        let attrs = attrs.clone();
+        let children = children_element.clone();
+        let aria_label = aria_label.clone();
+        let aria_roledescription = aria_roledescription.clone();
+
+        rsx! {
+            ProvideOptionContext { selected,
+                div {
+                    role: "option",
+                    id,
+                    tabindex: "-1",
+
+                    aria_selected: selected(),
+                    aria_disabled: disabled(),
+                    aria_label,
+                    aria_roledescription,
+
+                    "data-highlighted": focused(),
+                    "data-disabled": disabled(),
+                    "data-selected": selected(),
+
+                    onmouseenter: move |_| {
+                        if !disabled() {
+                            ctx.focus_state.set_focus(Some(index()));
+                        }
+                    },
+                    onpointerdown: move |event: PointerEvent| {
+                        if !disabled()
+                            && &event.pointer_type() == "mouse"
+                            && event.trigger_button() == Some(MouseButton::Primary)
+                        {
+                            ctx.set_value.call(Some(RcPartialEqValue::new(value_signal.cloned())));
+                            ctx.open.set(false);
+                            ctx.query.set(String::new());
+                            event.prevent_default();
+                        }
+                    },
+                    ontouchstart: move |_| {
+                        did_drag.set(false);
+                    },
+                    ontouchend: move |_| {
+                        if !disabled() && !did_drag() {
+                            ctx.set_value.call(Some(RcPartialEqValue::new(value_signal.cloned())));
+                            ctx.open.set(false);
+                            ctx.query.set(String::new());
+                        }
+                    },
+                    ontouchmove: move |_| {
+                        did_drag.set(true);
+                    },
+
+                    ..attrs,
+                    {children}
+                }
+            }
+        }
+    });
+
     use_effect(move || {
         let option_state = OptionState {
             tab_index: index(),
@@ -89,6 +168,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
             text_value: text_value.cloned(),
             id: id(),
             disabled: disabled_signal.cloned(),
+            render,
         };
         ctx.options.write().push(option_state);
     });
@@ -97,80 +177,20 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
         ctx.options.write().retain(|opt| opt.id != *id.read());
     });
 
-    let focused = move || ctx.focus_state.is_focused(index());
-    let disabled = move || ctx.disabled.cloned() || props.disabled.cloned();
-    let selected = use_memo(move || {
-        ctx.value.read().as_ref().and_then(|v| v.as_ref::<T>()) == Some(&*props.value.read())
-    });
-    let visible = use_memo(move || {
-        let options = ctx.options.read();
-        options
-            .iter()
-            .find(|o| o.tab_index == index())
-            .map(|o| ctx.option_matches(o))
-            .unwrap_or(true)
-    });
+    // No visible markup — the list emits us via `render` in ranked order.
+    rsx! {}
+}
 
-    let mut did_drag = use_signal(|| false);
-
+/// Tiny wrapper that provides [`ComboboxOptionContext`] to its children so
+/// [`ComboboxItemIndicator`] can read the option's selected state. Used
+/// internally by the option's render callback. Takes `Memo<bool>` (concrete
+/// type) to avoid the `SuperInto` ambiguity introduced by `dioxus-stores`.
+#[component]
+fn ProvideOptionContext(selected: Memo<bool>, children: Element) -> Element {
     use_context_provider(|| ComboboxOptionContext {
         selected: selected.into(),
     });
-
-    let render = use_context::<ComboboxContentContext>().render;
-
-    rsx! {
-        if render() && visible() {
-            div {
-                role: "option",
-                id,
-                tabindex: "-1",
-
-                aria_selected: selected(),
-                aria_disabled: disabled(),
-                aria_label: props.aria_label.clone(),
-                aria_roledescription: props.aria_roledescription.clone(),
-
-                "data-highlighted": focused(),
-                "data-disabled": disabled(),
-                "data-selected": selected(),
-
-                onmouseenter: move |_| {
-                    if !disabled() {
-                        ctx.focus_state.set_focus(Some(index()));
-                    }
-                },
-                onpointerdown: move |event| {
-                    if !disabled()
-                        && &event.pointer_type() == "mouse"
-                        && event.trigger_button() == Some(MouseButton::Primary)
-                    {
-                        ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
-                        ctx.open.set(false);
-                        ctx.query.set(String::new());
-                        // Prevent the input from losing focus before click registers.
-                        event.prevent_default();
-                    }
-                },
-                ontouchstart: move |_| {
-                    did_drag.set(false);
-                },
-                ontouchend: move |_| {
-                    if !disabled() && !did_drag() {
-                        ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
-                        ctx.open.set(false);
-                        ctx.query.set(String::new());
-                    }
-                },
-                ontouchmove: move |_| {
-                    did_drag.set(true);
-                },
-
-                ..props.attributes,
-                {props.children}
-            }
-        }
-    }
+    rsx! { {children} }
 }
 
 /// Props for [`ComboboxItemIndicator`].
