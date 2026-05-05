@@ -8,7 +8,9 @@
 //!
 //! ## Parts
 //!
-//! - [`Combobox`] — root container, state owner.
+//! - [`Combobox`] — single-select root container, state owner.
+//! - [`ComboboxMulti`] — multi-select variant. Toggling an option keeps the
+//!   popup open; the listbox advertises `aria-multiselectable="true"`.
 //! - [`ComboboxInput`] — the input that opens the popup and filters options.
 //! - [`ComboboxContent`] — the popup container.
 //! - [`ComboboxList`] — `role="listbox"` container for options.
@@ -54,7 +56,8 @@ pub use components::{
     Combobox, ComboboxContent, ComboboxContentProps, ComboboxEmpty, ComboboxEmptyProps,
     ComboboxGroup, ComboboxGroupLabel, ComboboxGroupLabelProps, ComboboxGroupProps, ComboboxInput,
     ComboboxInputProps, ComboboxItemIndicator, ComboboxItemIndicatorProps, ComboboxList,
-    ComboboxListProps, ComboboxOption, ComboboxOptionProps, ComboboxProps,
+    ComboboxListProps, ComboboxMulti, ComboboxMultiProps, ComboboxOption, ComboboxOptionProps,
+    ComboboxProps,
 };
 
 pub use context::default_combobox_filter;

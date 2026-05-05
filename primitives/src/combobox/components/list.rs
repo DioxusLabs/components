@@ -27,10 +27,10 @@ pub struct ComboboxListProps {
 /// [`ComboboxContent`](super::content::ComboboxContent).
 ///
 /// `ComboboxOption` no longer renders its own DOM. Instead, options register
-/// themselves with the parent combobox and this list emits each visible
-/// option's `<div role="option">` in relevance-ranked order. That way the DOM
-/// order matches what sighted users see, so screen-reader exploration mode
-/// (NVDA browse, JAWS list, VoiceOver rotor) walks the same sequence.
+/// themselves with the parent combobox and this list emits each visible root
+/// option's `<div role="option">` in relevance-ranked order. Grouped options
+/// are emitted by their [`ComboboxGroup`](super::group::ComboboxGroup) so they
+/// remain inside their `role="group"` containers.
 #[component]
 pub fn ComboboxList(props: ComboboxListProps) -> Element {
     let mut ctx = use_context::<ComboboxContext>();
@@ -48,13 +48,14 @@ pub fn ComboboxList(props: ComboboxListProps) -> Element {
         return rsx! { {props.children} };
     }
 
-    let visible_renders = ctx.visible_renders();
+    let visible_renders = ctx.root_visible_renders();
 
     rsx! {
         div {
             id,
             role: "listbox",
             tabindex: "-1",
+            aria_multiselectable: ctx.multi,
             ..props.attributes,
             {props.children}
             for render in visible_renders {

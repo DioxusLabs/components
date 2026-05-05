@@ -33,19 +33,32 @@ pub fn ComboboxGroup(props: ComboboxGroupProps) -> Element {
     let ctx = use_context::<ComboboxContext>();
     let disabled = ctx.disabled.cloned() || props.disabled.cloned();
 
+    let id = use_unique_id();
+    let id = use_id_or(id, props.id);
+
+    let visible = use_memo(move || ctx.group_has_visible_options(&id()));
     let labeled_by = use_signal(|| None);
-    use_context_provider(|| ComboboxGroupContext { labeled_by });
+    use_context_provider(|| ComboboxGroupContext {
+        id,
+        labeled_by,
+        visible,
+    });
 
     let render = use_context::<ComboboxContentContext>().render;
+    let group_renders = ctx.group_visible_renders(&id());
 
     rsx! {
-        if render() {
+        if render() && visible() {
             div {
+                id,
                 role: "group",
                 aria_disabled: disabled,
                 aria_labelledby: labeled_by,
                 ..props.attributes,
                 {props.children}
+                for render in group_renders {
+                    {render.call(())}
+                }
             }
         } else {
             {props.children}
@@ -83,13 +96,15 @@ pub fn ComboboxGroupLabel(props: ComboboxGroupLabelProps) -> Element {
 
     let render = use_context::<ComboboxContentContext>().render;
 
+    if !render() || !(ctx.visible)() {
+        return rsx! {};
+    }
+
     rsx! {
-        if render() {
-            div {
-                id,
-                ..props.attributes,
-                {props.children}
-            }
+        div {
+            id,
+            ..props.attributes,
+            {props.children}
         }
     }
 }

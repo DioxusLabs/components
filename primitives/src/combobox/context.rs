@@ -54,6 +54,8 @@ pub(super) struct OptionState {
     pub id: String,
     /// Whether the option is disabled.
     pub disabled: bool,
+    /// ID of the group that owns this option, if any.
+    pub group_id: Option<String>,
     /// Stable callback that returns the option's rendered `<div role="option">`.
     /// `ComboboxList` calls this in relevance-ranked order so that DOM order
     /// matches visual order — keeping screen-reader exploration consistent
@@ -71,6 +73,28 @@ impl PartialEq for OptionState {
             && self.text_value == other.text_value
             && self.id == other.id
             && self.disabled == other.disabled
+            && self.group_id == other.group_id
+    }
+}
+
+/// A filtered option ready to render.
+#[derive(Clone)]
+pub(super) struct VisibleOptionState {
+    /// Order of the option as it was registered.
+    pub tab_index: usize,
+    /// Whether the option is disabled.
+    pub disabled: bool,
+    /// ID of the group that owns this option, if any.
+    pub group_id: Option<String>,
+    /// Stable callback that returns the option's rendered `<div role="option">`.
+    pub render: Callback<(), Element>,
+}
+
+impl PartialEq for VisibleOptionState {
+    fn eq(&self, other: &Self) -> bool {
+        self.tab_index == other.tab_index
+            && self.disabled == other.disabled
+            && self.group_id == other.group_id
     }
 }
 
@@ -127,10 +151,15 @@ pub(super) struct ComboboxContext {
     pub open: Signal<bool>,
     /// Current search/filter query.
     pub query: Signal<String>,
-    /// Current value.
-    pub value: Memo<Option<RcPartialEqValue>>,
-    /// Set the value callback.
+    /// Currently selected values. Single-select stores 0 or 1; multi-select
+    /// stores any number, in user-toggle order.
+    pub values: Memo<Vec<RcPartialEqValue>>,
+    /// Toggle/replace a value. In single mode replaces the selection (or
+    /// clears it when called with `None`); in multi mode toggles a value's
+    /// membership in `values` (`None` is a no-op).
     pub set_value: Callback<Option<RcPartialEqValue>>,
+    /// Whether this is a multi-select combobox.
+    pub multi: bool,
     /// All registered options.
     pub options: Signal<Vec<OptionState>>,
     /// The id of the listbox for ARIA wiring.
@@ -142,30 +171,75 @@ pub(super) struct ComboboxContext {
     /// Visible options in relevance-ranked order. The root `Combobox`
     /// component computes this once per `(options, query)` change so the
     /// list, empty placeholder, and keyboard navigation share a single scan.
-    pub visible: Memo<Vec<(usize, Callback<(), Element>)>>,
+    pub visible: Memo<Vec<VisibleOptionState>>,
 }
 
 impl ComboboxContext {
-    /// `text_value` of the currently selected option, if any.
+    /// `text_value`(s) for the currently selected option(s). Single mode
+    /// returns the lone selection's text; multi mode returns the joined
+    /// `text_value`s in selection order. `None` when nothing is selected.
     pub fn selected_text(&self) -> Option<String> {
-        let value = self.value.read();
-        let v = value.as_ref()?;
-        self.options
-            .read()
+        let values = self.values.read();
+        if values.is_empty() {
+            return None;
+        }
+        let options = self.options.read();
+        let parts: Vec<String> = values
             .iter()
-            .find(|opt| &opt.value == v)
-            .map(|opt| opt.text_value.clone())
+            .filter_map(|v| {
+                options
+                    .iter()
+                    .find(|opt| &opt.value == v)
+                    .map(|opt| opt.text_value.clone())
+            })
+            .collect();
+        if parts.is_empty() {
+            None
+        } else {
+            Some(parts.join(", "))
+        }
+    }
+
+    /// Whether the given value is currently selected.
+    pub fn is_selected(&self, value: &RcPartialEqValue) -> bool {
+        self.values.read().iter().any(|v| v == value)
     }
 
     /// Tab indices of visible options in ranked order.
     pub fn visible_indices(&self) -> Vec<usize> {
-        self.visible.read().iter().map(|(t, _)| *t).collect()
+        self.visible
+            .read()
+            .iter()
+            .filter_map(|option| (!option.disabled).then_some(option.tab_index))
+            .collect()
     }
 
-    /// Render callbacks of visible options in ranked order. `ComboboxList`
-    /// calls these directly to emit `<div role="option">` markup.
-    pub fn visible_renders(&self) -> Vec<Callback<(), Element>> {
-        self.visible.read().iter().map(|(_, r)| *r).collect()
+    /// Render callbacks of visible root options in ranked order.
+    pub fn root_visible_renders(&self) -> Vec<Callback<(), Element>> {
+        self.visible
+            .read()
+            .iter()
+            .filter(|option| option.group_id.is_none())
+            .map(|option| option.render)
+            .collect()
+    }
+
+    /// Render callbacks of visible options in a group in ranked order.
+    pub fn group_visible_renders(&self, group_id: &str) -> Vec<Callback<(), Element>> {
+        self.visible
+            .read()
+            .iter()
+            .filter(|option| option.group_id.as_deref() == Some(group_id))
+            .map(|option| option.render)
+            .collect()
+    }
+
+    /// Whether a group has any visible options.
+    pub fn group_has_visible_options(&self, group_id: &str) -> bool {
+        self.visible
+            .read()
+            .iter()
+            .any(|option| option.group_id.as_deref() == Some(group_id))
     }
 
     /// Whether at least one option is visible.
@@ -173,16 +247,42 @@ impl ComboboxContext {
         !self.visible.read().is_empty()
     }
 
-    /// Move focus to the next visible option (in ranked order), wrapping.
+    /// Whether an enabled option is still in the visible set.
+    pub fn is_visible_focusable(&self, tab_index: usize) -> bool {
+        self.visible
+            .read()
+            .iter()
+            .any(|option| option.tab_index == tab_index && !option.disabled)
+    }
+
+    /// ID of the focused option, only when it is currently visible and enabled.
+    pub fn focused_visible_option_id(&self) -> Option<String> {
+        let idx = self.focus_state.current_focus()?;
+        if !self.is_visible_focusable(idx) {
+            return None;
+        }
+        self.options
+            .read()
+            .iter()
+            .find(|opt| opt.tab_index == idx)
+            .map(|opt| opt.id.clone())
+    }
+
+    /// Move focus to the next visible enabled option in ranked order.
     pub fn focus_next_visible(&mut self) {
         let indices = self.visible_indices();
         if indices.is_empty() {
             self.focus_state.set_focus(None);
             return;
         }
+        let roving_loop = self.focus_state.roving_loop.cloned();
         let next = match self.focus_state.recent_focus() {
             Some(curr) => match indices.iter().position(|&i| i == curr) {
-                Some(pos) => indices.get(pos + 1).copied().unwrap_or(indices[0]),
+                Some(pos) => indices
+                    .get(pos + 1)
+                    .copied()
+                    .or_else(|| roving_loop.then_some(indices[0]))
+                    .unwrap_or(curr),
                 None => indices[0],
             },
             None => indices[0],
@@ -190,7 +290,7 @@ impl ComboboxContext {
         self.focus_state.set_focus(Some(next));
     }
 
-    /// Move focus to the previous visible option (in ranked order), wrapping.
+    /// Move focus to the previous visible enabled option in ranked order.
     pub fn focus_prev_visible(&mut self) {
         let indices = self.visible_indices();
         if indices.is_empty() {
@@ -198,29 +298,46 @@ impl ComboboxContext {
             return;
         }
         let last = *indices.last().unwrap();
+        let roving_loop = self.focus_state.roving_loop.cloned();
         let prev = match self.focus_state.recent_focus() {
             Some(curr) => match indices.iter().position(|&i| i == curr) {
-                Some(0) => last,
+                Some(0) => {
+                    if roving_loop {
+                        last
+                    } else {
+                        curr
+                    }
+                }
                 Some(pos) => indices[pos - 1],
-                None => last,
+                None => {
+                    if roving_loop {
+                        last
+                    } else {
+                        indices[0]
+                    }
+                }
             },
-            None => last,
+            None => {
+                if roving_loop {
+                    last
+                } else {
+                    indices[0]
+                }
+            }
         };
         self.focus_state.set_focus(Some(prev));
     }
 
-    /// Move focus to the first visible option.
+    /// Move focus to the first visible enabled option.
     pub fn focus_first_visible(&mut self) {
-        if let Some(first) = self.visible.read().first().map(|(t, _)| *t) {
-            self.focus_state.set_focus(Some(first));
-        }
+        self.focus_state
+            .set_focus(self.visible_indices().first().copied());
     }
 
-    /// Move focus to the last visible option.
+    /// Move focus to the last visible enabled option.
     pub fn focus_last_visible(&mut self) {
-        if let Some(last) = self.visible.read().last().map(|(t, _)| *t) {
-            self.focus_state.set_focus(Some(last));
-        }
+        self.focus_state
+            .set_focus(self.visible_indices().last().copied());
     }
 
     /// Select the currently focused (visible) option, if any.
@@ -231,6 +348,9 @@ impl ComboboxContext {
         let Some(idx) = self.focus_state.current_focus() else {
             return;
         };
+        if !self.is_visible_focusable(idx) {
+            return;
+        }
         let value = {
             let options = self.options.read();
             options
@@ -239,16 +359,20 @@ impl ComboboxContext {
                 .map(|o| o.value.clone())
         };
         if let Some(value) = value {
-            self.commit_value(value);
+            self.select_value(value);
         }
     }
 
-    /// Commit a value: fire the change callback, close the popup, and reset
-    /// the query so reopening shows everything.
-    pub fn commit_value(&mut self, value: RcPartialEqValue) {
+    /// Select or toggle a value. In single mode this commits the value, closes
+    /// the popup, and clears the query. In multi mode it toggles the value's
+    /// membership in the selection while leaving the popup open and the query
+    /// intact, so the user can keep selecting from the filtered list.
+    pub fn select_value(&mut self, value: RcPartialEqValue) {
         self.set_value.call(Some(value));
-        self.open.set(false);
-        self.query.set(String::new());
+        if !self.multi {
+            self.open.set(false);
+            self.query.set(String::new());
+        }
     }
 }
 
@@ -267,5 +391,7 @@ pub(super) struct ComboboxContentContext {
 /// Context for combobox group components.
 #[derive(Clone, Copy)]
 pub(super) struct ComboboxGroupContext {
+    pub id: Memo<String>,
     pub labeled_by: Signal<Option<String>>,
+    pub visible: Memo<bool>,
 }

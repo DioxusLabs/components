@@ -48,12 +48,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
         if !open() {
             return None;
         }
-        let idx = ctx.focus_state.current_focus()?;
-        let options = ctx.options.read();
-        options
-            .iter()
-            .find(|opt| opt.tab_index == idx)
-            .map(|opt| opt.id.clone())
+        ctx.focused_visible_option_id()
     });
 
     let display_value = use_memo(move || {

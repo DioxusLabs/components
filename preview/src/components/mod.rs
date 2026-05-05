@@ -128,7 +128,7 @@ examples!(
     checkbox,
     collapsible,
     color_picker,
-    combobox,
+    combobox[multi],
     context_menu,
     card,
     date_picker[internationalized, range, multi_month, unavailable_dates],

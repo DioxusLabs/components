@@ -83,12 +83,11 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
     });
 
     let mut ctx: ComboboxContext = use_context();
+    let group_ctx: Option<super::super::context::ComboboxGroupContext> = try_use_context();
 
     let focused = move || ctx.focus_state.is_focused(index());
     let disabled = move || ctx.disabled.cloned() || props.disabled.cloned();
-    let selected = use_memo(move || {
-        ctx.value.read().as_ref().and_then(|v| v.as_ref::<T>()) == Some(&*props.value.read())
-    });
+    let selected = use_memo(move || ctx.is_selected(&RcPartialEqValue::new(props.value.cloned())));
 
     let mut did_drag = use_signal(|| false);
 
@@ -132,7 +131,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
                             && &event.pointer_type() == "mouse"
                             && event.trigger_button() == Some(MouseButton::Primary)
                         {
-                            ctx.commit_value(RcPartialEqValue::new(value.cloned()));
+                            ctx.select_value(RcPartialEqValue::new(value.cloned()));
                             event.prevent_default();
                         }
                     },
@@ -141,7 +140,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
                     },
                     ontouchend: move |_| {
                         if !disabled() && !did_drag() {
-                            ctx.commit_value(RcPartialEqValue::new(value.cloned()));
+                            ctx.select_value(RcPartialEqValue::new(value.cloned()));
                         }
                     },
                     ontouchmove: move |_| {
@@ -163,6 +162,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
             text_value: text_value.cloned(),
             id: option_id.clone(),
             disabled: props.disabled.cloned(),
+            group_id: group_ctx.map(|group| (group.id)()),
             render,
         };
         if ctx.options.peek().iter().any(|opt| opt == &option_state) {
