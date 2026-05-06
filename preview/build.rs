@@ -93,15 +93,14 @@ fn render_code_block_html(kind: &pulldown_cmark::CodeBlockKind<'_>, source: &str
     let highlighted: dioxus_code::advanced::HighlightedSource =
         dioxus_code::SourceCode::new(language, source).into();
 
-    let mut light_code = String::new();
-    push_highlighted_code(&mut light_code, &highlighted, "dxc-github-light");
+    let mut code = String::new();
+    push_highlighted_code(
+        &mut code,
+        &highlighted,
+        "dxc-system dxc-system-light-github-light dxc-system-dark-github-dark",
+    );
 
-    let mut dark_code = String::new();
-    push_highlighted_code(&mut dark_code, &highlighted, "dxc-github-dark");
-
-    format!(
-        r#"<div class="dx-preview-code-theme dx-preview-code-theme-light">{light_code}</div><div class="dx-preview-code-theme dx-preview-code-theme-dark">{dark_code}</div>"#
-    )
+    format!(r#"<div class="dx-preview-code-theme">{code}</div>"#)
 }
 
 fn push_highlighted_code(

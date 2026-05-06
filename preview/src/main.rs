@@ -3,7 +3,7 @@ use core::panic;
 use crate::components::{separator::Separator, tabs::component::*};
 use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
-use dioxus_code::{advanced::HighlightedSource, Code, Theme};
+use dioxus_code::{advanced::HighlightedSource, Code, CodeTheme, Theme};
 use dioxus_i18n::prelude::*;
 use dioxus_primitives::icon::Icon;
 
@@ -221,8 +221,9 @@ fn NavigationLayout() -> Element {
             href: asset!("/assets/dx-components-theme.css"),
         }
         document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
-        dioxus_code::advanced::CodeThemeStyles { theme: Theme::GITHUB_LIGHT.into() }
-        dioxus_code::advanced::CodeThemeStyles { theme: Theme::GITHUB_DARK.into() }
+        dioxus_code::advanced::CodeThemeStyles {
+            theme: CodeTheme::system(Theme::GITHUB_LIGHT, Theme::GITHUB_DARK)
+        }
         Navbar {}
         Outlet::<Route> {}
     }
@@ -334,17 +335,10 @@ fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
 fn PreviewCode(source: HighlightedSource) -> Element {
     rsx! {
         div {
-            class: "dx-preview-code-theme dx-preview-code-theme-light",
-            Code {
-                src: source.clone(),
-                theme: Theme::GITHUB_LIGHT,
-            }
-        }
-        div {
-            class: "dx-preview-code-theme dx-preview-code-theme-dark",
+            class: "dx-preview-code-theme",
             Code {
                 src: source,
-                theme: Theme::GITHUB_DARK,
+                theme: CodeTheme::system(Theme::GITHUB_LIGHT, Theme::GITHUB_DARK),
             }
         }
     }

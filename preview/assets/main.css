@@ -132,14 +132,6 @@ body {
   box-sizing: border-box;
 }
 
-.dx-preview-code-theme-light {
-  display: var(--dark, none) var(--light, block);
-}
-
-.dx-preview-code-theme-dark {
-  display: var(--dark, block) var(--light, none);
-}
-
 .dx-code-block[data-collapsed="true"] {
   height: 20em;
   backdrop-filter: blur(1px);
