@@ -1,4 +1,4 @@
-//! ComboboxList component — the listbox container.
+//! ComboboxList component.
 
 use dioxus::prelude::*;
 
@@ -16,22 +16,12 @@ pub struct ComboboxListProps {
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 
-    /// Children — typically [`ComboboxOption`](super::option::ComboboxOption)s,
-    /// [`ComboboxGroup`](super::group::ComboboxGroup)s, and an optional
-    /// [`ComboboxEmpty`](super::empty::ComboboxEmpty).
+    /// Children, typically [`ComboboxOption`](super::option::ComboboxOption)s
+    /// and an optional [`ComboboxEmpty`](super::empty::ComboboxEmpty).
     pub children: Element,
 }
 
-/// # ComboboxList
-///
-/// The listbox that contains the visible options. Must be used inside
-/// [`ComboboxContent`](super::content::ComboboxContent).
-///
-/// `ComboboxOption` no longer renders its own DOM. Instead, options register
-/// themselves with the parent combobox and this list emits each visible root
-/// option's `<div role="option">` in relevance-ranked order. Grouped options
-/// are emitted by their [`ComboboxGroup`](super::group::ComboboxGroup) so they
-/// remain inside their `role="group"` containers.
+/// Listbox that contains the visible options.
 #[component]
 pub fn ComboboxList(props: ComboboxListProps) -> Element {
     let mut ctx = use_context::<ComboboxContext>();
@@ -43,25 +33,17 @@ pub fn ComboboxList(props: ComboboxListProps) -> Element {
         ctx.list_id.set(Some(id()));
     });
 
-    if !render() {
-        // Mount children so options can still register themselves with the
-        // context (the trigger uses that to look up the selected label).
-        return rsx! { {props.children} };
-    }
-
-    let visible_renders = ctx.root_visible_renders();
-
     rsx! {
-        div {
-            id,
-            role: "listbox",
-            tabindex: "-1",
-            aria_multiselectable: ctx.multi,
-            ..props.attributes,
-            {props.children}
-            for render in visible_renders {
-                {render.call(())}
+        if render() {
+            div {
+                id,
+                role: "listbox",
+                tabindex: "-1",
+                ..props.attributes,
+                {props.children}
             }
+        } else {
+            {props.children}
         }
     }
 }

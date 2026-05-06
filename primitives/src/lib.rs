@@ -42,6 +42,7 @@ pub mod progress;
 pub mod radio_group;
 pub mod scroll_area;
 pub mod select;
+mod selection;
 pub mod separator;
 pub mod slider;
 pub mod switch;

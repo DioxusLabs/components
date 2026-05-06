@@ -1,5 +1,4 @@
-//! ComboboxInput — the single `<input>` that doubles as the combobox trigger
-//! and the search field.
+//! Combobox input component.
 
 use dioxus::prelude::*;
 
@@ -9,8 +8,7 @@ use crate::{use_id_or, use_unique_id};
 /// Props for [`ComboboxInput`].
 #[derive(Props, Clone, PartialEq)]
 pub struct ComboboxInputProps {
-    /// Placeholder shown when the input is empty (no selected value and no
-    /// query in flight).
+    /// Placeholder shown when the input is empty.
     #[props(default)]
     pub placeholder: ReadSignal<String>,
 
@@ -23,17 +21,7 @@ pub struct ComboboxInputProps {
     pub attributes: Vec<Attribute>,
 }
 
-/// # ComboboxInput
-///
-/// The text input that doubles as the combobox trigger. Following WAI-ARIA
-/// 1.2's combobox pattern, this is the only element with `role="combobox"`:
-/// it owns `aria-expanded`, `aria-controls`, and `aria-activedescendant`,
-/// and the listbox lives in a separate popup that DOM focus never moves into.
-///
-/// - Closed: shows the selected option's text (or the placeholder).
-/// - Open: shows the user's typed query.
-/// - Click, typing, and arrow keys open the popup; Enter selects; Escape and
-///   blur close.
+/// The text input that opens and filters the popup list.
 #[component]
 pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
     let mut ctx = use_context::<ComboboxContext>();
@@ -144,8 +132,6 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
             },
             onkeydown,
             onblur: move |_| {
-                // The popup's onpointerdown prevents focus loss for in-popup
-                // clicks, so a real blur means focus moved outside.
                 if open() {
                     open.set(false);
                 }

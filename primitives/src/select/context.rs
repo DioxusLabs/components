@@ -5,46 +5,10 @@ use dioxus::prelude::*;
 use dioxus_core::Task;
 use dioxus_sdk_time::sleep;
 
-use std::{any::Any, rc::Rc, time::Duration};
+use std::time::Duration;
 
 use super::text_search::AdaptiveKeyboard;
-
-trait DynPartialEq: Any {
-    fn eq(&self, other: &dyn Any) -> bool;
-}
-
-impl<T: PartialEq + 'static> DynPartialEq for T {
-    fn eq(&self, other: &dyn Any) -> bool {
-        other.downcast_ref::<T>() == Some(self)
-    }
-}
-
-#[derive(Clone)]
-pub(crate) struct RcPartialEqValue {
-    value: Rc<dyn DynPartialEq>,
-}
-
-impl RcPartialEqValue {
-    pub fn new<T: PartialEq + 'static>(value: T) -> Self {
-        Self {
-            value: Rc::new(value),
-        }
-    }
-
-    pub fn as_any(&self) -> &dyn Any {
-        (&*self.value) as &dyn Any
-    }
-
-    pub fn as_ref<T: PartialEq + 'static>(&self) -> Option<&T> {
-        self.as_any().downcast_ref::<T>()
-    }
-}
-
-impl PartialEq for RcPartialEqValue {
-    fn eq(&self, other: &Self) -> bool {
-        self.value.eq(&*other.value)
-    }
-}
+pub(crate) use crate::selection::{OptionState, RcPartialEqValue};
 
 /// Main context for the select component containing all shared state
 #[derive(Clone, Copy)]
@@ -148,21 +112,6 @@ impl SelectContext {
             self.focus_state.set_focus(Some(best_match_index));
         }
     }
-}
-
-/// State for individual select options
-#[derive(PartialEq)]
-pub(super) struct OptionState {
-    /// Tab index for focus management
-    pub tab_index: usize,
-    /// The value of the option
-    pub value: RcPartialEqValue,
-    /// Display text for the option
-    pub text_value: String,
-    /// Unique ID for the option
-    pub id: String,
-    /// Whether the option is disabled
-    pub disabled: bool,
 }
 
 /// Context for select option components to know if they're selected

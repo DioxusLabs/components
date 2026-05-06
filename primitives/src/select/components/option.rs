@@ -3,6 +3,7 @@
 use crate::{
     focus::use_focus_controlled_item_disabled,
     select::context::{RcPartialEqValue, SelectListContext},
+    selection::{option_text_value, remove_option, sync_option},
     use_effect, use_effect_cleanup, use_id_or, use_unique_id,
 };
 use dioxus::html::input_data::MouseButton;
@@ -108,23 +109,8 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
     let index = props.index;
     let value = props.value;
-    let text_value = use_memo(move || match (props.text_value)() {
-        Some(text) => text,
-        None => {
-            let value = value.read();
-            let as_any: &dyn std::any::Any = &*value;
-            as_any
-                .downcast_ref::<String>()
-                .cloned()
-                .or_else(|| as_any.downcast_ref::<&str>().map(|s| s.to_string()))
-                .unwrap_or_else(|| {
-                    tracing::warn!(
-                        "SelectOption with non-string types requires text_value to be set"
-                    );
-                    String::new()
-                })
-        }
-    });
+    let text_value =
+        use_memo(move || option_text_value(&*value.read(), (props.text_value)(), "SelectOption"));
 
     let mut ctx: SelectContext = use_context();
     let disabled = {
@@ -142,19 +128,11 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
             id: option_id.clone(),
             disabled: disabled(),
         };
-        if ctx.options.peek().iter().any(|opt| opt == &option_state) {
-            return;
-        }
-        let mut options = ctx.options.write();
-        if let Some(option) = options.iter_mut().find(|opt| opt.id == option_id) {
-            *option = option_state;
-        } else {
-            options.push(option_state);
-        }
+        sync_option(ctx.options, option_state);
     });
 
     use_effect_cleanup(move || {
-        ctx.options.write().retain(|opt| opt.id != *id.read());
+        remove_option(ctx.options, id.read().as_str());
     });
 
     let onmounted = use_focus_controlled_item_disabled(props.index, disabled);

@@ -1,4 +1,4 @@
-//! ComboboxEmpty — placeholder shown when no options match the query.
+//! Combobox empty state component.
 
 use dioxus::prelude::*;
 
@@ -15,10 +15,7 @@ pub struct ComboboxEmptyProps {
     pub children: Element,
 }
 
-/// # ComboboxEmpty
-///
-/// Renders its children only when the current query produces no visible
-/// options. Place it inside a [`ComboboxList`](super::list::ComboboxList).
+/// Renders when no option matches the current query.
 #[component]
 pub fn ComboboxEmpty(props: ComboboxEmptyProps) -> Element {
     let ctx = use_context::<ComboboxContext>();

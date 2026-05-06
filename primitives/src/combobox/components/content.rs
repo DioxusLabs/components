@@ -1,4 +1,4 @@
-//! ComboboxContent component (the popup container).
+//! Combobox popup component.
 
 use dioxus::prelude::*;
 
@@ -20,14 +20,7 @@ pub struct ComboboxContentProps {
     pub children: Element,
 }
 
-/// # ComboboxContent
-///
-/// The popup container that wraps the [`ComboboxList`](super::list::ComboboxList).
-/// Renders only when the combobox is open and animates open/closed via the
-/// `data-state` attribute. `ComboboxInput` lives outside this — it's the
-/// persistent trigger that owns keyboard focus.
-///
-/// Must be used inside a [`Combobox`](super::combobox::Combobox).
+/// Popup container for the combobox list.
 #[component]
 pub fn ComboboxContent(props: ComboboxContentProps) -> Element {
     let ctx = use_context::<ComboboxContext>();
@@ -49,16 +42,12 @@ pub fn ComboboxContent(props: ComboboxContentProps) -> Element {
                 id,
                 "data-state": if open() { "open" } else { "closed" },
                 onpointerdown: move |event| {
-                    // Keep focus on the search input during clicks inside the popup
-                    // so option clicks register before the input blurs.
                     event.prevent_default();
                 },
                 ..props.attributes,
                 {props.children}
             }
         } else {
-            // Still render children when closed so options/groups can register
-            // themselves with the context, but they won't render markup.
             {props.children}
         }
     }

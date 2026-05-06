@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_primitives::combobox::{
-    self, ComboboxContentProps, ComboboxEmptyProps, ComboboxGroupLabelProps, ComboboxGroupProps,
-    ComboboxInputProps, ComboboxListProps, ComboboxMultiProps, ComboboxOptionProps, ComboboxProps,
+    self, ComboboxContentProps, ComboboxEmptyProps, ComboboxInputProps, ComboboxListProps,
+    ComboboxOptionProps, ComboboxProps,
 };
 use dioxus_primitives::icon;
 
@@ -15,26 +15,6 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
             default_value: props.default_value,
             on_value_change: props.on_value_change,
             disabled: props.disabled,
-            name: props.name,
-            roving_loop: props.roving_loop,
-            filter: props.filter,
-            attributes: props.attributes,
-            {props.children}
-        }
-    }
-}
-
-#[component]
-pub fn ComboboxMulti<T: Clone + PartialEq + 'static>(props: ComboboxMultiProps<T>) -> Element {
-    rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
-        combobox::ComboboxMulti {
-            class: "dx-combobox",
-            values: props.values,
-            default_values: props.default_values,
-            on_values_change: props.on_values_change,
-            disabled: props.disabled,
-            name: props.name,
             roving_loop: props.roving_loop,
             filter: props.filter,
             attributes: props.attributes,
@@ -91,31 +71,8 @@ pub fn ComboboxList(props: ComboboxListProps) -> Element {
 #[component]
 pub fn ComboboxEmpty(props: ComboboxEmptyProps) -> Element {
     rsx! {
-        combobox::ComboboxEmpty { class: "dx-combobox-empty", attributes: props.attributes,
-            {props.children}
-        }
-    }
-}
-
-#[component]
-pub fn ComboboxGroup(props: ComboboxGroupProps) -> Element {
-    rsx! {
-        combobox::ComboboxGroup {
-            class: "dx-combobox-group",
-            disabled: props.disabled,
-            id: props.id,
-            attributes: props.attributes,
-            {props.children}
-        }
-    }
-}
-
-#[component]
-pub fn ComboboxGroupLabel(props: ComboboxGroupLabelProps) -> Element {
-    rsx! {
-        combobox::ComboboxGroupLabel {
-            class: "dx-combobox-group-label",
-            id: props.id,
+        combobox::ComboboxEmpty {
+            class: "dx-combobox-empty",
             attributes: props.attributes,
             {props.children}
         }
@@ -142,15 +99,14 @@ pub fn ComboboxOption<T: Clone + PartialEq + 'static>(props: ComboboxOptionProps
 
 #[component]
 pub fn ComboboxItemIndicator() -> Element {
-    // Always render the check; the option's data-selected attribute drives
-    // opacity in CSS so unselected rows reserve the same width (matching
-    // shadcn's `Check className={cn("ml-auto", value === ... ? "opacity-100" : "opacity-0")}`).
     rsx! {
-        icon::Icon {
-            class: "dx-combobox-check-icon",
-            width: "16px",
-            height: "16px",
-            path { d: "M20 6 9 17l-5-5" }
+        combobox::ComboboxItemIndicator {
+            icon::Icon {
+                class: "dx-combobox-check-icon",
+                width: "16px",
+                height: "16px",
+                path { d: "M20 6 9 17l-5-5" }
+            }
         }
     }
 }
