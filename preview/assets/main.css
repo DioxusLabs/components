@@ -113,6 +113,19 @@ body {
 }
 
 /* Code block styles */
+/* stylelint-disable-next-line selector-class-pattern */
+.dx-preview-code-theme .dxc {
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  tab-size: 4;
+}
+
 .dx-code-block {
   overflow: hidden;
   width: 100%;
