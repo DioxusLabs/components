@@ -30,7 +30,8 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
     let id = use_id_or(id, props.id);
 
     let open = ctx.selectable.open;
-    let mut query = ctx.query;
+    let query = ctx.query;
+    let set_query = ctx.set_query;
 
     let active_descendant = use_memo(move || {
         if !open() {
@@ -50,7 +51,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
     let onkeydown = move |event: KeyboardEvent| match event.key() {
         Key::ArrowDown => {
             if !open() {
-                query.set(String::new());
+                set_query.call(String::new());
                 ctx.set_open(true);
             }
             ctx.focus_next_visible();
@@ -59,7 +60,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
         }
         Key::ArrowUp => {
             if !open() {
-                query.set(String::new());
+                set_query.call(String::new());
                 ctx.set_open(true);
             }
             ctx.focus_prev_visible();
@@ -110,7 +111,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
 
             onclick: move |_| {
                 if !open() {
-                    query.set(String::new());
+                    set_query.call(String::new());
                     ctx.selectable.focus_state.set_focus(None);
                     ctx.set_open(true);
                 }
@@ -128,7 +129,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
                         })
                         .unwrap_or(value)
                 };
-                query.set(next_query);
+                set_query.call(next_query);
                 if !open() {
                     ctx.set_open(true);
                 }

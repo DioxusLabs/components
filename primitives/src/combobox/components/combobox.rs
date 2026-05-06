@@ -3,7 +3,10 @@
 use dioxus::prelude::*;
 
 use super::super::context::{default_combobox_filter, ComboboxContext, RcPartialEqValue};
-use crate::selectable::{use_selectable_root, SelectionMode};
+use crate::{
+    selectable::{use_selectable_root, SelectionMode},
+    use_controlled,
+};
 
 /// Props for [`Combobox`].
 #[derive(Props, Clone, PartialEq)]
@@ -37,6 +40,18 @@ pub struct ComboboxProps<T: Clone + PartialEq + 'static = String> {
     #[props(default)]
     pub on_open_change: Callback<bool>,
 
+    /// The controlled text query used to filter options.
+    #[props(default)]
+    pub query: ReadSignal<Option<String>>,
+
+    /// The initial text query when uncontrolled.
+    #[props(default)]
+    pub default_query: ReadSignal<String>,
+
+    /// Callback fired when the text query changes.
+    #[props(default)]
+    pub on_query_change: Callback<String>,
+
     /// Whether arrow-key navigation should wrap.
     #[props(default = ReadSignal::new(Signal::new(true)))]
     pub roving_loop: ReadSignal<bool>,
@@ -61,6 +76,9 @@ fn use_combobox_root(
     open: ReadSignal<Option<bool>>,
     default_open: ReadSignal<bool>,
     on_open_change: Callback<bool>,
+    query: ReadSignal<Option<String>>,
+    default_query: ReadSignal<String>,
+    on_query_change: Callback<String>,
     filter: Callback<(String, String), bool>,
 ) -> Memo<bool> {
     let selectable = use_selectable_root(
@@ -73,12 +91,13 @@ fn use_combobox_root(
         default_open.cloned(),
         on_open_change,
     );
-    let query = use_signal(String::new);
+    let (query, set_query) = use_controlled(query, default_query.cloned(), on_query_change);
     let open = selectable.open;
 
     use_context_provider(|| ComboboxContext {
         selectable,
         query,
+        set_query,
         filter,
     });
 
@@ -116,6 +135,9 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
         props.open,
         props.default_open,
         props.on_open_change,
+        props.query,
+        props.default_query,
+        props.on_query_change,
         props.filter,
     );
 

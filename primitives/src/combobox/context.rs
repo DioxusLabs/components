@@ -10,39 +10,11 @@ pub fn default_combobox_filter(query: &str, text: &str) -> bool {
     query.is_empty() || text.to_lowercase().contains(&query)
 }
 
-fn combobox_match_rank(query: &str, text: &str) -> Option<(usize, usize, usize)> {
-    let query = query.trim().to_lowercase();
-    if query.is_empty() {
-        return Some((0, 0, 0));
-    }
-
-    let text = text.to_lowercase();
-    if text == query {
-        return Some((0, 0, text.len()));
-    }
-
-    if text.starts_with(&query) {
-        return Some((1, 0, text.len()));
-    }
-
-    let word_prefix = text.match_indices(&query).find_map(|(index, _)| {
-        text[..index]
-            .chars()
-            .last()
-            .is_some_and(|c| !c.is_alphanumeric())
-            .then_some(index)
-    });
-    if let Some(index) = word_prefix {
-        return Some((2, index, text.len()));
-    }
-
-    text.find(&query).map(|index| (3, index, text.len()))
-}
-
 #[derive(Clone, Copy)]
 pub(super) struct ComboboxContext {
     pub selectable: SelectableContext,
-    pub query: Signal<String>,
+    pub query: Memo<String>,
+    pub set_query: Callback<String>,
     pub filter: Callback<(String, String), bool>,
 }
 
@@ -85,7 +57,7 @@ impl ComboboxContext {
 
     fn visible_enabled_indices(&self) -> Vec<usize> {
         let query = self.query.cloned();
-        let mut matches: Vec<_> = self
+        let mut indices: Vec<_> = self
             .selectable
             .options
             .read()
@@ -93,24 +65,10 @@ impl ComboboxContext {
             .filter(|option| {
                 !option.disabled && self.filter.call((query.clone(), option.text_value.clone()))
             })
-            .map(|option| {
-                (
-                    combobox_match_rank(&query, &option.text_value).unwrap_or((usize::MAX, 0, 0)),
-                    option.tab_index,
-                )
-            })
+            .map(|option| option.tab_index)
             .collect();
-        matches.sort_by_key(|(rank, tab_index)| (*rank, *tab_index));
-        matches
-            .into_iter()
-            .map(|(_, tab_index)| tab_index)
-            .collect()
-    }
-
-    pub fn visible_option_order(&self, tab_index: usize) -> Option<usize> {
-        self.visible_enabled_indices()
-            .into_iter()
-            .position(|index| index == tab_index)
+        indices.sort_unstable();
+        indices
     }
 
     pub fn focus_next_visible(&mut self) {

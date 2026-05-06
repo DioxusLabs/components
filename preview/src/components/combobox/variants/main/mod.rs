@@ -3,6 +3,7 @@ use dioxus::prelude::*;
 
 #[component]
 pub fn Demo() -> Element {
+    let mut query = use_signal(String::new);
     let frameworks: &[(&str, &str)] = &[
         ("next", "Next.js"),
         ("svelte", "SvelteKit"),
@@ -15,6 +16,8 @@ pub fn Demo() -> Element {
 
     rsx! {
         Combobox::<String> {
+            query: Some(query()),
+            on_query_change: move |next| query.set(next),
             ComboboxInput {
                 placeholder: "Select framework...",
                 aria_label: "Select framework",
