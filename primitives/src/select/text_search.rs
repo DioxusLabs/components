@@ -418,7 +418,7 @@ static QWERTZ_KEYBOARD_LAYOUT: [[char; 10]; 4] = [
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::select::context::{OptionState, RcPartialEqValue};
+    use crate::selectable::{OptionState, RcPartialEqValue};
     use std::collections::HashMap;
 
     #[test]
