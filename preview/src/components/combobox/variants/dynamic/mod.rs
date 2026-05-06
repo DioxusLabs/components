@@ -27,41 +27,39 @@ pub fn Demo() -> Element {
                     placeholder: "Select framework...",
                     aria_label: "Dynamic framework",
                 }
-                ComboboxContent {
-                    ComboboxList { aria_label: "Dynamic frameworks",
-                        ComboboxEmpty { "No framework found." }
+                ComboboxList { aria_label: "Dynamic frameworks",
+                    ComboboxEmpty { "No framework found." }
+                    ComboboxOption::<String> {
+                        index: 0usize,
+                        value: "next".to_string(),
+                        text_value: "Next.js",
+                        "Next.js"
+                        ComboboxItemIndicator {}
+                    }
+                    if show_svelte() {
                         ComboboxOption::<String> {
-                            index: 0usize,
-                            value: "next".to_string(),
-                            text_value: "Next.js",
-                            "Next.js"
+                            index: 1usize,
+                            value: "svelte".to_string(),
+                            text_value: "SvelteKit",
+                            "SvelteKit"
                             ComboboxItemIndicator {}
                         }
-                        if show_svelte() {
-                            ComboboxOption::<String> {
-                                index: 1usize,
-                                value: "svelte".to_string(),
-                                text_value: "SvelteKit",
-                                "SvelteKit"
-                                ComboboxItemIndicator {}
-                            }
-                        }
-                        if show_solid() {
-                            ComboboxOption::<String> {
-                                index: 2usize,
-                                value: "solid".to_string(),
-                                text_value: "SolidStart",
-                                "SolidStart"
-                                ComboboxItemIndicator {}
-                            }
-                        }
+                    }
+                    if show_solid() {
                         ComboboxOption::<String> {
-                            index: 3usize,
-                            value: "dioxus".to_string(),
-                            text_value: "Dioxus",
-                            "Dioxus"
+                            index: 2usize,
+                            value: "solid".to_string(),
+                            text_value: "SolidStart",
+                            "SolidStart"
                             ComboboxItemIndicator {}
                         }
+                    }
+                    ComboboxOption::<String> {
+                        index: 3usize,
+                        value: "dioxus".to_string(),
+                        text_value: "Dioxus",
+                        "Dioxus"
+                        ComboboxItemIndicator {}
                     }
                 }
             }

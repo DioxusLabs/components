@@ -9,10 +9,10 @@ const input = (page: Page) =>
     page.getByRole("combobox", { name: "Select framework" });
 
 const content = (page: Page) =>
-    page.locator(".dx-combobox-content[data-state='open']");
+    page.locator(".dx-combobox-list[data-state='open']");
 
 const list = (page: Page) =>
-    page.locator(".dx-combobox-content[data-state='open'] .dx-combobox-list");
+    page.locator(".dx-combobox-list[data-state='open']");
 
 test("has no automatically detectable accessibility issues", async ({ page }) => {
     await page.goto(URL, { timeout: 20 * 60 * 1000 });
@@ -125,7 +125,7 @@ test("keeps filtered options during keyboard close animation", async ({ page }) 
 
     await page.keyboard.press("Enter");
 
-    const closingContent = page.locator(".dx-combobox-content[data-state='closed']");
+    const closingContent = page.locator(".dx-combobox-list[data-state='closed']");
     await expect(closingContent).toBeVisible();
     await expect(closingContent.getByRole("option", { name: "SvelteKit" })).toBeVisible();
     await expect(closingContent.getByRole("option")).toHaveCount(1);

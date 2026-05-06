@@ -70,7 +70,7 @@ pub struct ComboboxProps<T: Clone + PartialEq + 'static = String> {
 
 fn use_combobox_root(
     values: Memo<Vec<RcPartialEqValue>>,
-    set_value: Callback<Option<RcPartialEqValue>>,
+    set_value: Callback<RcPartialEqValue>,
     disabled: ReadSignal<bool>,
     roving_loop: ReadSignal<bool>,
     open: ReadSignal<Option<bool>>,
@@ -116,15 +116,13 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
     });
 
     let selected = use_memo(move || value().map(RcPartialEqValue::new).into_iter().collect());
-    let set_value = use_callback(move |incoming: Option<RcPartialEqValue>| {
-        let value = incoming.map(|value| {
-            value
-                .as_ref::<T>()
-                .expect("combobox and option value types must match")
-                .clone()
-        });
-        internal_value.set(value.clone());
-        on_change.call(value);
+    let set_value = use_callback(move |incoming: RcPartialEqValue| {
+        let value = incoming
+            .as_ref::<T>()
+            .expect("combobox and option value types must match")
+            .clone();
+        internal_value.set(Some(value.clone()));
+        on_change.call(Some(value));
     });
 
     let open = use_combobox_root(

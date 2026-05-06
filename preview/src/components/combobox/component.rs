@@ -1,17 +1,19 @@
 use dioxus::prelude::*;
 use dioxus_primitives::combobox::{
-    self, ComboboxContentProps, ComboboxEmptyProps, ComboboxInputProps, ComboboxListProps,
-    ComboboxOptionProps, ComboboxProps,
+    self, ComboboxEmptyProps, ComboboxInputProps, ComboboxListProps, ComboboxOptionProps,
+    ComboboxProps,
 };
-use dioxus_primitives::icon;
+use dioxus_primitives::{dioxus_attributes::attributes, icon, merge_attributes};
 
 #[component]
 pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Element {
+    let base = attributes!(div { class: "dx-combobox" });
+    let merged = merge_attributes(vec![base, props.attributes]);
+
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("../picker.css") }
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         combobox::Combobox {
-            class: "dx-combobox",
             value: props.value,
             default_value: props.default_value,
             on_value_change: props.on_value_change,
@@ -24,7 +26,7 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
             on_query_change: props.on_query_change,
             roving_loop: props.roving_loop,
             filter: props.filter,
-            attributes: props.attributes,
+            attributes: merged,
             {props.children}
         }
     }
@@ -52,24 +54,14 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
 }
 
 #[component]
-pub fn ComboboxContent(props: ComboboxContentProps) -> Element {
-    rsx! {
-        combobox::ComboboxContent {
-            class: "dx-combobox-content",
-            id: props.id,
-            attributes: props.attributes,
-            {props.children}
-        }
-    }
-}
-
-#[component]
 pub fn ComboboxList(props: ComboboxListProps) -> Element {
+    let base = attributes!(div { class: "dx-combobox-list" });
+    let merged = merge_attributes(vec![base, props.attributes]);
+
     rsx! {
         combobox::ComboboxList {
-            class: "dx-combobox-list",
             id: props.id,
-            attributes: props.attributes,
+            attributes: merged,
             {props.children}
         }
     }
@@ -77,10 +69,12 @@ pub fn ComboboxList(props: ComboboxListProps) -> Element {
 
 #[component]
 pub fn ComboboxEmpty(props: ComboboxEmptyProps) -> Element {
+    let base = attributes!(div { class: "dx-combobox-empty" });
+    let merged = merge_attributes(vec![base, props.attributes]);
+
     rsx! {
         combobox::ComboboxEmpty {
-            class: "dx-combobox-empty",
-            attributes: props.attributes,
+            attributes: merged,
             {props.children}
         }
     }
@@ -88,9 +82,11 @@ pub fn ComboboxEmpty(props: ComboboxEmptyProps) -> Element {
 
 #[component]
 pub fn ComboboxOption<T: Clone + PartialEq + 'static>(props: ComboboxOptionProps<T>) -> Element {
+    let base = attributes!(div { class: "dx-combobox-option" });
+    let merged = merge_attributes(vec![base, props.attributes]);
+
     rsx! {
         combobox::ComboboxOption::<T> {
-            class: "dx-combobox-option",
             value: props.value,
             text_value: props.text_value,
             disabled: props.disabled,
@@ -98,7 +94,7 @@ pub fn ComboboxOption<T: Clone + PartialEq + 'static>(props: ComboboxOptionProps
             index: props.index,
             aria_label: props.aria_label,
             aria_roledescription: props.aria_roledescription,
-            attributes: props.attributes,
+            attributes: merged,
             {props.children}
         }
     }

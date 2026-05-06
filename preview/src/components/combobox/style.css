@@ -35,13 +35,9 @@
   transform: translateY(-50%);
 }
 
-.dx-combobox-content {
-  top: calc(100% + 0.25rem);
-  overflow: hidden;
-  width: 200px;
-}
-
 .dx-combobox-list {
+  top: calc(100% + 0.25rem);
+  width: 200px;
   display: flex;
   overflow: hidden auto;
   max-height: 300px;

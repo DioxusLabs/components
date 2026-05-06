@@ -43,20 +43,18 @@ pub fn Demo() -> Element {
                     placeholder: "Select framework...",
                     aria_label: "Controlled framework",
                 }
-                ComboboxContent {
-                    ComboboxList { aria_label: "Controlled frameworks",
-                        ComboboxEmpty { "No framework found." }
-                        {
-                            frameworks.iter().enumerate().map(|(i, (value, label))| rsx! {
-                                ComboboxOption::<String> {
-                                    index: i,
-                                    value: value.to_string(),
-                                    text_value: label.to_string(),
-                                    {*label}
-                                    ComboboxItemIndicator {}
-                                }
-                            })
-                        }
+                ComboboxList { aria_label: "Controlled frameworks",
+                    ComboboxEmpty { "No framework found." }
+                    {
+                        frameworks.iter().enumerate().map(|(i, (value, label))| rsx! {
+                            ComboboxOption::<String> {
+                                index: i,
+                                value: value.to_string(),
+                                text_value: label.to_string(),
+                                {*label}
+                                ComboboxItemIndicator {}
+                            }
+                        })
                     }
                 }
             }

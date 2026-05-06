@@ -3,7 +3,7 @@
 use dioxus::prelude::*;
 
 use super::super::context::ComboboxContext;
-use crate::listbox::{use_listbox_id, ListboxContext};
+use crate::listbox::{use_listbox_id, use_listbox_render, ListboxContext};
 
 /// Props for [`ComboboxList`].
 #[derive(Props, Clone, PartialEq)]
@@ -25,15 +25,23 @@ pub struct ComboboxListProps {
 #[component]
 pub fn ComboboxList(props: ComboboxListProps) -> Element {
     let ctx = use_context::<ComboboxContext>();
-    let render = use_context::<ListboxContext>().render;
-
+    let open = ctx.selectable.open;
     let id = use_listbox_id(props.id, ctx.selectable.list_id);
+    let render = use_listbox_render(id, open);
+
+    use_context_provider(|| ListboxContext {
+        render: render.into(),
+    });
 
     rsx! {
         if render() {
             div {
                 id,
                 role: "listbox",
+                "data-state": if open() { "open" } else { "closed" },
+                onpointerdown: move |event| {
+                    event.prevent_default();
+                },
                 ..props.attributes,
                 {props.children}
             }

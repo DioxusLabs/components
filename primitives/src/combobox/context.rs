@@ -55,56 +55,32 @@ impl ComboboxContext {
             .focused_option_id_where(|option| self.is_visible(option.tab_index))
     }
 
-    fn visible_enabled_indices(&self) -> Vec<usize> {
-        let query = self.query.cloned();
-        let mut indices: Vec<_> = self
-            .selectable
-            .options
-            .read()
-            .iter()
-            .filter(|option| {
-                !option.disabled && self.filter.call((query.clone(), option.text_value.clone()))
-            })
-            .map(|option| option.tab_index)
-            .collect();
-        indices.sort_unstable();
-        indices
-    }
-
     pub fn focus_next_visible(&mut self) {
-        let indices = self.visible_enabled_indices();
-        let Some(next) = next_index(
-            &indices,
-            self.selectable.focus_state.current_focus(),
-            (self.selectable.focus_state.roving_loop)(),
-        ) else {
-            self.selectable.focus_state.set_focus(None);
-            return;
-        };
-        self.selectable.focus_state.set_focus(Some(next));
+        let query = self.query.cloned();
+        let filter = self.filter;
+        self.selectable
+            .focus_next_where(|option| filter.call((query.clone(), option.text_value.clone())));
     }
 
     pub fn focus_prev_visible(&mut self) {
-        let indices = self.visible_enabled_indices();
-        let Some(next) = prev_index(
-            &indices,
-            self.selectable.focus_state.current_focus(),
-            (self.selectable.focus_state.roving_loop)(),
-        ) else {
-            self.selectable.focus_state.set_focus(None);
-            return;
-        };
-        self.selectable.focus_state.set_focus(Some(next));
+        let query = self.query.cloned();
+        let filter = self.filter;
+        self.selectable
+            .focus_prev_where(|option| filter.call((query.clone(), option.text_value.clone())));
     }
 
     pub fn focus_first_visible(&mut self) {
-        let first = self.visible_enabled_indices().into_iter().next();
-        self.selectable.focus_state.set_focus(first);
+        let query = self.query.cloned();
+        let filter = self.filter;
+        self.selectable
+            .focus_first_where(|option| filter.call((query.clone(), option.text_value.clone())));
     }
 
     pub fn focus_last_visible(&mut self) {
-        let last = self.visible_enabled_indices().into_iter().next_back();
-        self.selectable.focus_state.set_focus(last);
+        let query = self.query.cloned();
+        let filter = self.filter;
+        self.selectable
+            .focus_last_where(|option| filter.call((query.clone(), option.text_value.clone())));
     }
 
     pub fn select_focused(&mut self) {
@@ -116,75 +92,5 @@ impl ComboboxContext {
 
     pub fn select_value(&mut self, value: RcPartialEqValue) {
         self.selectable.select_value(value);
-    }
-}
-
-fn next_index(indices: &[usize], current: Option<usize>, roving_loop: bool) -> Option<usize> {
-    match current {
-        Some(current) => {
-            let Some(current_position) = indices.iter().position(|&index| index == current) else {
-                let next_position = indices.partition_point(|&index| index <= current);
-                return indices
-                    .get(next_position)
-                    .copied()
-                    .or_else(|| roving_loop.then(|| indices.first().copied()).flatten());
-            };
-            indices
-                .get(current_position + 1)
-                .copied()
-                .or_else(|| roving_loop.then(|| indices.first().copied()).flatten())
-        }
-        None => indices.first().copied(),
-    }
-}
-
-fn prev_index(indices: &[usize], current: Option<usize>, roving_loop: bool) -> Option<usize> {
-    match current {
-        Some(current) => {
-            let Some(current_position) = indices.iter().position(|&index| index == current) else {
-                let prev_position = indices.partition_point(|&index| index < current);
-                return prev_position
-                    .checked_sub(1)
-                    .and_then(|position| indices.get(position).copied())
-                    .or_else(|| roving_loop.then(|| indices.last().copied()).flatten());
-            };
-            current_position
-                .checked_sub(1)
-                .and_then(|position| indices.get(position).copied())
-                .or_else(|| roving_loop.then(|| indices.last().copied()).flatten())
-        }
-        None if roving_loop => indices.last().copied(),
-        None => indices.first().copied(),
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{next_index, prev_index};
-
-    #[test]
-    fn next_index_recovers_when_current_is_not_visible() {
-        assert_eq!(next_index(&[2, 4, 6], Some(1), true), Some(2));
-        assert_eq!(next_index(&[2, 4, 6], Some(1), false), Some(2));
-        assert_eq!(next_index(&[1, 3, 6], Some(4), true), Some(6));
-        assert_eq!(next_index(&[1, 3, 6], Some(4), false), Some(6));
-        assert_eq!(next_index(&[1, 3, 6], Some(7), true), Some(1));
-        assert_eq!(next_index(&[1, 3, 6], Some(7), false), None);
-    }
-
-    #[test]
-    fn prev_index_recovers_when_current_is_not_visible() {
-        assert_eq!(prev_index(&[2, 4, 6], Some(1), true), Some(6));
-        assert_eq!(prev_index(&[2, 4, 6], Some(1), false), None);
-        assert_eq!(prev_index(&[1, 3, 6], Some(4), true), Some(3));
-        assert_eq!(prev_index(&[1, 3, 6], Some(4), false), Some(3));
-        assert_eq!(prev_index(&[1, 3, 6], Some(0), true), Some(6));
-        assert_eq!(prev_index(&[1, 3, 6], Some(0), false), None);
-    }
-
-    #[test]
-    fn visible_index_navigation_handles_empty_lists() {
-        assert_eq!(next_index(&[], Some(1), true), None);
-        assert_eq!(prev_index(&[], Some(1), true), None);
     }
 }

@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 
 use crate::{
     selection::{option_text_value, remove_option, sync_option, OptionState, RcPartialEqValue},
-    use_animated_open, use_effect, use_effect_with_cleanup, use_id_or, use_unique_id,
+    use_animated_open, use_effect, use_effect_cleanup, use_id_or, use_unique_id,
 };
 
 #[derive(Clone, Copy)]
@@ -50,24 +50,37 @@ pub(crate) fn use_listbox_option<T: Clone + PartialEq + 'static>(
 ) -> Memo<String> {
     let generated_id = use_unique_id();
     let id = use_id_or(generated_id, id);
+    let mut previous_id: Signal<Option<String>> = use_signal(|| None);
     let text_value =
         use_memo(move || option_text_value(&*value.read(), text_value(), component_name));
 
-    use_effect_with_cleanup(move || {
+    use_effect(move || {
         let option_id = id();
-        let cleanup_id = option_id.clone();
+        let stale_id = previous_id
+            .peek()
+            .as_ref()
+            .filter(|stale_id| *stale_id != &option_id)
+            .cloned();
+        if let Some(stale_id) = stale_id {
+            remove_option(options, &stale_id);
+        }
+        let registered_id = option_id.clone();
         sync_option(
             options,
             OptionState {
                 tab_index: index(),
                 value: RcPartialEqValue::new(value.cloned()),
                 text_value: text_value.cloned(),
-                id: option_id,
+                id: registered_id,
                 disabled: disabled(),
             },
         );
-        move || {
-            remove_option(options, &cleanup_id);
+        previous_id.set(Some(option_id));
+    });
+
+    use_effect_cleanup(move || {
+        if let Some(option_id) = previous_id.peek().as_ref() {
+            remove_option(options, option_id);
         }
     });
 

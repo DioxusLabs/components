@@ -120,7 +120,7 @@ pub struct SelectMultiProps<T: Clone + PartialEq + 'static = String> {
 /// [`SelectMulti`] need. Returns the `open` signal for the root `<div>`.
 fn use_select_root(
     values: Memo<Vec<RcPartialEqValue>>,
-    set_value: Callback<Option<RcPartialEqValue>>,
+    set_value: Callback<RcPartialEqValue>,
     selection_mode: SelectionMode,
     disabled: ReadSignal<bool>,
     roving_loop: ReadSignal<bool>,
@@ -231,10 +231,7 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
         Some(v) => vec![RcPartialEqValue::new(v)],
         None => vec![],
     });
-    let set_value = use_callback(move |cursor_opt: Option<RcPartialEqValue>| {
-        let Some(value) = cursor_opt else {
-            return;
-        };
+    let set_value = use_callback(move |value: RcPartialEqValue| {
         let value_t = value
             .as_ref::<T>()
             .unwrap_or_else(|| panic!("The values of select and all options must match types"))
@@ -328,10 +325,7 @@ pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -
             .map(RcPartialEqValue::new)
             .collect()
     });
-    let set_value = use_callback(move |cursor_opt: Option<RcPartialEqValue>| {
-        let Some(value) = cursor_opt else {
-            return;
-        };
+    let set_value = use_callback(move |value: RcPartialEqValue| {
         let value_t = value
             .as_ref::<T>()
             .unwrap_or_else(|| panic!("The values of select and all options must match types"))

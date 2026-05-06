@@ -22,7 +22,7 @@
   background: var(--light, var(--primary-color-4)) var(--dark, var(--primary-color-5));
 }
 
-.dx-combobox-content,
+.dx-combobox-list,
 .dx-select-list {
   position: absolute;
   z-index: 50;
@@ -34,12 +34,12 @@
   transform-origin: top;
 }
 
-.dx-combobox-content[data-state="open"],
+.dx-combobox-list[data-state="open"],
 .dx-select-list[data-state="open"] {
   animation: dx-picker-in 150ms ease-out forwards;
 }
 
-.dx-combobox-content[data-state="closed"],
+.dx-combobox-list[data-state="closed"],
 .dx-select-list[data-state="closed"] {
   animation: dx-picker-out 100ms ease-in forwards;
   pointer-events: none;

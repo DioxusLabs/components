@@ -111,7 +111,9 @@ pub(crate) fn sync_option(mut options: Signal<Vec<OptionState>>, option_state: O
     {
         *option = option_state;
     } else {
-        options.push(option_state);
+        let insert_at =
+            options.partition_point(|option| option.tab_index <= option_state.tab_index);
+        options.insert(insert_at, option_state);
     }
 }
 

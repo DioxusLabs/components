@@ -35,7 +35,7 @@ pub(crate) struct SelectableContext {
     pub(crate) open: Memo<bool>,
     pub(crate) set_open: Callback<bool>,
     pub(crate) values: Memo<Vec<RcPartialEqValue>>,
-    pub(crate) set_value: Callback<Option<RcPartialEqValue>>,
+    pub(crate) set_value: Callback<RcPartialEqValue>,
     pub(crate) selection_mode: SelectionMode,
     pub(crate) options: Signal<Vec<OptionState>>,
     pub(crate) list_id: Signal<Option<String>>,
@@ -100,17 +100,104 @@ impl SelectableContext {
         self.select_focused_where(|_| true);
     }
 
+    fn matching_enabled_indices(&self, predicate: impl Fn(&OptionState) -> bool) -> Vec<usize> {
+        self.options
+            .read()
+            .iter()
+            .filter(|option| !option.disabled && predicate(option))
+            .map(|option| option.tab_index)
+            .collect()
+    }
+
+    pub(crate) fn focus_next_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
+        let indices = self.matching_enabled_indices(predicate);
+        let Some(next) = next_index(
+            &indices,
+            self.focus_state.current_focus(),
+            (self.focus_state.roving_loop)(),
+        ) else {
+            self.focus_state.set_focus(None);
+            return;
+        };
+        self.focus_state.set_focus(Some(next));
+    }
+
+    pub(crate) fn focus_prev_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
+        let indices = self.matching_enabled_indices(predicate);
+        let Some(next) = prev_index(
+            &indices,
+            self.focus_state.current_focus(),
+            (self.focus_state.roving_loop)(),
+        ) else {
+            self.focus_state.set_focus(None);
+            return;
+        };
+        self.focus_state.set_focus(Some(next));
+    }
+
+    pub(crate) fn focus_first_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
+        let first = self.matching_enabled_indices(predicate).into_iter().next();
+        self.focus_state.set_focus(first);
+    }
+
+    pub(crate) fn focus_last_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
+        let last = self
+            .matching_enabled_indices(predicate)
+            .into_iter()
+            .next_back();
+        self.focus_state.set_focus(last);
+    }
+
     pub(crate) fn select_value(&mut self, value: RcPartialEqValue) {
-        self.set_value.call(Some(value));
+        self.set_value.call(value);
         if self.selection_mode.closes_on_select() {
             self.set_open(false);
         }
     }
 }
 
+fn next_index(indices: &[usize], current: Option<usize>, roving_loop: bool) -> Option<usize> {
+    match current {
+        Some(current) => {
+            let Some(current_position) = indices.iter().position(|&index| index == current) else {
+                let next_position = indices.partition_point(|&index| index <= current);
+                return indices
+                    .get(next_position)
+                    .copied()
+                    .or_else(|| roving_loop.then(|| indices.first().copied()).flatten());
+            };
+            indices
+                .get(current_position + 1)
+                .copied()
+                .or_else(|| roving_loop.then(|| indices.first().copied()).flatten())
+        }
+        None => indices.first().copied(),
+    }
+}
+
+fn prev_index(indices: &[usize], current: Option<usize>, roving_loop: bool) -> Option<usize> {
+    match current {
+        Some(current) => {
+            let Some(current_position) = indices.iter().position(|&index| index == current) else {
+                let prev_position = indices.partition_point(|&index| index < current);
+                return prev_position
+                    .checked_sub(1)
+                    .and_then(|position| indices.get(position).copied())
+                    .or_else(|| roving_loop.then(|| indices.last().copied()).flatten());
+            };
+            current_position
+                .checked_sub(1)
+                .and_then(|position| indices.get(position).copied())
+                .or_else(|| roving_loop.then(|| indices.last().copied()).flatten())
+        }
+        None if roving_loop => indices.last().copied(),
+        None => indices.first().copied(),
+    }
+}
+
 pub(crate) fn use_selectable_root(
     values: Memo<Vec<RcPartialEqValue>>,
-    set_value: Callback<Option<RcPartialEqValue>>,
+    set_value: Callback<RcPartialEqValue>,
     selection_mode: SelectionMode,
     disabled: ReadSignal<bool>,
     roving_loop: ReadSignal<bool>,

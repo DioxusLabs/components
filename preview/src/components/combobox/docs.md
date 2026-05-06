@@ -18,16 +18,14 @@ Combobox::<String> {
     query: Some(query()),
     on_query_change: move |next| query.set(next),
     ComboboxInput { placeholder: "Select a framework..." }
-    ComboboxContent {
-        ComboboxList {
-            ComboboxEmpty { "No framework found." }
-            ComboboxOption::<String> {
-                index: 0,
-                value: "next",
-                text_value: "Next.js",
-                "Next.js"
-                ComboboxItemIndicator { "✔" }
-            }
+    ComboboxList {
+        ComboboxEmpty { "No framework found." }
+        ComboboxOption::<String> {
+            index: 0,
+            value: "next",
+            text_value: "Next.js",
+            "Next.js"
+            ComboboxItemIndicator { "✔" }
         }
     }
 }
