@@ -61,7 +61,7 @@ jobs:
           cd test-harness
           # Add dependencies manually; TODO: remove this once dx components supports local dependencies
           dx components add calendar,popover --path ..
-          dx components add button,separator,sheet,tooltip --path ..
+          dx components add button,separator,sheet,skeleton,tooltip --path ..
           dx components add dialog,input --path ..
           # Add all components
           dx components add --all --path .. --force
