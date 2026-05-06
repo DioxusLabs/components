@@ -3,7 +3,7 @@ use core::panic;
 use crate::components::tabs::component::*;
 use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
-use dioxus_i18n::prelude::*;
+// use dioxus_i18n::prelude::*;
 use dioxus_primitives::icon::Icon;
 
 use std::str::FromStr;
@@ -95,13 +95,13 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    use_init_i18n(|| {
-        I18nConfig::new(langid!("en-US"))
-            .with_locale((langid!("en-US"), include_str!("i18n/en-US.ftl")))
-            .with_locale((langid!("fr-FR"), include_str!("i18n/fr-FR.ftl")))
-            .with_locale((langid!("es-ES"), include_str!("i18n/es-ES.ftl")))
-            .with_locale((langid!("de-DE"), include_str!("i18n/de-DE.ftl")))
-    });
+    // use_init_i18n(|| {
+    //     I18nConfig::new(langid!("en-US"))
+    //         .with_locale((langid!("en-US"), include_str!("i18n/en-US.ftl")))
+    //         .with_locale((langid!("fr-FR"), include_str!("i18n/fr-FR.ftl")))
+    //         .with_locale((langid!("es-ES"), include_str!("i18n/es-ES.ftl")))
+    //         .with_locale((langid!("de-DE"), include_str!("i18n/de-DE.ftl")))
+    // });
 
     rsx! {
         Router::<Route> {}
@@ -232,6 +232,7 @@ fn NavigationLayout() -> Element {
         document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
         Navbar {}
         Outlet::<Route> {}
+        Footer {}
     }
 }
 
@@ -320,6 +321,64 @@ fn Navbar() -> Element {
                     theme::DarkModeToggle {}
                     LanguageSelect {}
                 }
+            }
+        }
+    }
+}
+
+#[component]
+fn Footer() -> Element {
+    if Route::in_iframe().unwrap_or_default() {
+        return rsx! {};
+    }
+
+    let abc = 456;
+
+    rsx! {
+        footer { class: "dx-preview-footer",
+            div { class: "dx-footer-inner",
+                div { class: "dx-footer-brand",
+                    Link { to: Route::home(), class: "dx-footer-brand-link",
+                        img {
+                            src: asset!("/assets/dioxus_color.svg"),
+                            alt: "Dioxus Logo",
+                            width: "22",
+                            height: "22",
+                        }
+                        span { "DioxusUI" }
+                    }
+                    p { class: "dx-footer-tagline",
+                        "Accessible, themeable interface pieces for Dioxus apps."
+                    }
+                }
+                nav { class: "dx-footer-nav", aria_label: "Footer",
+                    div { class: "dx-footer-nav-group",
+                        span { class: "dx-footer-nav-heading", "Library" }
+                        Link { to: Route::home(), class: "dx-footer-link", "Components" }
+                        Link { to: Route::docs(), class: "dx-footer-link", "Docs" }
+                        Link {
+                            to: Route::EmailClientDashboard { dark_mode: Route::in_dark_mode() },
+                            class: "dx-footer-link",
+                            "Demos"
+                        }
+                    }
+                    div { class: "dx-footer-nav-group",
+                        span { class: "dx-footer-nav-heading", "Project" }
+                        Link {
+                            to: "https://github.com/DioxusLabs/components",
+                            class: "dx-footer-link",
+                            "GitHub"
+                        }
+                        Link {
+                            to: "https://dioxuslabs.com",
+                            class: "dx-footer-link",
+                            "Dioxus"
+                        }
+                    }
+                }
+            }
+            div { class: "dx-footer-base",
+                span { class: "dx-footer-copy", "Built with Dioxus." }
             }
         }
     }
@@ -458,7 +517,7 @@ fn LanguageSelect() -> Element {
                         }
                         let id = current_lang.read().id();
                         tracing::info!("Current lang: {id}");
-                        i18n().set_language(id);
+                        // i18n().set_language(id);
                     },
                     for lang in Language::iter() {
                         option {
@@ -1046,7 +1105,59 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
                     }
                 }
             }
-            ComponentGallery {}
+            Showcase {}
+            section { class: "dx-home-section dx-catalog-section",
+                header { class: "dx-section-header",
+                    span { class: "dx-section-eyebrow", "Catalog" }
+                    h2 { class: "dx-section-title", "All components" }
+                    p { class: "dx-section-summary",
+                        "Every primitive in the library, with live previews and a copy-paste install command for each one."
+                    }
+                }
+                ComponentGallery {}
+            }
+        }
+    }
+}
+
+#[component]
+fn Showcase() -> Element {
+    let dark_mode = Route::in_dark_mode();
+
+    let prefix = router().prefix().unwrap_or_default();
+    let email_route = Route::EmailClientDashboard { dark_mode }.to_string();
+    let email_src = format!("{prefix}{email_route}");
+
+    rsx! {
+        section { class: "dx-home-section dx-showcase-section",
+            header { class: "dx-section-header",
+                span { class: "dx-section-eyebrow", "Showcase" }
+                h2 { class: "dx-section-title", "Built for real applications" }
+                p { class: "dx-section-summary",
+                    "Polished, opinionated layouts assembled from these primitives. Click through to explore the full demo."
+                }
+            }
+            Link {
+                to: Route::EmailClientDashboard { dark_mode },
+                class: "dx-showcase-card dx-showcase-card-feature",
+                div { class: "dx-showcase-frame",
+                    iframe {
+                        src: "{email_src}",
+                        title: "Email client demo",
+                        "loading": "lazy",
+                        scrolling: "no",
+                        tabindex: "-1",
+                        "aria-hidden": "true",
+                    }
+                }
+                div { class: "dx-showcase-meta",
+                    span { class: "dx-showcase-tag", "Dashboard" }
+                    h3 { class: "dx-showcase-title", "Email client" }
+                    p { class: "dx-showcase-description",
+                        "A multi-pane mail app composed from sidebar, list, reading pane, and compose dialog."
+                    }
+                }
+            }
         }
     }
 }

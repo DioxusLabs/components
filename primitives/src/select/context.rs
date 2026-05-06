@@ -3,7 +3,7 @@
 use crate::focus::FocusState;
 use dioxus::prelude::*;
 use dioxus_core::Task;
-use dioxus_sdk_time::sleep;
+// use dioxus_sdk_time::sleep;
 
 use std::{any::Any, rc::Rc, time::Duration};
 
@@ -126,7 +126,7 @@ impl SelectContext {
         // Spawn a new task to clear the buffer after the configured timeout
         let timeout = self.typeahead_timeout.cloned();
         let new_task = spawn(async move {
-            sleep(timeout).await;
+            // sleep(timeout).await;
 
             // Clear the buffer
             typeahead_buffer_signal.write().clear();

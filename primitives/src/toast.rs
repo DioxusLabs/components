@@ -6,7 +6,7 @@ use crate::{
 };
 use dioxus::dioxus_core::DynamicNode;
 use dioxus::prelude::*;
-use dioxus_sdk_time::use_timeout;
+// use dioxus_sdk_time::use_timeout;
 use std::collections::VecDeque;
 use std::time::Duration;
 
@@ -374,16 +374,16 @@ pub fn Toast(props: ToastProps) -> Element {
         let toast_id = props.id;
         let remove_toast = ctx.remove_toast;
 
-        // Create a timeout using dioxus-time
-        let timeout = use_timeout(duration, move |()| {
-            // Call the remove_toast function directly with the toast ID
-            remove_toast.call(toast_id);
-        });
+        // // Create a timeout using dioxus-time
+        // let timeout = use_timeout(duration, move |()| {
+        //     // Call the remove_toast function directly with the toast ID
+        //     remove_toast.call(toast_id);
+        // });
 
-        // Start the timeout when the component mounts
-        use_effect(move || {
-            timeout.action(());
-        });
+        // // Start the timeout when the component mounts
+        // use_effect(move || {
+        //     timeout.action(());
+        // });
     }
 
     rsx! {
