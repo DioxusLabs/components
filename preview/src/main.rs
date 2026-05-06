@@ -221,9 +221,6 @@ fn NavigationLayout() -> Element {
             href: asset!("/assets/dx-components-theme.css"),
         }
         document::Link { rel: "stylesheet", href: asset!("/assets/hero.css") }
-        dioxus_code::advanced::CodeThemeStyles {
-            theme: CodeTheme::system(Theme::GITHUB_LIGHT, Theme::GITHUB_DARK)
-        }
         Navbar {}
         Outlet::<Route> {}
     }
