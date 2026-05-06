@@ -44,7 +44,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
         if open() {
             query.cloned()
         } else {
-            ctx.selected_text().unwrap_or_default()
+            ctx.selectable.selected_text().unwrap_or_default()
         }
     });
 
@@ -112,16 +112,17 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
             onclick: move |_| {
                 if !open() {
                     set_query.call(String::new());
-                    ctx.selectable.focus_state.set_focus(None);
                     ctx.set_open(true);
                 }
             },
             oninput: move |event| {
+                let was_open = open();
                 let value = event.value();
-                let next_query = if open() {
+                let next_query = if was_open {
                     value
                 } else {
-                    ctx.selected_text()
+                    ctx.selectable
+                        .selected_text()
                         .and_then(|selected| {
                             value
                                 .strip_prefix(&selected)
@@ -130,10 +131,11 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
                         .unwrap_or(value)
                 };
                 set_query.call(next_query);
-                if !open() {
+                if was_open {
+                    ctx.selectable.focus_state.set_focus(None);
+                } else {
                     ctx.set_open(true);
                 }
-                ctx.selectable.focus_state.set_focus(None);
             },
             onkeydown,
             onblur: move |_| {

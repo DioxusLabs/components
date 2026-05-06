@@ -26,14 +26,6 @@ impl ComboboxContext {
         self.selectable.set_open(open);
     }
 
-    pub fn selected_text(&self) -> Option<String> {
-        self.selectable.selected_text()
-    }
-
-    pub fn is_selected(&self, value: &RcPartialEqValue) -> bool {
-        self.selectable.is_selected(value)
-    }
-
     pub fn is_visible(&self, tab_index: usize) -> bool {
         let query = self.query.cloned();
         self.selectable
@@ -91,9 +83,5 @@ impl ComboboxContext {
         let filter = self.filter;
         self.selectable
             .select_focused_where(|option| filter.call((query.clone(), option.text_value.clone())));
-    }
-
-    pub fn select_value(&mut self, value: RcPartialEqValue) {
-        self.selectable.select_value(value);
     }
 }

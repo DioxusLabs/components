@@ -55,7 +55,10 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
     let mut ctx: ComboboxContext = use_context();
     let disabled = move || ctx.selectable.disabled.cloned() || props.disabled.cloned();
     let visible = move || ctx.is_visible(index());
-    let selected = use_memo(move || ctx.is_selected(&RcPartialEqValue::new(props.value.cloned())));
+    let selected = use_memo(move || {
+        ctx.selectable
+            .is_selected(&RcPartialEqValue::new(props.value.cloned()))
+    });
     let id = use_listbox_option(
         props.id,
         index,
@@ -101,7 +104,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
                 },
                 onpointerup: move |event| {
                     if pointer_select_commit(&event, disabled(), down_pos) {
-                        ctx.select_value(RcPartialEqValue::new(value.cloned()));
+                        ctx.selectable.select_value(RcPartialEqValue::new(value.cloned()));
                     }
                 },
                 onpointercancel: move |_| {
