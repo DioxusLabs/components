@@ -3,12 +3,14 @@
 use core::panic;
 use std::time::Duration;
 
-use crate::{select::context::RcPartialEqValue, use_controlled, use_effect};
+use crate::{
+    selectable::{use_selectable_root, RcPartialEqValue, SelectionMode},
+    use_controlled, use_effect,
+};
 use dioxus::prelude::*;
 use dioxus_core::Task;
 
 use super::super::context::SelectContext;
-use crate::focus::use_focus_provider;
 
 /// Props for the [`Select`] (single-select) component
 #[derive(Props, Clone, PartialEq)]
@@ -30,6 +32,18 @@ pub struct SelectProps<T: Clone + PartialEq + 'static = String> {
     /// Whether the select is disabled
     #[props(default)]
     pub disabled: ReadSignal<bool>,
+
+    /// The controlled open state of the select popup.
+    #[props(default)]
+    pub open: ReadSignal<Option<bool>>,
+
+    /// The initial open state when uncontrolled.
+    #[props(default)]
+    pub default_open: ReadSignal<bool>,
+
+    /// Callback fired when the popup open state changes.
+    #[props(default)]
+    pub on_open_change: Callback<bool>,
 
     /// Name of the select for form submission
     #[props(default)]
@@ -70,6 +84,18 @@ pub struct SelectMultiProps<T: Clone + PartialEq + 'static = String> {
     #[props(default)]
     pub disabled: ReadSignal<bool>,
 
+    /// The controlled open state of the select popup.
+    #[props(default)]
+    pub open: ReadSignal<Option<bool>>,
+
+    /// The initial open state when uncontrolled.
+    #[props(default)]
+    pub default_open: ReadSignal<bool>,
+
+    /// Callback fired when the popup open state changes.
+    #[props(default)]
+    pub on_open_change: Callback<bool>,
+
     /// Name of the select for form submission
     #[props(default)]
     pub name: ReadSignal<String>,
@@ -95,18 +121,28 @@ pub struct SelectMultiProps<T: Clone + PartialEq + 'static = String> {
 fn use_select_root(
     values: Memo<Vec<RcPartialEqValue>>,
     set_value: Callback<Option<RcPartialEqValue>>,
-    multi: bool,
+    selection_mode: SelectionMode,
     disabled: ReadSignal<bool>,
     roving_loop: ReadSignal<bool>,
+    open: ReadSignal<Option<bool>>,
+    default_open: ReadSignal<bool>,
+    on_open_change: Callback<bool>,
     typeahead_timeout: ReadSignal<Duration>,
-) -> Signal<bool> {
-    let open = use_signal(|| false);
+) -> Memo<bool> {
+    let selectable = use_selectable_root(
+        values,
+        set_value,
+        selection_mode,
+        disabled,
+        roving_loop,
+        open,
+        default_open.cloned(),
+        on_open_change,
+    );
     let mut typeahead_buffer = use_signal(String::new);
-    let options = use_signal(Vec::default);
     let adaptive_keyboard = use_signal(super::super::text_search::AdaptiveKeyboard::new);
-    let list_id = use_signal(|| None);
     let mut typeahead_clear_task: Signal<Option<Task>> = use_signal(|| None);
-    let focus_state = use_focus_provider(roving_loop);
+    let open = selectable.open;
 
     // Clear the typeahead buffer when the select is closed
     use_effect(move || {
@@ -120,16 +156,9 @@ fn use_select_root(
     let initial_focus = use_signal(|| None);
 
     use_context_provider(|| SelectContext {
-        typeahead_buffer,
-        open,
-        values,
-        set_value,
-        multi,
-        options,
+        selectable,
         adaptive_keyboard,
-        list_id,
-        focus_state,
-        disabled,
+        typeahead_buffer,
         typeahead_clear_task,
         typeahead_timeout,
         initial_focus,
@@ -217,15 +246,19 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
     let open = use_select_root(
         values,
         set_value,
-        false,
+        SelectionMode::Single,
         props.disabled,
         props.roving_loop,
+        props.open,
+        props.default_open,
+        props.on_open_change,
         props.typeahead_timeout,
     );
 
     rsx! {
         div {
             "data-state": if open() { "open" } else { "closed" },
+            "data-disabled": (props.disabled)(),
             ..props.attributes,
             {props.children}
         }
@@ -315,15 +348,19 @@ pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -
     let open = use_select_root(
         values,
         set_value,
-        true,
+        SelectionMode::Multiple,
         props.disabled,
         props.roving_loop,
+        props.open,
+        props.default_open,
+        props.on_open_change,
         props.typeahead_timeout,
     );
 
     rsx! {
         div {
             "data-state": if open() { "open" } else { "closed" },
+            "data-disabled": (props.disabled)(),
             ..props.attributes,
             {props.children}
         }

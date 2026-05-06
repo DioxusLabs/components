@@ -1,6 +1,6 @@
 //! Text search and matching algorithms for the select component.
 
-use crate::select::context::OptionState;
+use crate::selectable::OptionState;
 use core::f32;
 use std::collections::HashMap;
 

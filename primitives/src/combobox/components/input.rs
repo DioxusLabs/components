@@ -29,7 +29,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
     let id = use_unique_id();
     let id = use_id_or(id, props.id);
 
-    let mut open = ctx.open;
+    let open = ctx.selectable.open;
     let mut query = ctx.query;
 
     let active_descendant = use_memo(move || {
@@ -51,7 +51,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
         Key::ArrowDown => {
             if !open() {
                 query.set(String::new());
-                open.set(true);
+                ctx.set_open(true);
             }
             ctx.focus_next_visible();
             event.prevent_default();
@@ -60,7 +60,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
         Key::ArrowUp => {
             if !open() {
                 query.set(String::new());
-                open.set(true);
+                ctx.set_open(true);
             }
             ctx.focus_prev_visible();
             event.prevent_default();
@@ -82,7 +82,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
             event.stop_propagation();
         }
         Key::Escape if open() => {
-            open.set(false);
+            ctx.set_open(false);
             event.prevent_default();
             event.stop_propagation();
         }
@@ -97,13 +97,13 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
             placeholder: props.placeholder,
             autocomplete: "off",
             spellcheck: "false",
-            disabled: (ctx.disabled)(),
+            disabled: (ctx.selectable.disabled)(),
 
             role: "combobox",
             aria_autocomplete: "list",
             aria_haspopup: "listbox",
             aria_expanded: open(),
-            aria_controls: ctx.list_id,
+            aria_controls: ctx.selectable.list_id,
             aria_activedescendant: active_descendant(),
 
             "data-state": if open() { "open" } else { "closed" },
@@ -111,8 +111,8 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
             onclick: move |_| {
                 if !open() {
                     query.set(String::new());
-                    ctx.focus_state.set_focus(None);
-                    open.set(true);
+                    ctx.selectable.focus_state.set_focus(None);
+                    ctx.set_open(true);
                 }
             },
             oninput: move |event| {
@@ -130,14 +130,14 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
                 };
                 query.set(next_query);
                 if !open() {
-                    open.set(true);
+                    ctx.set_open(true);
                 }
-                ctx.focus_state.set_focus(None);
+                ctx.selectable.focus_state.set_focus(None);
             },
             onkeydown,
             onblur: move |_| {
                 if open() {
-                    open.set(false);
+                    ctx.set_open(false);
                 }
             },
 

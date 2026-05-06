@@ -2,10 +2,8 @@
 
 use dioxus::prelude::*;
 
-use super::super::context::{
-    default_combobox_filter, ComboboxContext, OptionState, RcPartialEqValue,
-};
-use crate::focus::use_focus_provider;
+use super::super::context::{default_combobox_filter, ComboboxContext, RcPartialEqValue};
+use crate::selectable::{use_selectable_root, SelectionMode};
 
 /// Props for [`Combobox`].
 #[derive(Props, Clone, PartialEq)]
@@ -27,6 +25,18 @@ pub struct ComboboxProps<T: Clone + PartialEq + 'static = String> {
     #[props(default)]
     pub disabled: ReadSignal<bool>,
 
+    /// The controlled open state of the popup.
+    #[props(default)]
+    pub open: ReadSignal<Option<bool>>,
+
+    /// The initial open state when uncontrolled.
+    #[props(default)]
+    pub default_open: ReadSignal<bool>,
+
+    /// Callback fired when the popup open state changes.
+    #[props(default)]
+    pub on_open_change: Callback<bool>,
+
     /// Whether arrow-key navigation should wrap.
     #[props(default = ReadSignal::new(Signal::new(true)))]
     pub roving_loop: ReadSignal<bool>,
@@ -44,27 +54,31 @@ pub struct ComboboxProps<T: Clone + PartialEq + 'static = String> {
 }
 
 fn use_combobox_root(
-    value: Memo<Option<RcPartialEqValue>>,
+    values: Memo<Vec<RcPartialEqValue>>,
     set_value: Callback<Option<RcPartialEqValue>>,
     disabled: ReadSignal<bool>,
     roving_loop: ReadSignal<bool>,
+    open: ReadSignal<Option<bool>>,
+    default_open: ReadSignal<bool>,
+    on_open_change: Callback<bool>,
     filter: Callback<(String, String), bool>,
-) -> Signal<bool> {
-    let open = use_signal(|| false);
+) -> Memo<bool> {
+    let selectable = use_selectable_root(
+        values,
+        set_value,
+        SelectionMode::Single,
+        disabled,
+        roving_loop,
+        open,
+        default_open.cloned(),
+        on_open_change,
+    );
     let query = use_signal(String::new);
-    let options: Signal<Vec<OptionState>> = use_signal(Vec::default);
-    let list_id = use_signal(|| None);
-    let focus_state = use_focus_provider(roving_loop);
+    let open = selectable.open;
 
     use_context_provider(|| ComboboxContext {
-        open,
+        selectable,
         query,
-        value,
-        set_value,
-        options,
-        list_id,
-        focus_state,
-        disabled,
         filter,
     });
 
@@ -82,7 +96,7 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
         None => internal_value.cloned(),
     });
 
-    let selected = use_memo(move || value().map(RcPartialEqValue::new));
+    let selected = use_memo(move || value().map(RcPartialEqValue::new).into_iter().collect());
     let set_value = use_callback(move |incoming: Option<RcPartialEqValue>| {
         let value = incoming.map(|value| {
             value
@@ -99,6 +113,9 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
         set_value,
         props.disabled,
         props.roving_loop,
+        props.open,
+        props.default_open,
+        props.on_open_change,
         props.filter,
     );
 

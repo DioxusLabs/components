@@ -70,12 +70,12 @@ pub fn SelectValue(props: SelectValueProps) -> Element {
     let ctx = use_context::<SelectContext>();
 
     let selected_text_value = use_memo(move || {
-        let values = ctx.values.read();
-        let options = ctx.options.read();
+        let values = ctx.selectable.values.read();
+        let options = ctx.selectable.options.read();
         selection::selected_text(values.iter(), &options)
     });
 
-    let is_empty = move || ctx.values.read().is_empty();
+    let is_empty = move || ctx.selectable.is_empty();
     let display_value = selected_text_value().unwrap_or_else(|| props.placeholder.cloned());
 
     rsx! {

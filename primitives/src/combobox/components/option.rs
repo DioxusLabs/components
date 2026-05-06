@@ -1,12 +1,12 @@
 //! Combobox option components.
 
-use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 
 use super::super::context::{ComboboxContext, RcPartialEqValue};
 use crate::{
     focus::use_focus_entry_disabled,
     listbox::{use_listbox_option, ListboxContext, ListboxOptionContext},
+    selectable::{pointer_select_cancel, pointer_select_commit, pointer_select_start},
 };
 
 /// Props for [`ComboboxOption`].
@@ -53,7 +53,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
     let value = props.value;
 
     let mut ctx: ComboboxContext = use_context();
-    let disabled = move || ctx.disabled.cloned() || props.disabled.cloned();
+    let disabled = move || ctx.selectable.disabled.cloned() || props.disabled.cloned();
     let visible = move || ctx.is_visible(index());
     let selected = use_memo(move || ctx.is_selected(&RcPartialEqValue::new(props.value.cloned())));
     let id = use_listbox_option(
@@ -61,17 +61,17 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
         index,
         value,
         props.text_value,
-        ctx.options,
+        ctx.selectable.options,
         disabled,
         "ComboboxOption",
     );
 
-    use_focus_entry_disabled(ctx.focus_state, props.index, disabled);
+    use_focus_entry_disabled(ctx.selectable.focus_state, props.index, disabled);
 
     let render = use_context::<ListboxContext>().render;
-    let focused = move || ctx.focus_state.is_focused(index());
+    let focused = move || ctx.selectable.focus_state.is_focused(index());
     let order = move || ctx.visible_option_order(index()).unwrap_or(index());
-    let mut down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);
+    let down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);
 
     use_context_provider(|| ListboxOptionContext {
         selected: selected.into(),
@@ -97,38 +97,19 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
 
                 onmouseenter: move |_| {
                     if !disabled() {
-                        ctx.focus_state.set_focus(Some(index()));
+                        ctx.selectable.focus_state.set_focus(Some(index()));
                     }
                 },
                 onpointerdown: move |event| {
-                    if disabled() || event.trigger_button() != Some(MouseButton::Primary) {
-                        return;
-                    }
-                    // Keep focus on the combobox input while deferring selection until
-                    // pointerup, so touch scroll gestures can be cancelled.
-                    event.prevent_default();
-                    let p = event.client_coordinates();
-                    down_pos.set(Some((p.x, p.y)));
+                    pointer_select_start(&event, disabled(), down_pos);
                 },
                 onpointerup: move |event| {
-                    if disabled() || event.trigger_button() != Some(MouseButton::Primary) {
-                        return;
+                    if pointer_select_commit(&event, disabled(), down_pos) {
+                        ctx.select_value(RcPartialEqValue::new(value.cloned()));
                     }
-                    let Some((x0, y0)) = down_pos.take() else {
-                        return;
-                    };
-                    if event.pointer_type() == "touch" {
-                        let p = event.client_coordinates();
-                        let dx = p.x - x0;
-                        let dy = p.y - y0;
-                        if dx * dx + dy * dy > 25.0 {
-                            return;
-                        }
-                    }
-                    ctx.select_value(RcPartialEqValue::new(value.cloned()));
                 },
                 onpointercancel: move |_| {
-                    down_pos.set(None);
+                    pointer_select_cancel(down_pos);
                 },
 
                 ..props.attributes,

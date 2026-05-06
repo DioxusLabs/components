@@ -27,7 +27,7 @@ pub struct ComboboxContentProps {
 #[component]
 pub fn ComboboxContent(props: ComboboxContentProps) -> Element {
     let ctx = use_context::<ComboboxContext>();
-    let open = ctx.open;
+    let open = ctx.selectable.open;
 
     let id = use_unique_id();
     let id = use_id_or(id, props.id);

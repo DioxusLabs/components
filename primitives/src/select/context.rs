@@ -1,6 +1,5 @@
 //! Context types and implementations for the select component.
 
-use crate::focus::FocusState;
 use dioxus::prelude::*;
 use dioxus_core::Task;
 use dioxus_sdk_time::sleep;
@@ -8,33 +7,18 @@ use dioxus_sdk_time::sleep;
 use std::time::Duration;
 
 use super::text_search::AdaptiveKeyboard;
-pub(crate) use crate::selection::{OptionState, RcPartialEqValue};
+use crate::selectable::SelectableContext;
 
 /// Main context for the select component containing all shared state
 #[derive(Clone, Copy)]
 pub(super) struct SelectContext {
-    /// The typeahead buffer for searching options
-    pub typeahead_buffer: Signal<String>,
-    /// If the select is open
-    pub open: Signal<bool>,
-    /// Currently selected values. In single-select mode this contains at most one entry.
-    pub values: Memo<Vec<RcPartialEqValue>>,
-    /// Set the value callback. In single mode this replaces the selection;
-    /// in multi mode it toggles the given value in/out of the selection.
-    pub set_value: Callback<Option<RcPartialEqValue>>,
-    /// Whether the select allows multiple values to be selected
-    pub multi: bool,
-    /// A list of options with their states
-    pub options: Signal<Vec<OptionState>>,
+    /// Shared selectable listbox state.
+    pub selectable: SelectableContext,
     /// Adaptive keyboard system for multi-language support
     pub adaptive_keyboard: Signal<AdaptiveKeyboard>,
+    /// The typeahead buffer for searching options
+    pub typeahead_buffer: Signal<String>,
     /// The ID of the list for ARIA attributes
-    pub list_id: Signal<Option<String>>,
-    /// The focus state for the select
-    pub focus_state: FocusState,
-    /// Whether the select is disabled
-    pub disabled: ReadSignal<bool>,
-    /// Task handle for clearing typeahead buffer
     pub typeahead_clear_task: Signal<Option<Task>>,
     /// Timeout before clearing typeahead buffer
     pub typeahead_timeout: ReadSignal<Duration>,
@@ -43,23 +27,17 @@ pub(super) struct SelectContext {
 }
 
 impl SelectContext {
+    pub fn set_open(&mut self, open: bool) {
+        self.selectable.set_open(open);
+    }
+
+    pub fn multi(&self) -> bool {
+        self.selectable.selection_mode.is_multiple()
+    }
+
     /// Select the currently focused item
     pub fn select_current_item(&mut self) {
-        // If the select is open, select the focused item
-        if self.open.cloned() {
-            if let Some(focused_index) = self.focus_state.current_focus() {
-                let options = self.options.read();
-                if let Some(option) = options
-                    .iter()
-                    .find(|opt| opt.tab_index == focused_index && !opt.disabled)
-                {
-                    self.set_value.call(Some(option.value.clone()));
-                    if !self.multi {
-                        self.open.set(false);
-                    }
-                }
-            }
-        }
+        self.selectable.select_focused();
     }
 
     /// Learn from a keyboard event mapping physical key to logical character
@@ -103,13 +81,15 @@ impl SelectContext {
         self.typeahead_clear_task.write().replace(new_task);
 
         // Focus the best match using adaptive keyboard
-        let options = self.options.read();
+        let options = self.selectable.options.read();
         let keyboard = self.adaptive_keyboard.read();
 
         if let Some(best_match_index) =
             super::text_search::best_match(&keyboard, &typeahead, &options)
         {
-            self.focus_state.set_focus(Some(best_match_index));
+            self.selectable
+                .focus_state
+                .set_focus(Some(best_match_index));
         }
     }
 }

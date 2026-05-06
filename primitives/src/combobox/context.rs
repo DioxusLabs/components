@@ -1,7 +1,7 @@
 //! Shared state for the combobox component.
 
-pub(crate) use crate::selection::{OptionState, RcPartialEqValue};
-use crate::{focus::FocusState, selection};
+pub(crate) use crate::selectable::RcPartialEqValue;
+use crate::selectable::SelectableContext;
 use dioxus::prelude::*;
 
 /// The default case-insensitive substring filter.
@@ -41,31 +41,28 @@ fn combobox_match_rank(query: &str, text: &str) -> Option<(usize, usize, usize)>
 
 #[derive(Clone, Copy)]
 pub(super) struct ComboboxContext {
-    pub open: Signal<bool>,
+    pub selectable: SelectableContext,
     pub query: Signal<String>,
-    pub value: Memo<Option<RcPartialEqValue>>,
-    pub set_value: Callback<Option<RcPartialEqValue>>,
-    pub options: Signal<Vec<OptionState>>,
-    pub list_id: Signal<Option<String>>,
-    pub focus_state: FocusState,
-    pub disabled: ReadSignal<bool>,
     pub filter: Callback<(String, String), bool>,
 }
 
 impl ComboboxContext {
+    pub fn set_open(&mut self, open: bool) {
+        self.selectable.set_open(open);
+    }
+
     pub fn selected_text(&self) -> Option<String> {
-        let value = self.value.read();
-        let options = self.options.read();
-        selection::selected_text(value.iter(), &options)
+        self.selectable.selected_text()
     }
 
     pub fn is_selected(&self, value: &RcPartialEqValue) -> bool {
-        self.value.read().as_ref() == Some(value)
+        self.selectable.is_selected(value)
     }
 
     pub fn is_visible(&self, tab_index: usize) -> bool {
         let query = self.query.cloned();
-        self.options
+        self.selectable
+            .options
             .read()
             .iter()
             .find(|option| option.tab_index == tab_index)
@@ -74,24 +71,22 @@ impl ComboboxContext {
 
     pub fn has_visible_options(&self) -> bool {
         let query = self.query.cloned();
-        self.options
+        self.selectable
+            .options
             .read()
             .iter()
             .any(|option| self.filter.call((query.clone(), option.text_value.clone())))
     }
 
     pub fn focused_visible_option_id(&self) -> Option<String> {
-        let index = self.focus_state.current_focus()?;
-        self.options
-            .read()
-            .iter()
-            .find(|option| option.tab_index == index && !option.disabled && self.is_visible(index))
-            .map(|option| option.id.clone())
+        self.selectable
+            .focused_option_id_where(|option| self.is_visible(option.tab_index))
     }
 
     fn visible_enabled_indices(&self) -> Vec<usize> {
         let query = self.query.cloned();
         let mut matches: Vec<_> = self
+            .selectable
             .options
             .read()
             .iter()
@@ -122,59 +117,47 @@ impl ComboboxContext {
         let indices = self.visible_enabled_indices();
         let Some(next) = next_index(
             &indices,
-            self.focus_state.current_focus(),
-            (self.focus_state.roving_loop)(),
+            self.selectable.focus_state.current_focus(),
+            (self.selectable.focus_state.roving_loop)(),
         ) else {
-            self.focus_state.set_focus(None);
+            self.selectable.focus_state.set_focus(None);
             return;
         };
-        self.focus_state.set_focus(Some(next));
+        self.selectable.focus_state.set_focus(Some(next));
     }
 
     pub fn focus_prev_visible(&mut self) {
         let indices = self.visible_enabled_indices();
         let Some(next) = prev_index(
             &indices,
-            self.focus_state.current_focus(),
-            (self.focus_state.roving_loop)(),
+            self.selectable.focus_state.current_focus(),
+            (self.selectable.focus_state.roving_loop)(),
         ) else {
-            self.focus_state.set_focus(None);
+            self.selectable.focus_state.set_focus(None);
             return;
         };
-        self.focus_state.set_focus(Some(next));
+        self.selectable.focus_state.set_focus(Some(next));
     }
 
     pub fn focus_first_visible(&mut self) {
         let first = self.visible_enabled_indices().into_iter().next();
-        self.focus_state.set_focus(first);
+        self.selectable.focus_state.set_focus(first);
     }
 
     pub fn focus_last_visible(&mut self) {
         let last = self.visible_enabled_indices().into_iter().next_back();
-        self.focus_state.set_focus(last);
+        self.selectable.focus_state.set_focus(last);
     }
 
     pub fn select_focused(&mut self) {
-        if !self.open.cloned() {
-            return;
-        }
-        let Some(index) = self.focus_state.current_focus() else {
-            return;
-        };
-        let value = self
-            .options
-            .read()
-            .iter()
-            .find(|option| option.tab_index == index && !option.disabled && self.is_visible(index))
-            .map(|option| option.value.clone());
-        if let Some(value) = value {
-            self.select_value(value);
-        }
+        let query = self.query.cloned();
+        let filter = self.filter;
+        self.selectable
+            .select_focused_where(|option| filter.call((query.clone(), option.text_value.clone())));
     }
 
     pub fn select_value(&mut self, value: RcPartialEqValue) {
-        self.set_value.call(Some(value));
-        self.open.set(false);
+        self.selectable.select_value(value);
     }
 }
 

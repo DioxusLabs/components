@@ -73,11 +73,11 @@ pub struct SelectListProps {
 pub fn SelectList(props: SelectListProps) -> Element {
     let mut ctx = use_context::<SelectContext>();
 
-    let id = use_listbox_id(props.id, ctx.list_id);
+    let id = use_listbox_id(props.id, ctx.selectable.list_id);
 
-    let mut open = ctx.open;
+    let open = ctx.selectable.open;
     let mut listbox_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
-    let focused = move || open() && !ctx.focus_state.any_focused();
+    let focused = move || open() && !ctx.selectable.focus_state.any_focused();
 
     use_effect(move || {
         let Some(listbox_ref) = listbox_ref() else {
@@ -121,30 +121,27 @@ pub fn SelectList(props: SelectListProps) -> Element {
             }
             Key::ArrowUp => {
                 arrow_key_navigation(event);
-                ctx.focus_state.focus_prev();
+                ctx.selectable.focus_state.focus_prev();
             }
             Key::End => {
                 arrow_key_navigation(event);
-                ctx.focus_state.focus_last();
+                ctx.selectable.focus_state.focus_last();
             }
             Key::ArrowDown => {
                 arrow_key_navigation(event);
-                ctx.focus_state.focus_next();
+                ctx.selectable.focus_state.focus_next();
             }
             Key::Home => {
                 arrow_key_navigation(event);
-                ctx.focus_state.focus_first();
+                ctx.selectable.focus_state.focus_first();
             }
             Key::Enter => {
                 ctx.select_current_item();
-                if !ctx.multi {
-                    open.set(false);
-                }
                 event.prevent_default();
                 event.stop_propagation();
             }
             Key::Escape => {
-                open.set(false);
+                ctx.set_open(false);
                 event.prevent_default();
                 event.stop_propagation();
             }
@@ -160,7 +157,9 @@ pub fn SelectList(props: SelectListProps) -> Element {
 
     use_effect(move || {
         if render() {
-            ctx.focus_state.set_focus(ctx.initial_focus.cloned());
+            ctx.selectable
+                .focus_state
+                .set_focus(ctx.initial_focus.cloned());
         } else {
             ctx.initial_focus.set(None);
         }
@@ -172,7 +171,7 @@ pub fn SelectList(props: SelectListProps) -> Element {
                 id,
                 role: "listbox",
                 tabindex: if focused() { "0" } else { "-1" },
-                aria_multiselectable: ctx.multi,
+                aria_multiselectable: ctx.multi(),
 
                 // Data attributes
                 "data-state": if open() { "open" } else { "closed" },
@@ -181,7 +180,7 @@ pub fn SelectList(props: SelectListProps) -> Element {
                 onkeydown,
                 onblur: move |_| {
                     if focused() {
-                        open.set(false);
+                        ctx.set_open(false);
                     }
                 },
 

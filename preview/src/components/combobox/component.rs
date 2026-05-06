@@ -8,6 +8,7 @@ use dioxus_primitives::icon;
 #[component]
 pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Element {
     rsx! {
+        document::Link { rel: "stylesheet", href: asset!("../picker.css") }
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         combobox::Combobox {
             class: "dx-combobox",
@@ -15,6 +16,9 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
             default_value: props.default_value,
             on_value_change: props.on_value_change,
             disabled: props.disabled,
+            open: props.open,
+            default_open: props.default_open,
+            on_open_change: props.on_open_change,
             roving_loop: props.roving_loop,
             filter: props.filter,
             attributes: props.attributes,

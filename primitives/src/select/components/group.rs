@@ -72,7 +72,7 @@ pub struct SelectGroupProps {
 #[component]
 pub fn SelectGroup(props: SelectGroupProps) -> Element {
     let ctx = use_context::<SelectContext>();
-    let disabled = ctx.disabled.cloned() || props.disabled.cloned();
+    let disabled = ctx.selectable.disabled.cloned() || props.disabled.cloned();
 
     let labeled_by = use_signal(|| None);
 

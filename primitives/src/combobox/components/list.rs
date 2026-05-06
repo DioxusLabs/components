@@ -27,7 +27,7 @@ pub fn ComboboxList(props: ComboboxListProps) -> Element {
     let ctx = use_context::<ComboboxContext>();
     let render = use_context::<ListboxContext>().render;
 
-    let id = use_listbox_id(props.id, ctx.list_id);
+    let id = use_listbox_id(props.id, ctx.selectable.list_id);
 
     rsx! {
         if render() {

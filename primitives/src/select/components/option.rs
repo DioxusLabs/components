@@ -3,9 +3,10 @@
 use crate::{
     focus::use_focus_controlled_item_disabled,
     listbox::{use_listbox_option, ListboxContext, ListboxOptionContext},
-    select::context::RcPartialEqValue,
+    selectable::{
+        pointer_select_cancel, pointer_select_commit, pointer_select_start, RcPartialEqValue,
+    },
 };
-use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 
 use super::super::context::SelectContext;
@@ -105,7 +106,7 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
 
     let mut ctx: SelectContext = use_context();
     let disabled = {
-        let select_disabled = ctx.disabled;
+        let select_disabled = ctx.selectable.disabled;
         let option_disabled = props.disabled;
         move || select_disabled.cloned() || option_disabled.cloned()
     };
@@ -114,21 +115,22 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
         index,
         value,
         props.text_value,
-        ctx.options,
+        ctx.selectable.options,
         disabled,
         "SelectOption",
     );
 
     let onmounted = use_focus_controlled_item_disabled(props.index, disabled);
-    let focused = move || ctx.focus_state.is_focused(index());
+    let focused = move || ctx.selectable.focus_state.is_focused(index());
     let selected = use_memo(move || {
         let value = props.value.read();
-        ctx.values
+        ctx.selectable
+            .values
             .read()
             .iter()
             .any(|v| v.as_ref::<T>() == Some(&*value))
     });
-    let mut down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);
+    let down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);
 
     use_context_provider(|| ListboxOptionContext {
         selected: selected.into(),
@@ -151,46 +153,20 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
                 "data-disabled": disabled(),
 
                 onpointerdown: move |event| {
-                    if disabled() || event.trigger_button() != Some(MouseButton::Primary) {
-                        return;
-                    }
-                    // Suppress the synthesized focus shift and click event so the listbox
-                    // keeps DOM focus (its onblur would otherwise close us mid-tap). We
-                    // commit the selection ourselves on pointerup.
-                    event.prevent_default();
-                    let p = event.client_coordinates();
-                    down_pos.set(Some((p.x, p.y)));
+                    pointer_select_start(&event, disabled(), down_pos);
                 },
                 onpointerup: move |event| {
-                    if disabled() || event.trigger_button() != Some(MouseButton::Primary) {
-                        return;
-                    }
-                    let Some((x0, y0)) = down_pos.take() else {
-                        return;
-                    };
-                    // Drag-cancel only matters for touch; mouse clicks shouldn't be
-                    // suppressed by tiny cursor drift between down and up. ~5px
-                    // threshold tolerates small touch wobble.
-                    if event.pointer_type() == "touch" {
-                        let p = event.client_coordinates();
-                        let dx = p.x - x0;
-                        let dy = p.y - y0;
-                        if dx * dx + dy * dy > 25.0 {
-                            return;
-                        }
-                    }
-                    ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
-                    if !ctx.multi {
-                        ctx.open.set(false);
+                    if pointer_select_commit(&event, disabled(), down_pos) {
+                        ctx.selectable.select_value(RcPartialEqValue::new(props.value.cloned()));
                     }
                 },
                 onpointercancel: move |_| {
-                    down_pos.set(None);
+                    pointer_select_cancel(down_pos);
                 },
                 onblur: move |_| {
                     if focused() {
-                        ctx.focus_state.blur();
-                        ctx.open.set(false);
+                        ctx.selectable.focus_state.blur();
+                        ctx.set_open(false);
                     }
                 },
 

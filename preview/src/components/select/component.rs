@@ -11,12 +11,16 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
+        document::Link { rel: "stylesheet", href: asset!("../picker.css") }
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         select::Select {
             value: props.value,
             default_value: props.default_value,
             on_value_change: props.on_value_change,
             disabled: props.disabled,
+            open: props.open,
+            default_open: props.default_open,
+            on_open_change: props.on_open_change,
             name: props.name,
             roving_loop: props.roving_loop,
             typeahead_timeout: props.typeahead_timeout,
@@ -32,12 +36,16 @@ pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
+        document::Link { rel: "stylesheet", href: asset!("../picker.css") }
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         select::SelectMulti {
             values: props.values,
             default_values: props.default_values,
             on_values_change: props.on_values_change,
             disabled: props.disabled,
+            open: props.open,
+            default_open: props.default_open,
+            on_open_change: props.on_open_change,
             name: props.name,
             roving_loop: props.roving_loop,
             typeahead_timeout: props.typeahead_timeout,
