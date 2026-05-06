@@ -12,6 +12,16 @@ html[data-theme="light"] {
   --light: initial;
 }
 
+html[data-theme="dark"] [class~="dxc-system"] {
+  --dxc-light-on: ;
+  --dxc-dark-on: initial;
+}
+
+html[data-theme="light"] [class~="dxc-system"] {
+  --dxc-light-on: initial;
+  --dxc-dark-on: ;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --dark: initial;

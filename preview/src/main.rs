@@ -3,6 +3,10 @@ use core::panic;
 use crate::components::{separator::Separator, tabs::component::*};
 use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
+use dioxus_code::{
+    advanced::{CodeThemeStyles, HighlightedSource},
+    Code, CodeTheme, Theme,
+};
 use dioxus_i18n::prelude::*;
 use dioxus_primitives::icon::Icon;
 
@@ -309,28 +313,34 @@ fn Navbar() -> Element {
     }
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 struct HighlightedCode {
-    light: &'static str,
-    dark: &'static str,
+    source: HighlightedSource,
 }
 
 #[component]
 fn CodeBlock(source: HighlightedCode, collapsed: bool) -> Element {
     rsx! {
         div {
-            class: "dx-code-block dx-dark-code-block",
+            class: "dx-code-block",
             tabindex: "0",
             "data-collapsed": "{collapsed}",
-            dangerous_inner_html: source.dark,
-        }
-        div {
-            class: "dx-code-block dx-light-code-block",
-            tabindex: "0",
-            "data-collapsed": "{collapsed}",
-            dangerous_inner_html: source.light,
+            PreviewCode { source: source.source }
         }
         CopyButton { position: "absolute", top: "0.5em", right: "0.5em" }
+    }
+}
+
+#[component]
+fn PreviewCode(source: HighlightedSource) -> Element {
+    rsx! {
+        div {
+            class: "dx-preview-code-theme",
+            Code {
+                src: source,
+                theme: CodeTheme::system(Theme::GITHUB_LIGHT, Theme::GITHUB_DARK),
+            }
+        }
     }
 }
 
@@ -344,7 +354,7 @@ fn CopyButton(#[props(extends=GlobalAttributes)] attributes: Vec<Attribute>) -> 
             r#type: "button",
             aria_label: "Copy code",
             "data-copied": copied,
-            "onclick": "navigator.clipboard.writeText(this.parentNode.firstChild.innerText || this.parentNode.innerText);",
+            "onclick": "const visiblePre = Array.from(this.parentNode.querySelectorAll('pre')).find((pre) => pre.offsetParent !== null); navigator.clipboard.writeText(visiblePre ? visiblePre.innerText : Array.from(this.parentNode.childNodes).filter((node) => node !== this).map((node) => node.textContent).join('').trim());",
             onclick: move |_| copied.set(true),
             ..attributes,
             if copied() {
@@ -663,8 +673,6 @@ fn ComponentDemo(iframe: Option<bool>, dark_mode: Option<bool>, name: String) ->
         };
     };
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/assets/prism.css") }
-        script { src: asset!("/assets/prism.js") }
         ComponentHighlight { demo }
     }
 }
@@ -685,6 +693,9 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     };
 
     rsx! {
+        CodeThemeStyles {
+            theme: CodeTheme::system(Theme::GITHUB_LIGHT, Theme::GITHUB_DARK),
+        }
         main { class: "dx-component-demo",
             h1 { class: "dx-component-title", "{name}" }
             div { class: "dx-component-preview",
@@ -1130,12 +1141,5 @@ fn GotoIcon(mut props: LinkProps) -> Element {
 }
 
 const THEME_CSS: HighlightedCode = HighlightedCode {
-    light: include_str!(concat!(
-        env!("OUT_DIR"),
-        "/dx-components-theme.css.base16-ocean.light.html"
-    )),
-    dark: include_str!(concat!(
-        env!("OUT_DIR"),
-        "/dx-components-theme.css.base16-ocean.dark.html"
-    )),
+    source: dioxus_code::code!("/assets/dx-components-theme.css"),
 };
