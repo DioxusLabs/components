@@ -6,14 +6,14 @@ use super::super::context::{
     default_combobox_filter, ComboboxContext, OptionState, RcPartialEqValue,
 };
 use crate::focus::use_focus_provider;
-use crate::use_controlled;
 
 /// Props for [`Combobox`].
 #[derive(Props, Clone, PartialEq)]
 pub struct ComboboxProps<T: Clone + PartialEq + 'static = String> {
-    /// The controlled value.
+    /// The controlled value. If supplied, the combobox is controlled
+    /// and the signal's `None` value means no option is selected.
     #[props(default)]
-    pub value: ReadSignal<Option<Option<T>>>,
+    pub value: Option<ReadSignal<Option<T>>>,
 
     /// The default uncontrolled value.
     #[props(default)]
@@ -74,8 +74,13 @@ fn use_combobox_root(
 /// A single-select autocomplete input with a filterable popup list.
 #[component]
 pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Element {
-    let (value, set_value_internal) =
-        use_controlled(props.value, props.default_value, props.on_value_change);
+    let controlled_value = props.value;
+    let on_change = props.on_value_change;
+    let mut internal_value: Signal<Option<T>> = use_signal(|| props.default_value.clone());
+    let value = use_memo(move || match controlled_value {
+        Some(value) => value.cloned(),
+        None => internal_value.cloned(),
+    });
 
     let selected = use_memo(move || value().map(RcPartialEqValue::new));
     let set_value = use_callback(move |incoming: Option<RcPartialEqValue>| {
@@ -85,7 +90,8 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
                 .expect("combobox and option value types must match")
                 .clone()
         });
-        set_value_internal.call(value);
+        internal_value.set(value.clone());
+        on_change.call(value);
     });
 
     let open = use_combobox_root(

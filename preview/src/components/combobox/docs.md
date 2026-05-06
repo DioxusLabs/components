@@ -3,10 +3,12 @@ The Combobox component is an autocomplete input with a filterable popup list.
 ## Component Structure
 
 ```rust
+let mut value = use_signal(|| None::<String>);
+
 Combobox::<String> {
-    value: "next",
-    on_value_change: |value: Option<String>| {
-        // Handle the change.
+    value,
+    on_value_change: move |next: Option<String>| {
+        value.set(next);
     },
     ComboboxInput { placeholder: "Select a framework..." }
     ComboboxContent {
