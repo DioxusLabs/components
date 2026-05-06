@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 
 use crate::{
     selection::{option_text_value, remove_option, sync_option, OptionState, RcPartialEqValue},
-    use_animated_open, use_effect, use_effect_cleanup, use_id_or, use_unique_id,
+    use_animated_open, use_effect, use_effect_with_cleanup, use_id_or, use_unique_id,
 };
 
 #[derive(Clone, Copy)]
@@ -53,8 +53,9 @@ pub(crate) fn use_listbox_option<T: Clone + PartialEq + 'static>(
     let text_value =
         use_memo(move || option_text_value(&*value.read(), text_value(), component_name));
 
-    use_effect(move || {
+    use_effect_with_cleanup(move || {
         let option_id = id();
+        let cleanup_id = option_id.clone();
         sync_option(
             options,
             OptionState {
@@ -65,10 +66,9 @@ pub(crate) fn use_listbox_option<T: Clone + PartialEq + 'static>(
                 disabled: disabled(),
             },
         );
-    });
-
-    use_effect_cleanup(move || {
-        remove_option(options, id.read().as_str());
+        move || {
+            remove_option(options, &cleanup_id);
+        }
     });
 
     id
