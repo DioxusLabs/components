@@ -1,3 +1,5 @@
+use dioxus::prelude::*;
+
 fn main() {
     let out_dir = std::env::var("OUT_DIR").unwrap();
     let out_dir = std::path::PathBuf::from(out_dir);
@@ -93,47 +95,28 @@ fn render_code_block_html(kind: &pulldown_cmark::CodeBlockKind<'_>, source: &str
     let highlighted: dioxus_code::advanced::HighlightedSource =
         dioxus_code::SourceCode::new(language, source).into();
 
-    let mut code = String::new();
-    push_highlighted_code(
-        &mut code,
-        &highlighted,
-        "dxc-system dxc-system-light-github-light dxc-system-dark-github-dark",
-    );
-
-    format!(r#"<div class="dx-preview-code-theme">{code}</div>"#)
-}
-
-fn push_highlighted_code(
-    html: &mut String,
-    highlighted: &dioxus_code::advanced::HighlightedSource,
-    theme_class: &str,
-) {
-    html.push_str(r#"<pre class="dxc "#);
-    html.push_str(theme_class);
-    html.push_str(r#"" data-language=""#);
-    html.push_str(highlighted.language().slug());
-    html.push_str(r#""><code>"#);
-
-    for segment in highlighted.segments() {
-        if let Some(tag) = segment.tag() {
-            html.push_str(r#"<span class="a-"#);
-            html.push_str(tag);
-            html.push_str(r#"">"#);
-            push_escaped_html(html, segment.text());
-            html.push_str("</span>");
-        } else {
-            push_escaped_html(html, segment.text());
+    dioxus_ssr::render_element(rsx! {
+        div {
+            class: "dx-preview-code-theme",
+            dioxus_code::Code {
+                src: highlighted,
+                theme: dioxus_code::CodeTheme::system(
+                    dioxus_code::Theme::GITHUB_LIGHT,
+                    dioxus_code::Theme::GITHUB_DARK,
+                ),
+            }
         }
-    }
-
-    html.push_str("</code></pre>");
+    })
 }
 
 fn render_plain_code_block(source: &str) -> String {
-    let mut html = String::from(r#"<pre><code>"#);
-    push_escaped_html(&mut html, source.trim_end_matches('\n'));
-    html.push_str("</code></pre>");
-    html
+    let source = source.trim_end_matches('\n');
+
+    dioxus_ssr::render_element(rsx! {
+        pre {
+            code { "{source}" }
+        }
+    })
 }
 
 fn language_from_slug(slug: &str) -> Option<dioxus_code::Language> {
@@ -143,18 +126,5 @@ fn language_from_slug(slug: &str) -> Option<dioxus_code::Language> {
         "rust" => Some(dioxus_code::Language::Rust),
         "css" => Some(dioxus_code::Language::Css),
         slug => dioxus_code::Language::from_slug(slug),
-    }
-}
-
-fn push_escaped_html(output: &mut String, input: &str) {
-    for char in input.chars() {
-        match char {
-            '&' => output.push_str("&amp;"),
-            '<' => output.push_str("&lt;"),
-            '>' => output.push_str("&gt;"),
-            '"' => output.push_str("&quot;"),
-            '\'' => output.push_str("&#39;"),
-            _ => output.push(char),
-        }
     }
 }

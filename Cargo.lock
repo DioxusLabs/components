@@ -6262,6 +6262,7 @@ dependencies = [
  "dioxus-code",
  "dioxus-i18n",
  "dioxus-primitives 0.0.1",
+ "dioxus-ssr",
  "palette",
  "pulldown-cmark",
  "strum",
