@@ -12,12 +12,12 @@ html[data-theme="light"] {
   --light: initial;
 }
 
-html[data-theme="dark"] .dxc-system {
+html[data-theme="dark"] [class~="dxc-system"] {
   --dxc-light-on: ;
   --dxc-dark-on: initial;
 }
 
-html[data-theme="light"] .dxc-system {
+html[data-theme="light"] [class~="dxc-system"] {
   --dxc-light-on: initial;
   --dxc-dark-on: ;
 }
