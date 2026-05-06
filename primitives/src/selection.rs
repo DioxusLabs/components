@@ -1,6 +1,6 @@
 //! Shared option selection helpers.
 
-use dioxus::prelude::{ReadableExt, Signal, WritableExt};
+use dioxus::prelude::{Signal, WritableExt};
 use std::{any::Any, rc::Rc};
 
 trait DynPartialEq: Any {
@@ -100,10 +100,6 @@ pub(crate) fn selected_text<'a>(
 
 /// Insert or update a registered option.
 pub(crate) fn sync_option(mut options: Signal<Vec<OptionState>>, option_state: OptionState) {
-    if options.peek().iter().any(|option| option == &option_state) {
-        return;
-    }
-
     sync_option_state(&mut options.write(), option_state);
 }
 
