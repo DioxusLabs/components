@@ -360,7 +360,7 @@ fn CopyButton(#[props(extends=GlobalAttributes)] attributes: Vec<Attribute>) -> 
             r#type: "button",
             aria_label: "Copy code",
             "data-copied": copied,
-            "onclick": "navigator.clipboard.writeText(Array.from(this.parentNode.querySelectorAll('pre')).find((pre) => pre.offsetParent !== null).innerText);",
+            "onclick": "const visiblePre = Array.from(this.parentNode.querySelectorAll('pre')).find((pre) => pre.offsetParent !== null); navigator.clipboard.writeText(visiblePre ? visiblePre.innerText : Array.from(this.parentNode.childNodes).filter((node) => node !== this).map((node) => node.textContent).join('').trim());",
             onclick: move |_| copied.set(true),
             ..attributes,
             if copied() {

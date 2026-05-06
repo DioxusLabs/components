@@ -114,6 +114,7 @@ body {
 
 /* Code block styles */
 .dx-code-block {
+  overflow: hidden;
   width: 100%;
   max-width: calc(100vw - 2rem);
   height: 100%;
@@ -121,9 +122,9 @@ body {
   box-sizing: border-box;
   border-radius: 0.5rem;
   margin: 0;
-  overflow: hidden;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .dx-code-block .dxc {
   width: 100%;
   height: 100%;
