@@ -97,6 +97,8 @@
 }
 
 .dx-combobox-list {
+  display: flex;
+  flex-direction: column;
   max-height: 300px;
   overflow: hidden auto;
   padding: 0.25rem;

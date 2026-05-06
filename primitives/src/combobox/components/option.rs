@@ -66,12 +66,11 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
         "ComboboxOption",
     );
 
-    use_focus_entry_disabled(ctx.focus_state, props.index, move || {
-        disabled() || !visible()
-    });
+    use_focus_entry_disabled(ctx.focus_state, props.index, disabled);
 
     let render = use_context::<ListboxContext>().render;
     let focused = move || ctx.focus_state.is_focused(index());
+    let order = move || ctx.visible_option_order(index()).unwrap_or(index());
     let mut down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);
 
     use_context_provider(|| ListboxOptionContext {
@@ -93,6 +92,8 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
                 "data-highlighted": focused(),
                 "data-disabled": disabled(),
                 "data-selected": selected(),
+                "data-order": order(),
+                style: "order: {order()};",
 
                 onmouseenter: move |_| {
                     if !disabled() {

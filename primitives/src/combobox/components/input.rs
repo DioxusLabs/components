@@ -50,6 +50,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
     let onkeydown = move |event: KeyboardEvent| match event.key() {
         Key::ArrowDown => {
             if !open() {
+                query.set(String::new());
                 open.set(true);
             }
             ctx.focus_next_visible();
@@ -58,6 +59,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
         }
         Key::ArrowUp => {
             if !open() {
+                query.set(String::new());
                 open.set(true);
             }
             ctx.focus_prev_visible();
@@ -108,6 +110,8 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
 
             onclick: move |_| {
                 if !open() {
+                    query.set(String::new());
+                    ctx.focus_state.set_focus(None);
                     open.set(true);
                 }
             },
@@ -128,7 +132,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
                 if !open() {
                     open.set(true);
                 }
-                ctx.focus_first_visible();
+                ctx.focus_state.set_focus(None);
             },
             onkeydown,
             onblur: move |_| {

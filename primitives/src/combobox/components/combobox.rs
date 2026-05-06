@@ -6,7 +6,7 @@ use super::super::context::{
     default_combobox_filter, ComboboxContext, OptionState, RcPartialEqValue,
 };
 use crate::focus::use_focus_provider;
-use crate::{use_controlled, use_effect};
+use crate::use_controlled;
 
 /// Props for [`Combobox`].
 #[derive(Props, Clone, PartialEq)]
@@ -51,16 +51,10 @@ fn use_combobox_root(
     filter: Callback<(String, String), bool>,
 ) -> Signal<bool> {
     let open = use_signal(|| false);
-    let mut query = use_signal(String::new);
+    let query = use_signal(String::new);
     let options: Signal<Vec<OptionState>> = use_signal(Vec::default);
     let list_id = use_signal(|| None);
     let focus_state = use_focus_provider(roving_loop);
-
-    use_effect(move || {
-        if !open() {
-            query.set(String::new());
-        }
-    });
 
     use_context_provider(|| ComboboxContext {
         open,
