@@ -72,6 +72,7 @@
     font-size: 0.925rem;
     text-overflow: ellipsis;
     white-space: nowrap;
+    padding-right: 20px;
 }
 
 .dx-hero-prompt {

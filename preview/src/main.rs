@@ -273,7 +273,7 @@ fn Navbar() -> Element {
                             width: "28",
                             height: "28",
                         }
-                        span { "DioxusUI" }
+                        span { "Dioxus-Components" }
                     }
                     Link { to: Route::docs(), class: "dx-navbar-link", "Docs" }
                     Link {
@@ -626,9 +626,9 @@ fn Docs(dark_mode: Option<bool>) -> Element {
             article { class: "dx-docs-page dx-docs-prose",
                 header { class: "dx-docs-page-header",
                     p { class: "dx-docs-eyebrow", "Docs" }
-                    h1 { "Build with DioxusUI" }
+                    h1 { "Build with Dioxus-Components" }
                     p {
-                        "DioxusUI is a collection of styled, accessible Dioxus components designed to be copied into your app. Use the CLI when you want the fastest path, or copy the source when you want complete ownership."
+                        "Dioxus-Components is a collection of styled, accessible Dioxus components designed to be copied into your app. Use the CLI when you want the fastest path, or copy the source when you want complete ownership."
                     }
                 }
                 section { class: "dx-docs-section",
@@ -1026,14 +1026,14 @@ fn Home(iframe: Option<bool>, dark_mode: Option<bool>) -> Element {
         main { class: "dx-home-page", role: "main",
             div { id: "hero",
                 div { class: "dx-hero-shell",
-                    h1 { "DioxusUI" }
+                    h1 { "Dioxus-Components" }
                     p { class: "dx-hero-summary",
                         "Accessible, themeable interface pieces for Dioxus apps. Browse the catalog, copy the CLI command, and pull only what you need into your project."
                     }
                     div { class: "dx-hero-command",
                         span { class: "dx-hero-prompt", "$" }
-                        code { "dx components list" }
-                        CopyCommandButton { command: "dx components list".to_string() }
+                        code { "cargo add dioxus-components" }
+                        CopyCommandButton { command: "cargo add dioxus-components".to_string() }
                     }
                     nav { class: "dx-hero-cloud", aria_label: "Component links",
                         for component in components::DEMOS {
