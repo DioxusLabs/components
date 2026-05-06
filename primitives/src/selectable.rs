@@ -101,51 +101,36 @@ impl SelectableContext {
     }
 
     fn matching_enabled_indices(&self, predicate: impl Fn(&OptionState) -> bool) -> Vec<usize> {
-        self.options
+        let mut indices: Vec<_> = self
+            .options
             .read()
             .iter()
             .filter(|option| !option.disabled && predicate(option))
             .map(|option| option.tab_index)
-            .collect()
+            .collect();
+        indices.sort_unstable();
+        indices.dedup();
+        indices
     }
 
     pub(crate) fn focus_next_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
         let indices = self.matching_enabled_indices(predicate);
-        let Some(next) = next_index(
-            &indices,
-            self.focus_state.current_focus(),
-            (self.focus_state.roving_loop)(),
-        ) else {
-            self.focus_state.set_focus(None);
-            return;
-        };
-        self.focus_state.set_focus(Some(next));
+        self.focus_state.focus_next_from_current(&indices);
     }
 
     pub(crate) fn focus_prev_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
         let indices = self.matching_enabled_indices(predicate);
-        let Some(next) = prev_index(
-            &indices,
-            self.focus_state.current_focus(),
-            (self.focus_state.roving_loop)(),
-        ) else {
-            self.focus_state.set_focus(None);
-            return;
-        };
-        self.focus_state.set_focus(Some(next));
+        self.focus_state.focus_prev_from_current(&indices);
     }
 
     pub(crate) fn focus_first_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
-        let first = self.matching_enabled_indices(predicate).into_iter().next();
-        self.focus_state.set_focus(first);
+        let indices = self.matching_enabled_indices(predicate);
+        self.focus_state.focus_first_in(&indices);
     }
 
     pub(crate) fn focus_last_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
-        let last = self
-            .matching_enabled_indices(predicate)
-            .into_iter()
-            .next_back();
-        self.focus_state.set_focus(last);
+        let indices = self.matching_enabled_indices(predicate);
+        self.focus_state.focus_last_in(&indices);
     }
 
     pub(crate) fn select_value(&mut self, value: RcPartialEqValue) {
@@ -153,45 +138,6 @@ impl SelectableContext {
         if self.selection_mode.closes_on_select() {
             self.set_open(false);
         }
-    }
-}
-
-fn next_index(indices: &[usize], current: Option<usize>, roving_loop: bool) -> Option<usize> {
-    match current {
-        Some(current) => {
-            let Some(current_position) = indices.iter().position(|&index| index == current) else {
-                let next_position = indices.partition_point(|&index| index <= current);
-                return indices
-                    .get(next_position)
-                    .copied()
-                    .or_else(|| roving_loop.then(|| indices.first().copied()).flatten());
-            };
-            indices
-                .get(current_position + 1)
-                .copied()
-                .or_else(|| roving_loop.then(|| indices.first().copied()).flatten())
-        }
-        None => indices.first().copied(),
-    }
-}
-
-fn prev_index(indices: &[usize], current: Option<usize>, roving_loop: bool) -> Option<usize> {
-    match current {
-        Some(current) => {
-            let Some(current_position) = indices.iter().position(|&index| index == current) else {
-                let prev_position = indices.partition_point(|&index| index < current);
-                return prev_position
-                    .checked_sub(1)
-                    .and_then(|position| indices.get(position).copied())
-                    .or_else(|| roving_loop.then(|| indices.last().copied()).flatten());
-            };
-            current_position
-                .checked_sub(1)
-                .and_then(|position| indices.get(position).copied())
-                .or_else(|| roving_loop.then(|| indices.last().copied()).flatten())
-        }
-        None if roving_loop => indices.last().copied(),
-        None => indices.first().copied(),
     }
 }
 

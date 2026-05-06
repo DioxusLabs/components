@@ -20,6 +20,9 @@ pub(super) struct ComboboxContext {
 
 impl ComboboxContext {
     pub fn set_open(&mut self, open: bool) {
+        if open {
+            self.selectable.focus_state.set_focus(None);
+        }
         self.selectable.set_open(open);
     }
 
