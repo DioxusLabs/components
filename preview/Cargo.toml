@@ -16,6 +16,7 @@ tracing.workspace = true
 time = { version = "0.3.44", features = ["std", "macros"] }
 
 [build-dependencies]
+dioxus-code = { version = "0.1.0", default-features = false, features = ["runtime", "lang-css"] }
 pulldown-cmark = "0.13.0"
 
 [features]
