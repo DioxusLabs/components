@@ -114,20 +114,6 @@ impl SelectContext {
     }
 }
 
-/// Context for select option components to know if they're selected
-#[derive(Clone, Copy)]
-pub(super) struct SelectOptionContext {
-    /// Whether this option is currently selected
-    pub selected: ReadSignal<bool>,
-}
-
-/// Context for children of select list components to know if they should render
-#[derive(Clone, Copy)]
-pub(super) struct SelectListContext {
-    /// Whether to render in the dom (or just run logic)
-    pub render: ReadSignal<bool>,
-}
-
 /// Context for select group components
 #[derive(Clone, Copy)]
 pub(super) struct SelectGroupContext {

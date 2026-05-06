@@ -3,13 +3,10 @@
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 
-use super::super::context::{
-    ComboboxContentContext, ComboboxContext, ComboboxOptionContext, OptionState, RcPartialEqValue,
-};
+use super::super::context::{ComboboxContext, RcPartialEqValue};
 use crate::{
     focus::use_focus_entry_disabled,
-    selection::{option_text_value, remove_option, sync_option},
-    use_effect, use_effect_cleanup, use_id_or, use_unique_id,
+    listbox::{use_listbox_option, ListboxContext, ListboxOptionContext},
 };
 
 /// Props for [`ComboboxOption`].
@@ -52,43 +49,31 @@ pub struct ComboboxOptionProps<T: Clone + PartialEq + 'static> {
 /// A selectable option inside a [`ComboboxList`](super::list::ComboboxList).
 #[component]
 pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps<T>) -> Element {
-    let option_id = use_unique_id();
-    let id = use_id_or(option_id, props.id);
-
     let index = props.index;
     let value = props.value;
-    let text_value =
-        use_memo(move || option_text_value(&*value.read(), (props.text_value)(), "ComboboxOption"));
 
     let mut ctx: ComboboxContext = use_context();
     let disabled = move || ctx.disabled.cloned() || props.disabled.cloned();
     let visible = move || ctx.is_visible(index());
     let selected = use_memo(move || ctx.is_selected(&RcPartialEqValue::new(props.value.cloned())));
-
-    use_effect(move || {
-        let option_id = id();
-        let option_state = OptionState {
-            tab_index: index(),
-            value: RcPartialEqValue::new(value.cloned()),
-            text_value: text_value.cloned(),
-            id: option_id.clone(),
-            disabled: disabled(),
-        };
-        sync_option(ctx.options, option_state);
-    });
-
-    use_effect_cleanup(move || {
-        remove_option(ctx.options, id.read().as_str());
-    });
+    let id = use_listbox_option(
+        props.id,
+        index,
+        value,
+        props.text_value,
+        ctx.options,
+        disabled,
+        "ComboboxOption",
+    );
 
     use_focus_entry_disabled(ctx.focus_state, props.index, move || {
         disabled() || !visible()
     });
 
-    let render = use_context::<ComboboxContentContext>().render;
+    let render = use_context::<ListboxContext>().render;
     let focused = move || ctx.focus_state.is_focused(index());
 
-    use_context_provider(|| ComboboxOptionContext {
+    use_context_provider(|| ListboxOptionContext {
         selected: selected.into(),
     });
 
@@ -137,7 +122,7 @@ pub struct ComboboxItemIndicatorProps {
 /// Renders its children when the parent option is selected.
 #[component]
 pub fn ComboboxItemIndicator(props: ComboboxItemIndicatorProps) -> Element {
-    let ctx: ComboboxOptionContext = use_context();
+    let ctx: ListboxOptionContext = use_context();
     if !(ctx.selected)() {
         return rsx! {};
     }

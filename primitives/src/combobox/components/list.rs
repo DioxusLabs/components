@@ -2,8 +2,8 @@
 
 use dioxus::prelude::*;
 
-use super::super::context::{ComboboxContentContext, ComboboxContext};
-use crate::{use_effect, use_id_or, use_unique_id};
+use super::super::context::ComboboxContext;
+use crate::listbox::{use_listbox_id, ListboxContext};
 
 /// Props for [`ComboboxList`].
 #[derive(Props, Clone, PartialEq)]
@@ -24,14 +24,10 @@ pub struct ComboboxListProps {
 /// Listbox that contains the visible options.
 #[component]
 pub fn ComboboxList(props: ComboboxListProps) -> Element {
-    let mut ctx = use_context::<ComboboxContext>();
-    let render = use_context::<ComboboxContentContext>().render;
+    let ctx = use_context::<ComboboxContext>();
+    let render = use_context::<ListboxContext>().render;
 
-    let id = use_unique_id();
-    let id = use_id_or(id, props.id);
-    use_effect(move || {
-        ctx.list_id.set(Some(id()));
-    });
+    let id = use_listbox_id(props.id, ctx.list_id);
 
     rsx! {
         if render() {

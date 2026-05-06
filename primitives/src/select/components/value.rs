@@ -3,6 +3,7 @@
 use dioxus::prelude::*;
 
 use super::super::context::SelectContext;
+use crate::selection;
 
 /// The props for the [`SelectValue`] component
 #[derive(Props, Clone, PartialEq)]
@@ -70,24 +71,8 @@ pub fn SelectValue(props: SelectValueProps) -> Element {
 
     let selected_text_value = use_memo(move || {
         let values = ctx.values.read();
-        if values.is_empty() {
-            return None;
-        }
         let options = ctx.options.read();
-        let parts: Vec<String> = values
-            .iter()
-            .filter_map(|v| {
-                options
-                    .iter()
-                    .find(|opt| opt.value == *v)
-                    .map(|opt| opt.text_value.clone())
-            })
-            .collect();
-        if parts.is_empty() {
-            None
-        } else {
-            Some(parts.join(", "))
-        }
+        selection::selected_text(values.iter(), &options)
     });
 
     let is_empty = move || ctx.values.read().is_empty();

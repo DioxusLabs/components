@@ -2,8 +2,11 @@
 
 use dioxus::prelude::*;
 
-use super::super::context::{ComboboxContentContext, ComboboxContext};
-use crate::{use_animated_open, use_id_or, use_unique_id};
+use super::super::context::ComboboxContext;
+use crate::{
+    listbox::{use_listbox_render, ListboxContext},
+    use_id_or, use_unique_id,
+};
 
 /// Props for [`ComboboxContent`].
 #[derive(Props, Clone, PartialEq)]
@@ -29,10 +32,9 @@ pub fn ComboboxContent(props: ComboboxContentProps) -> Element {
     let id = use_unique_id();
     let id = use_id_or(id, props.id);
 
-    let render = use_animated_open(id, open);
-    let render = use_memo(render);
+    let render = use_listbox_render(id, open);
 
-    use_context_provider(|| ComboboxContentContext {
+    use_context_provider(|| ListboxContext {
         render: render.into(),
     });
 

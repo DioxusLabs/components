@@ -1,6 +1,6 @@
 //! SelectGroup and SelectGroupLabel component implementations.
 
-use crate::{select::context::SelectListContext, use_effect, use_id_or, use_unique_id};
+use crate::{listbox::ListboxContext, use_effect, use_id_or, use_unique_id};
 use dioxus::prelude::*;
 
 use super::super::context::{SelectContext, SelectGroupContext};
@@ -77,7 +77,7 @@ pub fn SelectGroup(props: SelectGroupProps) -> Element {
     let labeled_by = use_signal(|| None);
 
     use_context_provider(|| SelectGroupContext { labeled_by });
-    let render = use_context::<SelectListContext>().render;
+    let render = use_context::<ListboxContext>().render;
 
     rsx! {
         if render() {
@@ -168,7 +168,7 @@ pub fn SelectGroupLabel(props: SelectGroupLabelProps) -> Element {
         ctx.labeled_by.set(Some(id()));
     });
 
-    let render = use_context::<SelectListContext>().render;
+    let render = use_context::<ListboxContext>().render;
 
     rsx! {
         if render () {

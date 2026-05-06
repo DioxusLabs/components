@@ -80,6 +80,24 @@ pub(crate) fn option_text_value<T: 'static>(
     })
 }
 
+/// Display text for selected values in selection order.
+pub(crate) fn selected_text<'a>(
+    values: impl IntoIterator<Item = &'a RcPartialEqValue>,
+    options: &[OptionState],
+) -> Option<String> {
+    let parts: Vec<String> = values
+        .into_iter()
+        .filter_map(|value| {
+            options
+                .iter()
+                .find(|option| &option.value == value)
+                .map(|option| option.text_value.clone())
+        })
+        .collect();
+
+    (!parts.is_empty()).then(|| parts.join(", "))
+}
+
 /// Insert or update a registered option.
 pub(crate) fn sync_option(mut options: Signal<Vec<OptionState>>, option_state: OptionState) {
     if options.peek().iter().any(|option| option == &option_state) {

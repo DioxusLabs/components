@@ -2,14 +2,13 @@
 
 use crate::{
     focus::use_focus_controlled_item_disabled,
-    select::context::{RcPartialEqValue, SelectListContext},
-    selection::{option_text_value, remove_option, sync_option},
-    use_effect, use_effect_cleanup, use_id_or, use_unique_id,
+    listbox::{use_listbox_option, ListboxContext, ListboxOptionContext},
+    select::context::RcPartialEqValue,
 };
 use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 
-use super::super::context::{OptionState, SelectContext, SelectOptionContext};
+use super::super::context::SelectContext;
 
 /// The props for the [`SelectOption`] component
 #[derive(Props, Clone, PartialEq)]
@@ -101,16 +100,8 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 /// ```
 #[component]
 pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>) -> Element {
-    // Generate a unique ID for this option for accessibility
-    let option_id = use_unique_id();
-
-    // Use use_id_or to handle the ID
-    let id = use_id_or(option_id, props.id);
-
     let index = props.index;
     let value = props.value;
-    let text_value =
-        use_memo(move || option_text_value(&*value.read(), (props.text_value)(), "SelectOption"));
 
     let mut ctx: SelectContext = use_context();
     let disabled = {
@@ -118,22 +109,15 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
         let option_disabled = props.disabled;
         move || select_disabled.cloned() || option_disabled.cloned()
     };
-
-    use_effect(move || {
-        let option_id = id();
-        let option_state = OptionState {
-            tab_index: index(),
-            value: RcPartialEqValue::new(value.cloned()),
-            text_value: text_value.cloned(),
-            id: option_id.clone(),
-            disabled: disabled(),
-        };
-        sync_option(ctx.options, option_state);
-    });
-
-    use_effect_cleanup(move || {
-        remove_option(ctx.options, id.read().as_str());
-    });
+    let id = use_listbox_option(
+        props.id,
+        index,
+        value,
+        props.text_value,
+        ctx.options,
+        disabled,
+        "SelectOption",
+    );
 
     let onmounted = use_focus_controlled_item_disabled(props.index, disabled);
     let focused = move || ctx.focus_state.is_focused(index());
@@ -146,11 +130,11 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
     });
     let mut down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);
 
-    use_context_provider(|| SelectOptionContext {
+    use_context_provider(|| ListboxOptionContext {
         selected: selected.into(),
     });
 
-    let render = use_context::<SelectListContext>().render;
+    let render = use_context::<ListboxContext>().render;
 
     rsx! {
         if render() {
@@ -272,7 +256,7 @@ pub struct SelectItemIndicatorProps {
 /// ```
 #[component]
 pub fn SelectItemIndicator(props: SelectItemIndicatorProps) -> Element {
-    let ctx: SelectOptionContext = use_context();
+    let ctx: ListboxOptionContext = use_context();
     if !(ctx.selected)() {
         return rsx! {};
     }

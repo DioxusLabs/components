@@ -1,7 +1,7 @@
 //! Shared state for the combobox component.
 
-use crate::focus::FocusState;
 pub(crate) use crate::selection::{OptionState, RcPartialEqValue};
+use crate::{focus::FocusState, selection};
 use dioxus::prelude::*;
 
 /// The default case-insensitive substring filter.
@@ -26,12 +26,8 @@ pub(super) struct ComboboxContext {
 impl ComboboxContext {
     pub fn selected_text(&self) -> Option<String> {
         let value = self.value.read();
-        let value = value.as_ref()?;
-        self.options
-            .read()
-            .iter()
-            .find(|option| &option.value == value)
-            .map(|option| option.text_value.clone())
+        let options = self.options.read();
+        selection::selected_text(value.iter(), &options)
     }
 
     pub fn is_selected(&self, value: &RcPartialEqValue) -> bool {
@@ -103,14 +99,4 @@ impl ComboboxContext {
         self.open.set(false);
         self.query.set(String::new());
     }
-}
-
-#[derive(Clone, Copy)]
-pub(super) struct ComboboxOptionContext {
-    pub selected: ReadSignal<bool>,
-}
-
-#[derive(Clone, Copy)]
-pub(super) struct ComboboxContentContext {
-    pub render: ReadSignal<bool>,
 }

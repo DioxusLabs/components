@@ -2,7 +2,8 @@
 
 use dioxus::prelude::*;
 
-use super::super::context::{ComboboxContentContext, ComboboxContext};
+use super::super::context::ComboboxContext;
+use crate::listbox::ListboxContext;
 
 /// Props for [`ComboboxEmpty`].
 #[derive(Props, Clone, PartialEq)]
@@ -19,7 +20,7 @@ pub struct ComboboxEmptyProps {
 #[component]
 pub fn ComboboxEmpty(props: ComboboxEmptyProps) -> Element {
     let ctx = use_context::<ComboboxContext>();
-    let render = use_context::<ComboboxContentContext>().render;
+    let render = use_context::<ListboxContext>().render;
 
     let any_visible = use_memo(move || ctx.has_visible_options());
 

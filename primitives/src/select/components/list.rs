@@ -1,7 +1,8 @@
 //! SelectList component implementation.
 
 use crate::{
-    select::context::SelectListContext, use_animated_open, use_effect, use_id_or, use_unique_id,
+    listbox::{use_listbox_id, use_listbox_render, ListboxContext},
+    use_effect,
 };
 use dioxus::prelude::*;
 
@@ -72,11 +73,7 @@ pub struct SelectListProps {
 pub fn SelectList(props: SelectListProps) -> Element {
     let mut ctx = use_context::<SelectContext>();
 
-    let id = use_unique_id();
-    let id = use_id_or(id, props.id);
-    use_effect(move || {
-        ctx.list_id.set(Some(id()));
-    });
+    let id = use_listbox_id(props.id, ctx.list_id);
 
     let mut open = ctx.open;
     let mut listbox_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
@@ -155,10 +152,9 @@ pub fn SelectList(props: SelectListProps) -> Element {
         }
     };
 
-    let render = use_animated_open(id, open);
-    let render = use_memo(render);
+    let render = use_listbox_render(id, open);
 
-    use_context_provider(|| SelectListContext {
+    use_context_provider(|| ListboxContext {
         render: render.into(),
     });
 
