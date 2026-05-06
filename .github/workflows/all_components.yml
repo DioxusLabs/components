@@ -109,7 +109,7 @@ jobs:
             if [ "$file" = "date_picker" ]; then
               dx components add calendar,popover --path ..
             elif [ "$file" = "sidebar" ]; then
-              dx components add button,separator,sheet,tooltip --path ..
+              dx components add button,separator,sheet,skeleton,tooltip --path ..
             elif [ "$file" = "item" ]; then
               dx components add separator --path ..
             elif [ "$file" = "color_picker" ]; then

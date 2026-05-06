@@ -3,6 +3,7 @@ use crate::components::separator::Separator;
 use crate::components::sheet::{
     Sheet, SheetContent, SheetDescription, SheetHeader, SheetSide, SheetTitle,
 };
+use crate::components::skeleton::Skeleton;
 use crate::components::tooltip::{Tooltip, TooltipContent, TooltipTrigger};
 use dioxus::core::use_drop;
 use dioxus::prelude::*;
@@ -13,8 +14,6 @@ use dioxus_primitives::icon;
 
 #[css_module("/src/components/sidebar/style.css")]
 struct Styles;
-#[css_module("/src/components/skeleton/style.css")]
-struct SkeletonStyles;
 
 // constants
 const SIDEBAR_WIDTH: &str = "16rem";
@@ -764,9 +763,9 @@ pub fn SidebarMenuSkeleton(
         div {
             ..merged,
             if show_icon {
-                div { class: format!("{} {}", SkeletonStyles::dx_skeleton, Styles::dx_sidebar_menu_skeleton_icon) }
+                Skeleton { class: Styles::dx_sidebar_menu_skeleton_icon.to_string() }
             }
-            div { class: format!("{} {}", SkeletonStyles::dx_skeleton, Styles::dx_sidebar_menu_skeleton_text), width: "70%" }
+            Skeleton { class: Styles::dx_sidebar_menu_skeleton_text.to_string(), width: "70%" }
         }
     }
 }
