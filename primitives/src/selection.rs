@@ -104,20 +104,74 @@ pub(crate) fn sync_option(mut options: Signal<Vec<OptionState>>, option_state: O
         return;
     }
 
-    let mut options = options.write();
-    if let Some(option) = options
-        .iter_mut()
-        .find(|option| option.id == option_state.id)
+    sync_option_state(&mut options.write(), option_state);
+}
+
+fn sync_option_state(options: &mut Vec<OptionState>, option_state: OptionState) {
+    if let Some(position) = options
+        .iter()
+        .position(|option| option.id == option_state.id)
     {
-        *option = option_state;
+        if options[position].tab_index == option_state.tab_index {
+            options[position] = option_state;
+        } else {
+            options.remove(position);
+            insert_option(options, option_state);
+        }
     } else {
-        let insert_at =
-            options.partition_point(|option| option.tab_index <= option_state.tab_index);
-        options.insert(insert_at, option_state);
+        insert_option(options, option_state);
     }
+}
+
+fn insert_option(options: &mut Vec<OptionState>, option_state: OptionState) {
+    let insert_at = options.partition_point(|option| option.tab_index <= option_state.tab_index);
+    options.insert(insert_at, option_state);
 }
 
 /// Remove a registered option by id.
 pub(crate) fn remove_option(mut options: Signal<Vec<OptionState>>, id: &str) {
     options.write().retain(|option| option.id != id);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn option(id: &str, tab_index: usize) -> OptionState {
+        OptionState {
+            tab_index,
+            value: RcPartialEqValue::new(id.to_string()),
+            text_value: id.to_string(),
+            id: id.to_string(),
+            disabled: false,
+        }
+    }
+
+    fn ids(options: &[OptionState]) -> Vec<&str> {
+        options.iter().map(|option| option.id.as_str()).collect()
+    }
+
+    fn tab_indices(options: &[OptionState]) -> Vec<usize> {
+        options.iter().map(|option| option.tab_index).collect()
+    }
+
+    #[test]
+    fn sync_option_state_repositions_when_tab_index_changes() {
+        let mut options = vec![option("a", 0), option("b", 1), option("c", 2)];
+
+        sync_option_state(&mut options, option("a", 3));
+
+        assert_eq!(ids(&options), ["b", "c", "a"]);
+        assert_eq!(tab_indices(&options), [1, 2, 3]);
+    }
+
+    #[test]
+    fn sync_option_state_keeps_sorted_order_when_tab_index_decreases() {
+        let mut options = vec![option("a", 0), option("b", 1), option("c", 2)];
+
+        sync_option_state(&mut options, option("c", 0));
+
+        assert_eq!(ids(&options), ["a", "c", "b"]);
+        assert_eq!(tab_indices(&options), [0, 0, 1]);
+    }
 }
