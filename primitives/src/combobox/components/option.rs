@@ -72,6 +72,7 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
 
     let render = use_context::<ListboxContext>().render;
     let focused = move || ctx.focus_state.is_focused(index());
+    let mut down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);
 
     use_context_provider(|| ListboxOptionContext {
         selected: selected.into(),
@@ -98,11 +99,35 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
                         ctx.focus_state.set_focus(Some(index()));
                     }
                 },
-                onpointerdown: move |event: PointerEvent| {
-                    if !disabled() && event.trigger_button() == Some(MouseButton::Primary) {
-                        ctx.select_value(RcPartialEqValue::new(value.cloned()));
-                        event.prevent_default();
+                onpointerdown: move |event| {
+                    if disabled() || event.trigger_button() != Some(MouseButton::Primary) {
+                        return;
                     }
+                    // Keep focus on the combobox input while deferring selection until
+                    // pointerup, so touch scroll gestures can be cancelled.
+                    event.prevent_default();
+                    let p = event.client_coordinates();
+                    down_pos.set(Some((p.x, p.y)));
+                },
+                onpointerup: move |event| {
+                    if disabled() || event.trigger_button() != Some(MouseButton::Primary) {
+                        return;
+                    }
+                    let Some((x0, y0)) = down_pos.take() else {
+                        return;
+                    };
+                    if event.pointer_type() == "touch" {
+                        let p = event.client_coordinates();
+                        let dx = p.x - x0;
+                        let dy = p.y - y0;
+                        if dx * dx + dy * dy > 25.0 {
+                            return;
+                        }
+                    }
+                    ctx.select_value(RcPartialEqValue::new(value.cloned()));
+                },
+                onpointercancel: move |_| {
+                    down_pos.set(None);
                 },
 
                 ..props.attributes,
