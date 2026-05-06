@@ -34,7 +34,6 @@ pub fn ComboboxList(props: ComboboxListProps) -> Element {
             div {
                 id,
                 role: "listbox",
-                tabindex: "-1",
                 ..props.attributes,
                 {props.children}
             }

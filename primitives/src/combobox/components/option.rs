@@ -81,7 +81,6 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
             div {
                 role: "option",
                 id,
-                tabindex: "-1",
 
                 aria_selected: selected(),
                 aria_disabled: disabled(),

@@ -66,9 +66,13 @@ test("arrow keys stay on visible filtered options", async ({ page }) => {
 
     const svelte = list(page).getByRole("option", { name: "SvelteKit" });
     await expect(svelte).toBeVisible();
+    await expect(svelte).not.toHaveAttribute("tabindex", /.+/);
+    await expect(list(page)).not.toHaveAttribute("tabindex", /.+/);
 
     await page.keyboard.press("ArrowDown");
     await expect(svelte).toHaveAttribute("data-highlighted", "true");
+    await expect(trigger).toBeFocused();
+    await expect(trigger).toHaveAttribute("aria-activedescendant", await svelte.getAttribute("id"));
 
     await page.keyboard.press("ArrowDown");
     await expect(svelte).toHaveAttribute("data-highlighted", "true");
