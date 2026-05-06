@@ -28,12 +28,20 @@ pub struct DragAndDropListProps {
 #[component]
 pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     let is_removable = props.is_removable;
-    let items = props
+    // Keep a stable key per item so Dioxus moves keyed siblings instead of
+    // swapping content between list items during reorder.
+    let items: Vec<Element> = props
         .items
         .iter()
-        .map(|item| {
+        .enumerate()
+        .map(|(idx, item)| {
+            let key = item
+                .as_ref()
+                .ok()
+                .and_then(|v| v.key.clone())
+                .unwrap_or_else(|| idx.to_string());
             rsx! {
-                DragIcon {}
+                DragIcon { key: "{key}" }
                 div { class: "dx-item-body-div", {item} }
                 if is_removable {
                     RemoveButton {}
@@ -67,15 +75,20 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
 #[component]
 fn DragIcon() -> Element {
     rsx! {
-        div { class: "dx-item-icon-div", aria_hidden: "true",
-            Icon {
-                // equal icon from lucide https://lucide.dev/icons/equal
-                stroke: "var(--secondary-color-4)",
-                width: "24",
-                height: "24",
-                line { x1: "5", x2: "19", y1: "9", y2: "9" }
-                line { x1: "5", x2: "19", y1: "15", y2: "15" }
-            }
+        Icon {
+            // grip-vertical from lucide https://lucide.dev/icons/grip-vertical
+            class: "dx-item-icon",
+            aria_hidden: "true",
+            width: "16px",
+            height: "16px",
+            fill: "currentColor",
+            stroke: "none",
+            circle { cx: "9", cy: "5", r: "1.25" }
+            circle { cx: "9", cy: "12", r: "1.25" }
+            circle { cx: "9", cy: "19", r: "1.25" }
+            circle { cx: "15", cy: "5", r: "1.25" }
+            circle { cx: "15", cy: "12", r: "1.25" }
+            circle { cx: "15", cy: "19", r: "1.25" }
         }
     }
 }
@@ -98,9 +111,8 @@ pub fn RemoveButton(
             {children}
             Icon {
                 // X icon from lucide https://lucide.dev/icons/x
-                stroke: "var(--secondary-color-4)",
-                width: "24",
-                height: "24",
+                width: "14px",
+                height: "14px",
                 path { d: "M18 6 6 18" }
                 path { d: "m6 6 12 12" }
             }
