@@ -3,7 +3,10 @@ use core::panic;
 use crate::components::{separator::Separator, tabs::component::*};
 use crate::dioxus_router::LinkProps;
 use dioxus::prelude::*;
-use dioxus_code::{advanced::HighlightedSource, Code, CodeTheme, Theme};
+use dioxus_code::{
+    advanced::{CodeThemeStyles, HighlightedSource},
+    Code, CodeTheme, Theme,
+};
 use dioxus_i18n::prelude::*;
 use dioxus_primitives::icon::Icon;
 
@@ -691,6 +694,9 @@ fn ComponentHighlight(demo: ComponentDemoData) -> Element {
     };
 
     rsx! {
+        CodeThemeStyles {
+            theme: CodeTheme::system(Theme::GITHUB_LIGHT, Theme::GITHUB_DARK),
+        }
         main { class: "dx-component-demo",
             h1 { class: "dx-component-title", "{name}" }
             div { class: "dx-component-preview",
