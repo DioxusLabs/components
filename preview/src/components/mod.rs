@@ -113,7 +113,7 @@ examples!(
     aspect_ratio,
     avatar,
     badge,
-    button,
+    button[size, icon],
     calendar[simple, internationalized, range, multi_month, unavailable_dates],
     checkbox,
     collapsible,
