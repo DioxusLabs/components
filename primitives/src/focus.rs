@@ -88,15 +88,9 @@ fn first_enabled<'a>(iter: impl IntoIterator<Item = (&'a usize, &'a bool)>) -> O
 fn next_index(indices: &[usize], current: Option<usize>, roving_loop: bool) -> Option<usize> {
     match current {
         Some(current) => {
-            let Some(current_position) = indices.iter().position(|&index| index == current) else {
-                let next_position = indices.partition_point(|&index| index <= current);
-                return indices
-                    .get(next_position)
-                    .copied()
-                    .or_else(|| roving_loop.then(|| indices.first().copied()).flatten());
-            };
+            let next_position = indices.partition_point(|&index| index <= current);
             indices
-                .get(current_position + 1)
+                .get(next_position)
                 .copied()
                 .or_else(|| roving_loop.then(|| indices.first().copied()).flatten())
         }
@@ -107,14 +101,8 @@ fn next_index(indices: &[usize], current: Option<usize>, roving_loop: bool) -> O
 fn prev_index(indices: &[usize], current: Option<usize>, roving_loop: bool) -> Option<usize> {
     match current {
         Some(current) => {
-            let Some(current_position) = indices.iter().position(|&index| index == current) else {
-                let prev_position = indices.partition_point(|&index| index < current);
-                return prev_position
-                    .checked_sub(1)
-                    .and_then(|position| indices.get(position).copied())
-                    .or_else(|| roving_loop.then(|| indices.last().copied()).flatten());
-            };
-            current_position
+            let prev_position = indices.partition_point(|&index| index < current);
+            prev_position
                 .checked_sub(1)
                 .and_then(|position| indices.get(position).copied())
                 .or_else(|| roving_loop.then(|| indices.last().copied()).flatten())
