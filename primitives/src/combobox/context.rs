@@ -48,14 +48,24 @@ impl ComboboxContext {
         self.selectable.options.read().iter().any(self.predicate())
     }
 
-    pub fn first_visible_enabled_index_for_query(&self, query: String) -> Option<usize> {
-        self.selectable
-            .first_matching_enabled_index(self.predicate_for(query))
+    pub fn open_with_empty_query_and_focus_first(&mut self) {
+        let query = String::new();
+        self.set_query.call(query.clone());
+        let initial_focus = self
+            .selectable
+            .first_matching_enabled_index(self.predicate_for(query));
+        self.selectable.initial_focus.set(initial_focus);
+        self.set_open(true);
     }
 
-    pub fn last_visible_enabled_index_for_query(&self, query: String) -> Option<usize> {
-        self.selectable
-            .last_matching_enabled_index(self.predicate_for(query))
+    pub fn open_with_empty_query_and_focus_last(&mut self) {
+        let query = String::new();
+        self.set_query.call(query.clone());
+        let initial_focus = self
+            .selectable
+            .last_matching_enabled_index(self.predicate_for(query));
+        self.selectable.initial_focus.set(initial_focus);
+        self.set_open(true);
     }
 
     pub fn focused_option_id(&self) -> Option<String> {
