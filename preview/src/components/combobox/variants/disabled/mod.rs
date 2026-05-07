@@ -19,17 +19,15 @@ pub fn Demo() -> Element {
                 }
                 ComboboxList { aria_label: "Frameworks with disabled option",
                     ComboboxEmpty { "No framework found." }
-                    {
-                        frameworks.iter().enumerate().map(|(i, (value, label, disabled))| rsx! {
-                            ComboboxOption::<String> {
-                                index: i,
-                                value: value.to_string(),
-                                text_value: label.to_string(),
-                                disabled: *disabled,
-                                {*label}
-                                ComboboxItemIndicator {}
-                            }
-                        })
+                    for (i , (value , label , disabled)) in frameworks.iter().enumerate() {
+                        ComboboxOption::<String> {
+                            index: i,
+                            value: value.to_string(),
+                            text_value: label.to_string(),
+                            disabled: *disabled,
+                            {*label}
+                            ComboboxItemIndicator {}
+                        }
                     }
                 }
             }

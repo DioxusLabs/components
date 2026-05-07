@@ -24,16 +24,14 @@ pub fn Demo() -> Element {
             }
             ComboboxList { aria_label: "Frameworks",
                 ComboboxEmpty { "No framework found." }
-                {
-                    frameworks.iter().enumerate().map(|(i, (value, label))| rsx! {
-                        ComboboxOption::<String> {
-                            index: i,
-                            value: value.to_string(),
-                            text_value: label.to_string(),
-                            {*label}
-                            ComboboxItemIndicator {}
-                        }
-                    })
+                for (i , (value , label)) in frameworks.iter().enumerate() {
+                    ComboboxOption::<String> {
+                        index: i,
+                        value: value.to_string(),
+                        text_value: label.to_string(),
+                        {*label}
+                        ComboboxItemIndicator {}
+                    }
                 }
             }
         }
