@@ -247,7 +247,7 @@ pub(crate) fn DatePickerInput(props: DatePickerInputProps) -> Element {
             DatePickerPopoverContent { align: ContentAlign::Center,
                 date_picker::DatePickerCalendar { calendar: CalendarRoot,
                     for offset in 0..month_count {
-                        DefaultCalendarView { key: "{offset}", offset, month_count }
+                        CalendarMonthView { key: "{offset}", offset, month_count }
                     }
                 }
             }
@@ -299,7 +299,7 @@ pub(crate) fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
                 date_picker::DateRangePickerCalendar {
                     calendar: RangeCalendarRoot,
                     for offset in 0..month_count {
-                        DefaultCalendarView { key: "{offset}", offset, month_count }
+                        CalendarMonthView { key: "{offset}", offset, month_count }
                     }
                 }
             }

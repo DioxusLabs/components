@@ -168,7 +168,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
             disabled_ranges: props.disabled_ranges,
             attributes: props.attributes,
             for offset in 0..month_count {
-                DefaultCalendarView { key: "{offset}", offset, month_count }
+                CalendarMonthView { key: "{offset}", offset, month_count }
             }
         }
     }
@@ -194,7 +194,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
             disabled_ranges: props.disabled_ranges,
             attributes: props.attributes,
             for offset in 0..month_count {
-                DefaultCalendarView { key: "{offset}", offset, month_count }
+                CalendarMonthView { key: "{offset}", offset, month_count }
             }
         }
     }
@@ -255,7 +255,7 @@ pub(crate) fn RangeCalendarRoot(props: calendar::RangeCalendarProps) -> Element 
 }
 
 #[component]
-pub(crate) fn DefaultCalendarView(offset: u8, month_count: u8) -> Element {
+pub(crate) fn CalendarMonthView(offset: u8, month_count: u8) -> Element {
     let show_previous = offset == 0;
     let show_next = offset.saturating_add(1) == month_count;
 
