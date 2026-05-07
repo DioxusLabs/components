@@ -151,13 +151,13 @@ impl SelectableContext {
     }
 
     pub(crate) fn focus_first_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
-        let indices = self.matching_enabled_indices(predicate);
-        self.focus_state.focus_first_in(&indices);
+        let index = self.first_matching_enabled_index(predicate);
+        self.focus_state.set_focus(index);
     }
 
     pub(crate) fn focus_last_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
-        let indices = self.matching_enabled_indices(predicate);
-        self.focus_state.focus_last_in(&indices);
+        let index = self.last_matching_enabled_index(predicate);
+        self.focus_state.set_focus(index);
     }
 
     pub(crate) fn select_value(&mut self, value: RcPartialEqValue) {

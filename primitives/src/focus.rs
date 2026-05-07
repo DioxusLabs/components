@@ -199,14 +199,6 @@ impl FocusState {
         self.focus_prev_from(self.current_focus(), indices);
     }
 
-    pub(crate) fn focus_first_in(&mut self, indices: &[usize]) {
-        self.set_focus(indices.first().copied());
-    }
-
-    pub(crate) fn focus_last_in(&mut self, indices: &[usize]) {
-        self.set_focus(indices.last().copied());
-    }
-
     pub(crate) fn try_focus_placement(&mut self, placement: FocusPlacement) -> bool {
         let Some(index) = (match placement {
             FocusPlacement::First => self.first_enabled_index(),
