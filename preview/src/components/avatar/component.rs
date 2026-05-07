@@ -13,11 +13,11 @@ pub enum AvatarImageSize {
 }
 
 impl AvatarImageSize {
-    fn to_class(self) -> String {
+    fn to_class(self) -> &'static str {
         match self {
-            AvatarImageSize::Small => Styles::dx_avatar_sm.to_string(),
-            AvatarImageSize::Medium => Styles::dx_avatar_md.to_string(),
-            AvatarImageSize::Large => Styles::dx_avatar_lg.to_string(),
+            AvatarImageSize::Small => Styles::dx_avatar_sm,
+            AvatarImageSize::Medium => Styles::dx_avatar_md,
+            AvatarImageSize::Large => Styles::dx_avatar_lg,
         }
     }
 }
@@ -30,10 +30,10 @@ pub enum AvatarShape {
 }
 
 impl AvatarShape {
-    fn to_class(self) -> String {
+    fn to_class(self) -> &'static str {
         match self {
-            AvatarShape::Circle => Styles::dx_avatar_circle.to_string(),
-            AvatarShape::Rounded => Styles::dx_avatar_rounded.to_string(),
+            AvatarShape::Circle => Styles::dx_avatar_circle,
+            AvatarShape::Rounded => Styles::dx_avatar_rounded,
         }
     }
 }
@@ -71,7 +71,9 @@ pub struct AvatarProps {
 pub fn Avatar(props: AvatarProps) -> Element {
     rsx! {
         avatar::Avatar {
-            class: format!("{} {} {}", Styles::dx_avatar, props.size.to_class(), props.shape.to_class()),
+            class: Styles::dx_avatar,
+            class: props.size.to_class(),
+            class: props.shape.to_class(),
             on_load: props.on_load,
             on_error: props.on_error,
             on_state_change: props.on_state_change,
