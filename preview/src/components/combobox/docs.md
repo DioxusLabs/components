@@ -11,7 +11,7 @@ let mut value = use_signal(|| None::<String>);
 let mut query = use_signal(String::new);
 
 Combobox::<String> {
-    value,
+    value: Some(value.into()),
     on_value_change: move |next: Option<String>| {
         value.set(next);
     },
@@ -21,8 +21,8 @@ Combobox::<String> {
     ComboboxList {
         ComboboxEmpty { "No framework found." }
         ComboboxOption::<String> {
-            index: 0,
-            value: "next",
+            index: 0usize,
+            value: "next".to_string(),
             text_value: "Next.js",
             "Next.js"
             ComboboxItemIndicator { "✔" }
