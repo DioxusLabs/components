@@ -1,23 +1,23 @@
 .dx-button {
-  box-sizing: border-box;
   display: inline-flex;
+  box-sizing: border-box;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
   padding: 0;
   border: none;
   border-radius: 0.5rem;
-  outline: none;
   cursor: default;
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
+  gap: 0.5rem;
   line-height: 1.25rem;
-  white-space: nowrap;
+  outline: none;
   transition-duration: 150ms;
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 }
 
 .dx-button svg {
@@ -35,8 +35,8 @@
   padding: 0 0.5rem;
   border-radius: 0.5rem;
   font-size: 0.75rem;
-  line-height: 1rem;
   gap: 0.25rem;
+  line-height: 1rem;
 }
 
 .dx-button[data-size="xs"]:has(> svg) {
