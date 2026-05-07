@@ -52,18 +52,26 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
         Key::ArrowDown => {
             if !open() {
                 set_query.call(String::new());
+                ctx.selectable
+                    .initial_focus
+                    .set(ctx.first_visible_enabled_index_for_query(String::new()));
                 ctx.set_open(true);
+            } else {
+                ctx.focus_next_visible();
             }
-            ctx.focus_next_visible();
             event.prevent_default();
             event.stop_propagation();
         }
         Key::ArrowUp => {
             if !open() {
                 set_query.call(String::new());
+                ctx.selectable
+                    .initial_focus
+                    .set(ctx.last_visible_enabled_index_for_query(String::new()));
                 ctx.set_open(true);
+            } else {
+                ctx.focus_prev_visible();
             }
-            ctx.focus_prev_visible();
             event.prevent_default();
             event.stop_propagation();
         }

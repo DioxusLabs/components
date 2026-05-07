@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 
 use super::super::context::{default_combobox_filter, ComboboxContext, RcPartialEqValue};
 use crate::{
-    selectable::{use_selectable_root, SelectionMode},
+    selectable::{use_selectable_root, use_single_selectable_value, SelectionMode},
     use_controlled,
 };
 
@@ -107,23 +107,12 @@ fn use_combobox_root(
 /// A single-select autocomplete input with a filterable popup list.
 #[component]
 pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Element {
-    let controlled_value = props.value;
-    let on_change = props.on_value_change;
-    let mut internal_value: Signal<Option<T>> = use_signal(|| props.default_value.clone());
-    let value = use_memo(move || match controlled_value {
-        Some(value) => value.cloned(),
-        None => internal_value.cloned(),
-    });
-
-    let selected = use_memo(move || value().map(RcPartialEqValue::new).into_iter().collect());
-    let set_value = use_callback(move |incoming: RcPartialEqValue| {
-        let value = incoming
-            .as_ref::<T>()
-            .expect("combobox and option value types must match")
-            .clone();
-        internal_value.set(Some(value.clone()));
-        on_change.call(Some(value));
-    });
+    let (selected, set_value) = use_single_selectable_value(
+        props.value,
+        props.default_value,
+        props.on_value_change,
+        "combobox",
+    );
 
     let open = use_combobox_root(
         selected,

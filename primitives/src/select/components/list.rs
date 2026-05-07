@@ -1,9 +1,6 @@
 //! SelectList component implementation.
 
-use crate::{
-    listbox::{use_listbox_id, use_listbox_render, ListboxContext},
-    use_effect,
-};
+use crate::{listbox::use_listbox_container, use_effect};
 use dioxus::prelude::*;
 
 use super::super::context::SelectContext;
@@ -72,8 +69,6 @@ pub struct SelectListProps {
 #[component]
 pub fn SelectList(props: SelectListProps) -> Element {
     let mut ctx = use_context::<SelectContext>();
-
-    let id = use_listbox_id(props.id, ctx.selectable.list_id);
 
     let open = ctx.selectable.open;
     let mut listbox_ref: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(|| None);
@@ -149,26 +144,13 @@ pub fn SelectList(props: SelectListProps) -> Element {
         }
     };
 
-    let render = use_listbox_render(id, open);
-
-    use_context_provider(|| ListboxContext {
-        render: render.into(),
-    });
-
-    use_effect(move || {
-        if render() {
-            ctx.selectable
-                .focus_state
-                .set_focus(ctx.initial_focus.cloned());
-        } else {
-            ctx.initial_focus.set(None);
-        }
-    });
+    let listbox = use_listbox_container(props.id, ctx.selectable);
+    let render = listbox.render;
 
     rsx! {
         if render() {
             div {
-                id,
+                id: listbox.id,
                 role: "listbox",
                 tabindex: if focused() { "0" } else { "-1" },
                 aria_multiselectable: ctx.multi(),

@@ -1,10 +1,11 @@
 //! SelectOption and SelectItemIndicator component implementations.
 
 use crate::{
-    focus::use_focus_controlled_item_disabled,
-    listbox::{use_listbox_option, ListboxContext, ListboxOptionContext},
+    focus::use_focus_control_disabled,
+    listbox::{ListboxContext, ListboxItemIndicator},
     selectable::{
-        pointer_select_cancel, pointer_select_commit, pointer_select_start, RcPartialEqValue,
+        pointer_select_cancel, pointer_select_commit, pointer_select_start, use_selectable_option,
+        RcPartialEqValue,
     },
 };
 use dioxus::prelude::*;
@@ -102,39 +103,22 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 #[component]
 pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>) -> Element {
     let index = props.index;
-    let value = props.value;
 
     let mut ctx: SelectContext = use_context();
-    let disabled = {
-        let select_disabled = ctx.selectable.disabled;
-        let option_disabled = props.disabled;
-        move || select_disabled.cloned() || option_disabled.cloned()
-    };
-    let id = use_listbox_option(
+    let option = use_selectable_option(
+        ctx.selectable,
         props.id,
         index,
-        value,
+        props.value,
         props.text_value,
-        ctx.selectable.options,
-        disabled,
+        props.disabled,
         "SelectOption",
     );
 
-    let onmounted = use_focus_controlled_item_disabled(props.index, disabled);
-    let focused = move || ctx.selectable.focus_state.is_focused(index());
-    let selected = use_memo(move || {
-        let value = props.value.read();
-        ctx.selectable
-            .values
-            .read()
-            .iter()
-            .any(|v| v.as_ref::<T>() == Some(&*value))
-    });
-    let down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);
-
-    use_context_provider(|| ListboxOptionContext {
-        selected: selected.into(),
-    });
+    let onmounted =
+        use_focus_control_disabled(ctx.selectable.focus_state, props.index, move || {
+            option.disabled.cloned()
+        });
 
     let render = use_context::<ListboxContext>().render;
 
@@ -142,29 +126,29 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
         if render() {
             div {
                 role: "option",
-                id,
-                tabindex: if focused() { "0" } else { "-1" },
+                id: option.id,
+                tabindex: if (option.focused)() { "0" } else { "-1" },
                 onmounted,
 
-                aria_selected: selected(),
-                aria_disabled: disabled(),
+                aria_selected: (option.selected)(),
+                aria_disabled: (option.disabled)(),
                 aria_label: props.aria_label.clone(),
                 aria_roledescription: props.aria_roledescription.clone(),
-                "data-disabled": disabled(),
+                "data-disabled": (option.disabled)(),
 
                 onpointerdown: move |event| {
-                    pointer_select_start(&event, disabled(), down_pos);
+                    pointer_select_start(&event, (option.disabled)(), option.down_pos);
                 },
                 onpointerup: move |event| {
-                    if pointer_select_commit(&event, disabled(), down_pos) {
-                        ctx.selectable.select_value(RcPartialEqValue::new(props.value.cloned()));
+                    if pointer_select_commit(&event, (option.disabled)(), option.down_pos) {
+                        ctx.selectable.select_value(RcPartialEqValue::new(option.value.cloned()));
                     }
                 },
                 onpointercancel: move |_| {
-                    pointer_select_cancel(down_pos);
+                    pointer_select_cancel(option.down_pos);
                 },
                 onblur: move |_| {
-                    if focused() {
+                    if (option.focused)() {
                         ctx.selectable.focus_state.blur();
                         ctx.set_open(false);
                     }
@@ -232,11 +216,9 @@ pub struct SelectItemIndicatorProps {
 /// ```
 #[component]
 pub fn SelectItemIndicator(props: SelectItemIndicatorProps) -> Element {
-    let ctx: ListboxOptionContext = use_context();
-    if !(ctx.selected)() {
-        return rsx! {};
-    }
     rsx! {
-        {props.children}
+        ListboxItemIndicator {
+            {props.children}
+        }
     }
 }

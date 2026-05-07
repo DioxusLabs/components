@@ -3,6 +3,7 @@
 use dioxus::prelude::*;
 
 use crate::{
+    selectable::SelectableContext,
     selection::{option_text_value, remove_option, sync_option, OptionState, RcPartialEqValue},
     use_animated_open, use_effect, use_effect_cleanup, use_id_or, use_unique_id,
 };
@@ -15,6 +16,11 @@ pub(crate) struct ListboxContext {
 #[derive(Clone, Copy)]
 pub(crate) struct ListboxOptionContext {
     pub(crate) selected: ReadSignal<bool>,
+}
+
+pub(crate) struct ListboxState {
+    pub(crate) id: Memo<String>,
+    pub(crate) render: Memo<bool>,
 }
 
 pub(crate) fn use_listbox_id(
@@ -37,6 +43,30 @@ pub(crate) fn use_listbox_render(
 ) -> Memo<bool> {
     let render = use_animated_open(id, open);
     use_memo(render)
+}
+
+pub(crate) fn use_listbox_container(
+    id: ReadSignal<Option<String>>,
+    mut selectable: SelectableContext,
+) -> ListboxState {
+    let id = use_listbox_id(id, selectable.list_id);
+    let render = use_listbox_render(id, selectable.open);
+
+    use_context_provider(|| ListboxContext {
+        render: render.into(),
+    });
+
+    use_effect(move || {
+        if render.cloned() {
+            selectable
+                .focus_state
+                .set_focus(selectable.initial_focus.cloned());
+        } else {
+            selectable.initial_focus.set(None);
+        }
+    });
+
+    ListboxState { id, render }
 }
 
 pub(crate) fn use_listbox_option<T: Clone + PartialEq + 'static>(
@@ -85,4 +115,15 @@ pub(crate) fn use_listbox_option<T: Clone + PartialEq + 'static>(
     });
 
     id
+}
+
+#[component]
+pub(crate) fn ListboxItemIndicator(children: Element) -> Element {
+    let ctx: ListboxOptionContext = use_context();
+    if !(ctx.selected)() {
+        return rsx! {};
+    }
+    rsx! {
+        {children}
+    }
 }

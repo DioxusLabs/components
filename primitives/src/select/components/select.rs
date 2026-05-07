@@ -4,7 +4,9 @@ use core::panic;
 use std::time::Duration;
 
 use crate::{
-    selectable::{use_selectable_root, RcPartialEqValue, SelectionMode},
+    selectable::{
+        use_selectable_root, use_single_selectable_value, RcPartialEqValue, SelectionMode,
+    },
     use_controlled, use_effect,
 };
 use dioxus::prelude::*;
@@ -153,15 +155,12 @@ fn use_select_root(
             typeahead_buffer.take();
         }
     });
-    let initial_focus = use_signal(|| None);
-
     use_context_provider(|| SelectContext {
         selectable,
         adaptive_keyboard,
         typeahead_buffer,
         typeahead_clear_task,
         typeahead_timeout,
-        initial_focus,
     });
 
     open
@@ -219,26 +218,12 @@ fn use_select_root(
 /// - `data-state`: Indicates the current state of the select. Values are `open` or `closed`.
 #[component]
 pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element {
-    let controlled_value = props.value;
-    let on_change = props.on_value_change;
-    let mut internal_value: Signal<Option<T>> = use_signal(|| props.default_value.clone());
-    let single_value = use_memo(move || match controlled_value {
-        Some(value) => value.cloned(),
-        None => internal_value.cloned(),
-    });
-
-    let values = use_memo(move || match single_value() {
-        Some(v) => vec![RcPartialEqValue::new(v)],
-        None => vec![],
-    });
-    let set_value = use_callback(move |value: RcPartialEqValue| {
-        let value_t = value
-            .as_ref::<T>()
-            .unwrap_or_else(|| panic!("The values of select and all options must match types"))
-            .clone();
-        internal_value.set(Some(value_t.clone()));
-        on_change.call(Some(value_t));
-    });
+    let (values, set_value) = use_single_selectable_value(
+        props.value,
+        props.default_value,
+        props.on_value_change,
+        "select",
+    );
 
     let open = use_select_root(
         values,

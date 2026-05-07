@@ -13,6 +13,23 @@ const content = (page: Page) =>
 const list = (page: Page) =>
     page.locator(".dx-combobox-list[data-state='open']");
 
+test("opens from the focused input with the keyboard", async ({ page }) => {
+    await page.goto(URL, { timeout: 20 * 60 * 1000 });
+
+    const trigger = input(page);
+    await expect(trigger).toBeVisible();
+    await trigger.focus();
+    await expect(trigger).toBeFocused();
+
+    await page.keyboard.press("ArrowDown");
+    await expect(content(page)).toBeVisible();
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await expect(list(page).getByRole("option", { name: "Next.js" })).toHaveAttribute(
+        "data-highlighted",
+        "true",
+    );
+});
+
 test("filters and selects with the keyboard", async ({ page }) => {
     await page.goto(URL, { timeout: 20 * 60 * 1000 });
 
@@ -37,6 +54,17 @@ test("filters and selects with the keyboard", async ({ page }) => {
     await page.keyboard.press("Escape");
     await expect(content(page)).toHaveCount(0);
     await expect(trigger).toHaveValue("SvelteKit");
+});
+
+test("shows an empty state when no options match", async ({ page }) => {
+    await page.goto(URL, { timeout: 20 * 60 * 1000 });
+
+    const trigger = input(page);
+    await trigger.click();
+    await page.keyboard.type("zzz");
+
+    await expect(list(page).getByText("No framework found.")).toBeVisible();
+    await expect(list(page).getByRole("option")).toHaveCount(0);
 });
 
 test("arrow keys stay on visible filtered options", async ({ page }) => {
@@ -140,6 +168,8 @@ test("tabbing away closes the list", async ({ page }) => {
 test("disabled options are exposed but skipped by keyboard selection", async ({ page }) => {
     await page.goto(variantUrl("disabled"), { timeout: 20 * 60 * 1000 });
 
+    await expect(page.getByRole("combobox", { name: "Disabled combobox" })).toBeDisabled();
+
     const trigger = page.getByRole("combobox", {
         name: "Framework with disabled option",
     });
@@ -161,15 +191,6 @@ test("disabled options are exposed but skipped by keyboard selection", async ({ 
 
     await page.keyboard.press("ArrowUp");
     await expect(next).toHaveAttribute("data-highlighted", "true");
-});
-
-test("disabled combobox cannot open or edit", async ({ page }) => {
-    await page.goto(variantUrl("disabled"), { timeout: 20 * 60 * 1000 });
-
-    const trigger = page.getByRole("combobox", { name: "Disabled combobox" });
-    await expect(trigger).toBeDisabled();
-    await page.keyboard.press("ArrowDown");
-    await expect(content(page)).toHaveCount(0);
 });
 
 test("controlled value and controlled open stay in sync", async ({ page }) => {

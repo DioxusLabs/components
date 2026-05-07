@@ -45,6 +45,20 @@ impl ComboboxContext {
             .any(|option| self.filter.call((query.clone(), option.text_value.clone())))
     }
 
+    pub fn first_visible_enabled_index_for_query(&self, query: String) -> Option<usize> {
+        let filter = self.filter;
+        self.selectable.first_matching_enabled_index(|option| {
+            filter.call((query.clone(), option.text_value.clone()))
+        })
+    }
+
+    pub fn last_visible_enabled_index_for_query(&self, query: String) -> Option<usize> {
+        let filter = self.filter;
+        self.selectable.last_matching_enabled_index(|option| {
+            filter.call((query.clone(), option.text_value.clone()))
+        })
+    }
+
     pub fn focused_visible_option_id(&self) -> Option<String> {
         self.selectable
             .focused_option_id_where(|option| self.is_visible(option.tab_index))

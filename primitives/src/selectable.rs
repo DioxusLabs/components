@@ -4,7 +4,8 @@ use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 
 use crate::{
-    focus::{use_focus_provider, FocusState},
+    focus::{use_focus_entry_disabled, use_focus_provider, FocusState},
+    listbox::{use_listbox_option, ListboxOptionContext},
     selection, use_controlled,
 };
 
@@ -40,7 +41,19 @@ pub(crate) struct SelectableContext {
     pub(crate) options: Signal<Vec<OptionState>>,
     pub(crate) list_id: Signal<Option<String>>,
     pub(crate) focus_state: FocusState,
+    pub(crate) initial_focus: Signal<Option<usize>>,
     pub(crate) disabled: ReadSignal<bool>,
+}
+
+#[derive(Clone, Copy)]
+pub(crate) struct SelectableOption<T: Clone + PartialEq + 'static> {
+    pub(crate) id: Memo<String>,
+    pub(crate) disabled: Memo<bool>,
+    pub(crate) selected: Memo<bool>,
+    pub(crate) focused: Memo<bool>,
+    pub(crate) down_pos: Signal<Option<(f64, f64)>>,
+    pub(crate) index: ReadSignal<usize>,
+    pub(crate) value: ReadSignal<T>,
 }
 
 impl SelectableContext {
@@ -113,6 +126,20 @@ impl SelectableContext {
         indices
     }
 
+    pub(crate) fn first_matching_enabled_index(
+        &self,
+        predicate: impl Fn(&OptionState) -> bool,
+    ) -> Option<usize> {
+        self.matching_enabled_indices(predicate).first().copied()
+    }
+
+    pub(crate) fn last_matching_enabled_index(
+        &self,
+        predicate: impl Fn(&OptionState) -> bool,
+    ) -> Option<usize> {
+        self.matching_enabled_indices(predicate).last().copied()
+    }
+
     pub(crate) fn focus_next_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
         let indices = self.matching_enabled_indices(predicate);
         self.focus_state.focus_next_from_current(&indices);
@@ -141,6 +168,30 @@ impl SelectableContext {
     }
 }
 
+pub(crate) fn use_single_selectable_value<T: Clone + PartialEq + 'static>(
+    controlled_value: Option<ReadSignal<Option<T>>>,
+    default_value: Option<T>,
+    on_change: Callback<Option<T>>,
+    component_name: &'static str,
+) -> (Memo<Vec<RcPartialEqValue>>, Callback<RcPartialEqValue>) {
+    let mut internal_value: Signal<Option<T>> = use_signal(|| default_value.clone());
+    let value = use_memo(move || match controlled_value {
+        Some(value) => value.cloned(),
+        None => internal_value.cloned(),
+    });
+    let values = use_memo(move || value().map(RcPartialEqValue::new).into_iter().collect());
+    let set_value = use_callback(move |incoming: RcPartialEqValue| {
+        let value = incoming
+            .as_ref::<T>()
+            .unwrap_or_else(|| panic!("{component_name} and option value types must match"))
+            .clone();
+        internal_value.set(Some(value.clone()));
+        on_change.call(Some(value));
+    });
+
+    (values, set_value)
+}
+
 pub(crate) fn use_selectable_root(
     values: Memo<Vec<RcPartialEqValue>>,
     set_value: Callback<RcPartialEqValue>,
@@ -155,6 +206,7 @@ pub(crate) fn use_selectable_root(
     let options: Signal<Vec<OptionState>> = use_signal(Vec::default);
     let list_id = use_signal(|| None);
     let focus_state = use_focus_provider(roving_loop);
+    let initial_focus = use_signal(|| None);
 
     SelectableContext {
         open,
@@ -165,7 +217,50 @@ pub(crate) fn use_selectable_root(
         options,
         list_id,
         focus_state,
+        initial_focus,
         disabled,
+    }
+}
+
+pub(crate) fn use_selectable_option<T: Clone + PartialEq + 'static>(
+    selectable: SelectableContext,
+    id: ReadSignal<Option<String>>,
+    index: ReadSignal<usize>,
+    value: ReadSignal<T>,
+    text_value: ReadSignal<Option<String>>,
+    option_disabled: ReadSignal<bool>,
+    component_name: &'static str,
+) -> SelectableOption<T> {
+    let disabled = {
+        let root_disabled = selectable.disabled;
+        use_memo(move || root_disabled.cloned() || option_disabled.cloned())
+    };
+    let id = use_listbox_option(
+        id,
+        index,
+        value,
+        text_value,
+        selectable.options,
+        move || disabled.cloned(),
+        component_name,
+    );
+    use_focus_entry_disabled(selectable.focus_state, index, move || disabled.cloned());
+    let selected = use_memo(move || selectable.is_selected(&RcPartialEqValue::new(value.cloned())));
+    let focused = use_memo(move || selectable.focus_state.is_focused(index()));
+    let down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);
+
+    use_context_provider(|| ListboxOptionContext {
+        selected: selected.into(),
+    });
+
+    SelectableOption {
+        id,
+        disabled,
+        selected,
+        focused,
+        down_pos,
+        index,
+        value,
     }
 }
 
