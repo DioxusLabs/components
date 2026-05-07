@@ -317,7 +317,7 @@ pub fn CalendarDay(props: CalendarDayProps) -> Element {
             class: Styles::dx_calendar_grid_cell,
             date: props.date,
             attributes: props.attributes,
-            {props.children}
+            children: props.children,
         }
     }
 }
@@ -331,5 +331,34 @@ fn DropDownIcon() -> Element {
             stroke: "var(--secondary-color-4)",
             path { d: "m6 9 6 6 6-6" }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use time::macros::date;
+
+    #[component]
+    fn StyledCalendarDayWithDefaultContent() -> Element {
+        rsx! {
+            Calendar {
+                view_date: date!(2026 - 05 - 15),
+                CalendarView {
+                    CalendarDay {
+                        date: date!(2026 - 05 - 15),
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn styled_calendar_day_preserves_primitive_default_content() {
+        let mut dom = VirtualDom::new(StyledCalendarDayWithDefaultContent);
+        dom.rebuild_in_place();
+        let html = dioxus_ssr::render(&dom);
+
+        assert!(html.contains(">15</button>"));
     }
 }
