@@ -9,7 +9,7 @@ const LOAD_TIMEOUT = 20 * 60 * 1000;
 /** Navigate to the DnD page and return the first (main) variant list. */
 async function loadMainList(page: import("@playwright/test").Page) {
   await page.goto(URL, { timeout: LOAD_TIMEOUT });
-  const list = page.locator(".dx-dnd-list").first();
+  const list = page.getByRole("list", { name: "Sortable list" }).first();
   await expect(list).toBeVisible({ timeout: 30000 });
   return list;
 }
@@ -17,14 +17,18 @@ async function loadMainList(page: import("@playwright/test").Page) {
 /** Navigate to the DnD page and return the second (removable) variant list. */
 async function loadRemovableList(page: import("@playwright/test").Page) {
   await page.goto(REMOVABLE_URL, { timeout: LOAD_TIMEOUT });
-  const list = page.locator(".dx-dnd-list").first();
+  const list = page.getByRole("list", { name: "Sortable list" }).first();
   await expect(list).toBeVisible({ timeout: 30000 });
   return list;
 }
 
 /** Helper to get list items from a dnd-list container. */
 function getItems(list: import("@playwright/test").Locator) {
-  return list.locator(".dx-dnd-list-item");
+  return list.locator('[aria-roledescription="sortable item"]');
+}
+
+function getLiveRegion(list: import("@playwright/test").Locator) {
+  return list.locator("xpath=..").locator('[role="status"][aria-live="assertive"]');
 }
 
 async function itemText(locator: import("@playwright/test").Locator) {
@@ -41,12 +45,11 @@ async function dispatchDragLifecycle(
   },
 ) {
   await page.evaluate(async ({ sourceIndex, targetIndex, drop, end = true }) => {
-    const list = document.querySelector(".dx-dnd-list");
-    const ul = list?.querySelector(".dx-dnd-list-ul");
-    const items = list?.querySelectorAll(".dx-dnd-list-item");
+    const list = document.querySelector('ul[aria-roledescription="sortable list"]');
+    const items = list?.querySelectorAll('li[aria-roledescription="sortable item"]');
     const source = items?.[sourceIndex];
     const target = items?.[targetIndex];
-    if (!list || !ul || !source || !target) {
+    if (!list || !source || !target) {
       throw new Error("Drag-and-drop test elements were not found");
     }
 
@@ -72,7 +75,7 @@ async function dispatchDragLifecycle(
     await new Promise(requestAnimationFrame);
 
     if (drop === "list") {
-      dispatch(ul, "drop");
+      dispatch(list, "drop");
       await new Promise(requestAnimationFrame);
     } else if (drop === "document") {
       dispatch(document, "drop");
@@ -128,7 +131,7 @@ test.describe("Drag and drop lifecycle", () => {
   }) => {
     const list = await loadMainList(page);
     const items = getItems(list);
-    const liveRegion = list.locator('[aria-live="assertive"]');
+    const liveRegion = getLiveRegion(list);
     const itemCount = await items.count();
 
     // Grab item 3 (index 2)
@@ -184,7 +187,7 @@ test.describe("Drag and drop lifecycle", () => {
     await page.keyboard.press("Enter");
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("Escape");
-    const liveRegion = list.locator('[aria-live="assertive"]');
+    const liveRegion = getLiveRegion(list);
     await expect(liveRegion).toContainText(
       "Movement cancelled. The item has returned to its starting position of 1",
     );
@@ -217,7 +220,7 @@ test.describe("Drag and drop lifecycle", () => {
     const itemCount = await items.count();
     await items.first().click();
     await page.keyboard.press("Space");
-    const liveRegion = list.locator('[aria-live="assertive"]');
+    const liveRegion = getLiveRegion(list);
     await expect(liveRegion).toContainText(
       `You have lifted an item in position 1 of ${itemCount}`,
     );
@@ -233,7 +236,7 @@ test.describe("Drag and drop lifecycle", () => {
   ): Promise<number> {
     return page.evaluate(() => {
       const beforeTarget = document.querySelector(
-        '.dx-drop-indicator[data-position="before"] + .dx-dnd-list-item',
+        '[data-position="before"] + li[aria-roledescription="sortable item"]',
       );
       if (beforeTarget) {
         return Number.parseFloat(
@@ -241,7 +244,7 @@ test.describe("Drag and drop lifecycle", () => {
         );
       }
       const afterTarget = document.querySelector(
-        '.dx-dnd-list-item:has(+ .dx-drop-indicator[data-position="after"])',
+        'li[aria-roledescription="sortable item"]:has(+ [data-position="after"])',
       );
       if (afterTarget) {
         return Number.parseFloat(
@@ -261,7 +264,7 @@ test.describe("Drag and drop lifecycle", () => {
       end: false,
     });
 
-    await expect(page.locator(".dx-drop-indicator")).toHaveCount(1);
+    await expect(page.locator("[data-position]")).toHaveCount(1);
     await expect.poll(() => dropIndicatorOpacity(page)).toBeGreaterThan(0.5);
   });
 
@@ -283,7 +286,7 @@ test.describe("Drag and drop lifecycle", () => {
   }) => {
     const list = await loadMainList(page);
     const items = getItems(list);
-    const sourceTitle = await items.nth(2).locator(".dx-task-title").innerText();
+    const sourceTitle = await itemText(items.nth(2));
 
     await dispatchDragLifecycle(page, {
       sourceIndex: 2,
@@ -291,9 +294,7 @@ test.describe("Drag and drop lifecycle", () => {
       drop: "document",
     });
 
-    await expect(items.nth(3).locator(".dx-task-title")).toHaveText(
-      sourceTitle,
-    );
+    await expect.poll(() => itemText(items.nth(3))).toBe(sourceTitle);
   });
 
   test("cancelled mouse drag does not reorder the list", async ({ page }) => {
@@ -319,7 +320,7 @@ test.describe("Remove behavior", () => {
     const list = await loadRemovableList(page);
     const items = getItems(list);
     const initialCount = await items.count();
-    const removeButtons = list.locator(".dx-remove-button");
+    const removeButtons = list.getByRole("button", { name: /Remove item/ });
     await removeButtons.nth(2).click();
     await expect(items).toHaveCount(initialCount - 1);
     await expect(items.nth(2)).toBeFocused();
@@ -331,7 +332,7 @@ test.describe("Remove behavior", () => {
     const list = await loadRemovableList(page);
     const items = getItems(list);
     const initialCount = await items.count();
-    const removeButtons = list.locator(".dx-remove-button");
+    const removeButtons = list.getByRole("button", { name: /Remove item/ });
     await removeButtons.nth(initialCount - 1).click();
     await expect(items).toHaveCount(initialCount - 1);
     await expect(items.nth(initialCount - 2)).toBeFocused();
@@ -351,7 +352,7 @@ test.describe("Remove behavior", () => {
     await page.keyboard.press("Enter");
 
     await expect.poll(() => itemText(items.nth(2))).toBe(movedText);
-    await items.nth(2).locator(".dx-remove-button").click();
+    await items.nth(2).getByRole("button", { name: /Remove item/ }).click();
 
     await expect(items).toHaveCount(initialCount - 1);
     await expect.poll(async () => {
@@ -369,7 +370,7 @@ test.describe("Axe automated scan", () => {
     await loadMainList(page);
 
     const accessibilityScanResults = await new AxeBuilder({ page })
-      .include(".dx-dnd-list")
+      .include('ul[aria-roledescription="sortable list"]')
       .disableRules(["color-contrast"])
       .analyze();
 

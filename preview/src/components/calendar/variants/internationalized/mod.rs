@@ -9,7 +9,7 @@ pub fn Demo() -> Element {
     let mut selected_date = use_signal(|| None::<Date>);
     let mut view_date = use_signal(|| date!(2026 - 05 - 15));
     rsx! {
-        div { class: "dx-calendar-example", style: "padding: 20px;",
+        div { style: "padding: 20px;",
             Calendar {
                 selected_date: selected_date(),
                 on_date_change: move |date| {
@@ -25,17 +25,6 @@ pub fn Demo() -> Element {
                 on_format_month: |month: Month| tid!(& month.to_string()),
                 min_date: date!(1995 - 07 - 21),
                 max_date: date!(2035 - 09 - 11),
-                CalendarView {
-                    CalendarHeader {
-                        CalendarNavigation {
-                            CalendarPreviousMonthButton {}
-                            CalendarSelectMonth {}
-                            CalendarSelectYear {}
-                            CalendarNextMonthButton {}
-                        }
-                    }
-                    CalendarGrid {}
-                }
             }
         }
     }

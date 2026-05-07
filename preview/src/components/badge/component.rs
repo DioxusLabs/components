@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 use dioxus_primitives::icon;
 
+#[css_module("/src/components/badge/style.css")]
+struct Styles;
+
 #[derive(Copy, Clone, PartialEq, Default)]
 #[non_exhaustive]
 pub enum BadgeVariant {
@@ -39,8 +42,6 @@ pub struct BadgeProps {
 #[component]
 pub fn Badge(props: BadgeProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
-
         BadgeElement {
             "padding": true,
             variant: props.variant,
@@ -54,7 +55,7 @@ pub fn Badge(props: BadgeProps) -> Element {
 fn BadgeElement(props: BadgeProps) -> Element {
     rsx! {
         span {
-            class: "dx-badge",
+            class: Styles::dx_badge,
             "data-style": props.variant.class(),
             ..props.attributes,
             {props.children}

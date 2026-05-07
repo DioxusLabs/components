@@ -4,7 +4,7 @@
     align-items: center;
 }
 
-.dx-date-picker-group .dx-popover-trigger {
+.dx-date-picker-group .dx-date-picker-popover-trigger {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -15,7 +15,7 @@
     transition: rotate 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dx-popover[data-state="open"] div .dx-date-picker-trigger {
+.dx-date-picker [data-state="open"] .dx-date-picker-trigger {
     rotate: 180deg;
 }
 
@@ -45,7 +45,7 @@
     transition: background-color 100ms ease-out;
 }
 
-.dx-date-picker-group .dx-popover-content {
+.dx-date-picker-group .dx-date-picker-popover-content {
     max-width: unset;
     padding: 0;
 }

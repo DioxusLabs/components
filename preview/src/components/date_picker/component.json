@@ -7,6 +7,10 @@
     {
       "name": "dioxus-primitives",
       "git": "https://github.com/DioxusLabs/components"
+    },
+    {
+      "name": "time",
+      "version": "0.3.44"
     }
   ],
   "componentDependencies": ["calendar", "popover"],

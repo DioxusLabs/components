@@ -2,27 +2,22 @@ import { test, expect } from "@playwright/test";
 
 test("test", async ({ page }) => {
   await page.goto("http://127.0.0.1:8080/component/?name=accordion&", { timeout: 20 * 60 * 1000 }); // Increase timeout to 20 minutes
-  // Get the first .dx-accordion-item
-  const accordionItem = page.locator(".dx-accordion-item");
-  // Click on the first .dx-accordion-item
-  const firstAccordionItem = accordionItem.first();
-  await firstAccordionItem.locator("button").click();
-  // Verify that the first .dx-accordion-item is expanded (data-open="true")
+  const accordionItems = page.locator("[data-open]").filter({ has: page.getByRole("button") });
+  const buttons = accordionItems.getByRole("button");
+  const firstAccordionItem = accordionItems.first();
+  await buttons.first().click();
   await expect(firstAccordionItem).toHaveAttribute("data-open", "true");
 
-  // Click on the second .dx-accordion-item
-  const secondAccordionItem = accordionItem.nth(1);
-  await secondAccordionItem.locator("button").click();
-  // Verify that the second .dx-accordion-item is expanded (data-open="true")
+  const secondAccordionItem = accordionItems.nth(1);
+  await buttons.nth(1).click();
   await expect(secondAccordionItem).toHaveAttribute("data-open", "true");
-  // Verify the first .dx-accordion-item is collapsed (data-open="false")
   await expect(firstAccordionItem).toHaveAttribute("data-open", "false");
 });
 
 test("keyboard navigation skips disabled items", async ({ page }) => {
   await page.goto("http://127.0.0.1:8080/component/?name=accordion&", { timeout: 20 * 60 * 1000 });
-  const accordionItems = page.locator(".dx-accordion-item");
-  const buttons = accordionItems.locator("button");
+  const accordionItems = page.locator("[data-open]").filter({ has: page.getByRole("button") });
+  const buttons = accordionItems.getByRole("button");
 
   await expect(accordionItems.nth(2)).toHaveAttribute("data-disabled", "true");
   await expect(buttons.nth(2)).toBeDisabled();

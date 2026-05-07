@@ -225,7 +225,6 @@ pub fn VirtualList(props: VirtualListProps) -> Element {
     rsx! {
         div {
             id: container_id,
-            class: "dx-virtual-list-container",
             role: "list",
             tabindex: "0",
             ..attributes,

@@ -4,6 +4,10 @@ use dioxus_primitives::dialog::{
     self, DialogCtx, DialogDescriptionProps, DialogRootProps, DialogTitleProps,
 };
 use dioxus_primitives::icon;
+use dioxus_primitives::merge_attributes;
+
+#[css_module("/src/components/sheet/style.css")]
+struct Styles;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub enum SheetSide {
@@ -43,9 +47,8 @@ pub fn Sheet(props: DialogRootProps) -> Element {
 #[component]
 fn SheetRoot(props: DialogRootProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         dialog::DialogRoot {
-            class: "dx-sheet-root",
+            class: Styles::dx_sheet_root,
             "data-slot": "sheet-root",
             id: props.id,
             is_modal: props.is_modal,
@@ -67,8 +70,8 @@ pub fn SheetContent(
     children: Element,
 ) -> Element {
     let class = class
-        .map(|c| format!("dx-sheet {c}"))
-        .unwrap_or("dx-sheet".to_string());
+        .map(|c| format!("{} {c}", Styles::dx_sheet))
+        .unwrap_or(Styles::dx_sheet.to_string());
 
     rsx! {
         dialog::DialogContent {
@@ -78,14 +81,24 @@ pub fn SheetContent(
             "data-side": side.as_str(),
             attributes,
             {children}
-            SheetClose { class: "dx-sheet-close",
-                icon::Icon {
-                    class: "dx-sheet-close-icon",
-                    width: "20px",
-                    height: "20px",
-                    path { d: "M18 6 6 18" }
-                    path { d: "m6 6 12 12" }
-                }
+        }
+    }
+}
+
+#[component]
+pub fn SheetContentClose(#[props(extends = GlobalAttributes)] attributes: Vec<Attribute>) -> Element {
+    let base = attributes!(button {
+        class: Styles::dx_sheet_close,
+    });
+    let attributes = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        SheetClose { attributes,
+            icon::Icon {
+                width: "20px",
+                height: "20px",
+                path { d: "M18 6 6 18" }
+                path { d: "m6 6 12 12" }
             }
         }
     }
@@ -97,7 +110,7 @@ pub fn SheetHeader(
     children: Element,
 ) -> Element {
     rsx! {
-        div { class: "dx-sheet-header", "data-slot": "sheet-header", ..attributes, {children} }
+        div { class: Styles::dx_sheet_header, "data-slot": "sheet-header", ..attributes, {children} }
     }
 }
 
@@ -107,7 +120,7 @@ pub fn SheetFooter(
     children: Element,
 ) -> Element {
     rsx! {
-        div { class: "dx-sheet-footer", "data-slot": "sheet-footer", ..attributes, {children} }
+        div { class: Styles::dx_sheet_footer, "data-slot": "sheet-footer", ..attributes, {children} }
     }
 }
 
@@ -116,7 +129,7 @@ pub fn SheetTitle(props: DialogTitleProps) -> Element {
     rsx! {
         dialog::DialogTitle {
             id: props.id,
-            class: "dx-sheet-title",
+            class: Styles::dx_sheet_title,
             "data-slot": "sheet-title",
             attributes: props.attributes,
             {props.children}
@@ -129,7 +142,7 @@ pub fn SheetDescription(props: DialogDescriptionProps) -> Element {
     rsx! {
         dialog::DialogDescription {
             id: props.id,
-            class: "dx-sheet-description",
+            class: Styles::dx_sheet_description,
             "data-slot": "sheet-description",
             attributes: props.attributes,
             {props.children}
@@ -145,14 +158,14 @@ pub fn SheetClose(
 ) -> Element {
     let ctx: DialogCtx = use_context();
 
-    let mut merged: Vec<Attribute> = attributes! {
+    let base = attributes! {
         button {
             onclick: move |_| {
                 ctx.set_open(false);
             }
         }
     };
-    merged.extend(attributes);
+    let merged = merge_attributes(vec![base, attributes]);
 
     if let Some(dynamic) = r#as {
         dynamic.call(merged)

@@ -1,5 +1,8 @@
 use dioxus::prelude::*;
 
+#[css_module("/src/components/textarea/style.css")]
+struct Styles;
+
 #[derive(Copy, Clone, PartialEq, Default)]
 #[non_exhaustive]
 pub enum TextareaVariant {
@@ -49,9 +52,8 @@ pub fn Textarea(
     children: Element,
 ) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         textarea {
-            class: "dx-textarea",
+            class: Styles::dx_textarea,
             "data-slot": "textarea",
             "data-style": variant.class(),
             oninput: move |e| _ = oninput.map(|callback| callback(e)),

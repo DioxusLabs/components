@@ -5,13 +5,15 @@ use dioxus_primitives::combobox::{
 };
 use dioxus_primitives::{dioxus_attributes::attributes, icon, merge_attributes};
 
+#[css_module("/src/components/combobox/style.css")]
+struct Styles;
+
 #[component]
 pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Element {
-    let base = attributes!(div { class: "dx-combobox" });
+    let base = attributes!(div { class: Styles::dx_combobox });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         combobox::Combobox {
             value: props.value,
             default_value: props.default_value,
@@ -34,15 +36,15 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
 #[component]
 pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
     rsx! {
-        div { class: "dx-combobox-input-wrapper",
+        div { class: Styles::dx_combobox_input_wrapper,
             combobox::ComboboxInput {
-                class: "dx-combobox-input",
+                class: Styles::dx_combobox_input,
                 placeholder: props.placeholder,
                 id: props.id,
                 attributes: props.attributes,
             }
             icon::Icon {
-                class: "dx-combobox-expand-icon",
+                class: Styles::dx_combobox_expand_icon,
                 width: "16px",
                 height: "16px",
                 path { d: "m7 15 5 5 5-5" }
@@ -54,7 +56,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
 
 #[component]
 pub fn ComboboxList(props: ComboboxListProps) -> Element {
-    let base = attributes!(div { class: "dx-combobox-list" });
+    let base = attributes!(div { class: Styles::dx_combobox_list });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
@@ -68,7 +70,7 @@ pub fn ComboboxList(props: ComboboxListProps) -> Element {
 
 #[component]
 pub fn ComboboxEmpty(props: ComboboxEmptyProps) -> Element {
-    let base = attributes!(div { class: "dx-combobox-empty" });
+    let base = attributes!(div { class: Styles::dx_combobox_empty });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
@@ -81,7 +83,7 @@ pub fn ComboboxEmpty(props: ComboboxEmptyProps) -> Element {
 
 #[component]
 pub fn ComboboxOption<T: Clone + PartialEq + 'static>(props: ComboboxOptionProps<T>) -> Element {
-    let base = attributes!(div { class: "dx-combobox-option" });
+    let base = attributes!(div { class: Styles::dx_combobox_option });
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
@@ -104,7 +106,7 @@ pub fn ComboboxItemIndicator() -> Element {
     rsx! {
         combobox::ComboboxItemIndicator {
             icon::Icon {
-                class: "dx-combobox-check-icon",
+                class: Styles::dx_combobox_check_icon,
                 width: "16px",
                 height: "16px",
                 path { d: "M20 6 9 17l-5-5" }
