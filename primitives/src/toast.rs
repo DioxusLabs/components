@@ -4,7 +4,6 @@ use crate::{
     portal::{use_portal, PortalIn, PortalOut},
     use_global_keydown_listener, use_unique_id,
 };
-use dioxus::dioxus_core::DynamicNode;
 use dioxus::prelude::*;
 use dioxus_sdk_time::use_timeout;
 use std::collections::VecDeque;
@@ -71,7 +70,7 @@ pub struct ToastProviderProps {
     pub max_toasts: ReadSignal<usize>,
 
     /// The callback to render a toast. Defaults to rendering the [`Toast`] component.
-    #[props(default = Callback::new(|props: ToastPropsWithOwner| rsx! { {DynamicNode::Component(props.into_vcomponent(Toast))} }))]
+    #[props(default = Callback::new(|props: ToastPropsWithOwner| rsx! { Toast { ..props } }))]
     pub render_toast: Callback<ToastPropsWithOwner, Element>,
 
     /// Additional attributes to apply to the toast container element.

@@ -1,4 +1,3 @@
-use dioxus::dioxus_core::DynamicNode;
 use dioxus::prelude::*;
 use dioxus_primitives::toast::{
     self, Toast, ToastCloseButtonProps, ToastContentProps, ToastDescriptionProps, ToastProps,
@@ -86,9 +85,7 @@ pub fn ToastProvider(
     children: Element,
 ) -> Element {
     let render_toast = render_toast.unwrap_or_else(|| {
-        Callback::new(|p: toast::ToastPropsWithOwner| {
-            rsx! { {DynamicNode::Component(p.into_vcomponent(StyledToast))} }
-        })
+        Callback::new(|p: toast::ToastPropsWithOwner| rsx! { StyledToast { ..p } })
     });
 
     rsx! {
