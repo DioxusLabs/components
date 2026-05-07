@@ -11,7 +11,6 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("../picker.css") }
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         combobox::Combobox {
             value: props.value,

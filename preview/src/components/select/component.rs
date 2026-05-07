@@ -11,7 +11,6 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("../picker.css") }
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         select::Select {
             value: props.value,
@@ -36,7 +35,6 @@ pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -
     let merged = merge_attributes(vec![base, props.attributes]);
 
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("../picker.css") }
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
         select::SelectMulti {
             values: props.values,
