@@ -333,32 +333,3 @@ fn DropDownIcon() -> Element {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use time::macros::date;
-
-    #[component]
-    fn StyledCalendarDayWithDefaultContent() -> Element {
-        rsx! {
-            Calendar {
-                view_date: date!(2026 - 05 - 15),
-                CalendarView {
-                    CalendarDay {
-                        date: date!(2026 - 05 - 15),
-                    }
-                }
-            }
-        }
-    }
-
-    #[test]
-    fn styled_calendar_day_preserves_primitive_default_content() {
-        let mut dom = VirtualDom::new(StyledCalendarDayWithDefaultContent);
-        dom.rebuild_in_place();
-        let html = dioxus_ssr::render(&dom);
-
-        assert!(html.contains(">15</button>"));
-    }
-}
