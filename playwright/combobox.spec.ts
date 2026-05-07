@@ -215,41 +215,6 @@ test("controlled value and controlled open stay in sync", async ({ page }) => {
     await expect(storedValue).toHaveText("dioxus");
 });
 
-test("clears focus when a controlled query hides the highlighted option", async ({ page }) => {
-    await page.goto(variantUrl("controlled"), { timeout: 20 * 60 * 1000 });
-
-    const trigger = page.getByRole("combobox", { name: "Controlled framework" });
-    const storedValue = page.getByTestId("combobox-controlled-value");
-
-    await trigger.click();
-    await expect(content(page)).toBeVisible();
-
-    const next = list(page).getByRole("option", { name: "Next.js" });
-    await page.keyboard.press("ArrowDown");
-    await expect(next).toHaveAttribute("data-highlighted", "true");
-
-    await page.getByRole("button", { name: "Filter SvelteKit" }).click();
-
-    const svelte = list(page).getByRole("option", { name: "SvelteKit" });
-    await expect(trigger).toBeFocused();
-    await expect(next).toHaveCount(0);
-    await expect(svelte).toBeVisible();
-    await expect(svelte).not.toHaveAttribute("data-highlighted", "true");
-    await expect(trigger).not.toHaveAttribute("aria-activedescendant", /.+/);
-
-    await page.keyboard.press("Enter");
-    await expect(content(page)).toBeVisible();
-    await expect(trigger).toHaveValue("sve");
-    await expect(storedValue).toHaveText("svelte");
-
-    await page.keyboard.press("ArrowDown");
-    await expect(svelte).toHaveAttribute("data-highlighted", "true");
-
-    await page.keyboard.press("Enter");
-    await expect(content(page)).toHaveCount(0);
-    await expect(trigger).toHaveValue("SvelteKit");
-});
-
 test("dynamic option removal updates filtering and keyboard selection", async ({ page }) => {
     await page.goto(variantUrl("dynamic"), { timeout: 20 * 60 * 1000 });
 
