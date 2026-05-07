@@ -13,13 +13,17 @@ use dioxus_primitives::{
     popover::{PopoverContentProps, PopoverTriggerProps},
     ContentAlign,
 };
-use time::{macros::date, Date};
+use time::{Date, Month};
 
 use super::super::calendar::*;
 use super::super::popover::*;
 
 #[css_module("/src/components/date_picker/style.css")]
 struct Styles;
+
+fn fixed_date(year: i32, month: Month, day: u8) -> Date {
+    Date::from_calendar_date(year, month, day).expect("valid fixed date")
+}
 
 #[derive(Clone, Copy)]
 struct StyledDatePickerContext {
@@ -52,11 +56,11 @@ pub struct DatePickerProps {
     pub read_only: ReadSignal<bool>,
 
     /// Lower limit of the range of available dates
-    #[props(default = date!(1925-01-01))]
+    #[props(default = fixed_date(1925, Month::January, 1))]
     pub min_date: Date,
 
     /// Upper limit of the range of available dates
-    #[props(default = date!(2050-12-31))]
+    #[props(default = fixed_date(2050, Month::December, 31))]
     pub max_date: Date,
 
     /// Callback when display day placeholder
@@ -107,11 +111,11 @@ pub struct DateRangePickerProps {
     pub read_only: ReadSignal<bool>,
 
     /// Lower limit of the range of available dates
-    #[props(default = date!(1925-01-01))]
+    #[props(default = fixed_date(1925, Month::January, 1))]
     pub min_date: Date,
 
     /// Upper limit of the range of available dates
-    #[props(default = date!(2050-12-31))]
+    #[props(default = fixed_date(2050, Month::December, 31))]
     pub max_date: Date,
 
     /// Callback when display day placeholder
@@ -398,13 +402,12 @@ pub(crate) fn DatePickerPopoverContent(props: PopoverContentProps) -> Element {
 mod tests {
     use super::*;
     use dioxus_primitives::calendar::DateRange;
-    use time::macros::date;
 
     #[component]
     fn DatePickerWithDefaultInput() -> Element {
         rsx! {
             DatePicker {
-                selected_date: Some(date!(2026 - 05 - 07)),
+                selected_date: Some(fixed_date(2026, Month::May, 7)),
             }
         }
     }
@@ -413,7 +416,10 @@ mod tests {
     fn DateRangePickerWithDefaultInput() -> Element {
         rsx! {
             DateRangePicker {
-                selected_range: Some(DateRange::new(date!(2026 - 05 - 07), date!(2026 - 05 - 11))),
+                selected_range: Some(DateRange::new(
+                    fixed_date(2026, Month::May, 7),
+                    fixed_date(2026, Month::May, 11),
+                )),
             }
         }
     }

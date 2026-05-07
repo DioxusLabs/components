@@ -9,10 +9,14 @@ use dioxus_primitives::calendar::{
 };
 use dioxus_primitives::icon::Icon;
 use dioxus_primitives::{dioxus_attributes::attributes, merge_attributes};
-use time::{macros::date, Date, Month, UtcDateTime, Weekday};
+use time::{Date, Month, UtcDateTime, Weekday};
 
 #[css_module("/src/components/calendar/style.css")]
 struct Styles;
+
+fn fixed_date(year: i32, month: Month, day: u8) -> Date {
+    Date::from_calendar_date(year, month, day).expect("valid fixed date")
+}
 
 fn weekday_abbreviation(weekday: Weekday) -> &'static str {
     match weekday {
@@ -65,11 +69,11 @@ pub struct CalendarProps {
     pub first_day_of_week: Weekday,
 
     /// Lower limit of the range of available dates
-    #[props(default = date!(1925-01-01))]
+    #[props(default = fixed_date(1925, Month::January, 1))]
     pub min_date: Date,
 
     /// Upper limit of the range of available dates
-    #[props(default = date!(2050-12-31))]
+    #[props(default = fixed_date(2050, Month::December, 31))]
     pub max_date: Date,
 
     /// Specify how many months are visible at once
@@ -124,11 +128,11 @@ pub struct RangeCalendarProps {
     pub first_day_of_week: Weekday,
 
     /// Lower limit of the range of available dates
-    #[props(default = date!(1925-01-01))]
+    #[props(default = fixed_date(1925, Month::January, 1))]
     pub min_date: Date,
 
     /// Upper limit of the range of available dates
-    #[props(default = date!(2050-12-31))]
+    #[props(default = fixed_date(2050, Month::December, 31))]
     pub max_date: Date,
 
     /// Specify how many months are visible at once
@@ -542,13 +546,12 @@ fn DropDownIcon() -> Element {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use time::macros::date;
 
     #[component]
     fn CalendarWithDefaultView() -> Element {
         rsx! {
             Calendar {
-                view_date: date!(2026 - 05 - 15),
+                view_date: fixed_date(2026, Month::May, 15),
             }
         }
     }
@@ -557,7 +560,7 @@ mod tests {
     fn CalendarWithDefaultMonthCount() -> Element {
         rsx! {
             Calendar {
-                view_date: date!(2026 - 05 - 15),
+                view_date: fixed_date(2026, Month::May, 15),
                 month_count: 3,
             }
         }
