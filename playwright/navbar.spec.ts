@@ -5,7 +5,8 @@ test('hover navigation', async ({ page }) => {
   // wait for the styles to load
   await expect(page.getByRole('menuitem', { name: 'Inputs' })).toHaveCSS('border-width', '0px');
   const inputsNav = page.locator('.dx-navbar-nav').first();
-  await inputsNav.hover();
+  await page.mouse.move(0, 0);
+  await page.getByRole('menuitem', { name: 'Inputs' }).hover();
   await expect(inputsNav).toHaveAttribute('data-state', 'open');
   const calendar = page.getByRole('menuitem', { name: 'Calendar' });
   await expect(calendar).toBeVisible();
