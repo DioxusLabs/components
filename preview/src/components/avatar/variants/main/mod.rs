@@ -23,7 +23,7 @@ pub fn Demo() -> Element {
                     },
                     aria_label: "Basic avatar",
                     AvatarImage {
-                        class: Styles::dx_avatar_image.to_string(),
+                        class: Styles::dx_avatar_image,
                         src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
                         alt: "User avatar",
                     }
@@ -40,7 +40,7 @@ pub fn Demo() -> Element {
                     },
                     aria_label: "Basic avatar",
                     AvatarImage {
-                        class: Styles::dx_avatar_image.to_string(),
+                        class: Styles::dx_avatar_image,
                         src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
                         alt: "User avatar",
                     }
@@ -56,7 +56,7 @@ pub fn Demo() -> Element {
                     },
                     aria_label: "Error avatar",
                     AvatarImage {
-                        class: Styles::dx_avatar_image.to_string(),
+                        class: Styles::dx_avatar_image,
                         src: "https://invalid-url.example/image.jpg",
                         alt: "Invalid image",
                     }
@@ -72,7 +72,7 @@ pub fn Demo() -> Element {
                     },
                     aria_label: "Large avatar",
                     AvatarImage {
-                        class: Styles::dx_avatar_image.to_string(),
+                        class: Styles::dx_avatar_image,
                         src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif()),
                         alt: "Large avatar",
                     }
