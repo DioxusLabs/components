@@ -87,8 +87,7 @@ fn use_combobox_root(
         roving_loop,
         open,
     );
-    let (query, set_query) =
-        use_controlled(query.value, query.default.cloned(), query.on_change);
+    let (query, set_query) = use_controlled(query.value, query.default.cloned(), query.on_change);
     let open = selectable.open;
 
     use_context_provider(|| ComboboxContext {
