@@ -21,6 +21,7 @@ pub mod calendar;
 pub mod checkbox;
 pub mod collapsible;
 pub mod color_picker;
+pub mod combobox;
 pub mod context_menu;
 pub mod date_picker;
 pub mod dialog;
@@ -30,6 +31,7 @@ mod focus;
 pub mod hover_card;
 pub mod icon;
 pub mod label;
+mod listbox;
 pub mod menubar;
 mod move_interaction;
 #[cfg(feature = "router")]
@@ -41,6 +43,8 @@ pub mod progress;
 pub mod radio_group;
 pub mod scroll_area;
 pub mod select;
+mod selectable;
+mod selection;
 pub mod separator;
 pub mod slider;
 pub mod switch;
@@ -98,6 +102,17 @@ fn use_id_or<T: Clone + PartialEq + 'static>(
             gen_id.peek().clone()
         }
     })
+}
+
+/// A controlled-or-uncontrolled prop trio: external value signal,
+/// fallback default signal, and change callback. Bundles the three
+/// pieces that always travel together when forwarding props into
+/// internal hooks like [`use_controlled`].
+#[derive(Clone, Copy)]
+pub(crate) struct Controlled<T: Clone + PartialEq + 'static> {
+    pub(crate) value: ReadSignal<Option<T>>,
+    pub(crate) default: ReadSignal<T>,
+    pub(crate) on_change: Callback<T>,
 }
 
 /// Allows some state to be either controlled or uncontrolled.

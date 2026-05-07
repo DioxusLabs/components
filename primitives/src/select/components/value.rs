@@ -68,30 +68,11 @@ pub struct SelectValueProps {
 pub fn SelectValue(props: SelectValueProps) -> Element {
     let ctx = use_context::<SelectContext>();
 
-    let selected_text_value = use_memo(move || {
-        let values = ctx.values.read();
-        if values.is_empty() {
-            return None;
-        }
-        let options = ctx.options.read();
-        let parts: Vec<String> = values
-            .iter()
-            .filter_map(|v| {
-                options
-                    .iter()
-                    .find(|opt| opt.value == *v)
-                    .map(|opt| opt.text_value.clone())
-            })
-            .collect();
-        if parts.is_empty() {
-            None
-        } else {
-            Some(parts.join(", "))
-        }
-    });
-
-    let is_empty = move || ctx.values.read().is_empty();
-    let display_value = selected_text_value().unwrap_or_else(|| props.placeholder.cloned());
+    let is_empty = move || ctx.selectable.is_empty();
+    let display_value = ctx
+        .selectable
+        .selected_text()
+        .unwrap_or_else(|| props.placeholder.cloned());
 
     rsx! {
         // Add placeholder option if needed

@@ -1,14 +1,16 @@
 //! SelectOption and SelectItemIndicator component implementations.
 
 use crate::{
-    focus::use_focus_controlled_item_disabled,
-    select::context::{RcPartialEqValue, SelectListContext},
-    use_effect, use_effect_cleanup, use_id_or, use_unique_id,
+    focus::use_focus_control_disabled,
+    listbox::{ListboxContext, ListboxItemIndicator},
+    selectable::{
+        pointer_select_cancel, pointer_select_commit, pointer_select_start, use_selectable_option,
+        RcPartialEqValue, SelectableOptionConfig,
+    },
 };
-use dioxus::html::input_data::MouseButton;
 use dioxus::prelude::*;
 
-use super::super::context::{OptionState, SelectContext, SelectOptionContext};
+use super::super::context::SelectContext;
 
 /// The props for the [`SelectOption`] component
 #[derive(Props, Clone, PartialEq)]
@@ -100,135 +102,57 @@ pub struct SelectOptionProps<T: Clone + PartialEq + 'static> {
 /// ```
 #[component]
 pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>) -> Element {
-    // Generate a unique ID for this option for accessibility
-    let option_id = use_unique_id();
-
-    // Use use_id_or to handle the ID
-    let id = use_id_or(option_id, props.id);
-
     let index = props.index;
-    let value = props.value;
-    let text_value = use_memo(move || match (props.text_value)() {
-        Some(text) => text,
-        None => {
-            let value = value.read();
-            let as_any: &dyn std::any::Any = &*value;
-            as_any
-                .downcast_ref::<String>()
-                .cloned()
-                .or_else(|| as_any.downcast_ref::<&str>().map(|s| s.to_string()))
-                .unwrap_or_else(|| {
-                    tracing::warn!(
-                        "SelectOption with non-string types requires text_value to be set"
-                    );
-                    String::new()
-                })
-        }
-    });
 
     let mut ctx: SelectContext = use_context();
-    let disabled = {
-        let select_disabled = ctx.disabled;
-        let option_disabled = props.disabled;
-        move || select_disabled.cloned() || option_disabled.cloned()
-    };
+    let option = use_selectable_option(
+        ctx.selectable,
+        SelectableOptionConfig {
+            id: props.id,
+            index,
+            value: props.value,
+            text_value: props.text_value,
+            option_disabled: props.disabled,
+            component_name: "SelectOption",
+        },
+    );
 
-    use_effect(move || {
-        let option_id = id();
-        let option_state = OptionState {
-            tab_index: index(),
-            value: RcPartialEqValue::new(value.cloned()),
-            text_value: text_value.cloned(),
-            id: option_id.clone(),
-            disabled: disabled(),
-        };
-        if ctx.options.peek().iter().any(|opt| opt == &option_state) {
-            return;
-        }
-        let mut options = ctx.options.write();
-        if let Some(option) = options.iter_mut().find(|opt| opt.id == option_id) {
-            *option = option_state;
-        } else {
-            options.push(option_state);
-        }
-    });
+    let onmounted =
+        use_focus_control_disabled(ctx.selectable.focus_state, props.index, move || {
+            option.disabled.cloned()
+        });
 
-    use_effect_cleanup(move || {
-        ctx.options.write().retain(|opt| opt.id != *id.read());
-    });
-
-    let onmounted = use_focus_controlled_item_disabled(props.index, disabled);
-    let focused = move || ctx.focus_state.is_focused(index());
-    let selected = use_memo(move || {
-        let value = props.value.read();
-        ctx.values
-            .read()
-            .iter()
-            .any(|v| v.as_ref::<T>() == Some(&*value))
-    });
-    let mut down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);
-
-    use_context_provider(|| SelectOptionContext {
-        selected: selected.into(),
-    });
-
-    let render = use_context::<SelectListContext>().render;
+    let render = use_context::<ListboxContext>().render;
 
     rsx! {
         if render() {
             div {
                 role: "option",
-                id,
-                tabindex: if focused() { "0" } else { "-1" },
+                id: option.id,
+                tabindex: if (option.focused)() { "0" } else { "-1" },
                 onmounted,
 
-                aria_selected: selected(),
-                aria_disabled: disabled(),
+                aria_selected: (option.selected)(),
+                aria_disabled: (option.disabled)(),
                 aria_label: props.aria_label.clone(),
                 aria_roledescription: props.aria_roledescription.clone(),
-                "data-disabled": disabled(),
+                "data-disabled": (option.disabled)(),
 
                 onpointerdown: move |event| {
-                    if disabled() || event.trigger_button() != Some(MouseButton::Primary) {
-                        return;
-                    }
-                    // Suppress the synthesized focus shift and click event so the listbox
-                    // keeps DOM focus (its onblur would otherwise close us mid-tap). We
-                    // commit the selection ourselves on pointerup.
-                    event.prevent_default();
-                    let p = event.client_coordinates();
-                    down_pos.set(Some((p.x, p.y)));
+                    pointer_select_start(&event, (option.disabled)(), option.down_pos);
                 },
                 onpointerup: move |event| {
-                    if disabled() || event.trigger_button() != Some(MouseButton::Primary) {
-                        return;
-                    }
-                    let Some((x0, y0)) = down_pos.take() else {
-                        return;
-                    };
-                    // Drag-cancel only matters for touch; mouse clicks shouldn't be
-                    // suppressed by tiny cursor drift between down and up. ~5px
-                    // threshold tolerates small touch wobble.
-                    if event.pointer_type() == "touch" {
-                        let p = event.client_coordinates();
-                        let dx = p.x - x0;
-                        let dy = p.y - y0;
-                        if dx * dx + dy * dy > 25.0 {
-                            return;
-                        }
-                    }
-                    ctx.set_value.call(Some(RcPartialEqValue::new(props.value.cloned())));
-                    if !ctx.multi {
-                        ctx.open.set(false);
+                    if pointer_select_commit(&event, (option.disabled)(), option.down_pos) {
+                        ctx.selectable.select_value(RcPartialEqValue::new(option.value.cloned()));
                     }
                 },
                 onpointercancel: move |_| {
-                    down_pos.set(None);
+                    pointer_select_cancel(option.down_pos);
                 },
                 onblur: move |_| {
-                    if focused() {
-                        ctx.focus_state.blur();
-                        ctx.open.set(false);
+                    if (option.focused)() {
+                        ctx.selectable.focus_state.blur();
+                        ctx.set_open(false);
                     }
                 },
 
@@ -294,11 +218,9 @@ pub struct SelectItemIndicatorProps {
 /// ```
 #[component]
 pub fn SelectItemIndicator(props: SelectItemIndicatorProps) -> Element {
-    let ctx: SelectOptionContext = use_context();
-    if !(ctx.selected)() {
-        return rsx! {};
-    }
     rsx! {
-        {props.children}
+        ListboxItemIndicator {
+            {props.children}
+        }
     }
 }

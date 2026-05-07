@@ -85,6 +85,33 @@ fn first_enabled<'a>(iter: impl IntoIterator<Item = (&'a usize, &'a bool)>) -> O
         .find_map(|(&idx, &disabled)| (!disabled).then_some(idx))
 }
 
+fn next_index(indices: &[usize], current: Option<usize>, roving_loop: bool) -> Option<usize> {
+    match current {
+        Some(current) => {
+            let next_position = indices.partition_point(|&index| index <= current);
+            indices
+                .get(next_position)
+                .copied()
+                .or_else(|| roving_loop.then(|| indices.first().copied()).flatten())
+        }
+        None => indices.first().copied(),
+    }
+}
+
+fn prev_index(indices: &[usize], current: Option<usize>, roving_loop: bool) -> Option<usize> {
+    match current {
+        Some(current) => {
+            let prev_position = indices.partition_point(|&index| index < current);
+            prev_position
+                .checked_sub(1)
+                .and_then(|position| indices.get(position).copied())
+                .or_else(|| roving_loop.then(|| indices.last().copied()).flatten())
+        }
+        None if roving_loop => indices.last().copied(),
+        None => indices.first().copied(),
+    }
+}
+
 #[derive(Clone, Copy)]
 pub(crate) struct FocusState {
     pub(crate) roving_loop: ReadSignal<bool>,
@@ -105,17 +132,13 @@ impl FocusState {
 
     pub(crate) fn set_focus(&mut self, index: Option<usize>) {
         if let Some(idx) = index {
+            if self.items.peek().get(&idx) == Some(&true) {
+                self.current_focus.set(None);
+                return;
+            }
             self.recent_focus.set(Some(idx));
         }
         self.current_focus.set(index);
-    }
-
-    fn enabled_index_after(&self, index: usize) -> Option<usize> {
-        first_enabled(self.items.read().range(index.saturating_add(1)..))
-    }
-
-    fn enabled_index_before(&self, index: usize) -> Option<usize> {
-        first_enabled(self.items.read().range(..index).rev())
     }
 
     pub(crate) fn first_enabled_index(&self) -> Option<usize> {
@@ -126,29 +149,30 @@ impl FocusState {
         first_enabled(self.items.read().iter().rev())
     }
 
+    fn enabled_indices(&self) -> Vec<usize> {
+        self.items
+            .read()
+            .iter()
+            .filter_map(|(&index, &disabled)| (!disabled).then_some(index))
+            .collect()
+    }
+
+    fn focus_next_from(&mut self, current: Option<usize>, indices: &[usize]) {
+        self.set_focus(next_index(indices, current, (self.roving_loop)()));
+    }
+
+    fn focus_prev_from(&mut self, current: Option<usize>, indices: &[usize]) {
+        self.set_focus(prev_index(indices, current, (self.roving_loop)()));
+    }
+
     pub(crate) fn focus_next(&mut self) {
-        let index = match self.recent_focus() {
-            Some(current) => self.enabled_index_after(current).or_else(|| {
-                (self.roving_loop)()
-                    .then(|| self.first_enabled_index())
-                    .flatten()
-            }),
-            None => self.first_enabled_index(),
-        };
-        self.set_focus(index);
+        let indices = self.enabled_indices();
+        self.focus_next_from(self.recent_focus(), &indices);
     }
 
     pub(crate) fn focus_prev(&mut self) {
-        let index = match self.recent_focus() {
-            Some(current) => self.enabled_index_before(current).or_else(|| {
-                (self.roving_loop)()
-                    .then(|| self.last_enabled_index())
-                    .flatten()
-            }),
-            None if (self.roving_loop)() => self.last_enabled_index(),
-            None => self.first_enabled_index(),
-        };
-        self.set_focus(index);
+        let indices = self.enabled_indices();
+        self.focus_prev_from(self.recent_focus(), &indices);
     }
 
     pub(crate) fn focus_first(&mut self) {
@@ -157,6 +181,14 @@ impl FocusState {
 
     pub(crate) fn focus_last(&mut self) {
         self.set_focus(self.last_enabled_index());
+    }
+
+    pub(crate) fn focus_next_from_current(&mut self, indices: &[usize]) {
+        self.focus_next_from(self.current_focus(), indices);
+    }
+
+    pub(crate) fn focus_prev_from_current(&mut self, indices: &[usize]) {
+        self.focus_prev_from(self.current_focus(), indices);
     }
 
     pub(crate) fn try_focus_placement(&mut self, placement: FocusPlacement) -> bool {
@@ -197,7 +229,7 @@ impl FocusState {
             .unwrap_or_default()
     }
 
-    fn is_enabled(&self, index: usize) -> bool {
+    pub(crate) fn is_enabled(&self, index: usize) -> bool {
         self.items.peek().get(&index) == Some(&false)
     }
 
@@ -217,14 +249,13 @@ impl FocusState {
         if self.items.peek().get(&index) == Some(&disabled) {
             return;
         }
-        let existed = self.items.peek().contains_key(&index);
         self.items.write().insert(index, disabled);
 
         let Some(focused) = *self.current_focus.peek() else {
             return;
         };
-        if disabled && existed && focused == index {
-            // Focus was on this item and it just became disabled — release it.
+        if disabled && focused == index {
+            // Focus cannot remain on a disabled item.
             self.blur();
         } else if !disabled && self.items.peek().get(&focused) == Some(&true) {
             // Focus is parked on a known-disabled item; advance to the nearest enabled one.

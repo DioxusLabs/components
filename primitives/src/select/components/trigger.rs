@@ -66,28 +66,32 @@ pub struct SelectTriggerProps {
 #[component]
 pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
     let mut ctx = use_context::<SelectContext>();
-    let mut open = ctx.open;
+    let open = ctx.selectable.open;
 
     rsx! {
         button {
             // Standard HTML attributes
-            disabled: (ctx.disabled)(),
+            disabled: (ctx.selectable.disabled)(),
             type: "button",
 
             onclick: move |_| {
-                open.toggle();
+                ctx.selectable.toggle_open();
             },
             onkeydown: move |event| {
                 match event.key() {
                     Key::ArrowUp => {
-                        open.set(true);
-                        ctx.initial_focus.set(ctx.focus_state.last_enabled_index());
+                        ctx.set_open(true);
+                        ctx.selectable
+                            .initial_focus
+                            .set(ctx.selectable.focus_state.last_enabled_index());
                         event.prevent_default();
                         event.stop_propagation();
                     }
                     Key::ArrowDown => {
-                        open.set(true);
-                        ctx.initial_focus.set(ctx.focus_state.first_enabled_index());
+                        ctx.set_open(true);
+                        ctx.selectable
+                            .initial_focus
+                            .set(ctx.selectable.focus_state.first_enabled_index());
                         event.prevent_default();
                         event.stop_propagation();
                     }
@@ -98,7 +102,7 @@ pub fn SelectTrigger(props: SelectTriggerProps) -> Element {
             // ARIA attributes
             aria_haspopup: "listbox",
             aria_expanded: open(),
-            aria_controls: ctx.list_id,
+            aria_controls: ctx.selectable.list_id,
 
             // Pass through other attributes
             ..props.attributes,
