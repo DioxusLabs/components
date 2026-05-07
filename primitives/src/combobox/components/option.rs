@@ -6,8 +6,8 @@ use super::super::context::ComboboxContext;
 use crate::{
     listbox::{ListboxContext, ListboxItemIndicator},
     selectable::{
-        pointer_select_cancel, pointer_select_commit, pointer_select_start,
-        use_selectable_option_with_focus_disabled, RcPartialEqValue,
+        pointer_select_cancel, pointer_select_commit, pointer_select_start, use_selectable_option,
+        RcPartialEqValue, SelectableOptionConfig,
     },
 };
 
@@ -55,15 +55,16 @@ pub fn ComboboxOption<T: PartialEq + Clone + 'static>(props: ComboboxOptionProps
 
     let mut ctx: ComboboxContext = use_context();
     let visible = move || ctx.is_visible(index());
-    let option = use_selectable_option_with_focus_disabled(
+    let option = use_selectable_option(
         ctx.selectable,
-        props.id,
-        index,
-        props.value,
-        props.text_value,
-        props.disabled,
-        "ComboboxOption",
-        move || !visible(),
+        SelectableOptionConfig {
+            id: props.id,
+            index,
+            value: props.value,
+            text_value: props.text_value,
+            option_disabled: props.disabled,
+            component_name: "ComboboxOption",
+        },
     );
 
     let render = use_context::<ListboxContext>().render;

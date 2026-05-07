@@ -56,6 +56,15 @@ pub(crate) struct SelectableOption<T: Clone + PartialEq + 'static> {
     pub(crate) value: ReadSignal<T>,
 }
 
+pub(crate) struct SelectableOptionConfig<T: Clone + PartialEq + 'static> {
+    pub(crate) id: ReadSignal<Option<String>>,
+    pub(crate) index: ReadSignal<usize>,
+    pub(crate) value: ReadSignal<T>,
+    pub(crate) text_value: ReadSignal<Option<String>>,
+    pub(crate) option_disabled: ReadSignal<bool>,
+    pub(crate) component_name: &'static str,
+}
+
 impl SelectableContext {
     pub(crate) fn set_open(&mut self, open: bool) {
         self.set_open.call(open);
@@ -221,35 +230,16 @@ pub(crate) fn use_selectable_root(
 
 pub(crate) fn use_selectable_option<T: Clone + PartialEq + 'static>(
     selectable: SelectableContext,
-    id: ReadSignal<Option<String>>,
-    index: ReadSignal<usize>,
-    value: ReadSignal<T>,
-    text_value: ReadSignal<Option<String>>,
-    option_disabled: ReadSignal<bool>,
-    component_name: &'static str,
+    option: SelectableOptionConfig<T>,
 ) -> SelectableOption<T> {
-    use_selectable_option_with_focus_disabled(
-        selectable,
+    let SelectableOptionConfig {
         id,
         index,
         value,
         text_value,
         option_disabled,
         component_name,
-        || false,
-    )
-}
-
-pub(crate) fn use_selectable_option_with_focus_disabled<T: Clone + PartialEq + 'static>(
-    selectable: SelectableContext,
-    id: ReadSignal<Option<String>>,
-    index: ReadSignal<usize>,
-    value: ReadSignal<T>,
-    text_value: ReadSignal<Option<String>>,
-    option_disabled: ReadSignal<bool>,
-    component_name: &'static str,
-    focus_disabled: impl Fn() -> bool + Copy + 'static,
-) -> SelectableOption<T> {
+    } = option;
     let disabled = {
         let root_disabled = selectable.disabled;
         use_memo(move || root_disabled.cloned() || option_disabled.cloned())
@@ -263,9 +253,7 @@ pub(crate) fn use_selectable_option_with_focus_disabled<T: Clone + PartialEq + '
         move || disabled.cloned(),
         component_name,
     );
-    use_focus_entry_disabled(selectable.focus_state, index, move || {
-        disabled.cloned() || focus_disabled()
-    });
+    use_focus_entry_disabled(selectable.focus_state, index, move || disabled.cloned());
     let selected = use_memo(move || selectable.is_selected(&RcPartialEqValue::new(value.cloned())));
     let focused = use_memo(move || selectable.focus_state.is_focused(index()));
     let down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);

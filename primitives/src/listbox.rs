@@ -57,11 +57,13 @@ pub(crate) fn use_listbox_container(
     });
 
     use_effect(move || {
-        if render.cloned() {
-            selectable
-                .focus_state
-                .set_focus(selectable.initial_focus.cloned());
-        } else {
+        if !render.cloned() {
+            selectable.initial_focus.set(None);
+            return;
+        }
+
+        if let Some(index) = selectable.initial_focus.cloned() {
+            selectable.focus_state.set_focus(Some(index));
             selectable.initial_focus.set(None);
         }
     });

@@ -5,7 +5,7 @@ use crate::{
     listbox::{ListboxContext, ListboxItemIndicator},
     selectable::{
         pointer_select_cancel, pointer_select_commit, pointer_select_start, use_selectable_option,
-        RcPartialEqValue,
+        RcPartialEqValue, SelectableOptionConfig,
     },
 };
 use dioxus::prelude::*;
@@ -107,12 +107,14 @@ pub fn SelectOption<T: PartialEq + Clone + 'static>(props: SelectOptionProps<T>)
     let mut ctx: SelectContext = use_context();
     let option = use_selectable_option(
         ctx.selectable,
-        props.id,
-        index,
-        props.value,
-        props.text_value,
-        props.disabled,
-        "SelectOption",
+        SelectableOptionConfig {
+            id: props.id,
+            index,
+            value: props.value,
+            text_value: props.text_value,
+            option_disabled: props.disabled,
+            component_name: "SelectOption",
+        },
     );
 
     let onmounted =
