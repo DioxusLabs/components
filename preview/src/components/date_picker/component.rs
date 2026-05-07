@@ -2,16 +2,18 @@ use dioxus::prelude::*;
 
 use dioxus_primitives::icon;
 use dioxus_primitives::{
+    calendar::DateRange,
     date_picker::{
         self, DatePickerDaySegmentProps, DatePickerInputProps, DatePickerMonthSegmentProps,
-        DatePickerProps, DatePickerSeparatorProps, DatePickerYearSegmentProps,
-        DateRangePickerEndValueProps, DateRangePickerProps, DateRangePickerStartValueProps,
+        DatePickerSeparatorProps, DatePickerYearSegmentProps, DateRangePickerEndValueProps,
+        DateRangePickerStartValueProps,
     },
     dioxus_attributes::attributes,
     merge_attributes,
     popover::{PopoverContentProps, PopoverTriggerProps},
     ContentAlign,
 };
+use time::{macros::date, Date};
 
 use super::super::calendar::*;
 use super::super::popover::*;
@@ -19,12 +21,136 @@ use super::super::popover::*;
 #[css_module("/src/components/date_picker/style.css")]
 struct Styles;
 
+#[derive(Clone, Copy)]
+struct StyledDatePickerContext {
+    month_count: u8,
+}
+
+fn styled_month_count() -> u8 {
+    try_use_context::<StyledDatePickerContext>()
+        .map(|ctx| ctx.month_count)
+        .unwrap_or(1)
+        .max(1)
+}
+
+#[derive(Props, Clone, PartialEq)]
+pub struct DatePickerProps {
+    /// Callback when value changes
+    #[props(default)]
+    pub on_value_change: Callback<Option<Date>>,
+
+    /// The selected date
+    #[props(default)]
+    pub selected_date: ReadSignal<Option<Date>>,
+
+    /// Whether the date picker is disabled
+    #[props(default)]
+    pub disabled: ReadSignal<bool>,
+
+    /// Whether the date picker is enable user input
+    #[props(default = ReadSignal::new(Signal::new(false)))]
+    pub read_only: ReadSignal<bool>,
+
+    /// Lower limit of the range of available dates
+    #[props(default = date!(1925-01-01))]
+    pub min_date: Date,
+
+    /// Upper limit of the range of available dates
+    #[props(default = date!(2050-12-31))]
+    pub max_date: Date,
+
+    /// Callback when display day placeholder
+    #[props(default = Callback::new(|_| "D".to_string()))]
+    pub on_format_day_placeholder: Callback<(), String>,
+
+    /// Callback when display month placeholder
+    #[props(default = Callback::new(|_| "M".to_string()))]
+    pub on_format_month_placeholder: Callback<(), String>,
+
+    /// Callback when display year placeholder
+    #[props(default = Callback::new(|_| "Y".to_string()))]
+    pub on_format_year_placeholder: Callback<(), String>,
+
+    /// Specify how many months are visible at once
+    #[props(default = 1)]
+    pub month_count: u8,
+
+    /// Unavailable dates
+    #[props(default)]
+    pub disabled_ranges: ReadSignal<Vec<DateRange>>,
+
+    /// Whether focus should loop around when reaching the end.
+    #[props(default = ReadSignal::new(Signal::new(false)))]
+    pub roving_loop: ReadSignal<bool>,
+
+    /// Additional attributes to extend the date picker element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
+#[derive(Props, Clone, PartialEq)]
+pub struct DateRangePickerProps {
+    /// Callback when value changes
+    #[props(default)]
+    pub on_range_change: Callback<Option<DateRange>>,
+
+    /// The selected date
+    #[props(default)]
+    pub selected_range: ReadSignal<Option<DateRange>>,
+
+    /// Whether the date picker is disabled
+    #[props(default)]
+    pub disabled: ReadSignal<bool>,
+
+    /// Whether the date picker is enable user input
+    #[props(default = ReadSignal::new(Signal::new(false)))]
+    pub read_only: ReadSignal<bool>,
+
+    /// Lower limit of the range of available dates
+    #[props(default = date!(1925-01-01))]
+    pub min_date: Date,
+
+    /// Upper limit of the range of available dates
+    #[props(default = date!(2050-12-31))]
+    pub max_date: Date,
+
+    /// Callback when display day placeholder
+    #[props(default = Callback::new(|_| "D".to_string()))]
+    pub on_format_day_placeholder: Callback<(), String>,
+
+    /// Callback when display month placeholder
+    #[props(default = Callback::new(|_| "M".to_string()))]
+    pub on_format_month_placeholder: Callback<(), String>,
+
+    /// Callback when display year placeholder
+    #[props(default = Callback::new(|_| "Y".to_string()))]
+    pub on_format_year_placeholder: Callback<(), String>,
+
+    /// Specify how many months are visible at once
+    #[props(default = 1)]
+    pub month_count: u8,
+
+    /// Unavailable dates
+    #[props(default)]
+    pub disabled_ranges: ReadSignal<Vec<DateRange>>,
+
+    /// Whether focus should loop around when reaching the end.
+    #[props(default = ReadSignal::new(Signal::new(false)))]
+    pub roving_loop: ReadSignal<bool>,
+
+    /// Additional attributes to extend the date picker element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
 #[component]
 pub fn DatePicker(props: DatePickerProps) -> Element {
     let base = attributes!(div {
         class: Styles::dx_date_picker
     });
     let merged = merge_attributes(vec![base, props.attributes]);
+    let month_count = props.month_count.max(1);
+    use_context_provider(|| StyledDatePickerContext { month_count });
 
     rsx! {
         div {
@@ -40,7 +166,11 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
                 attributes: merged,
                 date_picker::DatePickerPopover {
                     popover_root: PopoverRoot,
-                    {props.children}
+                    DatePickerInput {
+                        on_format_day_placeholder: props.on_format_day_placeholder,
+                        on_format_month_placeholder: props.on_format_month_placeholder,
+                        on_format_year_placeholder: props.on_format_year_placeholder,
+                    }
                 }
             }
         }
@@ -53,6 +183,8 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
         class: Styles::dx_date_picker
     });
     let merged = merge_attributes(vec![base, props.attributes]);
+    let month_count = props.month_count.max(1);
+    use_context_provider(|| StyledDatePickerContext { month_count });
 
     rsx! {
         div {
@@ -66,19 +198,27 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
                 disabled_ranges: props.disabled_ranges,
                 roving_loop: props.roving_loop,
                 attributes: merged,
-                date_picker::DatePickerPopover { popover_root: PopoverRoot, {props.children} }
+                date_picker::DatePickerPopover {
+                    popover_root: PopoverRoot,
+                    DateRangePickerInput {
+                        on_format_day_placeholder: props.on_format_day_placeholder,
+                        on_format_month_placeholder: props.on_format_month_placeholder,
+                        on_format_year_placeholder: props.on_format_year_placeholder,
+                    }
+                }
             }
         }
     }
 }
 
 #[component]
-pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
+pub(crate) fn DatePickerInput(props: DatePickerInputProps) -> Element {
     let base = attributes!(div {
         class: Styles::dx_date_picker_group
     });
     let merged = merge_attributes(vec![base, props.attributes]);
     let extra_children = props.children;
+    let month_count = styled_month_count();
 
     rsx! {
         date_picker::DatePickerInput {
@@ -101,17 +241,9 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
             }
             DatePickerPopoverTrigger {}
             DatePickerPopoverContent { align: ContentAlign::Center,
-                date_picker::DatePickerCalendar { calendar: Calendar,
-                    CalendarView {
-                        CalendarHeader {
-                            CalendarNavigation {
-                                CalendarPreviousMonthButton {}
-                                CalendarSelectMonth {}
-                                CalendarSelectYear {}
-                                CalendarNextMonthButton {}
-                            }
-                        }
-                        CalendarGrid {}
+                date_picker::DatePickerCalendar { calendar: CalendarRoot,
+                    for offset in 0..month_count {
+                        DefaultCalendarView { key: "{offset}", offset, month_count }
                     }
                 }
             }
@@ -120,12 +252,13 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
 }
 
 #[component]
-pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
+pub(crate) fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
     let base = attributes!(div {
         class: Styles::dx_date_picker_group
     });
     let merged = merge_attributes(vec![base, props.attributes]);
     let extra_children = props.children;
+    let month_count = styled_month_count();
 
     rsx! {
         date_picker::DateRangePickerInput {
@@ -160,17 +293,9 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
             DatePickerPopoverContent {
                 align: ContentAlign::Center,
                 date_picker::DateRangePickerCalendar {
-                    calendar: RangeCalendar,
-                    CalendarView {
-                        CalendarHeader {
-                            CalendarNavigation {
-                                CalendarPreviousMonthButton {}
-                                CalendarSelectMonth {}
-                                CalendarSelectYear {}
-                                CalendarNextMonthButton {}
-                            }
-                        }
-                        CalendarGrid {}
+                    calendar: RangeCalendarRoot,
+                    for offset in 0..month_count {
+                        DefaultCalendarView { key: "{offset}", offset, month_count }
                     }
                 }
             }
@@ -179,7 +304,7 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
 }
 
 #[component]
-pub fn DatePickerYearSegment(props: DatePickerYearSegmentProps) -> Element {
+pub(crate) fn DatePickerYearSegment(props: DatePickerYearSegmentProps) -> Element {
     rsx! {
         date_picker::DatePickerYearSegment {
             class: Styles::dx_date_segment,
@@ -189,7 +314,7 @@ pub fn DatePickerYearSegment(props: DatePickerYearSegmentProps) -> Element {
 }
 
 #[component]
-pub fn DatePickerMonthSegment(props: DatePickerMonthSegmentProps) -> Element {
+pub(crate) fn DatePickerMonthSegment(props: DatePickerMonthSegmentProps) -> Element {
     rsx! {
         date_picker::DatePickerMonthSegment {
             class: Styles::dx_date_segment,
@@ -199,7 +324,7 @@ pub fn DatePickerMonthSegment(props: DatePickerMonthSegmentProps) -> Element {
 }
 
 #[component]
-pub fn DatePickerDaySegment(props: DatePickerDaySegmentProps) -> Element {
+pub(crate) fn DatePickerDaySegment(props: DatePickerDaySegmentProps) -> Element {
     rsx! {
         date_picker::DatePickerDaySegment {
             class: Styles::dx_date_segment,
@@ -209,7 +334,7 @@ pub fn DatePickerDaySegment(props: DatePickerDaySegmentProps) -> Element {
 }
 
 #[component]
-pub fn DatePickerSeparator(props: DatePickerSeparatorProps) -> Element {
+pub(crate) fn DatePickerSeparator(props: DatePickerSeparatorProps) -> Element {
     rsx! {
         date_picker::DatePickerSeparator {
             class: Styles::dx_date_segment,
@@ -220,7 +345,7 @@ pub fn DatePickerSeparator(props: DatePickerSeparatorProps) -> Element {
 }
 
 #[component]
-pub fn DateRangePickerStartValue(props: DateRangePickerStartValueProps) -> Element {
+pub(crate) fn DateRangePickerStartValue(props: DateRangePickerStartValueProps) -> Element {
     rsx! {
         date_picker::DateRangePickerStartValue {
             {props.children}
@@ -229,7 +354,7 @@ pub fn DateRangePickerStartValue(props: DateRangePickerStartValueProps) -> Eleme
 }
 
 #[component]
-pub fn DateRangePickerEndValue(props: DateRangePickerEndValueProps) -> Element {
+pub(crate) fn DateRangePickerEndValue(props: DateRangePickerEndValueProps) -> Element {
     rsx! {
         date_picker::DateRangePickerEndValue {
             {props.children}
@@ -238,7 +363,7 @@ pub fn DateRangePickerEndValue(props: DateRangePickerEndValueProps) -> Element {
 }
 
 #[component]
-pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
+pub(crate) fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
         PopoverTrigger {
             class: Styles::dx_date_picker_popover_trigger,
@@ -256,7 +381,7 @@ pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
 }
 
 #[component]
-pub fn DatePickerPopoverContent(props: PopoverContentProps) -> Element {
+pub(crate) fn DatePickerPopoverContent(props: PopoverContentProps) -> Element {
     rsx! {
         PopoverContent {
             class: Styles::dx_date_picker_popover_content.to_string(),
@@ -276,45 +401,38 @@ mod tests {
     use time::macros::date;
 
     #[component]
-    fn DatePickerInputWithCustomChild() -> Element {
+    fn DatePickerWithDefaultInput() -> Element {
         rsx! {
             DatePicker {
                 selected_date: Some(date!(2026 - 05 - 07)),
-                DatePickerInput {
-                    span { "Custom child" }
-                }
             }
         }
     }
 
     #[component]
-    fn DateRangePickerInputWithCustomChild() -> Element {
+    fn DateRangePickerWithDefaultInput() -> Element {
         rsx! {
             DateRangePicker {
                 selected_range: Some(DateRange::new(date!(2026 - 05 - 07), date!(2026 - 05 - 11))),
-                DateRangePickerInput {
-                    span { "Range child" }
-                }
             }
         }
     }
 
     #[test]
-    fn date_picker_input_appends_custom_children_to_default_control() {
-        let mut dom = VirtualDom::new(DatePickerInputWithCustomChild);
+    fn date_picker_renders_default_input_when_children_are_omitted() {
+        let mut dom = VirtualDom::new(DatePickerWithDefaultInput);
         dom.rebuild_in_place();
         let html = dioxus_ssr::render(&dom);
 
         assert!(html.contains("2026"));
         assert!(html.contains("05"));
         assert!(html.contains("07"));
-        assert!(html.contains("Custom child"));
         assert!(html.contains("Show Calendar"));
     }
 
     #[test]
-    fn date_range_picker_input_appends_custom_children_to_default_control() {
-        let mut dom = VirtualDom::new(DateRangePickerInputWithCustomChild);
+    fn date_range_picker_renders_default_input_when_children_are_omitted() {
+        let mut dom = VirtualDom::new(DateRangePickerWithDefaultInput);
         dom.rebuild_in_place();
         let html = dioxus_ssr::render(&dom);
 
@@ -322,7 +440,7 @@ mod tests {
         assert!(html.contains("05"));
         assert!(html.contains("07"));
         assert!(html.contains("11"));
-        assert!(html.contains("Range child"));
         assert!(html.contains("Show Calendar"));
     }
+
 }

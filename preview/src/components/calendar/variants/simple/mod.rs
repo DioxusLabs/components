@@ -19,16 +19,6 @@ pub fn Demo() -> Element {
                     tracing::info!("View changed to: {}-{}", new_view.year(), new_view.month());
                     view_date.set(new_view);
                 },
-                CalendarView {
-                    CalendarHeader {
-                        CalendarNavigation {
-                            CalendarPreviousMonthButton {}
-                            CalendarMonthTitle {}
-                            CalendarNextMonthButton {}
-                        }
-                    }
-                    CalendarGrid {}
-                }
             }
         }
     }

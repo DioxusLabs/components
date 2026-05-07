@@ -21,17 +21,6 @@ pub fn Demo() -> Element {
                 },
                 min_date: date!(1995 - 07 - 21),
                 max_date: date!(2035 - 09 - 11),
-                CalendarView {
-                    CalendarHeader {
-                        CalendarNavigation {
-                            CalendarPreviousMonthButton {}
-                            CalendarSelectMonth {}
-                            CalendarSelectYear {}
-                            CalendarNextMonthButton {}
-                        }
-                    }
-                    CalendarGrid {}
-                }
             }
         }
     }
