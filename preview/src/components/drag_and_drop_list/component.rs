@@ -113,8 +113,21 @@ pub fn RemoveButton(
     rsx! {
         button {
             class: Styles::dx_remove_button,
+            r#type: "button",
             aria_label: "{label}",
-            onclick: move |_| ctx.remove(index),
+            draggable: "false",
+            onpointerdown: move |event| event.stop_propagation(),
+            onmousedown: move |event| event.stop_propagation(),
+            onmouseup: move |event| event.stop_propagation(),
+            ondragstart: move |event| {
+                event.prevent_default();
+                event.stop_propagation();
+            },
+            onkeydown: move |event| event.stop_propagation(),
+            onclick: move |event| {
+                event.stop_propagation();
+                ctx.remove(index);
+            },
             ..attributes,
             {children}
             Icon {
