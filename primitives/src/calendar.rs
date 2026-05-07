@@ -2294,14 +2294,19 @@ pub struct CalendarDayProps {
 #[component]
 pub fn CalendarDay(props: CalendarDayProps) -> Element {
     let single_context = try_use_context::<CalendarContext>().is_some();
+    let CalendarDayProps {
+        date,
+        attributes,
+        children,
+    } = props;
 
     if single_context {
         rsx! {
-            SingleCalendarDay { date: props.date, attributes: props.attributes.clone() }
+            SingleCalendarDay { date, attributes: attributes.clone(), children: children.clone() }
         }
     } else {
         rsx! {
-            RangeCalendarDay { date: props.date, attributes: props.attributes.clone() }
+            RangeCalendarDay { date, attributes, children }
         }
     }
 }
@@ -2567,6 +2572,36 @@ mod tests {
         }
     }
 
+    #[component]
+    fn CalendarDayWithCustomChild() -> Element {
+        rsx! {
+            Calendar {
+                view_date: date!(2026 - 05 - 15),
+                CalendarView {
+                    CalendarDay {
+                        date: date!(2026 - 05 - 15),
+                        "Custom day"
+                    }
+                }
+            }
+        }
+    }
+
+    #[component]
+    fn RangeCalendarDayWithCustomChild() -> Element {
+        rsx! {
+            RangeCalendar {
+                view_date: date!(2026 - 05 - 15),
+                CalendarView {
+                    CalendarDay {
+                        date: date!(2026 - 05 - 15),
+                        "Custom range day"
+                    }
+                }
+            }
+        }
+    }
+
     #[test]
     fn implicit_calendar_views_render_consecutive_months_on_first_render() {
         let mut dom = VirtualDom::new(ConsecutiveCalendarViews);
@@ -2576,6 +2611,26 @@ mod tests {
         assert!(html.contains("May 2026"));
         assert!(html.contains("June 2026"));
         assert!(html.contains("July 2026"));
+    }
+
+    #[test]
+    fn calendar_day_forwards_custom_children() {
+        let mut dom = VirtualDom::new(CalendarDayWithCustomChild);
+        dom.rebuild_in_place();
+        let html = dioxus_ssr::render(&dom);
+
+        assert!(html.contains("Custom day"));
+        assert!(!html.contains(">15</button>"));
+    }
+
+    #[test]
+    fn range_calendar_day_forwards_custom_children() {
+        let mut dom = VirtualDom::new(RangeCalendarDayWithCustomChild);
+        dom.rebuild_in_place();
+        let html = dioxus_ssr::render(&dom);
+
+        assert!(html.contains("Custom range day"));
+        assert!(!html.contains(">15</button>"));
     }
 
     #[test]

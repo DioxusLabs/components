@@ -133,7 +133,10 @@ pub struct ColorPickerProps {
 ///                },
 ///                ColorArea {
 ///                    AreaTrack {
-///                        AreaThumb {}
+///                        AreaThumb {
+///                            AreaThumbSaturationInput {}
+///                            AreaThumbValueInput {}
+///                        }
 ///                    }
 ///                }
 ///            }
@@ -202,7 +205,10 @@ pub struct ColorAreaProps {
 ///                },
 ///                ColorArea {
 ///                    AreaTrack {
-///                        AreaThumb {}
+///                        AreaThumb {
+///                            AreaThumbSaturationInput {}
+///                            AreaThumbValueInput {}
+///                        }
 ///                    }
 ///                }
 ///            }
@@ -571,4 +577,64 @@ struct ColorAreaContext {
 struct AreaThumbContext {
     saturation_input_ref: Signal<Option<Rc<MountedData>>>,
     value_input_ref: Signal<Option<Rc<MountedData>>>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[component]
+    fn ColorAreaWithZeroChildThumb() -> Element {
+        rsx! {
+            ColorPicker {
+                color: Hsv::<encoding::Srgb, f64>::new(RgbHue::new(155.0), 0.5, 0.75),
+                ColorArea {
+                    AreaTrack {
+                        AreaThumb {}
+                    }
+                }
+            }
+        }
+    }
+
+    #[component]
+    fn ColorAreaWithAccessibleThumbInputs() -> Element {
+        rsx! {
+            ColorPicker {
+                color: Hsv::<encoding::Srgb, f64>::new(RgbHue::new(155.0), 0.5, 0.75),
+                ColorArea {
+                    AreaTrack {
+                        AreaThumb {
+                            AreaThumbSaturationInput {
+                                class: "custom-saturation",
+                            }
+                            AreaThumbValueInput {
+                                class: "custom-value",
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn area_thumb_allows_zero_children() {
+        let mut dom = VirtualDom::new(ColorAreaWithZeroChildThumb);
+        dom.rebuild_in_place();
+        let html = dioxus_ssr::render(&dom);
+
+        assert_eq!(html.matches("type=\"range\"").count(), 0);
+    }
+
+    #[test]
+    fn area_thumb_preserves_explicit_axis_input_slots() {
+        let mut dom = VirtualDom::new(ColorAreaWithAccessibleThumbInputs);
+        dom.rebuild_in_place();
+        let html = dioxus_ssr::render(&dom);
+
+        assert_eq!(html.matches("type=\"range\"").count(), 2);
+        assert!(html.contains("custom-saturation"));
+        assert!(html.contains("custom-value"));
+    }
 }

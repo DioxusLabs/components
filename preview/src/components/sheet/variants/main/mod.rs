@@ -30,7 +30,6 @@ pub fn Demo() -> Element {
         }
         Sheet { open: open(), on_open_change: move |v| open.set(v),
             SheetContent { side: side(),
-                SheetContentClose {}
                 SheetHeader {
                     SheetTitle { "Sheet Title" }
                     SheetDescription { "Sheet description goes here." }
@@ -66,6 +65,7 @@ pub fn Demo() -> Element {
                         },
                     }
                 }
+                SheetContentClose {}
             }
         }
     }
