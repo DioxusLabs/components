@@ -37,7 +37,7 @@ pub fn ComboboxInput(props: ComboboxInputProps) -> Element {
         if !open() {
             return None;
         }
-        ctx.focused_visible_option_id()
+        ctx.focused_option_id()
     });
 
     let display_value = use_memo(move || {

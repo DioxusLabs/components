@@ -58,8 +58,8 @@ impl ComboboxContext {
             .last_matching_enabled_index(self.predicate_for(query))
     }
 
-    pub fn focused_visible_option_id(&self) -> Option<String> {
-        self.selectable.focused_option_id_where(self.predicate())
+    pub fn focused_option_id(&self) -> Option<String> {
+        self.selectable.focused_option_id()
     }
 
     pub fn focus_next_visible(&mut self) {
@@ -79,6 +79,6 @@ impl ComboboxContext {
     }
 
     pub fn select_focused(&mut self) {
-        self.selectable.select_focused_where(self.predicate());
+        self.selectable.select_focused();
     }
 }

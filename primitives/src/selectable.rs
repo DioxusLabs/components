@@ -79,38 +79,37 @@ impl SelectableContext {
         self.values.read().is_empty()
     }
 
-    pub(crate) fn focused_option_id_where(
-        &self,
-        predicate: impl Fn(&OptionState) -> bool,
-    ) -> Option<String> {
+    pub(crate) fn focused_option_id(&self) -> Option<String> {
         let index = self.focus_state.current_focus()?;
+        if !self.focus_state.is_enabled(index) {
+            return None;
+        }
         self.options
             .read()
             .iter()
-            .find(|option| option.tab_index == index && !option.disabled && predicate(option))
+            .find(|option| option.tab_index == index && !option.disabled)
             .map(|option| option.id.clone())
     }
 
-    pub(crate) fn select_focused_where(&mut self, predicate: impl Fn(&OptionState) -> bool) {
+    pub(crate) fn select_focused(&mut self) {
         if !self.open.cloned() {
             return;
         }
         let Some(index) = self.focus_state.current_focus() else {
             return;
         };
+        if !self.focus_state.is_enabled(index) {
+            return;
+        }
         let value = self
             .options
             .read()
             .iter()
-            .find(|option| option.tab_index == index && !option.disabled && predicate(option))
+            .find(|option| option.tab_index == index && !option.disabled)
             .map(|option| option.value.clone());
         if let Some(value) = value {
             self.select_value(value);
         }
-    }
-
-    pub(crate) fn select_focused(&mut self) {
-        self.select_focused_where(|_| true);
     }
 
     fn matching_enabled_indices(&self, predicate: impl Fn(&OptionState) -> bool) -> Vec<usize> {
@@ -229,6 +228,28 @@ pub(crate) fn use_selectable_option<T: Clone + PartialEq + 'static>(
     option_disabled: ReadSignal<bool>,
     component_name: &'static str,
 ) -> SelectableOption<T> {
+    use_selectable_option_with_focus_disabled(
+        selectable,
+        id,
+        index,
+        value,
+        text_value,
+        option_disabled,
+        component_name,
+        || false,
+    )
+}
+
+pub(crate) fn use_selectable_option_with_focus_disabled<T: Clone + PartialEq + 'static>(
+    selectable: SelectableContext,
+    id: ReadSignal<Option<String>>,
+    index: ReadSignal<usize>,
+    value: ReadSignal<T>,
+    text_value: ReadSignal<Option<String>>,
+    option_disabled: ReadSignal<bool>,
+    component_name: &'static str,
+    focus_disabled: impl Fn() -> bool + Copy + 'static,
+) -> SelectableOption<T> {
     let disabled = {
         let root_disabled = selectable.disabled;
         use_memo(move || root_disabled.cloned() || option_disabled.cloned())
@@ -242,7 +263,9 @@ pub(crate) fn use_selectable_option<T: Clone + PartialEq + 'static>(
         move || disabled.cloned(),
         component_name,
     );
-    use_focus_entry_disabled(selectable.focus_state, index, move || disabled.cloned());
+    use_focus_entry_disabled(selectable.focus_state, index, move || {
+        disabled.cloned() || focus_disabled()
+    });
     let selected = use_memo(move || selectable.is_selected(&RcPartialEqValue::new(value.cloned())));
     let focused = use_memo(move || selectable.focus_state.is_focused(index()));
     let down_pos: Signal<Option<(f64, f64)>> = use_signal(|| None);

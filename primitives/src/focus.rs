@@ -132,6 +132,10 @@ impl FocusState {
 
     pub(crate) fn set_focus(&mut self, index: Option<usize>) {
         if let Some(idx) = index {
+            if self.items.peek().get(&idx) == Some(&true) {
+                self.current_focus.set(None);
+                return;
+            }
             self.recent_focus.set(Some(idx));
         }
         self.current_focus.set(index);
@@ -225,7 +229,7 @@ impl FocusState {
             .unwrap_or_default()
     }
 
-    fn is_enabled(&self, index: usize) -> bool {
+    pub(crate) fn is_enabled(&self, index: usize) -> bool {
         self.items.peek().get(&index) == Some(&false)
     }
 
@@ -245,14 +249,13 @@ impl FocusState {
         if self.items.peek().get(&index) == Some(&disabled) {
             return;
         }
-        let existed = self.items.peek().contains_key(&index);
         self.items.write().insert(index, disabled);
 
         let Some(focused) = *self.current_focus.peek() else {
             return;
         };
-        if disabled && existed && focused == index {
-            // Focus was on this item and it just became disabled — release it.
+        if disabled && focused == index {
+            // Focus cannot remain on a disabled item.
             self.blur();
         } else if !disabled && self.items.peek().get(&focused) == Some(&true) {
             // Focus is parked on a known-disabled item; advance to the nearest enabled one.
