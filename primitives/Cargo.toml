@@ -24,6 +24,9 @@ palette = "0.7.6"
 [build-dependencies]
 lazy-js-bundle = "0.6.2"
 
+[dev-dependencies]
+dioxus-ssr = "0.7.0"
+
 [features]
 default = ["router"]
 router = ["dioxus/router"]

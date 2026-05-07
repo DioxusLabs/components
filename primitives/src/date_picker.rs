@@ -27,7 +27,6 @@ struct BaseDatePickerContext {
     focus: FocusState,
     enabled_date_range: DateRange,
     available_ranges: Memo<AvailableRanges>,
-    month_count: u8,
 }
 
 /// The context provided by the [`DatePicker`] component to its children.
@@ -72,10 +71,6 @@ pub struct DatePickerProps {
     /// Upper limit of the range of available dates
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
-
-    /// Specify how many months are visible at once
-    #[props(default = 1)]
-    pub month_count: u8,
 
     /// Unavailable dates
     #[props(default)]
@@ -150,7 +145,6 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
         focus,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
         available_ranges,
-        month_count: props.month_count,
     });
 
     use_context_provider(|| DatePickerContext {
@@ -212,10 +206,6 @@ pub struct DateRangePickerProps {
     /// Upper limit of the range of available dates
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
-
-    /// Specify how many months are visible at once
-    #[props(default = 1)]
-    pub month_count: u8,
 
     /// Unavailable dates
     #[props(default)]
@@ -290,7 +280,6 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
         focus,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
         available_ranges,
-        month_count: props.month_count,
     });
 
     use_context_provider(|| DateRangePickerContext {
@@ -442,10 +431,6 @@ pub struct DatePickerCalendarProps<T: DefaultCalendarProps + Properties + Partia
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
 
-    /// Specify how many months are visible at once
-    #[props(default = 1)]
-    pub month_count: u8,
-
     /// Unavailable dates
     #[props(default)]
     pub disabled_ranges: ReadSignal<Vec<DateRange>>,
@@ -533,7 +518,6 @@ pub fn DatePickerCalendar(props: DatePickerCalendarProps<CalendarProps>) -> Elem
             first_day_of_week: props.first_day_of_week,
             min_date,
             max_date,
-            month_count: base_ctx.month_count,
             attributes: props.attributes,
             {props.children}
         }
@@ -610,7 +594,6 @@ pub fn DateRangePickerCalendar(props: DatePickerCalendarProps<RangeCalendarProps
             first_day_of_week: props.first_day_of_week,
             min_date,
             max_date,
-            month_count: base_ctx.month_count,
             attributes: props.attributes,
             {props.children}
         }
@@ -805,7 +788,6 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
 
     rsx! {
         span {
-            class: "dx-date-segment",
             id,
             role: "spinbutton",
             aria_valuemin: props.min.to_string(),
@@ -834,18 +816,237 @@ fn DateSegment<T: Clone + Copy + Integer + FromStr + Display + 'static>(
     }
 }
 
+#[derive(Clone, Copy)]
+struct DateElementContext {
+    start_index: usize,
+    year_value: Signal<Option<i32>>,
+    month_value: Signal<Option<u8>>,
+    day_value: Signal<Option<u8>>,
+    on_format_day_placeholder: Callback<(), String>,
+    on_format_month_placeholder: Callback<(), String>,
+    on_format_year_placeholder: Callback<(), String>,
+}
+
+/// The props for the [`DatePickerYearSegment`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DatePickerYearSegmentProps {
+    /// Additional attributes for the year segment element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
+/// The props for the [`DatePickerMonthSegment`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DatePickerMonthSegmentProps {
+    /// Additional attributes for the month segment element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
+/// The props for the [`DatePickerDaySegment`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DatePickerDaySegmentProps {
+    /// Additional attributes for the day segment element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
+/// The props for the [`DatePickerSeparator`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DatePickerSeparatorProps {
+    /// The separator symbol.
+    #[props(default = '-')]
+    pub symbol: char,
+
+    /// Additional attributes for the separator element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
+/// A year segment in a date input.
 #[component]
-fn DateSeparator(#[props(default = '-')] symbol: char) -> Element {
+pub fn DatePickerYearSegment(props: DatePickerYearSegmentProps) -> Element {
+    let mut ctx = use_context::<DateElementContext>();
+    let base_ctx = use_context::<BaseDatePickerContext>();
+    let today = OffsetDateTime::now_local_date();
+    let min_year = base_ctx.enabled_date_range.start().year();
+    let max_year = base_ctx.enabled_date_range.end().year();
+
+    rsx! {
+        DateSegment {
+            aria_label: "year",
+            index: ctx.start_index,
+            value: ctx.year_value,
+            default: today.year(),
+            on_value_change: move |value: Option<i32>| ctx.year_value.set(value),
+            min: min_year,
+            max: max_year,
+            max_length: 4,
+            on_format_placeholder: ctx.on_format_year_placeholder,
+            attributes: props.attributes,
+        }
+    }
+}
+
+/// A month segment in a date input.
+#[component]
+pub fn DatePickerMonthSegment(props: DatePickerMonthSegmentProps) -> Element {
+    let mut ctx = use_context::<DateElementContext>();
+    let base_ctx = use_context::<BaseDatePickerContext>();
+    let today = OffsetDateTime::now_local_date();
+    let min_date = base_ctx.enabled_date_range.start();
+    let max_date = base_ctx.enabled_date_range.end();
+    let min_year = min_date.year();
+    let max_year = max_date.year();
+    let min_month = match (ctx.year_value)() {
+        Some(year) if year == min_year => min_date.month(),
+        _ => Month::January,
+    };
+    let max_month = match (ctx.year_value)() {
+        Some(year) if year == max_year => max_date.month(),
+        _ => Month::December,
+    };
+
+    rsx! {
+        DateSegment {
+            aria_label: "month",
+            index: ctx.start_index + 1usize,
+            value: ctx.month_value,
+            default: today.month() as u8,
+            on_value_change: move |value: Option<u8>| ctx.month_value.set(value),
+            min: min_month as u8,
+            max: max_month as u8,
+            max_length: 2,
+            on_format_placeholder: ctx.on_format_month_placeholder,
+            attributes: props.attributes,
+        }
+    }
+}
+
+/// A day segment in a date input.
+#[component]
+pub fn DatePickerDaySegment(props: DatePickerDaySegmentProps) -> Element {
+    let mut ctx = use_context::<DateElementContext>();
+    let base_ctx = use_context::<BaseDatePickerContext>();
+    let today = OffsetDateTime::now_local_date();
+    let min_date = base_ctx.enabled_date_range.start();
+    let max_date = base_ctx.enabled_date_range.end();
+    let min_year = min_date.year();
+    let max_year = max_date.year();
+    let min_day = match ((ctx.year_value)(), (ctx.month_value)()) {
+        (Some(year), Some(month)) if year == min_year && month == min_date.month() as u8 => {
+            min_date.day()
+        }
+        _ => 1,
+    };
+    let max_day = match ((ctx.year_value)(), (ctx.month_value)()) {
+        (Some(year), Some(month)) if year == max_year && month == max_date.month() as u8 => {
+            max_date.day()
+        }
+        (Some(year), Some(month)) => {
+            if let Ok(month) = Month::try_from(month) {
+                month.length(year)
+            } else {
+                31
+            }
+        }
+        _ => 31,
+    };
+
+    rsx! {
+        DateSegment {
+            aria_label: "day",
+            index: ctx.start_index + 2usize,
+            value: ctx.day_value,
+            default: today.day(),
+            on_value_change: move |value: Option<u8>| ctx.day_value.set(value),
+            min: min_day,
+            max: max_day,
+            max_length: 2,
+            on_format_placeholder: ctx.on_format_day_placeholder,
+            attributes: props.attributes,
+        }
+    }
+}
+
+/// A separator in a date input.
+#[component]
+pub fn DatePickerSeparator(props: DatePickerSeparatorProps) -> Element {
     rsx! {
         span {
-            class: "dx-date-segment",
             aria_hidden: "true",
             tabindex: "-1",
             "is-separator": true,
             "no-date": true,
-            "{symbol}"
+            ..props.attributes,
+            "{props.symbol}"
         }
     }
+}
+
+/// The props for the [`DatePickerInputValue`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DatePickerInputValueProps {
+    /// Callback when display day placeholder
+    #[props(default = Callback::new(|_| "D".to_string()))]
+    pub on_format_day_placeholder: Callback<(), String>,
+
+    /// Callback when display month placeholder
+    #[props(default = Callback::new(|_| "M".to_string()))]
+    pub on_format_month_placeholder: Callback<(), String>,
+
+    /// Callback when display year placeholder
+    #[props(default = Callback::new(|_| "Y".to_string()))]
+    pub on_format_year_placeholder: Callback<(), String>,
+
+    /// The children of the date value.
+    #[props(default)]
+    pub children: Option<Element>,
+}
+
+/// The props for the [`DateRangePickerInputValue`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DateRangePickerInputValueProps {
+    /// Callback when display day placeholder
+    #[props(default = Callback::new(|_| "D".to_string()))]
+    pub on_format_day_placeholder: Callback<(), String>,
+
+    /// Callback when display month placeholder
+    #[props(default = Callback::new(|_| "M".to_string()))]
+    pub on_format_month_placeholder: Callback<(), String>,
+
+    /// Callback when display year placeholder
+    #[props(default = Callback::new(|_| "Y".to_string()))]
+    pub on_format_year_placeholder: Callback<(), String>,
+
+    /// The children of the date range value.
+    #[props(default)]
+    pub children: Option<Element>,
+}
+
+/// The props for the [`DateRangePickerStartValue`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DateRangePickerStartValueProps {
+    /// The children of the start date value.
+    #[props(default)]
+    pub children: Option<Element>,
+}
+
+/// The props for the [`DateRangePickerEndValue`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DateRangePickerEndValueProps {
+    /// The children of the end date value.
+    #[props(default)]
+    pub children: Option<Element>,
+}
+
+#[derive(Clone, Copy)]
+struct DateRangeInputContext {
+    start_date: Signal<Option<Date>>,
+    end_date: Signal<Option<Date>>,
+    on_format_day_placeholder: Callback<(), String>,
+    on_format_month_placeholder: Callback<(), String>,
+    on_format_year_placeholder: Callback<(), String>,
 }
 
 #[derive(Props, Clone, PartialEq)]
@@ -872,15 +1073,20 @@ struct DateElementProps {
     /// Callback when display year placeholder
     #[props(default = Callback::new(|_| "Y".to_string()))]
     pub on_format_year_placeholder: Callback<(), String>,
+
+    /// The children of the date element.
+    #[props(default)]
+    pub children: Option<Element>,
 }
 
 #[component]
 fn DateElement(props: DateElementProps) -> Element {
     let ctx = use_context::<BaseDatePickerContext>();
+    let selected_date = props.selected_date.peek().cloned();
 
-    let mut day_value = use_signal(|| None);
-    let mut month_value = use_signal(|| None);
-    let mut year_value = use_signal(|| None);
+    let mut day_value = use_signal(move || selected_date.map(|date| date.day()));
+    let mut month_value = use_signal(move || selected_date.map(|date| date.month() as u8));
+    let mut year_value = use_signal(move || selected_date.map(|date| date.year()));
 
     use_effect(move || {
         let date = (props.selected_date)();
@@ -905,75 +1111,142 @@ fn DateElement(props: DateElementProps) -> Element {
         }
     });
 
-    let today = OffsetDateTime::now_local_date();
+    use_context_provider(|| DateElementContext {
+        start_index: props.start_index,
+        year_value,
+        month_value,
+        day_value,
+        on_format_day_placeholder: props.on_format_day_placeholder,
+        on_format_month_placeholder: props.on_format_month_placeholder,
+        on_format_year_placeholder: props.on_format_year_placeholder,
+    });
 
-    let min_date = ctx.enabled_date_range.start();
-    let max_date = ctx.enabled_date_range.end();
-    let min_year = min_date.year();
-    let max_year = max_date.year();
-    let min_month = match year_value() {
-        Some(year) if year == min_year => min_date.month(),
-        _ => Month::January,
-    };
-    let max_month = match year_value() {
-        Some(year) if year == max_year => max_date.month(),
-        _ => Month::December,
-    };
-    let min_day = match (year_value(), month_value()) {
-        (Some(year), Some(month)) if year == min_year && month == min_date.month() as u8 => {
-            min_date.day()
+    let children = props.children.unwrap_or_else(|| {
+        rsx! {
+            DatePickerYearSegment {}
+            DatePickerSeparator {}
+            DatePickerMonthSegment {}
+            DatePickerSeparator {}
+            DatePickerDaySegment {}
         }
-        _ => 1,
-    };
-    let max_day = match (year_value(), month_value()) {
-        (Some(year), Some(month)) if year == max_year && month == max_date.month() as u8 => {
-            max_date.day()
-        }
-        (Some(year), Some(month)) => {
-            if let Ok(month) = Month::try_from(month) {
-                month.length(year)
-            } else {
-                31
-            }
-        }
-        _ => 31,
-    };
+    });
 
     rsx! {
-        DateSegment {
-            aria_label: "year",
-            index: props.start_index,
-            value: year_value,
-            default: today.year(),
-            on_value_change: move |value: Option<i32>| year_value.set(value),
-            min: min_year,
-            max: max_year,
-            max_length: 4,
-            on_format_placeholder: props.on_format_year_placeholder,
+        {children}
+    }
+}
+
+/// The editable date value for a single date picker input.
+#[component]
+pub fn DatePickerInputValue(props: DatePickerInputValueProps) -> Element {
+    let mut base_ctx = use_context::<BaseDatePickerContext>();
+    let mut ctx = use_context::<DatePickerContext>();
+
+    rsx! {
+        DateElement {
+            selected_date: ctx.selected_date,
+            on_date_change: move |date| {
+                ctx.set_date(date);
+                base_ctx.open.set(false);
+            },
+            on_format_day_placeholder: props.on_format_day_placeholder,
+            on_format_month_placeholder: props.on_format_month_placeholder,
+            on_format_year_placeholder: props.on_format_year_placeholder,
+            children: props.children,
         }
-        DateSeparator {}
-        DateSegment {
-            aria_label: "month",
-            index: props.start_index + 1usize,
-            value: month_value,
-            default: today.month() as u8,
-            on_value_change: move |value: Option<u8>| month_value.set(value),
-            min: min_month as u8,
-            max: max_month as u8,
-            max_length: 2,
-            on_format_placeholder: props.on_format_month_placeholder,
+    }
+}
+
+/// The editable date range value for a date range picker input.
+#[component]
+pub fn DateRangePickerInputValue(props: DateRangePickerInputValueProps) -> Element {
+    let base_ctx = use_context::<BaseDatePickerContext>();
+    let mut ctx = use_context::<DateRangePickerContext>();
+    let selected_range = ctx.date_range.peek().cloned();
+
+    let mut start_date = use_signal(move || selected_range.map(|range| range.start()));
+    let mut end_date = use_signal(move || selected_range.map(|range| range.end()));
+
+    use_effect(move || {
+        let date_range = ctx.date_range.cloned();
+        start_date.set(date_range.map(|r| r.start()));
+        end_date.set(date_range.map(|r| r.end()));
+    });
+
+    use_effect(move || {
+        if let (Some(start), Some(end)) = (start_date(), end_date()) {
+            // force auto validation for input range
+            if end < start {
+                return;
+            }
+
+            // checking non-contiguous ranges
+            if base_ctx
+                .available_ranges
+                .read()
+                .available_range(start, base_ctx.enabled_date_range)
+                .is_some_and(|r| r.contains(end))
+            {
+                let range = Some(DateRange::new(start, end));
+                ctx.set_range(range);
+            }
+        };
+    });
+
+    use_context_provider(|| DateRangeInputContext {
+        start_date,
+        end_date,
+        on_format_day_placeholder: props.on_format_day_placeholder,
+        on_format_month_placeholder: props.on_format_month_placeholder,
+        on_format_year_placeholder: props.on_format_year_placeholder,
+    });
+
+    let children = props.children.unwrap_or_else(|| {
+        rsx! {
+            DateRangePickerStartValue {}
+            DatePickerSeparator {
+                symbol: '—',
+            }
+            DateRangePickerEndValue {}
         }
-        DateSeparator {}
-        DateSegment {
-            aria_label: "day",
-            index: props.start_index + 2usize,
-            value: day_value,
-            default: today.day(),
-            on_value_change: move |value: Option<u8>| day_value.set(value),
-            min: min_day,
-            max: max_day,
-            max_length: 2,
-            on_format_placeholder: props.on_format_day_placeholder,
+    });
+
+    rsx! {
+        {children}
+    }
+}
+
+/// The editable start date value in a range picker input.
+#[component]
+pub fn DateRangePickerStartValue(props: DateRangePickerStartValueProps) -> Element {
+    let mut ctx = use_context::<DateRangeInputContext>();
+
+    rsx! {
+        DateElement {
+            selected_date: ctx.start_date,
+            on_date_change: move |date| ctx.start_date.set(date),
+            on_format_day_placeholder: ctx.on_format_day_placeholder,
+            on_format_month_placeholder: ctx.on_format_month_placeholder,
+            on_format_year_placeholder: ctx.on_format_year_placeholder,
+            children: props.children,
+        }
+    }
+}
+
+/// The editable end date value in a range picker input.
+#[component]
+pub fn DateRangePickerEndValue(props: DateRangePickerEndValueProps) -> Element {
+    let mut ctx = use_context::<DateRangeInputContext>();
+
+    rsx! {
+        DateElement {
+            start_index: 3,
+            selected_date: ctx.end_date,
+            on_date_change: move |date| ctx.end_date.set(date),
+            on_format_day_placeholder: ctx.on_format_day_placeholder,
+            on_format_month_placeholder: ctx.on_format_month_placeholder,
+            on_format_year_placeholder: ctx.on_format_year_placeholder,
+            children: props.children,
         }
     }
 }
@@ -998,7 +1271,8 @@ pub struct DatePickerInputProps {
     pub attributes: Vec<Attribute>,
 
     /// The children of the date picker element
-    pub children: Element,
+    #[props(default)]
+    pub children: Option<Element>,
 }
 
 /// # DatePickerInput
@@ -1041,22 +1315,19 @@ pub struct DatePickerInputProps {
 /// ```
 #[component]
 pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
-    let mut base_ctx = use_context::<BaseDatePickerContext>();
-    let mut ctx = use_context::<DatePickerContext>();
-
-    rsx! {
-        div { class: "dx-date-picker-group", ..props.attributes,
-            DateElement {
-                selected_date: ctx.selected_date,
-                on_date_change: move |date| {
-                    ctx.set_date(date);
-                    base_ctx.open.set(false);
-                },
+    let children = props.children.unwrap_or_else(|| {
+        rsx! {
+            DatePickerInputValue {
                 on_format_day_placeholder: props.on_format_day_placeholder,
                 on_format_month_placeholder: props.on_format_month_placeholder,
                 on_format_year_placeholder: props.on_format_year_placeholder,
             }
-            {props.children}
+        }
+    });
+
+    rsx! {
+        div { ..props.attributes,
+            {children}
         }
     }
 }
@@ -1100,57 +1371,74 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
 /// ```
 #[component]
 pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
-    let base_ctx = use_context::<BaseDatePickerContext>();
-    let mut ctx = use_context::<DateRangePickerContext>();
-
-    let mut start_date = use_signal(|| None);
-    let mut end_date = use_signal(|| None);
-
-    use_effect(move || {
-        let date_range = ctx.date_range.cloned();
-        start_date.set(date_range.map(|r| r.start()));
-        end_date.set(date_range.map(|r| r.end()));
-    });
-
-    use_effect(move || {
-        if let (Some(start), Some(end)) = (start_date(), end_date()) {
-            // force auto validation for input range
-            if end < start {
-                return;
+    let children = props.children.unwrap_or_else(|| {
+        rsx! {
+            DateRangePickerInputValue {
+                on_format_day_placeholder: props.on_format_day_placeholder,
+                on_format_month_placeholder: props.on_format_month_placeholder,
+                on_format_year_placeholder: props.on_format_year_placeholder,
             }
-
-            // checking non-contiguous ranges
-            if base_ctx
-                .available_ranges
-                .read()
-                .available_range(start, base_ctx.enabled_date_range)
-                .is_some_and(|r| r.contains(end))
-            {
-                let range = Some(DateRange::new(start, end));
-                ctx.set_range(range);
-            }
-        };
+        }
     });
 
     rsx! {
-        div { class: "dx-date-picker-group", ..props.attributes,
-            DateElement {
-                selected_date: start_date(),
-                on_date_change: move |date| start_date.set(date),
-                on_format_day_placeholder: props.on_format_day_placeholder,
-                on_format_month_placeholder: props.on_format_month_placeholder,
-                on_format_year_placeholder: props.on_format_year_placeholder,
-            }
-            DateSeparator { symbol: '—' }
-            DateElement {
-                start_index: 3,
-                selected_date: end_date(),
-                on_date_change: move |date| end_date.set(date),
-                on_format_day_placeholder: props.on_format_day_placeholder,
-                on_format_month_placeholder: props.on_format_month_placeholder,
-                on_format_year_placeholder: props.on_format_year_placeholder,
-            }
-            {props.children}
+        div { ..props.attributes,
+            {children}
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use time::macros::date;
+
+    #[component]
+    fn ControlledDatePicker() -> Element {
+        rsx! {
+            DatePicker {
+                selected_date: Some(date!(2026 - 05 - 07)),
+                DatePickerInput {}
+            }
+        }
+    }
+
+    #[component]
+    fn ControlledDateRangePicker() -> Element {
+        rsx! {
+            DateRangePicker {
+                selected_range: Some(DateRange::new(date!(2026 - 05 - 07), date!(2026 - 05 - 11))),
+                DateRangePickerInput {}
+            }
+        }
+    }
+
+    #[test]
+    fn date_picker_input_renders_controlled_date_on_first_render() {
+        let mut dom = VirtualDom::new(ControlledDatePicker);
+        dom.rebuild_in_place();
+        let html = dioxus_ssr::render(&dom);
+
+        assert!(html.contains("2026"));
+        assert!(html.contains("05"));
+        assert!(html.contains("07"));
+        assert!(!html.contains("YYYY"));
+        assert!(!html.contains("MM"));
+        assert!(!html.contains("DD"));
+    }
+
+    #[test]
+    fn date_range_picker_input_renders_controlled_range_on_first_render() {
+        let mut dom = VirtualDom::new(ControlledDateRangePicker);
+        dom.rebuild_in_place();
+        let html = dioxus_ssr::render(&dom);
+
+        assert!(html.contains("2026"));
+        assert!(html.contains("05"));
+        assert!(html.contains("07"));
+        assert!(html.contains("11"));
+        assert!(!html.contains("YYYY"));
+        assert!(!html.contains("MM"));
+        assert!(!html.contains("DD"));
     }
 }

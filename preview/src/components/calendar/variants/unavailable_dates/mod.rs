@@ -20,7 +20,7 @@ pub fn Demo() -> Element {
     });
 
     rsx! {
-        div { class: "dx-calendar-example", style: "padding: 20px;",
+        div { style: "padding: 20px;",
             RangeCalendar {
                 selected_range: selected_range(),
                 on_range_change: move |range| {
@@ -35,17 +35,6 @@ pub fn Demo() -> Element {
                 min_date: date!(1995 - 07 - 21),
                 max_date: date!(2035 - 09 - 11),
                 disabled_ranges: disabled_ranges(),
-                CalendarView {
-                    CalendarHeader {
-                        CalendarNavigation {
-                            CalendarPreviousMonthButton {}
-                            CalendarSelectMonth {}
-                            CalendarSelectYear {}
-                            CalendarNextMonthButton {}
-                        }
-                    }
-                    CalendarGrid {}
-                }
             }
         }
     }

@@ -3,8 +3,8 @@ use crate::components::{
     input::Input,
     label::Label,
     sheet::{
-        Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetSide,
-        SheetTitle,
+        Sheet, SheetClose, SheetContent, SheetContentClose, SheetDescription, SheetFooter,
+        SheetHeader, SheetSide, SheetTitle,
     },
 };
 use dioxus::prelude::*;
@@ -65,6 +65,7 @@ pub fn Demo() -> Element {
                         },
                     }
                 }
+                SheetContentClose {}
             }
         }
     }

@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 #[component]
 pub fn Demo() -> Element {
     rsx! {
-        div { class: "dx-menubar-example",
+        div {
             Menubar {
                 MenubarMenu { index: 0usize,
                     MenubarTrigger { "File" }

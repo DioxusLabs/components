@@ -3,13 +3,14 @@ use dioxus_primitives::navbar::{
     self, NavbarContentProps, NavbarItemProps, NavbarNavProps, NavbarProps, NavbarTriggerProps,
 };
 use dioxus_primitives::icon;
+#[css_module("/src/components/navbar/style.css")]
+struct Styles;
 
 #[component]
 pub fn Navbar(props: NavbarProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         navbar::Navbar {
-            class: "dx-navbar",
+            class: Styles::dx_navbar,
             disabled: props.disabled,
             roving_loop: props.roving_loop,
             attributes: props.attributes,
@@ -22,7 +23,7 @@ pub fn Navbar(props: NavbarProps) -> Element {
 pub fn NavbarNav(props: NavbarNavProps) -> Element {
     rsx! {
         navbar::NavbarNav {
-            class: "dx-navbar-nav",
+            class: Styles::dx_navbar_nav,
             index: props.index,
             disabled: props.disabled,
             attributes: props.attributes,
@@ -34,10 +35,10 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
 #[component]
 pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
     rsx! {
-        navbar::NavbarTrigger { class: "dx-navbar-trigger", attributes: props.attributes,
+        navbar::NavbarTrigger { class: Styles::dx_navbar_trigger, attributes: props.attributes,
             {props.children}
             icon::Icon {
-                class: "dx-navbar-expand-icon",
+                class: Styles::dx_navbar_expand_icon,
                 width: "20px",
                 height: "20px",
                 stroke: "var(--secondary-color-4)",
@@ -51,7 +52,7 @@ pub fn NavbarTrigger(props: NavbarTriggerProps) -> Element {
 pub fn NavbarContent(props: NavbarContentProps) -> Element {
     rsx! {
         navbar::NavbarContent {
-            class: "dx-navbar-content",
+            class: Styles::dx_navbar_content,
             id: props.id,
             attributes: props.attributes,
             {props.children}
@@ -63,7 +64,7 @@ pub fn NavbarContent(props: NavbarContentProps) -> Element {
 pub fn NavbarItem(props: NavbarItemProps) -> Element {
     rsx! {
         navbar::NavbarItem {
-            class: "dx-navbar-item",
+            class: Styles::dx_navbar_item.to_string(),
             index: props.index,
             value: props.value,
             disabled: props.disabled,

@@ -6,11 +6,12 @@ const PAGE_TIMEOUT = 20 * 60 * 1000;
 async function openPicker(page: Page) {
   await page.goto(PAGE_URL, { timeout: PAGE_TIMEOUT });
   // The color picker button's aria-label contains the current hex.
-  const button = page.locator('.dx-color-picker-button').first();
+  const button = page.getByRole('button', { name: /Color picker/i }).first();
   await expect(button).toBeVisible();
   await button.click();
-  const popover = page.locator('.dx-color-picker-popover');
-  await expect(popover).toHaveAttribute('data-state', 'open');
+  await expect(button).toHaveAttribute('aria-expanded', 'true');
+  const popover = page.getByRole('dialog');
+  await expect(popover).toBeVisible();
   return { button, popover };
 }
 
@@ -25,7 +26,7 @@ test('opens popover and shows initial color', async ({ page }) => {
   await expect(hexField).toHaveValue('#9B80FF');
 
   // Both the trigger swatch and the popover swatch render the same color.
-  const swatches = page.locator('.dx-color-swatch');
+  const swatches = page.getByRole('img', { name: /Selected color #9B80FF/i });
   await expect(swatches.first()).toHaveAttribute(
     'style',
     /--swatch-color:\s*#9B80FF/i,
@@ -47,7 +48,7 @@ test('typing a new hex updates the color picker', async ({ page }) => {
 
   // The hue slider snaps to red (0°). Read it from the thumb that lives in
   // the open dialog, not the (non-existent) one outside it.
-  const hueThumb = page.locator('.dx-color-slider-thumb').first();
+  const hueThumb = page.getByRole('slider', { name: 'Hue' });
   // Hue can be reported as 0 or 360 depending on which way palette wraps —
   // both are red.
   await expect.poll(async () => {
@@ -74,7 +75,7 @@ test('hex field strips invalid characters and caps at 7 chars', async ({ page })
 test('hue slider keyboard navigation updates color', async ({ page }) => {
   await openPicker(page);
   // The hue slider lives inside the popover. Use the thumb directly.
-  const hueThumb = page.locator('.dx-color-slider-thumb').first();
+  const hueThumb = page.getByRole('slider', { name: 'Hue' });
   await hueThumb.focus();
 
   const before = Number(await hueThumb.getAttribute('aria-valuenow'));
@@ -93,7 +94,7 @@ test('hue slider keyboard navigation updates color', async ({ page }) => {
 
 test('color area thumb keyboard navigation updates saturation/value', async ({ page }) => {
   await openPicker(page);
-  const areaThumb = page.locator('.dx-color-area-thumb');
+  const areaThumb = page.getByLabel('Color area');
   await expect(areaThumb).toBeVisible();
   await areaThumb.focus();
 
@@ -129,7 +130,7 @@ test('escape closes the color picker popover', async ({ page }) => {
 test('clicking the color area updates saturation and value', async ({ page }) => {
   await openPicker(page);
 
-  const area = page.locator('.dx-color-area-container');
+  const area = page.locator('[role="group"]').filter({ has: page.getByLabel('Color area') }).last();
   const sInput = page.locator('input[aria-label="Saturation"]');
   const vInput = page.locator('input[aria-label="Value"]');
 
@@ -146,7 +147,7 @@ test('clicking the color area updates saturation and value', async ({ page }) =>
 test('dragging the color area updates saturation and value', async ({ page }) => {
   await openPicker(page);
 
-  const area = page.locator('.dx-color-area-container');
+  const area = page.locator('[role="group"]').filter({ has: page.getByLabel('Color area') }).last();
   const sInput = page.locator('input[aria-label="Saturation"]');
   const vInput = page.locator('input[aria-label="Value"]');
 

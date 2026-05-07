@@ -6,7 +6,7 @@
   max-width: 350px;
 }
 
-.dx-toast-list {
+.dx-toast-container ol {
   display: flex;
   flex-direction: column-reverse;
   padding: 0;
@@ -14,7 +14,7 @@
   gap: 0.75rem;
 }
 
-.dx-toast-item {
+.dx-toast-container li {
   display: flex;
 }
 

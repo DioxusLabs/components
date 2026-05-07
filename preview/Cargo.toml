@@ -21,6 +21,9 @@ dioxus-code = { version = "0.1.0", default-features = false, features = ["runtim
 dioxus-ssr = "0.7.0"
 pulldown-cmark = "0.13.0"
 
+[dev-dependencies]
+dioxus-ssr = "0.7.0"
+
 [features]
 web = ["dioxus/web", "dioxus-primitives/web"]
 desktop = ["dioxus/desktop"]

@@ -26,7 +26,6 @@ pub fn Demo() -> Element {
                     selected_range.set(range);
                 },
                 disabled_ranges: disabled_ranges,
-                DateRangePickerInput {}
             }
         }
     }

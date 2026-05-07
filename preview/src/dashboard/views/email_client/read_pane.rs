@@ -98,7 +98,7 @@ pub(super) fn ReadPane(
 
     rsx! {
         section { class: "ec-read-pane",
-            Toolbar { aria_label: "Message actions",
+            Toolbar { class: "ec-read-toolbar", aria_label: "Message actions",
                 ToolbarGroup {
                     ToolbarButton {
                         index: 0usize,
@@ -106,7 +106,7 @@ pub(super) fn ReadPane(
                         LucideIcon { kind: IconKind::ArrowLeft }
                     }
                 }
-                ToolbarSeparator {}
+                ToolbarSeparator { class: "ec-read-toolbar-separator" }
                 ToolbarGroup {
                     ToolbarButton { index: 1usize, on_click: archive_selected,
                         LucideIcon { kind: IconKind::Archive }
@@ -121,7 +121,7 @@ pub(super) fn ReadPane(
                         " Delete"
                     }
                 }
-                ToolbarSeparator {}
+                ToolbarSeparator { class: "ec-read-toolbar-separator" }
                 ToolbarGroup {
                     ToolbarButton { index: 4usize, on_click: toggle_flag_selected,
                         if selected_flagged {

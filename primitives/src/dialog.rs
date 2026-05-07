@@ -137,7 +137,6 @@ pub fn DialogRoot(props: DialogRootProps) -> Element {
         if render() {
             div {
                 id,
-                class: "dx-dialog-overlay",
                 aria_hidden: (!open()).then_some("true"),
                 onpointerdown: move |_| {
                     // Use pointerdown rather than click so a drag that starts

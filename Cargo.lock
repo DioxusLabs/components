@@ -2443,6 +2443,7 @@ dependencies = [
  "dioxus",
  "dioxus-attributes 0.1.0",
  "dioxus-sdk-time",
+ "dioxus-ssr",
  "lazy-js-bundle 0.6.2",
  "num-integer",
  "palette",

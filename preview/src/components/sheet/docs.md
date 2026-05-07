@@ -11,6 +11,8 @@ Sheet {
     // Available sides: Top, Right (default), Bottom, Left.
     SheetContent {
         side: SheetSide::Right,
+        // SheetContentClose renders the standard close button for the sheet content.
+        SheetContentClose {}
         // SheetHeader groups the title and description at the top.
         SheetHeader {
             // The sheet title defines the heading of the sheet.

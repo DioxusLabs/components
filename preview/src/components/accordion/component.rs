@@ -3,13 +3,15 @@ use dioxus_primitives::accordion::{
     self, AccordionContentProps, AccordionItemProps, AccordionProps, AccordionTriggerProps,
 };
 use dioxus_primitives::icon;
+// Each `css_module` macro will expand the annotated struct in the current scope
+#[css_module("/src/components/accordion/style.css")]
+struct Styles;
 
 #[component]
 pub fn Accordion(props: AccordionProps) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
         accordion::Accordion {
-            class: "dx-accordion",
+            class: Styles::dx_accordion,
             width: "15rem",
             id: props.id,
             allow_multiple_open: props.allow_multiple_open,
@@ -26,7 +28,7 @@ pub fn Accordion(props: AccordionProps) -> Element {
 pub fn AccordionItem(props: AccordionItemProps) -> Element {
     rsx! {
         accordion::AccordionItem {
-            class: "dx-accordion-item",
+            class: Styles::dx_accordion_item,
             disabled: props.disabled,
             default_open: props.default_open,
             on_change: props.on_change,
@@ -42,12 +44,12 @@ pub fn AccordionItem(props: AccordionItemProps) -> Element {
 pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
     rsx! {
         accordion::AccordionTrigger {
-            class: "dx-accordion-trigger",
+            class: Styles::dx_accordion_trigger,
             id: props.id,
             attributes: props.attributes,
             {props.children}
             icon::Icon {
-                class: "dx-accordion-expand-icon",
+                class: Styles::dx_accordion_expand_icon,
                 width: "20px",
                 height: "20px",
                 stroke: "var(--secondary-color-4)",
@@ -61,7 +63,7 @@ pub fn AccordionTrigger(props: AccordionTriggerProps) -> Element {
 pub fn AccordionContent(props: AccordionContentProps) -> Element {
     rsx! {
         accordion::AccordionContent {
-            class: "dx-accordion-content",
+            class: Styles::dx_accordion_content,
             style: "--collapsible-content-width: 140px",
             id: props.id,
             attributes: props.attributes,

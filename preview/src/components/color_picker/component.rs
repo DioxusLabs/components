@@ -10,6 +10,9 @@ use palette::{encoding, FromColor, Hsv, IntoColor, RgbHue, Srgb};
 
 use crate::components::input::Input;
 
+#[css_module("/src/components/color_picker/style.css")]
+struct Styles;
+
 fn format_color_hex(color: Color) -> String {
     format!("#{color:X}")
 }
@@ -66,10 +69,8 @@ pub fn ColorPickerRoot(props: ColorPickerRootProps) -> Element {
     });
 
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
-
         color_picker::ColorPicker {
-            class: "dx-color-picker",
+            class: Styles::dx_color_picker,
             color: props.color,
             on_color_change: props.on_color_change,
             disabled: props.disabled,
@@ -169,7 +170,7 @@ pub fn ColorPickerTrigger(props: ColorPickerTriggerProps) -> Element {
 
     rsx! {
         popover::PopoverTrigger {
-            class: "dx-color-picker-button",
+            class: Styles::dx_color_picker_button,
             disabled: if (ctx.disabled)() { true },
             aria_label: format!("Color picker {aria_hex}"),
             aria_expanded: (ctx.open)(),
@@ -196,7 +197,7 @@ pub struct ColorPickerPopoverProps {
 pub fn ColorPickerPopover(props: ColorPickerPopoverProps) -> Element {
     rsx! {
         popover::PopoverContent {
-            class: "dx-color-picker-popover".to_string(),
+            class: Styles::dx_color_picker_popover.to_string(),
             attributes: props.attributes,
             {props.children}
         }
@@ -258,12 +259,12 @@ fn ColorField(props: ColorFieldProps) -> Element {
 
     rsx! {
         div {
-            class: "dx-color-field-container",
+            class: Styles::dx_color_field_container,
             ..props.attributes,
             if let Some(label) = props.label {
                 Label {
                     html_for: "color_field",
-                    class: "dx-color-slider-title",
+                    class: Styles::dx_color_slider_title,
                     {label}
                 }
             }
@@ -291,7 +292,7 @@ fn ColorField(props: ColorFieldProps) -> Element {
                 },
             }
             if let Some(text) = props.description {
-                span { class: "dx-color-field-description", {text} }
+                span { class: Styles::dx_color_field_description, {text} }
             }
             {props.children}
         }
@@ -327,7 +328,7 @@ fn ColorSwatch(props: ColorSwatchProps) -> Element {
         div {
             role: "img",
             aria_label: format!("Selected color {hex_color}"),
-            class: "dx-color-swatch",
+            class: Styles::dx_color_swatch,
             style: "--swatch-color: {hex_color}",
             ..props.attributes,
             {props.children}
@@ -391,12 +392,12 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
     rsx! {
 
         div {
-            class: "dx-color-slider-container",
+            class: Styles::dx_color_slider_container,
             ..props.attributes,
-            label { class: "dx-color-slider-title", {props.title} }
-            output { class: "dx-color-slider-output", "{display_value}" }
+            label { class: Styles::dx_color_slider_title, {props.title} }
+            output { class: Styles::dx_color_slider_output, "{display_value}" }
             Slider {
-                class: "dx-color-slider",
+                class: Styles::dx_color_slider,
                 label: "Color Slider",
                 horizontal: true,
                 max: 360.0,
@@ -408,9 +409,9 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
                     ctx.set_hue(h);
                 },
                 SliderTrack {
-                    class: "dx-color-slider-track",
+                    class: Styles::dx_color_slider_track,
                     SliderThumb {
-                        class: "dx-color-slider-thumb",
+                        class: Styles::dx_color_slider_thumb,
                         aria_label: "Hue",
                         aria_valuetext: format!("{:.0}°", current_hue()),
                         background_color: format_color_hex(thumb_color()),
@@ -426,11 +427,20 @@ fn ColorSlider(props: ColorSliderProps) -> Element {
 fn ColorArea(props: ColorAreaProps) -> Element {
     rsx! {
         color_picker::ColorArea {
-            class: "dx-color-area-container",
+            class: Styles::dx_color_area_container,
             step: props.step,
             attributes: props.attributes,
             color_picker::AreaTrack {
-                color_picker::AreaThumb {}
+                class: Styles::dx_color_area_track,
+                color_picker::AreaThumb {
+                    class: Styles::dx_color_area_thumb,
+                    color_picker::AreaThumbSaturationInput {
+                        class: Styles::dx_color_area_input,
+                    }
+                    color_picker::AreaThumbValueInput {
+                        class: Styles::dx_color_area_input,
+                    }
+                }
             }
             {props.children}
         }
@@ -454,12 +464,12 @@ pub fn ColorPickerSelect(props: ColorPickerSelectProps) -> Element {
 
     rsx! {
         div {
-            class: "dx-color-picker-dialog",
+            class: Styles::dx_color_picker_dialog,
             ..props.attributes,
             ColorArea {}
             ColorSlider { title: "Hue" }
             div {
-                class: "dx-color-picker-input",
+                class: Styles::dx_color_picker_input,
                 ColorField { label: "Hex" }
                 ColorSwatch { color: ctx.color() }
             }
