@@ -146,7 +146,7 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
 pub fn DatePickerPopoverTrigger(props: PopoverTriggerProps) -> Element {
     rsx! {
         PopoverTrigger {
-            class: Styles::dx_date_picker_popover_trigger.to_string(),
+            class: Styles::dx_date_picker_popover_trigger,
             aria_label: "Show Calendar",
             attributes: props.attributes,
             icon::Icon {

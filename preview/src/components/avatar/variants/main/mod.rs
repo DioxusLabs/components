@@ -27,7 +27,7 @@ pub fn Demo() -> Element {
                         src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
                         alt: "User avatar",
                     }
-                    AvatarFallback { class: Styles::dx_avatar_fallback.to_string(), "EA" }
+                    AvatarFallback { class: Styles::dx_avatar_fallback, "EA" }
                 }
             }
             div { class: Styles::dx_avatar_item,
@@ -44,7 +44,7 @@ pub fn Demo() -> Element {
                         src: "https://avatars.githubusercontent.com/u/66571940?s=96&v=4",
                         alt: "User avatar",
                     }
-                    AvatarFallback { class: Styles::dx_avatar_fallback.to_string(), "EA" }
+                    AvatarFallback { class: Styles::dx_avatar_fallback, "EA" }
                 }
             }
             div { class: Styles::dx_avatar_item,
@@ -60,7 +60,7 @@ pub fn Demo() -> Element {
                         src: "https://invalid-url.example/image.jpg",
                         alt: "Invalid image",
                     }
-                    AvatarFallback { class: Styles::dx_avatar_fallback.to_string(), "JK" }
+                    AvatarFallback { class: Styles::dx_avatar_fallback, "JK" }
                 }
             }
             div { class: Styles::dx_avatar_item,
@@ -76,7 +76,7 @@ pub fn Demo() -> Element {
                         src: asset!("/assets/dioxus-logo.png", ImageAssetOptions::new().with_avif()),
                         alt: "Large avatar",
                     }
-                    AvatarFallback { class: Styles::dx_avatar_fallback.to_string(), "DX" }
+                    AvatarFallback { class: Styles::dx_avatar_fallback, "DX" }
                 }
             }
         }

@@ -763,9 +763,9 @@ pub fn SidebarMenuSkeleton(
         div {
             ..merged,
             if show_icon {
-                Skeleton { class: Styles::dx_sidebar_menu_skeleton_icon.to_string() }
+                Skeleton { class: Styles::dx_sidebar_menu_skeleton_icon }
             }
-            Skeleton { class: Styles::dx_sidebar_menu_skeleton_text.to_string(), width: "70%" }
+            Skeleton { class: Styles::dx_sidebar_menu_skeleton_text, width: "70%" }
         }
     }
 }

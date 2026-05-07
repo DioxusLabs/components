@@ -12,7 +12,7 @@ pub fn Demo() -> Element {
             onsubmit: move |e| {
                 tracing::info!("{:?}", e.values());
             },
-            Checkbox { id: "tos-check", class: Styles::dx_tos_check.to_string(), name: "tos-check",
+            Checkbox { id: "tos-check", class: Styles::dx_tos_check, name: "tos-check",
                 CheckboxIndicator { "+" }
             }
             label { r#for: "tos-check", "I agree to the terms presented." }
