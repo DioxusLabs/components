@@ -3,7 +3,9 @@ use dioxus_primitives::calendar::{
     self, CalendarDayProps, CalendarGridBodyProps, CalendarGridCellProps,
     CalendarGridDayHeaderProps, CalendarGridHeadProps, CalendarGridHeaderRowProps,
     CalendarGridRootProps, CalendarGridWeekProps, CalendarHeaderProps, CalendarMonthTitleProps,
-    CalendarNavigationProps, CalendarProps, CalendarSelectMonthProps, CalendarSelectYearProps,
+    CalendarNavigationProps, CalendarProps, CalendarSelectMonthProps,
+    CalendarSelectMonthSelectProps, CalendarSelectMonthValueProps, CalendarSelectYearProps,
+    CalendarSelectYearSelectProps, CalendarSelectYearValueProps, CalendarViewProps,
     RangeCalendarProps,
 };
 use dioxus_primitives::icon::Icon;
@@ -27,7 +29,6 @@ pub fn Calendar(props: CalendarProps) -> Element {
             first_day_of_week: props.first_day_of_week,
             min_date: props.min_date,
             max_date: props.max_date,
-            month_count: props.month_count,
             disabled_ranges: props.disabled_ranges,
             attributes: props.attributes,
             {props.children}
@@ -51,7 +52,6 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
             first_day_of_week: props.first_day_of_week,
             min_date: props.min_date,
             max_date: props.max_date,
-            month_count: props.month_count,
             disabled_ranges: props.disabled_ranges,
             attributes: props.attributes,
             {props.children}
@@ -60,15 +60,13 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
 }
 
 #[component]
-pub fn CalendarView(
-    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
-    children: Element,
-) -> Element {
+pub fn CalendarView(props: CalendarViewProps) -> Element {
     rsx! {
-        div {
+        calendar::CalendarView {
             class: Styles::dx_calendar_view,
-            ..attributes,
-            {children}
+            offset: props.offset,
+            attributes: props.attributes,
+            {props.children}
         }
     }
 }
@@ -121,11 +119,34 @@ pub fn CalendarNextMonthButton(
 pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     rsx! {
         calendar::CalendarSelectMonth {
-            container_class: Some(Styles::dx_calendar_month_select_container.to_string()),
-            value_class: Some(Styles::dx_calendar_month_select_value.to_string()),
+            attributes: props.attributes,
+            class: Styles::dx_calendar_month_select_container,
+            CalendarSelectMonthSelect {}
+            CalendarSelectMonthValue {
+                DropDownIcon { }
+                {props.children}
+            }
+        }
+    }
+}
+
+#[component]
+pub fn CalendarSelectMonthSelect(props: CalendarSelectMonthSelectProps) -> Element {
+    rsx! {
+        calendar::CalendarSelectMonthSelect {
             class: Styles::dx_calendar_month_select,
             attributes: props.attributes,
-            DropDownIcon { }
+        }
+    }
+}
+
+#[component]
+pub fn CalendarSelectMonthValue(props: CalendarSelectMonthValueProps) -> Element {
+    rsx! {
+        calendar::CalendarSelectMonthValue {
+            class: Styles::dx_calendar_month_select_value,
+            attributes: props.attributes,
+            {props.children}
         }
     }
 }
@@ -134,11 +155,34 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
 pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
     rsx! {
         calendar::CalendarSelectYear {
-            container_class: Some(Styles::dx_calendar_year_select_container.to_string()),
-            value_class: Some(Styles::dx_calendar_year_select_value.to_string()),
+            attributes: props.attributes,
+            class: Styles::dx_calendar_year_select_container,
+            CalendarSelectYearSelect {}
+            CalendarSelectYearValue {
+                DropDownIcon { }
+                {props.children}
+            }
+        }
+    }
+}
+
+#[component]
+pub fn CalendarSelectYearSelect(props: CalendarSelectYearSelectProps) -> Element {
+    rsx! {
+        calendar::CalendarSelectYearSelect {
             class: Styles::dx_calendar_year_select,
             attributes: props.attributes,
-            DropDownIcon { }
+        }
+    }
+}
+
+#[component]
+pub fn CalendarSelectYearValue(props: CalendarSelectYearValueProps) -> Element {
+    rsx! {
+        calendar::CalendarSelectYearValue {
+            class: Styles::dx_calendar_year_select_value,
+            attributes: props.attributes,
+            {props.children}
         }
     }
 }
@@ -146,10 +190,8 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
 #[component]
 pub fn CalendarGrid(
     #[props(default)] id: Option<String>,
-    #[props(default)] show_week_numbers: bool,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
-    let _ = show_week_numbers;
     let grid = calendar::use_calendar_grid();
 
     rsx! {
@@ -171,7 +213,6 @@ pub fn CalendarGrid(
                         for date in week.iter().copied() {
                             CalendarGridCell {
                                 key: "{date}",
-                                date,
                                 CalendarDay { date }
                             }
                         }
@@ -253,7 +294,6 @@ pub fn CalendarGridWeek(props: CalendarGridWeekProps) -> Element {
 pub fn CalendarGridCell(props: CalendarGridCellProps) -> Element {
     rsx! {
         calendar::CalendarGridCell {
-            date: props.date,
             attributes: props.attributes,
             {props.children}
         }

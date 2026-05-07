@@ -35,7 +35,8 @@ DatePicker {
 
                 // The DatePickerCalendar component wraps the Calendar with its navigation components
                 DatePickerCalendar {
-                    // The calendar view will get rendered once for each month in the multi-month view.
+                    // Render one CalendarView for each visible month. The calendar derives the
+                    // visible month count from the CalendarView components that are rendered.
                     CalendarView {
                         CalendarHeader {
                             CalendarNavigation {

@@ -334,14 +334,27 @@ pub fn AreaTrack(props: AreaTrackProps) -> Element {
 /// The props for the [`AreaThumb`] component
 #[derive(Props, Clone, PartialEq)]
 pub struct AreaThumbProps {
-    /// Class applied to the inner range input elements.
-    #[props(default)]
-    pub input_class: Option<String>,
     /// Additional attributes to apply to the thumb element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
     /// The children of the thumb element
     pub children: Element,
+}
+
+/// The props for the [`AreaThumbSaturationInput`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct AreaThumbSaturationInputProps {
+    /// Additional attributes to apply to the saturation input element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
+/// The props for the [`AreaThumbValueInput`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct AreaThumbValueInputProps {
+    /// Additional attributes to apply to the value input element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
 }
 
 /// # AreaThumb
@@ -356,8 +369,13 @@ pub fn AreaThumb(props: AreaThumbProps) -> Element {
     let area_ctx = use_context::<ColorAreaContext>();
 
     let mut button_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
-    let mut saturation_input_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
-    let mut value_input_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    let saturation_input_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    let value_input_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+
+    let thumb_ctx = use_context_provider(|| AreaThumbContext {
+        saturation_input_ref,
+        value_input_ref,
+    });
 
     use_effect(move || {
         if let Some(button) = button_ref() {
@@ -376,11 +394,6 @@ pub fn AreaThumb(props: AreaThumbProps) -> Element {
         percent.width,
         100. - percent.height
     );
-    let current = (area_ctx.value)();
-    let min = COLOR_AREA_MIN;
-    let max = COLOR_AREA_MAX;
-    let step = (area_ctx.step)();
-    let color_label = color_name(Srgb::<f64>::from_color(picker_ctx.color()).into_format());
     let thumb_color = color_hex(Srgb::<f64>::from_color(picker_ctx.color()).into_format());
 
     rsx! {
@@ -415,98 +428,134 @@ pub fn AreaThumb(props: AreaThumbProps) -> Element {
                 set_area_value(picker_ctx, clamp_area_value(new_value, (area_ctx.step)()));
 
                 let target = if move_event.delta_x != 0.0 {
-                    saturation_input_ref()
+                    (thumb_ctx.saturation_input_ref)()
                 } else {
-                    value_input_ref()
+                    (thumb_ctx.value_input_ref)()
                 };
                 if let Some(target) = target {
                     _ = target.set_focus(true).await;
                 }
             },
             ..props.attributes,
-            input {
-                class: props.input_class.clone(),
-                r#type: "range",
-                aria_label: "Saturation",
-                aria_roledescription: "2D Slider",
-                aria_valuetext: format!("Saturation {:.0}%, {color_label}", percent.width),
-                aria_orientation: "horizontal",
-                tabindex: "-1",
-                min: "{min}",
-                max: "{max}",
-                step: "{step}",
-                value: format!("{}", current.x),
-                onmounted: move |evt| {
-                    saturation_input_ref.set(Some(evt.data()));
-                },
-                // Cross-axis arrows hand focus to the value input so AT
-                // announces the new channel.
-                onkeydown: move |evt: Event<KeyboardData>| async move {
-                    let Some(move_event) = MoveEvent::from_keyboard(&evt, (area_ctx.step)()) else {
-                        return;
-                    };
-                    evt.prevent_default();
-
-                    let new_value =
-                        (area_ctx.value)() + Size2D::new(move_event.delta_x, move_event.delta_y);
-                    set_area_value(picker_ctx, clamp_area_value(new_value, (area_ctx.step)()));
-
-                    if move_event.delta_y != 0.0 {
-                        if let Some(target) = value_input_ref() {
-                            _ = target.set_focus(true).await;
-                        }
-                    }
-                },
-                // Voice-control / direct-manipulation: a programmatic value
-                // change on the input feeds the new saturation through.
-                oninput: move |evt: Event<FormData>| {
-                    if let Ok(s) = evt.value().parse::<f64>() {
-                        let v = picker_ctx.color().value;
-                        let scaled = s.clamp(COLOR_AREA_MIN, COLOR_AREA_MAX) / COLOR_AREA_RANGE;
-                        picker_ctx.set_sv(scaled, v);
-                    }
-                },
-            }
-            input {
-                class: props.input_class.clone(),
-                r#type: "range",
-                aria_label: "Value",
-                aria_roledescription: "2D Slider",
-                aria_valuetext: format!("Value {:.0}%, {color_label}", percent.height),
-                aria_orientation: "vertical",
-                tabindex: "-1",
-                min: "{min}",
-                max: "{max}",
-                step: "{step}",
-                value: format!("{}", current.y),
-                onmounted: move |evt| {
-                    value_input_ref.set(Some(evt.data()));
-                },
-                onkeydown: move |evt: Event<KeyboardData>| async move {
-                    let Some(move_event) = MoveEvent::from_keyboard(&evt, (area_ctx.step)()) else {
-                        return;
-                    };
-                    evt.prevent_default();
-
-                    let new_value =
-                        (area_ctx.value)() + Size2D::new(move_event.delta_x, move_event.delta_y);
-                    set_area_value(picker_ctx, clamp_area_value(new_value, (area_ctx.step)()));
-
-                    if move_event.delta_x != 0.0 {
-                        if let Some(target) = saturation_input_ref() {
-                            _ = target.set_focus(true).await;
-                        }
-                    }
-                },
-                oninput: move |evt: Event<FormData>| {
-                    if let Ok(v) = evt.value().parse::<f64>() {
-                        let s = picker_ctx.color().saturation;
-                        let scaled = v.clamp(COLOR_AREA_MIN, COLOR_AREA_MAX) / COLOR_AREA_RANGE;
-                        picker_ctx.set_sv(s, scaled);
-                    }
-                },
-            }
             {props.children}
+        }
+    }
+}
+
+/// The saturation axis input for [`AreaThumb`].
+#[component]
+pub fn AreaThumbSaturationInput(props: AreaThumbSaturationInputProps) -> Element {
+    let picker_ctx = use_context::<ColorPickerContext>();
+    let area_ctx = use_context::<ColorAreaContext>();
+    let mut thumb_ctx = use_context::<AreaThumbContext>();
+
+    let percent = area_percent((area_ctx.value)());
+    let current = (area_ctx.value)();
+    let min = COLOR_AREA_MIN;
+    let max = COLOR_AREA_MAX;
+    let step = (area_ctx.step)();
+    let color_label = color_name(Srgb::<f64>::from_color(picker_ctx.color()).into_format());
+
+    rsx! {
+        input {
+            r#type: "range",
+            aria_label: "Saturation",
+            aria_roledescription: "2D Slider",
+            aria_valuetext: format!("Saturation {:.0}%, {color_label}", percent.width),
+            aria_orientation: "horizontal",
+            tabindex: "-1",
+            min: "{min}",
+            max: "{max}",
+            step: "{step}",
+            value: format!("{}", current.x),
+            onmounted: move |evt| {
+                thumb_ctx.saturation_input_ref.set(Some(evt.data()));
+            },
+            // Cross-axis arrows hand focus to the value input so AT
+            // announces the new channel.
+            onkeydown: move |evt: Event<KeyboardData>| async move {
+                let Some(move_event) = MoveEvent::from_keyboard(&evt, (area_ctx.step)()) else {
+                    return;
+                };
+                evt.prevent_default();
+
+                let new_value =
+                    (area_ctx.value)() + Size2D::new(move_event.delta_x, move_event.delta_y);
+                set_area_value(picker_ctx, clamp_area_value(new_value, (area_ctx.step)()));
+
+                if move_event.delta_y != 0.0 {
+                    if let Some(target) = (thumb_ctx.value_input_ref)() {
+                        _ = target.set_focus(true).await;
+                    }
+                }
+            },
+            // Voice-control / direct-manipulation: a programmatic value
+            // change on the input feeds the new saturation through.
+            oninput: move |evt: Event<FormData>| {
+                if let Ok(s) = evt.value().parse::<f64>() {
+                    let v = picker_ctx.color().value;
+                    let scaled = s.clamp(COLOR_AREA_MIN, COLOR_AREA_MAX) / COLOR_AREA_RANGE;
+                    picker_ctx.set_sv(scaled, v);
+                }
+            },
+            ..props.attributes,
+        }
+    }
+}
+
+/// The value axis input for [`AreaThumb`].
+#[component]
+pub fn AreaThumbValueInput(props: AreaThumbValueInputProps) -> Element {
+    let picker_ctx = use_context::<ColorPickerContext>();
+    let area_ctx = use_context::<ColorAreaContext>();
+    let mut thumb_ctx = use_context::<AreaThumbContext>();
+
+    let percent = area_percent((area_ctx.value)());
+    let current = (area_ctx.value)();
+    let min = COLOR_AREA_MIN;
+    let max = COLOR_AREA_MAX;
+    let step = (area_ctx.step)();
+    let color_label = color_name(Srgb::<f64>::from_color(picker_ctx.color()).into_format());
+
+    rsx! {
+        input {
+            r#type: "range",
+            aria_label: "Value",
+            aria_roledescription: "2D Slider",
+            aria_valuetext: format!("Value {:.0}%, {color_label}", percent.height),
+            aria_orientation: "vertical",
+            tabindex: "-1",
+            min: "{min}",
+            max: "{max}",
+            step: "{step}",
+            value: format!("{}", current.y),
+            onmounted: move |evt| {
+                thumb_ctx.value_input_ref.set(Some(evt.data()));
+            },
+            onkeydown: move |evt: Event<KeyboardData>| async move {
+                let Some(move_event) = MoveEvent::from_keyboard(&evt, (area_ctx.step)()) else {
+                    return;
+                };
+                evt.prevent_default();
+
+                let new_value =
+                    (area_ctx.value)() + Size2D::new(move_event.delta_x, move_event.delta_y);
+                set_area_value(picker_ctx, clamp_area_value(new_value, (area_ctx.step)()));
+
+                if move_event.delta_x != 0.0 {
+                    if let Some(target) = (thumb_ctx.saturation_input_ref)() {
+                        _ = target.set_focus(true).await;
+                    }
+                }
+            },
+            oninput: move |evt: Event<FormData>| {
+                if let Ok(v) = evt.value().parse::<f64>() {
+                    let s = picker_ctx.color().saturation;
+                    let scaled = v.clamp(COLOR_AREA_MIN, COLOR_AREA_MAX) / COLOR_AREA_RANGE;
+                    picker_ctx.set_sv(s, scaled);
+                }
+            },
+            ..props.attributes,
         }
     }
 }
@@ -516,4 +565,10 @@ struct ColorAreaContext {
     value: Memo<ClientPoint>,
     step: ReadSignal<f64>,
     dragging: ReadSignal<bool>,
+}
+
+#[derive(Clone, Copy)]
+struct AreaThumbContext {
+    saturation_input_ref: Signal<Option<Rc<MountedData>>>,
+    value_input_ref: Signal<Option<Rc<MountedData>>>,
 }

@@ -66,16 +66,12 @@ pub fn SheetContent(
     #[props(default = ReadSignal::new(Signal::new(None)))] id: ReadSignal<Option<String>>,
     #[props(default)] side: SheetSide,
     #[props(default)] class: Option<String>,
-    #[props(default)] close_class: Option<String>,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
     children: Element,
 ) -> Element {
     let class = class
         .map(|c| format!("{} {c}", Styles::dx_sheet))
         .unwrap_or(Styles::dx_sheet.to_string());
-    let close_class = close_class
-        .map(|c| format!("{} {c}", Styles::dx_sheet_close))
-        .unwrap_or(Styles::dx_sheet_close.to_string());
 
     rsx! {
         dialog::DialogContent {
@@ -85,13 +81,24 @@ pub fn SheetContent(
             "data-side": side.as_str(),
             attributes,
             {children}
-            SheetClose { class: close_class,
-                icon::Icon {
-                    width: "20px",
-                    height: "20px",
-                    path { d: "M18 6 6 18" }
-                    path { d: "m6 6 12 12" }
-                }
+        }
+    }
+}
+
+#[component]
+pub fn SheetContentClose(#[props(extends = GlobalAttributes)] attributes: Vec<Attribute>) -> Element {
+    let base = attributes!(button {
+        class: Styles::dx_sheet_close,
+    });
+    let attributes = merge_attributes(vec![base, attributes]);
+
+    rsx! {
+        SheetClose { attributes,
+            icon::Icon {
+                width: "20px",
+                height: "20px",
+                path { d: "M18 6 6 18" }
+                path { d: "m6 6 12 12" }
             }
         }
     }

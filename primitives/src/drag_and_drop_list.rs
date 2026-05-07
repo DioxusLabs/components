@@ -264,24 +264,44 @@ pub struct DragAndDropListProps {
     #[props(default)]
     pub aria_label: Option<String>,
 
-    /// Class to apply to the inner `ul` element.
-    #[props(default)]
-    pub ul_class: Option<String>,
-
-    /// Class to apply to the rendered list `li` items.
-    #[props(default)]
-    pub item_class: Option<String>,
-
-    /// Class to apply to the drop indicator div rendered next to the items.
-    #[props(default)]
-    pub indicator_class: Option<String>,
-
     /// Additional attributes to apply to the list element.
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 
     /// The children of the list component.
-    pub children: Element,
+    #[props(default)]
+    pub children: Option<Element>,
+}
+
+/// The props for the [`DragAndDropListItems`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DragAndDropListItemsProps {
+    /// Accessible label for the list.
+    pub aria_label: String,
+
+    /// Additional attributes to apply to the inner list element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the inner list element.
+    #[props(default)]
+    pub children: Option<Element>,
+}
+
+/// The props for the [`DragAndDropInstructions`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DragAndDropInstructionsProps {
+    /// Additional attributes to apply to the instructions element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
+/// The props for the [`DragAndDropLiveRegion`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DragAndDropLiveRegionProps {
+    /// Additional attributes to apply to the live region element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
 }
 
 /// # DragAndDropList
@@ -313,13 +333,12 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     let list_items = use_signal(|| props.items.clone());
     let announcement = use_signal(String::new);
 
-    let ctx = use_context_provider(move || DragAndDropContext {
+    use_context_provider(move || DragAndDropContext {
         drag,
         list_items,
         focused_index: Signal::new(None),
         announcement,
     });
-    let mut list_drop_ctx = ctx;
 
     let label = props
         .aria_label
@@ -327,71 +346,122 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
         .unwrap_or("Sortable list")
         .to_string();
 
-    let item_class = props.item_class.clone();
-    let indicator_class = props.indicator_class.clone();
-    let display_list = move |elements: Vec<Element>| {
-        elements
-            .iter()
-            .enumerate()
-            .map(|(index, children)| {
-                let item_class = item_class.clone();
-                let indicator_class = indicator_class.clone();
-                // Propagate any `key:` the caller set on the item's root
-                // element through to the wrapping `DragAndDropListItem`,
-                // so Dioxus reconciles siblings by identity and actually
-                // moves DOM nodes on reorder (enabling CSS animations).
-                let key = children
-                    .as_ref()
-                    .ok()
-                    .and_then(|vnode| vnode.key.clone())
-                    .unwrap_or_else(|| index.to_string());
-                rsx! {
-                    DragAndDropListItem {
-                        key: "{key}",
-                        index,
-                        class: item_class.unwrap_or_default(),
-                        indicator_class,
-                        {children}
-                    }
-                }
-            })
-            .collect::<Vec<Element>>()
-    };
+    let children = props.children.unwrap_or_else(|| {
+        rsx! {
+            DragAndDropInstructions {}
+            DragAndDropListItems {
+                aria_label: label,
+            }
+            DragAndDropLiveRegion {}
+        }
+    });
 
     rsx! {
         div {
             ..props.attributes,
-            div {
-                id: "dnd-instructions",
-                style: "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);",
-                "Press Enter to start reordering. Use Arrow keys to change position. Press Enter to confirm or Escape to cancel."
+            {children}
+        }
+    }
+}
+
+/// Return render data for the current sortable items.
+pub fn use_drag_and_drop_list_items() -> Vec<DragAndDropListRenderItem> {
+    let ctx: DragAndDropContext = use_context();
+    (ctx.list_items)()
+        .into_iter()
+        .enumerate()
+        .map(|(index, children)| {
+            // Propagate any `key:` the caller set on the item's root element
+            // through to the keyed sortable item fragment.
+            let key = children
+                .as_ref()
+                .ok()
+                .and_then(|vnode| vnode.key.clone())
+                .unwrap_or_else(|| index.to_string());
+            DragAndDropListRenderItem {
+                index,
+                key,
+                children,
             }
-            ul {
-                class: props.ul_class,
-                aria_label: "{label}",
-                aria_roledescription: "sortable list",
-                aria_describedby: "dnd-instructions",
-                ondragover: move |event: Event<DragData>| {
-                    // Drops can happen in the visual gaps between items. The
-                    // nearest item still owns target calculation, but the list
-                    // must accept the final drop for those gap targets.
-                    event.prevent_default();
-                    event.data_transfer().set_drop_effect("move");
-                },
-                ondrop: move |event: Event<DragData>| {
-                    event.prevent_default();
-                    list_drop_ctx.drop();
-                },
-                { display_list(list_items()).iter() }
+        })
+        .collect()
+}
+
+/// The inner list element for sortable items.
+#[component]
+pub fn DragAndDropListItems(props: DragAndDropListItemsProps) -> Element {
+    let mut ctx: DragAndDropContext = use_context();
+    let children = props.children.unwrap_or_else(|| {
+        rsx! {
+            for item in use_drag_and_drop_list_items() {
+                Fragment {
+                    key: "{item.key}",
+                    DragAndDropDropIndicator {
+                        index: item.index,
+                        position: "before",
+                    }
+                    DragAndDropListItem {
+                        index: item.index,
+                        {item.children}
+                    }
+                    DragAndDropDropIndicator {
+                        index: item.index,
+                        position: "after",
+                    }
+                }
             }
-            div {
-                role: "status",
-                aria_live: "assertive",
-                aria_atomic: "true",
-                style: "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);",
-                "{announcement}"
-            }
-            {props.children}
+        }
+    });
+
+    rsx! {
+        ul {
+            aria_label: "{props.aria_label}",
+            aria_roledescription: "sortable list",
+            aria_describedby: "dnd-instructions",
+            ondragover: move |event: Event<DragData>| {
+                // Drops can happen in the visual gaps between items. The
+                // nearest item still owns target calculation, but the list
+                // must accept the final drop for those gap targets.
+                event.prevent_default();
+                event.data_transfer().set_drop_effect("move");
+            },
+            ondrop: move |event: Event<DragData>| {
+                event.prevent_default();
+                ctx.drop();
+            },
+            ..props.attributes,
+            {children}
+        }
+    }
+}
+
+/// Screen-reader instructions for keyboard sorting.
+#[component]
+pub fn DragAndDropInstructions(props: DragAndDropInstructionsProps) -> Element {
+    rsx! {
+        div {
+            id: "dnd-instructions",
+            style: "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);",
+            ..props.attributes,
+            "Press Enter to start reordering. Use Arrow keys to change position. Press Enter to confirm or Escape to cancel."
+        }
+    }
+}
+
+/// Live region for drag-and-drop announcements.
+#[component]
+pub fn DragAndDropLiveRegion(props: DragAndDropLiveRegionProps) -> Element {
+    let ctx: DragAndDropContext = use_context();
+    let announcement = (ctx.announcement)();
+
+    rsx! {
+        div {
+            role: "status",
+            aria_live: "assertive",
+            aria_atomic: "true",
+            style: "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);",
+            ..props.attributes,
+            "{announcement}"
         }
     }
 }
@@ -402,15 +472,38 @@ pub struct DragAndDropListItemProps {
     /// The index of the item in the list
     pub index: usize,
 
-    /// Class to apply to the drop indicator element rendered next to the item.
-    #[props(default)]
-    pub indicator_class: Option<String>,
-
     /// Additional attributes to apply to the list item element.
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 
     /// The children of the list item component.
+    pub children: Element,
+}
+
+/// The props for the [`DragAndDropDropIndicator`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct DragAndDropDropIndicatorProps {
+    /// The index of the item this indicator is adjacent to.
+    pub index: usize,
+
+    /// The indicator position relative to the item.
+    pub position: &'static str,
+
+    /// Additional attributes to apply to the drop indicator element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
+/// Data for rendering a sortable list item.
+#[derive(Clone, PartialEq)]
+pub struct DragAndDropListRenderItem {
+    /// The current index of this item.
+    pub index: usize,
+
+    /// The stable key for this item.
+    pub key: String,
+
+    /// The rendered item children.
     pub children: Element,
 }
 
@@ -458,11 +551,6 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             }
         }
     });
-
-    let render_drop_indicator = move |to: Option<usize>| match to {
-        None => false,
-        Some(v) => v == index,
-    };
 
     let onkeydown = move |event: Event<KeyboardData>| {
         let key = event.key();
@@ -529,9 +617,6 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
     let is_tab_reachable = ctx.is_focused(index) || ((ctx.focused_index)().is_none() && index == 0);
 
     rsx! {
-        if ctx.drop_position() == DropPosition::Before && render_drop_indicator(ctx.drop_to()) {
-            DropIndicator { class: props.indicator_class.clone(), position: "before" }
-        }
         li {
             aria_roledescription: "sortable item",
             draggable: "true",
@@ -624,18 +709,27 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
             ..props.attributes,
             {props.children}
         }
-        if ctx.drop_position() == DropPosition::After && render_drop_indicator(ctx.drop_to()) {
-            DropIndicator { class: props.indicator_class.clone(), position: "after" }
-        }
     }
 }
 
+/// The drop indicator rendered next to a sortable item.
 #[component]
-fn DropIndicator(class: Option<String>, position: &'static str) -> Element {
+pub fn DragAndDropDropIndicator(props: DragAndDropDropIndicatorProps) -> Element {
+    let ctx: DragAndDropContext = use_context();
+    let render = ctx.drop_to().is_some_and(|to| to == props.index)
+        && match props.position {
+            "before" => ctx.drop_position() == DropPosition::Before,
+            "after" => ctx.drop_position() == DropPosition::After,
+            _ => false,
+        };
+    if !render {
+        return rsx! {};
+    }
+
     rsx! {
         div {
-            class,
-            "data-position": "{position}",
+            "data-position": "{props.position}",
+            ..props.attributes,
         }
     }
 }

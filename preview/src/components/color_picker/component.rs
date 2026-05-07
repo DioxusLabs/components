@@ -434,7 +434,12 @@ fn ColorArea(props: ColorAreaProps) -> Element {
                 class: Styles::dx_color_area_track,
                 color_picker::AreaThumb {
                     class: Styles::dx_color_area_thumb,
-                    input_class: Some(Styles::dx_color_area_input.to_string()),
+                    color_picker::AreaThumbSaturationInput {
+                        class: Styles::dx_color_area_input,
+                    }
+                    color_picker::AreaThumbValueInput {
+                        class: Styles::dx_color_area_input,
+                    }
                 }
             }
             {props.children}

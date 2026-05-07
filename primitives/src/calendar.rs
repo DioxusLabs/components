@@ -1,6 +1,9 @@
 //! Defines the [`Calendar`] component and its sub-components, which provide a calendar interface with date selection and navigation.
 
-use dioxus::prelude::*;
+use dioxus::{
+    core::{current_scope_id, ScopeId},
+    prelude::*,
+};
 use std::{
     collections::HashSet,
     fmt::{self, Display},
@@ -9,7 +12,7 @@ use std::{
 
 use time::{ext::NumericalDuration, macros::date, Date, Month, OffsetDateTime, Weekday};
 
-use crate::{date_picker::DefaultCalendarProps, LocalDateExt as _};
+use crate::{date_picker::DefaultCalendarProps, use_effect_cleanup, LocalDateExt as _};
 
 // A collection of [`Weekday`]s stored as a single byte
 // Implemented as a bitmask where bits 1-7 correspond to Monday-Sunday
@@ -332,7 +335,13 @@ pub struct BaseCalendarContext {
     today: Date,
     first_day_of_week: Weekday,
     enabled_date_range: DateRange,
-    month_count: u8,
+    view_registrations: Signal<Vec<CalendarViewRegistration>>,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+struct CalendarViewRegistration {
+    id: ScopeId,
+    offset: Option<u8>,
 }
 
 impl BaseCalendarContext {
@@ -380,6 +389,64 @@ impl BaseCalendarContext {
                     .available_range(date, self.enabled_date_range)
             })
         })
+    }
+
+    fn visible_month_count(&self) -> u8 {
+        self.view_registrations
+            .read()
+            .iter()
+            .enumerate()
+            .map(|(index, view)| {
+                view.offset
+                    .unwrap_or_else(|| u8::try_from(index).unwrap_or(u8::MAX))
+                    .saturating_add(1)
+            })
+            .max()
+            .unwrap_or(1)
+    }
+
+    fn calendar_view_offset(&self, id: ScopeId, offset: Option<u8>) -> u8 {
+        offset.unwrap_or_else(|| {
+            self.view_registrations
+                .read()
+                .iter()
+                .position(|view| view.id == id)
+                .and_then(|index| u8::try_from(index).ok())
+                .unwrap_or_default()
+        })
+    }
+
+    fn register_calendar_view(&self, id: ScopeId, offset: Option<u8>) {
+        if self
+            .view_registrations
+            .read()
+            .iter()
+            .any(|view| view.id == id && view.offset == offset)
+        {
+            return;
+        }
+
+        let mut view_registrations_signal = self.view_registrations;
+        let mut view_registrations = view_registrations_signal.write();
+        if let Some(view) = view_registrations.iter_mut().find(|view| view.id == id) {
+            view.offset = offset;
+        } else {
+            view_registrations.push(CalendarViewRegistration { id, offset });
+        }
+    }
+
+    fn unregister_calendar_view(&self, id: ScopeId) {
+        if !self
+            .view_registrations
+            .read()
+            .iter()
+            .any(|view| view.id == id)
+        {
+            return;
+        }
+
+        let mut view_registrations = self.view_registrations;
+        view_registrations.write().retain(|view| view.id != id);
     }
 }
 
@@ -448,10 +515,6 @@ pub struct CalendarProps {
     /// Upper limit of the range of available dates
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
-
-    /// Specify how many months are visible at once
-    #[props(default = 1)]
-    pub month_count: u8,
 
     /// Unavailable dates
     #[props(default)]
@@ -522,6 +585,7 @@ impl DefaultCalendarProps for CalendarProps {
 #[component]
 pub fn Calendar(props: CalendarProps) -> Element {
     let available_ranges = use_memo(move || AvailableRanges::new(&props.disabled_ranges.read()));
+    let view_registrations = use_signal(Vec::new);
 
     // Create base context provider for child components
     let mut base_ctx = use_context_provider(|| BaseCalendarContext {
@@ -535,7 +599,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
         today: props.today,
         first_day_of_week: props.first_day_of_week,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
-        month_count: props.month_count,
+        view_registrations,
     });
     // Create Calendar context provider for child components
     use_context_provider(|| CalendarContext {
@@ -559,7 +623,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
                             let view_date = previous_month(min_date).unwrap_or(min_date);
                             (base_ctx.set_view_date)(view_date);
                         } else {
-                            let max_date = nth_month_next(min_date, props.month_count)
+                            let max_date = nth_month_next(min_date, base_ctx.visible_month_count())
                                 .unwrap_or(min_date);
                             if date >= max_date {
                                 let view_date = next_month(min_date).unwrap_or(min_date);
@@ -609,9 +673,7 @@ pub fn Calendar(props: CalendarProps) -> Element {
                 }
             },
             ..props.attributes,
-            for offset in 0..props.month_count {
-                CalendarView { offset, {props.children.clone()} }
-            }
+            {props.children}
         }
     }
 }
@@ -710,10 +772,6 @@ pub struct RangeCalendarProps {
     #[props(default = date!(2050-12-31))]
     pub max_date: Date,
 
-    /// Specify how many months are visible at once
-    #[props(default = 1)]
-    pub month_count: u8,
-
     /// Unavailable dates
     #[props(default)]
     pub disabled_ranges: ReadSignal<Vec<DateRange>>,
@@ -787,6 +845,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
     let anchor_date = use_signal(|| None::<Date>);
     let highlighted_range = use_signal(|| (props.selected_range)());
     let available_ranges = use_memo(move || AvailableRanges::new(&props.disabled_ranges.read()));
+    let view_registrations = use_signal(Vec::new);
 
     // Create base context provider for child components
     let mut base_ctx = use_context_provider(|| BaseCalendarContext {
@@ -800,7 +859,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
         today: props.today,
         first_day_of_week: props.first_day_of_week,
         enabled_date_range: DateRange::new(props.min_date, props.max_date),
-        month_count: props.month_count,
+        view_registrations,
     });
 
     // Create RangeCalendar context provider for child components
@@ -836,7 +895,7 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
                             let view_date = previous_month(min_date).unwrap_or(min_date);
                             (base_ctx.set_view_date)(view_date);
                         } else {
-                            let max_date = nth_month_next(min_date, props.month_count)
+                            let max_date = nth_month_next(min_date, base_ctx.visible_month_count())
                                 .unwrap_or(min_date);
                             if date >= max_date {
                                 let view_date = next_month(min_date).unwrap_or(min_date);
@@ -894,18 +953,21 @@ pub fn RangeCalendar(props: RangeCalendarProps) -> Element {
                 }
             },
             ..props.attributes,
-            for offset in 0..props.month_count {
-                CalendarView { offset, {props.children.clone()} }
-            }
+            {props.children}
         }
     }
 }
 
+/// The props for the [`CalendarView`] component.
 #[derive(Props, Clone, PartialEq)]
-struct CalendarViewProps {
+pub struct CalendarViewProps {
     /// An offset from the beginning of the view date that this should display
-    #[props(default = 0)]
-    pub offset: u8,
+    #[props(default)]
+    pub offset: Option<u8>,
+
+    /// Additional attributes to apply to the view element
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
 
     /// The children of the calendar element
     pub children: Element,
@@ -933,14 +995,36 @@ impl CalendarViewContext {
     }
 }
 
+/// A calendar view for one visible month.
+///
+/// Render one [`CalendarView`] for each month you want visible. The calendar derives the
+/// visible month count from the registered views and uses each view's render order as
+/// its month offset unless `offset` is provided.
 #[component]
-fn CalendarView(props: CalendarViewProps) -> Element {
-    use_context_provider(|| CalendarViewContext {
-        offset: props.offset,
+pub fn CalendarView(props: CalendarViewProps) -> Element {
+    let base_ctx: BaseCalendarContext = use_context();
+    let view_id = current_scope_id();
+
+    use_hook(move || {
+        base_ctx.register_calendar_view(view_id, props.offset);
     });
 
+    use_effect(move || {
+        base_ctx.register_calendar_view(view_id, props.offset);
+    });
+
+    use_effect_cleanup(move || {
+        base_ctx.unregister_calendar_view(view_id);
+    });
+
+    let offset = base_ctx.calendar_view_offset(view_id, props.offset);
+
+    use_context_provider(|| CalendarViewContext { offset });
+
     rsx! {
-        {props.children}
+        div { ..props.attributes,
+            {props.children}
+        }
     }
 }
 
@@ -1142,10 +1226,6 @@ pub fn CalendarPreviousMonthButton(props: CalendarPreviousMonthButtonProps) -> E
     let ctx: BaseCalendarContext = use_context();
     let view_ctx: CalendarViewContext = use_context();
 
-    if view_ctx.offset != 0 {
-        return rsx! {};
-    }
-
     // disable previous button when we reach the limit
     let button_disabled = use_memo(move || {
         // Get the current view date from context
@@ -1245,10 +1325,6 @@ pub struct CalendarNextMonthButtonProps {
 pub fn CalendarNextMonthButton(props: CalendarNextMonthButtonProps) -> Element {
     let ctx: BaseCalendarContext = use_context();
     let view_ctx: CalendarViewContext = use_context();
-
-    if view_ctx.offset + 1 != ctx.month_count {
-        return rsx! {};
-    }
 
     // disable next button when we reach the limit
     let button_disabled = use_memo(move || {
@@ -1372,10 +1448,6 @@ pub struct CalendarGridProps {
     #[props(default)]
     pub id: Option<String>,
 
-    /// Whether to show week numbers
-    #[props(default)]
-    pub show_week_numbers: bool,
-
     /// Additional attributes to apply to the grid element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -1458,9 +1530,6 @@ pub struct CalendarGridWeekProps {
 /// The props for the [`CalendarGridCell`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarGridCellProps {
-    /// The date represented by this cell
-    pub date: Date,
-
     /// Additional attributes to apply to the day cell element
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -1628,7 +1697,6 @@ fn calendar_grid_weeks(view_date: Date, first_day_of_week: Weekday) -> Vec<Vec<D
 /// - `data-month`: The relative month of the date. Possible values are `last`, `current`, or `next`
 #[component]
 pub fn CalendarGrid(props: CalendarGridProps) -> Element {
-    let _ = props.show_week_numbers;
     let grid = use_calendar_grid();
 
     rsx! {
@@ -1652,7 +1720,6 @@ pub fn CalendarGrid(props: CalendarGridProps) -> Element {
                         for date in week.iter().copied() {
                             CalendarGridCell {
                                 key: "{date}",
-                                date,
                                 CalendarDay { date }
                             }
                         }
@@ -1742,8 +1809,6 @@ pub fn CalendarGridWeek(props: CalendarGridWeekProps) -> Element {
 /// A day cell in a calendar grid.
 #[component]
 pub fn CalendarGridCell(props: CalendarGridCellProps) -> Element {
-    let _ = props.date;
-
     rsx! {
         td {
             ..props.attributes,
@@ -1755,25 +1820,53 @@ pub fn CalendarGridCell(props: CalendarGridCellProps) -> Element {
 /// The props for the [`CalendarSelectMonth`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarSelectMonthProps {
-    /// Class for the outer `<span>` container element.
-    #[props(default)]
-    pub container_class: Option<String>,
-
-    /// Class for the inner `<span>` value element.
-    #[props(default)]
-    pub value_class: Option<String>,
-
-    /// Additional attributes to extend the select month element
+    /// Additional attributes to apply to the month select container element.
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 
-    /// The children of the select element
+    /// The children of the month select container element.
+    #[props(default)]
+    pub children: Element,
+}
+
+/// The props for the [`CalendarSelectMonthSelect`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarSelectMonthSelectProps {
+    /// Additional attributes to apply to the native month select element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
+/// The props for the [`CalendarSelectMonthOption`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarSelectMonthOptionProps {
+    /// The month represented by this option.
+    pub month: Month,
+
+    /// Additional attributes to apply to the month option element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the month option element.
+    #[props(default)]
+    pub children: Option<Element>,
+}
+
+/// The props for the [`CalendarSelectMonthValue`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarSelectMonthValueProps {
+    /// Additional attributes to apply to the displayed month value element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the displayed month value element.
+    #[props(default)]
     pub children: Element,
 }
 
 /// # CalendarSelectMonth
 ///
-/// The [`CalendarSelectMonth`] component provides a drop-down list for selecting the current month.
+/// The [`CalendarSelectMonth`] component provides a container for the month select controls.
 ///
 /// This must be used inside a [`Calendar`] component.
 ///
@@ -1781,7 +1874,8 @@ pub struct CalendarSelectMonthProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton, CalendarSelectMonth
+///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton,
+///     CalendarSelectMonth, CalendarSelectMonthSelect, CalendarSelectMonthValue
 /// };
 /// use time::{Date, Month, UtcDateTime};
 /// #[component]
@@ -1805,7 +1899,10 @@ pub struct CalendarSelectMonthProps {
 ///                     CalendarPreviousMonthButton {
 ///                         "<"
 ///                     }
-///                     CalendarSelectMonth {}
+///                     CalendarSelectMonth {
+///                         CalendarSelectMonthSelect {}
+///                         CalendarSelectMonthValue {}
+///                     }
 ///                     CalendarNextMonthButton {
 ///                         ">"
 ///                     }
@@ -1818,11 +1915,19 @@ pub struct CalendarSelectMonthProps {
 /// ```
 #[component]
 pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
+    rsx! {
+        span {
+            ..props.attributes,
+            {props.children}
+        }
+    }
+}
+
+/// The native select element for choosing the visible month.
+#[component]
+pub fn CalendarSelectMonthSelect(props: CalendarSelectMonthSelectProps) -> Element {
     let base_ctx: BaseCalendarContext = use_context();
     let view_ctx: CalendarViewContext = use_context();
-
-    let view_date = view_ctx.offset_view_date();
-    let month = view_date.month();
 
     let months = use_memo(move || {
         // Get the current view date from context
@@ -1851,29 +1956,54 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
     });
 
     rsx! {
-        span { class: props.container_class,
-            select {
-                aria_label: "Month",
-                onchange: move |e| {
-                    let mut view_date = view_ctx.offset_view_date();
-                    let number = e.value().parse().unwrap_or(view_date.month() as u8);
-                    let cur_month = Month::try_from(number).expect("Month out-of-range");
-                    view_date = view_date.replace_month(cur_month).unwrap();
-                    view_ctx.set_offset_view_date(view_date);
-                },
-                ..props.attributes,
-                for month in months() {
-                    option {
-                        value: month as u8,
-                        selected: view_ctx.offset_view_date().month() == month,
-                        {base_ctx.format_month.call(month)}
-                    }
-                }
+        select {
+            aria_label: "Month",
+            onchange: move |e| {
+                let mut view_date = view_ctx.offset_view_date();
+                let number = e.value().parse().unwrap_or(view_date.month() as u8);
+                let cur_month = Month::try_from(number).expect("Month out-of-range");
+                view_date = view_date.replace_month(cur_month).unwrap();
+                view_ctx.set_offset_view_date(view_date);
+            },
+            ..props.attributes,
+            for month in months() {
+                CalendarSelectMonthOption { key: "{month:?}", month }
             }
-            span { class: props.value_class,
-                {base_ctx.format_month.call(month)}
-                {props.children}
-            }
+        }
+    }
+}
+
+/// An option in the native month select element.
+#[component]
+pub fn CalendarSelectMonthOption(props: CalendarSelectMonthOptionProps) -> Element {
+    let base_ctx: BaseCalendarContext = use_context();
+    let view_ctx: CalendarViewContext = use_context();
+    let children = props
+        .children
+        .unwrap_or_else(|| rsx! { {base_ctx.format_month.call(props.month)} });
+
+    rsx! {
+        option {
+            value: props.month as u8,
+            selected: view_ctx.offset_view_date().month() == props.month,
+            ..props.attributes,
+            {children}
+        }
+    }
+}
+
+/// The displayed month value.
+#[component]
+pub fn CalendarSelectMonthValue(props: CalendarSelectMonthValueProps) -> Element {
+    let base_ctx: BaseCalendarContext = use_context();
+    let view_ctx: CalendarViewContext = use_context();
+    let month = view_ctx.offset_view_date().month();
+
+    rsx! {
+        span {
+            ..props.attributes,
+            {base_ctx.format_month.call(month)}
+            {props.children}
         }
     }
 }
@@ -1881,25 +2011,53 @@ pub fn CalendarSelectMonth(props: CalendarSelectMonthProps) -> Element {
 /// The props for the [`CalendarSelectYear`] component.
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarSelectYearProps {
-    /// Class for the outer `<span>` container element.
-    #[props(default)]
-    pub container_class: Option<String>,
-
-    /// Class for the inner `<span>` value element.
-    #[props(default)]
-    pub value_class: Option<String>,
-
-    /// Additional attributes to extend the select year element
+    /// Additional attributes to apply to the year select container element.
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
 
-    /// The children of the select element
+    /// The children of the year select container element.
+    #[props(default)]
+    pub children: Element,
+}
+
+/// The props for the [`CalendarSelectYearSelect`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarSelectYearSelectProps {
+    /// Additional attributes to apply to the native year select element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+}
+
+/// The props for the [`CalendarSelectYearOption`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarSelectYearOptionProps {
+    /// The year represented by this option.
+    pub year: i32,
+
+    /// Additional attributes to apply to the year option element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the year option element.
+    #[props(default)]
+    pub children: Option<Element>,
+}
+
+/// The props for the [`CalendarSelectYearValue`] component.
+#[derive(Props, Clone, PartialEq)]
+pub struct CalendarSelectYearValueProps {
+    /// Additional attributes to apply to the displayed year value element.
+    #[props(extends = GlobalAttributes)]
+    pub attributes: Vec<Attribute>,
+
+    /// The children of the displayed year value element.
+    #[props(default)]
     pub children: Element,
 }
 
 /// # CalendarSelectYear
 ///
-/// The [`CalendarSelectYear`] component provides a drop-down list for selecting the current year.
+/// The [`CalendarSelectYear`] component provides a container for the year select controls.
 ///
 /// This must be used inside a [`Calendar`] component.
 ///
@@ -1907,7 +2065,8 @@ pub struct CalendarSelectYearProps {
 /// ```rust
 /// use dioxus::prelude::*;
 /// use dioxus_primitives::calendar::{
-///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton, CalendarSelectYear
+///     Calendar, CalendarGrid, CalendarHeader, CalendarNavigation, CalendarNextMonthButton, CalendarPreviousMonthButton,
+///     CalendarSelectYear, CalendarSelectYearSelect, CalendarSelectYearValue
 /// };
 /// use time::{Date, Month, UtcDateTime};
 /// #[component]
@@ -1931,7 +2090,10 @@ pub struct CalendarSelectYearProps {
 ///                     CalendarPreviousMonthButton {
 ///                         "<"
 ///                     }
-///                     CalendarSelectYear {}
+///                     CalendarSelectYear {
+///                         CalendarSelectYearSelect {}
+///                         CalendarSelectYearValue {}
+///                     }
 ///                     CalendarNextMonthButton {
 ///                         ">"
 ///                     }
@@ -1944,11 +2106,19 @@ pub struct CalendarSelectYearProps {
 /// ```
 #[component]
 pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
+    rsx! {
+        span {
+            ..props.attributes,
+            {props.children}
+        }
+    }
+}
+
+/// The native select element for choosing the visible year.
+#[component]
+pub fn CalendarSelectYearSelect(props: CalendarSelectYearSelectProps) -> Element {
     let base_ctx: BaseCalendarContext = use_context();
     let view_ctx: CalendarViewContext = use_context();
-
-    let view_date = view_ctx.offset_view_date();
-    let year = view_date.year();
 
     let years = use_memo(move || {
         // Get the current view date from context
@@ -1969,28 +2139,52 @@ pub fn CalendarSelectYear(props: CalendarSelectYearProps) -> Element {
     });
 
     rsx! {
-        span { class: props.container_class,
-            select {
-                aria_label: "Year",
-                onchange: move |e| {
-                    let mut view_date = view_ctx.offset_view_date();
-                    let year = e.value().parse().unwrap_or(view_date.year());
-                    view_date = view_date.replace_year(year).unwrap_or(view_date);
-                    view_ctx.set_offset_view_date(view_date);
-                },
-                ..props.attributes,
-                for year in years() {
-                    option {
-                        value: year,
-                        selected: base_ctx.view_date().year() == year,
-                        "{year}"
-                    }
-                }
+        select {
+            aria_label: "Year",
+            onchange: move |e| {
+                let mut view_date = view_ctx.offset_view_date();
+                let year = e.value().parse().unwrap_or(view_date.year());
+                view_date = view_date.replace_year(year).unwrap_or(view_date);
+                view_ctx.set_offset_view_date(view_date);
+            },
+            ..props.attributes,
+            for year in years() {
+                CalendarSelectYearOption { key: "{year}", year }
             }
-            span { class: props.value_class,
-                "{year}"
-                {props.children}
-            }
+        }
+    }
+}
+
+/// An option in the native year select element.
+#[component]
+pub fn CalendarSelectYearOption(props: CalendarSelectYearOptionProps) -> Element {
+    let view_ctx: CalendarViewContext = use_context();
+    let children = props.children.unwrap_or_else(|| {
+        let year = props.year;
+        rsx! { "{year}" }
+    });
+
+    rsx! {
+        option {
+            value: props.year,
+            selected: view_ctx.offset_view_date().year() == props.year,
+            ..props.attributes,
+            {children}
+        }
+    }
+}
+
+/// The displayed year value.
+#[component]
+pub fn CalendarSelectYearValue(props: CalendarSelectYearValueProps) -> Element {
+    let view_ctx: CalendarViewContext = use_context();
+    let year = view_ctx.offset_view_date().year();
+
+    rsx! {
+        span {
+            ..props.attributes,
+            "{year}"
+            {props.children}
         }
     }
 }
@@ -2354,6 +2548,35 @@ fn RangeCalendarDay(props: CalendarDayProps) -> Element {
 mod tests {
     use super::*;
     use time::macros::date;
+
+    #[component]
+    fn ConsecutiveCalendarViews() -> Element {
+        rsx! {
+            Calendar {
+                view_date: date!(2026 - 05 - 15),
+                CalendarView {
+                    CalendarMonthTitle {}
+                }
+                CalendarView {
+                    CalendarMonthTitle {}
+                }
+                CalendarView {
+                    CalendarMonthTitle {}
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn implicit_calendar_views_render_consecutive_months_on_first_render() {
+        let mut dom = VirtualDom::new(ConsecutiveCalendarViews);
+        dom.rebuild_in_place();
+        let html = dioxus_ssr::render(&dom);
+
+        assert!(html.contains("May 2026"));
+        assert!(html.contains("June 2026"));
+        assert!(html.contains("July 2026"));
+    }
 
     #[test]
     fn test_weekday_set() {

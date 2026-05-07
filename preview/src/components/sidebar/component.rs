@@ -1,7 +1,7 @@
 use crate::components::button::{Button, ButtonVariant};
 use crate::components::separator::Separator;
 use crate::components::sheet::{
-    Sheet, SheetContent, SheetDescription, SheetHeader, SheetSide, SheetTitle,
+    Sheet, SheetContent, SheetContentClose, SheetDescription, SheetHeader, SheetSide, SheetTitle,
 };
 use crate::components::skeleton::Skeleton;
 use crate::components::tooltip::{Tooltip, TooltipContent, TooltipTrigger};
@@ -298,10 +298,10 @@ pub fn Sidebar(
                 SheetContent {
                     side: sheet_side,
                     class: Styles::dx_sidebar_sheet.to_string(),
-                    close_class: Styles::dx_sidebar_sheet_close.to_string(),
                     "data-sidebar": "sidebar",
                     "data-slot": "sidebar",
                     "data-mobile": "true",
+                    SheetContentClose { class: Styles::dx_sidebar_sheet_close }
                     SheetHeader { class: Styles::dx_sr_only,
                         SheetTitle { "Sidebar" }
                         SheetDescription { "Displays the mobile sidebar." }

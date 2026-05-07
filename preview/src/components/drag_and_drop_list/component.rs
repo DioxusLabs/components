@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_primitives::drag_and_drop_list::{
-    self, DragAndDropContext, DragAndDropItemContext, DragAndDropListItemProps,
+    self, DragAndDropContext, DragAndDropDropIndicatorProps, DragAndDropItemContext,
+    DragAndDropListItemProps, DragAndDropListItemsProps,
 };
 use dioxus_primitives::icon::Icon;
 
@@ -31,6 +32,10 @@ pub struct DragAndDropListProps {
 #[component]
 pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     let is_removable = props.is_removable;
+    let aria_label = props
+        .aria_label
+        .clone()
+        .unwrap_or_else(|| "Sortable list".to_string());
     // Keep a stable key per item so Dioxus moves keyed siblings instead of
     // swapping content between list items during reorder.
     let items: Vec<Element> = props
@@ -56,12 +61,14 @@ pub fn DragAndDropList(props: DragAndDropListProps) -> Element {
     rsx! {
         drag_and_drop_list::DragAndDropList {
             class: Styles::dx_dnd_list,
-            ul_class: Some(Styles::dx_dnd_list_ul.to_string()),
-            item_class: Some(Styles::dx_dnd_list_item.to_string()),
-            indicator_class: Some(Styles::dx_drop_indicator.to_string()),
             items,
             aria_label: props.aria_label,
             attributes: props.attributes,
+            drag_and_drop_list::DragAndDropInstructions {}
+            DragAndDropListItems {
+                aria_label,
+            }
+            drag_and_drop_list::DragAndDropLiveRegion {}
             {props.children}
         }
     }
@@ -72,10 +79,49 @@ pub fn DragAndDropListItem(props: DragAndDropListItemProps) -> Element {
     rsx! {
         drag_and_drop_list::DragAndDropListItem {
             class: Styles::dx_dnd_list_item,
-            indicator_class: Some(Styles::dx_drop_indicator.to_string()),
             index: props.index,
             attributes: props.attributes,
             {props.children}
+        }
+    }
+}
+
+#[component]
+pub fn DragAndDropListItems(props: DragAndDropListItemsProps) -> Element {
+    rsx! {
+        drag_and_drop_list::DragAndDropListItems {
+            class: Styles::dx_dnd_list_ul,
+            aria_label: props.aria_label,
+            attributes: props.attributes,
+            for item in drag_and_drop_list::use_drag_and_drop_list_items() {
+                Fragment {
+                    key: "{item.key}",
+                    DragAndDropDropIndicator {
+                        index: item.index,
+                        position: "before",
+                    }
+                    DragAndDropListItem {
+                        index: item.index,
+                        {item.children}
+                    }
+                    DragAndDropDropIndicator {
+                        index: item.index,
+                        position: "after",
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn DragAndDropDropIndicator(props: DragAndDropDropIndicatorProps) -> Element {
+    rsx! {
+        drag_and_drop_list::DragAndDropDropIndicator {
+            class: Styles::dx_drop_indicator,
+            index: props.index,
+            position: props.position,
+            attributes: props.attributes,
         }
     }
 }

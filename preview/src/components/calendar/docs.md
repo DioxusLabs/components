@@ -16,7 +16,8 @@ Calendar {
         // This callback is triggered when the view date changes.
         // The date parameter contains the new view date.
     },
-    // The calendar view will get rendered once for each month in the multi-month view.
+    // Render one CalendarView for each visible month. The calendar derives the
+    // visible month count from the CalendarView components that are rendered.
     CalendarView {
         // The calendar header should contain the navigation controls and the title for the calendar.
         CalendarHeader {

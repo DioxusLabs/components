@@ -23,11 +23,26 @@ pub fn Demo() -> Element {
                 },
                 min_date: date!(1995 - 07 - 21),
                 max_date: date!(2035 - 09 - 11),
-                month_count: 3,
                 CalendarView {
                     CalendarHeader {
                         CalendarNavigation {
                             CalendarPreviousMonthButton {}
+                            CalendarMonthTitle {}
+                        }
+                    }
+                    CalendarGrid {}
+                }
+                CalendarView {
+                    CalendarHeader {
+                        CalendarNavigation {
+                            CalendarMonthTitle {}
+                        }
+                    }
+                    CalendarGrid {}
+                }
+                CalendarView {
+                    CalendarHeader {
+                        CalendarNavigation {
                             CalendarMonthTitle {}
                             CalendarNextMonthButton {}
                         }

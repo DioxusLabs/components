@@ -2,7 +2,11 @@ use dioxus::prelude::*;
 
 use dioxus_primitives::icon;
 use dioxus_primitives::{
-    date_picker::{self, DatePickerInputProps, DatePickerProps, DateRangePickerProps},
+    date_picker::{
+        self, DatePickerDaySegmentProps, DatePickerInputProps, DatePickerMonthSegmentProps,
+        DatePickerProps, DatePickerSeparatorProps, DatePickerYearSegmentProps,
+        DateRangePickerEndValueProps, DateRangePickerProps, DateRangePickerStartValueProps,
+    },
     dioxus_attributes::attributes,
     merge_attributes,
     popover::{PopoverContentProps, PopoverTriggerProps},
@@ -31,7 +35,6 @@ pub fn DatePicker(props: DatePickerProps) -> Element {
                 read_only: props.read_only,
                 min_date: props.min_date,
                 max_date: props.max_date,
-                month_count: props.month_count,
                 disabled_ranges: props.disabled_ranges,
                 roving_loop: props.roving_loop,
                 attributes: merged,
@@ -60,7 +63,6 @@ pub fn DateRangePicker(props: DateRangePickerProps) -> Element {
                 read_only: props.read_only,
                 min_date: props.min_date,
                 max_date: props.max_date,
-                month_count: props.month_count,
                 disabled_ranges: props.disabled_ranges,
                 roving_loop: props.roving_loop,
                 attributes: merged,
@@ -76,15 +78,18 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
         class: Styles::dx_date_picker_group
     });
     let merged = merge_attributes(vec![base, props.attributes]);
-
-    rsx! {
-        date_picker::DatePickerInput {
-            segment_class: Some(Styles::dx_date_segment.to_string()),
-            on_format_day_placeholder: props.on_format_day_placeholder,
-            on_format_month_placeholder: props.on_format_month_placeholder,
-            on_format_year_placeholder: props.on_format_year_placeholder,
-            attributes: merged,
-            {props.children}
+    let children = props.children.unwrap_or_else(|| {
+        rsx! {
+            date_picker::DatePickerInputValue {
+                on_format_day_placeholder: props.on_format_day_placeholder,
+                on_format_month_placeholder: props.on_format_month_placeholder,
+                on_format_year_placeholder: props.on_format_year_placeholder,
+                DatePickerYearSegment {}
+                DatePickerSeparator {}
+                DatePickerMonthSegment {}
+                DatePickerSeparator {}
+                DatePickerDaySegment {}
+            }
             DatePickerPopoverTrigger {}
             DatePickerPopoverContent { align: ContentAlign::Center,
                 date_picker::DatePickerCalendar { calendar: Calendar,
@@ -102,6 +107,16 @@ pub fn DatePickerInput(props: DatePickerInputProps) -> Element {
                 }
             }
         }
+    });
+
+    rsx! {
+        date_picker::DatePickerInput {
+            on_format_day_placeholder: props.on_format_day_placeholder,
+            on_format_month_placeholder: props.on_format_month_placeholder,
+            on_format_year_placeholder: props.on_format_year_placeholder,
+            attributes: merged,
+            {children}
+        }
     }
 }
 
@@ -111,15 +126,28 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
         class: Styles::dx_date_picker_group
     });
     let merged = merge_attributes(vec![base, props.attributes]);
-
-    rsx! {
-        date_picker::DateRangePickerInput {
-            segment_class: Some(Styles::dx_date_segment.to_string()),
-            on_format_day_placeholder: props.on_format_day_placeholder,
-            on_format_month_placeholder: props.on_format_month_placeholder,
-            on_format_year_placeholder: props.on_format_year_placeholder,
-            attributes: merged,
-            {props.children}
+    let children = props.children.unwrap_or_else(|| {
+        rsx! {
+            date_picker::DateRangePickerInputValue {
+                on_format_day_placeholder: props.on_format_day_placeholder,
+                on_format_month_placeholder: props.on_format_month_placeholder,
+                on_format_year_placeholder: props.on_format_year_placeholder,
+                DateRangePickerStartValue {
+                    DatePickerYearSegment {}
+                    DatePickerSeparator {}
+                    DatePickerMonthSegment {}
+                    DatePickerSeparator {}
+                    DatePickerDaySegment {}
+                }
+                DatePickerSeparator { symbol: '—' }
+                DateRangePickerEndValue {
+                    DatePickerYearSegment {}
+                    DatePickerSeparator {}
+                    DatePickerMonthSegment {}
+                    DatePickerSeparator {}
+                    DatePickerDaySegment {}
+                }
+            }
             DatePickerPopoverTrigger {}
             DatePickerPopoverContent {
                 align: ContentAlign::Center,
@@ -138,6 +166,75 @@ pub fn DateRangePickerInput(props: DatePickerInputProps) -> Element {
                     }
                 }
             }
+        }
+    });
+
+    rsx! {
+        date_picker::DateRangePickerInput {
+            on_format_day_placeholder: props.on_format_day_placeholder,
+            on_format_month_placeholder: props.on_format_month_placeholder,
+            on_format_year_placeholder: props.on_format_year_placeholder,
+            attributes: merged,
+            {children}
+        }
+    }
+}
+
+#[component]
+pub fn DatePickerYearSegment(props: DatePickerYearSegmentProps) -> Element {
+    rsx! {
+        date_picker::DatePickerYearSegment {
+            class: Styles::dx_date_segment,
+            attributes: props.attributes,
+        }
+    }
+}
+
+#[component]
+pub fn DatePickerMonthSegment(props: DatePickerMonthSegmentProps) -> Element {
+    rsx! {
+        date_picker::DatePickerMonthSegment {
+            class: Styles::dx_date_segment,
+            attributes: props.attributes,
+        }
+    }
+}
+
+#[component]
+pub fn DatePickerDaySegment(props: DatePickerDaySegmentProps) -> Element {
+    rsx! {
+        date_picker::DatePickerDaySegment {
+            class: Styles::dx_date_segment,
+            attributes: props.attributes,
+        }
+    }
+}
+
+#[component]
+pub fn DatePickerSeparator(props: DatePickerSeparatorProps) -> Element {
+    rsx! {
+        date_picker::DatePickerSeparator {
+            class: Styles::dx_date_segment,
+            symbol: props.symbol,
+            attributes: props.attributes,
+        }
+    }
+}
+
+#[component]
+pub fn DateRangePickerStartValue(props: DateRangePickerStartValueProps) -> Element {
+    rsx! {
+        date_picker::DateRangePickerStartValue {
+            {props.children}
+        }
+    }
+}
+
+#[component]
+pub fn DateRangePickerEndValue(props: DateRangePickerEndValueProps) -> Element {
+    rsx! {
+        date_picker::DateRangePickerEndValue {
+            {props.children}
         }
     }
 }

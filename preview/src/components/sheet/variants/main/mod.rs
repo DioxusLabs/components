@@ -3,8 +3,8 @@ use crate::components::{
     input::Input,
     label::Label,
     sheet::{
-        Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetSide,
-        SheetTitle,
+        Sheet, SheetClose, SheetContent, SheetContentClose, SheetDescription, SheetFooter,
+        SheetHeader, SheetSide, SheetTitle,
     },
 };
 use dioxus::prelude::*;
@@ -30,6 +30,7 @@ pub fn Demo() -> Element {
         }
         Sheet { open: open(), on_open_change: move |v| open.set(v),
             SheetContent { side: side(),
+                SheetContentClose {}
                 SheetHeader {
                     SheetTitle { "Sheet Title" }
                     SheetDescription { "Sheet description goes here." }
