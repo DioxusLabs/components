@@ -192,6 +192,7 @@ pub(crate) fn use_single_selectable_value<T: Clone + PartialEq + 'static>(
     (values, set_value)
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn use_selectable_root(
     values: Memo<Vec<RcPartialEqValue>>,
     set_value: Callback<RcPartialEqValue>,

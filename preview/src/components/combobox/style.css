@@ -1,6 +1,6 @@
 .dx-combobox {
-  display: inline-block;
   position: relative;
+  display: inline-block;
 }
 
 .dx-combobox-input-wrapper {
@@ -9,14 +9,14 @@
 }
 
 .dx-combobox-input {
+  width: 100%;
+  height: 2.25rem;
   box-sizing: border-box;
+  padding: 0 2rem 0 0.75rem;
   border: none;
   border-radius: 0.5rem;
   background: var(--light, var(--primary-color)) var(--dark, var(--primary-color-3));
   box-shadow: inset 0 0 0 1px var(--light, var(--primary-color-6)) var(--dark, var(--primary-color-7));
-  width: 100%;
-  height: 2.25rem;
-  padding: 0 2rem 0 0.75rem;
   color: var(--secondary-color-1);
   cursor: text;
   font-family: inherit;
@@ -52,17 +52,17 @@
 .dx-combobox-list {
   position: absolute;
   z-index: 50;
-  left: 0;
   top: calc(100% + 0.25rem);
-  width: 200px;
+  left: 0;
   display: flex;
   overflow: hidden auto;
+  width: 200px;
   max-height: 300px;
   flex-direction: column;
+  padding: 0.25rem;
   border-radius: 0.5rem;
   background: var(--light, var(--primary-color)) var(--dark, var(--primary-color-5));
   box-shadow: inset 0 0 0 1px var(--light, var(--primary-color-6)) var(--dark, var(--primary-color-7));
-  padding: 0.25rem;
   color: var(--secondary-color-1);
   transform-origin: top;
 }
@@ -109,8 +109,8 @@
 .dx-combobox-option {
   display: flex;
   align-items: center;
-  border-radius: 0.375rem;
   padding: 0.375rem 0.5rem;
+  border-radius: 0.375rem;
   cursor: default;
   font-size: 0.875rem;
   gap: 0.5rem;

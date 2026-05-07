@@ -120,6 +120,7 @@ pub struct SelectMultiProps<T: Clone + PartialEq + 'static = String> {
 
 /// Sets up the shared signals, focus, and context that both [`Select`] and
 /// [`SelectMulti`] need. Returns the `open` signal for the root `<div>`.
+#[allow(clippy::too_many_arguments)]
 fn use_select_root(
     values: Memo<Vec<RcPartialEqValue>>,
     set_value: Callback<RcPartialEqValue>,

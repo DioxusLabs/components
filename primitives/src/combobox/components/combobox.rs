@@ -70,6 +70,7 @@ pub struct ComboboxProps<T: Clone + PartialEq + 'static = String> {
     pub children: Element,
 }
 
+#[allow(clippy::too_many_arguments)]
 fn use_combobox_root(
     values: Memo<Vec<RcPartialEqValue>>,
     set_value: Callback<RcPartialEqValue>,
