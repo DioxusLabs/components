@@ -2,9 +2,11 @@
 
 use dioxus::prelude::*;
 
-use super::super::context::{default_combobox_filter, ComboboxContext, RcPartialEqValue};
+use super::super::context::{default_combobox_filter, ComboboxContext};
 use crate::{
-    selectable::{use_selectable_root, use_single_selectable_value, SelectionMode},
+    selectable::{
+        use_selectable_root, use_single_selectable_value, RcPartialEqValue, SelectionMode,
+    },
     use_controlled,
 };
 
