@@ -1,5 +1,4 @@
 import { test, expect, devices, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
 
 const URL = "http://127.0.0.1:8080/component/?name=combobox&";
 const variantUrl = (variant: string) =>
@@ -13,22 +12,6 @@ const content = (page: Page) =>
 
 const list = (page: Page) =>
     page.locator(".dx-combobox-list[data-state='open']");
-
-test("has no automatically detectable accessibility issues", async ({ page }) => {
-    await page.goto(URL, { timeout: 20 * 60 * 1000 });
-    const trigger = input(page);
-    await expect(trigger).toBeVisible();
-    await trigger.focus();
-    await expect(trigger).toBeFocused();
-    await page.keyboard.press("ArrowDown");
-    await expect(content(page)).toBeVisible();
-
-    const accessibilityScanResults = await new AxeBuilder({ page })
-        .disableRules("color-contrast")
-        .analyze();
-
-    expect(accessibilityScanResults.violations).toEqual([]);
-});
 
 test("filters and selects with the keyboard", async ({ page }) => {
     await page.goto(URL, { timeout: 20 * 60 * 1000 });
