@@ -104,6 +104,17 @@ fn use_id_or<T: Clone + PartialEq + 'static>(
     })
 }
 
+/// A controlled-or-uncontrolled prop trio: external value signal,
+/// fallback default signal, and change callback. Bundles the three
+/// pieces that always travel together when forwarding props into
+/// internal hooks like [`use_controlled`].
+#[derive(Clone, Copy)]
+pub(crate) struct Controlled<T: Clone + PartialEq + 'static> {
+    pub(crate) value: ReadSignal<Option<T>>,
+    pub(crate) default: ReadSignal<T>,
+    pub(crate) on_change: Callback<T>,
+}
+
 /// Allows some state to be either controlled or uncontrolled.
 pub fn use_controlled<T: Clone + PartialEq + 'static>(
     prop: ReadSignal<Option<T>>,

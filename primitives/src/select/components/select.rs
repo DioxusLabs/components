@@ -7,7 +7,7 @@ use crate::{
     selectable::{
         use_selectable_root, use_single_selectable_value, RcPartialEqValue, SelectionMode,
     },
-    use_controlled, use_effect,
+    use_controlled, use_effect, Controlled,
 };
 use dioxus::prelude::*;
 use dioxus_core::Task;
@@ -120,16 +120,13 @@ pub struct SelectMultiProps<T: Clone + PartialEq + 'static = String> {
 
 /// Sets up the shared signals, focus, and context that both [`Select`] and
 /// [`SelectMulti`] need. Returns the `open` signal for the root `<div>`.
-#[allow(clippy::too_many_arguments)]
 fn use_select_root(
     values: Memo<Vec<RcPartialEqValue>>,
     set_value: Callback<RcPartialEqValue>,
     selection_mode: SelectionMode,
     disabled: ReadSignal<bool>,
     roving_loop: ReadSignal<bool>,
-    open: ReadSignal<Option<bool>>,
-    default_open: ReadSignal<bool>,
-    on_open_change: Callback<bool>,
+    open: Controlled<bool>,
     typeahead_timeout: ReadSignal<Duration>,
 ) -> Memo<bool> {
     let selectable = use_selectable_root(
@@ -139,8 +136,6 @@ fn use_select_root(
         disabled,
         roving_loop,
         open,
-        default_open.cloned(),
-        on_open_change,
     );
     let mut typeahead_buffer = use_signal(String::new);
     let adaptive_keyboard = use_signal(super::super::text_search::AdaptiveKeyboard::new);
@@ -232,9 +227,11 @@ pub fn Select<T: Clone + PartialEq + 'static>(props: SelectProps<T>) -> Element 
         SelectionMode::Single,
         props.disabled,
         props.roving_loop,
-        props.open,
-        props.default_open,
-        props.on_open_change,
+        Controlled {
+            value: props.open,
+            default: props.default_open,
+            on_change: props.on_open_change,
+        },
         props.typeahead_timeout,
     );
 
@@ -331,9 +328,11 @@ pub fn SelectMulti<T: Clone + PartialEq + 'static>(props: SelectMultiProps<T>) -
         SelectionMode::Multiple,
         props.disabled,
         props.roving_loop,
-        props.open,
-        props.default_open,
-        props.on_open_change,
+        Controlled {
+            value: props.open,
+            default: props.default_open,
+            on_change: props.on_open_change,
+        },
         props.typeahead_timeout,
     );
 

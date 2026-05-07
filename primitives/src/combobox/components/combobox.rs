@@ -7,7 +7,7 @@ use crate::{
     selectable::{
         use_selectable_root, use_single_selectable_value, RcPartialEqValue, SelectionMode,
     },
-    use_controlled,
+    use_controlled, Controlled,
 };
 
 /// Props for [`Combobox`].
@@ -70,18 +70,13 @@ pub struct ComboboxProps<T: Clone + PartialEq + 'static = String> {
     pub children: Element,
 }
 
-#[allow(clippy::too_many_arguments)]
 fn use_combobox_root(
     values: Memo<Vec<RcPartialEqValue>>,
     set_value: Callback<RcPartialEqValue>,
     disabled: ReadSignal<bool>,
     roving_loop: ReadSignal<bool>,
-    open: ReadSignal<Option<bool>>,
-    default_open: ReadSignal<bool>,
-    on_open_change: Callback<bool>,
-    query: ReadSignal<Option<String>>,
-    default_query: ReadSignal<String>,
-    on_query_change: Callback<String>,
+    open: Controlled<bool>,
+    query: Controlled<String>,
     filter: Callback<(String, String), bool>,
 ) -> Memo<bool> {
     let selectable = use_selectable_root(
@@ -91,10 +86,9 @@ fn use_combobox_root(
         disabled,
         roving_loop,
         open,
-        default_open.cloned(),
-        on_open_change,
     );
-    let (query, set_query) = use_controlled(query, default_query.cloned(), on_query_change);
+    let (query, set_query) =
+        use_controlled(query.value, query.default.cloned(), query.on_change);
     let open = selectable.open;
 
     use_context_provider(|| ComboboxContext {
@@ -122,12 +116,16 @@ pub fn Combobox<T: Clone + PartialEq + 'static>(props: ComboboxProps<T>) -> Elem
         set_value,
         props.disabled,
         props.roving_loop,
-        props.open,
-        props.default_open,
-        props.on_open_change,
-        props.query,
-        props.default_query,
-        props.on_query_change,
+        Controlled {
+            value: props.open,
+            default: props.default_open,
+            on_change: props.on_open_change,
+        },
+        Controlled {
+            value: props.query,
+            default: props.default_query,
+            on_change: props.on_query_change,
+        },
         props.filter,
     );
 

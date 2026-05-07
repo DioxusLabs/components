@@ -6,7 +6,7 @@ use dioxus::prelude::*;
 use crate::{
     focus::{use_focus_entry_disabled, use_focus_provider, FocusState},
     listbox::{use_listbox_option, ListboxOptionContext},
-    selection, use_controlled,
+    selection, use_controlled, Controlled,
 };
 
 pub(crate) use crate::selection::{OptionState, RcPartialEqValue};
@@ -192,18 +192,15 @@ pub(crate) fn use_single_selectable_value<T: Clone + PartialEq + 'static>(
     (values, set_value)
 }
 
-#[allow(clippy::too_many_arguments)]
 pub(crate) fn use_selectable_root(
     values: Memo<Vec<RcPartialEqValue>>,
     set_value: Callback<RcPartialEqValue>,
     selection_mode: SelectionMode,
     disabled: ReadSignal<bool>,
     roving_loop: ReadSignal<bool>,
-    open: ReadSignal<Option<bool>>,
-    default_open: bool,
-    on_open_change: Callback<bool>,
+    open: Controlled<bool>,
 ) -> SelectableContext {
-    let (open, set_open) = use_controlled(open, default_open, on_open_change);
+    let (open, set_open) = use_controlled(open.value, open.default.cloned(), open.on_change);
     let options: Signal<Vec<OptionState>> = use_signal(Vec::default);
     let list_id = use_signal(|| None);
     let focus_state = use_focus_provider(roving_loop);
