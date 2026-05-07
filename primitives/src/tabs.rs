@@ -448,7 +448,9 @@ pub fn TabContent(props: TabContentProps) -> Element {
             hidden: !selected(),
             ..props.attributes,
 
-            {props.children}
+            if selected() {
+                {props.children}
+            }
         }
     }
 }

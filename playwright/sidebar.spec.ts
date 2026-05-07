@@ -14,7 +14,7 @@ test("sidebar: preview page renders block", async ({ page }) => {
   await page.goto(`${BASE_URL}/component/?name=sidebar&`, {
     timeout: 20 * 60 * 1000,
   });
-  const iframe = page.locator("#component-preview-frame iframe").first();
+  const iframe = page.locator("iframe").first();
   await expect(iframe).toBeVisible();
   await expect(iframe).toHaveAttribute(
     "src",

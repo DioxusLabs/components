@@ -113,26 +113,36 @@ body {
 }
 
 /* Code block styles */
+/* stylelint-disable-next-line selector-class-pattern */
+.dx-preview-code-theme .dxc {
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  tab-size: 4;
+}
+
 .dx-code-block {
-  overflow: scroll;
+  overflow: hidden;
   width: 100%;
   max-width: calc(100vw - 2rem);
   height: 100%;
   max-height: 80vh;
   box-sizing: border-box;
-  padding: 0.5rem;
   border-radius: 0.5rem;
   margin: 0;
-  font-family: "Courier New", Courier, monospace;
-  white-space: pre;
 }
 
-.dx-dark-code-block {
-  display: var(--dark, block) var(--light, none);
-}
-
-.dx-light-code-block {
-  display: var(--dark, none) var(--light, block);
+/* stylelint-disable-next-line selector-class-pattern */
+.dx-code-block .dxc {
+  width: 100%;
+  height: 100%;
+  max-height: 80vh;
+  box-sizing: border-box;
 }
 
 .dx-code-block[data-collapsed="true"] {
