@@ -252,9 +252,8 @@ fn use_animated_open(
     let mut show_in_dom = use_signal(|| false);
 
     use_effect(move || {
-        let open = open.cloned();
-        if open {
-            show_in_dom.set(open);
+        if open.cloned() {
+            show_in_dom.set(true);
         } else {
             spawn(async move {
                 let id = id.cloned();
@@ -271,7 +270,11 @@ fn use_animated_open(
                 );
                 let _ = eval.send(id);
                 _ = eval.recv::<bool>().await;
-                show_in_dom.set(open);
+                // The element may have been reopened while we waited for the exit
+                // animation. Only hide it if it is still closed.
+                if !open.cloned() {
+                    show_in_dom.set(false);
+                }
             });
         }
     });
