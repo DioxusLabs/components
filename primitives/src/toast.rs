@@ -887,7 +887,7 @@ mod dioxus_test_tests {
     use dioxus::prelude::*;
     use dioxus_test::{
         by_role,
-        matchers::{contains_substring, empty, eq, inner_html, len},
+        matchers::{contains_substring, eq, inner_html, is_empty, len},
         render, Result, Role,
     };
     use std::time::Duration;
@@ -972,7 +972,10 @@ mod dioxus_test_tests {
             .click()
             .await?;
 
-        tester.query_all(by_role(Role::Alert)).expect(empty()).await
+        tester
+            .query_all(by_role(Role::Alert))
+            .expect(is_empty())
+            .await
     }
 
     #[tokio::test]
