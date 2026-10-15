@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - "[0-9]+.[0-9]+"
     paths:
       - /**
       - preview/**/*.rs
@@ -17,6 +18,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
+      - "[0-9]+.[0-9]+"
     paths:
       - /**
       - preview/**/*.rs
