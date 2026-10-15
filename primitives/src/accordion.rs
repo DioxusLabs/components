@@ -1,6 +1,5 @@
 //! Defines the [`Accordion`] component and its sub-components.
 
-use crate::dioxus_elements::Key;
 use crate::focus::{use_focus_control_disabled, use_focus_entry_disabled, FocusState};
 use crate::{use_animated_open, use_id_or, use_unique_id};
 use dioxus::prelude::*;
