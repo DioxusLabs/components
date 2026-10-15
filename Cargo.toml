@@ -8,6 +8,7 @@ tracing = { version = "0.1", features = ["std"] }
 
 dioxus = "=0.8.0-alpha.2"
 dioxus-rsx = "=0.8.0-alpha.2"
+dioxus-ssr = "=0.8.0-alpha.2"
 
 [profile.release]
 opt-level = "z"
