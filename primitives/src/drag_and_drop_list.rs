@@ -376,7 +376,7 @@ pub fn use_drag_and_drop_list_items() -> Vec<DragAndDropListRenderItem> {
             let key = children
                 .as_ref()
                 .ok()
-                .and_then(|vnode| vnode.key.clone())
+                .and_then(|vnode| vnode.key().map(str::to_owned))
                 .unwrap_or_else(|| index.to_string());
             DragAndDropListRenderItem {
                 index,
