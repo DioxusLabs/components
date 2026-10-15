@@ -712,7 +712,7 @@ pub struct NavbarItemProps {
 /// The [`NavbarItem`] component defines the following data attributes you can use to control styling:
 /// - `data-disabled`: Indicates if the item is disabled. Values are `true` or `false`.
 #[component]
-pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
+pub fn NavbarItem(props: NavbarItemProps) -> Element {
     let mut ctx: NavbarContext = use_context();
     let mut nav_ctx: Option<NavbarNavContext> = try_use_context();
 
@@ -732,40 +732,40 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
 
     let mut onmounted = use_focus_controlled_item_disabled(props.index, disabled);
 
-    props.attributes.push(onkeydown({
-        let value = props.value.clone();
-        let to = props.to.clone();
-        move |event: Event<KeyboardData>| {
-            if event.key() == Key::Enter || event.key() == Key::Character(" ".to_string()) {
-                if !disabled() {
-                    props.on_select.call(value.clone());
-                    ctx.set_open_nav.call(None);
-                    let navigator = navigator();
-                    navigator.push(to.clone());
+    let attributes = props
+        .attributes
+        .onkeydown({
+            let value = props.value.clone();
+            let to = props.to.clone();
+            move |event: Event<KeyboardData>| {
+                if event.key() == Key::Enter || event.key() == Key::Character(" ".to_string()) {
+                    if !disabled() {
+                        props.on_select.call(value.clone());
+                        ctx.set_open_nav.call(None);
+                        let navigator = navigator();
+                        navigator.push(to.clone());
+                    }
+                    event.prevent_default();
+                    event.stop_propagation();
                 }
-                event.prevent_default();
-                event.stop_propagation();
             }
-        }
-    }));
-
-    props.attributes.push(onpointerdown(move |_| {
-        if !disabled() {
-            if let Some(mut nav_ctx) = nav_ctx {
-                nav_ctx.focus.set_focus(Some(props.index.cloned()));
+        })
+        .onpointerdown(move |_| {
+            if !disabled() {
+                if let Some(mut nav_ctx) = nav_ctx {
+                    nav_ctx.focus.set_focus(Some(props.index.cloned()));
+                }
             }
-        }
-    }));
-
-    props.attributes.push(onblur(move |_| {
-        if focused() {
-            if let Some(nav_ctx) = &mut nav_ctx {
-                nav_ctx.focus.blur();
+        })
+        .onblur(move |_| {
+            if focused() {
+                if let Some(nav_ctx) = &mut nav_ctx {
+                    nav_ctx.focus.blur();
+                }
+                ctx.focus.set_focus(None);
+                ctx.set_open_nav.call(None);
             }
-            ctx.focus.set_focus(None);
-            ctx.set_open_nav.call(None);
-        }
-    }));
+        });
 
     let tabindex = if focused()
         || (nav_ctx.is_none() && ctx.focus.recent_focus_or_default() == props.index.cloned())
@@ -807,7 +807,7 @@ pub fn NavbarItem(mut props: NavbarItemProps) -> Element {
                 }
             },
 
-            attributes: props.attributes,
+            attributes,
             {props.children}
         }
     }
