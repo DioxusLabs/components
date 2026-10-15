@@ -14,7 +14,7 @@ repository = "https://github.com/DioxusLabs/components"
 [dependencies]
 dioxus.workspace = true
 dioxus-attributes = { path = "../dioxus-attributes" }
-dioxus-sdk-time = "0.7.0"
+dioxus-sdk-time = { git = "https://github.com/nikuda/dioxus-sdk", branch = "dioxus-v0.8.0-alpha.2" }
 time = { version = "0.3.44", features = ["std", "macros", "parsing", "local-offset"] }
 num-integer = "0.1.46"
 tracing.workspace = true
@@ -22,7 +22,7 @@ serde = { version = "1.0", features = ["derive"] }
 palette = "0.7.6"
 
 [build-dependencies]
-lazy-js-bundle = "0.7.9"
+lazy-js-bundle = "=0.8.0-alpha.2"
 
 [dev-dependencies]
 dioxus-ssr.workspace = true
