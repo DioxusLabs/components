@@ -3,12 +3,16 @@ resolver = "3"
 members = ["primitives", "preview", "test-harness", "dioxus-attributes"]
 
 [workspace.dependencies]
-dioxus-primitives = { path = "primitives" }
-tracing = { version = "0.1", features = ["std"] }
-
 dioxus = "=0.8.0-alpha.2"
+dioxus-code = { git = "https://github.com/nikuda/dioxus-code", branch = "dioxus-v0.8.0-alpha.2", default-features = false }
+dioxus-i18n = "=0.7.0-alpha.1"
+dioxus-icons = { git = "https://github.com/nikuda/dioxus-icons", branch = "dioxus-v0.8.0-alpha.2" }
+dioxus-primitives = { path = "primitives" }
 dioxus-rsx = "=0.8.0-alpha.2"
+dioxus-sdk-time = { git = "https://github.com/nikuda/dioxus-sdk", branch = "dioxus-v0.8.0-alpha.2" }
 dioxus-ssr = "=0.8.0-alpha.2"
+lazy-js-bundle = "=0.8.0-alpha.2"
+tracing = { version = "0.1", features = ["std"] }
 
 [profile.release]
 opt-level = "z"
