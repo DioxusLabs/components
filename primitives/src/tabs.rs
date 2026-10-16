@@ -464,7 +464,7 @@ mod tests {
     };
     use dioxus_test::{
         by_role,
-        matchers::{contains_substring, has_focus, inner_html},
+        matchers::{contains_substring, eq, has_focus, inner_html},
         render, Result, Role,
     };
 
@@ -512,14 +512,14 @@ mod tests {
         }
         let tester = render(TestComponent);
         tester
-            .query(by_role(Role::Tab).having_name("First Tab"))
+            .query(by_role(Role::Tab).having_name(eq("First Tab")))
             .focus()
             .await?;
 
         tester.key_down(Key::Named(NamedKey::ArrowRight), Modifiers::empty())?;
 
         tester
-            .query(by_role(Role::Tab).having_name("Second Tab"))
+            .query(by_role(Role::Tab).having_name(eq("Second Tab")))
             .expect(has_focus())
             .await
     }
@@ -568,14 +568,14 @@ mod tests {
         }
         let tester = render(TestComponent);
         tester
-            .query(by_role(Role::Tab).having_name("Third Tab"))
+            .query(by_role(Role::Tab).having_name(eq("Third Tab")))
             .focus()
             .await?;
 
         tester.key_down(Key::Named(NamedKey::ArrowRight), Modifiers::empty())?;
 
         tester
-            .query(by_role(Role::Tab).having_name("First Tab"))
+            .query(by_role(Role::Tab).having_name(eq("First Tab")))
             .expect(has_focus())
             .await
     }
@@ -624,14 +624,14 @@ mod tests {
         }
         let tester = render(TestComponent);
         tester
-            .query(by_role(Role::Tab).having_name("Second Tab"))
+            .query(by_role(Role::Tab).having_name(eq("Second Tab")))
             .focus()
             .await?;
 
         tester.key_down(Key::Named(NamedKey::ArrowLeft), Modifiers::empty())?;
 
         tester
-            .query(by_role(Role::Tab).having_name("First Tab"))
+            .query(by_role(Role::Tab).having_name(eq("First Tab")))
             .expect(has_focus())
             .await
     }
@@ -680,14 +680,14 @@ mod tests {
         }
         let tester = render(TestComponent);
         tester
-            .query(by_role(Role::Tab).having_name("First Tab"))
+            .query(by_role(Role::Tab).having_name(eq("First Tab")))
             .focus()
             .await?;
 
         tester.key_down(Key::Named(NamedKey::ArrowLeft), Modifiers::empty())?;
 
         tester
-            .query(by_role(Role::Tab).having_name("Third Tab"))
+            .query(by_role(Role::Tab).having_name(eq("Third Tab")))
             .expect(has_focus())
             .await
     }
@@ -727,7 +727,7 @@ mod tests {
         let tester = render(TestComponent);
 
         tester
-            .query(by_role(Role::Tab).having_name("Second Tab"))
+            .query(by_role(Role::Tab).having_name(eq("Second Tab")))
             .click()
             .await?;
 
@@ -771,12 +771,12 @@ mod tests {
         }
         let tester = render(TestComponent);
         tester
-            .query(by_role(Role::Tab).having_name("Second Tab"))
+            .query(by_role(Role::Tab).having_name(eq("Second Tab")))
             .click()
             .await?;
 
         tester
-            .query(by_role(Role::Tab).having_name("First Tab"))
+            .query(by_role(Role::Tab).having_name(eq("First Tab")))
             .click()
             .await?;
 
