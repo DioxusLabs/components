@@ -520,7 +520,7 @@ pub fn Toast(props: ToastProps) -> Element {
 
             "data-type": props.toast_type.as_str(),
             "data-permanent": props.permanent,
-            "data-toast-even": (props.index % 2 == 0).then_some("true"),
+            "data-toast-even": props.index.is_multiple_of(2).then_some("true"),
             "data-toast-odd": (props.index % 2 == 1).then_some("true"),
             "data-top": (props.index == 0).then_some("true"),
             style: "--toast-index: {props.index}",

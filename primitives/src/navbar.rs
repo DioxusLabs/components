@@ -145,11 +145,11 @@ pub fn Navbar(props: NavbarProps) -> Element {
                 },
                 onkeydown: move |event: Event<KeyboardData>| {
                     match event.key() {
-                        Key::Escape => ctx.set_open_nav.call(None),
-                        Key::ArrowLeft => ctx.focus.focus_prev(),
-                        Key::ArrowRight => ctx.focus.focus_next(),
-                        Key::Home => ctx.focus.focus_first(),
-                        Key::End => ctx.focus.focus_last(),
+                        Key::Named(NamedKey::Escape) => ctx.set_open_nav.call(None),
+                        Key::Named(NamedKey::ArrowLeft) => ctx.focus.focus_prev(),
+                        Key::Named(NamedKey::ArrowRight) => ctx.focus.focus_next(),
+                        Key::Named(NamedKey::Home) => ctx.focus.focus_first(),
+                        Key::Named(NamedKey::End) => ctx.focus.focus_last(),
                         _ => return,
                     }
                     event.prevent_default();
@@ -317,10 +317,10 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
             },
             onkeydown: move |event: Event<KeyboardData>| {
                 match event.key() {
-                    Key::Enter if !disabled() => {
+                    Key::Named(NamedKey::Enter) if !disabled() => {
                         ctx.set_open_nav.call((!is_open()).then(&*props.index));
                     }
-                    Key::ArrowDown if !disabled() => {
+                    Key::Named(NamedKey::ArrowDown) if !disabled() => {
                         if !is_open() {
                             nav_ctx.initial_focus.set(Some(FocusPlacement::First));
                             ctx.set_open_nav.call(Some(props.index.cloned()));
@@ -328,7 +328,7 @@ pub fn NavbarNav(props: NavbarNavProps) -> Element {
                             nav_ctx.focus_next();
                         }
                     },
-                    Key::ArrowUp if !disabled() => {
+                    Key::Named(NamedKey::ArrowUp) if !disabled() => {
                         if is_open() {
                             nav_ctx.focus_prev();
                         } else {
@@ -738,7 +738,9 @@ pub fn NavbarItem(props: NavbarItemProps) -> Element {
             let value = props.value.clone();
             let to = props.to.clone();
             move |event: Event<KeyboardData>| {
-                if event.key() == Key::Enter || event.key() == Key::Character(" ".to_string()) {
+                if event.key() == Key::Named(NamedKey::Enter)
+                    || event.key() == Key::Character(" ".to_string())
+                {
                     if !disabled() {
                         props.on_select.call(value.clone());
                         ctx.set_open_nav.call(None);
