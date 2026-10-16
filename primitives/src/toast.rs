@@ -922,7 +922,7 @@ mod dioxus_test_tests {
         let tester = render(TestComponent);
 
         tester
-            .query(by_role(Role::Button).having_name("Info (60s)"))
+            .query(by_role(Role::Button).having_name(eq("Info (60s)")))
             .click()
             .await?;
 
@@ -963,12 +963,12 @@ mod dioxus_test_tests {
         }
         let tester = render(TestComponent);
         tester
-            .query(by_role(Role::Button).having_name("Info (60s)"))
+            .query(by_role(Role::Button).having_name(eq("Info (60s)")))
             .click()
             .await?;
 
         tester
-            .query(by_role(Role::Button).having_name("close"))
+            .query(by_role(Role::Button).having_name(eq("close")))
             .click()
             .await?;
 
@@ -1008,11 +1008,11 @@ mod dioxus_test_tests {
         let tester = render(TestComponent);
 
         tester
-            .query(by_role(Role::Button).having_name("Info (60s)"))
+            .query(by_role(Role::Button).having_name(eq("Info (60s)")))
             .click()
             .await?;
         tester
-            .query(by_role(Role::Button).having_name("Info (60s)"))
+            .query(by_role(Role::Button).having_name(eq("Info (60s)")))
             .click()
             .await?;
 
@@ -1052,15 +1052,15 @@ mod dioxus_test_tests {
         let tester = render(TestComponent);
 
         tester
-            .query(by_role(Role::Button).having_name("Info (60s)"))
+            .query(by_role(Role::Button).having_name(eq("Info (60s)")))
             .click()
             .await?;
         tester
-            .query(by_role(Role::Button).having_name("Info (60s)"))
+            .query(by_role(Role::Button).having_name(eq("Info (60s)")))
             .click()
             .await?;
         tester
-            .query(by_role(Role::Button).having_name("close"))
+            .query(by_role(Role::Button).having_name(eq("close")))
             .click()
             .await?;
 
