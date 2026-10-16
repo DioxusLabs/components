@@ -597,11 +597,17 @@ pub(crate) fn use_item(builder: CollectionItemBuilder) -> CollectionItem {
     // Keep DOM focus in sync when this item becomes focused. The handler that
     // populates `controlled_ref` may be attached in a different component.
     let controlled_ref: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
-    let moved: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    let mut moved: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
     use_effect({
         let index = index.clone();
         move || {
             if disabled() || hidden() {
+                // Not focusable now, so focus has not moved here for the
+                // focus to come: an item enabled again and focused in the
+                // same flush must still take it.
+                if moved.peek().is_some() {
+                    moved.set(None);
+                }
                 return;
             }
             collection.control_mount_focus(index(), controlled_ref, moved);
