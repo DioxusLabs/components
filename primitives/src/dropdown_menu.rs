@@ -50,21 +50,61 @@ struct DropdownMenuContext {
 }
 
 impl DropdownMenuContext {
-    fn close(&mut self, restore_trigger_focus: bool) {
+    fn open_and_focus(&mut self, placement: FocusPlacement) {
+        self.initial_focus.set(Some(placement));
+        self.set_open.call(true);
+    }
+
+    fn close(&mut self) {
+        self.close_with_focus(false);
+    }
+
+    fn close_and_focus(&mut self) {
+        self.close_with_focus(true);
+    }
+
+    fn close_with_focus(&mut self, focus_trigger: bool) {
         self.initial_focus.set(None);
         self.had_item_focus.set(false);
         self.focus.blur();
-        self.restore_trigger_focus.set(restore_trigger_focus);
+        self.restore_trigger_focus.set(focus_trigger);
 
         // Calling set_open may invoke consumer code that unmounts this scope,
         // so it must remain the last access to context-owned reactive state.
         self.set_open.call(false);
     }
+}
 
-    fn open_with_focus(&mut self, placement: FocusPlacement) {
-        self.initial_focus.set(Some(placement));
-        self.set_open.call(true);
-    }
+fn use_focus(mut ctx: DropdownMenuContext) {
+    use_effect(move || {
+        let is_open = (ctx.open)();
+        let item_focused = ctx.focus.any_focused();
+
+        if !is_open {
+            ctx.initial_focus.set(None);
+            if *ctx.had_item_focus.peek() {
+                ctx.had_item_focus.set(false);
+            }
+            ctx.focus.blur();
+            if (ctx.restore_trigger_focus)() {
+                ctx.restore_trigger_focus.set(false);
+                if let Some(trigger) = (ctx.trigger)() {
+                    spawn(async move {
+                        let _ = trigger.set_focus(true).await;
+                    });
+                }
+            }
+            return;
+        }
+
+        if item_focused {
+            if !*ctx.had_item_focus.peek() {
+                ctx.had_item_focus.set(true);
+            }
+        } else if (ctx.had_item_focus)() {
+            ctx.close();
+        }
+    });
 }
 
 /// The props for the [`DropdownMenu`] component
@@ -164,32 +204,7 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
         trigger,
     });
 
-    use_effect(move || {
-        let is_open = open();
-        let item_focused = ctx.focus.any_focused();
-
-        if !is_open {
-            ctx.initial_focus.set(None);
-            if *ctx.had_item_focus.peek() {
-                ctx.had_item_focus.set(false);
-            }
-            ctx.focus.blur();
-            if (ctx.restore_trigger_focus)() {
-                ctx.restore_trigger_focus.set(false);
-                if let Some(trigger) = (ctx.trigger)() {
-                    spawn(async move {
-                        let _ = trigger.set_focus(true).await;
-                    });
-                }
-            }
-        } else if item_focused {
-            if !*ctx.had_item_focus.peek() {
-                ctx.had_item_focus.set(true);
-            }
-        } else if (ctx.had_item_focus)() {
-            ctx.close(false);
-        }
-    });
+    use_focus(ctx);
 
     // Handle escape key to close the menu
     let handle_keydown = move |event: Event<KeyboardData>| {
@@ -199,31 +214,31 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
         match event.key() {
             Key::Named(NamedKey::Enter) => {
                 if open() {
-                    ctx.close(false);
+                    ctx.close();
                 } else {
-                    ctx.open_with_focus(FocusPlacement::First);
+                    ctx.open_and_focus(FocusPlacement::First);
                 }
             }
             Key::Character(character) if character == " " => {
                 if open() {
-                    ctx.close(false);
+                    ctx.close();
                 } else {
-                    ctx.open_with_focus(FocusPlacement::First);
+                    ctx.open_and_focus(FocusPlacement::First);
                 }
             }
-            Key::Named(NamedKey::Escape) => ctx.close(true),
+            Key::Named(NamedKey::Escape) => ctx.close_and_focus(),
             Key::Named(NamedKey::ArrowDown) => {
                 if open() {
                     ctx.focus.focus_next();
                 } else {
-                    ctx.open_with_focus(FocusPlacement::First);
+                    ctx.open_and_focus(FocusPlacement::First);
                 }
             }
             Key::Named(NamedKey::ArrowUp) => {
                 if open() {
                     ctx.focus.focus_prev();
                 } else {
-                    ctx.open_with_focus(FocusPlacement::Last);
+                    ctx.open_and_focus(FocusPlacement::Last);
                 }
             }
             Key::Named(NamedKey::Home) => ctx.focus.focus_first(),
@@ -342,12 +357,12 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
                 // scope, so no context-owned state is accessed afterwards.
                 ctx.set_open.call(true);
             } else {
-                ctx.close(false);
+                ctx.close();
             }
         },
         onblur: move |_| {
             if !ctx.focus.any_focused() {
-                ctx.close(false);
+                ctx.close();
             }
         },
     });
@@ -543,7 +558,7 @@ pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
                 e.stop_propagation();
                 if !disabled() {
                     let value = (props.value)();
-                    ctx.close(true);
+                    ctx.close_and_focus();
                     props.on_select.call(value);
                 }
             },
@@ -552,7 +567,7 @@ pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
                 if event.key() == Key::Named(NamedKey::Enter) || event.key() == Key::Character(" ".to_string()) {
                     if !disabled() {
                         let value = (props.value)();
-                        ctx.close(true);
+                        ctx.close_and_focus();
                         props.on_select.call(value);
                     }
                     event.prevent_default();
@@ -564,7 +579,7 @@ pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
 
             onblur: move |_| {
                 if focused() {
-                    ctx.close(false);
+                    ctx.close();
                 }
             },
         }), props.attributes, ITEM_OWNED_ATTRIBUTES),
