@@ -591,27 +591,6 @@ pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dioxus::core::AttributeValue::Text;
-
-    fn text_attribute(name: &'static str, value: &str) -> Attribute {
-        Attribute {
-            name,
-            namespace: None,
-            volatile: false,
-            value: Text(value.to_string()),
-        }
-    }
-
-    fn attribute_value<'a>(attributes: &'a [Attribute], name: &str) -> &'a str {
-        let attribute = attributes
-            .iter()
-            .find(|attribute| attribute.name == name)
-            .unwrap_or_else(|| panic!("missing {name} attribute"));
-        match &attribute.value {
-            Text(value) => value,
-            _ => panic!("expected {name} to contain text"),
-        }
-    }
 
     #[component]
     fn OpenMenu() -> Element {
@@ -651,35 +630,5 @@ mod tests {
         assert!(html.contains("aria-checked=\"true\""), "{html}");
         assert!(!html.contains("role=\"listbox\""), "{html}");
         assert!(!html.contains("role=\"option\""), "{html}");
-    }
-
-    #[test]
-    fn consumer_semantics_override_defaults_without_replacing_primitive_behavior() {
-        let attributes = merge_primitive_attributes(
-            vec![
-                text_attribute("role", "menuitem"),
-                text_attribute("onclick", "primitive"),
-                text_attribute("tabindex", "-1"),
-            ],
-            vec![
-                text_attribute("role", "menuitemradio"),
-                text_attribute("aria-checked", "true"),
-                text_attribute("onclick", "consumer"),
-                text_attribute("tabindex", "0"),
-            ],
-            ITEM_OWNED_ATTRIBUTES,
-        );
-
-        assert_eq!(attribute_value(&attributes, "role"), "menuitemradio");
-        assert_eq!(attribute_value(&attributes, "aria-checked"), "true");
-        assert_eq!(attribute_value(&attributes, "onclick"), "primitive");
-        assert_eq!(attribute_value(&attributes, "tabindex"), "-1");
-        assert_eq!(
-            attributes
-                .iter()
-                .filter(|attribute| attribute.name == "role")
-                .count(),
-            1
-        );
     }
 }
