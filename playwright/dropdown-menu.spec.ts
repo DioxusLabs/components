@@ -1,50 +1,86 @@
 import { test, expect } from '@playwright/test';
 
-test('test', async ({ page }) => {
+test('dropdown menu supports pointer and keyboard focus lifecycle', async ({ page }) => {
   await page.goto('http://127.0.0.1:8080/component/?name=dropdown_menu&');
-  let menuElement = page.getByRole('button', { name: 'Open Menu' });
-  // The menu should not be open initially
-  await expect(menuElement).toHaveAttribute('data-state', 'closed');
-  // Clicking the menu should open it
-  await menuElement.click();
-  await expect(menuElement).toHaveAttribute('data-state', 'open');
-  // Pressing down should focus the first item
-  await page.keyboard.press('ArrowDown');
-  await expect(page.getByRole('option', { name: 'Edit' })).toBeFocused();
-  await expect(page.getByRole('option', { name: 'Undo' })).toHaveAttribute('data-disabled', 'true');
-  await page.keyboard.press('ArrowDown');
-  await expect(page.getByRole('option', { name: 'Duplicate' })).toBeFocused();
-  // The menu should close after selecting an item
-  await page.keyboard.press('Enter');
-  await expect(menuElement).toHaveAttribute('data-state', 'closed');
-  // The selected item should be displayed
-  await expect(page.getByText('Selected: Duplicate')).toBeVisible();
+  const menuTrigger = page.getByRole('button', { name: 'Open Menu' });
 
-  // Reopen the menu
-  await menuElement.click();
-  await expect(menuElement).toHaveAttribute('data-state', 'open');
-  // Pressing Escape should close the menu
-  await page.keyboard.press('Escape');
-  await expect(menuElement).toHaveAttribute('data-state', 'closed');
+  await test.step('pointer interaction opens the menu', async () => {
+    await expect(menuTrigger).toHaveAttribute('data-state', 'closed');
+    await menuTrigger.click();
+    await expect(menuTrigger).toHaveAttribute('data-state', 'open');
+  });
 
-  // Reopen the menu
-  await menuElement.click();
-  await expect(menuElement).toHaveAttribute('data-state', 'open');
-  // Pressing Tab should close the menu
-  await page.keyboard.press('Tab');
-  await expect(menuElement).toHaveAttribute('data-state', 'closed');
+  await test.step('keyboard navigation skips disabled items and selection restores focus', async () => {
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitem', { name: 'Edit' })).toBeFocused();
+    await expect(page.getByRole('menuitem', { name: 'Undo' })).toHaveAttribute(
+      'data-disabled',
+      'true',
+    );
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitem', { name: 'Duplicate' })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(menuTrigger).toHaveAttribute('data-state', 'closed');
+    await expect(menuTrigger).toBeFocused();
+    await expect(page.getByText('Selected: Duplicate')).toBeVisible();
+  });
 
-  // Reopen the menu
-  await menuElement.click();
-  await expect(menuElement).toHaveAttribute('data-state', 'open');
-  // Clicking outside the menu should close it
-  await page.locator('body').click({ position: { x: 0, y: 0 } });
-  await expect(menuElement).toHaveAttribute('data-state', 'closed');
+  await test.step('ArrowDown opens a closed menu at its first enabled item', async () => {
+    await page.keyboard.press('ArrowDown');
+    await expect(menuTrigger).toHaveAttribute('data-state', 'open');
+    await expect(page.getByRole('menuitem', { name: 'Edit' })).toBeFocused();
+  });
 
-  // Reopen the menu
-  await menuElement.click();
-  await expect(menuElement).toHaveAttribute('data-state', 'open');
-  // Clicking an item should close the menu
-  await page.getByRole('option', { name: 'Edit' }).click();
-  await expect(menuElement).toHaveAttribute('data-state', 'closed');
+  await test.step('Escape closes the menu and restores trigger focus', async () => {
+    await page.keyboard.press('Escape');
+    await expect(menuTrigger).toHaveAttribute('data-state', 'closed');
+    await expect(menuTrigger).toBeFocused();
+  });
+
+  await test.step('Enter opens a closed menu at its first enabled item', async () => {
+    await page.keyboard.press('Enter');
+    await expect(menuTrigger).toHaveAttribute('data-state', 'open');
+    await expect(page.getByRole('menuitem', { name: 'Edit' })).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(menuTrigger).toBeFocused();
+  });
+
+  await test.step('Space opens a closed menu at its first enabled item', async () => {
+    await page.keyboard.press('Space');
+    await expect(menuTrigger).toHaveAttribute('data-state', 'open');
+    await expect(page.getByRole('menuitem', { name: 'Edit' })).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(menuTrigger).toBeFocused();
+  });
+
+  await test.step('ArrowUp opens a closed menu at its last enabled item', async () => {
+    await page.keyboard.press('ArrowUp');
+    await expect(menuTrigger).toHaveAttribute('data-state', 'open');
+    await expect(page.getByRole('menuitem', { name: 'Delete' })).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(menuTrigger).toBeFocused();
+  });
+
+  await test.step('Tab closes the menu', async () => {
+    await menuTrigger.click();
+    await expect(menuTrigger).toHaveAttribute('data-state', 'open');
+    await page.keyboard.press('Tab');
+    await expect(menuTrigger).toHaveAttribute('data-state', 'closed');
+  });
+
+  await test.step('outside pointer interaction closes the menu', async () => {
+    await menuTrigger.click();
+    await expect(menuTrigger).toHaveAttribute('data-state', 'open');
+    await page.locator('body').click({ position: { x: 0, y: 0 } });
+    await expect(menuTrigger).toHaveAttribute('data-state', 'closed');
+  });
+
+  await test.step('pointer selection closes the menu and restores trigger focus', async () => {
+    await menuTrigger.click();
+    await expect(menuTrigger).toHaveAttribute('data-state', 'open');
+    await page.getByRole('menuitem', { name: 'Edit' }).click();
+    await expect(menuTrigger).toHaveAttribute('data-state', 'closed');
+    await expect(menuTrigger).toBeFocused();
+    await expect(page.getByText('Selected: Edit')).toBeVisible();
+  });
 });

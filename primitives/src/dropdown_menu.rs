@@ -3,11 +3,33 @@
 use std::rc::Rc;
 
 use crate::{
-    focus::{use_focus_controlled_item_disabled, use_focus_provider, FocusState},
+    focus::{
+        use_deferred_focus, use_focus_controlled_item_disabled, use_focus_provider, FocusPlacement,
+        FocusState,
+    },
     merge_attributes, use_animated_open, use_controlled, use_id_or, use_unique_id,
 };
 use dioxus::prelude::*;
 use dioxus_attributes::attributes;
+
+const CONTENT_OWNED_ATTRIBUTES: &[&str] = &["aria-labelledby", "data-state", "id", "onpointerdown"];
+const ITEM_OWNED_ATTRIBUTES: &[&str] = &[
+    "data-disabled",
+    "onblur",
+    "onclick",
+    "onkeydown",
+    "onmounted",
+    "tabindex",
+];
+
+fn merge_primitive_attributes(
+    base: Vec<Attribute>,
+    mut consumer: Vec<Attribute>,
+    primitive_owned: &[&str],
+) -> Vec<Attribute> {
+    consumer.retain(|attribute| !primitive_owned.iter().any(|owned| *owned == attribute.name));
+    merge_attributes(vec![base, consumer])
+}
 
 #[derive(Clone, Copy)]
 struct DropdownMenuContext {
@@ -18,9 +40,71 @@ struct DropdownMenuContext {
 
     // Focus state
     focus: FocusState,
+    initial_focus: Signal<Option<FocusPlacement>>,
+    had_item_focus: Signal<bool>,
+    restore_trigger_focus: Signal<bool>,
 
     // Unique ID for the trigger button
     trigger_id: Signal<String>,
+    trigger: Signal<Option<Rc<MountedData>>>,
+}
+
+impl DropdownMenuContext {
+    fn open_and_focus(&mut self, placement: FocusPlacement) {
+        self.initial_focus.set(Some(placement));
+        self.set_open.call(true);
+    }
+
+    fn close(&mut self) {
+        self.close_with_focus(false);
+    }
+
+    fn close_and_focus(&mut self) {
+        self.close_with_focus(true);
+    }
+
+    fn close_with_focus(&mut self, focus_trigger: bool) {
+        self.initial_focus.set(None);
+        self.had_item_focus.set(false);
+        self.focus.blur();
+        self.restore_trigger_focus.set(focus_trigger);
+
+        // Calling set_open may invoke consumer code that unmounts this scope,
+        // so it must remain the last access to context-owned reactive state.
+        self.set_open.call(false);
+    }
+}
+
+fn use_focus(mut ctx: DropdownMenuContext) {
+    use_effect(move || {
+        let is_open = (ctx.open)();
+        let item_focused = ctx.focus.any_focused();
+
+        if !is_open {
+            ctx.initial_focus.set(None);
+            if *ctx.had_item_focus.peek() {
+                ctx.had_item_focus.set(false);
+            }
+            ctx.focus.blur();
+            if (ctx.restore_trigger_focus)() {
+                ctx.restore_trigger_focus.set(false);
+                if let Some(trigger) = (ctx.trigger)() {
+                    spawn(async move {
+                        let _ = trigger.set_focus(true).await;
+                    });
+                }
+            }
+            return;
+        }
+
+        if item_focused {
+            if !*ctx.had_item_focus.peek() {
+                ctx.had_item_focus.set(true);
+            }
+        } else if (ctx.had_item_focus)() {
+            ctx.close();
+        }
+    });
 }
 
 /// The props for the [`DropdownMenu`] component
@@ -103,21 +187,24 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
 
     let disabled = props.disabled;
     let trigger_id = use_unique_id();
+    let trigger = use_signal(|| None);
     let focus = use_focus_provider(props.roving_loop);
+    let initial_focus = use_signal(|| None);
+    let had_item_focus = use_signal(|| false);
+    let restore_trigger_focus = use_signal(|| false);
     let mut ctx = use_context_provider(|| DropdownMenuContext {
         open,
         set_open,
         disabled,
         focus,
+        initial_focus,
+        had_item_focus,
+        restore_trigger_focus,
         trigger_id,
+        trigger,
     });
 
-    use_effect(move || {
-        let focused = focus.any_focused();
-        if *ctx.open.peek() != focused {
-            (ctx.set_open)(focused);
-        }
-    });
+    use_focus(ctx);
 
     // Handle escape key to close the menu
     let handle_keydown = move |event: Event<KeyboardData>| {
@@ -126,16 +213,32 @@ pub fn DropdownMenu(props: DropdownMenuProps) -> Element {
         }
         match event.key() {
             Key::Named(NamedKey::Enter) => {
-                let new_open = !(ctx.open)();
-                ctx.set_open.call(new_open);
+                if open() {
+                    ctx.close();
+                } else {
+                    ctx.open_and_focus(FocusPlacement::First);
+                }
             }
-            Key::Named(NamedKey::Escape) => ctx.set_open.call(false),
+            Key::Character(character) if character == " " => {
+                if open() {
+                    ctx.close();
+                } else {
+                    ctx.open_and_focus(FocusPlacement::First);
+                }
+            }
+            Key::Named(NamedKey::Escape) => ctx.close_and_focus(),
             Key::Named(NamedKey::ArrowDown) => {
-                ctx.focus.focus_next();
+                if open() {
+                    ctx.focus.focus_next();
+                } else {
+                    ctx.open_and_focus(FocusPlacement::First);
+                }
             }
             Key::Named(NamedKey::ArrowUp) => {
                 if open() {
                     ctx.focus.focus_prev();
+                } else {
+                    ctx.open_and_focus(FocusPlacement::Last);
                 }
             }
             Key::Named(NamedKey::Home) => ctx.focus.focus_first(),
@@ -219,7 +322,6 @@ pub struct DropdownMenuTriggerProps {
 #[component]
 pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
     let mut ctx: DropdownMenuContext = use_context();
-    let mut element = use_signal(|| None::<Rc<MountedData>>);
 
     let open = ctx.open;
     let disabled = ctx.disabled;
@@ -232,9 +334,9 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
         "data-disabled": disabled,
         disabled: disabled,
         aria_expanded: open,
-        aria_haspopup: "listbox",
+        aria_haspopup: "menu",
         onmounted: move |e: MountedEvent| {
-            element.set(Some(e.data()));
+            ctx.trigger.set(Some(e.data()));
         },
         onclick: move |_| {
             if disabled() {
@@ -242,20 +344,25 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
             }
 
             let new_open = !open();
-            ctx.set_open.call(new_open);
-
             // Focus the element on click. Safari does not do this automatically.
             // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/button#clicking_and_focus
-            if let Some(data) = element() {
+            if let Some(data) = (ctx.trigger)() {
                 spawn(async move {
                     _ = data.set_focus(true).await;
                 });
             }
+
+            if new_open {
+                // Calling set_open may invoke consumer code that unmounts this
+                // scope, so no context-owned state is accessed afterwards.
+                ctx.set_open.call(true);
+            } else {
+                ctx.close();
+            }
         },
         onblur: move |_| {
             if !ctx.focus.any_focused() {
-                ctx.focus.blur();
-                ctx.set_open.call(false);
+                ctx.close();
             }
         },
     });
@@ -337,12 +444,13 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
     let unique_id = use_unique_id();
     let id = use_id_or(unique_id, props.id);
     let render = use_animated_open(id, ctx.open);
+    use_deferred_focus(ctx.focus, ctx.initial_focus, render);
 
     rsx! {
         if render() {
-            div {
+            div { ..merge_primitive_attributes(attributes!(div {
                 id,
-                role: "listbox",
+                role: "menu",
                 aria_labelledby: "{ctx.trigger_id}",
                 "data-state": if (ctx.open)() { "open" } else { "closed" },
                 onpointerdown: move |event| {
@@ -353,7 +461,7 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
                     event.prevent_default();
                     event.stop_propagation();
                 },
-                ..props.attributes,
+            }), props.attributes, CONTENT_OWNED_ATTRIBUTES),
                 {props.children}
             }
         }
@@ -441,24 +549,26 @@ pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
     let onmounted = use_focus_controlled_item_disabled(props.index, disabled);
 
     rsx! {
-        div {
-            role: "option",
+        div { ..merge_primitive_attributes(attributes!(div {
+            role: "menuitem",
             "data-disabled": disabled(),
             tabindex: if focused() { "0" } else { "-1" },
 
             onclick: move |e: Event<MouseData>| {
                 e.stop_propagation();
                 if !disabled() {
-                    props.on_select.call((props.value)());
-                    ctx.set_open.call(false);
+                    let value = (props.value)();
+                    ctx.close_and_focus();
+                    props.on_select.call(value);
                 }
             },
 
             onkeydown: move |event: Event<KeyboardData>| {
                 if event.key() == Key::Named(NamedKey::Enter) || event.key() == Key::Character(" ".to_string()) {
                     if !disabled() {
-                        props.on_select.call((props.value)());
-                        ctx.set_open.call(false);
+                        let value = (props.value)();
+                        ctx.close_and_focus();
+                        props.on_select.call(value);
                     }
                     event.prevent_default();
                     event.stop_propagation();
@@ -469,12 +579,56 @@ pub fn DropdownMenuItem<T: Clone + PartialEq + 'static>(
 
             onblur: move |_| {
                 if focused() {
-                    ctx.focus.blur();
+                    ctx.close();
                 }
             },
-
-            ..props.attributes,
+        }), props.attributes, ITEM_OWNED_ATTRIBUTES),
             {props.children}
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[component]
+    fn OpenMenu() -> Element {
+        rsx! {
+            DropdownMenu { default_open: true,
+                DropdownMenuTrigger { "Open menu" }
+                DropdownMenuContent {
+                    DropdownMenuItem {
+                        value: "action",
+                        index: 0usize,
+                        "Action"
+                    }
+                    DropdownMenuItem {
+                        value: "choice",
+                        index: 1usize,
+                        role: "menuitemradio",
+                        aria_checked: "true",
+                        "Choice"
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn rendered_roles_are_menu_semantics_and_consumer_overrides_are_unique() {
+        let mut dom = VirtualDom::new(OpenMenu);
+        dom.rebuild_in_place();
+        dom.process_events();
+        dom.render_immediate(&mut dioxus::core::NoOpMutations);
+        let html = dioxus_ssr::render(&dom);
+
+        assert!(html.contains("aria-haspopup=\"menu\""), "{html}");
+        assert_eq!(html.matches("role=\"menu\"").count(), 1, "{html}");
+        assert_eq!(html.matches("role=\"menuitem\"").count(), 1, "{html}");
+        assert_eq!(html.matches("role=\"menuitemradio\"").count(), 1, "{html}");
+        assert!(html.contains("aria-checked=\"true\""), "{html}");
+        assert!(!html.contains("role=\"listbox\""), "{html}");
+        assert!(!html.contains("role=\"option\""), "{html}");
     }
 }
